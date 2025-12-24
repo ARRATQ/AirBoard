@@ -1,0 +1,75 @@
+version: '3.8'
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: airboard-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-airboard}
+      POSTGRES_USER: ${DB_USER:-airboard}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-airboard123}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-airboard} -d ${DB_NAME:-airboard}"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # Backend Go API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host
+    container_name: airboard-backend
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-airboard}
+      - DB_PASSWORD=${DB_PASSWORD:-airboard123}
+      - DB_NAME=${DB_NAME:-airboard}
+      - JWT_SECRET=${JWT_SECRET:-airboard-super-secret-key-2024}
+      - GIN_MODE=release
+      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:5173}
+      - UPLOAD_DIR=/app/uploads
+      - SSO_ENABLED=${SSO_ENABLED:-true}
+      - SSO_AUTO_PROVISION=${SSO_AUTO_PROVISION:-true}
+      - SSO_DEFAULT_ROLE=${SSO_DEFAULT_ROLE:-user}
+      - SSO_DEFAULT_GROUP=${SSO_DEFAULT_GROUP:-Common}
+      - SSO_ADMIN_GROUPS=${SSO_ADMIN_GROUPS:-airboard-admins}
+    volumes:
+      - uploads_data:/app/uploads
+    expose:
+      - "8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Frontend Vue.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      network: host
+    container_name: airboard-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads_data:

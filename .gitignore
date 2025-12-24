@@ -1,0 +1,147 @@
+# Environnement
+.env
+.env.local
+.env.development
+# Ne pas ignorer .env.production - nécessaire pour Docker build
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+# package-lock.json - Keep it for reproducibility
+
+# Build outputs
+dist/
+build/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+backend/backend
+backend/backend-test
+backend/main
+backend/airboard
+*.test
+*.out
+go.work
+# go.sum - Keep it for dependency management
+
+# Docker volumes
+.docker/
+postgres-data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Temporary files
+*.tmp
+*.temp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets et configuration locale
+*.key
+*.pem
+secrets/
+config/local.*
+
+# Scripts de développement
+debug-*.sh
+test-*.sh
+fix-*.sh
+quick-*.sh
+dev-*.sh
+# Exclude all .sh except update-version.sh (needed for versioning)
+*.sh
+!update-version.sh
+
+# Documentation temporaire
+TEMP-*.md
+DEBUG-*.md
+CHANGELOG.md
+COOLIFY-*.md
+DEPLOIEMENT-*.md
+DEPLOYMENT-*.md
+DOCKER-*.md
+GITHUB-*.md
+PROJECT-*.md
+QUICK-START-*.md
+QUICK_START_*.md
+RESUME-*.md
+HOME_PAGE_*.md
+HOME_*.md
+NGINX_*.md
+SYNC_*.md
+*_FIX*.md
+
+# Integration documentation
+COMMENTS_FEEDBACK_GUIDE.md
+INTEGRATION_COMPLETE.md
+NOTIFICATIONS_GUIDE.md
+RESUME_INTEGRATION.md
+
+# Screenshots et images de debug
+*.png
+!img/*.png
+!frontend/public/*.png
+!frontend/src/assets/*.png
+
+# Scripts de test
+test_*.js
+test-*.js
+
+# Documentation Claude Code (privée)
+CLAUDE.md
+
+# Répertoires temporaires
+docker-simple/
+releases/
+.coolify
+.cursor-free-vip/
+
+# Documentation
+docs/

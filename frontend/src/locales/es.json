@@ -1,0 +1,1143 @@
+{
+  "common": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "administration": "Administración",
+    "overview": "Visión general",
+    "appGroups": "Grupos de apps",
+    "applications": "Aplicaciones",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "daysAgo": "Hace {count} días",
+    "daysRemaining": "{count} día(s) restante(s)",
+    "retry": "Reintentar",
+    "users": "Usuarios",
+    "groups": "Grupos",
+    "settings": "Ajustes",
+    "darkMode": "Modo oscuro",
+    "showNavbar": "Mostrar barra de navegación",
+    "toggleSidebar": "Alternar menú",
+    "expandSidebar": "Expandir menú",
+    "zoom": "Zoom",
+    "logout": "Cerrar sesión",
+    "search": "Buscar",
+    "status_all": "Todos los estados",
+    "status_active": "Solo activos",
+    "status_inactive": "Solo inactivos",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "create": "Crear",
+    "new": "Nuevo",
+    "language": "Idioma",
+    "language_fr": "Francés",
+    "language_en": "Inglés",
+    "language_es": "Español",
+    "language_ar": "Árabe",
+    "edit": "Editar",
+    "favorites": "Favoritos",
+    "myFavorites": "Mis Favoritos",
+    "addToFavorites": "Añadir a favoritos",
+    "removeFromFavorites": "Quitar de favoritos",
+    "noFavorites": "Aún no hay favoritos",
+    "analytics": "Analíticas",
+    "announcements": "Anuncios",
+    "newsHub": "Centro de Noticias",
+    "events": "Eventos",
+    "save": "Guardar",
+    "noGroup": "Sin grupo",
+    "close": "Cerrar",
+    "applicationsManagement": "Gestión de aplicaciones",
+    "contentManagement": "Gestión de contenido",
+    "usersGroups": "Usuarios y Grupos",
+    "systemSettings": "Configuración del sistema",
+    "systemConfiguration": "Configuración del Sistema",
+    "dashboardAnalytics": "Panel de Control y Análisis",
+    "eventsManagement": "Gestión de eventos",
+    "polls": "Encuestas",
+    "pollsManagement": "Gestión de Encuestas",
+    "media": "Medios",
+    "view": "Ver",
+    "download": "Descargar",
+    "update": "Actualizar",
+    "updating": "Actualizando...",
+    "deleting": "Eliminando...",
+    "page": "Página",
+    "of": "de"
+  },
+  "calendar": {
+    "title": "Calendario de Eventos",
+    "today": "Hoy",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "loading": "Cargando calendario...",
+    "noEvents": "No hay eventos",
+    "noEventsHelp": "No hay eventos en este período",
+    "noEventsForDay": "No hay eventos para este día",
+    "andMore": "y {count} más",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Día",
+    "daysOfWeek": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+  },
+  "agenda": {
+    "title": "Agenda de Eventos",
+    "subtitle": "Ver y gestionar eventos",
+    "calendar": "Calendario",
+    "list": "Lista",
+    "addEvent": "Añadir evento",
+    "add": "Añadir",
+    "loading": "Cargando eventos...",
+    "published": "Publicado",
+    "draft": "Borrador",
+    "noEventsFound": "No se encontraron eventos",
+    "reload": "Recargar",
+    "categories": "Categorías",
+    "noCategories": "Sin categorías"
+  },
+  "groups": {
+    "title": "Grupos de usuarios",
+    "subtitle": "Gestione permisos por grupos",
+    "newGroup": "Nuevo grupo",
+    "searchPlaceholder": "Buscar un grupo...",
+    "status_all": "Todos los estados",
+    "status_active": "Solo activos",
+    "status_inactive": "Solo inactivos",
+    "users": "usuarios",
+    "appsLabel": "grupos de apps",
+    "appsAccess": "Acceso a grupos de aplicaciones:",
+    "usersLabel": "Usuarios:",
+    "noResultsTitle": "Sin resultados",
+    "noResultsText": "Ningún grupo coincide con tus criterios de búsqueda.",
+    "emptyTitle": "Sin grupos",
+    "emptyText": "Comience creando su primer grupo de usuarios.",
+    "createGroup": "Crear grupo",
+    "edit": "Editar",
+    "remove": "Eliminar",
+    "confirmDeleteTitle": "Eliminar grupo",
+    "confirmDeleteText": "¿Seguro que desea eliminar el grupo \"{name}\"? Esta acción es irreversible y eliminará todas las asociaciones con usuarios.",
+    "deleted": "Grupo eliminado correctamente",
+    "saved": "Grupo guardado correctamente",
+    "created": "Grupo creado correctamente",
+    "updated": "Grupo actualizado correctamente",
+    "loadError": "Error al cargar los grupos",
+    "saveError": "Error al guardar el grupo",
+    "deleteError": "Error al eliminar el grupo"
+  },
+  "applications": {
+    "title": "Aplicaciones",
+    "subtitle": "Gestione las aplicaciones del portal",
+    "new": "Nueva aplicación",
+    "add": "Añadir aplicación",
+    "searchPlaceholder": "Buscar aplicaciones...",
+    "filter_all_groups": "Todos los grupos",
+    "noResultsTitle": "Sin resultados",
+    "noResultsText": "Ninguna aplicación coincide con tus criterios.",
+    "emptyTitle": "Sin aplicaciones",
+    "emptyText": "Añade tu primera aplicación para empezar.",
+    "order": "Orden",
+    "confirmDeleteTitle": "Eliminar aplicación",
+    "confirmDeleteText": "¿Seguro que desea eliminar \"{name}\"? Esta acción no se puede deshacer."
+  },
+  "users": {
+    "title": "Usuarios",
+    "subtitle": "Gestione las cuentas de usuario",
+    "new": "Nuevo usuario",
+    "searchPlaceholder": "Buscar un usuario...",
+    "filter_all_roles": "Todos los roles",
+    "filter_admins": "Administradores",
+    "filter_editors": "Editores",
+    "filter_users": "Usuarios",
+    "no_group": "Sin grupo",
+    "role_admin": "Administrador",
+    "role_editor": "Editor",
+    "role_user": "Usuario",
+    "noResultsTitle": "Sin resultados",
+    "noResultsText": "Ningún usuario coincide con tus criterios de búsqueda.",
+    "emptyTitle": "Sin usuarios",
+    "emptyText": "Comience creando su primer usuario.",
+    "create": "Crear usuario",
+    "activate": "Activar",
+    "deactivate": "Desactivar"
+  },
+  "settings": {
+    "title": "Ajustes de la aplicación",
+    "subtitle": "Personaliza la apariencia y la marca",
+    "changePassword": "Cambiar contraseña",
+    "resetToDefault": "Restablecer por defecto",
+    "livePreview": "Vista previa en vivo",
+    "previewDashboardTitle": "Panel",
+    "previewWelcome": "Bienvenido a tu portal de aplicaciones",
+    "appInformation": "Información de la aplicación",
+    "appName": "Nombre de la aplicación",
+    "appNamePlaceholder": "Airboard",
+    "appIcon": "Icono de la aplicación",
+    "dashboardCustomization": "Personalización del panel",
+    "dashboardTitle": "Título del panel",
+    "dashboardTitlePlaceholder": "Panel",
+    "welcomeMessage": "Mensaje de bienvenida",
+    "welcomeMessagePlaceholder": "Bienvenido a tu portal de aplicaciones",
+    "reload": "Recargar",
+    "save": "Guardar ajustes",
+    "changePasswordSubtitle": "Introduce tu contraseña actual y una nueva",
+    "currentPassword": "Contraseña actual",
+    "currentPasswordPlaceholder": "Introduce la contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "newPasswordPlaceholder": "Introduce la nueva contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "confirmNewPasswordPlaceholder": "Confirma la nueva contraseña",
+    "resetTitle": "Restablecer ajustes por defecto",
+    "resetSubtitle": "¿Seguro que deseas restablecer todos los ajustes? Esta acción no se puede deshacer.",
+    "resetButton": "Restablecer",
+    "authConfiguration": "Configuración de autenticación",
+    "signupEnabled": "Habilitar registro de usuarios",
+    "signupEnabledHelp": "Permitir que nuevos usuarios creen cuentas a través del formulario de registro. Si está deshabilitado, solo los administradores pueden crear nuevas cuentas de usuario.",
+    "defaultGroupConfiguration": "Configuración del grupo predeterminado",
+    "defaultGroup": "Grupo predeterminado para nuevos usuarios",
+    "noDefaultGroup": "Sin grupo predeterminado (asignación manual)",
+    "defaultGroupHelp": "Seleccione el grupo que se asignará automáticamente a los nuevos usuarios durante el registro. Dejar vacío para requerir asignación manual."
+  },
+  "admin": {
+    "overviewTitle": "Administración",
+    "overviewSubtitle": "Gestiona tu portal de aplicaciones y usuarios",
+    "manageAppGroups": "Gestionar categorías de aplicaciones",
+    "manageApplications": "Añadir y editar aplicaciones",
+    "manageUsers": "Gestionar cuentas de usuarios",
+    "manageGroups": "Gestionar permisos por grupos",
+    "dangerZone": "Zona de peligro",
+    "resetDatabaseTitle": "Restablece la base de datos para comenzar de nuevo con datos de demostración.",
+    "resetDatabaseWarning": "Advertencia: Esta acción eliminará permanentemente todos tus datos actuales.",
+    "resetDatabaseButton": "Restablecer base de datos",
+    "resetDatabaseInProgress": "Restableciendo...",
+    "confirmResetTitle": "Confirmar restablecimiento",
+    "confirmResetMessage": "¿Estás absolutamente seguro de que deseas restablecer la base de datos?",
+    "confirmResetWarning": "Todos los datos actuales se eliminarán permanentemente.",
+    "confirmResetButton": "Sí, restablecer",
+    "confirmResetCancel": "Cancelar",
+    "resetInProgress": "Restableciendo...",
+    "newsArticles": "Artículos de noticias"
+  },
+  "appGroups": {
+    "subtitle": "Organiza tus aplicaciones en grupos",
+    "new": "Nuevo grupo"
+  },
+  "analytics": {
+    "title": "Analíticas",
+    "subtitle": "Estadísticas de uso de aplicaciones",
+    "totalClicks": "Clics totales",
+    "uniqueUsers": "Usuarios únicos",
+    "last7Days": "Últimos 7 días",
+    "last30Days": "Últimos 30 días",
+    "topApplications": "Aplicaciones más usadas",
+    "topUsers": "Usuarios más activos",
+    "dailyActivity": "Actividad diaria (últimos 30 días)",
+    "clicks": "clics",
+    "users": "usuarios",
+    "apps": "apps",
+    "noData": "No hay datos disponibles",
+    "noAnalytics": "Sin datos de analíticas",
+    "noAnalyticsText": "Comienza a usar las aplicaciones para ver las estadísticas aquí."
+  },
+  "announcements": {
+    "title": "Anuncios",
+    "subtitle": "Gestione los anuncios mostrados en el panel",
+    "new": "Nuevo Anuncio",
+    "create": "Crear Anuncio",
+    "edit": "Editar Anuncio",
+    "titleField": "Título",
+    "contentField": "Contenido",
+    "typeField": "Tipo",
+    "priorityField": "Prioridad",
+    "startDateField": "Fecha de inicio",
+    "endDateField": "Fecha de fin",
+    "isActive": "Anuncio activo",
+    "type_info": "Información",
+    "type_warning": "Advertencia",
+    "type_success": "Éxito",
+    "type_error": "Error",
+    "priority": "Prioridad",
+    "startDate": "Inicio",
+    "endDate": "Fin",
+    "created": "Creado",
+    "emptyTitle": "Sin anuncios",
+    "emptyText": "Cree su primer anuncio para informar a sus usuarios.",
+    "confirmDeleteTitle": "Eliminar Anuncio",
+    "confirmDeleteText": "¿Está seguro de que desea eliminar el anuncio \"{title}\"?",
+    "saving": "Guardando...",
+    "deleting": "Eliminando..."
+  },
+  "news": {
+    "widget": {
+      "title": "Destacados",
+      "viewAll": "Ver todo",
+      "noNews": "No hay noticias en este momento"
+    },
+    "center": {
+      "title": "Centro de Noticias",
+      "subtitle": "Todas las noticias y artículos",
+      "searchPlaceholder": "Buscar artículos...",
+      "allCategories": "Todas las categorías",
+      "allTypes": "Todos los tipos",
+      "noNews": "No hay artículos disponibles"
+    },
+    "detail": {
+      "back": "Volver",
+      "pinned": "Fijado",
+      "views": "vistas",
+      "reactions": "Reacciones",
+      "edit": "Editar artículo",
+      "notFound": "Artículo no encontrado",
+      "backToList": "Volver a los artículos"
+    },
+    "types": {
+      "article": "Artículo",
+      "tutorial": "Tutorial",
+      "announcement": "Anuncio",
+      "faq": "FAQ"
+    },
+    "priority": {
+      "urgent": "Urgente",
+      "important": "Importante",
+      "normal": "Normal"
+    },
+    "sort": {
+      "dateNewest": "Más recientes",
+      "dateOldest": "Más antiguos",
+      "mostViewed": "Más vistos",
+      "mostReacted": "Más reacciones",
+      "titleAZ": "Título (A-Z)",
+      "titleZA": "Título (Z-A)"
+    }
+  },
+  "dashboard": {
+    "collapseAll": "Contraer Todo",
+    "expandAll": "Expandir Todo",
+    "viewModes": {
+      "list": "Lista",
+      "grid": "Cuadrícula",
+      "table": "Tabla"
+    },
+    "zoom": {
+      "extraSmall": "Muy pequeño",
+      "small": "Pequeño",
+      "normal": "Normal",
+      "large": "Grande"
+    },
+    "searchApps": "Buscar una aplicación...",
+    "allCategories": "Todas las categorías",
+    "sortByName": "Ordenar por nombre",
+    "sortByCategory": "Ordenar por categoría",
+    "sortByRecent": "Más recientes",
+    "resetFilters": "Restablecer filtros",
+    "applicationsFound": "aplicación(es) encontrada(s)",
+    "application": "Aplicación",
+    "description": "Descripción",
+    "category": "Categoría",
+    "actions": "Acciones",
+    "open": "Abrir",
+    "noApplicationsFound": "No se encontraron aplicaciones",
+    "time": {
+      "justNow": "Ahora mismo",
+      "minutesAgo": "hace {count} minuto(s)",
+      "hoursAgo": "hace {count} hora(s)",
+      "daysAgo": "hace {count} día(s)"
+    }
+  },
+  "groupAdmin": {
+    "title": "Administración de Grupo",
+    "subtitle": "Gestiona los recursos de los grupos que administras",
+    "managedGroups": "Grupos Administrados",
+    "appGroups": "Grupos de Apps",
+    "applications": "Aplicaciones",
+    "news": "Noticias de Grupo",
+    "yourGroups": "Tus Grupos",
+    "yourGroupsSubtitle": "Grupos que administras",
+    "noManagedGroups": "No hay grupos administrados",
+    "noManagedGroupsHelp": "Contacta a un administrador para obtener derechos de administración de grupo",
+    "manageAppGroups": "Gestionar Grupos de Apps",
+    "manageAppGroupsDesc": "Crear y organizar tus grupos de aplicaciones",
+    "manageApplications": "Gestionar Aplicaciones",
+    "manageApplicationsDesc": "Añadir y configurar aplicaciones",
+    "manageNews": "Gestionar Noticias",
+    "manageNewsDesc": "Publicar noticias para tus grupos",
+    "dashboard": "Panel",
+    "myAppGroups": "Mis Grupos de Apps",
+    "myApplications": "Mis Aplicaciones",
+    "myPolls": "Mis Encuestas",
+    "groupNews": "Noticias de Grupo",
+    "appGroupModal": {
+      "title": {
+        "new": "Nuevo Grupo",
+        "edit": "Editar Grupo"
+      },
+      "subtitle": {
+        "new": "Crear un nuevo grupo para organizar aplicaciones",
+        "edit": "Modificar la configuración del grupo de aplicaciones"
+      },
+      "ownerGroup": "Grupo Propietario",
+      "group": "Grupo",
+      "selectGroup": "Seleccionar un grupo",
+      "ownerGroupHelp": "Este grupo de aplicaciones será privado y accesible solo por los miembros de este grupo.",
+      "ownerGroupEditHelp": "El grupo propietario no puede ser modificado.",
+      "basicInfo": "Información Básica",
+      "groupName": "Nombre del Grupo",
+      "displayOrder": "Orden de Visualización",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Describe este grupo de aplicaciones...",
+      "appearance": "Apariencia",
+      "preview": "Vista Previa",
+      "previewName": "Nombre del Grupo",
+      "previewDescription": "Descripción...",
+      "color": "Color",
+      "icon": "Icono",
+      "options": "Opciones",
+      "activeAndVisible": "Activo y visible para usuarios",
+      "cancel": "Cancelar",
+      "update": "Actualizar",
+      "create": "Crear",
+      "errors": {
+        "nameRequired": "El nombre es requerido",
+        "ownerGroupRequired": "El grupo propietario es requerido"
+      }
+    },
+    "applicationModal": {
+      "title": {
+        "new": "Nueva Aplicación",
+        "edit": "Editar Aplicación"
+      },
+      "subtitle": {
+        "new": "Añadir una nueva aplicación al portal",
+        "edit": "Modificar la configuración de la aplicación"
+      },
+      "basicInfo": "Información Básica",
+      "applicationName": "Nombre de la Aplicación",
+      "appGroup": "Grupo de Apps",
+      "selectGroup": "Seleccionar un grupo",
+      "applicationUrl": "URL de la Aplicación",
+      "urlPlaceholder": "https://gitlab.example.com",
+      "urlHelp": "URL completa hacia la aplicación (con https://)",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción de la aplicación...",
+      "appearance": "Apariencia",
+      "preview": "Vista Previa",
+      "previewName": "Nombre de la Aplicación",
+      "previewUrl": "URL...",
+      "color": "Color",
+      "icon": "Icono",
+      "displayOrder": "Orden de Visualización",
+      "behaviorOptions": "Opciones de Comportamiento",
+      "openInNewTab": "Abrir en nueva pestaña",
+      "activeAndVisible": "Activo y visible para usuarios",
+      "cancel": "Cancelar",
+      "update": "Actualizar",
+      "create": "Crear",
+      "noPrivateGroups": "No hay grupos de aplicaciones privados disponibles. Crea primero un grupo de aplicaciones privado.",
+      "errors": {
+        "nameRequired": "El nombre es requerido",
+        "urlRequired": "La URL es requerida",
+        "invalidUrl": "Formato de URL inválido",
+        "appGroupRequired": "El grupo de aplicaciones es requerido"
+      }
+    },
+    "appGroupsManagement": {
+      "title": "Grupos de Aplicaciones",
+      "subtitle": "Gestionar grupos de aplicaciones de tus grupos administrados",
+      "newGroup": "Nuevo Grupo",
+      "noManagedGroups": "No hay grupos administrados",
+      "noManagedGroupsHelp": "Debes ser administrador de al menos un grupo para crear grupos de aplicaciones. Contacta a un administrador del sistema para obtener derechos de administración de grupo.",
+      "searchPlaceholder": "Buscar grupos...",
+      "status": {
+        "all": "Todos los estados",
+        "active": "Solo activos",
+        "inactive": "Solo inactivos"
+      },
+      "applications": "aplicaciones",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "statusBadge": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "order": "Orden:",
+      "ownerGroup": "Grupo:",
+      "empty": {
+        "title": "No hay grupos de aplicaciones",
+        "description": "Crea tu primer grupo de aplicaciones para empezar.",
+        "createButton": "Crear grupo"
+      },
+      "noResults": {
+        "title": "Sin resultados",
+        "description": "Ningún grupo coincide con tus criterios de búsqueda."
+      },
+      "deleteConfirm": {
+        "title": "Eliminar grupo",
+        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible."
+      },
+      "deleteError": "Error al eliminar el grupo"
+    },
+    "applicationsManagement": {
+      "title": "Aplicaciones",
+      "subtitle": "Gestionar aplicaciones de tus grupos",
+      "newApplication": "Nueva Aplicación",
+      "noAppGroups": "No hay grupos de aplicaciones",
+      "noAppGroupsHelp": "Debes crear primero un grupo de aplicaciones antes de poder añadir aplicaciones.",
+      "searchPlaceholder": "Buscar aplicaciones...",
+      "groupFilter": {
+        "all": "Todos los grupos"
+      },
+      "status": {
+        "all": "Todos los estados",
+        "active": "Solo activos",
+        "inactive": "Solo inactivos"
+      },
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "statusBadge": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "order": "Orden:",
+      "noGroup": "Sin grupo",
+      "empty": {
+        "title": "No hay aplicaciones",
+        "description": "Crea tu primera aplicación para empezar.",
+        "createButton": "Añadir aplicación"
+      },
+      "noResults": {
+        "title": "Sin resultados",
+        "description": "Ninguna aplicación coincide con tus criterios de búsqueda."
+      },
+      "deleteConfirm": {
+        "title": "Eliminar aplicación",
+        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible."
+      },
+      "deleteError": "Error al eliminar la aplicación"
+    },
+    "newsManagement": {
+      "title": "Noticias de Grupo",
+      "subtitle": "Gestionar noticias para tus grupos",
+      "newArticle": "Nuevo Artículo",
+      "infoTitle": "Gestión de noticias de grupo",
+      "infoDescription": "Como Administrador de Grupo, puedes crear noticias dirigidas para tus grupos administrados. Estas noticias serán visibles solo para los miembros de los grupos que selecciones.",
+      "searchPlaceholder": "Buscar artículos...",
+      "categoryFilter": {
+        "all": "Todas las categorías"
+      },
+      "statusFilter": {
+        "all": "Todos los estados",
+        "published": "Publicado",
+        "draft": "Borrador"
+      },
+      "priorityFilter": {
+        "all": "Todas las prioridades",
+        "urgent": "Urgente",
+        "important": "Importante",
+        "normal": "Normal"
+      },
+      "status": {
+        "published": "Publicado",
+        "draft": "Borrador"
+      },
+      "priority": {
+        "urgent": "Urgente",
+        "important": "Importante",
+        "normal": "Normal"
+      },
+      "author": {
+        "unknown": "Desconocido"
+      },
+      "targetGroups": "Grupos Objetivo",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      },
+      "pagination": {
+        "page": "Página {page} de {pages}"
+      },
+      "empty": {
+        "title": "No hay noticias",
+        "noResults": "Ningún artículo coincide con tus criterios.",
+        "createFirst": "Crea tu primera noticia para tus grupos.",
+        "createButton": "Crear artículo"
+      },
+      "deleteConfirm": {
+        "title": "Eliminar artículo",
+        "message": "¿Seguro que deseas eliminar \"{title}\"? Esta acción es irreversible."
+      },
+      "deleteError": "Error al eliminar el artículo"
+    },
+    "newsEditor": {
+      "title": {
+        "new": "Nuevo Artículo de Grupo",
+        "edit": "Editar Artículo"
+      },
+      "subtitle": {
+        "new": "Crear una nueva noticia para tus grupos",
+        "edit": "Editar tu noticia de grupo"
+      },
+      "backToList": "Volver a la lista",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Introduce un título atractivo para tu artículo...",
+      "summaryLabel": "Resumen",
+      "summaryPlaceholder": "Escribe un breve resumen que aparecerá en listas y previsualizaciones...",
+      "summaryHelp": "Descripción breve para previsualizaciones",
+      "contentLabel": "Contenido del Artículo",
+      "contentPlaceholder": "Escribe el contenido de tu artículo aquí. Usa la barra de herramientas para formatear tu texto, añadir enlaces, bloques de código, etc...",
+      "publishSection": "Publicación",
+      "publishImmediately": "Publicar inmediatamente",
+      "publishDate": "Fecha de publicación",
+      "expiryDate": "Fecha de vencimiento",
+      "expiryDateOptional": "(Opcional)",
+      "expiryDateHelp": "Archivo automático después de esta fecha",
+      "targetGroups": "Grupos Objetivo",
+      "targetGroupsRequired": "*",
+      "targetGroupsHelp": "Selecciona los grupos que verán esta noticia",
+      "noGroupSelected": "⚠️ No hay grupo seleccionado - el artículo no será visible para nadie",
+      "addGroup": "+ Añadir un grupo",
+      "classification": "Clasificación",
+      "categoryLabel": "Categoría",
+      "noCategory": "Sin categoría",
+      "typeLabel": "Tipo",
+      "types": {
+        "article": "📄 Artículo",
+        "tutorial": "📚 Tutorial",
+        "announcement": "📢 Anuncio",
+        "faq": "❓ FAQ"
+      },
+      "priorityLabel": "Prioridad",
+      "priorities": {
+        "normal": "⚪ Normal",
+        "important": "🟠 Importante",
+        "urgent": "🔴 Urgente"
+      },
+      "tagsSection": "Etiquetas",
+      "noTagSelected": "No hay etiqueta seleccionada",
+      "addTag": "+ Añadir etiqueta",
+      "actions": {
+        "saving": "Guardando...",
+        "update": "Actualizar",
+        "create": "Crear artículo",
+        "cancel": "Cancelar"
+      },
+      "validation": {
+        "selectGroupRequired": "Selecciona al menos un grupo para publicar"
+      },
+      "messages": {
+        "loadError": "Error al cargar la noticia",
+        "updateSuccess": "Artículo actualizado correctamente",
+        "createSuccess": "Artículo creado correctamente",
+        "saveError": "Error al guardar el artículo",
+        "selectGroupError": "Por favor selecciona al menos un grupo objetivo"
+      }
+    },
+    "pollsManagement": {
+      "title": "Mis Encuestas",
+      "subtitle": "Gestiona las encuestas de tus grupos",
+      "newPoll": "Nueva encuesta",
+      "stats": {
+        "total": "Mis Encuestas",
+        "active": "Activas",
+        "closed": "Cerradas"
+      },
+      "filters": {
+        "status": "Estado",
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar...",
+        "all": "Todos",
+        "active": "Activas",
+        "closed": "Cerradas"
+      },
+      "empty": {
+        "title": "No hay encuestas",
+        "description": "Crea tu primera encuesta para tus grupos",
+        "createButton": "Crear una encuesta"
+      }
+    }
+  },
+  "version": {
+    "newVersionAvailable": "Nueva versión disponible",
+    "updateReady": "Una actualización está lista para instalar",
+    "update": "Actualizar",
+    "currentVersion": "Versión actual",
+    "newVersion": "Nueva versión",
+    "releasedOn": "Publicado el",
+    "releaseNotes": "Notas de la versión",
+    "remindLater": "Recordarme más tarde",
+    "viewOnGithub": "Ver en GitHub"
+  },
+  "home": {
+    "title": "Inicio",
+    "welcome": "¡Bienvenido, {name}!",
+    "welcomeMessage": "¡Bienvenido de nuevo, {name}!",
+    "welcomeSubtitle": "Aquí tienes una vista general de tu portal hoy",
+    "viewAll": "Ver todo",
+    "noFavorites": "Sin favoritos",
+    "noEvents": "Sin eventos",
+    "noNews": "Sin artículos",
+    "stats": {
+      "title": "Estadísticas",
+      "users": "Usuarios",
+      "groups": "Grupos",
+      "appGroups": "Grupos de apps",
+      "apps": "Aplicaciones",
+      "news": "Artículos",
+      "events": "Eventos",
+      "polls": "Encuestas",
+      "managedGroups": "Grupos gestionados",
+      "totalMembers": "Miembros totales",
+      "managedAppGroups": "Grupos de apps gestionados",
+      "managedApps": "Mis aplicaciones",
+      "managedNews": "Artículos gestionados",
+      "managedPolls": "Encuestas gestionadas"
+    },
+    "favorites": {
+      "title": "Aplicaciones favoritas",
+      "empty": "Sin favoritos aún. Agrega aplicaciones desde el panel."
+    },
+    "newApps": {
+      "title": "Añadidas recientemente",
+      "empty": "Sin aplicaciones nuevas",
+      "newBadge": "Nuevo"
+    },
+    "todayEvents": {
+      "title": "Eventos de hoy"
+    },
+    "upcomingEvents": {
+      "title": "Próximos eventos"
+    },
+    "recentNews": {
+      "title": "Artículos recientes"
+    },
+    "polls": {
+      "title": "Encuestas",
+      "noPolls": "No hay encuestas disponibles",
+      "newest": "Nueva encuesta",
+      "expiringSoon": "Termina pronto",
+      "latestResults": "Últimos resultados",
+      "closesIn": "Cierra en",
+      "votes": "{count} voto(s)"
+    },
+    "quickActions": {
+      "title": "Acciones rápidas",
+      "manageUsers": "Gestionar usuarios",
+      "manageGroups": "Gestionar grupos",
+      "manageApps": "Gestionar apps",
+      "createAnnouncement": "Crear anuncio",
+      "myGroups": "Mis grupos",
+      "myApps": "Mis aplicaciones",
+      "createNews": "Crear artículo",
+      "createEvent": "Crear evento"
+    },
+    "error": {
+      "title": "No se puede cargar inicio",
+      "message": "Ocurrió un error al cargar la página de inicio. Por favor, inténtalo de nuevo."
+    }
+  },
+
+  "email": {
+    "title": "Notificaciones por Email",
+    "subtitle": "Configurar servidor SMTP y plantillas de email",
+    "smtpSettings": "Configuración SMTP",
+    "host": "Servidor SMTP",
+    "hostPlaceholder": "smtp.example.com",
+    "port": "Puerto",
+    "username": "Usuario",
+    "usernamePlaceholder": "usuario{'@'}example.com",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Ingrese contraseña",
+    "passwordKeep": "Dejar vacío para mantener actual",
+    "fromEmail": "Email remitente",
+    "fromEmailPlaceholder": "noreply{'@'}example.com",
+    "fromName": "Nombre remitente",
+    "useTLS": "Usar TLS (puerto 465)",
+    "useSTARTTLS": "Usar STARTTLS (puerto 587)",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "lastTestSuccess": "Última prueba exitosa",
+    "lastTestFailed": "Última prueba fallida",
+    "testEmail": "Enviar email de prueba",
+    "testEmailAddress": "Dirección de email de prueba",
+    "testEmailPlaceholder": "test{'@'}example.com",
+    "send": "Enviar",
+    "testSuccess": "Email de prueba enviado con éxito",
+    "testFailed": "Error al enviar email de prueba",
+    "smtpSaved": "Configuración SMTP guardada",
+    "smtpSaveError": "Error al guardar configuración SMTP",
+    "templates": "Plantillas de email",
+    "templateNews": "Nuevo artículo",
+    "templateApplication": "Nueva aplicación",
+    "templateEvent": "Nuevo evento",
+    "templateAnnouncement": "Anuncio",
+    "enableTemplate": "Activar notificaciones para este tipo",
+    "subject": "Asunto",
+    "subjectPlaceholder": "Asunto del email",
+    "htmlBody": "Cuerpo HTML",
+    "htmlBodyPlaceholder": "Código HTML de la plantilla",
+    "variables": "Variables disponibles",
+    "variableCopied": "Variable copiada al portapapeles",
+    "preview": "Vista previa",
+    "previewError": "Error al generar vista previa",
+    "resetTemplate": "Restablecer",
+    "resetConfirm": "¿Está seguro de restablecer esta plantilla a su valor predeterminado?",
+    "templateSaved": "Plantilla guardada",
+    "templateSaveError": "Error al guardar plantilla",
+    "templateReset": "Plantilla restablecida",
+    "templateResetError": "Error al restablecer plantilla",
+    "logs": "Historial de envíos",
+    "noLogs": "Aún no se han enviado notificaciones",
+    "logType": "Tipo",
+    "logTitle": "Título",
+    "logRecipients": "Destinatarios",
+    "logStatus": "Estado",
+    "logDate": "Fecha",
+    "statusPending": "Pendiente",
+    "statusSending": "Enviando",
+    "statusCompleted": "Completado",
+    "statusFailed": "Fallido"
+  },
+
+  "comments": {
+    "title": "Comentarios",
+    "placeholder": "Añadir un comentario...",
+    "submit": "Publicar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "edit_title": "Editar comentario",
+    "empty": "Aún no hay comentarios. ¡Sé el primero en comentar!",
+    "disabled": "Los comentarios están desactivados",
+    "anonymous": "Anónimo",
+    "edited": "editado",
+    "pending": "Pendiente",
+    "flagged": "Marcado",
+    "time": {
+      "just_now": "Ahora mismo",
+      "minutes_ago": "{count} min",
+      "hours_ago": "{count} h",
+      "days_ago": "{count} d"
+    }
+  },
+
+  "feedback": {
+    "helpful": "¿Te ha sido útil?",
+    "positive": "positivo",
+    "negative": "negativo"
+  },
+
+  "moderation": {
+    "title": "Moderación de comentarios",
+    "description": "Gestiona los comentarios pendientes y configura los ajustes de comentarios",
+    "pending": "Pendientes",
+    "settings": "Configuración",
+    "no_pending": "No hay comentarios pendientes",
+    "flagged": "Marcado",
+    "approve": "Aprobar",
+    "flag": "Marcar",
+    "delete": "Eliminar",
+    "settings_title": "Configuración de comentarios",
+    "enable_comments": "Habilitar comentarios",
+    "enable_comments_desc": "Habilitar o deshabilitar comentarios en todo el sitio",
+    "news_comments": "Comentarios en noticias",
+    "news_comments_desc": "Permitir comentarios en artículos de noticias",
+    "app_comments": "Comentarios en aplicaciones",
+    "app_comments_desc": "Permitir comentarios en aplicaciones",
+    "event_comments": "Comentarios en eventos",
+    "event_comments_desc": "Permitir comentarios en eventos",
+    "require_moderation": "Requiere moderación",
+    "require_moderation_desc": "Los comentarios requieren aprobación antes de publicarse",
+    "max_length": "Longitud máxima de comentario",
+    "max_length_desc": "Número máximo de caracteres permitidos por comentario",
+    "save_settings": "Guardar configuración"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "center": "Centro de notificaciones",
+    "manageNotifications": "Gestiona tus notificaciones",
+    "noNotifications": "Sin notificaciones",
+    "allCaughtUp": "¡Estás al día!",
+    "markAsRead": "Marcar como leída",
+    "markAllRead": "Marcar todo como leído",
+    "delete": "Eliminar",
+    "deleteAllRead": "Eliminar leídas",
+    "confirmDeleteAllRead": "¿Realmente deseas eliminar todas las notificaciones leídas?",
+    "view": "Ver",
+    "viewAll": "Ver todo",
+    "showAll": "Mostrar todo",
+    "showUnreadOnly": "Solo no leídas",
+    "total": "Total",
+    "unread": "No leídas",
+    "read": "Leídas",
+    "urgent": "Urgente",
+    "important": "Importante",
+    "readAt": "Leído el",
+    "justNow": "Justo ahora",
+    "minutesAgo": "Hace {count} minuto | Hace {count} minutos",
+    "hoursAgo": "Hace {count} hora | Hace {count} horas",
+    "daysAgo": "Hace {count} día | Hace {count} días",
+    "types": {
+      "system": "Sistema",
+      "news": "Noticia",
+      "announcement": "Anuncio",
+      "event": "Evento",
+      "poll": "Encuesta",
+      "comment": "Comentario",
+      "reaction": "Reacción"
+    }
+  },
+  "polls": {
+    "title": "Encuestas",
+    "subtitle": "Participa en encuestas y ve los resultados",
+    "loading": "Cargando encuestas...",
+    "empty": {
+      "title": "No se encontraron encuestas",
+      "description": "Aún no hay encuestas disponibles."
+    },
+    "filters": {
+      "status": "Estado",
+      "status_all": "Todos los estados",
+      "status_active": "Activas",
+      "status_closed": "Cerradas",
+      "type": "Tipo",
+      "type_all": "Todos los tipos",
+      "type_single": "Elección única",
+      "type_multiple": "Elecciones múltiples",
+      "search": "Buscar",
+      "searchPlaceholder": "Buscar una encuesta..."
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page} de {total_pages}"
+    },
+    "status": {
+      "closed": "Cerrada",
+      "expiringSoon": "Expira pronto",
+      "anonymous": "Anónima",
+      "until": "Hasta"
+    },
+    "voting": {
+      "sending": "Enviando...",
+      "vote": "Votar",
+      "viewResults": "Ver resultados",
+      "voteToViewResults": "Vota para ver los resultados.",
+      "pollClosed": "Esta encuesta está cerrada.",
+      "pollClosedResults": "Encuesta cerrada. Haz clic abajo para ver los resultados.",
+      "thanksForVote": "¡Gracias por votar! Haz clic abajo para ver los resultados.",
+      "thanksResultsLater": "¡Gracias por votar! Los resultados estarán disponibles después del cierre de la encuesta.",
+      "success": "¡Voto registrado con éxito!",
+      "error": "Error al votar"
+    },
+    "results": {
+      "loading": "Cargando resultados...",
+      "loadError": "No se pueden cargar los resultados",
+      "retry": "Reintentar",
+      "voterDetails": "Detalles de votantes",
+      "viewFullDetails": "Ver detalles completos",
+      "unknownOption": "Opción desconocida"
+    },
+    "actions": {
+      "edit": "Editar",
+      "close": "Cerrar",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Realmente deseas eliminar esta encuesta? Esta acción es irreversible.",
+      "confirmClose": "¿Deseas cerrar esta encuesta? Los usuarios ya no podrán votar.",
+      "deleteSuccess": "Encuesta eliminada correctamente",
+      "closeSuccess": "Encuesta cerrada correctamente",
+      "deleteError": "Error al eliminar",
+      "closeError": "Error al cerrar",
+      "loadError": "No se pueden cargar las encuestas"
+    },
+    "editor": {
+      "title": {
+        "new": "Nueva Encuesta",
+        "edit": "Editar Encuesta"
+      },
+      "subtitle": {
+        "new": "Crea una nueva encuesta para recopilar opiniones",
+        "edit": "Modifica la configuración de la encuesta"
+      },
+      "basicInfo": "Información Básica",
+      "pollQuestion": "Pregunta de la Encuesta",
+      "pollQuestionPlaceholder": "¿Qué característica te gustaría priorizar?",
+      "description": "Descripción (opcional)",
+      "descriptionPlaceholder": "Añade detalles o contexto...",
+      "responseOptions": "Opciones de Respuesta",
+      "optionPlaceholder": "Opción {index}",
+      "addOption": "Añadir una opción",
+      "optionsHelp": "Mínimo 2 opciones, máximo 10",
+      "typeAndSettings": "Tipo y Configuración",
+      "pollType": "Tipo de Encuesta",
+      "pollType_single": "Elección única (radio)",
+      "pollType_multiple": "Elecciones múltiples (checkbox)",
+      "resultsVisibility": "Visibilidad de Resultados",
+      "resultsVisibility_always": "Siempre visibles",
+      "resultsVisibility_after": "Después de votar",
+      "resultsVisibility_closed": "Solo después del cierre",
+      "anonymousPoll": "Encuesta anónima (ocultar identidades de votantes)",
+      "activePoll": "Encuesta activa (abierta para votar)",
+      "periodAndTargeting": "Período y Segmentación",
+      "startDate": "Fecha de inicio (opcional)",
+      "endDate": "Fecha de fin (opcional)",
+      "targetGroups": "Grupos objetivo (vacío = global)",
+      "targetGroupsHelp": "Mantén Ctrl (Cmd en Mac) para seleccionar múltiples grupos. Si no se selecciona ningún grupo, la encuesta será visible para todos.",
+      "optionalLinks": "Enlaces (opcional)",
+      "linkToArticle": "Enlazar a artículo",
+      "linkToArticlePlaceholder": "ID del artículo",
+      "linkToAnnouncement": "Enlazar a anuncio",
+      "linkToAnnouncementPlaceholder": "ID del anuncio",
+      "advancedOptions": "opciones avanzadas",
+      "showAdvanced": "Mostrar",
+      "hideAdvanced": "Ocultar",
+      "cancel": "Cancelar",
+      "create": "Crear Encuesta",
+      "save": "Guardar",
+      "validation": {
+        "titleRequired": "El título es requerido",
+        "minOptionsRequired": "La encuesta debe tener al menos 2 opciones"
+      },
+      "messages": {
+        "createSuccess": "Encuesta creada correctamente",
+        "updateSuccess": "Encuesta actualizada correctamente",
+        "saveError": "Error al guardar"
+      }
+    },
+    "detail": {
+      "breadcrumb": "Encuestas",
+      "notFound": "Encuesta no encontrada",
+      "backToPolls": "Volver a encuestas",
+      "targetGroups": "Grupos objetivo",
+      "linkedArticle": "Artículo vinculado",
+      "linkedAnnouncement": "Anuncio vinculado",
+      "loadError": "Encuesta no encontrada",
+      "breadcrumbText": "Encuestas",
+      "targetGroupsTitle": "Grupos objetivo",
+      "linkedArticleTitle": "Artículo vinculado",
+      "linkedAnnouncementTitle": "Anuncio vinculado"
+    },
+    "adminPollsManagement": {
+      "title": "Gestión de Encuestas",
+      "subtitle": "Crea y gestiona encuestas para recopilar opiniones de usuarios",
+      "newPoll": "Nueva encuesta",
+      "stats": {
+        "total": "Total",
+        "active": "Activas",
+        "closed": "Cerradas",
+        "votes": "Votos"
+      },
+      "filters": {
+        "status": "Estado",
+        "status_all": "Todos",
+        "status_active": "Activas",
+        "status_closed": "Cerradas",
+        "type": "Tipo",
+        "type_all": "Todos los tipos",
+        "type_single": "Elección única",
+        "type_multiple": "Elecciones múltiples",
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar..."
+      },
+      "status": {
+        "active": "Activa",
+        "closed": "Cerrada",
+        "singleChoice": "Elección única",
+        "multipleChoices": "Elecciones múltiples",
+        "anonymous": "Anónima"
+      },
+      "actions": {
+        "viewResults": "Ver resultados",
+        "edit": "Editar",
+        "close": "Cerrar",
+        "delete": "Eliminar"
+      },
+      "empty": {
+        "title": "No hay encuestas",
+        "description": "Comience creando su primera encuesta",
+        "createButton": "Crear una encuesta"
+      },
+      "confirmation": {
+        "closeTitle": "Cerrar encuesta",
+        "closeMessage": "¿Deseas cerrar esta encuesta? Los usuarios ya no podrán votar.",
+        "deleteTitle": "Eliminar encuesta",
+        "deleteMessage": "¿Realmente deseas eliminar la encuesta \"{title}\"? Esta acción es irreversible."
+      },
+      "messages": {
+        "closeSuccess": "Encuesta cerrada correctamente",
+        "deleteSuccess": "Encuesta eliminada correctamente",
+        "closeError": "Error al cerrar",
+        "deleteError": "Error al eliminar",
+        "loadError": "Error al cargar las encuestas"
+      },
+      "details": {
+        "until": "Hasta",
+        "options": "opciones",
+        "groups": "grupo(s)"
+      }
+    },
+    "media": {
+      "title": "Biblioteca de medios",
+      "upload": "Subir",
+      "dropFiles": "Suelta tus archivos aquí",
+      "orClickToSelect": "o haz clic para seleccionar",
+      "uploading": "Subiendo",
+      "uploadQueue": "Cola de subida",
+      "loading": "Cargando medios...",
+      "noMedia": "No hay medios disponibles",
+      "insert": "Insertar",
+      "delete": "Eliminar",
+      "selectMedia": "Seleccionar medio",
+      "uploadSuccess": "Archivo subido con éxito",
+      "uploadError": "Error al subir",
+      "deleteSuccess": "Medio eliminado con éxito",
+      "deleteError": "Error al eliminar medio"
+    }
+  },
+  "media": {
+    "title": "Gestión de medios",
+    "subtitle": "Administrar archivos, imágenes y documentos",
+    "upload": "Subir",
+    "searchPlaceholder": "Buscar medios...",
+    "filter_all_types": "Todos los tipos",
+    "type_image": "Imágenes",
+    "type_video": "Videos",
+    "type_pdf": "PDF",
+    "type_document": "Documentos",
+    "type_spreadsheet": "Hojas de cálculo",
+    "type_presentation": "Presentaciones",
+    "total_files": "Total de archivos",
+    "total_images": "Total de imágenes",
+    "total_documents": "Total de documentos",
+    "total_size": "Tamaño total",
+    "uploaded_by": "Subido por",
+    "copy_url": "Copiar URL",
+    "emptyTitle": "Sin medios",
+    "emptyText": "Aún no se han subido archivos.",
+    "noResultsTitle": "Sin resultados",
+    "noResultsText": "Ningún medio coincide con tus criterios de búsqueda.",
+    "upload_title": "Subir archivo",
+    "drag_drop": "Arrastra y suelta un archivo aquí",
+    "or": "o",
+    "select_file": "Seleccionar archivo",
+    "uploading": "Subiendo...",
+    "edit_title": "Editar medio",
+    "filename": "Nombre del archivo",
+    "filename_placeholder": "Ingrese el nombre del archivo",
+    "file_size": "Tamaño del archivo",
+    "mime_type": "Tipo MIME",
+    "dimensions": "Dimensiones",
+    "uploaded_at": "Subido el",
+    "url": "URL",
+    "confirmDeleteTitle": "Eliminar medio",
+    "confirmDeleteText": "¿Estás seguro de que quieres eliminar {name}? Esta acción es irreversible.",
+    "url_copied": "¡URL copiada al portapapeles!",
+    "upload_error": "Error al subir el archivo",
+    "update_error": "Error al actualizar el medio",
+    "delete_error": "Error al eliminar el medio"
+  }
+}

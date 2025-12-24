@@ -1,0 +1,23 @@
+{
+  "version": "1.5.0",
+  "buildDate": "2025-12-24",
+  "gitCommit": "bb1fa2f",
+  "changelog": [
+    {
+      "version": "1.5.0",
+      "date": "2025-12-24",
+      "changes": [
+        "feat: Implement comprehensive security improvements (OWASP 2025)",
+        "Fix OAuth connection errors and add troubleshooting tools",
+        "Fix SSO OAuth callback nonce parameter mismatch",
+        "Remove Docker-Fix-Report.md file",
+        "Fix Docker permission issues causing backend restart loops",
+        "Remove docs/ directory from version control",
+        "Add docs/ directory to .gitignore",
+        "Global commit: Complete security implementation, media management, and comprehensive updates",
+        "Improve Nginx static assets caching configuration",
+        "Improve Nginx static assets caching configuration"
+      ]
+    }
+  ]
+}

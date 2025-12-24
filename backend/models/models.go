@@ -1,0 +1,387 @@
+package models
+
+import (
+	"strings"
+	"time"
+
+	"gorm.io/gorm"
+)
+
+// User représente un utilisateur du système
+type User struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	Username    string         `json:"username" gorm:"unique;not null"`
+	Email       string         `json:"email" gorm:"unique;not null"`
+	Password    string         `json:"-"` // Nullable pour les users SSO
+	FirstName   string         `json:"first_name"`
+	LastName    string         `json:"last_name"`
+	Role        string         `json:"role" gorm:"default:'user'"` // admin, editor, user
+	IsActive    bool           `json:"is_active" gorm:"default:true"`
+	SSOProvider string         `json:"sso_provider,omitempty"` // authentik, azure, etc.
+	SSOID       string         `json:"sso_id,omitempty"`       // ID utilisateur externe
+	LastLogin   *time.Time     `json:"last_login"`             // Dernière connexion
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	Groups        []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
+	Favorites     []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
+	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"` // Groupes administrés (pour group_admin)
+}
+
+// Group représente un groupe d'utilisateurs
+type Group struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	Name        string         `json:"name" gorm:"unique;not null"`
+	Description string         `json:"description"`
+	Color       string         `json:"color" gorm:"default:'#3B82F6'"` // Couleur pour l'affichage
+	IsActive    bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	Users     []User     `json:"users,omitempty" gorm:"many2many:user_groups;"`
+	AppGroups []AppGroup `json:"app_groups,omitempty" gorm:"many2many:group_app_groups;"`
+}
+
+// AppGroup représente un groupe d'applications
+type AppGroup struct {
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	Name        string         `json:"name" gorm:"unique;not null"`
+	Description string         `json:"description"`
+	Color       string         `json:"color" gorm:"default:'#10B981'"`   // Couleur pour l'affichage
+	Icon        string         `json:"icon" gorm:"default:'mdi:folder'"` // Icône Iconify
+	Order       int            `json:"order" gorm:"default:0"`
+	IsActive    bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	Applications []Application `json:"applications,omitempty"`
+	Groups       []Group       `json:"groups,omitempty" gorm:"many2many:group_app_groups;"`
+	OwnerGroupID *uint         `json:"owner_group_id"`                                       // Groupe propriétaire (pour AppGroups privés)
+	OwnerGroup   *Group        `json:"owner_group,omitempty" gorm:"foreignKey:OwnerGroupID"` // Relation avec le groupe propriétaire
+	IsPrivate    bool          `json:"is_private" gorm:"default:false"`                      // Flag pour AppGroups privés
+}
+
+// Application représente une application dans le portail
+type Application struct {
+	ID           uint           `json:"id" gorm:"primaryKey"`
+	Name         string         `json:"name" gorm:"not null"`
+	Description  string         `json:"description"`
+	URL          string         `json:"url" gorm:"not null"`
+	Icon         string         `json:"icon" gorm:"default:'mdi:application'"` // Icône Iconify
+	Color        string         `json:"color" gorm:"default:'#6366F1'"`        // Couleur pour l'affichage
+	Order        int            `json:"order" gorm:"default:0"`
+	IsActive     bool           `json:"is_active" gorm:"default:true"`
+	OpenInNewTab bool           `json:"open_in_new_tab" gorm:"default:true"`
+	AppGroupID   uint           `json:"app_group_id"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	AppGroup *AppGroup `json:"app_group,omitempty"`
+}
+
+// JWT Claims structure
+type Claims struct {
+	UserID          uint   `json:"user_id"`
+	Username        string `json:"username"`
+	Role            string `json:"role"`
+	Email           string `json:"email"`
+	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty"` // IDs des groupes administrés (pour group_admin)
+}
+
+// Request/Response structures
+type LoginRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponse struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+	User         User   `json:"user"`
+}
+
+type RegisterRequest struct {
+	Username  string `json:"username" binding:"required,min=3,max=30,alphanum"`
+	Email     string `json:"email" binding:"required,email,max=100"`
+	Password  string `json:"password" binding:"required,min=8,max=128"`
+	FirstName string `json:"first_name" binding:"max=50"`
+	LastName  string `json:"last_name" binding:"max=50"`
+}
+
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Code    int    `json:"code"`
+}
+
+type SuccessResponse struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+type PaginatedResponse struct {
+	Data       interface{} `json:"data"`
+	Total      int64       `json:"total"`
+	Page       int         `json:"page"`
+	PageSize   int         `json:"page_size"`
+	TotalPages int         `json:"total_pages"`
+}
+
+// Dashboard response
+type DashboardResponse struct {
+	AppGroups []AppGroupWithApps `json:"app_groups"`
+	Stats     DashboardStats     `json:"stats"`
+}
+
+type AppGroupWithApps struct {
+	AppGroup
+	Applications []Application `json:"applications"`
+}
+
+type DashboardStats struct {
+	TotalAppGroups    int64 `json:"total_app_groups"`
+	TotalApplications int64 `json:"total_applications"`
+	TotalUsers        int64 `json:"total_users"`
+	TotalGroups       int64 `json:"total_groups"`
+}
+
+// Media represents uploaded media files (images, documents, videos)
+type Media struct {
+	ID           uint           `json:"id" gorm:"primaryKey"`
+	Filename     string         `json:"filename" gorm:"not null"`            // Original filename
+	StoragePath  string         `json:"storage_path" gorm:"not null;unique"` // Path on disk or S3 key
+	URL          string         `json:"url" gorm:"not null"`                 // Public URL to access the file
+	MimeType     string         `json:"mime_type" gorm:"not null"`           // image/jpeg, application/pdf, etc.
+	FileSize     int64          `json:"file_size" gorm:"not null"`           // Size in bytes
+	Width        *int           `json:"width,omitempty"`                     // Image width (if image)
+	Height       *int           `json:"height,omitempty"`                    // Image height (if image)
+	ThumbnailURL string         `json:"thumbnail_url,omitempty"`             // Thumbnail for images/videos
+	StorageType  string         `json:"storage_type" gorm:"default:'local'"` // local, s3, minio
+	UploadedBy   uint           `json:"uploaded_by"`                         // User who uploaded
+	UsageCount   int            `json:"usage_count" gorm:"default:0"`        // Track how many times it's used
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	Uploader User `json:"uploader,omitempty" gorm:"foreignKey:UploadedBy"`
+}
+
+// MediaType returns a user-friendly media type category
+func (m *Media) MediaType() string {
+	switch {
+	case strings.HasPrefix(m.MimeType, "image/"):
+		return "image"
+	case strings.HasPrefix(m.MimeType, "video/"):
+		return "video"
+	case m.MimeType == "application/pdf":
+		return "pdf"
+	case strings.Contains(m.MimeType, "word") || strings.Contains(m.MimeType, "document"):
+		return "document"
+	case strings.Contains(m.MimeType, "sheet") || strings.Contains(m.MimeType, "excel"):
+		return "spreadsheet"
+	case strings.Contains(m.MimeType, "presentation") || strings.Contains(m.MimeType, "powerpoint"):
+		return "presentation"
+	default:
+		return "file"
+	}
+}
+
+// AppSettings représente les paramètres de configuration de l'application
+type AppSettings struct {
+	ID              uint      `json:"id" gorm:"primaryKey"`
+	AppName         string    `json:"app_name" gorm:"default:'Airboard'"`
+	AppIcon         string    `json:"app_icon" gorm:"default:'mdi:view-dashboard'"`
+	DashboardTitle  string    `json:"dashboard_title" gorm:"default:'Dashboard'"`
+	WelcomeMessage  string    `json:"welcome_message" gorm:"default:'Welcome to your application portal'"`     // Message pour la page Dashboard
+	HomePageMessage string    `json:"home_page_message" gorm:"default:'Discover your personalized workspace'"` // Message pour la page d'accueil
+	SignupEnabled   bool      `json:"signup_enabled" gorm:"default:true"`                                      // Activer/désactiver l'inscription
+	DefaultGroupID  *uint     `json:"default_group_id" gorm:"default:null"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+// AppSettingsRequest pour les requêtes de mise à jour
+type AppSettingsRequest struct {
+	AppName         string `json:"app_name" binding:"required,min=1"`
+	AppIcon         string `json:"app_icon" binding:"required"`
+	DashboardTitle  string `json:"dashboard_title" binding:"required,min=1"`
+	WelcomeMessage  string `json:"welcome_message" binding:"required,min=1"`   // Message pour Dashboard
+	HomePageMessage string `json:"home_page_message" binding:"required,min=1"` // Message pour page d'accueil
+	SignupEnabled   *bool  `json:"signup_enabled"`                             // Activer/désactiver l'inscription
+	DefaultGroupID  *uint  `json:"default_group_id"`
+}
+
+// ChangePasswordRequest pour les changements de mot de passe
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
+// OAuthProvider représente un fournisseur OAuth (Google, Microsoft, etc.)
+type OAuthProvider struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	ProviderName string    `json:"provider_name" gorm:"unique;not null"` // google, microsoft
+	DisplayName  string    `json:"display_name" gorm:"not null"`         // "Google", "Microsoft"
+	Icon         string    `json:"icon" gorm:"default:'mdi:login'"`      // Icône Iconify
+	IsEnabled    bool      `json:"is_enabled" gorm:"default:false"`
+	ClientID     string    `json:"client_id"`
+	ClientSecret string    `json:"-"` // Ne jamais exposer dans le JSON
+	RedirectURI  string    `json:"redirect_uri"`
+	AuthURL      string    `json:"auth_url"`      // URL d'autorisation OAuth
+	TokenURL     string    `json:"token_url"`     // URL d'échange de token
+	UserInfoURL  string    `json:"user_info_url"` // URL pour récupérer les infos utilisateur
+	Scopes       string    `json:"scopes"`        // Scopes OAuth séparés par des espaces
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// OAuthProviderRequest pour les requêtes de mise à jour
+type OAuthProviderRequest struct {
+	ProviderName string `json:"provider_name" binding:"required"`
+	DisplayName  string `json:"display_name" binding:"required"`
+	Icon         string `json:"icon"`
+	IsEnabled    bool   `json:"is_enabled"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	RedirectURI  string `json:"redirect_uri"`
+	AuthURL      string `json:"auth_url"`
+	TokenURL     string `json:"token_url"`
+	UserInfoURL  string `json:"user_info_url"`
+	Scopes       string `json:"scopes"`
+}
+
+// OAuthProviderPublic pour l'affichage public (sans secrets)
+type OAuthProviderPublic struct {
+	ID           uint   `json:"id"`
+	ProviderName string `json:"provider_name"`
+	DisplayName  string `json:"display_name"`
+	Icon         string `json:"icon"`
+	IsEnabled    bool   `json:"is_enabled"`
+	RedirectURI  string `json:"redirect_uri"`
+}
+
+// ApplicationClick représente un clic sur une application pour les analytics
+type ApplicationClick struct {
+	ID            uint      `json:"id" gorm:"primaryKey"`
+	UserID        uint      `json:"user_id"`
+	ApplicationID uint      `json:"application_id"`
+	ClickedAt     time.Time `json:"clicked_at"`
+
+	// Relations
+	User        User        `json:"user,omitempty"`
+	Application Application `json:"application,omitempty"`
+}
+
+// Analytics response structures
+type ApplicationStats struct {
+	ApplicationID   uint   `json:"application_id"`
+	ApplicationName string `json:"application_name"`
+	Icon            string `json:"icon"`
+	Color           string `json:"color"`
+	ClickCount      int64  `json:"click_count"`
+	UniqueUsers     int64  `json:"unique_users"`
+}
+
+type UserStats struct {
+	UserID       uint   `json:"user_id"`
+	Username     string `json:"username"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	ClickCount   int64  `json:"click_count"`
+	UniqueApps   int64  `json:"unique_apps"`
+	LastActivity string `json:"last_activity"`
+}
+
+type DailyStats struct {
+	Date        string `json:"date"`
+	ClickCount  int64  `json:"click_count"`
+	UniqueUsers int64  `json:"unique_users"`
+}
+
+type AnalyticsDashboard struct {
+	TotalClicks      int64              `json:"total_clicks"`
+	TotalUniqueUsers int64              `json:"total_unique_users"`
+	TopApplications  []ApplicationStats `json:"top_applications"`
+	TopUsers         []UserStats        `json:"top_users"`
+	DailyActivity    []DailyStats       `json:"daily_activity"`
+	ClicksLast7Days  int64              `json:"clicks_last_7_days"`
+	ClicksLast30Days int64              `json:"clicks_last_30_days"`
+}
+
+// Announcement représente une annonce/actualité affichée sur le dashboard
+type Announcement struct {
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Title     string         `json:"title" gorm:"not null"`
+	Content   string         `json:"content" gorm:"type:text"`
+	Type      string         `json:"type" gorm:"default:'info'"` // info, warning, success, error
+	Priority  int            `json:"priority" gorm:"default:0"`  // Plus élevé = plus important
+	IsActive  bool           `json:"is_active" gorm:"default:true"`
+	StartDate *time.Time     `json:"start_date"` // Date de début d'affichage (optionnel)
+	EndDate   *time.Time     `json:"end_date"`   // Date de fin d'affichage (optionnel)
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+// AnnouncementRequest pour les requêtes de création/mise à jour
+type AnnouncementRequest struct {
+	Title     string     `json:"title" binding:"required,min=1"`
+	Content   string     `json:"content"`
+	Type      string     `json:"type" binding:"required,oneof=info warning success error"`
+	Priority  int        `json:"priority"`
+	IsActive  bool       `json:"is_active"`
+	StartDate *time.Time `json:"start_date"`
+	EndDate   *time.Time `json:"end_date"`
+}
+
+// Notification représente une notification in-app pour un utilisateur
+type Notification struct {
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	UserID    uint           `json:"user_id" gorm:"not null;index"`
+	Type      string         `json:"type" gorm:"not null"` // system, news, announcement, event, comment, reaction
+	Category  string         `json:"category"`              // login, role_change, access_granted, access_revoked, new_article, etc.
+	Title     string         `json:"title" gorm:"not null"`
+	Message   string         `json:"message" gorm:"type:text"`
+	Icon      string         `json:"icon" gorm:"default:'mdi:bell'"` // Icône Iconify
+	Color     string         `json:"color" gorm:"default:'#3B82F6'"` // Couleur pour l'affichage
+	IsRead    bool           `json:"is_read" gorm:"default:false;index"`
+	Priority  int            `json:"priority" gorm:"default:0"` // 0=normal, 1=important, 2=urgent
+	ActionURL string         `json:"action_url"`                // URL de redirection au clic
+	Metadata  string         `json:"metadata" gorm:"type:jsonb"`
+	CreatedAt time.Time      `json:"created_at" gorm:"index"`
+	ReadAt    *time.Time     `json:"read_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relations
+	User User `json:"user,omitempty"`
+}
+
+// NotificationRequest pour les requêtes de création/mise à jour
+type NotificationRequest struct {
+	UserID    uint   `json:"user_id"`
+	Type      string `json:"type" binding:"required"`
+	Category  string `json:"category"`
+	Title     string `json:"title" binding:"required,min=1"`
+	Message   string `json:"message"`
+	Icon      string `json:"icon"`
+	Color     string `json:"color"`
+	Priority  int    `json:"priority"`
+	ActionURL string `json:"action_url"`
+	Metadata  string `json:"metadata"`
+}
+
+// NotificationStats pour les statistiques de notifications
+type NotificationStats struct {
+	TotalNotifications int64 `json:"total_notifications"`
+	UnreadCount        int64 `json:"unread_count"`
+	ReadCount          int64 `json:"read_count"`
+}
