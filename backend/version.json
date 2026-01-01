@@ -1,8 +1,15 @@
 {
-  "version": "1.5.0",
-  "buildDate": "2025-12-24",
+  "version": "1.6.0",
+  "buildDate": "2026-01-01",
   "gitCommit": "bb1fa2f",
   "changelog": [
+    {
+      "version": "1.6.0",
+      "date": "2026-01-01",
+      "changes": [
+        "Bump version to 1.6.0"
+      ]
+    },
     {
       "version": "1.5.0",
       "date": "2025-12-24",
