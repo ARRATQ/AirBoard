@@ -221,7 +221,10 @@ func main() {
 
 		// Profil utilisateur
 		protected.GET("/auth/profile", authHandler.GetProfile)
+		protected.PUT("/auth/profile", authHandler.UpdateProfile)
 		protected.POST("/auth/change-password", authHandler.ChangePassword)
+		protected.POST("/auth/avatar", authHandler.UploadAvatar)
+		protected.DELETE("/auth/avatar", authHandler.DeleteAvatar)
 
 		// Dashboard
 		protected.GET("/dashboard", dashboardHandler.GetDashboard)

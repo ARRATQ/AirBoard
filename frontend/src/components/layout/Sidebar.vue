@@ -301,7 +301,7 @@
           </button>
         </div>
 
-        <!-- Theme & Language Row -->
+        <!-- Theme, Help & Language Row -->
         <div class="flex items-center justify-between mb-4">
           <!-- Theme toggle -->
           <button
@@ -313,6 +313,15 @@
               :icon="appStore.isDarkMode ? 'mdi:weather-night' : 'mdi:weather-sunny'"
               class="h-5 w-5"
             />
+          </button>
+
+          <!-- Help button -->
+          <button
+            @click="showHelpDrawer = true"
+            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            :title="$t('help.title')"
+          >
+            <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
           </button>
 
           <!-- Language selector - compact -->
@@ -353,6 +362,15 @@
           />
         </button>
 
+        <!-- Help button -->
+        <button
+          @click="showHelpDrawer = true"
+          class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          :title="$t('help.title')"
+        >
+          <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
+        </button>
+
         <!-- Language selector - icon only -->
         <select
           class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 text-xs text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 w-12 text-center"
@@ -367,30 +385,71 @@
         </select>
       </div>
 
-      <!-- User profile -->
-      <div class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <div class="flex-shrink-0">
-          <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-            <span class="text-sm font-medium text-gray-900 dark:text-white">
-              {{ authStore.userInitials }}
-            </span>
-          </div>
-        </div>
-        <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-            {{ authStore.userDisplayName }}
-          </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-            {{ authStore.user?.email }}
-          </p>
-        </div>
+      <!-- User profile with dropdown -->
+      <div class="relative" ref="userMenuRef">
         <button
-          @click="handleLogout"
-          class="btn-ghost p-1"
-          :title="$t('common.logout')"
+          @click="toggleUserMenu"
+          class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
         >
-          <Icon icon="mdi:logout" class="h-4 w-4" />
+          <div class="flex-shrink-0">
+            <div class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+              <img
+                v-if="authStore.user?.avatar_url"
+                :src="authStore.user.avatar_url"
+                alt="Avatar"
+                class="h-full w-full object-cover"
+              />
+              <span v-else class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ authStore.userInitials }}
+              </span>
+            </div>
+          </div>
+          <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-left">
+            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {{ authStore.userDisplayName }}
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {{ authStore.user?.email }}
+            </p>
+          </div>
+          <Icon
+            v-if="appStore.sidebarOpen"
+            :icon="showUserMenu ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+            class="h-4 w-4 text-gray-400 flex-shrink-0"
+          />
         </button>
+
+        <!-- Dropdown menu -->
+        <Transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="transform opacity-0 scale-95"
+          enter-to-class="transform opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="transform opacity-100 scale-100"
+          leave-to-class="transform opacity-0 scale-95"
+        >
+          <div
+            v-if="showUserMenu"
+            class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+          >
+            <router-link
+              to="/profile"
+              @click="showUserMenu = false"
+              class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Icon icon="mdi:account-circle-outline" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <span class="text-sm text-gray-700 dark:text-gray-300">{{ $t('profile.title') }}</span>
+            </router-link>
+            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+            <button
+              @click="handleLogout"
+              class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
+            >
+              <Icon icon="mdi:logout" class="h-5 w-5" />
+              <span class="text-sm">{{ $t('common.logout') }}</span>
+            </button>
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -483,11 +542,14 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Help Drawer -->
+    <HelpDrawer v-model="showHelpDrawer" />
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -495,6 +557,7 @@ import { useAppStore } from '@/stores/app'
 import { useVersionStore } from '@/stores/version'
 import ZoomControl from '@/components/dashboard/ZoomControl.vue'
 import NotificationBell from '@/components/notifications/NotificationBell.vue'
+import HelpDrawer from '@/components/help/HelpDrawer.vue'
 
 const authStore = useAuthStore()
 const appStore = useAppStore()
@@ -504,6 +567,30 @@ const router = useRouter()
 
 // State for update modal
 const showUpdateModal = ref(false)
+const showHelpDrawer = ref(false)
+
+// State for user menu
+const showUserMenu = ref(false)
+const userMenuRef = ref(null)
+
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+}
+
+// Close menu when clicking outside
+const handleClickOutside = (event) => {
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
+    showUserMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 // Fermer la sidebar sur mobile lors de la navigation
 watch(() => route.path, () => {

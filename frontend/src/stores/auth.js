@@ -147,6 +147,51 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const saveProfile = async (profileData) => {
+    try {
+      isLoading.value = true
+      const updatedUser = await authService.updateProfile(profileData)
+      user.value = updatedUser
+      localStorage.setItem('airboard_user', JSON.stringify(updatedUser))
+      return updatedUser
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du profil:', error)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const uploadAvatar = async (file) => {
+    try {
+      isLoading.value = true
+      const updatedUser = await authService.uploadAvatar(file)
+      user.value = updatedUser
+      localStorage.setItem('airboard_user', JSON.stringify(updatedUser))
+      return updatedUser
+    } catch (error) {
+      console.error('Erreur lors de l\'upload de l\'avatar:', error)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const deleteAvatar = async () => {
+    try {
+      isLoading.value = true
+      const updatedUser = await authService.deleteAvatar()
+      user.value = updatedUser
+      localStorage.setItem('airboard_user', JSON.stringify(updatedUser))
+      return updatedUser
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'avatar:', error)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const setUser = (userData) => {
     user.value = userData
     localStorage.setItem('airboard_user', JSON.stringify(userData))
@@ -218,6 +263,9 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     loadFromStorage,
     updateProfile,
+    saveProfile,
+    uploadAvatar,
+    deleteAvatar,
     setUser,
     setToken,
     setRefreshToken,

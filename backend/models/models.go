@@ -20,6 +20,11 @@ type User struct {
 	SSOProvider string         `json:"sso_provider,omitempty"` // authentik, azure, etc.
 	SSOID       string         `json:"sso_id,omitempty"`       // ID utilisateur externe
 	LastLogin   *time.Time     `json:"last_login"`             // Dernière connexion
+	AvatarURL   string         `json:"avatar_url,omitempty"`   // URL de l'avatar (stocké localement ou externe)
+	Phone       string         `json:"phone,omitempty"`        // Numéro de téléphone
+	Department  string         `json:"department,omitempty"`   // Département
+	JobTitle    string         `json:"job_title,omitempty"`    // Titre du poste
+	Location    string         `json:"location,omitempty"`     // Localisation
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
@@ -224,6 +229,16 @@ type AppSettingsRequest struct {
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
+// UpdateProfileRequest pour les mises à jour du profil utilisateur
+type UpdateProfileRequest struct {
+	FirstName  string `json:"first_name" binding:"max=50"`
+	LastName   string `json:"last_name" binding:"max=50"`
+	Phone      string `json:"phone" binding:"max=20"`
+	Department string `json:"department" binding:"max=100"`
+	JobTitle   string `json:"job_title" binding:"max=100"`
+	Location   string `json:"location" binding:"max=100"`
 }
 
 // OAuthProvider représente un fournisseur OAuth (Google, Microsoft, etc.)

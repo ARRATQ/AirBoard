@@ -146,6 +146,27 @@ export const authService = {
     return response.data
   },
 
+  async updateProfile(profileData) {
+    const response = await api.put('/auth/profile', profileData)
+    return response.data
+  },
+
+  async uploadAvatar(file) {
+    const formData = new FormData()
+    formData.append('avatar', file)
+    const response = await api.post('/auth/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
+  },
+
+  async deleteAvatar() {
+    const response = await api.delete('/auth/avatar')
+    return response.data
+  },
+
   async getSignupStatus() {
     const response = await api.get('/auth/signup/status')
     return response.data

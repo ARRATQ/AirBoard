@@ -666,3 +666,267 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 		User:         user,
 	})
 }
+
+// @Summary Mettre à jour le profil
+// @Description Met à jour les informations du profil de l'utilisateur connecté
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param profile body models.UpdateProfileRequest true "Informations du profil"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Router /auth/profile [put]
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "Utilisateur non authentifié",
+			Code:    http.StatusUnauthorized,
+		})
+		return
+	}
+
+	var req models.UpdateProfileRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: "Données invalides",
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	// Récupérer l'utilisateur
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Not Found",
+			Message: "Utilisateur non trouvé",
+			Code:    http.StatusNotFound,
+		})
+		return
+	}
+
+	// Mettre à jour les champs
+	user.FirstName = req.FirstName
+	user.LastName = req.LastName
+	user.Phone = req.Phone
+	user.Department = req.Department
+	user.JobTitle = req.JobTitle
+	user.Location = req.Location
+
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la mise à jour du profil",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Recharger l'utilisateur avec ses relations
+	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+
+	// Masquer le mot de passe
+	user.Password = ""
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary Upload avatar
+// @Description Upload un nouvel avatar pour l'utilisateur connecté
+// @Tags Auth
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param avatar formance file true "Fichier avatar (JPG, PNG, GIF, max 5MB)"
+// @Success 200 {object} models.User
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Router /auth/avatar [post]
+func (h *AuthHandler) UploadAvatar(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "Utilisateur non authentifié",
+			Code:    http.StatusUnauthorized,
+		})
+		return
+	}
+
+	// Récupérer le fichier
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: "Aucun fichier fourni",
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	// Vérifier la taille (max 5MB)
+	if file.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: "Le fichier est trop volumineux (max 5MB)",
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	// Vérifier le type MIME
+	contentType := file.Header.Get("Content-Type")
+	allowedTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/png":  true,
+		"image/gif":  true,
+		"image/webp": true,
+	}
+	if !allowedTypes[contentType] {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: "Type de fichier non autorisé (JPG, PNG, GIF, WEBP uniquement)",
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	// Récupérer l'utilisateur
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Not Found",
+			Message: "Utilisateur non trouvé",
+			Code:    http.StatusNotFound,
+		})
+		return
+	}
+
+	// Créer le dossier avatars s'il n'existe pas
+	avatarDir := "./uploads/avatars"
+	if err := utils.EnsureDir(avatarDir); err != nil {
+		log.Printf("Erreur lors de la création du dossier avatars: %v", err)
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la sauvegarde de l'avatar",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Générer un nom de fichier unique
+	ext := ".jpg"
+	switch contentType {
+	case "image/png":
+		ext = ".png"
+	case "image/gif":
+		ext = ".gif"
+	case "image/webp":
+		ext = ".webp"
+	}
+	filename := fmt.Sprintf("avatar_%d_%d%s", user.ID, time.Now().Unix(), ext)
+	filepath := fmt.Sprintf("%s/%s", avatarDir, filename)
+
+	// Sauvegarder le fichier
+	if err := c.SaveUploadedFile(file, filepath); err != nil {
+		log.Printf("Erreur lors de la sauvegarde du fichier avatar: %v", err)
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la sauvegarde de l'avatar",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Supprimer l'ancien avatar si existant (et si c'est un fichier local)
+	if user.AvatarURL != "" && strings.HasPrefix(user.AvatarURL, "/uploads/avatars/") {
+		oldPath := "." + user.AvatarURL
+		if err := utils.RemoveFile(oldPath); err != nil {
+			log.Printf("Erreur lors de la suppression de l'ancien avatar: %v", err)
+			// On continue quand même
+		}
+	}
+
+	// Mettre à jour l'URL de l'avatar
+	user.AvatarURL = fmt.Sprintf("/uploads/avatars/%s", filename)
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la mise à jour du profil",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Recharger l'utilisateur avec ses relations
+	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+
+	// Masquer le mot de passe
+	user.Password = ""
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary Supprimer l'avatar
+// @Description Supprime l'avatar de l'utilisateur connecté
+// @Tags Auth
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} models.User
+// @Failure 401 {object} models.ErrorResponse
+// @Router /auth/avatar [delete]
+func (h *AuthHandler) DeleteAvatar(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "Utilisateur non authentifié",
+			Code:    http.StatusUnauthorized,
+		})
+		return
+	}
+
+	// Récupérer l'utilisateur
+	var user models.User
+	if err := h.db.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Not Found",
+			Message: "Utilisateur non trouvé",
+			Code:    http.StatusNotFound,
+		})
+		return
+	}
+
+	// Supprimer le fichier avatar si existant (et si c'est un fichier local)
+	if user.AvatarURL != "" && strings.HasPrefix(user.AvatarURL, "/uploads/avatars/") {
+		oldPath := "." + user.AvatarURL
+		if err := utils.RemoveFile(oldPath); err != nil {
+			log.Printf("Erreur lors de la suppression de l'avatar: %v", err)
+			// On continue quand même
+		}
+	}
+
+	// Réinitialiser l'URL de l'avatar
+	user.AvatarURL = ""
+	if err := h.db.Save(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la mise à jour du profil",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Recharger l'utilisateur avec ses relations
+	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+
+	// Masquer le mot de passe
+	user.Password = ""
+
+	c.JSON(http.StatusOK, user)
+}

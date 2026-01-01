@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -270,4 +271,17 @@ func (v *SecureFileValidator) GetAllowedFileTypes() []string {
 		types = append(types, ext)
 	}
 	return types
+}
+
+// EnsureDir crée un répertoire s'il n'existe pas déjà
+func EnsureDir(path string) error {
+	return os.MkdirAll(path, 0755)
+}
+
+// RemoveFile supprime un fichier s'il existe
+func RemoveFile(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil // Le fichier n'existe pas, pas d'erreur
+	}
+	return os.Remove(path)
 }

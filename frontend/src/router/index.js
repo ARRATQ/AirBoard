@@ -123,6 +123,15 @@ const routes = [
     }
   },
   {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/ProfileView.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Profil'
+    }
+  },
+  {
     path: '/notifications',
     name: 'Notifications',
     component: () => import('@/views/Notifications.vue'),
