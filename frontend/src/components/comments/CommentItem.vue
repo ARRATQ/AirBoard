@@ -101,7 +101,7 @@ const canDelete = computed(() => {
     authStore.user.id === props.comment.user_id ||
     authStore.user.role === 'admin' ||
     authStore.user.role === 'editor' ||
-    authStore.user.role === 'group_admin'
+    (authStore.user.admin_of_groups && authStore.user.admin_of_groups.length > 0)
   )
 })
 

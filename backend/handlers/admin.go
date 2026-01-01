@@ -49,30 +49,25 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 	var total int64
 
 	// Filtrage selon le rôle
-	role := c.GetString("role")
 	query := h.db.Model(&models.AppGroup{})
 
-	if role == "group_admin" {
+	// Vérifier si l'utilisateur est admin d'au moins un groupe
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	if len(managedGroupIDs) > 0 {
 		// Group admin voit les AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
-		if len(managedGroupIDs) > 0 {
-			// Récupérer tous les AppGroups accessibles aux groupes administrés
-			query = query.Where(`
-				(
-					-- AppGroups publics
-					(is_private = false)
-				)
-				OR
-				(
-					-- AppGroups privés appartant aux groupes administrés
-					is_private = true AND owner_group_id IN ?
-				)
-			`, managedGroupIDs)
-		} else {
-			// Aucun groupe administré = aucun AppGroup visible
-			query = query.Where("1 = 0")
-		}
+		// Récupérer tous les AppGroups accessibles aux groupes administrés
+		query = query.Where(`
+			(
+				-- AppGroups publics
+				(is_private = false)
+			)
+			OR
+			(
+				-- AppGroups privés appartant aux groupes administrés
+				is_private = true AND owner_group_id IN ?
+			)
+		`, managedGroupIDs)
 	}
 	// Admin voit tout (pas de filtre)
 
@@ -127,10 +122,11 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Pour les group_admins, l'AppGroup est automatiquement privé et appartient au premier groupe administré
-	role := c.GetString("role")
-	if role == "group_admin" {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	// Pour les group_admins (utilisateurs admin d'au moins un groupe), l'AppGroup est automatiquement privé et appartient au premier groupe administré
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	isGroupAdmin := len(managedGroupIDs) > 0
+
+	if isGroupAdmin {
 		if len(managedGroupIDs) == 0 {
 			c.JSON(http.StatusForbidden, models.ErrorResponse{
 				Error:   "Forbidden",
@@ -158,8 +154,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	}
 
 	// Pour les group_admins, lier automatiquement l'AppGroup à leurs groupes administrés via group_app_groups
-	if role == "group_admin" {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	if isGroupAdmin {
 		for _, groupID := range managedGroupIDs {
 			h.db.Exec("INSERT INTO group_app_groups (group_id, app_group_id) VALUES (?, ?)", groupID, appGroup.ID)
 		}

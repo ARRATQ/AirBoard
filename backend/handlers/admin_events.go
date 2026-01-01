@@ -462,3 +462,118 @@ func (h *EventsHandler) DeleteCategory(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Catégorie supprimée avec succès"})
 }
+
+// ============================================
+// Gestion des jours fériés
+// ============================================
+
+// GetAvailableCountries - Liste des pays disponibles pour l'import des jours fériés
+func (h *EventsHandler) GetAvailableCountries(c *gin.Context) {
+	holidayService := services.NewHolidayService(h.db)
+
+	countries, err := holidayService.GetAvailableCountries()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"countries": countries})
+}
+
+// ImportHolidaysRequest représente la requête d'import des jours fériés
+type ImportHolidaysRequest struct {
+	CountryCode string `json:"country_code" binding:"required"`
+	Year        int    `json:"year" binding:"required"`
+	CategoryID  *uint  `json:"category_id"`
+}
+
+// ImportHolidays - Importe les jours fériés pour un pays et une année
+func (h *EventsHandler) ImportHolidays(c *gin.Context) {
+	var req ImportHolidaysRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		return
+	}
+
+	// Validation de l'année
+	currentYear := time.Now().Year()
+	if req.Year < currentYear-5 || req.Year > currentYear+5 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "L'année doit être comprise entre " + strconv.Itoa(currentYear-5) + " et " + strconv.Itoa(currentYear+5)})
+		return
+	}
+
+	// Récupérer l'utilisateur connecté comme auteur
+	authorID := c.GetUint("user_id")
+
+	holidayService := services.NewHolidayService(h.db)
+	result, err := holidayService.ImportHolidays(req.CountryCode, req.Year, authorID, req.CategoryID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Import terminé avec succès",
+		"imported": result.Imported,
+		"skipped":  result.Skipped,
+		"errors":   result.Errors,
+	})
+}
+
+// DeleteHolidays - Supprime les jours fériés d'un pays pour une année
+func (h *EventsHandler) DeleteHolidays(c *gin.Context) {
+	countryCode := c.Query("country_code")
+	yearStr := c.Query("year")
+
+	if countryCode == "" || yearStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "country_code et year sont requis"})
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Année invalide"})
+		return
+	}
+
+	holidayService := services.NewHolidayService(h.db)
+	deleted, err := holidayService.DeleteHolidaysByCountryAndYear(countryCode, year)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Suppression terminée",
+		"deleted": deleted,
+	})
+}
+
+// PreviewHolidays - Prévisualise les jours fériés sans les importer
+func (h *EventsHandler) PreviewHolidays(c *gin.Context) {
+	countryCode := c.Query("country_code")
+	yearStr := c.Query("year")
+
+	if countryCode == "" || yearStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "country_code et year sont requis"})
+		return
+	}
+
+	year, err := strconv.Atoi(yearStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Année invalide"})
+		return
+	}
+
+	holidayService := services.NewHolidayService(h.db)
+	holidays, err := holidayService.FetchHolidays(countryCode, year)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"holidays": holidays,
+		"count":    len(holidays),
+	})
+}

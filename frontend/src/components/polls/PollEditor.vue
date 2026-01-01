@@ -211,24 +211,32 @@
               </div>
 
               <div class="form-group">
-                <label for="target_groups" class="form-label">
+                <label class="form-label">
                   {{ t('polls.editor.targetGroups') }}
                 </label>
-                <select
-                  id="target_groups"
-                  v-model="form.target_group_ids"
-                  multiple
-                  class="form-select"
-                  size="5"
-                >
-                  <option
+                <div class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[60px]">
+                  <button
                     v-for="group in availableGroups"
                     :key="group.id"
-                    :value="group.id"
+                    type="button"
+                    @click="toggleGroup(group.id)"
+                    :class="[
+                      'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+                      form.target_group_ids.includes(group.id)
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'
+                    ]"
                   >
+                    <Icon
+                      :icon="form.target_group_ids.includes(group.id) ? 'mdi:check' : 'mdi:plus'"
+                      class="inline h-4 w-4 mr-1"
+                    />
                     {{ group.name }}
-                  </option>
-                </select>
+                  </button>
+                  <span v-if="availableGroups.length === 0" class="text-gray-500 dark:text-gray-400 text-sm italic">
+                    {{ t('polls.editor.noGroupsAvailable') }}
+                  </span>
+                </div>
                 <p class="form-help">
                   {{ t('polls.editor.targetGroupsHelp') }}
                 </p>
@@ -247,26 +255,46 @@
                   <label for="news_id" class="form-label">
                     {{ t('polls.editor.linkToArticle') }}
                   </label>
-                  <input
+                  <select
                     id="news_id"
-                    v-model.number="form.news_id"
-                    type="number"
-                    class="form-input"
-                    :placeholder="t('polls.editor.linkToArticlePlaceholder')"
-                  />
+                    v-model="form.news_id"
+                    class="form-select"
+                  >
+                    <option :value="null">{{ t('polls.editor.noArticleSelected') }}</option>
+                    <option
+                      v-for="article in availableNews"
+                      :key="article.id"
+                      :value="article.id"
+                    >
+                      {{ article.title }}
+                    </option>
+                  </select>
+                  <p v-if="loadingNews" class="form-help text-gray-500">
+                    <Icon icon="mdi:loading" class="inline animate-spin" /> {{ t('common.loading') }}...
+                  </p>
                 </div>
 
                 <div class="form-group">
                   <label for="announcement_id" class="form-label">
                     {{ t('polls.editor.linkToAnnouncement') }}
                   </label>
-                  <input
+                  <select
                     id="announcement_id"
-                    v-model.number="form.announcement_id"
-                    type="number"
-                    class="form-input"
-                    :placeholder="t('polls.editor.linkToAnnouncementPlaceholder')"
-                  />
+                    v-model="form.announcement_id"
+                    class="form-select"
+                  >
+                    <option :value="null">{{ t('polls.editor.noAnnouncementSelected') }}</option>
+                    <option
+                      v-for="announcement in availableAnnouncements"
+                      :key="announcement.id"
+                      :value="announcement.id"
+                    >
+                      {{ announcement.title }}
+                    </option>
+                  </select>
+                  <p v-if="loadingAnnouncements" class="form-help text-gray-500">
+                    <Icon icon="mdi:loading" class="inline animate-spin" /> {{ t('common.loading') }}...
+                  </p>
                 </div>
               </div>
             </div>
@@ -307,10 +335,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
-import { pollsService } from '@/services/api'
+import { pollsService, newsService, announcementsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
@@ -355,18 +383,60 @@ const errors = ref({})
 const loading = ref(false)
 const showAdvanced = ref(false)
 
+// Listes pour les liens optionnels
+const availableNews = ref([])
+const availableAnnouncements = ref([])
+const loadingNews = ref(false)
+const loadingAnnouncements = ref(false)
+
 const isEdit = computed(() => !!props.poll)
 
-// Groupes disponibles selon le rôle
+// Groupes disponibles - pour Group Admin, les groupes sont déjà filtrés par le parent
 const availableGroups = computed(() => {
-  if (authStore.user.role === 'admin') {
-    return props.groups
-  } else if (authStore.user.role === 'group_admin') {
-    // Filtrer uniquement les groupes administrés
-    const managedGroupIds = authStore.user.managed_group_ids || []
-    return props.groups.filter(g => managedGroupIds.includes(g.id))
+  // Les groupes passés en props sont déjà les bons selon le rôle
+  // (managedGroups pour group-admin, tous les groupes pour admin)
+  return props.groups || []
+})
+
+// Charger les articles disponibles
+const loadNews = async () => {
+  try {
+    loadingNews.value = true
+    const response = await newsService.getNews({ page_size: 100, is_published: true })
+    availableNews.value = response.news || []
+  } catch (error) {
+    console.error('Erreur lors du chargement des articles:', error)
+    availableNews.value = []
+  } finally {
+    loadingNews.value = false
   }
-  return props.groups
+}
+
+// Charger les annonces disponibles
+const loadAnnouncements = async () => {
+  try {
+    loadingAnnouncements.value = true
+    // Utiliser getActiveAnnouncements pour les utilisateurs normaux
+    const response = await announcementsService.getActiveAnnouncements()
+    availableAnnouncements.value = response || []
+  } catch (error) {
+    console.error('Erreur lors du chargement des annonces:', error)
+    availableAnnouncements.value = []
+  } finally {
+    loadingAnnouncements.value = false
+  }
+}
+
+// Charger les articles et annonces quand on ouvre les options avancées
+watch(showAdvanced, (newValue) => {
+  if (newValue) {
+    if (availableNews.value.length === 0) {
+      loadNews()
+    }
+    if (availableAnnouncements.value.length === 0) {
+      loadAnnouncements()
+    }
+  }
 })
 
 // Charger les données du sondage en édition
@@ -396,6 +466,9 @@ watch(() => props.poll, (newPoll) => {
 
     if (newPoll.news_id || newPoll.announcement_id) {
       showAdvanced.value = true
+      // Charger les listes si elles ne sont pas encore chargées
+      if (availableNews.value.length === 0) loadNews()
+      if (availableAnnouncements.value.length === 0) loadAnnouncements()
     }
   }
 }, { immediate: true })
@@ -418,6 +491,16 @@ const removeOption = (index) => {
     form.value.options.forEach((opt, idx) => {
       opt.order = idx
     })
+  }
+}
+
+// Toggle la sélection d'un groupe
+const toggleGroup = (groupId) => {
+  const index = form.value.target_group_ids.indexOf(groupId)
+  if (index === -1) {
+    form.value.target_group_ids.push(groupId)
+  } else {
+    form.value.target_group_ids.splice(index, 1)
   }
 }
 
@@ -478,23 +561,26 @@ const handleSubmit = async () => {
     let result
     const userRole = authStore.user.role
 
+    const user = authStore.user
+    const isGroupAdmin = user.admin_of_groups && user.admin_of_groups.length > 0
+
     if (isEdit.value) {
       // Mise à jour
       if (userRole === 'admin') {
         result = await pollsService.updatePoll(props.poll.id, payload)
+      } else if (isGroupAdmin) {
+        result = await pollsService.updatePollAsGroupAdmin(props.poll.id, payload)
       } else if (userRole === 'editor') {
         result = await pollsService.updatePollAsEditor(props.poll.id, payload)
-      } else if (userRole === 'group_admin') {
-        result = await pollsService.updatePollAsGroupAdmin(props.poll.id, payload)
       }
     } else {
       // Création
       if (userRole === 'admin') {
         result = await pollsService.createPoll(payload)
+      } else if (isGroupAdmin) {
+        result = await pollsService.createPollAsGroupAdmin(payload)
       } else if (userRole === 'editor') {
         result = await pollsService.createPollAsEditor(payload)
-      } else if (userRole === 'group_admin') {
-        result = await pollsService.createPollAsGroupAdmin(payload)
       }
     }
 

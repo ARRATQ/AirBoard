@@ -99,36 +99,28 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 
 	if userRole == "admin" {
 		// Admin voit tout
-	} else if userRole == "group_admin" {
-		// Group admin voit :
-		// 1. Ses propres sondages
-		// 2. Les sondages ciblant les groupes qu'il administre
-		// 3. Les sondages globaux (sans groupes cibles)
+	} else {
+		// Récupérer les groupes administrés ET les groupes d'appartenance
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-		if len(managedGroupIDs) > 0 {
-			query = query.Where(`
-				(author_id = ?) OR
-				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0 OR
-				EXISTS (
-					SELECT 1 FROM poll_target_groups
-					WHERE poll_target_groups.poll_id = polls.id
-					AND poll_target_groups.group_id IN (?)
-				)
-			`, userID, managedGroupIDs)
-		} else {
-			// Pas de groupes gérés : seulement ses propres sondages et sondages globaux
-			query = query.Where(`
-				(author_id = ?) OR
-				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
-			`, userID)
-		}
-	} else {
-		// User régulier : sondages globaux + sondages ciblant ses groupes
 		var userGroupIDs []uint
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 
-		if len(userGroupIDs) > 0 {
+		// Combiner les deux listes (appartenance + administration)
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+
+		var combinedGroupIDs []uint
+		for id := range allGroupIDs {
+			combinedGroupIDs = append(combinedGroupIDs, id)
+		}
+
+		if len(combinedGroupIDs) > 0 {
 			query = query.Where(`
 				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
 				OR EXISTS (
@@ -136,7 +128,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 					WHERE poll_target_groups.poll_id = polls.id
 					AND poll_target_groups.group_id IN (?)
 				)
-			`, userGroupIDs)
+			`, combinedGroupIDs)
 		} else {
 			// Si pas de groupes, voir seulement les sondages globaux
 			query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
@@ -205,49 +197,29 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 	// Vérifier l'accès pour group_admin et user
 	hasAccess := false
 
-	if userRole == "group_admin" {
-		// Group admin peut voir :
-		// 1. Ses propres sondages
-		// 2. Sondages sans groupes cibles (globaux)
-		// 3. Sondages ciblant ses groupes administrés
-		if poll.AuthorID == userID {
-			hasAccess = true
-		} else if len(poll.TargetGroups) == 0 {
-			hasAccess = true
-		} else {
-			managedGroupIDs := middleware.GetManagedGroupIDs(c)
-			for _, targetGroup := range poll.TargetGroups {
-				for _, managedID := range managedGroupIDs {
-					if targetGroup.ID == managedID {
-						hasAccess = true
-						break
-					}
-				}
-				if hasAccess {
-					break
-				}
-			}
-		}
-	} else {
-		// User régulier : vérifier s'il appartient à un groupe cible
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+	// Récupérer les groupes administrés ET les groupes d'appartenance
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	var userGroupIDs []uint
+	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 
-		// Si pas de groupes cibles, c'est un sondage global
-		if len(poll.TargetGroups) == 0 {
-			hasAccess = true
-		} else {
-			// Vérifier si l'utilisateur appartient à au moins un groupe cible
-			for _, targetGroup := range poll.TargetGroups {
-				for _, userGroupID := range userGroupIDs {
-					if targetGroup.ID == userGroupID {
-						hasAccess = true
-						break
-					}
-				}
-				if hasAccess {
-					break
-				}
+	// Combiner les deux listes
+	allGroupIDs := make(map[uint]bool)
+	for _, id := range userGroupIDs {
+		allGroupIDs[id] = true
+	}
+	for _, id := range managedGroupIDs {
+		allGroupIDs[id] = true
+	}
+
+	// Si pas de groupes cibles, c'est un sondage global
+	if len(poll.TargetGroups) == 0 {
+		hasAccess = true
+	} else {
+		// Vérifier si l'utilisateur appartient ou administre au moins un groupe cible
+		for _, targetGroup := range poll.TargetGroups {
+			if allGroupIDs[targetGroup.ID] {
+				hasAccess = true
+				break
 			}
 		}
 	}
@@ -637,16 +609,25 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 	if len(poll.TargetGroups) == 0 {
 		hasAccess = true // Sondage global
 	} else {
+		// Récupérer les groupes administrés ET les groupes d'appartenance
+		var managedGroupIDs []uint
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+
 		var userGroupIDs []uint
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Combiner les deux listes
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+
 		for _, targetGroup := range poll.TargetGroups {
-			for _, userGroupID := range userGroupIDs {
-				if targetGroup.ID == userGroupID {
-					hasAccess = true
-					break
-				}
-			}
-			if hasAccess {
+			if allGroupIDs[targetGroup.ID] {
+				hasAccess = true
 				break
 			}
 		}
@@ -736,16 +717,25 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 	} else if len(poll.TargetGroups) == 0 {
 		hasAccess = true
 	} else {
+		// Récupérer les groupes administrés ET les groupes d'appartenance
+		var managedGroupIDs []uint
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+
 		var userGroupIDs []uint
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Combiner les deux listes
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+
 		for _, targetGroup := range poll.TargetGroups {
-			for _, userGroupID := range userGroupIDs {
-				if targetGroup.ID == userGroupID {
-					hasAccess = true
-					break
-				}
-			}
-			if hasAccess {
+			if allGroupIDs[targetGroup.ID] {
+				hasAccess = true
 				break
 			}
 		}

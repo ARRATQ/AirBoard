@@ -53,7 +53,7 @@
     </div>
 
     <!-- Group Admin Stats - Compact List -->
-    <div v-else-if="role === 'group_admin'" class="stats-list">
+    <div v-else-if="managedGroupIds?.length > 0" class="stats-list">
       <div class="stat-row clickable" @click="navigateTo('/group-admin/dashboard')">
         <Icon icon="mdi:account-group" class="stat-icon stat-icon-indigo" />
         <span class="stat-value">{{ stats.managed_groups_count || 0 }}</span>
@@ -105,6 +105,10 @@ defineProps({
   role: {
     type: String,
     required: true
+  },
+  managedGroupIds: {
+    type: Array,
+    default: () => []
   }
 })
 

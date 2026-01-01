@@ -112,6 +112,23 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 		// Note : il ne voit PAS les articles publics globaux qu'il ne peut pas gérer
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
+		// Récupérer aussi les groupes d'appartenance pour la lecture publique
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Combiner les deux listes (appartenance + administration)
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+		var combinedGroupIDs []uint
+		for id := range allGroupIDs {
+			combinedGroupIDs = append(combinedGroupIDs, id)
+		}
+
 		// Si le group_admin accède via /group-admin/news, on filtre strictement
 		// Sinon (lecture publique via /news), il voit les news publiques comme un user normal
 		isAdminInterface := c.Request.URL.Path == "/api/v1/group-admin/news"
@@ -132,18 +149,28 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 				query = query.Where("author_id = ?", userID)
 			}
 		} else {
-			// Interface publique : voir les news publiées publiques + celles de ses groupes
-			query = query.Where(`
-				(author_id = ?) OR
-				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0 OR
-					EXISTS (
-						SELECT 1 FROM news_target_groups
-						WHERE news_target_groups.news_id = news.id
-						AND news_target_groups.group_id IN (?)
+			// Interface publique : voir ses brouillons + news publiées globales + celles de ses groupes (appartenance + administration)
+			if len(combinedGroupIDs) > 0 {
+				query = query.Where(`
+					(author_id = ?) OR
+					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
+						(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0 OR
+						EXISTS (
+							SELECT 1 FROM news_target_groups
+							WHERE news_target_groups.news_id = news.id
+							AND news_target_groups.group_id IN (?)
+						)
+					))
+				`, userID, true, time.Now(), combinedGroupIDs)
+			} else {
+				// Pas de groupes : ses brouillons + news publiques globales
+				query = query.Where(`
+					(author_id = ?) OR
+					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
+						(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
 					)
-				))
-			`, userID, true, time.Now(), managedGroupIDs)
+				`, userID, true, time.Now())
+			}
 		}
 	} else if userRole == "editor" {
 		// Editor voit : news publiques + ses propres brouillons

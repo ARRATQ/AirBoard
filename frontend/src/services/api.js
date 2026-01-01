@@ -723,6 +723,35 @@ export const adminEventsService = {
   async deleteCategory(id) {
     const response = await api.delete(`/admin/events/categories/${id}`)
     return response.data
+  },
+
+  // Holidays
+  async getAvailableCountries() {
+    const response = await api.get('/admin/events/holidays/countries')
+    return response.data
+  },
+
+  async previewHolidays(countryCode, year) {
+    const response = await api.get('/admin/events/holidays/preview', {
+      params: { country_code: countryCode, year }
+    })
+    return response.data
+  },
+
+  async importHolidays(countryCode, year, categoryId = null) {
+    const response = await api.post('/admin/events/holidays/import', {
+      country_code: countryCode,
+      year,
+      category_id: categoryId
+    })
+    return response.data
+  },
+
+  async deleteHolidays(countryCode, year) {
+    const response = await api.delete('/admin/events/holidays', {
+      params: { country_code: countryCode, year }
+    })
+    return response.data
   }
 }
 

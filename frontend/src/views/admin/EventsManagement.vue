@@ -7,10 +7,16 @@
           <h1 class="page-title">{{ $t('events.admin.title') }}</h1>
           <p class="page-subtitle">{{ $t('events.admin.subtitle') }}</p>
         </div>
-        <router-link to="/admin/events/new" class="btn btn-primary">
-          <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
-          {{ $t('events.admin.newEvent') }}
-        </router-link>
+        <div class="flex items-center gap-3">
+          <button @click="showImportHolidaysModal = true" class="btn btn-secondary">
+            <Icon icon="mdi:calendar-star" class="h-4 w-4 mr-2" />
+            {{ $t('events.holidays.importButton') }}
+          </button>
+          <router-link to="/admin/events/new" class="btn btn-primary">
+            <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
+            {{ $t('events.admin.newEvent') }}
+          </router-link>
+        </div>
       </div>
     </div>
 
@@ -252,6 +258,14 @@
         </div>
       </div>
     </div>
+
+    <!-- Import Holidays Modal -->
+    <ImportHolidaysModal
+      v-if="showImportHolidaysModal"
+      :categories="categories"
+      @close="showImportHolidaysModal = false"
+      @imported="handleHolidaysImported"
+    />
   </div>
 </template>
 
@@ -260,12 +274,14 @@ import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useEventsStore } from '@/stores/events'
 import { useAppStore } from '@/stores/app'
+import ImportHolidaysModal from '@/components/admin/ImportHolidaysModal.vue'
 
 const { proxy } = getCurrentInstance()
 const eventsStore = useEventsStore()
 const appStore = useAppStore()
 
 const eventToDelete = ref(null)
+const showImportHolidaysModal = ref(false)
 
 const filters = ref({
   search: '',
@@ -347,6 +363,12 @@ const changePage = (page) => {
   if (page >= 1 && page <= pagination.value.pages) {
     filters.value.page = page
   }
+}
+
+const handleHolidaysImported = (result) => {
+  showImportHolidaysModal.value = false
+  appStore.showSuccess(proxy.$t('events.holidays.importSuccess', { count: result.imported }))
+  loadEvents()
 }
 
 const formatDateRange = (startDate, endDate) => {

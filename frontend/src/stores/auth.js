@@ -34,15 +34,15 @@ export const useAuthStore = defineStore('auth', () => {
   })
 
   const isGroupAdmin = computed(() => {
-    // Un utilisateur est group admin s'il a le rôle group_admin ET qu'il administre au moins un groupe
-    if (user.value?.role !== 'group_admin') return false
+    // Un utilisateur est group admin s'il administre au moins un groupe (indépendamment de son rôle)
     return user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
   })
   const isEditor = computed(() => user.value?.role === 'editor')
   const canManageContent = computed(() =>
     user.value?.role === 'admin' ||
-    user.value?.role === 'group_admin' ||
-    user.value?.role === 'editor'
+    (user.value?.role === 'group_admin' && user.value?.admin_of_groups && user.value.admin_of_groups.length > 0) ||
+    user.value?.role === 'editor' ||
+    (user.value?.admin_of_groups && user.value.admin_of_groups.length > 0)
   )
   const managedGroupIds = computed(() => {
     // Récupérer les IDs des groupes administrés depuis la relation admin_of_groups

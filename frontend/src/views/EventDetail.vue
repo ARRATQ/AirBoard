@@ -330,8 +330,10 @@ const authStore = useAuthStore()
 // Computed
 const event = computed(() => eventsStore.currentEvent)
 const canEdit = computed(() => {
-  const userRole = authStore.user?.role
-  return userRole === 'admin' || userRole === 'editor' || userRole === 'group_admin'
+  const user = authStore.user
+  return user?.role === 'admin' ||
+         user?.role === 'editor' ||
+         (user?.admin_of_groups && user.admin_of_groups.length > 0)
 })
 
 const isPastEvent = computed(() => {
@@ -371,10 +373,10 @@ const fetchEvent = async () => {
 }
 
 const editEvent = () => {
-  const userRole = authStore.user?.role
-  if (userRole === 'admin' || userRole === 'editor') {
+  const user = authStore.user
+  if (user?.role === 'admin' || user?.role === 'editor') {
     router.push({ name: 'AdminEventEdit', params: { slug: event.value.slug } })
-  } else if (userRole === 'group_admin') {
+  } else if (user?.admin_of_groups && user.admin_of_groups.length > 0) {
     router.push({ name: 'GroupAdminEventEdit', params: { slug: event.value.slug } })
   }
 }

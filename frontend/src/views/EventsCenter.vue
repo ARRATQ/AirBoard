@@ -125,29 +125,74 @@
       </div>
     </div>
 
-    <!-- Categories -->
+    <!-- Category Filter -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mt-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {{ $t('agenda.categories') }} ({{ categories.length }})
+        {{ $t('agenda.filterByCategory') }}
       </h3>
-      
-      <div v-if="categories.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div 
-          v-for="category in categories" 
-          :key="category.id"
-          class="border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+
+      <div v-if="categories.length > 0" class="flex flex-wrap gap-3">
+        <!-- All categories button -->
+        <button
+          @click="selectedCategoryId = null"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
+            selectedCategoryId === null
+              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
+          ]"
         >
-          <div class="flex items-center gap-2">
-            <Icon :icon="category.icon || 'mdi:calendar'" class="h-5 w-5" :style="{ color: category.color }" />
-            <span class="font-medium text-gray-900 dark:text-white">{{ category.name }}</span>
-          </div>
-        </div>
+          <Icon icon="mdi:calendar-multiple" class="h-5 w-5" />
+          <span>{{ $t('agenda.allCategories') }}</span>
+          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
+            {{ getTotalEventsCount() }}
+          </span>
+        </button>
+
+        <!-- Category buttons -->
+        <button
+          v-for="category in categories"
+          :key="category.id"
+          @click="selectedCategoryId = category.id"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
+            selectedCategoryId === category.id
+              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
+          ]"
+        >
+          <Icon :icon="category.icon || 'mdi:calendar'" class="h-5 w-5" :style="{ color: category.color }" />
+          <span>{{ category.name }}</span>
+          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
+            {{ getCategoryEventsCount(category.id) }}
+          </span>
+        </button>
+
+        <!-- Holidays filter button -->
+        <button
+          @click="toggleHolidaysFilter"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
+            showOnlyHolidays
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
+          ]"
+        >
+          <Icon icon="mdi:calendar-star" class="h-5 w-5 text-red-500" />
+          <span>{{ $t('agenda.holidays') }}</span>
+          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
+            {{ getHolidaysCount() }}
+          </span>
+        </button>
       </div>
-      
+
       <div v-else class="text-center py-4">
         <p class="text-gray-600 dark:text-gray-400">{{ $t('agenda.noCategories') }}</p>
       </div>
     </div>
+
+    <!-- Working Days Calculator -->
+    <WorkingDaysCalculator class="mt-6" />
 
     <!-- Event Detail Modal -->
     <EventDetailModal
@@ -168,6 +213,7 @@ import { useEventsStore } from '@/stores/events'
 import { useAuthStore } from '@/stores/auth'
 import EventCalendar from '@/components/events/EventCalendar.vue'
 import EventDetailModal from '@/components/events/EventDetailModal.vue'
+import WorkingDaysCalculator from '@/components/events/WorkingDaysCalculator.vue'
 
 const router = useRouter()
 const eventsStore = useEventsStore()
@@ -179,6 +225,8 @@ const isLoading = ref(false)
 const currentView = ref('calendar')
 const calendarComponent = ref(null)
 const selectedEvent = ref(null) // Pour le modal de détail d'événement
+const selectedCategoryId = ref(null) // Filtre par catégorie
+const showOnlyHolidays = ref(false) // Filtre jours fériés
 
 // Computed
 const events = computed(() => eventsStore.events)
@@ -233,14 +281,53 @@ const getDisplayEvents = () => {
   // Use regular events first, fallback to calendar events if needed
   const regularEvents = events.value || []
   const calendarEvents = eventsStore.calendarEvents || []
-  
+
+  let eventsList = []
   if (regularEvents.length > 0) {
-    return regularEvents
+    eventsList = regularEvents
   } else if (calendarEvents.length > 0) {
-    return calendarEvents
+    eventsList = calendarEvents
   }
-  
-  return []
+
+  // Apply category filter
+  if (selectedCategoryId.value !== null) {
+    eventsList = eventsList.filter(event => event.category_id === selectedCategoryId.value)
+  }
+
+  // Apply holidays filter
+  if (showOnlyHolidays.value) {
+    eventsList = eventsList.filter(event => event.is_holiday === true)
+  }
+
+  return eventsList
+}
+
+// Category filter methods
+const getTotalEventsCount = () => {
+  const regularEvents = events.value || []
+  const calendarEvents = eventsStore.calendarEvents || []
+  return regularEvents.length > 0 ? regularEvents.length : calendarEvents.length
+}
+
+const getCategoryEventsCount = (categoryId) => {
+  const regularEvents = events.value || []
+  const calendarEvents = eventsStore.calendarEvents || []
+  const eventsList = regularEvents.length > 0 ? regularEvents : calendarEvents
+  return eventsList.filter(event => event.category_id === categoryId).length
+}
+
+const getHolidaysCount = () => {
+  const regularEvents = events.value || []
+  const calendarEvents = eventsStore.calendarEvents || []
+  const eventsList = regularEvents.length > 0 ? regularEvents : calendarEvents
+  return eventsList.filter(event => event.is_holiday === true).length
+}
+
+const toggleHolidaysFilter = () => {
+  showOnlyHolidays.value = !showOnlyHolidays.value
+  if (showOnlyHolidays.value) {
+    selectedCategoryId.value = null // Reset category filter when showing holidays
+  }
 }
 
 const viewEvent = (event) => {

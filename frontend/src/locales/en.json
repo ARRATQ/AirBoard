@@ -69,7 +69,8 @@
     "updating": "Updating...",
     "deleting": "Deleting...",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "optional": "optional"
   },
   "calendar": {
     "title": "Event Calendar",
@@ -101,7 +102,29 @@
     "noEventsFound": "No events found",
     "reload": "Reload",
     "categories": "Categories",
-    "noCategories": "No categories"
+    "noCategories": "No categories",
+    "filterByCategory": "Filter by category",
+    "allCategories": "All",
+    "holidays": "Holidays",
+    "calculator": {
+      "title": "Working Days Calculator",
+      "subtitle": "Calculate the number of working days between two dates",
+      "weekendDays": "Weekend days",
+      "weekendHint": "Click to select/deselect rest days",
+      "daysOfWeek": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "startDate": "Start date",
+      "endDate": "End date",
+      "excludeHolidays": "Exclude holidays from calculation",
+      "calculate": "Calculate",
+      "totalDays": "Total days",
+      "workingDays": "Working days",
+      "nonWorkingDays": "Non-working days",
+      "breakdown": "Breakdown",
+      "weekendCount": "Weekend days",
+      "holidaysCount": "Holidays",
+      "days": "day(s)",
+      "holidaysInPeriod": "Holidays in period"
+    }
   },
   "groups": {
     "title": "User groups",
@@ -875,6 +898,25 @@
       "createSuccess": "Event created successfully",
       "updateSuccess": "Event updated successfully",
       "saveError": "Error saving"
+    },
+    "holidays": {
+      "importButton": "Import holidays",
+      "importTitle": "Import holidays",
+      "importSubtitle": "Automatically import holidays from a country",
+      "selectCountry": "Select a country",
+      "chooseCountry": "Choose a country...",
+      "selectYear": "Select a year",
+      "selectCategory": "Category (optional)",
+      "noCategory": "No category",
+      "preview": "Preview",
+      "previewResults": "{count} holiday(s) found",
+      "import": "Import",
+      "importSuccess": "{count} holiday(s) imported successfully",
+      "imported": "{count} imported",
+      "skipped": "{count} skipped (already exist)",
+      "loadCountriesError": "Error loading countries",
+      "previewError": "Error previewing",
+      "importError": "Error importing holidays"
     }
   },
   "version": {
@@ -1225,12 +1267,13 @@
       "startDate": "Start date (optional)",
       "endDate": "End date (optional)",
       "targetGroups": "Target groups (empty = global)",
-      "targetGroupsHelp": "Hold Ctrl (Cmd on Mac) to select multiple groups. If no group is selected, the poll will be visible to everyone.",
+      "targetGroupsHelp": "Click on a group to select/deselect it. If no group is selected, the poll will be visible to everyone.",
+      "noGroupsAvailable": "No groups available",
       "optionalLinks": "Links (optional)",
       "linkToArticle": "Link to article",
-      "linkToArticlePlaceholder": "Article ID",
+      "noArticleSelected": "-- No article --",
       "linkToAnnouncement": "Link to announcement",
-      "linkToAnnouncementPlaceholder": "Announcement ID",
+      "noAnnouncementSelected": "-- No announcement --",
       "advancedOptions": "advanced options",
       "showAdvanced": "Show",
       "hideAdvanced": "Hide",

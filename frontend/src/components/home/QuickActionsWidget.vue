@@ -34,7 +34,7 @@
     </div>
 
     <!-- Group Admin Actions -->
-    <div v-else-if="role === 'group_admin'" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <div v-else-if="managedGroupIds?.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-3">
       <ActionButton
         icon="mdi:account-group"
         :label="$t('home.quickActions.myGroups')"
@@ -81,6 +81,10 @@ defineProps({
   role: {
     type: String,
     required: true
+  },
+  managedGroupIds: {
+    type: Array,
+    default: () => []
   }
 })
 </script>

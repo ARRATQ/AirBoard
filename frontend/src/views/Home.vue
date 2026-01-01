@@ -42,7 +42,7 @@
         <div class="column-1">
           <!-- Statistics Widget (Adaptive Height) - Admin/Group Admin Only -->
           <div v-if="showStats" class="bento-item stats-widget-container" data-aos="fade-up">
-            <StatsWidget :stats="homeData.stats" :role="homeData.user_role" />
+            <StatsWidget :stats="homeData.stats" :role="homeData.user_role" :managedGroupIds="homeData.managed_group_ids" />
           </div>
 
           <!-- Favorite Apps -->
@@ -115,7 +115,7 @@ const error = ref(null)
 
 // Computed
 const showStats = computed(() => {
-  return homeData.value.stats && (homeData.value.user_role === 'admin' || homeData.value.user_role === 'group_admin')
+  return homeData.value.stats && (homeData.value.user_role === 'admin' || homeData.value.managed_group_ids?.length > 0)
 })
 
 

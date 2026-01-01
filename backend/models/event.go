@@ -38,6 +38,10 @@ type Event struct {
 	IsPublished bool       `json:"is_published" gorm:"default:false;index"`
 	PublishedAt *time.Time `json:"published_at"`
 
+	// Jour férié
+	IsHoliday   bool   `json:"is_holiday" gorm:"default:false;index"`
+	CountryCode string `json:"country_code" gorm:"size:5"` // Code pays ISO (ex: FR, US, MA)
+
 	// Relations
 	AuthorID   uint           `json:"author_id" gorm:"not null;index"`
 	Author     User           `json:"author" gorm:"constraint:OnDelete:CASCADE;foreignKey:AuthorID"`

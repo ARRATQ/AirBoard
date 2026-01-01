@@ -91,13 +91,11 @@ func (am *AuthMiddleware) RequireAdmin() gin.HandlerFunc {
 
 // GenerateToken génère un token JWT
 func (am *AuthMiddleware) GenerateToken(user *models.User) (string, error) {
-	// Charger les groupes administrés si group_admin
+	// Charger les groupes administrés pour tous les utilisateurs
 	var managedGroupIDs []uint
-	if user.Role == "group_admin" {
-		am.db.Table("group_admins").
-			Where("user_id = ?", user.ID).
-			Pluck("group_id", &managedGroupIDs)
-	}
+	am.db.Table("group_admins").
+		Where("user_id = ?", user.ID).
+		Pluck("group_id", &managedGroupIDs)
 
 	claims := jwt.MapClaims{
 		"user_id":           user.ID,
@@ -115,13 +113,11 @@ func (am *AuthMiddleware) GenerateToken(user *models.User) (string, error) {
 
 // GenerateRefreshToken génère un refresh token
 func (am *AuthMiddleware) GenerateRefreshToken(user *models.User) (string, error) {
-	// Charger les groupes administrés si group_admin
+	// Charger les groupes administrés pour tous les utilisateurs
 	var managedGroupIDs []uint
-	if user.Role == "group_admin" {
-		am.db.Table("group_admins").
-			Where("user_id = ?", user.ID).
-			Pluck("group_id", &managedGroupIDs)
-	}
+	am.db.Table("group_admins").
+		Where("user_id = ?", user.ID).
+		Pluck("group_id", &managedGroupIDs)
 
 	claims := jwt.MapClaims{
 		"user_id":           user.ID,

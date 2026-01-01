@@ -203,9 +203,9 @@ const authStore = useAuthStore()
 const canEdit = computed(() => {
   const userRole = authStore.user?.role
   const userId = authStore.user?.id
-  return userRole === 'admin' || 
-         userRole === 'editor' || 
-         (userRole === 'group_admin' && props.event.author_id === userId)
+  return userRole === 'admin' ||
+         userRole === 'editor' ||
+         (authStore.user.admin_of_groups && authStore.user.admin_of_groups.length > 0 && props.event.author_id === userId)
 })
 
 // Methods

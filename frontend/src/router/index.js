@@ -521,10 +521,11 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // Vérifier les droits group admin (admin ou group_admin)
+  // Vérifier les droits group admin (admin ou utilisateur admin d'au moins un groupe)
   if (to.meta.requiresGroupAdmin) {
     const userRole = authStore.user?.role
-    if (userRole !== 'admin' && userRole !== 'group_admin') {
+    const isAdminOfGroups = authStore.user?.admin_of_groups && authStore.user.admin_of_groups.length > 0
+    if (userRole !== 'admin' && !isAdminOfGroups) {
       next({ name: 'Unauthorized' })
       return
     }

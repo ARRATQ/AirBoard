@@ -180,7 +180,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	}()
 
 	// 8. Load Stats (role-specific)
-	if role == "admin" || role == "group_admin" {
+	if role == "admin" || len(response.ManagedGroupIDs) > 0 {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -239,13 +239,14 @@ func (h *HomeHandler) getNewApps(userID uint, role string) ([]models.Application
 		return apps, err
 	}
 
-	// Users/Group Admins see apps in their groups + public apps
+	// Users/Group Admins see apps in their groups + managed groups + public apps
 	err := h.db.Distinct("applications.*").
 		Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 		Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
 		Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id").
-		Where("applications.is_active = ? AND (app_groups.is_private = ? OR user_groups.user_id = ?)",
-			true, false, userID).
+		Joins("LEFT JOIN group_admins ON group_app_groups.group_id = group_admins.group_id AND group_admins.user_id = ?", userID).
+		Where("applications.is_active = ? AND (app_groups.is_private = ? OR user_groups.user_id = ? OR group_admins.user_id = ?)",
+			true, false, userID, userID).
 		Preload("AppGroup").
 		Order("applications.created_at DESC").
 		Limit(5).
@@ -333,42 +334,30 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 		if err != nil {
 			return polls, err
 		}
-	} else if role == "group_admin" {
-		// Group admin voit :
-		// 1. Ses propres sondages
-		// 2. Les sondages globaux (sans groupes cibles)
-		// 3. Les sondages ciblant ses groupes administrés
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Requête pour récupérer les sondages accessibles
-		err = h.db.Preload("Author").
-			Preload("Options").
-			Where(`
-				(author_id = ?) OR
-				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0 OR
-				EXISTS (
-					SELECT 1 FROM poll_target_groups
-					WHERE poll_target_groups.poll_id = polls.id
-					AND poll_target_groups.group_id IN (?)
-				)
-			`, userID, userGroupIDs).
-			Order("created_at DESC").
-			Limit(10).
-			Find(&polls).Error
-
-		if err != nil {
-			return polls, err
-		}
 	} else {
-		// User régulier voit :
-		// 1. Les sondages globaux (sans groupes cibles)
-		// 2. Les sondages ciblant ses groupes
+		// Récupérer les groupes administrés ET les groupes d'appartenance
+		var managedGroupIDs []uint
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+
 		var userGroupIDs []uint
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 
-		if len(userGroupIDs) > 0 {
-			// L'utilisateur appartient à des groupes
+		// Combiner les deux listes (appartenance + administration)
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+
+		var combinedGroupIDs []uint
+		for id := range allGroupIDs {
+			combinedGroupIDs = append(combinedGroupIDs, id)
+		}
+
+		if len(combinedGroupIDs) > 0 {
+			// L'utilisateur appartient à des groupes ou en administre
 			err = h.db.Preload("Author").
 				Preload("Options").
 				Where(`
@@ -378,7 +367,7 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 						WHERE poll_target_groups.poll_id = polls.id
 						AND poll_target_groups.group_id IN (?)
 					)
-				`, userGroupIDs).
+				`, combinedGroupIDs).
 				Order("created_at DESC").
 				Limit(10).
 				Find(&polls).Error
@@ -510,7 +499,7 @@ func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint)
 
 		// Count all polls
 		h.db.Model(&models.Poll{}).Count(&stats.TotalPolls)
-	} else if role == "group_admin" && len(managedGroupIDs) > 0 {
+	} else if len(managedGroupIDs) > 0 {
 		stats.ManagedGroupsCount = int64(len(managedGroupIDs))
 
 		// Count total members in managed groups (distinct users)

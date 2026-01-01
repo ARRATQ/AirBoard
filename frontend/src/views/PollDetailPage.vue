@@ -133,7 +133,8 @@ const canManage = computed(() => {
   if (user.role === 'admin') return true
   if (user.role === 'editor') return true
 
-  if (user.role === 'group_admin') {
+  // Vérifier si l'utilisateur est admin d'au moins un groupe
+  if (user.admin_of_groups && user.admin_of_groups.length > 0) {
     // Peut gérer si auteur ou si le sondage cible un de ses groupes
     if (poll.value.author_id === user.id) return true
 
@@ -201,7 +202,7 @@ const confirmDelete = async () => {
       await pollsService.deletePoll(poll.value.id)
     } else if (user.role === 'editor') {
       await pollsService.deletePollAsEditor(poll.value.id)
-    } else if (user.role === 'group_admin') {
+    } else if (user.admin_of_groups && user.admin_of_groups.length > 0) {
       await pollsService.deletePollAsGroupAdmin(poll.value.id)
     }
 
@@ -229,7 +230,7 @@ const confirmClose = async () => {
 
     if (user.role === 'admin') {
       await pollsService.closePoll(poll.value.id)
-    } else if (user.role === 'group_admin') {
+    } else if (user.admin_of_groups && user.admin_of_groups.length > 0) {
       await pollsService.closePollAsGroupAdmin(poll.value.id)
     }
 

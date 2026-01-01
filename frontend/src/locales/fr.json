@@ -69,7 +69,8 @@
     "updating": "Mise à jour...",
     "deleting": "Suppression...",
     "page": "Page",
-    "of": "sur"
+    "of": "sur",
+    "optional": "optionnel"
   },
   "calendar": {
     "title": "Calendrier des Événements",
@@ -101,7 +102,29 @@
     "noEventsFound": "Aucun événement trouvé",
     "reload": "Recharger",
     "categories": "Catégories",
-    "noCategories": "Aucune catégorie"
+    "noCategories": "Aucune catégorie",
+    "filterByCategory": "Filtrer par catégorie",
+    "allCategories": "Toutes",
+    "holidays": "Jours fériés",
+    "calculator": {
+      "title": "Calculateur de jours ouvrés",
+      "subtitle": "Calculez le nombre de jours travaillés entre deux dates",
+      "weekendDays": "Jours de week-end",
+      "weekendHint": "Cliquez pour sélectionner/désélectionner les jours de repos",
+      "daysOfWeek": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "excludeHolidays": "Exclure les jours fériés du calcul",
+      "calculate": "Calculer",
+      "totalDays": "Nombre total de jours",
+      "workingDays": "Jours ouvrés",
+      "nonWorkingDays": "Jours non ouvrés",
+      "breakdown": "Détail",
+      "weekendCount": "Jours de week-end",
+      "holidaysCount": "Jours fériés",
+      "days": "jour(s)",
+      "holidaysInPeriod": "Jours fériés dans la période"
+    }
   },
   "groups": {
     "title": "Groupes d'utilisateurs",
@@ -531,6 +554,25 @@
       "createSuccess": "Événement créé avec succès",
       "updateSuccess": "Événement mis à jour avec succès",
       "saveError": "Erreur lors de la sauvegarde"
+    },
+    "holidays": {
+      "importButton": "Importer jours fériés",
+      "importTitle": "Importer les jours fériés",
+      "importSubtitle": "Importez automatiquement les jours fériés d'un pays",
+      "selectCountry": "Sélectionner un pays",
+      "chooseCountry": "Choisir un pays...",
+      "selectYear": "Sélectionner une année",
+      "selectCategory": "Catégorie (optionnel)",
+      "noCategory": "Sans catégorie",
+      "preview": "Prévisualiser",
+      "previewResults": "{count} jour(s) férié(s) trouvé(s)",
+      "import": "Importer",
+      "importSuccess": "{count} jour(s) férié(s) importé(s) avec succès",
+      "imported": "{count} importé(s)",
+      "skipped": "{count} ignoré(s) (déjà existants)",
+      "loadCountriesError": "Erreur lors du chargement des pays",
+      "previewError": "Erreur lors de la prévisualisation",
+      "importError": "Erreur lors de l'import des jours fériés"
     }
   },
   "groupAdmin": {
@@ -1196,12 +1238,13 @@
       "startDate": "Date de début (optionnel)",
       "endDate": "Date de fin (optionnel)",
       "targetGroups": "Groupes cibles (vide = global)",
-      "targetGroupsHelp": "Maintenez Ctrl (Cmd sur Mac) pour sélectionner plusieurs groupes. Si aucun groupe n'est sélectionné, le sondage sera visible par tous.",
+      "targetGroupsHelp": "Cliquez sur un groupe pour le sélectionner/désélectionner. Si aucun groupe n'est sélectionné, le sondage sera visible par tous.",
+      "noGroupsAvailable": "Aucun groupe disponible",
       "optionalLinks": "Liens (optionnel)",
       "linkToArticle": "Lier à un article",
-      "linkToArticlePlaceholder": "ID de l'article",
+      "noArticleSelected": "-- Aucun article --",
       "linkToAnnouncement": "Lier à une annonce",
-      "linkToAnnouncementPlaceholder": "ID de l'annonce",
+      "noAnnouncementSelected": "-- Aucune annonce --",
       "advancedOptions": "les options avancées",
       "showAdvanced": "Afficher",
       "hideAdvanced": "Masquer",

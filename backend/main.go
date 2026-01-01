@@ -407,6 +407,12 @@ func main() {
 			// Analytics Events (admin uniquement)
 			admin.GET("/events/analytics", eventsHandler.GetAnalytics)
 
+			// Gestion des jours fériés (admin uniquement)
+			admin.GET("/events/holidays/countries", eventsHandler.GetAvailableCountries)
+			admin.GET("/events/holidays/preview", eventsHandler.PreviewHolidays)
+			admin.POST("/events/holidays/import", eventsHandler.ImportHolidays)
+			admin.DELETE("/events/holidays", eventsHandler.DeleteHolidays)
+
 			// Gestion des emails et notifications
 			admin.GET("/email/smtp", emailHandler.GetSMTPConfig)
 			admin.PUT("/email/smtp", emailHandler.UpdateSMTPConfig)
