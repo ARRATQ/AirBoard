@@ -9,6 +9,21 @@ const api = axios.create({
   }
 })
 
+// Variables pour gérer le refresh token de manière thread-safe
+let isRefreshing = false
+let failedQueue = []
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
+}
+
 // Logs pour le développement
 if (import.meta.env.DEV) {
   api.interceptors.request.use(
@@ -62,50 +77,80 @@ export function setupInterceptors(router) {
     },
     async (error) => {
       const originalRequest = error.config
-      
+
       console.log('❌ Erreur API:', error.response?.status, originalRequest?.url, error.response?.data)
 
       // Si erreur 401 et pas déjà une tentative de refresh
       if (error.response?.status === 401 && !originalRequest._retry) {
-        console.log('🔄 Tentative de refresh du token...')
-        originalRequest._retry = true
+        // Ignorer les requêtes de refresh qui échouent
+        if (originalRequest.url === '/auth/refresh') {
+          return Promise.reject(error)
+        }
 
         const refreshToken = localStorage.getItem('airboard_refresh_token')
-        if (refreshToken) {
-          try {
-            console.log('🚀 Appel du refresh token...')
-            const response = await api.post('/auth/refresh', {
-              refresh_token: refreshToken
-            })
 
-            const { token, refresh_token } = response.data
-            localStorage.setItem('airboard_token', token)
-            localStorage.setItem('airboard_refresh_token', refresh_token)
-            
-            console.log('🔄 Token rafraîchi avec succès')
-
-            // Refaire la requête originale avec le nouveau token
-            originalRequest.headers.Authorization = `Bearer ${token}`
-            return api(originalRequest)
-          } catch (refreshError) {
-            console.error('❌ Refresh token échoué:', refreshError.response?.data || refreshError.message)
-            // Refresh failed, redirect to login
-            localStorage.removeItem('airboard_token')
-            localStorage.removeItem('airboard_refresh_token')
-            localStorage.removeItem('airboard_user')
-            
-            // Ne rediriger que si on n'est pas déjà sur une page d'auth
-            if (!window.location.pathname.includes('/auth/')) {
-              router.push('/auth/login')
-            }
-            return Promise.reject(refreshError)
-          }
-        } else {
+        // Si pas de refresh token, rediriger vers login
+        if (!refreshToken) {
           console.log('⚠️ Pas de refresh token disponible')
-          // No refresh token, redirect to login
           if (!window.location.pathname.includes('/auth/')) {
             router.push('/auth/login')
           }
+          return Promise.reject(error)
+        }
+
+        // Si un refresh est déjà en cours, mettre la requête en queue
+        if (isRefreshing) {
+          console.log('🔄 Refresh en cours, mise en queue de:', originalRequest.url)
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject })
+          }).then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`
+            return api(originalRequest)
+          }).catch(err => {
+            return Promise.reject(err)
+          })
+        }
+
+        originalRequest._retry = true
+        isRefreshing = true
+        console.log('🔄 Tentative de refresh du token...')
+
+        try {
+          console.log('🚀 Appel du refresh token...')
+          const response = await api.post('/auth/refresh', {
+            refresh_token: refreshToken
+          })
+
+          const { token, refresh_token } = response.data
+          localStorage.setItem('airboard_token', token)
+          localStorage.setItem('airboard_refresh_token', refresh_token)
+
+          console.log('🔄 Token rafraîchi avec succès')
+
+          // Traiter les requêtes en queue
+          processQueue(null, token)
+
+          // Refaire la requête originale avec le nouveau token
+          originalRequest.headers.Authorization = `Bearer ${token}`
+          return api(originalRequest)
+        } catch (refreshError) {
+          console.error('❌ Refresh token échoué:', refreshError.response?.data || refreshError.message)
+
+          // Rejeter toutes les requêtes en queue
+          processQueue(refreshError, null)
+
+          // Refresh failed, redirect to login
+          localStorage.removeItem('airboard_token')
+          localStorage.removeItem('airboard_refresh_token')
+          localStorage.removeItem('airboard_user')
+
+          // Ne rediriger que si on n'est pas déjà sur une page d'auth
+          if (!window.location.pathname.includes('/auth/')) {
+            router.push('/auth/login')
+          }
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
         }
       }
 
@@ -869,6 +914,27 @@ export const emailService = {
   // Logs
   async getLogs() {
     const response = await api.get('/admin/email/logs')
+    return response.data
+  },
+
+  // OAuth 2.0 Configuration
+  async getOAuthConfig() {
+    const response = await api.get('/admin/email/oauth')
+    return response.data
+  },
+
+  async updateOAuthConfig(data) {
+    const response = await api.put('/admin/email/oauth', data)
+    return response.data
+  },
+
+  async testOAuthConnection(toEmail) {
+    const response = await api.post('/admin/email/oauth/test', { to_email: toEmail })
+    return response.data
+  },
+
+  async refreshOAuthToken() {
+    const response = await api.post('/admin/email/oauth/refresh')
     return response.data
   }
 }

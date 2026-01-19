@@ -10,7 +10,66 @@
       </div>
     </div>
 
+    <!-- Tabs Navigation -->
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          @click="activeTab = 'smtp'"
+          :class="[
+            'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+            activeTab === 'smtp'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+          ]"
+        >
+          <Icon icon="mdi:email-cog" class="inline h-5 w-5 mr-2" />
+          Configuration SMTP
+        </button>
+        <button
+          @click="activeTab = 'oauth'"
+          :class="[
+            'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+            activeTab === 'oauth'
+              ? 'border-green-500 text-green-600 dark:text-green-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+          ]"
+        >
+          <Icon icon="mdi:shield-lock" class="inline h-5 w-5 mr-2" />
+          OAuth 2.0
+          <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            Moderne
+          </span>
+        </button>
+        <button
+          @click="activeTab = 'templates'"
+          :class="[
+            'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+            activeTab === 'templates'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+          ]"
+        >
+          <Icon icon="mdi:file-document-edit" class="inline h-5 w-5 mr-2" />
+          Templates
+        </button>
+        <button
+          @click="activeTab = 'logs'"
+          :class="[
+            'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+            activeTab === 'logs'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+          ]"
+        >
+          <Icon icon="mdi:history" class="inline h-5 w-5 mr-2" />
+          Logs
+        </button>
+      </nav>
+    </div>
+
     <div class="max-w-4xl space-y-6">
+      <!-- SMTP Configuration Tab -->
+      <div v-show="activeTab === 'smtp'">
       <!-- SMTP Configuration Section -->
       <div class="card">
         <div class="card-header flex items-center justify-between">
@@ -143,7 +202,15 @@
           </div>
         </div>
       </div>
+      </div>
 
+      <!-- OAuth 2.0 Configuration Tab -->
+      <div v-show="activeTab === 'oauth'">
+        <EmailOAuthConfig />
+      </div>
+
+      <!-- Email Templates Tab -->
+      <div v-show="activeTab === 'templates'">
       <!-- Email Templates Section -->
       <div class="card">
         <div class="card-header">
@@ -252,6 +319,11 @@
         </div>
       </div>
 
+      </div>
+      </div>
+
+      <!-- Logs Tab -->
+      <div v-show="activeTab === 'logs'">
       <!-- Email Logs Section -->
       <div class="card">
         <div class="card-header flex items-center justify-between">
@@ -376,6 +448,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import EmailOAuthConfig from '@/components/admin/EmailOAuthConfig.vue'
 import { useI18n } from 'vue-i18n'
 import { emailService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -384,6 +457,7 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 // State
+const activeTab = ref('smtp')
 const smtpConfig = ref({
   host: '',
   port: 587,

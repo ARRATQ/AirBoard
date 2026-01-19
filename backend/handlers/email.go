@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"airboard/config"
@@ -316,4 +318,256 @@ func (h *EmailHandler) GetTemplateVariables(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, variables)
+}
+
+// GetOAuthConfig retourne la configuration OAuth pour SMTP (sans secrets)
+func (h *EmailHandler) GetOAuthConfig(c *gin.Context) {
+	var smtpConfig models.SMTPConfig
+	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		return
+	}
+
+	// Retourner OAuth config sans secrets
+	if smtpConfig.EmailOAuthConfig != nil {
+		// Masquer les secrets
+		oauthConfig := *smtpConfig.EmailOAuthConfig
+		oauthConfig.ClientSecret = ""
+		oauthConfig.AccessToken = ""
+		oauthConfig.RefreshToken = ""
+		c.JSON(http.StatusOK, oauthConfig)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+// UpdateOAuthConfig crée ou met à jour la configuration OAuth
+func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
+	var req models.EmailOAuthConfigRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("[Email OAuth] UpdateOAuthConfig - Provider: %s, Tenant: %s, Client: %s",
+		req.Provider, req.TenantID, req.ClientID)
+
+	// Get or create SMTP config
+	var smtpConfig models.SMTPConfig
+	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Veuillez d'abord configurer les paramètres SMTP"})
+		return
+	}
+
+	oauthService := services.NewEmailOAuthService(h.db, h.config)
+
+	// Create or update OAuth config
+	var oauthConfig models.EmailOAuthConfig
+	if smtpConfig.EmailOAuthConfig != nil {
+		oauthConfig = *smtpConfig.EmailOAuthConfig
+		log.Printf("[Email OAuth] Mise à jour config existante ID: %d", oauthConfig.ID)
+	} else {
+		oauthConfig.SMTPConfigID = smtpConfig.ID
+		log.Printf("[Email OAuth] Création nouvelle config pour SMTP ID: %d", smtpConfig.ID)
+	}
+
+	// Update fields
+	oauthConfig.Provider = req.Provider
+	oauthConfig.TenantID = req.TenantID
+	oauthConfig.ClientID = req.ClientID
+	oauthConfig.GrantType = req.GrantType
+	oauthConfig.IsEnabled = req.IsEnabled
+
+	// Set scopes
+	if req.Scopes != "" {
+		oauthConfig.Scopes = req.Scopes
+	} else {
+		// Default scopes for Microsoft 365
+		// For client_credentials flow, use Graph API scope (SMTP doesn't work with app-only auth)
+		if req.GrantType == "client_credentials" {
+			oauthConfig.Scopes = "https://graph.microsoft.com/.default"
+		} else {
+			// For delegated (refresh_token) flow, can use SMTP
+			oauthConfig.Scopes = "https://outlook.office365.com/SMTP.Send"
+		}
+	}
+
+	// Build token URLs with tenant ID
+	if req.Provider == "microsoft" {
+		// Set URLs with tenant placeholders if not already set
+		if oauthConfig.AuthURL == "" || strings.Contains(oauthConfig.AuthURL, "{tenant}") {
+			oauthConfig.AuthURL = fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/authorize", req.TenantID)
+		}
+		if oauthConfig.TokenURL == "" || strings.Contains(oauthConfig.TokenURL, "{tenant}") {
+			oauthConfig.TokenURL = fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/token", req.TenantID)
+		}
+		log.Printf("[Email OAuth] Token URL configuré: %s", oauthConfig.TokenURL)
+	}
+
+	// Encrypt and store client secret if provided
+	if req.ClientSecret != "" {
+		encrypted, err := oauthService.EncryptToken(req.ClientSecret)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement du secret client"})
+			return
+		}
+		oauthConfig.ClientSecret = encrypted
+		log.Printf("[Email OAuth] Client secret chiffré et stocké")
+	}
+
+	// For refresh_token flow, store the refresh token
+	if req.GrantType == "refresh_token" && req.RefreshToken != "" {
+		encrypted, err := oauthService.EncryptToken(req.RefreshToken)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement du refresh token"})
+			return
+		}
+		oauthConfig.RefreshToken = encrypted
+		log.Printf("[Email OAuth] Refresh token chiffré et stocké")
+	}
+
+	// Save OAuth config
+	if oauthConfig.ID == 0 {
+		if err := h.db.Create(&oauthConfig).Error; err != nil {
+			log.Printf("[Email OAuth] Erreur création config: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la configuration OAuth"})
+			return
+		}
+		log.Printf("[Email OAuth] Config créée avec ID: %d", oauthConfig.ID)
+	} else {
+		if err := h.db.Save(&oauthConfig).Error; err != nil {
+			log.Printf("[Email OAuth] Erreur sauvegarde config: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour de la configuration OAuth"})
+			return
+		}
+		log.Printf("[Email OAuth] Config mise à jour ID: %d", oauthConfig.ID)
+	}
+
+	// Try to acquire initial token if enabled
+	if req.IsEnabled {
+		log.Printf("[Email OAuth] Tentative acquisition token initial...")
+		if err := oauthService.AcquireClientCredentialsToken(&oauthConfig); err != nil {
+			log.Printf("[Email OAuth] Échec acquisition token initial: %v", err)
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Configuration OAuth sauvegardée mais échec de l'acquisition du token",
+				"error":   err.Error(),
+			})
+			return
+		}
+		log.Printf("[Email OAuth] Token initial acquis avec succès")
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration OAuth mise à jour avec succès"})
+}
+
+// TestOAuthConnection teste la connexion OAuth SMTP
+func (h *EmailHandler) TestOAuthConnection(c *gin.Context) {
+	var req models.EmailOAuthTestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("[Email OAuth] Test connexion OAuth demandé pour: %s", req.ToEmail)
+
+	var smtpConfig models.SMTPConfig
+	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		return
+	}
+
+	if smtpConfig.EmailOAuthConfig == nil || !smtpConfig.EmailOAuthConfig.IsEnabled {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth non configuré ou désactivé"})
+		return
+	}
+
+	// Récupérer le nom de l'application
+	var appSettings models.AppSettings
+	h.db.First(&appSettings)
+	appName := appSettings.AppName
+	if appName == "" {
+		appName = "Airboard"
+	}
+
+	// Send test email using OAuth
+	testSubject := fmt.Sprintf("%s - Test OAuth SMTP", appName)
+	testBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
+.container { max-width: 600px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.header { background: linear-gradient(135deg, #10B981 0%%, #059669 100%%); color: white; padding: 30px; text-align: center; }
+.header h1 { margin: 0; font-size: 24px; }
+.content { padding: 30px; text-align: center; }
+.success-icon { font-size: 48px; margin-bottom: 20px; }
+.badge { display: inline-block; background: #dcfce7; color: #166534; padding: 8px 16px; border-radius: 8px; font-weight: 600; margin: 10px 0; }
+.footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>%s</h1>
+</div>
+<div class="content">
+<div class="success-icon">✅</div>
+<h2>OAuth 2.0 SMTP Test Réussi !</h2>
+<p>Cet email confirme que votre configuration OAuth 2.0 est correcte.</p>
+<div class="badge">🔐 Authentification moderne OAuth 2.0</div>
+<p><strong>Provider:</strong> %s<br>
+<strong>Serveur:</strong> %s<br>
+<strong>Port:</strong> %d</p>
+</div>
+<div class="footer">
+<p>Email de test envoyé le %s</p>
+<p>Powered by OAuth 2.0 XOAUTH2 SASL</p>
+</div>
+</div>
+</body>
+</html>`, appName, smtpConfig.EmailOAuthConfig.Provider, smtpConfig.Host, smtpConfig.Port, time.Now().Format("02/01/2006 à 15:04"))
+
+	// Temporairement activer OAuth pour le test
+	originalUseOAuth := smtpConfig.UseOAuth
+	smtpConfig.UseOAuth = true
+
+	if err := h.emailService.SendEmailWithOAuth(&smtpConfig, req.ToEmail, testSubject, testBody); err != nil {
+		log.Printf("[Email OAuth] Test échoué: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Test OAuth échoué: " + err.Error()})
+		return
+	}
+
+	// Restaurer l'état original
+	smtpConfig.UseOAuth = originalUseOAuth
+
+	log.Printf("[Email OAuth] Test réussi pour %s", req.ToEmail)
+	c.JSON(http.StatusOK, gin.H{"message": "Email de test OAuth envoyé avec succès"})
+}
+
+// RefreshOAuthToken rafraîchit manuellement le token OAuth
+func (h *EmailHandler) RefreshOAuthToken(c *gin.Context) {
+	log.Printf("[Email OAuth] Rafraîchissement manuel du token demandé")
+
+	var smtpConfig models.SMTPConfig
+	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		return
+	}
+
+	if smtpConfig.EmailOAuthConfig == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth non configuré"})
+		return
+	}
+
+	oauthService := services.NewEmailOAuthService(h.db, h.config)
+	if err := oauthService.RefreshAccessToken(smtpConfig.EmailOAuthConfig); err != nil {
+		log.Printf("[Email OAuth] Échec rafraîchissement: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Échec du rafraîchissement du token: " + err.Error()})
+		return
+	}
+
+	log.Printf("[Email OAuth] Token rafraîchi avec succès")
+	c.JSON(http.StatusOK, gin.H{"message": "Token rafraîchi avec succès"})
 }

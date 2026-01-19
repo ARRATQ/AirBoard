@@ -49,6 +49,7 @@ func main() {
 		&models.Event{},
 		&models.EventCategory{},
 		&models.SMTPConfig{},
+		&models.EmailOAuthConfig{},
 		&models.EmailTemplate{},
 		&models.EmailNotificationLog{},
 		&models.Media{},
@@ -427,6 +428,12 @@ func main() {
 			admin.POST("/email/templates/:type/reset", emailHandler.ResetEmailTemplate)
 			admin.GET("/email/templates/:type/preview", emailHandler.PreviewTemplate)
 			admin.GET("/email/logs", emailHandler.GetEmailLogs)
+
+			// OAuth 2.0 configuration for email (admin only)
+			admin.GET("/email/oauth", emailHandler.GetOAuthConfig)
+			admin.PUT("/email/oauth", emailHandler.UpdateOAuthConfig)
+			admin.POST("/email/oauth/test", emailHandler.TestOAuthConnection)
+			admin.POST("/email/oauth/refresh", emailHandler.RefreshOAuthToken)
 
 			// Gestion des commentaires (modération - admin uniquement)
 			admin.GET("/comments/pending", commentHandler.GetPendingComments)     // Commentaires en attente

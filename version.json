@@ -1,22 +1,22 @@
 {
-  "version": "1.5.0",
-  "buildDate": "2025-12-24",
-  "gitCommit": "bb1fa2f",
+  "version": "1.6.1",
+  "buildDate": "2026-01-19",
+  "gitCommit": "36f42ec",
   "changelog": [
     {
-      "version": "1.5.0",
-      "date": "2025-12-24",
+      "version": "1.6.1",
+      "date": "2026-01-19",
       "changes": [
-        "feat: Implement comprehensive security improvements (OWASP 2025)",
-        "Fix OAuth connection errors and add troubleshooting tools",
-        "Fix SSO OAuth callback nonce parameter mismatch",
-        "Remove Docker-Fix-Report.md file",
-        "Fix Docker permission issues causing backend restart loops",
-        "Remove docs/ directory from version control",
-        "Add docs/ directory to .gitignore",
-        "Global commit: Complete security implementation, media management, and comprehensive updates",
-        "Improve Nginx static assets caching configuration",
-        "Improve Nginx static assets caching configuration"
+        "Ajout de la mise à jour du champ last_login dans oauth.go:351-356 après une connexion OAuth réussie.",
+        "fix: Reorganize help content by role - move installation to admin section",
+        "fix: Prevent HTML error pages from displaying in help drawer",
+        "fix: Fix group admin permission check for editing app groups",
+        "fix: Fix bullet and numbered list styling in news editor and renderer",
+        "fix: Fix i18n translation function in group admin components",
+        "Global update: Add help system, update dependencies and enhance functionality",
+        "feat: Global update with multiple enhancements",
+        "chore: Bump version to 1.6.0",
+        "Initial commit: Airboard - Modern Application Portal"
       ]
     }
   ]

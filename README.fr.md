@@ -1407,7 +1407,6 @@ curl -X PUT http://localhost:8080/api/v1/notifications/1/read \
   -H "Authorization: Bearer <token>"
 ```
 
-Documentation complète : Voir [CLAUDE.md](CLAUDE.md) pour tous les endpoints.
 
 ---
 
@@ -1540,7 +1539,6 @@ docker-compose up -d
 
 ### Documentation Technique
 
-- [**CLAUDE.md**](CLAUDE.md) - Documentation développeur
   - Architecture détaillée
   - Patterns de développement
   - Ajout de fonctionnalités
@@ -1651,7 +1649,7 @@ Ouvrir une Pull Request sur GitHub avec :
 
 ## Support
 
-- **Documentation** : Ce README + [HOW-TO-USE.md](HOW-TO-USE.md) + [CLAUDE.md](CLAUDE.md)
+- **Documentation** : Ce README + [HOW-TO-USE.md](HOW-TO-USE.md) 
 - **Issues** : [GitHub Issues](../../issues)
 - **Discussions** : [GitHub Discussions](../../discussions)
 
