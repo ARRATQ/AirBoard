@@ -10,10 +10,14 @@
 
     <!-- News Info -->
     <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1.5">
         <h4 class="font-semibold text-xs text-gray-900 dark:text-white truncate">
           {{ article.title }}
         </h4>
+        <!-- Badge épinglé -->
+        <div v-if="article.is_pinned" class="badge-pinned" :title="t('news.detail.pinned')">
+          <Icon icon="mdi:pin" class="h-3 w-3" />
+        </div>
       </div>
       <p v-if="article.summary" class="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">
         {{ article.summary }}
@@ -21,6 +25,12 @@
       <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500 mt-0.5">
         <Icon icon="mdi:calendar" class="h-3 w-3" />
         <span>{{ formatDate(article.published_at || article.created_at) }}</span>
+
+        <!-- Badge groupe cible (si l'article est destiné à un groupe spécifique) -->
+        <div v-if="hasTargetGroups" class="badge-group" :title="targetGroupsTooltip">
+          <Icon icon="mdi:account-group" class="h-3 w-3" />
+          <span>{{ firstTargetGroupName }}</span>
+        </div>
 
         <!-- Badges pour commentaires et likes -->
         <div class="flex items-center gap-1.5 ml-auto">
@@ -41,10 +51,11 @@
 <script setup>
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   article: {
     type: Object,
     required: true
@@ -52,6 +63,27 @@ defineProps({
 })
 
 defineEmits(['click'])
+
+// Computed pour vérifier si l'article a des groupes cibles
+const hasTargetGroups = computed(() => {
+  return props.article.target_groups && props.article.target_groups.length > 0
+})
+
+// Nom du premier groupe cible (pour affichage compact)
+const firstTargetGroupName = computed(() => {
+  if (!hasTargetGroups.value) return ''
+  const groups = props.article.target_groups
+  if (groups.length === 1) {
+    return groups[0].name
+  }
+  return `${groups[0].name} +${groups.length - 1}`
+})
+
+// Tooltip avec tous les groupes cibles
+const targetGroupsTooltip = computed(() => {
+  if (!hasTargetGroups.value) return ''
+  return props.article.target_groups.map(g => g.name).join(', ')
+})
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -123,5 +155,57 @@ const formatDate = (dateString) => {
 
 .dark .news-list-item:hover .badge-stat {
   background-color: rgb(75 85 99);
+}
+
+/* Badge Pinned (épinglé) */
+.badge-pinned {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.125rem;
+  background-color: rgb(254 243 199);
+  border-radius: 0.25rem;
+  color: rgb(180 83 9);
+  flex-shrink: 0;
+}
+
+.dark .badge-pinned {
+  background-color: rgb(120 53 15);
+  color: rgb(253 230 138);
+}
+
+/* Badge Group (groupe cible) */
+.badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  background-color: rgb(219 234 254);
+  border-radius: 0.375rem;
+  color: rgb(29 78 216);
+  font-weight: 500;
+  font-size: 0.625rem;
+  max-width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.badge-group span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .badge-group {
+  background-color: rgb(30 58 138);
+  color: rgb(147 197 253);
+}
+
+.news-list-item:hover .badge-group {
+  background-color: rgb(191 219 254);
+}
+
+.dark .news-list-item:hover .badge-group {
+  background-color: rgb(30 64 175);
 }
 </style>

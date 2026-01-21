@@ -289,18 +289,87 @@ func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Even
 	return events, err
 }
 
-// Helper: Get recent news (last 5 published articles)
+// Helper: Get recent news (last 5 published articles filtered by user groups)
 func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, error) {
 	var news []models.News
+	var err error
 
-	query := h.db.Where("is_published = ?", true).
-		Preload("Author").
-		Preload("Category").
-		Preload("Tags").
-		Order("published_at DESC").
-		Limit(5)
+	// Les admins voient tous les articles publiés
+	if role == "admin" {
+		err = h.db.Where("is_published = ?", true).
+			Preload("Author").
+			Preload("Category").
+			Preload("Tags").
+			Preload("TargetGroups").
+			Order("is_pinned DESC, published_at DESC").
+			Limit(5).
+			Find(&news).Error
 
-	err := query.Find(&news).Error
+		if err != nil {
+			return news, err
+		}
+	} else {
+		// Récupérer les groupes administrés ET les groupes d'appartenance
+		var managedGroupIDs []uint
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Combiner les deux listes (appartenance + administration)
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+
+		var combinedGroupIDs []uint
+		for id := range allGroupIDs {
+			combinedGroupIDs = append(combinedGroupIDs, id)
+		}
+
+		if len(combinedGroupIDs) > 0 {
+			// L'utilisateur appartient à des groupes ou en administre
+			// Afficher les articles globaux (sans target_groups) OU les articles ciblant ses groupes
+			err = h.db.Where("is_published = ?", true).
+				Where(`
+					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
+					OR EXISTS (
+						SELECT 1 FROM news_target_groups
+						WHERE news_target_groups.news_id = news.id
+						AND news_target_groups.group_id IN (?)
+					)
+				`, combinedGroupIDs).
+				Preload("Author").
+				Preload("Category").
+				Preload("Tags").
+				Preload("TargetGroups").
+				Order("is_pinned DESC, published_at DESC").
+				Limit(5).
+				Find(&news).Error
+
+			if err != nil {
+				return news, err
+			}
+		} else {
+			// L'utilisateur n'appartient à aucun groupe : seulement les articles globaux
+			err = h.db.Where("is_published = ?", true).
+				Where("(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0").
+				Preload("Author").
+				Preload("Category").
+				Preload("Tags").
+				Preload("TargetGroups").
+				Order("is_pinned DESC, published_at DESC").
+				Limit(5).
+				Find(&news).Error
+
+			if err != nil {
+				return news, err
+			}
+		}
+	}
 
 	// Ajouter les compteurs de commentaires et réactions pour chaque article
 	for i := range news {
