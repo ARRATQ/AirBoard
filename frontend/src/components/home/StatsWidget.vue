@@ -54,7 +54,7 @@
 
     <!-- Group Admin Stats - Compact List -->
     <div v-else-if="managedGroupIds?.length > 0" class="stats-list">
-      <div class="stat-row clickable" @click="navigateTo('/group-admin/dashboard')">
+      <div class="stat-row clickable" @click="navigateTo('/group-admin')">
         <Icon icon="mdi:account-group" class="stat-icon stat-icon-indigo" />
         <span class="stat-value">{{ stats.managed_groups_count || 0 }}</span>
         <span class="stat-label">{{ $t('home.stats.managedGroups') }}</span>

@@ -44,8 +44,8 @@ const EventsManagement = () => import('@/views/admin/EventsManagement.vue')
 const EventEditor = () => import('@/views/admin/EventEditor.vue')
 
 // Events group admin views
-const GroupAdminEvents = () => import('@/views/admin/EventsManagement.vue')
-const GroupAdminEventEditor = () => import('@/views/admin/EventEditor.vue')
+const GroupAdminEvents = () => import('@/views/group-admin/EventsManagement.vue')
+const GroupAdminEventEditor = () => import('@/views/group-admin/EventEditor.vue')
 
 // Comment moderation
 const CommentModeration = () => import('@/views/admin/CommentModeration.vue')
@@ -491,9 +491,9 @@ const router = createRouter({
 })
 
 // Guards de navigation
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   // Charger l'état d'authentification depuis le localStorage SEULEMENT au premier chargement
   if (!authStore.isAuthenticated && !authStore.isLoading && !authStore.token) {
     authStore.loadFromStorage()
@@ -533,10 +533,42 @@ router.beforeEach((to, from, next) => {
   // Vérifier les droits group admin (admin ou utilisateur admin d'au moins un groupe)
   if (to.meta.requiresGroupAdmin) {
     const userRole = authStore.user?.role
-    const isAdminOfGroups = authStore.user?.admin_of_groups && authStore.user.admin_of_groups.length > 0
+    // Vérifier admin_of_groups (tableau de groupes) OU managed_group_ids (tableau d'IDs)
+    const adminOfGroups = authStore.user?.admin_of_groups
+    const managedGroupIds = authStore.user?.managed_group_ids
+    const isAdminOfGroups = (adminOfGroups && Array.isArray(adminOfGroups) && adminOfGroups.length > 0) ||
+                            (managedGroupIds && Array.isArray(managedGroupIds) && managedGroupIds.length > 0)
+
+    console.log('🔐 Guard requiresGroupAdmin:', {
+      route: to.path,
+      userRole,
+      adminOfGroups,
+      managedGroupIds,
+      isAdminOfGroups
+    })
+
+    // Si l'utilisateur n'est pas admin et n'a pas de groupes administrés localement,
+    // rafraîchir le profil pour vérifier les permissions à jour
     if (userRole !== 'admin' && !isAdminOfGroups) {
-      next({ name: 'Unauthorized' })
-      return
+      try {
+        await authStore.updateProfile()
+
+        // Re-vérifier les permissions avec les données fraîches
+        const updatedUserRole = authStore.user?.role
+        const updatedAdminOfGroups = authStore.user?.admin_of_groups
+        const updatedManagedGroupIds = authStore.user?.managed_group_ids
+        const updatedIsAdminOfGroups = (updatedAdminOfGroups && Array.isArray(updatedAdminOfGroups) && updatedAdminOfGroups.length > 0) ||
+                                       (updatedManagedGroupIds && Array.isArray(updatedManagedGroupIds) && updatedManagedGroupIds.length > 0)
+
+        if (updatedUserRole !== 'admin' && !updatedIsAdminOfGroups) {
+          next({ name: 'Unauthorized' })
+          return
+        }
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du profil:', error)
+        next({ name: 'Unauthorized' })
+        return
+      }
     }
   }
 

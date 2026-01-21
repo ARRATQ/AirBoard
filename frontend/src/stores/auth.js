@@ -35,42 +35,71 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isGroupAdmin = computed(() => {
     // Un utilisateur est group admin s'il administre au moins un groupe (indépendamment de son rôle)
-    return user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
+    // Vérifier admin_of_groups (tableau de groupes) OU managed_group_ids (tableau d'IDs)
+    const hasAdminOfGroups = user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
+    const hasManagedGroupIds = user.value?.managed_group_ids && user.value.managed_group_ids.length > 0
+    return hasAdminOfGroups || hasManagedGroupIds
   })
   const isEditor = computed(() => user.value?.role === 'editor')
-  const canManageContent = computed(() =>
-    user.value?.role === 'admin' ||
-    (user.value?.role === 'group_admin' && user.value?.admin_of_groups && user.value.admin_of_groups.length > 0) ||
-    user.value?.role === 'editor' ||
-    (user.value?.admin_of_groups && user.value.admin_of_groups.length > 0)
-  )
+  const canManageContent = computed(() => {
+    const hasAdminOfGroups = user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
+    const hasManagedGroupIds = user.value?.managed_group_ids && user.value.managed_group_ids.length > 0
+    return user.value?.role === 'admin' ||
+      user.value?.role === 'editor' ||
+      hasAdminOfGroups ||
+      hasManagedGroupIds
+  })
   const managedGroupIds = computed(() => {
-    // Récupérer les IDs des groupes administrés depuis la relation admin_of_groups
-    if (user.value?.admin_of_groups) {
+    // Récupérer les IDs des groupes administrés depuis admin_of_groups ou managed_group_ids
+    if (user.value?.admin_of_groups && user.value.admin_of_groups.length > 0) {
       return user.value.admin_of_groups.map(g => g.id)
+    }
+    if (user.value?.managed_group_ids && user.value.managed_group_ids.length > 0) {
+      return user.value.managed_group_ids
     }
     return []
   })
+
+  // Helper pour décoder le JWT et extraire managed_group_ids
+  const extractManagedGroupIdsFromToken = (jwtToken) => {
+    try {
+      const payload = jwtToken.split('.')[1]
+      const decoded = JSON.parse(atob(payload))
+      return decoded.managed_group_ids || []
+    } catch (e) {
+      console.warn('Erreur décodage JWT:', e)
+      return []
+    }
+  }
 
   // Actions
   const login = async (credentials) => {
     try {
       isLoading.value = true
       const response = await authService.login(credentials)
-      
+
       // Stocker les données dans l'ordre correct
       token.value = response.token
       refreshToken.value = response.refresh_token
-      user.value = response.user
+
+      // Enrichir l'objet user avec managed_group_ids du JWT si absent
+      const userData = { ...response.user }
+      console.log('🔍 user avant enrichissement:', userData.managed_group_ids)
+      if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
+        userData.managed_group_ids = extractManagedGroupIdsFromToken(response.token)
+        console.log('🔑 managed_group_ids extrait du JWT:', userData.managed_group_ids)
+      }
+      user.value = userData
 
       // Persistance locale
       localStorage.setItem('airboard_token', response.token)
       localStorage.setItem('airboard_refresh_token', response.refresh_token)
-      localStorage.setItem('airboard_user', JSON.stringify(response.user))
+      localStorage.setItem('airboard_user', JSON.stringify(userData))
 
       // Forcer la mise à jour des intercepteurs
       console.log('🔐 Token stocké:', response.token.substring(0, 20) + '...')
-      
+      console.log('👤 User final avec managed_group_ids:', userData.managed_group_ids)
+
       return response
     } catch (error) {
       console.error('Erreur de connexion:', error)
@@ -125,7 +154,13 @@ export const useAuthStore = defineStore('auth', () => {
       if (storedToken && storedUser) {
         token.value = storedToken
         refreshToken.value = storedRefreshToken
-        user.value = JSON.parse(storedUser)
+
+        // Enrichir l'objet user avec managed_group_ids du JWT si absent
+        const userData = JSON.parse(storedUser)
+        if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
+          userData.managed_group_ids = extractManagedGroupIdsFromToken(storedToken)
+        }
+        user.value = userData
         return true
       }
     } catch (error) {
@@ -138,6 +173,15 @@ export const useAuthStore = defineStore('auth', () => {
   const updateProfile = async () => {
     try {
       const profile = await authService.getProfile()
+
+      // Enrichir avec managed_group_ids du JWT si absent
+      if (!profile.managed_group_ids || profile.managed_group_ids.length === 0) {
+        const storedToken = localStorage.getItem('airboard_token')
+        if (storedToken) {
+          profile.managed_group_ids = extractManagedGroupIdsFromToken(storedToken)
+        }
+      }
+
       user.value = profile
       localStorage.setItem('airboard_user', JSON.stringify(profile))
       return profile
@@ -224,12 +268,18 @@ export const useAuthStore = defineStore('auth', () => {
       // Stocker les données
       token.value = response.token
       refreshToken.value = response.refresh_token
-      user.value = response.user
+
+      // Enrichir l'objet user avec managed_group_ids du JWT si absent
+      const userData = { ...response.user }
+      if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
+        userData.managed_group_ids = extractManagedGroupIdsFromToken(response.token)
+      }
+      user.value = userData
 
       // Persistance locale
       localStorage.setItem('airboard_token', response.token)
       localStorage.setItem('airboard_refresh_token', response.refresh_token)
-      localStorage.setItem('airboard_user', JSON.stringify(response.user))
+      localStorage.setItem('airboard_user', JSON.stringify(userData))
 
       return response
     } catch (error) {

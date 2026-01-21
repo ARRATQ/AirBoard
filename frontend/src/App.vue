@@ -98,6 +98,18 @@ onMounted(async () => {
   const hasStoredAuth = authStore.loadFromStorage()
   appStore.loadFromStorage()
 
+  // Si authentification stockée, rafraîchir le profil pour avoir les données à jour
+  // (notamment admin_of_groups qui peut changer sans reconnexion)
+  if (hasStoredAuth) {
+    try {
+      await authStore.updateProfile()
+    } catch (error) {
+      // Si erreur (token expiré, etc.), continuer normalement
+      // Le refresh token sera utilisé si nécessaire
+      console.log('Profil non rafraîchi:', error.message)
+    }
+  }
+
   // Si pas d'authentification stockée, tenter SSO auto-login
   // SAUF si on est sur un callback OAuth (Microsoft/Google)
   const isOAuthCallback = route.path.includes('/auth/oauth/') && route.query.code

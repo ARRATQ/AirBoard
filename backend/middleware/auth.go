@@ -66,7 +66,14 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("username", claims.Username)
 		c.Set("role", claims.Role)
 		c.Set("email", claims.Email)
-		c.Set("managed_group_ids", claims.ManagedGroupIDs)
+
+		// Charger dynamiquement les groupes administrés depuis la BDD
+		// (au lieu d'utiliser ceux du JWT qui peuvent être obsolètes)
+		var managedGroupIDs []uint
+		am.db.Table("group_admins").
+			Where("user_id = ?", claims.UserID).
+			Pluck("group_id", &managedGroupIDs)
+		c.Set("managed_group_ids", managedGroupIDs)
 
 		c.Next()
 	}

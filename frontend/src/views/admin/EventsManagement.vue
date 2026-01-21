@@ -8,11 +8,11 @@
           <p class="page-subtitle">{{ $t('events.admin.subtitle') }}</p>
         </div>
         <div class="flex items-center gap-3">
-          <button @click="showImportHolidaysModal = true" class="btn btn-secondary">
+          <button v-if="isAdminMode" @click="showImportHolidaysModal = true" class="btn btn-secondary">
             <Icon icon="mdi:calendar-star" class="h-4 w-4 mr-2" />
             {{ $t('events.holidays.importButton') }}
           </button>
-          <router-link to="/admin/events/new" class="btn btn-primary">
+          <router-link :to="isAdminMode ? '/admin/events/new' : '/group-admin/events/new'" class="btn btn-primary">
             <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
             {{ $t('events.admin.newEvent') }}
           </router-link>
@@ -169,7 +169,7 @@
               <!-- Actions -->
               <div class="flex items-center gap-2">
                 <router-link
-                  :to="`/admin/events/${event.slug}/edit`"
+                  :to="isAdminMode ? `/admin/events/${event.slug}/edit` : `/group-admin/events/${event.slug}/edit`"
                   class="btn btn-secondary btn-sm"
                   :title="$t('events.admin.edit')"
                 >
@@ -229,7 +229,7 @@
       <p class="empty-state-description">
         {{ $t('events.admin.noEventsHelp') }}
       </p>
-      <router-link to="/admin/events/new" class="btn btn-primary mt-4">
+      <router-link :to="isAdminMode ? '/admin/events/new' : '/group-admin/events/new'" class="btn btn-primary mt-4">
         <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
         {{ $t('events.admin.createEvent') }}
       </router-link>
@@ -271,14 +271,23 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
+import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useEventsStore } from '@/stores/events'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import ImportHolidaysModal from '@/components/admin/ImportHolidaysModal.vue'
 
 const { proxy } = getCurrentInstance()
+const route = useRoute()
 const eventsStore = useEventsStore()
 const appStore = useAppStore()
+const authStore = useAuthStore()
+
+// Vérifier si on est en mode admin (pas group-admin)
+const isAdminMode = computed(() => {
+  return route.path.startsWith('/admin') && authStore.user?.role === 'admin'
+})
 
 const eventToDelete = ref(null)
 const showImportHolidaysModal = ref(false)

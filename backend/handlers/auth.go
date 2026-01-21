@@ -156,6 +156,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Charger les IDs des groupes administrés
+	var managedGroupIDs []uint
+	h.db.Table("group_admins").
+		Where("user_id = ?", user.ID).
+		Pluck("group_id", &managedGroupIDs)
+	user.ManagedGroupIDs = managedGroupIDs
+
+	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
+	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
+		var adminGroups []models.Group
+		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
+		user.AdminOfGroups = adminGroups
+	}
+
 	// Masquer le mot de passe
 	user.Password = ""
 
@@ -457,6 +471,20 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
+	// Charger les IDs des groupes administrés
+	var managedGroupIDs []uint
+	h.db.Table("group_admins").
+		Where("user_id = ?", userID).
+		Pluck("group_id", &managedGroupIDs)
+	user.ManagedGroupIDs = managedGroupIDs
+
+	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
+	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
+		var adminGroups []models.Group
+		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
+		user.AdminOfGroups = adminGroups
+	}
+
 	// Masquer le mot de passe
 	user.Password = ""
 
@@ -653,6 +681,20 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 			Code:    http.StatusInternalServerError,
 		})
 		return
+	}
+
+	// Charger les IDs des groupes administrés (nécessaire pour le frontend)
+	var managedGroupIDs []uint
+	h.db.Table("group_admins").
+		Where("user_id = ?", user.ID).
+		Pluck("group_id", &managedGroupIDs)
+	user.ManagedGroupIDs = managedGroupIDs
+
+	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
+	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
+		var adminGroups []models.Group
+		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
+		user.AdminOfGroups = adminGroups
 	}
 
 	// Masquer le mot de passe (même si vide pour SSO)

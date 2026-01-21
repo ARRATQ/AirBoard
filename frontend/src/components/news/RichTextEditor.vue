@@ -239,6 +239,7 @@
               <MediaUploader
                 accept="image/*"
                 :max-size-m-b="5"
+                :as-group-admin="asGroupAdmin"
                 @upload-success="handleMediaUpload"
               />
             </div>
@@ -287,6 +288,7 @@
               <MediaUploader
                 accept="application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
                 :max-size-m-b="10"
+                :as-group-admin="asGroupAdmin"
                 @upload-success="handleFileUpload"
               />
             </div>
@@ -354,6 +356,10 @@ const props = defineProps({
   editable: {
     type: Boolean,
     default: true
+  },
+  asGroupAdmin: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -528,6 +534,28 @@ onBeforeUnmount(() => {
 .editor-content :deep(.ProseMirror p.is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
   @apply text-gray-400 dark:text-gray-500 float-left h-0 pointer-events-none;
+}
+
+/* Heading styles */
+.editor-content :deep(.ProseMirror h1) {
+  @apply text-3xl font-bold mb-4 mt-6 text-gray-900 dark:text-white;
+}
+
+.editor-content :deep(.ProseMirror h2) {
+  @apply text-2xl font-bold mb-3 mt-5 text-gray-900 dark:text-white;
+}
+
+.editor-content :deep(.ProseMirror h3) {
+  @apply text-xl font-bold mb-2 mt-4 text-gray-900 dark:text-white;
+}
+
+.editor-content :deep(.ProseMirror h4) {
+  @apply text-lg font-bold mb-2 mt-3 text-gray-900 dark:text-white;
+}
+
+/* Paragraph styling */
+.editor-content :deep(.ProseMirror p) {
+  @apply mb-4 leading-relaxed;
 }
 
 /* List styling */

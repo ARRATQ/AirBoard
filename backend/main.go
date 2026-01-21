@@ -515,10 +515,15 @@ func main() {
 			// Upload de médias
 			groupAdmin.POST("/media/upload", mediaHandler.UploadMedia)
 
-			// Tags
+			// Tags (group admin peut créer/modifier des tags)
 			groupAdmin.POST("/news/tags", newsHandler.CreateTag)
 			groupAdmin.PUT("/news/tags/:id", newsHandler.UpdateTag)
 			groupAdmin.DELETE("/news/tags/:id", newsHandler.DeleteTag)
+
+			// Categories (group admin peut créer/modifier des catégories)
+			groupAdmin.POST("/news/categories", newsHandler.CreateCategory)
+			groupAdmin.PUT("/news/categories/:id", newsHandler.UpdateCategory)
+			groupAdmin.DELETE("/news/categories/:id", newsHandler.DeleteCategory)
 
 			// Events (scoped)
 			groupAdmin.GET("/events", eventsHandler.GetEvents) // Liste des événements avec filtrage automatique par rôle
@@ -792,6 +797,25 @@ func createInitialData(db *gorm.DB, cfg *config.Config) (err error) {
 	} else if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to check for developers group: %w", err)
+	}
+
+	// Créer un groupe "Common" par défaut pour tous les nouveaux utilisateurs
+	var commonGroup models.Group
+	if err = tx.Unscoped().Where("LOWER(name) = ?", "common").First(&commonGroup).Error; err == gorm.ErrRecordNotFound {
+		commonGroup = models.Group{
+			Name:        "Common",
+			Description: "Groupe par défaut pour tous les utilisateurs",
+			Color:       "#6B7280",
+			IsActive:    true,
+		}
+		if err = tx.Create(&commonGroup).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to create common group: %w", err)
+		}
+		log.Println("✅ Groupe d'utilisateurs Common créé")
+	} else if err != nil && err != gorm.ErrRecordNotFound {
+		tx.Rollback()
+		return fmt.Errorf("failed to check for common group: %w", err)
 	}
 
 	// Créer les fournisseurs OAuth par défaut

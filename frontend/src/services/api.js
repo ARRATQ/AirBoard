@@ -715,6 +715,22 @@ export const groupAdminService = {
     return response.data
   },
 
+  // Categories (group admin peut créer/modifier des catégories)
+  async createCategory(data) {
+    const response = await api.post('/group-admin/news/categories', data)
+    return response.data
+  },
+
+  async updateCategory(id, data) {
+    const response = await api.put(`/group-admin/news/categories/${id}`, data)
+    return response.data
+  },
+
+  async deleteCategory(id) {
+    const response = await api.delete(`/group-admin/news/categories/${id}`)
+    return response.data
+  },
+
   // Managed Groups
   async getManagedGroups() {
     const response = await api.get('/group-admin/managed-groups')

@@ -381,6 +381,20 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		log.Printf("Error loading user groups: %v", err)
 	}
 
+	// Charger les IDs des groupes administrés (nécessaire pour le frontend)
+	var managedGroupIDs []uint
+	h.db.Table("group_admins").
+		Where("user_id = ?", user.ID).
+		Pluck("group_id", &managedGroupIDs)
+	user.ManagedGroupIDs = managedGroupIDs
+
+	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
+	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
+		var adminGroups []models.Group
+		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
+		user.AdminOfGroups = adminGroups
+	}
+
 	user.Password = ""
 
 	c.JSON(http.StatusOK, models.LoginResponse{
@@ -533,10 +547,21 @@ func (h *OAuthHandler) findOrCreateOAuthUser(providerName string, userInfo map[s
 			return models.User{}, err
 		}
 
-		// Ajouter au groupe "common"
-		var commonGroup models.Group
-		if err := h.db.Where("name = ?", "common").First(&commonGroup).Error; err == nil {
-			h.db.Model(&user).Association("Groups").Append(&commonGroup)
+		// Ajouter au groupe par défaut (depuis les paramètres de l'application)
+		var settings models.AppSettings
+		if err := h.db.First(&settings).Error; err == nil && settings.DefaultGroupID != nil {
+			var defaultGroup models.Group
+			if err := h.db.First(&defaultGroup, *settings.DefaultGroupID).Error; err == nil {
+				h.db.Model(&user).Association("Groups").Append(&defaultGroup)
+				log.Printf("[OAuth] User added to default group: %s", defaultGroup.Name)
+			}
+		} else {
+			// Fallback: chercher un groupe "Common" ou "common" si les paramètres ne définissent pas de groupe par défaut
+			var commonGroup models.Group
+			if err := h.db.Where("LOWER(name) = ?", "common").First(&commonGroup).Error; err == nil {
+				h.db.Model(&user).Association("Groups").Append(&commonGroup)
+				log.Printf("[OAuth] User added to fallback group: %s", commonGroup.Name)
+			}
 		}
 
 		log.Printf("[OAuth] New user created: %s (%s) via %s", user.Email, user.Username, providerName)

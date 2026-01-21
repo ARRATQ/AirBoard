@@ -33,6 +33,9 @@ type User struct {
 	Groups        []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
 	Favorites     []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
 	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"` // Groupes administrés (pour group_admin)
+
+	// Champ calculé (non stocké en base)
+	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (calculé dynamiquement)
 }
 
 // Group représente un groupe d'utilisateurs

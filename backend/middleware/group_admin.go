@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// RequireGroupAdmin vérifie que l'utilisateur est admin d'au moins un groupe
+// RequireGroupAdmin vérifie que l'utilisateur a le rôle admin, group_admin, ou est admin d'au moins un groupe
 func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
@@ -34,7 +34,30 @@ func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 			return
 		}
 
-		// Vérifier si l'utilisateur est admin d'au moins un groupe
+		// Vérifier les rôles non autorisés
+		if roleStr == "" || roleStr == "banned" {
+			c.JSON(http.StatusForbidden, models.ErrorResponse{
+				Error:   "Forbidden",
+				Message: "Accès non autorisé",
+				Code:    http.StatusForbidden,
+			})
+			c.Abort()
+			return
+		}
+
+		// Admin global peut tout faire
+		if roleStr == "admin" {
+			c.Next()
+			return
+		}
+
+		// Les utilisateurs avec le rôle "group_admin" peuvent accéder aux routes group-admin
+		if roleStr == "group_admin" {
+			c.Next()
+			return
+		}
+
+		// Pour les autres rôles, vérifier si l'utilisateur administre au moins un groupe
 		managedGroupIDsInterface, exists := c.Get("managed_group_ids")
 		var managedGroupIDs []uint
 		if exists {
@@ -43,32 +66,19 @@ func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 			}
 		}
 
-		if len(managedGroupIDs) == 0 {
-			// Si l'utilisateur n'est admin d'aucun groupe, il faut qu'il soit admin global
-			if roleStr != "admin" {
-				c.JSON(http.StatusForbidden, models.ErrorResponse{
-					Error:   "Forbidden",
-					Message: "Rôle Admin ou Admin de groupe requis",
-					Code:    http.StatusForbidden,
-				})
-				c.Abort()
-				return
-			}
-		} else {
-			// L'utilisateur est admin d'au moins un groupe, donc il peut accéder
-			// Vérifier que ce n'est pas un utilisateur inactif ou non autorisé
-			if roleStr == "" || roleStr == "banned" {
-				c.JSON(http.StatusForbidden, models.ErrorResponse{
-					Error:   "Forbidden",
-					Message: "Rôle Admin ou Admin de groupe requis",
-					Code:    http.StatusForbidden,
-				})
-				c.Abort()
-				return
-			}
+		if len(managedGroupIDs) > 0 {
+			// L'utilisateur administre au moins un groupe, donc il peut accéder
+			c.Next()
+			return
 		}
 
-		c.Next()
+		// Sinon, accès refusé
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "Forbidden",
+			Message: "Rôle Admin ou Admin de groupe requis",
+			Code:    http.StatusForbidden,
+		})
+		c.Abort()
 	}
 }
 

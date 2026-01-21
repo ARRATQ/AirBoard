@@ -72,6 +72,7 @@
                 <RichTextEditor
                   v-model="form.content"
                   placeholder="Rédigez le contenu de votre article ici. Utilisez la barre d'outils pour formater votre texte, ajouter des liens, des blocs de code, etc..."
+                  :as-group-admin="true"
                 />
               </div>
             </div>

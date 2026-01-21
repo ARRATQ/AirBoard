@@ -97,17 +97,30 @@ onMounted(async () => {
 
     // Stocker les tokens et l'utilisateur
     if (response.token && response.user) {
+      // Enrichir l'objet user avec managed_group_ids du JWT si absent
+      const userData = { ...response.user }
+      if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
+        try {
+          const payload = response.token.split('.')[1]
+          const decoded = JSON.parse(atob(payload))
+          userData.managed_group_ids = decoded.managed_group_ids || []
+          console.log('🔑 managed_group_ids extrait du JWT:', userData.managed_group_ids)
+        } catch (e) {
+          console.warn('Erreur décodage JWT:', e)
+          userData.managed_group_ids = []
+        }
+      }
+
       localStorage.setItem('airboard_token', response.token)
       localStorage.setItem('airboard_refresh_token', response.refresh_token)
-      localStorage.setItem('airboard_user', JSON.stringify(response.user))
+      localStorage.setItem('airboard_user', JSON.stringify(userData))
 
-      // Mettre à jour le store
-      authStore.token = response.token
-      authStore.refreshToken = response.refresh_token
-      authStore.user = response.user
-      authStore.isAuthenticated = true
+      // Mettre à jour le store via les setters appropriés
+      authStore.setToken(response.token)
+      authStore.setRefreshToken(response.refresh_token)
+      authStore.setUser(userData)
 
-      console.log('🎉 User authenticated:', response.user.username)
+      console.log('🎉 User authenticated:', userData.username, 'managed_group_ids:', userData.managed_group_ids)
 
       // Rediriger vers la page d'accueil
       await router.push('/home')

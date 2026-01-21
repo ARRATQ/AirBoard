@@ -260,7 +260,39 @@ func (h *AdminHandler) DeleteAppGroup(c *gin.Context) {
 		return
 	}
 
-	if err := h.db.Delete(&models.AppGroup{}, id).Error; err != nil {
+	// Vérifier si le groupe existe
+	var appGroup models.AppGroup
+	if err := h.db.First(&appGroup, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Not Found",
+			Message: "Groupe d'applications non trouvé",
+			Code:    http.StatusNotFound,
+		})
+		return
+	}
+
+	// Supprimer d'abord les applications associées (hard delete)
+	if err := h.db.Unscoped().Where("app_group_id = ?", id).Delete(&models.Application{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la suppression des applications",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Supprimer les associations many-to-many (group_app_groups)
+	if err := h.db.Exec("DELETE FROM group_app_groups WHERE app_group_id = ?", id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la suppression des associations",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Supprimer le groupe d'applications (hard delete pour permettre la recréation avec le même nom)
+	if err := h.db.Unscoped().Delete(&models.AppGroup{}, id).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la suppression",

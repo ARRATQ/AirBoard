@@ -276,6 +276,14 @@
         </router-link>
 
         <router-link
+          to="/group-admin/events"
+          :class="getLinkClasses('/group-admin/events')"
+        >
+          <Icon icon="mdi:calendar-edit" class="h-4 w-4" />
+          <span>{{ $t('groupAdmin.events') }}</span>
+        </router-link>
+
+        <router-link
           to="/group-admin/polls"
           :class="getLinkClasses('/group-admin/polls')"
         >
