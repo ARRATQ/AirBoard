@@ -122,7 +122,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Pour les group_admins (utilisateurs admin d'au moins un groupe), l'AppGroup est automatiquement privé et appartient au premier groupe administré
+	// Pour les admins de groupe (utilisateurs qui administrent au moins un groupe), l'AppGroup est automatiquement privé et appartient au premier groupe administré
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	isGroupAdmin := len(managedGroupIDs) > 0
 
@@ -136,7 +136,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 			return
 		}
 
-		// Forcer IsPrivate = true et définir OwnerGroupID pour les group_admins
+		// Forcer IsPrivate = true et définir OwnerGroupID pour les admins de groupe
 		appGroup.IsPrivate = true
 		ownerID := managedGroupIDs[0]
 		appGroup.OwnerGroupID = &ownerID
@@ -153,7 +153,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Pour les group_admins, lier automatiquement l'AppGroup à leurs groupes administrés via group_app_groups
+	// Pour les admins de groupe, lier automatiquement l'AppGroup à leurs groupes administrés via group_app_groups
 	if isGroupAdmin {
 		for _, groupID := range managedGroupIDs {
 			h.db.Exec("INSERT INTO group_app_groups (group_id, app_group_id) VALUES (?, ?)", groupID, appGroup.ID)
@@ -196,8 +196,8 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour group_admin
-	// Un group_admin peut modifier un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
+	// Vérification des permissions pour les admins de groupe
+	// Un admin de groupe peut modifier un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
 	if !middleware.CanManageAppGroupWithDB(c, appGroup.ID, h.db) {
 		c.JSON(http.StatusForbidden, models.ErrorResponse{
 			Error:   "Forbidden",
@@ -249,8 +249,8 @@ func (h *AdminHandler) DeleteAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour group_admin
-	// Un group_admin peut supprimer un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
+	// Vérification des permissions pour les admins de groupe
+	// Un admin de groupe peut supprimer un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
 	if !middleware.CanManageAppGroupWithDB(c, uint(id), h.db) {
 		c.JSON(http.StatusForbidden, models.ErrorResponse{
 			Error:   "Forbidden",
@@ -332,12 +332,12 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 		query = query.Where("app_group_id = ?", appGroupID)
 	}
 
-	// Filtrage selon le rôle pour group_admin
+	// Filtrage selon le rôle pour les admins de groupe
 	role := c.GetString("role")
-	if role == "group_admin" {
-		// Group admin voit les applications des AppGroups des groupes qu'il administre
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	if role != "admin" && len(managedGroupIDs) > 0 {
+		// Admin de groupe voit les applications des AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) > 0 {
 			// Récupérer toutes les applications dans les AppGroups accessibles aux groupes administrés
 			query = query.Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
@@ -405,8 +405,8 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour group_admin
-	// Un group_admin peut créer une application seulement dans un AppGroup privé qu'il possède
+	// Vérification des permissions pour les admins de groupe
+	// Un admin de groupe peut créer une application seulement dans un AppGroup privé qu'il possède
 	if !middleware.CanManageAppGroupWithDB(c, application.AppGroupID, h.db) {
 		c.JSON(http.StatusForbidden, models.ErrorResponse{
 			Error:   "Forbidden",
@@ -475,8 +475,8 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour group_admin
-	// Un group_admin peut modifier une application seulement si elle est dans un AppGroup privé qu'il possède
+	// Vérification des permissions pour les admins de groupe
+	// Un admin de groupe peut modifier une application seulement si elle est dans un AppGroup privé qu'il possède
 	if application.AppGroup == nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
@@ -538,9 +538,10 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour group_admin
+	// Vérification des permissions pour les admins de groupe
 	role := c.GetString("role")
-	if role == "group_admin" {
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	if role != "admin" && len(managedGroupIDs) > 0 {
 		var application models.Application
 		if err := h.db.Preload("AppGroup").First(&application, id).Error; err != nil {
 			c.JSON(http.StatusNotFound, models.ErrorResponse{
@@ -551,7 +552,7 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 			return
 		}
 
-		// Vérifier que l'application appartient à un AppGroup privé que le group_admin possède
+		// Vérifier que l'application appartient à un AppGroup privé que l'admin de groupe possède
 		if application.AppGroup == nil {
 			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 				Error:   "Internal Server Error",
@@ -1344,83 +1345,56 @@ func (h *AdminHandler) AssignGroupToAppGroups(c *gin.Context) {
 // @Failure 500 {object} models.ErrorResponse
 // @Router /admin/database/reset [post]
 func (h *AdminHandler) ResetDatabase(c *gin.Context) {
-	// Supprimer toutes les données dans l'ordre pour éviter les erreurs de contraintes
+	// Liste de toutes les tables à réinitialiser (dans l'ordre de dépendances)
+	tables := []string{
+		// Tables de jointure many-to-many
+		"user_favorites",
+		"user_groups",
+		"group_app_groups",
+		"group_admins",
+		"news_tags",
 
-	// Nettoyer les tables de jointure (many-to-many)
-	if err := h.db.Exec("DELETE FROM user_groups").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des associations utilisateurs-groupes",
-			Code:    http.StatusInternalServerError,
-		})
-		return
+		// Tables dépendantes (analytics, reactions, etc.)
+		"application_clicks",
+		"news_reactions",
+		"news_reads",
+		"poll_votes",
+		"comments",
+		"feedbacks",
+		"notifications",
+		"email_notification_logs",
+
+		// Tables avec relations
+		"poll_options",
+		"polls",
+		"events",
+		"event_categories",
+		"news",
+		"news_categories",
+		"tags",
+		"announcements",
+		"applications",
+		"app_groups",
+		"media",
+		"comment_settings",
+		"email_templates",
+		"smtp_configs",
+		"email_oauth_configs",
+		"oauth_providers",
+
+		// Tables principales
+		"users",
+		"groups",
+		"app_settings",
 	}
 
-	if err := h.db.Exec("DELETE FROM group_app_groups").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des associations groupes-applications",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Supprimer les applications
-	if err := h.db.Exec("DELETE FROM applications").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des applications",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Supprimer les groupes d'applications
-	if err := h.db.Exec("DELETE FROM app_groups").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des groupes d'applications",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Supprimer les utilisateurs
-	if err := h.db.Exec("DELETE FROM users").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des utilisateurs",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Supprimer les groupes d'utilisateurs
-	if err := h.db.Exec("DELETE FROM groups").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des groupes d'utilisateurs",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Supprimer les paramètres
-	if err := h.db.Exec("DELETE FROM app_settings").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des paramètres",
-			Code:    http.StatusInternalServerError,
-		})
-		return
-	}
-
-	// Réinitialiser les séquences pour repartir à 1
-	tables := []string{"users", "groups", "app_groups", "applications", "app_settings"}
+	// Utiliser TRUNCATE CASCADE pour supprimer toutes les données et gérer automatiquement les dépendances
+	// TRUNCATE est plus rapide que DELETE et réinitialise automatiquement les séquences
 	for _, table := range tables {
-		sequenceName := table + "_id_seq"
-		if err := h.db.Exec("ALTER SEQUENCE " + sequenceName + " RESTART WITH 1").Error; err != nil {
-			// Ignorer les erreurs de séquence, elles peuvent ne pas exister
+		query := "TRUNCATE TABLE " + table + " RESTART IDENTITY CASCADE"
+		if err := h.db.Exec(query).Error; err != nil {
+			// Ignorer les erreurs si la table n'existe pas
+			// (peut arriver si certaines fonctionnalités ne sont pas encore migrées)
 			continue
 		}
 	}

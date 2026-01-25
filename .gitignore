@@ -121,7 +121,7 @@ ONBOARDING_*.md
 PHASE2_*.md
 test_*.go
 ANALYTICS_*.md
-CHANGELOG_*.md
+CHANGELOG*.md
 
 # Integration documentation
 COMMENTS_FEEDBACK_GUIDE.md

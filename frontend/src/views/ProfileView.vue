@@ -473,7 +473,6 @@ const getAvatarUrl = (url) => {
 const getRoleLabel = (role) => {
   const labels = {
     admin: t('users.role_admin'),
-    group_admin: t('profile.roleGroupAdmin'),
     editor: t('users.role_editor'),
     user: t('users.role_user')
   }

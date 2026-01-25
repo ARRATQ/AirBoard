@@ -107,15 +107,15 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 	// Filtre published only et visibilité par groupes selon le rôle
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	if userRole == "admin" {
 		// Admin voit tout (publié + brouillons)
-	} else if userRole == "group_admin" {
-		// Group admin voit UNIQUEMENT dans l'interface d'administration :
+	} else if len(managedGroupIDs) > 0 {
+		// Group admin (utilisateur qui administre au moins un groupe) voit UNIQUEMENT dans l'interface d'administration :
 		// 1. Ses propres articles (publiés + brouillons)
 		// 2. Les articles (publiés + brouillons) ciblant les groupes qu'il administre
 		// Note : il ne voit PAS les articles publics globaux qu'il ne peut pas gérer
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 		// Récupérer aussi les groupes d'appartenance pour la lecture publique
 		var userGroupIDs []uint
@@ -266,6 +266,7 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	// Vérifier les permissions selon le rôle
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	if userRole == "admin" {
 		// Admin voit tout
@@ -275,12 +276,8 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 
 	// Vérifier si publié
 	if !news.IsPublished {
-		// Seul l'auteur ou un editor/group_admin peut voir un brouillon
-		if userRole == "editor" && news.AuthorID == userID {
-			c.JSON(http.StatusOK, news)
-			return
-		}
-		if userRole == "group_admin" && news.AuthorID == userID {
+		// Seul l'auteur ou un editor/admin de groupe peut voir un brouillon
+		if (userRole == "editor" || len(managedGroupIDs) > 0) && news.AuthorID == userID {
 			c.JSON(http.StatusOK, news)
 			return
 		}
@@ -289,11 +286,10 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	}
 
 	// Article publié : vérifier les groupes cibles
-	if userRole == "group_admin" {
-		// Group admin peut voir :
+	if len(managedGroupIDs) > 0 {
+		// Admin de groupe peut voir :
 		// 1. News sans groupes cibles (publiques/globales)
 		// 2. News ciblant ses groupes administrés
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 		// Si pas de groupes cibles, c'est une news globale (accessible à tous)
 		if len(news.TargetGroups) == 0 {
@@ -402,10 +398,10 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 	// Associer les groupes cibles avec vérification pour group_admin
 	if len(req.TargetGroupIDs) > 0 {
 		userRole := c.GetString("role")
+		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-		// Si group_admin, vérifier qu'il ne cible que ses groupes
-		if userRole == "group_admin" {
-			managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		// Si admin de groupe (non-admin global), vérifier qu'il ne cible que ses groupes
+		if userRole != "admin" && len(managedGroupIDs) > 0 {
 			for _, targetGroupID := range req.TargetGroupIDs {
 				canManage := false
 				for _, managedID := range managedGroupIDs {
@@ -504,9 +500,10 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 	// Vérifier les permissions
 	// - admin peut tout modifier
 	// - editor/group_admin peut modifier ses propres news
-	// - group_admin peut modifier les news ciblant les groupes qu'il administre
+	// - admin de groupe peut modifier les news ciblant les groupes qu'il administre
 	userID := c.GetUint("user_id")
 	userRole := c.GetString("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	canEdit := false
 	if userRole == "admin" {
@@ -514,17 +511,15 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 	} else if news.AuthorID == userID {
 		// L'auteur peut modifier sa propre news
 		canEdit = true
-	} else if userRole == "group_admin" {
-		// Group admin peut modifier les news ciblant ses groupes administrés
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
+	} else if len(managedGroupIDs) > 0 {
+		// Admin de groupe peut modifier les news ciblant ses groupes administrés
 		// Charger les groupes cibles de la news
 		var newsWithGroups models.News
 		h.db.Preload("TargetGroups").First(&newsWithGroups, news.ID)
 
-		// Si la news n'a pas de groupes cibles, elle est publique → group_admin ne peut pas la modifier
+		// Si la news n'a pas de groupes cibles, elle est publique → admin de groupe ne peut pas la modifier
 		if len(newsWithGroups.TargetGroups) > 0 {
-			// Vérifier si au moins un groupe cible est administré par le group_admin
+			// Vérifier si au moins un groupe cible est administré par l'admin de groupe
 			for _, targetGroup := range newsWithGroups.TargetGroups {
 				for _, managedID := range managedGroupIDs {
 					if targetGroup.ID == managedID {
@@ -589,11 +584,10 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		h.db.Model(&news).Association("Tags").Replace(tags)
 	}
 
-	// Mettre à jour les groupes cibles avec vérification pour group_admin
+	// Mettre à jour les groupes cibles avec vérification pour les admins de groupe
 	if req.TargetGroupIDs != nil {
-		// Si group_admin, vérifier qu'il ne cible que ses groupes
-		if userRole == "group_admin" && len(req.TargetGroupIDs) > 0 {
-			managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		// Si admin de groupe (non-admin global), vérifier qu'il ne cible que ses groupes
+		if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
 			for _, targetGroupID := range req.TargetGroupIDs {
 				canManage := false
 				for _, managedID := range managedGroupIDs {
@@ -643,9 +637,10 @@ func (h *NewsHandler) DeleteNews(c *gin.Context) {
 	// Vérifier les permissions
 	// - admin peut tout supprimer
 	// - editor/group_admin peut supprimer ses propres news
-	// - group_admin peut supprimer les news ciblant les groupes qu'il administre
+	// - admin de groupe peut supprimer les news ciblant les groupes qu'il administre
 	userID := c.GetUint("user_id")
 	userRole := c.GetString("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	canDelete := false
 	if userRole == "admin" {
@@ -653,17 +648,15 @@ func (h *NewsHandler) DeleteNews(c *gin.Context) {
 	} else if news.AuthorID == userID {
 		// L'auteur peut supprimer sa propre news
 		canDelete = true
-	} else if userRole == "group_admin" {
-		// Group admin peut supprimer les news ciblant ses groupes administrés
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
+	} else if len(managedGroupIDs) > 0 {
+		// Admin de groupe peut supprimer les news ciblant ses groupes administrés
 		// Charger les groupes cibles de la news
 		var newsWithGroups models.News
 		h.db.Preload("TargetGroups").First(&newsWithGroups, news.ID)
 
-		// Si la news n'a pas de groupes cibles, elle est publique → group_admin ne peut pas la supprimer
+		// Si la news n'a pas de groupes cibles, elle est publique → admin de groupe ne peut pas la supprimer
 		if len(newsWithGroups.TargetGroups) > 0 {
-			// Vérifier si au moins un groupe cible est administré par le group_admin
+			// Vérifier si au moins un groupe cible est administré par l'admin de groupe
 			for _, targetGroup := range newsWithGroups.TargetGroups {
 				for _, managedID := range managedGroupIDs {
 					if targetGroup.ID == managedID {

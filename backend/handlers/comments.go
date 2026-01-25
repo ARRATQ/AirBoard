@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/middleware"
 	"airboard/models"
 	"net/http"
 	"strconv"
@@ -100,11 +101,13 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 		Preload("Moderator").
 		Order("created_at DESC")
 
-	// Si modération requise, ne montrer que les commentaires approuvés (sauf pour admin/editor)
+	// Si modération requise, ne montrer que les commentaires approuvés (sauf pour admin/editor/admin de groupe)
 	userRole, exists := c.Get("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	if settings.RequireModeration && exists {
 		role := userRole.(string)
-		if role != "admin" && role != "editor" && role != "group_admin" {
+		// Admin, editor, et utilisateurs qui administrent au moins un groupe peuvent voir tous les commentaires
+		if role != "admin" && role != "editor" && len(managedGroupIDs) == 0 {
 			query = query.Where("is_approved = ?", true)
 		}
 	} else if settings.RequireModeration {
@@ -313,6 +316,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	userRole, _ := c.Get("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	// Récupérer le commentaire
 	var comment models.Comment
@@ -333,8 +337,8 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'utilisateur est l'auteur ou admin/editor
-	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" && userRole != "group_admin" {
+	// Vérifier que l'utilisateur est l'auteur ou admin/editor/admin de groupe
+	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" && len(managedGroupIDs) == 0 {
 		c.JSON(http.StatusForbidden, models.ErrorResponse{
 			Error:   "FORBIDDEN",
 			Message: "Vous n'avez pas la permission de supprimer ce commentaire",

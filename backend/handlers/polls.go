@@ -59,14 +59,33 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 		query = query.Where("poll_type = ?", pollType)
 	}
 
-	// Filtre par news
-	if newsID := c.Query("news_id"); newsID != "" {
-		query = query.Where("news_id = ?", newsID)
+	// Filtre par news - DOIT être strict et appliqué en premier
+	newsIDFilter := c.Query("news_id")
+	if newsIDFilter != "" && newsIDFilter != "0" && newsIDFilter != "null" && newsIDFilter != "undefined" {
+		log.Printf("[DEBUG GetPolls] Filtering by news_id=%s", newsIDFilter)
+		// Convertir en uint pour validation
+		newsIDUint, err := strconv.ParseUint(newsIDFilter, 10, 32)
+		if err != nil {
+			log.Printf("[WARN GetPolls] Invalid news_id format: %s", newsIDFilter)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid news_id format"})
+			return
+		} else {
+			// Filtre strict : seulement les sondages avec ce news_id exact (pas NULL)
+			query = query.Where("polls.news_id = ?", newsIDUint)
+		}
+	} else {
+		log.Printf("[DEBUG GetPolls] No news_id filter applied (news_id=%s)", newsIDFilter)
 	}
 
 	// Filtre par annonce
 	if announcementID := c.Query("announcement_id"); announcementID != "" {
-		query = query.Where("announcement_id = ?", announcementID)
+		announcementIDUint, err := strconv.ParseUint(announcementID, 10, 32)
+		if err != nil {
+			log.Printf("[WARN GetPolls] Invalid announcement_id format: %s", announcementID)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid announcement_id format"})
+			return
+		}
+		query = query.Where("polls.announcement_id = ?", announcementIDUint)
 	}
 
 	// Recherche sécurisée avec validation et assainissement
@@ -99,14 +118,20 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	}
 
 	// Filtre de visibilité par groupes selon le rôle
+	// IMPORTANT : Si on filtre par news_id ou announcement_id, on ne doit PAS appliquer
+	// le filtre de visibilité par groupes car on veut UNIQUEMENT les sondages liés à cette entité
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+
+	// Si on filtre par news_id ou announcement_id, ne pas appliquer le filtre de visibilité
+	// car on veut seulement les sondages explicitement liés à cette entité
+	isEntityFilter := newsIDFilter != "" || c.Query("announcement_id") != ""
 
 	if userRole == "admin" {
 		// Admin voit tout
-	} else if userRole == "group_admin" {
-		// Group admin : distinguer interface admin vs interface publique
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	} else if !isEntityFilter && len(managedGroupIDs) > 0 {
+		// Utilisateur qui administre au moins un groupe : distinguer interface admin vs interface publique
 
 		// Récupérer aussi les groupes d'appartenance pour la lecture publique
 		var userGroupIDs []uint
@@ -160,8 +185,9 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 				query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
 			}
 		}
-	} else {
+	} else if !isEntityFilter {
 		// User régulier ou editor : sondages globaux + ceux de leurs groupes
+		// Mais SEULEMENT si on ne filtre pas par news_id ou announcement_id
 		var userGroupIDs []uint
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 
@@ -179,6 +205,8 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 			query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
 		}
 	}
+	// Si isEntityFilter est true, on ne filtre PAS par groupes, on retourne seulement
+	// les sondages liés à l'entité spécifiée (news ou announcement)
 
 	// Tri
 	sortBy := c.DefaultQuery("sort", "created_at")
@@ -193,6 +221,18 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	if err := query.Offset(offset).Limit(pageSize).Find(&polls).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch polls"})
 		return
+	}
+
+	// Log des résultats pour débogage
+	log.Printf("[DEBUG GetPolls] Found %d polls (total: %d) for user_id=%d, role=%s, news_id=%s", len(polls), total, userID, userRole, c.Query("news_id"))
+	for i, poll := range polls {
+		var newsIDStr string
+		if poll.NewsID != nil {
+			newsIDStr = fmt.Sprintf("%d", *poll.NewsID)
+		} else {
+			newsIDStr = "NULL"
+		}
+		log.Printf("[DEBUG GetPolls] Poll[%d]: id=%d, title=%s, news_id=%s, target_groups=%d", i, poll.ID, poll.Title, newsIDStr, len(poll.TargetGroups))
 	}
 
 	// Calcul du nombre de pages
@@ -295,9 +335,9 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions pour les groupes cibles (group_admin)
-	if userRole == "group_admin" && len(req.TargetGroupIDs) > 0 {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	// Vérifier les permissions pour les groupes cibles (admins de groupe non-global)
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
 		for _, targetGroupID := range req.TargetGroupIDs {
 			canManage := false
 			for _, managedID := range managedGroupIDs {
@@ -419,6 +459,7 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	// Vérifier les permissions
 	userID := c.GetUint("user_id")
 	userRole := c.GetString("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	canEdit := false
 	if userRole == "admin" {
@@ -426,10 +467,8 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	} else if poll.AuthorID == userID {
 		// L'auteur peut modifier son propre sondage
 		canEdit = true
-	} else if userRole == "group_admin" {
-		// Group admin peut modifier les sondages ciblant ses groupes administrés
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
+	} else if len(managedGroupIDs) > 0 {
+		// Admin de groupe peut modifier les sondages ciblant ses groupes administrés
 		if len(poll.TargetGroups) > 0 {
 			for _, targetGroup := range poll.TargetGroups {
 				for _, managedID := range managedGroupIDs {
@@ -456,9 +495,8 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions pour les nouveaux groupes cibles (group_admin)
-	if userRole == "group_admin" && len(req.TargetGroupIDs) > 0 {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	// Vérifier les permissions pour les nouveaux groupes cibles (admins de groupe non-global)
+	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
 		for _, targetGroupID := range req.TargetGroupIDs {
 			canManage := false
 			for _, managedID := range managedGroupIDs {
@@ -546,15 +584,15 @@ func (h *PollsHandler) DeletePoll(c *gin.Context) {
 	// Vérifier les permissions
 	userID := c.GetUint("user_id")
 	userRole := c.GetString("role")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	canDelete := false
 	if userRole == "admin" {
 		canDelete = true
 	} else if poll.AuthorID == userID {
 		canDelete = true
-	} else if userRole == "group_admin" {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
+	} else if len(managedGroupIDs) > 0 {
+		// Admin de groupe peut supprimer les sondages ciblant ses groupes administrés
 		if len(poll.TargetGroups) > 0 {
 			for _, targetGroup := range poll.TargetGroups {
 				for _, managedID := range managedGroupIDs {

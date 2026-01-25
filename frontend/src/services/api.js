@@ -28,7 +28,10 @@ const processQueue = (error, token = null) => {
 if (import.meta.env.DEV) {
   api.interceptors.request.use(
     (config) => {
-      console.log('🚀', config.method?.toUpperCase(), config.url, config.data)
+      console.log('🚀', config.method?.toUpperCase(), config.url, {
+        data: config.data,
+        params: config.params
+      })
       return config
     },
     (error) => {
@@ -1084,7 +1087,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Créer un sondage (admin/editor/group_admin)
+  // Créer un sondage (admin/editor)
   async createPoll(data) {
     const response = await api.post('/admin/polls', data)
     return response.data
@@ -1096,7 +1099,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Créer un sondage (group_admin)
+  // Créer un sondage (admin de groupe)
   async createPollAsGroupAdmin(data) {
     const response = await api.post('/group-admin/polls', data)
     return response.data
@@ -1114,7 +1117,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Mettre à jour un sondage (group_admin)
+  // Mettre à jour un sondage (admin de groupe)
   async updatePollAsGroupAdmin(id, data) {
     const response = await api.put(`/group-admin/polls/${id}`, data)
     return response.data
@@ -1132,7 +1135,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Supprimer un sondage (group_admin)
+  // Supprimer un sondage (admin de groupe)
   async deletePollAsGroupAdmin(id) {
     const response = await api.delete(`/group-admin/polls/${id}`)
     return response.data
@@ -1144,7 +1147,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Fermer un sondage (group_admin)
+  // Fermer un sondage (admin de groupe)
   async closePollAsGroupAdmin(id) {
     const response = await api.post(`/group-admin/polls/${id}/close`)
     return response.data
@@ -1179,7 +1182,7 @@ export const pollsService = {
 
 // ===== Media Service =====
 export const mediaService = {
-  // Upload un fichier média (editor/group_admin/admin)
+  // Upload un fichier média (editor/admin de groupe/admin)
   async uploadMedia(file, onUploadProgress) {
     const formData = new FormData()
     formData.append('file', file)

@@ -74,6 +74,63 @@ func main() {
 		log.Printf("Avertissement: Impossible de créer l'index unique pour poll_votes: %v", err)
 	}
 
+	// Fix: Corriger les contraintes d'unicité sur les slugs pour permettre la réutilisation après soft delete
+	// News slug
+	db.Exec("DROP INDEX IF EXISTS idx_news_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_news_slug ON news(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour news.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour news.slug")
+	}
+
+	// NewsCategory slug
+	db.Exec("DROP INDEX IF EXISTS idx_category_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_category_slug ON news_categories(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour news_categories.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour news_categories.slug")
+	}
+
+	// Tag slug
+	db.Exec("DROP INDEX IF EXISTS idx_tag_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_tag_slug ON tags(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour tags.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour tags.slug")
+	}
+
+	// Tag name
+	db.Exec("DROP INDEX IF EXISTS idx_tag_name")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_tag_name ON tags(name) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour tags.name: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour tags.name")
+	}
+
+	// Event slug
+	db.Exec("DROP INDEX IF EXISTS idx_event_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_event_slug ON events(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour events.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour events.slug")
+	}
+
+	// EventCategory name
+	db.Exec("DROP INDEX IF EXISTS idx_event_category_name")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_event_category_name ON event_categories(name) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour event_categories.name: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour event_categories.name")
+	}
+
+	// EventCategory slug
+	db.Exec("DROP INDEX IF EXISTS idx_event_category_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_event_category_slug ON event_categories(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour event_categories.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour event_categories.slug")
+	}
+
 	// Créer les données initiales
 	if err := createInitialData(db, cfg); err != nil {
 		log.Fatalf("Erreur lors de la création des données initiales: %v", err)

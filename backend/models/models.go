@@ -32,10 +32,10 @@ type User struct {
 	// Relations
 	Groups        []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
 	Favorites     []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
-	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"` // Groupes administrés (pour group_admin)
+	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"` // Groupes administrés (utilisateurs qui peuvent gérer ces groupes)
 
 	// Champ calculé (non stocké en base)
-	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (calculé dynamiquement)
+	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (chargés depuis group_admins)
 }
 
 // Group représente un groupe d'utilisateurs
@@ -101,7 +101,7 @@ type Claims struct {
 	Username        string `json:"username"`
 	Role            string `json:"role"`
 	Email           string `json:"email"`
-	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty"` // IDs des groupes administrés (pour group_admin)
+	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty"` // IDs des groupes administrés (chargés depuis group_admins)
 }
 
 // Request/Response structures

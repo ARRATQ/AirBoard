@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// RequireGroupAdmin vérifie que l'utilisateur a le rôle admin, group_admin, ou est admin d'au moins un groupe
+// RequireGroupAdmin vérifie que l'utilisateur est admin global OU administre au moins un groupe (via table group_admins)
 func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
@@ -51,13 +51,7 @@ func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 			return
 		}
 
-		// Les utilisateurs avec le rôle "group_admin" peuvent accéder aux routes group-admin
-		if roleStr == "group_admin" {
-			c.Next()
-			return
-		}
-
-		// Pour les autres rôles, vérifier si l'utilisateur administre au moins un groupe
+		// Vérifier si l'utilisateur administre au moins un groupe (via table group_admins)
 		managedGroupIDsInterface, exists := c.Get("managed_group_ids")
 		var managedGroupIDs []uint
 		if exists {

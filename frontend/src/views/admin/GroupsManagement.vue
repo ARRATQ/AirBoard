@@ -210,13 +210,12 @@
                     <span
                       :class="{
                         'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': user.role === 'admin',
-                        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200': user.role === 'group_admin',
                         'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': user.role === 'editor',
                         'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role === 'user'
                       }"
                       class="badge text-xs"
                     >
-                      {{ user.role === 'admin' ? 'Admin' : user.role === 'group_admin' ? 'Group Admin' : user.role === 'editor' ? 'Editor' : 'User' }}
+                      {{ user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Editor' : 'User' }}
                     </span>
                   </label>
                 </div>

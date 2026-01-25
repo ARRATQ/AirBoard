@@ -186,7 +186,6 @@ const contentCache = ref({})
 const userRoleLabel = computed(() => {
   const role = authStore.user?.role
   if (role === 'admin') return t('users.role_admin')
-  if (role === 'group_admin') return t('help.guides.groupAdmin')
   if (role === 'editor') return t('users.role_editor')
   return t('users.role_user')
 })
@@ -197,7 +196,7 @@ const allGuides = computed(() => [
     id: 'user',
     label: t('help.guides.user'),
     icon: 'mdi:account',
-    roles: ['user', 'editor', 'group_admin', 'admin'], // Available to all
+    roles: ['user', 'editor', 'admin'], // Available to all
     sections: [
       {
         id: 'getting-started',
@@ -249,7 +248,7 @@ const allGuides = computed(() => [
     id: 'group-admin',
     label: t('help.guides.groupAdmin'),
     icon: 'mdi:shield-account',
-    roles: ['group_admin', 'admin'], // Only for group admins and admins
+    roles: ['admin'], // Only for admins (or users with managed groups)
     sections: [
       {
         id: 'group-admin-basics',
@@ -455,8 +454,6 @@ function initializeGuide() {
 
     if (userRole === 'admin') {
       selectedGuide.value = 'admin'
-    } else if (userRole === 'group_admin') {
-      selectedGuide.value = 'group-admin'
     } else if (userRole === 'editor') {
       selectedGuide.value = 'editor'
     } else {

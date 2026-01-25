@@ -233,9 +233,15 @@ const fetchLinkedPoll = async () => {
 
   try {
     // Fetch polls linked to this news article
+    console.log('[DEBUG NewsDetail] Fetching polls with news_id:', news.value.id)
     const response = await pollsService.getPolls({ news_id: news.value.id })
+    console.log('[DEBUG NewsDetail] Received polls:', response)
     if (response.polls && response.polls.length > 0) {
+      console.log('[DEBUG NewsDetail] Found linked poll:', response.polls[0])
       linkedPoll.value = response.polls[0] // Get the first linked poll
+    } else {
+      console.log('[DEBUG NewsDetail] No linked polls found')
+      linkedPoll.value = null
     }
   } catch (error) {
     console.error('Error fetching linked poll:', error)

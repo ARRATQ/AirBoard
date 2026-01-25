@@ -122,11 +122,12 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 	// Filtre published only et visibilité par groupes selon le rôle
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	if userRole == "admin" {
 		// Admin voit tout (publié + brouillons)
-	} else if userRole == "group_admin" {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	} else if len(managedGroupIDs) > 0 {
+		// Utilisateur qui administre au moins un groupe
 		isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/events")
 
 		if isAdminInterface {
@@ -257,11 +258,12 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 	// Appliquer filtres de visibilité selon rôle
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	if userRole == "admin" {
 		// Admin voit tout
-	} else if userRole == "group_admin" {
-		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	} else if len(managedGroupIDs) > 0 {
+		// Utilisateur qui administre au moins un groupe
 		if len(managedGroupIDs) > 0 {
 			query = query.Where(`
 				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
@@ -374,6 +376,7 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 	// Vérifier la visibilité selon le rôle
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
+	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	if userRole != "admin" {
 		// Vérifier si l'événement est publié
@@ -392,8 +395,9 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 		if targetGroupCount > 0 {
 			// Événement privé : vérifier si l'utilisateur est dans un des groupes cibles
 			var userGroupIDs []uint
-			if userRole == "group_admin" {
-				userGroupIDs = middleware.GetManagedGroupIDs(c)
+			if len(managedGroupIDs) > 0 {
+				// Utilisateur qui administre au moins un groupe
+				userGroupIDs = managedGroupIDs
 			} else {
 				h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 			}
