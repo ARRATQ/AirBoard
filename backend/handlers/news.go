@@ -286,64 +286,45 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	}
 
 	// Article publié : vérifier les groupes cibles
-	if len(managedGroupIDs) > 0 {
-		// Admin de groupe peut voir :
-		// 1. News sans groupes cibles (publiques/globales)
-		// 2. News ciblant ses groupes administrés
+	// Si pas de groupes cibles, c'est une news globale (accessible à tous)
+	if len(news.TargetGroups) == 0 {
+		c.JSON(http.StatusOK, news)
+		return
+	}
 
-		// Si pas de groupes cibles, c'est une news globale (accessible à tous)
-		if len(news.TargetGroups) == 0 {
-			c.JSON(http.StatusOK, news)
-			return
-		}
+	// Récupérer les groupes de l'utilisateur (membership)
+	var userGroupIDs []uint
+	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 
-		// Vérifier si au moins un groupe cible est administré par ce group_admin
-		hasAccess := false
-		for _, targetGroup := range news.TargetGroups {
-			for _, managedID := range managedGroupIDs {
-				if targetGroup.ID == managedID {
-					hasAccess = true
-					break
-				}
-			}
-			if hasAccess {
+	// Vérifier l'accès : l'utilisateur doit être membre OU admin d'au moins un groupe cible
+	hasAccess := false
+	for _, targetGroup := range news.TargetGroups {
+		// Vérifier si l'utilisateur est membre du groupe cible
+		for _, userGroupID := range userGroupIDs {
+			if targetGroup.ID == userGroupID {
+				hasAccess = true
 				break
 			}
 		}
-
-		if !hasAccess {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this news"})
-			return
-		}
-	} else {
-		// User régulier : vérifier s'il appartient à un groupe cible
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Si pas de groupes cibles, c'est une news globale
-		if len(news.TargetGroups) == 0 {
-			c.JSON(http.StatusOK, news)
-			return
+		if hasAccess {
+			break
 		}
 
-		// Vérifier si l'utilisateur appartient à au moins un groupe cible
-		hasAccess := false
-		for _, targetGroup := range news.TargetGroups {
-			for _, userGroupID := range userGroupIDs {
-				if targetGroup.ID == userGroupID {
-					hasAccess = true
-					break
-				}
-			}
-			if hasAccess {
+		// Vérifier si l'utilisateur administre le groupe cible (pour les group_admin)
+		for _, managedID := range managedGroupIDs {
+			if targetGroup.ID == managedID {
+				hasAccess = true
 				break
 			}
 		}
-
-		if !hasAccess {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this news"})
-			return
+		if hasAccess {
+			break
 		}
+	}
+
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this news"})
+		return
 	}
 
 	c.JSON(http.StatusOK, news)
