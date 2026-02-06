@@ -132,6 +132,15 @@ const routes = [
     }
   },
   {
+    path: '/gamification',
+    name: 'GamificationHub',
+    component: () => import('@/views/GamificationHub.vue'),
+    meta: {
+      requiresAuth: true,
+      title: 'Centre de Gamification'
+    }
+  },
+  {
     path: '/notifications',
     name: 'Notifications',
     component: () => import('@/views/Notifications.vue'),

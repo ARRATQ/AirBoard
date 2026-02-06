@@ -18,12 +18,13 @@ import (
 )
 
 type NewsHandler struct {
-	db     *gorm.DB
-	config *config.Config
+	db                  *gorm.DB
+	config              *config.Config
+	gamificationService *services.GamificationService
 }
 
-func NewNewsHandler(db *gorm.DB, cfg *config.Config) *NewsHandler {
-	return &NewsHandler{db: db, config: cfg}
+func NewNewsHandler(db *gorm.DB, cfg *config.Config, gs *services.GamificationService) *NewsHandler {
+	return &NewsHandler{db: db, config: cfg, gamificationService: gs}
 }
 
 // GetNews - Liste des news (accessible à tous les utilisateurs connectés)
@@ -467,6 +468,9 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 		}()
 	}
 
+	// Award Contributor XP
+	go h.gamificationService.AwardXP(userID, 100, "news_publish", fmt.Sprintf("{\"news_id\": %d}", news.ID))
+
 	c.JSON(http.StatusCreated, news)
 }
 
@@ -733,14 +737,37 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 	c.JSON(http.StatusOK, news)
 }
 
-// IncrementView - Incrémenter le compteur de vues
+// IncrementView - Incrémenter le compteur de vues et attribuer de l'XP
 func (h *NewsHandler) IncrementView(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid news ID"})
+		return
+	}
+	userID := c.GetUint("user_id")
 
+	// 1. Incrémenter le compteur global
 	if err := h.db.Model(&models.News{}).Where("id = ?", id).
 		UpdateColumn("view_count", gorm.Expr("view_count + ?", 1)).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to increment view"})
-		return
+		log.Printf("[ERROR IncrementView] Failed to increment view for news %d: %v", id, err)
+	}
+
+	// 2. Vérifier si l'utilisateur a déjà lu cet article pour l'XP
+	var exists int64
+	h.db.Model(&models.NewsRead{}).Where("news_id = ? AND user_id = ?", id, userID).Count(&exists)
+
+	if exists == 0 {
+		// Enregistrer la lecture
+		read := models.NewsRead{
+			NewsID: uint(id),
+			UserID: userID,
+			ReadAt: time.Now(),
+		}
+		if err := h.db.Create(&read).Error; err == nil {
+			// Attribuer de l'XP (20 points par lecture unique)
+			go h.gamificationService.AwardXP(userID, 20, "news_read", fmt.Sprintf("{\"news_id\": %d}", id))
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "View counted"})

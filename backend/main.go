@@ -61,7 +61,12 @@ func main() {
 		&models.Poll{},
 		&models.PollOption{},
 		&models.PollVote{},
-		&models.ChatMessage{}, // Chat
+		&models.ChatMessage{},         // Chat
+		&models.GamificationProfile{}, // Gamification
+		&models.Achievement{},
+		&models.UserAchievement{},
+		&models.XPTransaction{},
+		&models.HeroMessage{}, // Dynamic Hero Messages
 	); err != nil {
 		log.Fatal("Erreur lors des migrations:", err)
 	}
@@ -152,26 +157,36 @@ func main() {
 	ssoMiddleware := middleware.NewSSOMiddleware(db, cfg)
 	csrfManager := middleware.NewCSRFManager()
 
+	mediaHandler := handlers.NewMediaHandler(db, storageService)
+
+	// Gamification
+	gamificationService := services.NewGamificationService(db)
+
 	// Initialisation des handlers
-	authHandler := handlers.NewAuthHandler(db, authMiddleware, cfg.Server.SignupEnabled, cfg)
+	authHandler := handlers.NewAuthHandler(db, authMiddleware, cfg.Server.SignupEnabled, cfg, gamificationService)
 	dashboardHandler := handlers.NewDashboardHandler(db)
-	adminHandler := handlers.NewAdminHandler(db, cfg)
+	adminHandler := handlers.NewAdminHandler(db, cfg, gamificationService)
 	groupAdminHandler := handlers.NewGroupAdminHandler(db)
 	settingsHandler := handlers.NewSettingsHandler(db)
 	oauthHandler := handlers.NewOAuthHandler(db, authMiddleware)
 	favoritesHandler := handlers.NewFavoritesHandler(db)
-	analyticsHandler := handlers.NewAnalyticsHandler(db)
+	analyticsHandler := handlers.NewAnalyticsHandler(db, gamificationService)
 	announcementHandler := handlers.NewAnnouncementHandler(db)
-	newsHandler := handlers.NewNewsHandler(db, cfg)
-	eventsHandler := handlers.NewEventsHandler(db)
+	newsHandler := handlers.NewNewsHandler(db, cfg, gamificationService)
+	eventsHandler := handlers.NewEventsHandler(db, gamificationService)
 	homeHandler := handlers.NewHomeHandler(db)
 	versionHandler := handlers.NewVersionHandler()
 	emailHandler := handlers.NewEmailHandler(db, cfg)
 	commentHandler := handlers.NewCommentHandler(db)
 	feedbackHandler := handlers.NewFeedbackHandler(db)
 	notificationHandler := handlers.NewNotificationHandler(db)
-	pollsHandler := handlers.NewPollsHandler(db)
-	mediaHandler := handlers.NewMediaHandler(db, storageService)
+	pollsHandler := handlers.NewPollsHandler(db, gamificationService)
+	gamificationHandler := handlers.NewGamificationHandler(db, gamificationService)
+
+	// Seeding gamification
+	if err := gamificationService.SeedAchievements(); err != nil {
+		log.Printf("Erreur lors du seeding des achievements: %v", err)
+	}
 
 	// Initialisation du Chat
 	chatHub := chat.NewHub()
@@ -239,6 +254,17 @@ func main() {
 	// Routes publiques
 	api := router.Group("/api/v1")
 	{
+		// Gamification
+		gamification := api.Group("/gamification")
+		gamification.Use(authMiddleware.RequireAuth())
+		{
+			gamification.GET("/profile", gamificationHandler.GetMyProfile)
+			gamification.GET("/achievements", gamificationHandler.GetMyAchievements)
+			gamification.GET("/achievements/all", gamificationHandler.GetAllAchievements)
+			gamification.GET("/leaderboard", gamificationHandler.GetLeaderboard)
+			gamification.GET("/transactions", gamificationHandler.GetMyTransactions)
+		}
+
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authHandler.Login)
@@ -456,6 +482,12 @@ func main() {
 			admin.GET("/settings", settingsHandler.GetAppSettings)
 			admin.PUT("/settings", settingsHandler.UpdateAppSettings)
 			admin.POST("/settings/reset", settingsHandler.ResetAppSettings)
+
+			// Gestion des messages Hero
+			admin.GET("/settings/hero-messages", settingsHandler.GetHeroMessages)
+			admin.POST("/settings/hero-messages", settingsHandler.CreateHeroMessage)
+			admin.PUT("/settings/hero-messages/:id", settingsHandler.UpdateHeroMessage)
+			admin.DELETE("/settings/hero-messages/:id", settingsHandler.DeleteHeroMessage)
 
 			// Gestion des fournisseurs OAuth
 			admin.GET("/oauth/providers", oauthHandler.GetAllProviders)
@@ -1183,8 +1215,8 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 			if err = db.Create(&event4).Error; err != nil {
 				return fmt.Errorf("failed to create security training event: %w", err)
 			}
-			if err := db.Model(&event4).Association("TargetGroups").Append(&itGroup).Error; err != nil {
-				return fmt.Errorf("failed to associate security training with IT group: %w", err)
+			if err := db.Model(&event4).Association("TargetGroups").Append(&itGroup); err != nil {
+				return fmt.Errorf("failed to associate security training with IT group: %v", err)
 			}
 		}
 

@@ -96,6 +96,9 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 		}()
 	}
 
+	// Award Contributor XP
+	go h.gamificationService.AwardXP(userID, 150, "event_publish", "")
+
 	c.JSON(http.StatusCreated, event)
 }
 

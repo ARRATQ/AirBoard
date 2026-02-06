@@ -220,3 +220,137 @@ func GetDefaultGroupFromDB(db *gorm.DB) *models.Group {
 
 	return &group
 }
+
+// GetHeroMessages récupère tous les messages Hero
+func (h *SettingsHandler) GetHeroMessages(c *gin.Context) {
+	var messages []models.HeroMessage
+	if err := h.DB.Order("created_at DESC").Find(&messages).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to fetch hero messages",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Message: "Hero messages retrieved successfully",
+		Data:    messages,
+	})
+}
+
+// CreateHeroMessage crée un nouveau message Hero
+func (h *SettingsHandler) CreateHeroMessage(c *gin.Context) {
+	var request models.HeroMessageRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "validation_error",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	isActive := true
+	if request.IsActive != nil {
+		isActive = *request.IsActive
+	}
+
+	message := models.HeroMessage{
+		Content:  request.Content,
+		Author:   request.Author,
+		IsActive: isActive,
+	}
+
+	if err := h.DB.Create(&message).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to create hero message",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Invalider le cache
+	homeCache.InvalidateHeroMessages()
+
+	c.JSON(http.StatusCreated, models.SuccessResponse{
+		Message: "Hero message created successfully",
+		Data:    message,
+	})
+}
+
+// UpdateHeroMessage met à jour un message Hero existant
+func (h *SettingsHandler) UpdateHeroMessage(c *gin.Context) {
+	id := c.Param("id")
+	var message models.HeroMessage
+	if err := h.DB.First(&message, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.ErrorResponse{
+				Error:   "not_found",
+				Message: "Hero message not found",
+				Code:    http.StatusNotFound,
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+				Error:   "database_error",
+				Message: "Failed to fetch hero message",
+				Code:    http.StatusInternalServerError,
+			})
+		}
+		return
+	}
+
+	var request models.HeroMessageRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "validation_error",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	message.Content = request.Content
+	message.Author = request.Author
+	if request.IsActive != nil {
+		message.IsActive = *request.IsActive
+	}
+
+	if err := h.DB.Save(&message).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to update hero message",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Invalider le cache
+	homeCache.InvalidateHeroMessages()
+
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Message: "Hero message updated successfully",
+		Data:    message,
+	})
+}
+
+// DeleteHeroMessage supprime un message Hero
+func (h *SettingsHandler) DeleteHeroMessage(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.DB.Delete(&models.HeroMessage{}, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to delete hero message",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Invalider le cache
+	homeCache.InvalidateHeroMessages()
+
+	c.JSON(http.StatusOK, models.SuccessResponse{
+		Message: "Hero message deleted successfully",
+	})
+}

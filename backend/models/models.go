@@ -325,14 +325,23 @@ type DailyStats struct {
 	UniqueUsers int64  `json:"unique_users"`
 }
 
+type HourlyStats struct {
+	Hour       int   `json:"hour"`
+	ClickCount int64 `json:"click_count"`
+}
+
 type AnalyticsDashboard struct {
 	TotalClicks      int64              `json:"total_clicks"`
 	TotalUniqueUsers int64              `json:"total_unique_users"`
+	TotalActiveUsers int64              `json:"total_active_users"` // Total registered users
 	TopApplications  []ApplicationStats `json:"top_applications"`
 	TopUsers         []UserStats        `json:"top_users"`
 	DailyActivity    []DailyStats       `json:"daily_activity"`
+	HourlyActivity   []HourlyStats      `json:"hourly_activity"`
 	ClicksLast7Days  int64              `json:"clicks_last_7_days"`
 	ClicksLast30Days int64              `json:"clicks_last_30_days"`
+	ClicksGrowth     float64            `json:"clicks_growth"` // % growth vs previous 30 days
+	UsersGrowth      float64            `json:"users_growth"`  // % growth vs previous 30 days
 }
 
 // Announcement représente une annonce/actualité affichée sur le dashboard
@@ -366,7 +375,7 @@ type Notification struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	UserID    uint           `json:"user_id" gorm:"not null;index"`
 	Type      string         `json:"type" gorm:"not null"` // system, news, announcement, event, comment, reaction
-	Category  string         `json:"category"`              // login, role_change, access_granted, access_revoked, new_article, etc.
+	Category  string         `json:"category"`             // login, role_change, access_granted, access_revoked, new_article, etc.
 	Title     string         `json:"title" gorm:"not null"`
 	Message   string         `json:"message" gorm:"type:text"`
 	Icon      string         `json:"icon" gorm:"default:'mdi:bell'"` // Icône Iconify
@@ -402,4 +411,22 @@ type NotificationStats struct {
 	TotalNotifications int64 `json:"total_notifications"`
 	UnreadCount        int64 `json:"unread_count"`
 	ReadCount          int64 `json:"read_count"`
+}
+
+// HeroMessage représente un message dynamique affiché sur la page d'accueil
+type HeroMessage struct {
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Content   string         `json:"content" gorm:"not null"`
+	Author    string         `json:"author"` // Source optionnelle de la citation/hadith
+	IsActive  bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+// HeroMessageRequest pour les requêtes de création/mise à jour
+type HeroMessageRequest struct {
+	Content  string `json:"content" binding:"required,min=1"`
+	Author   string `json:"author"`
+	IsActive *bool  `json:"is_active"`
 }

@@ -53,7 +53,7 @@ if (import.meta.env.DEV) {
 }
 
 // Configuration des intercepteurs avec authentification
-export function setupInterceptors(router) {
+export function setupInterceptors(router, logoutCallback) {
   // Intercepteur de requête pour ajouter le token
   api.interceptors.request.use(
     (config) => {
@@ -95,6 +95,8 @@ export function setupInterceptors(router) {
         // Si pas de refresh token, rediriger vers login
         if (!refreshToken) {
           console.log('⚠️ Pas de refresh token disponible')
+          if (logoutCallback) logoutCallback()
+          
           if (!window.location.pathname.includes('/auth/')) {
             router.push('/auth/login')
           }
@@ -143,6 +145,7 @@ export function setupInterceptors(router) {
           processQueue(refreshError, null)
 
           // Refresh failed, redirect to login
+          if (logoutCallback) logoutCallback()
           localStorage.removeItem('airboard_token')
           localStorage.removeItem('airboard_refresh_token')
           localStorage.removeItem('airboard_user')
@@ -358,6 +361,27 @@ export const adminService = {
   async resetAppSettings() {
     const response = await api.post('/admin/settings/reset')
     return response.data.data || response.data
+  },
+
+  // Hero Messages
+  async getHeroMessages() {
+    const response = await api.get('/admin/settings/hero-messages')
+    return response.data.data || response.data
+  },
+
+  async createHeroMessage(data) {
+    const response = await api.post('/admin/settings/hero-messages', data)
+    return response.data
+  },
+
+  async updateHeroMessage(id, data) {
+    const response = await api.put(`/admin/settings/hero-messages/${id}`, data)
+    return response.data
+  },
+
+  async deleteHeroMessage(id) {
+    const response = await api.delete(`/admin/settings/hero-messages/${id}`)
+    return response.data
   },
 
   // Database
@@ -765,6 +789,35 @@ export const eventsService = {
     return response.data
   }
 }
+
+// Gamification Service
+export const gamificationService = {
+  async getProfile() {
+    const response = await api.get('/gamification/profile')
+    return response.data
+  },
+
+  async getMyAchievements() {
+    const response = await api.get('/gamification/achievements')
+    return response.data
+  },
+
+  async getAllAchievements() {
+    const response = await api.get('/gamification/achievements/all')
+    return response.data
+  },
+
+  async getLeaderboard() {
+    const response = await api.get('/gamification/leaderboard')
+    return response.data
+  },
+  
+  async getTransactions() {
+    const response = await api.get('/gamification/transactions')
+    return response.data
+  }
+}
+
 
 // Admin Events Service
 export const adminEventsService = {

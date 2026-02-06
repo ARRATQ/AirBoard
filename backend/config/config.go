@@ -170,6 +170,7 @@ func LoadConfig() *Config {
 			SignupEnabled: signupEnabled,
 			Origins: []string{
 				getEnv("FRONTEND_URL", "http://localhost:3000"),
+				"http://localhost:3001", // Vite dev server (fallback)
 				"http://localhost:5173", // Vite dev server
 				"http://localhost:8080", // Swagger
 			},

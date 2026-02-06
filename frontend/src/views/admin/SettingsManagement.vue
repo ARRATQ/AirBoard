@@ -22,10 +22,49 @@
 
     <!-- Settings Form -->
     <div class="max-w-4xl">
+      <!-- Tabs Navigation -->
+      <div class="flex border-b border-gray-700 mb-6 overflow-x-auto">
+        <button 
+          @click="activeTab = 'general'"
+          class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
+          :class="activeTab === 'general' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+        >
+          <Icon icon="mdi:cog" class="inline-block mr-2 h-4 w-4" />
+          {{ $t('settings.general') || 'General' }}
+        </button>
+        <button 
+          @click="activeTab = 'hero'"
+          class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
+          :class="activeTab === 'hero' ? 'border-green-500 text-green-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+        >
+          <Icon icon="mdi:format-quote-close" class="inline-block mr-2 h-4 w-4" />
+          Dynamic Messages
+        </button>
+        <button 
+          @click="activeTab = 'auth'"
+          class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
+          :class="activeTab === 'auth' ? 'border-purple-500 text-purple-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+        >
+          <Icon icon="mdi:shield-account" class="inline-block mr-2 h-4 w-4" />
+          Access & Auth
+        </button>
+        <button 
+          @click="activeTab = 'danger'"
+          class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
+          :class="activeTab === 'danger' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+        >
+          <Icon icon="mdi:alert" class="inline-block mr-2 h-4 w-4" />
+          Danger Zone
+        </button>
+      </div>
+
       <div class="card">
         <form @submit.prevent="handleSubmit" class="space-y-8">
-          <!-- Preview Section -->
-          <div>
+          
+          <!-- GENERAL TAB -->
+          <div v-show="activeTab === 'general'" class="space-y-8 animate-fade-in">
+            <!-- Preview Section -->
+            <div>
             <div class="section-header">
               <Icon icon="mdi:eye-outline" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.livePreview') }}</h4>
@@ -45,9 +84,6 @@
                 <h2 class="text-lg font-semibold text-white mb-2">{{ form.dashboard_title || $t('settings.previewDashboardTitle') }}</h2>
                 <p class="text-gray-300 text-sm mb-2">{{ form.welcome_message || $t('settings.previewWelcome') }}</p>
                 <p class="text-xs text-gray-400 italic">▲ Message Dashboard (page Applications)</p>
-                <p class="text-gray-300 text-sm mt-3">{{ form.home_page_message || 'Message de la page d\'accueil' }}</p>
-                <p class="text-xs text-gray-400 italic">▲ Message Home (page d'accueil)</p>
-                
                 <!-- Sample App Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
@@ -147,24 +183,67 @@
                 <p class="form-help">Friendly message displayed on the applications dashboard page</p>
               </div>
 
-              <div class="form-group">
-                <label for="home_page_message" class="form-label form-label-required">{{ $t('settings.homePageMessage') }}</label>
-                <textarea
-                  id="home_page_message"
-                  v-model="form.home_page_message"
-                  rows="3"
-                  required
-                  class="form-textarea"
-                  :placeholder="$t('settings.homePageMessagePlaceholder')"
-                ></textarea>
-                <p v-if="errors.home_page_message" class="form-error">{{ errors.home_page_message }}</p>
-                <p class="form-help">Message displayed in the hero section of the home page</p>
+            </div>
+            </div>
+          </div>
+
+          <!-- HERO MESSAGES TAB -->
+          <div v-show="activeTab === 'hero'" class="animate-fade-in">
+            <!-- Dynamic Hero Messages -->
+            <div>
+              <div class="section-header">
+                <Icon icon="mdi:format-quote-close" class="section-icon" />
+                <div class="flex-1 flex items-center justify-between">
+                  <h4 class="section-title">Dynamic Hero Messages</h4>
+                  <button type="button" @click="openHeroModal()" class="btn btn-secondary btn-sm">
+                    <Icon icon="mdi:plus" class="h-4 w-4 mr-1" />
+                    Add Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <p class="form-help mb-4">Manage the rotating quotes and messages displayed on the home page hero section.</p>
+                
+                <div v-if="heroMessages.length === 0" class="text-center py-8 bg-gray-800/50 rounded-lg border border-gray-700">
+                  <Icon icon="mdi:format-quote-open" class="h-12 w-12 text-gray-600 mx-auto mb-2" />
+                  <p class="text-gray-400">No dynamic messages configured. Default messages will be used.</p>
+                </div>
+
+                <div v-else class="grid grid-cols-1 gap-4">
+                  <div v-for="hero in heroMessages" :key="hero.id" 
+                    class="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-blue-500/50 transition-colors"
+                    :class="{ 'opacity-60': !hero.is_active }">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1">
+                        <p class="text-white font-medium mb-1 line-clamp-2">"{{ hero.content }}"</p>
+                        <p v-if="hero.author" class="text-xs text-gray-400">— {{ hero.author }}</p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button type="button" @click="toggleHeroStatus(hero)" 
+                          class="p-1.5 rounded-lg transition-colors"
+                          :class="hero.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-gray-500 hover:bg-gray-500/10'"
+                          :title="hero.is_active ? 'Deactivate' : 'Activate'">
+                          <Icon :icon="hero.is_active ? 'mdi:eye' : 'mdi:eye-off'" class="h-5 w-5" />
+                        </button>
+                        <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
+                          <Icon icon="mdi:pencil" class="h-5 w-5" />
+                        </button>
+                        <button type="button" @click="deleteHeroMessage(hero.id)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                          <Icon icon="mdi:trash-can" class="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Authentication Configuration -->
-          <div>
+          <!-- AUTH TAB -->
+          <div v-show="activeTab === 'auth'" class="space-y-8 animate-fade-in">
+            <!-- Authentication Configuration -->
+            <div>
             <div class="section-header">
               <Icon icon="mdi:shield-account" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.authConfiguration') }}</h4>
@@ -216,14 +295,19 @@
               <p class="form-help">{{ $t('settings.defaultGroupHelp') }}</p>
             </div>
           </div>
+          </div>
 
-          <!-- Danger Zone -->
-          <div>
+
+          <!-- DANGER ZONE TAB -->
+          <div v-show="activeTab === 'danger'" class="space-y-8 animate-fade-in">
+            <!-- Danger Zone -->
+            <div>
             <div class="section-header">
               <Icon icon="mdi:alert-circle" class="section-icon text-red-500" />
               <h4 class="section-title text-red-600 dark:text-red-400">{{ $t('admin.dangerZone') }}</h4>
             </div>
 
+            <!-- Danger Zone Content -->
             <div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-6">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0">
@@ -253,9 +337,10 @@
               </div>
             </div>
           </div>
+          </div>
 
-          <!-- Actions -->
-          <div class="flex justify-end space-x-4 pt-6 border-t border-gray-700">
+          <!-- Actions (Only show save/reset if not in Danger Zone or Hero tab which has auto-save/modals) -->
+          <div v-if="activeTab === 'general' || activeTab === 'auth'" class="flex justify-end space-x-4 pt-6 border-t border-gray-700 mt-8">
             <button
               type="button"
               @click="loadSettings"
@@ -444,6 +529,87 @@
         </div>
       </div>
     </div>
+
+    <!-- Hero Message Modal -->
+    <div v-if="showHeroModal" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-panel sm:max-w-lg sm:w-full">
+          <div class="modal-header">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0">
+                <Icon icon="mdi:format-quote-close" class="h-6 w-6 text-blue-500" />
+              </div>
+              <div>
+                <h3 class="modal-title">{{ editingHero ? 'Edit Message' : 'Add Hero Message' }}</h3>
+                <p class="modal-subtitle">
+                  Configure a quote or informational message for the homepage.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <form @submit.prevent="handleHeroSubmit" class="modal-content">
+            <div class="space-y-4">
+              <div class="form-group">
+                <label for="hero_content" class="form-label form-label-required">Message Content</label>
+                <textarea
+                  id="hero_content"
+                  v-model="heroForm.content"
+                  rows="3"
+                  required
+                  class="form-textarea"
+                  placeholder="e.g. The only way to do great work is to love what you do."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="hero_author" class="form-label">Author / Source (Optional)</label>
+                <input
+                  id="hero_author"
+                  v-model="heroForm.author"
+                  type="text"
+                  class="form-input"
+                  placeholder="e.g. Steve Jobs"
+                />
+              </div>
+
+              <div class="form-group">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <label class="form-label">Active Status</label>
+                    <p class="form-help">Visible messages will be included in the homepage rotation.</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="heroForm.is_active"
+                      class="sr-only peer"
+                    />
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button
+                type="button"
+                @click="showHeroModal = false"
+                class="btn btn-secondary"
+              >
+                {{ $t('common.cancel') }}
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+              >
+                {{ editingHero ? 'Update Message' : 'Add Message' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -469,13 +635,22 @@ const passwordErrors = ref({})
 const errors = ref({})
 const showResetDatabaseModal = ref(false)
 const isResetting = ref(false)
+const activeTab = ref('general') // 'general', 'hero', 'auth', 'danger'
+const heroMessages = ref([])
+const heroLoading = ref(false)
+const showHeroModal = ref(false)
+const editingHero = ref(null)
+const heroForm = reactive({
+  content: '',
+  author: '',
+  is_active: true
+})
 
 const form = reactive({
   app_name: '',
   app_icon: '',
   dashboard_title: '',
   welcome_message: '',
-  home_page_message: '',
   signup_enabled: true,
   default_group_id: null
 })
@@ -512,7 +687,6 @@ const loadSettings = async () => {
       app_icon: data.app_icon || 'mdi:view-dashboard',
       dashboard_title: data.dashboard_title || 'Dashboard',
       welcome_message: data.welcome_message || 'Welcome to your application portal',
-      home_page_message: data.home_page_message || 'Discover your personalized workspace',
       signup_enabled: data.signup_enabled !== undefined ? data.signup_enabled : true,
       default_group_id: data.default_group_id || null
     })
@@ -544,10 +718,6 @@ const validateForm = () => {
   
   if (!form.welcome_message.trim()) {
     errors.value.welcome_message = 'Welcome message is required'
-  }
-  
-  if (!form.home_page_message.trim()) {
-    errors.value.home_page_message = 'Home page message is required'
   }
   
   return Object.keys(errors.value).length === 0
@@ -690,8 +860,87 @@ const handleResetDatabase = async () => {
   }
 }
 
+// Hero Messages Methods
+const loadHeroMessages = async () => {
+  heroLoading.value = true
+  try {
+    const data = await adminService.getHeroMessages()
+    heroMessages.value = data
+  } catch (error) {
+    console.error('Error loading hero messages:', error)
+    appStore.showError('Failed to load hero messages')
+  } finally {
+    heroLoading.value = false
+  }
+}
+
+const openHeroModal = (hero = null) => {
+  if (hero) {
+    editingHero.value = hero
+    Object.assign(heroForm, {
+      content: hero.content,
+      author: hero.author,
+      is_active: hero.is_active
+    })
+  } else {
+    editingHero.value = null
+    Object.assign(heroForm, {
+      content: '',
+      author: '',
+      is_active: true
+    })
+  }
+  showHeroModal.value = true
+}
+
+const handleHeroSubmit = async () => {
+  if (!heroForm.content.trim()) return
+
+  try {
+    if (editingHero.value) {
+      await adminService.updateHeroMessage(editingHero.value.id, heroForm)
+      appStore.showSuccess('Message updated successfully')
+    } else {
+      await adminService.createHeroMessage(heroForm)
+      appStore.showSuccess('Message added successfully')
+    }
+    showHeroModal.value = false
+    await loadHeroMessages()
+  } catch (error) {
+    console.error('Error saving hero message:', error)
+    appStore.showError('Failed to save message')
+  }
+}
+
+const deleteHeroMessage = async (id) => {
+  if (!confirm('Are you sure you want to delete this message?')) return
+
+  try {
+    await adminService.deleteHeroMessage(id)
+    appStore.showSuccess('Message deleted successfully')
+    await loadHeroMessages()
+  } catch (error) {
+    console.error('Error deleting hero message:', error)
+    appStore.showError('Failed to delete message')
+  }
+}
+
+const toggleHeroStatus = async (hero) => {
+  try {
+    await adminService.updateHeroMessage(hero.id, {
+      content: hero.content,
+      author: hero.author,
+      is_active: !hero.is_active
+    })
+    await loadHeroMessages()
+  } catch (error) {
+    console.error('Error toggling hero status:', error)
+    appStore.showError('Failed to update message status')
+  }
+}
+
 // Lifecycle
 onMounted(async () => {
-  await Promise.all([loadSettings(), loadGroups()])
+  await Promise.all([loadSettings(), loadGroups(), loadHeroMessages()])
 })
 </script>

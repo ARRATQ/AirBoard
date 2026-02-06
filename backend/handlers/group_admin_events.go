@@ -102,6 +102,9 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 		Preload("TargetGroups").
 		First(&event, event.ID)
 
+	// Award Contributor XP
+	go h.gamificationService.AwardXP(userID, 150, "event_publish", "")
+
 	c.JSON(http.StatusCreated, event)
 }
 

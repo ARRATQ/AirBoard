@@ -43,6 +43,7 @@
     "announcements": "Annonces",
     "newsHub": "News Hub",
     "events": "Agenda",
+    "gamification": "My XP",
     "oauth": "OAuth",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
@@ -90,7 +91,15 @@
     "month": "Mois",
     "week": "Semaine",
     "day": "Jour",
-    "daysOfWeek": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+    "daysOfWeek": [
+      "Lun",
+      "Mar",
+      "Mer",
+      "Jeu",
+      "Ven",
+      "Sam",
+      "Dim"
+    ]
   },
   "agenda": {
     "title": "Agenda des Événements",
@@ -114,7 +123,15 @@
       "subtitle": "Calculez le nombre de jours travaillés entre deux dates",
       "weekendDays": "Jours de week-end",
       "weekendHint": "Cliquez pour sélectionner/désélectionner les jours de repos",
-      "daysOfWeek": ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
+      "daysOfWeek": [
+        "Dim",
+        "Lun",
+        "Mar",
+        "Mer",
+        "Jeu",
+        "Ven",
+        "Sam"
+      ],
       "startDate": "Date de début",
       "endDate": "Date de fin",
       "excludeHolidays": "Exclure les jours fériés du calcul",
@@ -157,8 +174,7 @@
     "loadError": "Erreur lors du chargement des groupes",
     "saveError": "Erreur lors de la sauvegarde du groupe",
     "deleteError": "Erreur lors de la suppression du groupe"
-  }
-  ,
+  },
   "applications": {
     "title": "Applications",
     "subtitle": "Gérez vos applications du portail",
@@ -273,6 +289,12 @@
     "clicks": "clics",
     "users": "utilisateurs",
     "apps": "apps",
+    "vsPrevious": "vs période précédente",
+    "engagementRate": "Taux d'engagement",
+    "hourlyActivity": "Distribution horaire",
+    "exportData": "Exporter les données",
+    "activeUsers": "Utilisateurs inscrits",
+    "peakUsage": "Pic d'utilisation",
     "noData": "Aucune donnée disponible",
     "noAnalytics": "Aucune donnée d'analyse",
     "noAnalyticsText": "Commencez à utiliser les applications pour voir les statistiques ici."
@@ -1126,7 +1148,6 @@
       "message": "Une erreur est survenue lors du chargement de la page d'accueil. Veuillez réessayer."
     }
   },
-
   "email": {
     "title": "Notifications Email",
     "subtitle": "Configurer le serveur SMTP et les templates d'emails",
@@ -1188,7 +1209,6 @@
     "statusCompleted": "Terminé",
     "statusFailed": "Échoué"
   },
-
   "comments": {
     "title": "Commentaires",
     "placeholder": "Ajouter un commentaire...",
@@ -1209,13 +1229,11 @@
       "days_ago": "{count} j"
     }
   },
-
   "feedback": {
     "helpful": "Cet article vous a-t-il été utile ?",
     "positive": "positif",
     "negative": "négatif"
   },
-
   "moderation": {
     "title": "Modération des commentaires",
     "description": "Gérez les commentaires en attente de modération et configurez les paramètres des commentaires",
@@ -1635,8 +1653,23 @@
     "currentPasswordIncorrect": "Le mot de passe actuel est incorrect",
     "passwordChangeError": "Erreur lors du changement de mot de passe",
     "saveError": "Erreur lors de la sauvegarde du profil"
+  },
+  "gamification": {
+    "title": "My XP",
+    "subtitle": "Suivez votre progression et débloquez des badges",
+    "level": "Niveau {level}",
+    "xp": "{current} / {next} XP",
+    "nextLevel": "Prochain niveau dans {xp} XP",
+    "achievements": "Mes Badges",
+    "leaderboard": "Classement Général",
+    "unlockedAt": "Débloqué le {date}",
+    "locked": "Verrouillé",
+    "rank": "Rang",
+    "score": "XP Total",
+    "recentActivity": "Activité Récente",
+    "all": "Tous",
+    "unlocked": "Débloqués",
+    "streak": "Série",
+    "xpReward": "Récompense : {xp} XP"
   }
-
 }
-
-

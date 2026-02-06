@@ -17,11 +17,15 @@ import (
 )
 
 type PollsHandler struct {
-	db *gorm.DB
+	db                  *gorm.DB
+	gamificationService *services.GamificationService
 }
 
-func NewPollsHandler(db *gorm.DB) *PollsHandler {
-	return &PollsHandler{db: db}
+func NewPollsHandler(db *gorm.DB, gamificationService *services.GamificationService) *PollsHandler {
+	return &PollsHandler{
+		db:                  db,
+		gamificationService: gamificationService,
+	}
 }
 
 // GetPolls - Liste des sondages (accessible à tous les utilisateurs connectés)
@@ -437,6 +441,13 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 				}
 			}
 		}()
+
+		// Accorder de l'XP pour la création du sondage (50 XP)
+		go func() {
+			if err := h.gamificationService.AwardXP(userID, 50, "poll_create", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
+				log.Printf("[Gamification] Failed to award XP for poll creation: %v", err)
+			}
+		}()
 	}
 
 	c.JSON(http.StatusCreated, poll)
@@ -776,6 +787,14 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 		"poll_id":     poll.ID,
 		"option_ids":  req.PollOptionIDs,
 	})
+
+	// Accorder de l'XP pour le vote (10 XP)
+	// On le fait de manière asynchrone pour ne pas ralentir la réponse
+	go func() {
+		if err := h.gamificationService.AwardXP(userID, 10, "poll_vote", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
+			log.Printf("[Gamification] Failed to award XP for poll vote: %v", err)
+		}
+	}()
 }
 
 // GetPollResults - Récupérer les résultats d'un sondage

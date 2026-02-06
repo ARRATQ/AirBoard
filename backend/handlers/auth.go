@@ -25,9 +25,10 @@ type AuthHandler struct {
 	notificationService *services.NotificationService
 	authSecurity        *utils.AuthSecurityManager
 	bcryptCost          int
+	gamificationService *services.GamificationService
 }
 
-func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, signupEnabled bool, cfg *config.Config) *AuthHandler {
+func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, signupEnabled bool, cfg *config.Config, gs *services.GamificationService) *AuthHandler {
 	return &AuthHandler{
 		db:                  db,
 		authMiddleware:      authMiddleware,
@@ -35,6 +36,7 @@ func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, sign
 		notificationService: services.NewNotificationService(db),
 		authSecurity:        utils.NewAuthSecurityManager(),
 		bcryptCost:          cfg.Security.BcryptCost,
+		gamificationService: gs,
 	}
 }
 
@@ -125,6 +127,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		log.Printf("Erreur lors de la mise à jour de la dernière connexion: %v", err)
 		// Ne pas bloquer la connexion pour cette erreur
 	}
+
+	// Gamification XP (Daily Login)
+	go h.gamificationService.AwardXP(user.ID, 50, "daily_login", "")
 
 	// Créer une notification de connexion (en arrière-plan) - DÉSACTIVÉ
 	/*

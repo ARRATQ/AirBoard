@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log"
+	"math"
 	"net/http"
 	"sync"
 	"time"
@@ -40,6 +41,14 @@ type HomeStats struct {
 	ManagedPollsCount     int64 `json:"managed_polls_count,omitempty"`
 }
 
+type GamificationSummary struct {
+	Level           int                  `json:"level"`
+	XP              int64                `json:"xp"`
+	NextLevelXP     int64                `json:"next_level_xp"`
+	ProgressPercent int                  `json:"progress_percent"`
+	RecentBadges    []models.Achievement `json:"recent_badges"`
+}
+
 type HomeResponse struct {
 	FavoriteApps    []models.Application  `json:"favorite_apps"`
 	NewApps         []models.Application  `json:"new_apps"`
@@ -49,9 +58,11 @@ type HomeResponse struct {
 	Polls           []models.Poll         `json:"polls"`
 	Announcements   []models.Announcement `json:"announcements"`
 	Stats           *HomeStats            `json:"stats,omitempty"`
+	Gamification    *GamificationSummary  `json:"gamification,omitempty"`
 	UserRole        string                `json:"user_role"`
 	ManagedGroupIDs []uint                `json:"managed_group_ids,omitempty"`
 	AppSettings     *models.AppSettings   `json:"app_settings,omitempty"`
+	HeroMessages    []models.HeroMessage  `json:"hero_messages,omitempty"`
 }
 
 // Main handler
@@ -202,6 +213,30 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		}
 		mu.Lock()
 		response.AppSettings = settings
+		mu.Unlock()
+	}()
+
+	// 10. Load Hero Messages (cached)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		messages, err := h.getHeroMessagesWithCache()
+		if err != nil {
+			log.Printf("[HOME] Failed to load hero messages: %v", err)
+			messages = []models.HeroMessage{}
+		}
+		mu.Lock()
+		response.HeroMessages = messages
+		mu.Unlock()
+	}()
+
+	// 11. Load Gamification Summary
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		summary := h.getGamificationSummary(userID.(uint))
+		mu.Lock()
+		response.Gamification = summary
 		mu.Unlock()
 	}()
 
@@ -543,6 +578,35 @@ func (h *HomeHandler) getAppSettingsWithCache() (*models.AppSettings, error) {
 	return &settings, nil
 }
 
+// Helper: Get hero messages with cache
+func (h *HomeHandler) getHeroMessagesWithCache() ([]models.HeroMessage, error) {
+	homeCache.mu.RLock()
+	cached := homeCache.heroMessages
+	homeCache.mu.RUnlock()
+
+	if cached != nil && cached.Data != nil && time.Now().Before(cached.ExpiresAt) {
+		return cached.Data.([]models.HeroMessage), nil
+	}
+
+	// Cache miss - query database
+	var messages []models.HeroMessage
+	err := h.db.Where("is_active = ?", true).Order("created_at DESC").Find(&messages).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Update cache
+	homeCache.mu.Lock()
+	homeCache.heroMessages = &CachedData{
+		Data:      messages,
+		ExpiresAt: time.Now().Add(15 * time.Minute),
+	}
+	homeCache.mu.Unlock()
+
+	return messages, nil
+}
+
 // Helper: Get stats based on role
 func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint) *HomeStats {
 	stats := &HomeStats{}
@@ -603,6 +667,54 @@ func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint)
 	return stats
 }
 
+// Helper: Get gamification summary for a user
+func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
+	var profile models.GamificationProfile
+	if err := h.db.Where("user_id = ?", userID).First(&profile).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			profile = models.GamificationProfile{UserID: userID, Level: 1, XP: 0}
+			h.db.Create(&profile)
+		} else {
+			return nil
+		}
+	}
+
+	// Calculate progress
+	currentXP := profile.XP
+	currentLevel := profile.Level
+	xpForCurrentLevel := int64(math.Pow(float64(currentLevel-1), 2) * 100)
+	xpForNextLevel := int64(math.Pow(float64(currentLevel), 2) * 100)
+
+	rangeNeed := xpForNextLevel - xpForCurrentLevel
+	xpInRange := currentXP - xpForCurrentLevel
+
+	progressPercent := 0
+	if rangeNeed > 0 {
+		progressPercent = int((float64(xpInRange) / float64(rangeNeed)) * 100)
+	}
+
+	// Fetch recent badges
+	var userAchievements []models.UserAchievement
+	h.db.Preload("Achievement").
+		Where("user_id = ?", userID).
+		Order("unlocked_at DESC").
+		Limit(3).
+		Find(&userAchievements)
+
+	recentBadges := make([]models.Achievement, 0)
+	for _, ua := range userAchievements {
+		recentBadges = append(recentBadges, ua.Achievement)
+	}
+
+	return &GamificationSummary{
+		Level:           profile.Level,
+		XP:              profile.XP,
+		NextLevelXP:     xpForNextLevel,
+		ProgressPercent: progressPercent,
+		RecentBadges:    recentBadges,
+	}
+}
+
 // Cache implementation
 type CachedData struct {
 	Data      interface{}
@@ -613,11 +725,13 @@ type HomeCache struct {
 	mu            sync.RWMutex
 	announcements *CachedData
 	appSettings   *CachedData
+	heroMessages  *CachedData
 }
 
 var homeCache = &HomeCache{
 	announcements: &CachedData{},
 	appSettings:   &CachedData{},
+	heroMessages:  &CachedData{},
 }
 
 // InvalidateAnnouncements can be called from admin handlers when announcements are modified
@@ -632,4 +746,11 @@ func (cache *HomeCache) InvalidateAppSettings() {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	cache.appSettings = &CachedData{}
+}
+
+// InvalidateHeroMessages can be called from admin handlers when hero messages are modified
+func (cache *HomeCache) InvalidateHeroMessages() {
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	cache.heroMessages = &CachedData{}
 }

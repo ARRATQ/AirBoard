@@ -32,8 +32,8 @@
           polls: homeData.polls?.length || 0
         }"
         :show-quick-stats="true"
-        :welcome-message="getWelcomeMessage()"
         :announcements="homeData.announcements || []"
+        :hero-messages="homeData.hero_messages || []"
       />
 
       <!-- Optimized 3-Column Grid Layout -->
@@ -43,6 +43,11 @@
           <!-- Statistics Widget (Adaptive Height) - Admin/Group Admin Only -->
           <div v-if="showStats" class="bento-item stats-widget-container" data-aos="fade-up">
             <StatsWidget :stats="homeData.stats" :role="homeData.user_role" :managedGroupIds="homeData.managed_group_ids" />
+          </div>
+
+          <!-- Gamification Widget -->
+          <div v-if="homeData.gamification" class="bento-item" data-aos="fade-up" data-aos-delay="100">
+            <GamificationWidget :summary="homeData.gamification" />
           </div>
 
           <!-- Favorite Apps -->
@@ -103,8 +108,8 @@ import FavoriteAppsWidget from '@/components/home/FavoriteAppsWidget.vue'
 import NewAppsWidget from '@/components/home/NewAppsWidget.vue'
 import UpcomingEventsWidget from '@/components/home/UpcomingEventsWidget.vue'
 import RecentNewsWidget from '@/components/home/RecentNewsWidget.vue'
-
 import PollsWidget from '@/components/home/PollsWidget.vue'
+import GamificationWidget from '@/components/home/GamificationWidget.vue'
 
 const authStore = useAuthStore()
 
@@ -122,9 +127,7 @@ const showStats = computed(() => {
 
 // Helper function to get welcome message with fallback
 const getWelcomeMessage = () => {
-  return homeData.value.app_settings?.home_page_message || 
-         homeData.value.app_settings?.HomePageMessage || 
-         homeData.value.app_settings?.welcome_message || 
+  return homeData.value.app_settings?.welcome_message || 
          homeData.value.app_settings?.WelcomeMessage || 
          ''
 }

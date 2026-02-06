@@ -74,6 +74,11 @@
           <Icon icon="mdi:poll" class="h-4 w-4" />
           <span>{{ $t('common.polls') }}</span>
         </router-link>
+
+        <router-link to="/gamification" :class="getLinkClasses('/gamification')">
+          <Icon icon="mdi:medal" class="h-4 w-4" />
+          <span>{{ $t('common.gamification') }}</span>
+        </router-link>
       </div>
 
       <!-- ========================================== -->
@@ -369,6 +374,13 @@
               <span v-else class="text-sm font-medium text-gray-900 dark:text-white">
                 {{ authStore.userInitials }}
               </span>
+              <!-- Prominent Level Badge -->
+              <div 
+                class="absolute -bottom-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-2 border-white dark:border-gray-800 text-[10px] font-black text-white shadow-lg animate-pulse-slow" 
+                :title="`Niveau ${authStore.gamificationProfile?.level || 1}`"
+              >
+                {{ authStore.gamificationProfile?.level || 1 }}
+              </div>
             </div>
           </div>
           <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-left">
@@ -620,6 +632,10 @@ onMounted(async () => {
     versionStore.startPeriodicUpdateCheck()
   } catch (error) {
     console.error('Failed to load version info:', error)
+  }
+
+  if (authStore.isAuthenticated) {
+    authStore.fetchGamificationProfile()
   }
 })
 

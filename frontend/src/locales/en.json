@@ -51,6 +51,7 @@
     "announcements": "Announcements",
     "newsHub": "News Hub",
     "events": "Events",
+    "gamification": "My XP",
     "noGroup": "No group",
     "close": "Close",
     "applicationsManagement": "Applications Management",
@@ -1664,8 +1665,25 @@
     "currentPasswordIncorrect": "Current password is incorrect",
     "passwordChangeError": "Error changing password",
     "saveError": "Error saving profile"
+  },
+  "gamification": {
+    "title": "My XP",
+    "subtitle": "Track your progress and unlock badges",
+    "level": "Level {level}",
+    "xp": "{current} / {next} XP",
+    "nextLevel": "Next level in {xp} XP",
+    "achievements": "My Badges",
+    "leaderboard": "Leaderboard",
+    "unlockedAt": "Unlocked on {date}",
+    "locked": "Locked",
+    "rank": "Rank",
+    "score": "Total XP",
+    "recentActivity": "Recent Activity",
+    "all": "All",
+    "unlocked": "Unlocked",
+    "streak": "Streak",
+    "xpReward": "{xp} XP Reward"
   }
-
 }
 
 

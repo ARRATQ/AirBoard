@@ -16,11 +16,12 @@ import (
 )
 
 type EventsHandler struct {
-	db *gorm.DB
+	db                  *gorm.DB
+	gamificationService *services.GamificationService
 }
 
-func NewEventsHandler(db *gorm.DB) *EventsHandler {
-	return &EventsHandler{db: db}
+func NewEventsHandler(db *gorm.DB, gs *services.GamificationService) *EventsHandler {
+	return &EventsHandler{db: db, gamificationService: gs}
 }
 
 // GetEvents - Liste des événements (accessible à tous les utilisateurs connectés)

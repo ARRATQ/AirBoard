@@ -12,8 +12,13 @@
       <!-- User Avatar & Welcome -->
       <div class="hero-header">
         <div class="user-avatar-wrapper">
-          <div class="user-avatar">
-            <Icon icon="mdi:account-circle" class="avatar-icon" />
+          <div class="user-avatar" :class="{ 'has-avatar': !!authStore.user?.avatar_url }">
+            <template v-if="authStore.user?.avatar_url">
+              <img :src="authStore.user.avatar_url" alt="Avatar" class="avatar-image" />
+            </template>
+            <template v-else>
+              <span class="avatar-initials">{{ authStore.userInitials }}</span>
+            </template>
             <div class="avatar-status"></div>
           </div>
           <div class="welcome-text">
@@ -22,7 +27,9 @@
               <span class="user-name">{{ userName }}</span>
               <span class="wave-emoji"></span>
             </h1>
-            <p class="hero-subtitle">{{ displayWelcomeMessage }}</p>
+            <transition name="fade-message" mode="out-in">
+              <p :key="dynamicMessage" class="hero-subtitle">{{ dynamicMessage }}</p>
+            </transition>
           </div>
         </div>
 
@@ -99,11 +106,11 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  welcomeMessage: {
-    type: String,
-    default: ''
-  },
   announcements: {
+    type: Array,
+    default: () => []
+  },
+  heroMessages: {
     type: Array,
     default: () => []
   }
@@ -120,20 +127,37 @@ const userName = computed(() => {
   return authStore.user?.first_name || authStore.user?.username || 'User'
 })
 
-const displayWelcomeMessage = computed(() => {
-  // Si un message personnalisé est passé en props, l'utiliser
-  if (props.welcomeMessage && props.welcomeMessage.trim()) {
-    return props.welcomeMessage
-  }
-  
-  // Sinon, utiliser les paramètres de l'application s'ils sont disponibles
-  const appStore = useAppStore()
-  if (appStore.appSettings?.welcome_message) {
-    return appStore.appSettings.welcome_message
-  }
-  
-  // Fallback sur la traduction par défaut
-  return t('home.hero.subtitle')
+// Messages par défaut (Fallback si aucun message n'est configuré en base)
+const staticMessages = [
+  "Le plus grand risque est de ne prendre aucun risque.",
+  "La connaissance est une lumière que Dieu place dans le cœur.",
+  "Le succès n'est pas final, l'échec n'est pas fatal : c'est le courage de continuer qui compte.",
+  "Un sourire est une aumône.",
+  "Votre travail va occuper une grande partie de votre vie, la seule façon d'être vraiment satisfait est de faire ce que vous croyez être un excellent travail.",
+  "Cherchez le savoir du berceau jusqu'au tombeau.",
+  "Agissez comme s'il était impossible d'échouer.",
+  "Celui qui ne remercie pas les gens ne remercie pas Dieu.",
+  "La patience est la clé de la réussite.",
+  "Le meilleur d'entre vous est celui qui est le plus utile aux autres."
+]
+
+const dynamicMessage = ref('')
+let messageInterval = null
+
+const setRandomMessage = () => {
+  const sourceMessages = props.heroMessages?.length > 0 
+    ? props.heroMessages.map(m => m.content)
+    : staticMessages
+    
+  const randomIndex = Math.floor(Math.random() * sourceMessages.length)
+  dynamicMessage.value = sourceMessages[randomIndex]
+}
+
+
+onMounted(() => {
+  setRandomMessage()
+  // Changer de message toutes le 10 secondes
+  messageInterval = setInterval(setRandomMessage, 10000)
 })
 
 const currentAnnouncement = computed(() => {
@@ -185,6 +209,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (announcementInterval) clearInterval(announcementInterval)
+  if (messageInterval) clearInterval(messageInterval)
 })
 </script>
 
@@ -374,6 +399,28 @@ onUnmounted(() => {
 .avatar-icon {
   font-size: 2.5rem;
   color: white;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-initials {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-status {
@@ -624,6 +671,18 @@ onUnmounted(() => {
 .slide-right-leave-to {
   transform: translateX(100%);
   opacity: 0;
+}
+
+/* Fade Message Transition */
+.fade-message-enter-active,
+.fade-message-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-message-enter-from,
+.fade-message-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /* Optimisation pour 1280x720 et résolutions similaires */

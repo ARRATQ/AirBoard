@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(null)
   const refreshToken = ref(null)
   const isLoading = ref(false)
+  const gamificationProfile = ref({ level: 1, xp: 0 })
 
   // Getters
   const isAuthenticated = computed(() => !!token.value && !!user.value)
@@ -290,6 +291,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const fetchGamificationProfile = async () => {
+    try {
+      const { gamificationService } = await import('@/services/api')
+      const profileData = await gamificationService.getProfile()
+      gamificationProfile.value = profileData
+      return profileData
+    } catch (error) {
+      console.error('Error fetching gamification profile:', error)
+    }
+  }
+
   return {
     // État
     user,
@@ -321,5 +333,7 @@ export const useAuthStore = defineStore('auth', () => {
     setRefreshToken,
     updateTokens,
     autoLoginSSO,
+    gamificationProfile,
+    fetchGamificationProfile,
   }
 })

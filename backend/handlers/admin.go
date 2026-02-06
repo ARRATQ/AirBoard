@@ -16,14 +16,16 @@ import (
 )
 
 type AdminHandler struct {
-	db         *gorm.DB
-	bcryptCost int
+	db                  *gorm.DB
+	bcryptCost          int
+	gamificationService *services.GamificationService
 }
 
-func NewAdminHandler(db *gorm.DB, cfg *config.Config) *AdminHandler {
+func NewAdminHandler(db *gorm.DB, cfg *config.Config, gs *services.GamificationService) *AdminHandler {
 	return &AdminHandler{
-		db:         db,
-		bcryptCost: cfg.Security.BcryptCost,
+		db:                  db,
+		bcryptCost:          cfg.Security.BcryptCost,
+		gamificationService: gs,
 	}
 }
 

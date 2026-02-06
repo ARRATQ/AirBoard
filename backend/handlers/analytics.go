@@ -1,21 +1,24 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"airboard/models"
+	"airboard/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type AnalyticsHandler struct {
-	db *gorm.DB
+	db                  *gorm.DB
+	gamificationService *services.GamificationService
 }
 
-func NewAnalyticsHandler(db *gorm.DB) *AnalyticsHandler {
-	return &AnalyticsHandler{db: db}
+func NewAnalyticsHandler(db *gorm.DB, gs *services.GamificationService) *AnalyticsHandler {
+	return &AnalyticsHandler{db: db, gamificationService: gs}
 }
 
 // TrackClick enregistre un clic sur une application
@@ -59,6 +62,9 @@ func (h *AnalyticsHandler) TrackClick(c *gin.Context) {
 		return
 	}
 
+	// Gamification XP
+	go h.gamificationService.AwardXP(userID.(uint), 5, "app_click", fmt.Sprintf("{\"app_id\": %d}", requestData.ApplicationID))
+
 	c.JSON(http.StatusCreated, models.SuccessResponse{
 		Message: "Clic enregistré avec succès",
 	})
@@ -75,6 +81,9 @@ func (h *AnalyticsHandler) GetDashboard(c *gin.Context) {
 	h.db.Model(&models.ApplicationClick{}).
 		Distinct("user_id").
 		Count(&dashboard.TotalUniqueUsers)
+
+	// Total des utilisateurs actifs (inscrits)
+	h.db.Model(&models.User{}).Where("is_active = ?", true).Count(&dashboard.TotalActiveUsers)
 
 	// Top 10 applications les plus cliquées
 	topApps := []models.ApplicationStats{}
@@ -129,15 +138,62 @@ func (h *AnalyticsHandler) GetDashboard(c *gin.Context) {
 		Scan(&dailyStats)
 	dashboard.DailyActivity = dailyStats
 
+	// Activité par heure (distribution) sur les 30 derniers jours
+	hourlyStats := []models.HourlyStats{}
+	h.db.Table("application_clicks").
+		Select(`
+			EXTRACT(HOUR FROM clicked_at) as hour,
+			COUNT(*) as click_count
+		`).
+		Where("clicked_at >= ?", time.Now().AddDate(0, 0, -30)).
+		Group("hour").
+		Order("hour ASC").
+		Scan(&hourlyStats)
+	dashboard.HourlyActivity = hourlyStats
+
 	// Clics des 7 derniers jours
 	h.db.Model(&models.ApplicationClick{}).
 		Where("clicked_at >= ?", time.Now().AddDate(0, 0, -7)).
 		Count(&dashboard.ClicksLast7Days)
 
-	// Clics des 30 derniers jours
+	// Clics des 30 derniers jours (Période A)
+	var countA int64
 	h.db.Model(&models.ApplicationClick{}).
 		Where("clicked_at >= ?", time.Now().AddDate(0, 0, -30)).
-		Count(&dashboard.ClicksLast30Days)
+		Count(&countA)
+	dashboard.ClicksLast30Days = countA
+
+	// Clics des 30-60 jours (Période B)
+	var countB int64
+	h.db.Model(&models.ApplicationClick{}).
+		Where("clicked_at >= ? AND clicked_at < ?", time.Now().AddDate(0, 0, -60), time.Now().AddDate(0, 0, -30)).
+		Count(&countB)
+
+	if countB > 0 {
+		dashboard.ClicksGrowth = float64(countA-countB) / float64(countB) * 100
+	} else if countA > 0 {
+		dashboard.ClicksGrowth = 100
+	}
+
+	// Utilisateurs uniques des 30 derniers jours (Période A)
+	var usersA int64
+	h.db.Model(&models.ApplicationClick{}).
+		Where("clicked_at >= ?", time.Now().AddDate(0, 0, -30)).
+		Distinct("user_id").
+		Count(&usersA)
+
+	// Utilisateurs uniques des 30-60 jours (Période B)
+	var usersB int64
+	h.db.Model(&models.ApplicationClick{}).
+		Where("clicked_at >= ? AND clicked_at < ?", time.Now().AddDate(0, 0, -60), time.Now().AddDate(0, 0, -30)).
+		Distinct("user_id").
+		Count(&usersB)
+
+	if usersB > 0 {
+		dashboard.UsersGrowth = float64(usersA-usersB) / float64(usersB) * 100
+	} else if usersA > 0 {
+		dashboard.UsersGrowth = 100
+	}
 
 	c.JSON(http.StatusOK, dashboard)
 }
