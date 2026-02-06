@@ -51,6 +51,9 @@
 
     <!-- Notifications -->
     <NotificationContainer />
+
+    <!-- Chat Overlay -->
+    <ChatOverlay v-if="isAuthenticated && !isAuthPage" />
   </div>
 </template>
 
@@ -65,6 +68,7 @@ import { useAppStore } from '@/stores/app'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import LoadingOverlay from '@/components/ui/LoadingOverlay.vue'
 import NotificationContainer from '@/components/ui/NotificationContainer.vue'
+import ChatOverlay from '@/components/chat/ChatOverlay.vue'
 
 // Stores
 const authStore = useAuthStore()

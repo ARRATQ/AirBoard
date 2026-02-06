@@ -56,6 +56,7 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 
 	// Créer l'événement en BDD
 	if err := h.db.Create(&event).Error; err != nil {
+		log.Printf("[ERROR] CreateEvent DB Error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de l'événement"})
 		return
 	}

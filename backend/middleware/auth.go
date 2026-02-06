@@ -27,26 +27,32 @@ func NewAuthMiddleware(cfg *config.Config, db *gorm.DB) *AuthMiddleware {
 func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Token d'autorisation manquant",
-				Code:    http.StatusUnauthorized,
-			})
-			c.Abort()
-			return
-		}
+		var tokenString string
 
-		// Extraire le token (format: "Bearer <token>")
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Format de token invalide",
-				Code:    http.StatusUnauthorized,
-			})
-			c.Abort()
-			return
+		if authHeader != "" {
+			// Extraire le token (format: "Bearer <token>")
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			if tokenString == authHeader {
+				c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+					Error:   "Unauthorized",
+					Message: "Format de token invalide",
+					Code:    http.StatusUnauthorized,
+				})
+				c.Abort()
+				return
+			}
+		} else {
+			// Essayer de récupérer le token depuis les query params (pour WebSocket)
+			tokenString = c.Query("token")
+			if tokenString == "" {
+				c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+					Error:   "Unauthorized",
+					Message: "Token d'autorisation manquant",
+					Code:    http.StatusUnauthorized,
+				})
+				c.Abort()
+				return
+			}
 		}
 
 		// Vérifier le token

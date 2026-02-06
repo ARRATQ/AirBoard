@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -176,6 +177,7 @@ func (e *Event) BeforeSave(tx *gorm.DB) error {
 func (e *Event) generateUniqueSlug(tx *gorm.DB, baseSlug string) string {
 	var count int64
 	slug := baseSlug
+	suffix := 1
 
 	// Vérifier si le slug existe déjà
 	for {
@@ -188,24 +190,25 @@ func (e *Event) generateUniqueSlug(tx *gorm.DB, baseSlug string) string {
 		}
 
 		// Sinon, essayer avec un suffixe numérique
-		count++
-		slug = baseSlug + "-" + strconv.FormatInt(count, 10)
+		suffix++
+		slug = fmt.Sprintf("%s-%d", baseSlug, suffix)
 
 		// Limiter la longueur du slug (max 100 caractères)
 		if len(slug) > 100 {
 			// Si le slug avec suffixe dépasse la limite, tronquer le baseSlug
-			maxBaseLength := 100 - len("-"+strconv.FormatInt(count, 10)) - 1
+			suffixStr := fmt.Sprintf("-%d", suffix)
+			maxBaseLength := 100 - len(suffixStr)
 			if maxBaseLength > 0 {
-				slug = baseSlug[:maxBaseLength] + "-" + strconv.FormatInt(count, 10)
+				slug = baseSlug[:maxBaseLength] + suffixStr
 			} else {
-				// Cas extrême: si même le suffixe ne tient pas
-				slug = "event-" + strconv.FormatInt(count, 10)
+				// Cas extrême
+				slug = fmt.Sprintf("event-%d", suffix)
 			}
 		}
 
 		// Éviter une boucle infinie (limite arbitraire)
-		if count > 9999 {
-			return baseSlug + "-" + strconv.FormatInt(time.Now().Unix(), 10)
+		if suffix > 10000 {
+			return fmt.Sprintf("%s-%d", baseSlug, time.Now().Unix())
 		}
 	}
 }

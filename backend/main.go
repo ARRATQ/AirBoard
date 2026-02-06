@@ -11,6 +11,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/services/chat" // Import chat service
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -60,6 +61,7 @@ func main() {
 		&models.Poll{},
 		&models.PollOption{},
 		&models.PollVote{},
+		&models.ChatMessage{}, // Chat
 	); err != nil {
 		log.Fatal("Erreur lors des migrations:", err)
 	}
@@ -170,6 +172,11 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler(db)
 	pollsHandler := handlers.NewPollsHandler(db)
 	mediaHandler := handlers.NewMediaHandler(db, storageService)
+
+	// Initialisation du Chat
+	chatHub := chat.NewHub()
+	go chatHub.Run()
+	chatHandler := handlers.NewChatHandler(db, chatHub)
 
 	// Configuration du routeur sécurisée
 	gin.SetMode(cfg.Server.Mode)
@@ -383,6 +390,32 @@ func main() {
 			polls.POST("/:id/vote", pollsHandler.Vote)             // Voter pour un sondage
 			polls.GET("/:id/results", pollsHandler.GetPollResults) // Récupérer les résultats d'un sondage
 		}
+
+		// Routes Chat (accessible à tous les utilisateurs connectés)
+		chatGroup := protected.Group("/chat")
+		{
+			chatGroup.GET("/contacts", chatHandler.GetContacts)
+			chatGroup.GET("/history", chatHandler.GetHistory)
+			chatGroup.DELETE("/messages/:id", chatHandler.DeleteMessage)
+			chatGroup.DELETE("/history", chatHandler.ClearConversation)
+		}
+
+		// Route WebSocket (publique mais sécurisée par token en query param si nécessaire, ou gérée par middleware si header supporté)
+		// Note : protected.Group use authMiddleware, which mostly looks for Authorization Header.
+		// Native WebSockets in browsers don't support custom headers easily.
+		// We might need a separate route group or accept query param auth in middleware.
+		// For MVP, if AuthMiddleware supports checking Cookie or Query Token, it works.
+		// Let's assume AuthMiddleware checks header. We might need to make WS explicit.
+		// IMPORTANT: For now, we put it under protected, implying the client must find a way to pass auth (e.g. Protocol header or if we change middleware).
+		// EASIER: Make it public but do manual check as we implemented in ServeWS.
+		// But ServeWS relies on context UserID set by Middleware.
+		// -> We will stick to protected and assume client sends token (e.g. via library that supports it or cookie).
+		// If using browser native WebSocket, we usually use logic in ServeWS to parse query param "?token=..." if header missing.
+		// Let's explicitly allow /ws to be outside main protected group if needed, but for now we try inside.
+		// actually, our ServeWS implementation checks context "user_id". So it NEEDS the middleware.
+		// We can tell middleware to look at query param "d_token" or "token".
+		// For this implementation, let's keep it here.
+		protected.GET("/ws", chatHandler.ServeWS)
 
 		// Routes admin
 		admin := protected.Group("/admin")
