@@ -62,6 +62,8 @@
                          :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=random`" 
                          class="w-8 h-8 rounded-full object-cover"
                        >
+                       <!-- Online Status -->
+                       <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{{ user.first_name }} {{ user.last_name }}</div>
@@ -110,6 +112,8 @@
                          :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=random`" 
                          class="w-8 h-8 rounded-full object-cover"
                        >
+                       <!-- Online Status -->
+                       <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{{ user.first_name }} {{ user.last_name }}</div>
@@ -136,6 +140,8 @@
                          :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=random`" 
                          class="w-8 h-8 rounded-full object-cover"
                        >
+                       <!-- Online Status -->
+                       <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{{ user.first_name }} {{ user.last_name }}</div>
@@ -165,10 +171,22 @@
               </div>
               
               <div class="relative">
-                 <button @click.stop="toggleMenu" class="text-white hover:bg-blue-700 p-1 rounded transition-colors flex items-center justify-center">
+                 <button @click.stop="toggleMenu" class="text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded transition-colors flex items-center justify-center">
                     <Icon icon="mdi:dots-vertical" class="text-xl" />
                  </button>
-                 <div v-if="showMenu" class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-lg w-48 z-20 py-1 text-gray-800 dark:text-gray-200">
+                 <div v-if="showMenu" class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-lg w-56 z-20 py-1 text-gray-800 dark:text-gray-200">
+                    <!-- Sound Toggle -->
+                    <button 
+                      @click="toggleNotifications"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 border-b dark:border-gray-700 mb-1"
+                    >
+                      <Icon :icon="notificationsEnabled ? 'mdi:bell-ring-outline' : 'mdi:bell-off-outline'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" />
+                      <span class="flex-1 text-xs">Sons notifications</span>
+                      <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-500'">
+                         {{ notificationsEnabled ? 'On' : 'Off' }}
+                      </span>
+                    </button>
+
                     <button 
                       @click="confirmClearHistory"
                       class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
@@ -195,7 +213,7 @@
                     class="px-3 py-2 rounded-lg break-words text-sm group flex items-start gap-2"
                     :class="msg.sender_id == myId ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none border dark:border-gray-700'"
                   >
-                    <span class="flex-1">{{ msg.content }}</span>
+                    <span class="flex-1 message-content" v-html="formatMessage(msg.content)"></span>
                     
                     <!-- Delete Button (Inline) -->
                     <button 
@@ -219,17 +237,43 @@
            </div>
 
            <!-- Input Area -->
-           <div class="p-3 border-t dark:border-gray-700 flex gap-2 bg-white dark:bg-gray-900">
+           <div class="relative">
+              <!-- Emoji Picker -->
+              <div v-if="showEmojiPicker" class="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-xl p-2 z-50 w-64">
+                 <div class="grid grid-cols-8 gap-1 h-40 overflow-y-auto p-1 scrollbar-thin">
+                    <button 
+                      v-for="emoji in commonEmojis" 
+                      :key="emoji" 
+                      @click="addEmoji(emoji)"
+                      class="hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded text-xl flex items-center justify-center transition-transform hover:scale-125"
+                    >
+                       {{ emoji }}
+                    </button>
+                 </div>
+              </div>
+           </div>
+
+           <div class="p-3 border-t dark:border-gray-700 flex gap-2 bg-white dark:bg-gray-900 items-center">
+              <button 
+                @click="showEmojiPicker = !showEmojiPicker"
+                class="text-gray-500 hover:text-blue-500 transition-colors p-1"
+                :class="{'text-blue-500': showEmojiPicker}"
+                title="Ajouter un emoji"
+              >
+                <Icon icon="mdi:emoticon-outline" class="text-xl" />
+              </button>
+
               <input 
                 v-model="newMessage" 
                 @keyup.enter="sendMessage"
+                @focus="showEmojiPicker = false"
                 type="text" 
                 placeholder="Écrivez un message..." 
                 class="flex-1 border dark:border-gray-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
               >
               <button 
                 @click="sendMessage"
-                class="bg-blue-600 text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50"
+                class="bg-blue-600 text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 flex-shrink-0"
                 :disabled="!newMessage.trim()"
               >
                 <Icon icon="mdi:send" class="text-sm" />
@@ -253,6 +297,7 @@ import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
+import DOMPurify from 'dompurify';
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
@@ -260,9 +305,26 @@ const { activeConversation, messages } = storeToRefs(chatStore);
 
 const newMessage = ref('');
 const searchQuery = ref('');
+const showEmojiPicker = ref(false);
 const messagesContainer = ref(null);
 const isMobile = ref(window.innerWidth < 768);
 const showMenu = ref(false);
+
+const commonEmojis = [
+  '😀', '😂', '🤣', '😊', '😍', '😘', '😉', '😎', 
+  '🤔', '🤨', '😐', '🙄', '😏', '😮', '😴', '😌', 
+  '😛', '😜', '🤤', '😒', '😓', '😔', '😕', '🙃', 
+  '😲', '☹️', '😤', '😢', '😭', '🤯', '😬', '😰', 
+  '😱', '🥵', '🥶', '😳', '🤪', '😵', '😡', '😠', 
+  '😇', '🥳', '🥴', '🥺', '🤫', '🧐', '🤓', '😈', 
+  '💀', '👻', '👽', '🤖', '💩', '😺', '😸', '😻', 
+  '👍', '👎', '👌', '✌️', '🤞', '🤝', '👏', '🙌', 
+  '🔥', '✨', '⭐', '❤️', '💯', '🎉', '🎁', '🚀'
+];
+
+const addEmoji = (emoji) => {
+  newMessage.value += emoji;
+};
 
 const myId = computed(() => authStore.user?.id);
 
@@ -310,8 +372,62 @@ const otherUsers = computed(() => {
   return filteredUsers.value.filter(u => !u.groups || u.groups.length === 0);
 });
 
+const notificationsEnabled = ref(localStorage.getItem('chat_notifications') !== 'false');
+
+const toggleNotifications = () => {
+  notificationsEnabled.value = !notificationsEnabled.value;
+  localStorage.setItem('chat_notifications', notificationsEnabled.value);
+};
+
 const toggleMenu = () => {
   showMenu.value = !showMenu.value;
+};
+
+const playNotificationSound = () => {
+  if (!notificationsEnabled.value) return;
+  
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+    
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.5);
+    
+    // Auto-close context after sound finishes to save resources
+    setTimeout(() => {
+      audioCtx.close();
+    }, 600);
+  } catch (e) {
+    console.warn('Audio context blocked or not supported', e);
+  }
+};
+
+const formatMessage = (content) => {
+  if (!content) return '';
+  
+  // URL detection regex
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  
+  // Replace URLs with <a> tags
+  let formatted = content.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-200 dark:text-blue-400 underline hover:text-white dark:hover:text-blue-300 transition-colors break-all cursor-pointer">${url}</a>`;
+  });
+  
+  return DOMPurify.sanitize(formatted, {
+    ALLOWED_TAGS: ['a'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+  });
 };
 
 const totalUnread = computed(() => {
@@ -371,6 +487,18 @@ watch(currentMessages, () => {
 watch(activeConversation, (newVal) => {
     if(newVal) scrollToBottom();
 });
+
+// Watch for unread messages to play sound
+watch(() => chatStore.unreadCounts, (newUnreads, oldUnreads) => {
+  if (!oldUnreads) return;
+  
+  for (const key in newUnreads) {
+    if (newUnreads[key] > (oldUnreads[key] || 0)) {
+      playNotificationSound();
+      break;
+    }
+  }
+}, { deep: true });
 
 const toggleMinimize = () => {
    // Currently clicking header closes chat, logic matches "toggleChat" which toggles isOpen.
