@@ -16,7 +16,7 @@
     </div>
 
     <!-- Expanded Window -->
-    <div v-else class="chat-window shadow-2xl rounded-t-lg bg-white flex flex-col z-50">
+    <div v-else class="chat-window shadow-2xl rounded-t-lg bg-white dark:bg-gray-900 border dark:border-gray-800 flex flex-col z-50">
       <!-- Header -->
       <div class="chat-header bg-blue-600 text-white p-3 rounded-t-lg flex justify-between items-center cursor-pointer" @click="toggleMinimize">
         <div class="flex items-center gap-2">
@@ -31,7 +31,7 @@
 
       <div class="flex flex-1 overflow-hidden h-full">
         <!-- Sidebar (Contacts) -->
-        <div v-if="!isMobile || !chatStore.activeConversation" class="w-full md:w-1/3 border-r flex flex-col bg-gray-50 h-full">
+        <div v-if="!isMobile || !chatStore.activeConversation" class="w-full md:w-1/3 border-r dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-gray-800 h-full">
            <!-- Search (Future) -->
            <!-- <div class="p-2 border-b"><input ... ></div> -->
            
@@ -42,10 +42,10 @@
                   v-for="group in chatStore.contacts.groups" 
                   :key="group.id"
                   @click="chatStore.openConversation('group', group)"
-                  class="flex items-center gap-2 p-2 rounded hover:bg-gray-200 cursor-pointer"
-                  :class="{'bg-blue-100': chatStore.activeConversation?.id === group.id && chatStore.activeConversation?.type === 'group'}"
+                  class="flex items-center gap-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  :class="{'bg-blue-100 dark:bg-blue-900/30': chatStore.activeConversation?.id === group.id && chatStore.activeConversation?.type === 'group'}"
                 >
-                   <div class="w-8 h-8 rounded bg-gray-300 flex items-center justify-center text-gray-600">
+                   <div class="w-8 h-8 rounded bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400">
                      <Icon icon="mdi:account-group" />
                    </div>
                    <div class="flex-1 min-w-0">
@@ -63,8 +63,8 @@
                   v-for="user in chatStore.contacts.users" 
                   :key="user.id"
                   @click="chatStore.openConversation('user', user)"
-                  class="flex items-center gap-2 p-2 rounded hover:bg-gray-200 cursor-pointer"
-                  :class="{'bg-blue-100': chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'}"
+                  class="flex items-center gap-2 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                  :class="{'bg-blue-100 dark:bg-blue-900/30': chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'}"
                 >
                    <div class="relative">
                       <img 
@@ -75,8 +75,8 @@
                       <!-- <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></span> -->
                    </div>
                    <div class="flex-1 min-w-0">
-                     <div class="font-medium truncate">{{ user.first_name }} {{ user.last_name }}</div>
-                     <div class="text-xs text-gray-500 truncate">{{ user.job_title }}</div>
+                     <div class="font-medium truncate text-gray-900 dark:text-gray-100">{{ user.first_name }} {{ user.last_name }}</div>
+                     <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.job_title }}</div>
                    </div>
                    <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
                      {{ chatStore.unreadCounts['user_'+user.id] }}
@@ -87,22 +87,22 @@
         </div>
 
         <!-- Conversation View -->
-        <div v-if="chatStore.activeConversation" class="flex-1 flex flex-col h-full bg-white" :class="{'hidden md:flex': !isMobile && !chatStore.activeConversation}">
+        <div v-if="chatStore.activeConversation" class="flex-1 flex flex-col h-full bg-white dark:bg-gray-900" :class="{'hidden md:flex': !isMobile && !chatStore.activeConversation}">
            <!-- Active Header -->
-           <div class="p-3 border-b flex justify-between items-center bg-white">
+           <div class="p-3 border-b dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-900">
               <div class="flex items-center gap-2">
-                 <button v-if="isMobile" @click="chatStore.closeConversation()" class="md:hidden mr-1 text-gray-600"><span class="mdi mdi-arrow-left"></span></button>
-                 <span class="font-bold truncate">{{ chatStore.activeConversation.name }}</span>
+                 <button v-if="isMobile" @click="chatStore.closeConversation()" class="md:hidden mr-1 text-gray-600 dark:text-gray-400"><Icon icon="mdi:arrow-left" /></button>
+                 <span class="font-bold truncate text-gray-900 dark:text-gray-100">{{ chatStore.activeConversation.name }}</span>
               </div>
               
               <div class="relative">
                  <button @click.stop="toggleMenu" class="text-white hover:bg-blue-700 p-1 rounded transition-colors flex items-center justify-center">
                     <Icon icon="mdi:dots-vertical" class="text-xl" />
                  </button>
-                 <div v-if="showMenu" class="absolute right-0 top-full mt-1 bg-white border rounded shadow-lg w-48 z-20 py-1 text-gray-800">
+                 <div v-if="showMenu" class="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded shadow-lg w-48 z-20 py-1 text-gray-800 dark:text-gray-200">
                     <button 
                       @click="confirmClearHistory"
-                      class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
                     >
                       <Icon icon="mdi:delete-sweep" /> Vider l'historique
                     </button>
@@ -119,12 +119,12 @@
                     class="flex flex-col max-w-[80%]"
                     :class="msg.sender_id == myId ? 'self-end items-end' : 'self-start items-start'"
                >
-                  <span v-if="chatStore.activeConversation?.type === 'group' && msg.sender_id != myId" class="text-[10px] font-bold text-gray-500 mb-0.5 px-1 truncate max-w-full">
+                  <span v-if="chatStore.activeConversation?.type === 'group' && msg.sender_id != myId" class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-0.5 px-1 truncate max-w-full">
                      {{ msg.sender?.first_name }} {{ msg.sender?.last_name || msg.sender?.username }}
                   </span>
                   <div 
                     class="px-3 py-2 rounded-lg break-words text-sm group flex items-start gap-2"
-                    :class="msg.sender_id == myId ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-100 text-gray-800 rounded-tl-none'"
+                    :class="msg.sender_id == myId ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none border dark:border-gray-700'"
                   >
                     <span class="flex-1">{{ msg.content }}</span>
                     
@@ -150,13 +150,13 @@
            </div>
 
            <!-- Input Area -->
-           <div class="p-3 border-t flex gap-2">
+           <div class="p-3 border-t dark:border-gray-700 flex gap-2 bg-white dark:bg-gray-900">
               <input 
                 v-model="newMessage" 
                 @keyup.enter="sendMessage"
                 type="text" 
                 placeholder="Écrivez un message..." 
-                class="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 bg-gray-50"
+                class="flex-1 border dark:border-gray-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
               >
               <button 
                 @click="sendMessage"
