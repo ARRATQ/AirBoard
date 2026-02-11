@@ -1,4 +1,10 @@
 {
+  "time": {
+    "justNow": "À l'instant",
+    "minutesAgo": "il y a {count} minute(s)",
+    "hoursAgo": "il y a {count} heure(s)",
+    "daysAgo": "il y a {count} jour(s)"
+  },
   "common": {
     "home": "Accueil",
     "dashboard": "Tableau de bord",

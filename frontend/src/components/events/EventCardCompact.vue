@@ -95,17 +95,17 @@ const isPastEvent = computed(() => {
 // Methods
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', { 
-    month: 'short', 
-    day: 'numeric' 
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric'
   })
 }
 
 const formatTime = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleTimeString('fr-FR', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return date.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 

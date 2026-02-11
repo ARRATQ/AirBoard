@@ -1,4 +1,10 @@
 {
+  "time": {
+    "justNow": "الآن",
+    "minutesAgo": "منذ {count} دقيقة",
+    "hoursAgo": "منذ {count} ساعة",
+    "daysAgo": "منذ {count} يوم"
+  },
   "common": {
     "home": "الصفحة الرئيسية",
     "dashboard": "لوحة التحكم",

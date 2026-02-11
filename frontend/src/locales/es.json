@@ -1,4 +1,10 @@
 {
+  "time": {
+    "justNow": "Ahora mismo",
+    "minutesAgo": "hace {count} minuto(s)",
+    "hoursAgo": "hace {count} hora(s)",
+    "daysAgo": "hace {count} día(s)"
+  },
   "common": {
     "home": "Inicio",
     "dashboard": "Panel",

@@ -30,9 +30,6 @@
 
 <script setup>
 import { Icon } from '@iconify/vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 defineProps({
   event: {
@@ -59,7 +56,7 @@ const formatDate = (dateString) => {
 const formatTime = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 }
 </script>
 

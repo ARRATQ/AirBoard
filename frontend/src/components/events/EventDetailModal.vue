@@ -212,7 +212,7 @@ const canEdit = computed(() => {
 const formatDateRange = (startDate, endDate) => {
   const start = new Date(startDate)
   const end = endDate ? new Date(endDate) : null
-  
+
   const formatOptions = {
     year: 'numeric',
     month: 'short',
@@ -220,18 +220,18 @@ const formatDateRange = (startDate, endDate) => {
     hour: '2-digit',
     minute: '2-digit'
   }
-  
+
   if (end && start.toDateString() === end.toDateString()) {
-    return `${start.toLocaleDateString('fr-FR', { ...formatOptions, hour: undefined, minute: undefined })} - ${end.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+    return `${start.toLocaleDateString(undefined, { ...formatOptions, hour: undefined, minute: undefined })} - ${end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
   } else if (end) {
-    return `${start.toLocaleDateString('fr-FR', formatOptions)} - ${end.toLocaleDateString('fr-FR', formatOptions)}`
+    return `${start.toLocaleDateString(undefined, formatOptions)} - ${end.toLocaleDateString(undefined, formatOptions)}`
   } else {
-    return start.toLocaleDateString('fr-FR', formatOptions)
+    return start.toLocaleDateString(undefined, formatOptions)
   }
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('fr-FR', {
+  return new Date(date).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

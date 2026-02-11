@@ -387,40 +387,40 @@ const editEvent = () => {
 const formatDateRange = (startDate, endDate) => {
   const start = new Date(startDate)
   const end = endDate ? new Date(endDate) : null
-  
-  const options = { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   }
-  
+
   if (end && start.toDateString() !== end.toDateString()) {
-    return `${start.toLocaleDateString('fr-FR', options)} - ${end.toLocaleDateString('fr-FR', options)}`
+    return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}`
   }
-  
-  return start.toLocaleDateString('fr-FR', options)
+
+  return start.toLocaleDateString(undefined, options)
 }
 
 const formatTimeRange = (startDate, endDate) => {
   const start = new Date(startDate)
   const end = endDate ? new Date(endDate) : null
-  
-  const timeOptions = { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+
+  const timeOptions = {
+    hour: '2-digit',
+    minute: '2-digit'
   }
-  
+
   if (end) {
-    return `${start.toLocaleTimeString('fr-FR', timeOptions)} - ${end.toLocaleTimeString('fr-FR', timeOptions)}`
+    return `${start.toLocaleTimeString(undefined, timeOptions)} - ${end.toLocaleTimeString(undefined, timeOptions)}`
   }
-  
-  return start.toLocaleTimeString('fr-FR', timeOptions)
+
+  return start.toLocaleTimeString(undefined, timeOptions)
 }
 
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -433,13 +433,13 @@ const formatRelativeTime = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
   const diffInSeconds = Math.floor((now - date) / 1000)
-  
+
   if (diffInSeconds < 60) return t('time.justNow')
   if (diffInSeconds < 3600) return t('time.minutesAgo', { count: Math.floor(diffInSeconds / 60) })
   if (diffInSeconds < 86400) return t('time.hoursAgo', { count: Math.floor(diffInSeconds / 3600) })
   if (diffInSeconds < 2592000) return t('time.daysAgo', { count: Math.floor(diffInSeconds / 86400) })
-  
-  return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'short', day: 'numeric' })
+
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 const formatRecurrenceRule = (recurrenceRule) => {

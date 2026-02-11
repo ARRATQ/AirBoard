@@ -398,10 +398,10 @@ const formatDateRange = (startDate, endDate) => {
   }
 
   if (end && start.toDateString() !== end.toDateString()) {
-    return `${start.toLocaleDateString('fr-FR', options)} - ${end.toLocaleDateString('fr-FR', options)}`
+    return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}`
   }
 
-  return start.toLocaleDateString('fr-FR', options)
+  return start.toLocaleDateString(undefined, options)
 }
 
 const formatTimeRange = (startDate, endDate) => {
@@ -415,10 +415,10 @@ const formatTimeRange = (startDate, endDate) => {
   }
 
   if (end) {
-    return `${start.toLocaleTimeString('fr-FR', timeOptions)} - ${end.toLocaleTimeString('fr-FR', timeOptions)}`
+    return `${start.toLocaleTimeString(undefined, timeOptions)} - ${end.toLocaleTimeString(undefined, timeOptions)}`
   }
 
-  return start.toLocaleTimeString('fr-FR', timeOptions)
+  return start.toLocaleTimeString(undefined, timeOptions)
 }
 
 const extractTextFromTiptap = (content) => {
