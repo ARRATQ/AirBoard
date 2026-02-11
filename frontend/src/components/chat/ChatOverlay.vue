@@ -203,14 +203,18 @@
               <!-- Reversed flex-col to stick to bottom -->
                <!-- Note: Data is usually chronological (old -> new). To use flex-col-reverse, we need new -> old order in DOM. 
                     Let's stick to standard flex-col and scroll to bottom for simplicity first. -->
-               <div v-for="msg in currentMessages" :key="msg.id" 
+               <div v-for="msg in currentMessages" :key="msg.id"
                     class="flex flex-col max-w-[80%]"
                     :class="msg.sender_id == myId ? 'self-end items-end' : 'self-start items-start'"
                >
-                  <span v-if="chatStore.activeConversation?.type === 'group' && msg.sender_id != myId" class="text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-0.5 px-1 truncate max-w-full">
-                     {{ msg.sender?.first_name }} {{ msg.sender?.last_name || msg.sender?.username }}
+                  <!-- Display sender name for ALL messages in group chats -->
+                  <span v-if="chatStore.activeConversation?.type === 'group'"
+                        class="text-[10px] font-bold mb-0.5 px-1 truncate max-w-full"
+                        :class="msg.sender_id == myId ? 'text-blue-300 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'"
+                  >
+                     {{ msg.sender_id == myId ? 'Vous' : (msg.sender?.first_name + ' ' + (msg.sender?.last_name || msg.sender?.username)) }}
                   </span>
-                  <div 
+                  <div
                     class="px-3 py-2 rounded-lg break-words text-sm group flex items-start gap-2"
                     :class="msg.sender_id == myId ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none border dark:border-gray-700'"
                   >
