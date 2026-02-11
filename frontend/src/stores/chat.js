@@ -62,6 +62,11 @@ export const useChatStore = defineStore('chat', {
       try {
         const response = await api.get('/chat/contacts');
         this.contacts = response.data; // { users: [], groups: [] }
+
+        // Enrich all existing messages with sender info from newly fetched contacts
+        for (const key in this.messages) {
+          this.messages[key].forEach(msg => this.enrichMessageWithSenderInfo(msg));
+        }
       } catch (error) {
         console.error('Error fetching contacts:', error);
       }
@@ -70,16 +75,40 @@ export const useChatStore = defineStore('chat', {
     async loadHistory(type, id) {
       const key = `${type}_${id}`;
       if (this.messages[key] && this.messages[key].length > 0) return; // Already loaded?
-      
+
       try {
         const params = type === 'user' ? { target_id: id } : { group_id: id };
         const response = await api.get('/chat/history', { params });
-        
+
         // Reverse to have oldest first (if backend returns newest first)
         // Backend returns created_at desc. We want asc for chat view implementation usually.
-        this.messages[key] = response.data.reverse(); 
+        const messages = response.data.reverse();
+
+        // Enrich all messages with sender info
+        messages.forEach(msg => this.enrichMessageWithSenderInfo(msg));
+
+        this.messages[key] = messages;
       } catch (error) {
         console.error('Error loading history:', error);
+      }
+    },
+
+    enrichMessageWithSenderInfo(message) {
+      // If sender info is already attached, skip
+      if (message.sender) return;
+
+      // Try to find sender in contacts
+      const sender = this.contacts.users.find(u => u.id === message.sender_id);
+      if (sender) {
+        message.sender = sender;
+      } else {
+        // If sender not found in contacts, create a minimal object
+        message.sender = {
+          id: message.sender_id,
+          first_name: 'Unknown',
+          last_name: 'User',
+          username: 'unknown'
+        };
       }
     },
 
@@ -178,9 +207,9 @@ export const useChatStore = defineStore('chat', {
         // Identify conversation key
         const authStore = useAuthStore();
         const myId = authStore.user.id;
-        
+
         let key = '';
-        
+
         if (payload.group_id) {
           key = `group_${payload.group_id}`;
         } else {
@@ -190,11 +219,14 @@ export const useChatStore = defineStore('chat', {
           const otherId = payload.sender_id === myId ? payload.recipient_id : payload.sender_id;
           key = `user_${otherId}`;
         }
-        
+
         if (!this.messages[key]) {
           this.messages[key] = [];
         }
-        
+
+        // Enrich message with sender info from contacts
+        this.enrichMessageWithSenderInfo(payload);
+
         this.messages[key].push(payload);
 
         // Determine the active conversation key
