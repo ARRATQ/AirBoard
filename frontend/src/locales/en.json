@@ -1,4 +1,30 @@
 {
+  "search": {
+    "title": "Search",
+    "subtitle": "Search across applications, news, events, polls and announcements",
+    "placeholder": "Type your search... (min. 2 characters)",
+    "noResults": "No results found",
+    "noResultsHint": "Try different terms or check the spelling",
+    "initialHint": "Start typing to search",
+    "initialHintSub": "Search across all sections of the application",
+    "active": "Active",
+    "closed": "Closed",
+    "tabs": {
+      "all": "All",
+      "applications": "Applications",
+      "news": "News",
+      "events": "Events",
+      "polls": "Polls",
+      "announcements": "Announcements"
+    },
+    "types": {
+      "applications": "Applications",
+      "news": "News",
+      "events": "Events",
+      "polls": "Polls",
+      "announcements": "Announcements"
+    }
+  },
   "time": {
     "justNow": "Just now",
     "minutesAgo": "{count} minute(s) ago",

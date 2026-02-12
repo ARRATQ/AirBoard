@@ -182,6 +182,7 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler(db)
 	pollsHandler := handlers.NewPollsHandler(db, gamificationService)
 	gamificationHandler := handlers.NewGamificationHandler(db, gamificationService)
+	searchHandler := handlers.NewSearchHandler(db)
 
 	// Seeding gamification
 	if err := gamificationService.SeedAchievements(); err != nil {
@@ -337,6 +338,9 @@ func main() {
 		{
 			analytics.POST("/track", analyticsHandler.TrackClick)
 		}
+
+		// Recherche globale
+		protected.GET("/search", searchHandler.GlobalSearch)
 
 		// Routes announcements (accessible à tous les utilisateurs connectés)
 		protected.GET("/announcements", announcementHandler.GetActiveAnnouncements)

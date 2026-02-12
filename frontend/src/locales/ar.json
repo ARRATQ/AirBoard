@@ -1,4 +1,30 @@
 {
+  "search": {
+    "title": "البحث",
+    "subtitle": "ابحث في التطبيقات والأخبار والأحداث والاستطلاعات والإعلانات",
+    "placeholder": "اكتب بحثك... (حد أدنى حرفان)",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsHint": "جرب مصطلحات أخرى أو تحقق من الإملاء",
+    "initialHint": "ابدأ بالكتابة للبحث",
+    "initialHintSub": "ابحث في جميع أقسام التطبيق",
+    "active": "نشط",
+    "closed": "مغلق",
+    "tabs": {
+      "all": "الكل",
+      "applications": "التطبيقات",
+      "news": "الأخبار",
+      "events": "الأحداث",
+      "polls": "الاستطلاعات",
+      "announcements": "الإعلانات"
+    },
+    "types": {
+      "applications": "التطبيقات",
+      "news": "الأخبار",
+      "events": "الأحداث",
+      "polls": "الاستطلاعات",
+      "announcements": "الإعلانات"
+    }
+  },
   "time": {
     "justNow": "الآن",
     "minutesAgo": "منذ {count} دقيقة",

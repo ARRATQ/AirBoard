@@ -50,6 +50,9 @@ const GroupAdminEventEditor = () => import('@/views/group-admin/EventEditor.vue'
 // Comment moderation
 const CommentModeration = () => import('@/views/admin/CommentModeration.vue')
 
+// Search
+const SearchPage = () => import('@/views/SearchPage.vue')
+
 // Error views
 const NotFound = () => import('@/views/errors/NotFound.vue')
 const Unauthorized = () => import('@/views/errors/Unauthorized.vue')
@@ -75,6 +78,15 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: 'Applications'
+    }
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    component: SearchPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Recherche'
     }
   },
   {

@@ -79,6 +79,11 @@
           <Icon icon="mdi:medal" class="h-4 w-4" />
           <span>{{ $t('common.gamification') }}</span>
         </router-link>
+
+        <router-link to="/search" :class="getLinkClasses('/search')">
+          <Icon icon="mdi:magnify" class="h-4 w-4" />
+          <span>{{ $t('search.title') }}</span>
+        </router-link>
       </div>
 
       <!-- ========================================== -->

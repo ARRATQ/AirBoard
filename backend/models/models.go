@@ -222,9 +222,9 @@ type AppSettingsRequest struct {
 	AppName         string `json:"app_name" binding:"required,min=1"`
 	AppIcon         string `json:"app_icon" binding:"required"`
 	DashboardTitle  string `json:"dashboard_title" binding:"required,min=1"`
-	WelcomeMessage  string `json:"welcome_message" binding:"required,min=1"`   // Message pour Dashboard
-	HomePageMessage string `json:"home_page_message" binding:"required,min=1"` // Message pour page d'accueil
-	SignupEnabled   *bool  `json:"signup_enabled"`                             // Activer/désactiver l'inscription
+	WelcomeMessage  string `json:"welcome_message" binding:"required,min=1"` // Message pour Dashboard
+	HomePageMessage string `json:"home_page_message"`                        // Message pour page d'accueil (optionnel)
+	SignupEnabled   *bool  `json:"signup_enabled"`                           // Activer/désactiver l'inscription
 	DefaultGroupID  *uint  `json:"default_group_id"`
 }
 

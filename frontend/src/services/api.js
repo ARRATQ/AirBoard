@@ -1347,4 +1347,7 @@ export const uploadAdminMedia = (formData, onUploadProgress) => {
 export const updateAdminMedia = (id, data) => api.put(`/admin/media/${id}`, data)
 export const deleteAdminMedia = (id) => api.delete(`/admin/media/${id}`)
 
+// ==================== Search ====================
+export const globalSearch = (q, type = '') => api.get('/search', { params: { q, ...(type ? { type } : {}) } })
+
 export default api

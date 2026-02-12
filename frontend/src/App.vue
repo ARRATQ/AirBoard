@@ -152,8 +152,20 @@ onMounted(async () => {
     }
   }
 
+  // Raccourci clavier Ctrl+K pour la recherche
+  const handleKeydown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault()
+      if (authStore.isAuthenticated) {
+        router.push('/search')
+      }
+    }
+  }
+  window.addEventListener('keydown', handleKeydown)
+
   // Nettoyer au démontage
   onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeydown)
     if (cleanupThemeWatcher) {
       cleanupThemeWatcher()
     }

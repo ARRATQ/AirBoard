@@ -1,4 +1,30 @@
 {
+  "search": {
+    "title": "Búsqueda",
+    "subtitle": "Buscar en aplicaciones, noticias, eventos, encuestas y anuncios",
+    "placeholder": "Escriba su búsqueda... (mín. 2 caracteres)",
+    "noResults": "No se encontraron resultados",
+    "noResultsHint": "Intente con otros términos o verifique la ortografía",
+    "initialHint": "Empiece a escribir para buscar",
+    "initialHintSub": "Busque en todas las secciones de la aplicación",
+    "active": "Activo",
+    "closed": "Cerrado",
+    "tabs": {
+      "all": "Todo",
+      "applications": "Aplicaciones",
+      "news": "Noticias",
+      "events": "Eventos",
+      "polls": "Encuestas",
+      "announcements": "Anuncios"
+    },
+    "types": {
+      "applications": "Aplicaciones",
+      "news": "Noticias",
+      "events": "Eventos",
+      "polls": "Encuestas",
+      "announcements": "Anuncios"
+    }
+  },
   "time": {
     "justNow": "Ahora mismo",
     "minutesAgo": "hace {count} minuto(s)",
