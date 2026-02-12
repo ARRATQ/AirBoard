@@ -106,21 +106,16 @@ func LoadConfig() *Config {
 			jwtSecret = generatedSecret
 			log.Printf("✅ Secret JWT sécurisé généré automatiquement (512 bits)")
 		}
+		log.Printf("⚠️ IMPORTANT: JWT_SECRET non défini - le secret change à chaque redémarrage!")
+		log.Printf("⚠️ Les tokens OAuth email et sessions JWT seront invalidés au prochain redémarrage.")
+		log.Printf("⚠️ Définissez JWT_SECRET dans vos variables d'environnement pour persister le chiffrement.")
 	} else {
-		// Valider le secret JWT fourni
+		// Valider le secret JWT fourni - avertir mais NE PAS remplacer
+		// Remplacer le secret casserait le chiffrement des données stockées (OAuth tokens, etc.)
 		if err := authSecurity.ValidateJWTSecret(jwtSecret); err != nil {
 			log.Printf("⚠️ Secret JWT faible détecté: %v", err)
-			log.Printf("⚠️ Veuillez utiliser JWT_SECRET avec au moins 32 caractères et haute entropie")
-			log.Printf("🔄 Génération d'un secret sécurisé pour remplacer le secret faible...")
-
-			// Générer un nouveau secret sécurisé pour remplacer le faible
-			secureSecret, genErr := authSecurity.GenerateSecureSecret()
-			if genErr != nil {
-				log.Printf("❌ Erreur lors de la génération du secret sécurisé: %v", genErr)
-			} else {
-				jwtSecret = secureSecret
-				log.Printf("✅ Secret JWT vulnérable remplacé par un secret sécurisé")
-			}
+			log.Printf("⚠️ Recommandation: utilisez JWT_SECRET avec au moins 32 caractères et haute entropie")
+			log.Printf("⚠️ Le secret actuel est conservé pour préserver le chiffrement des données existantes")
 		}
 	}
 
