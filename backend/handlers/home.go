@@ -410,7 +410,7 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 	for i := range news {
 		// Compter les commentaires
 		var commentCount int64
-		h.db.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ? AND status = ?", "news", news[i].ID, "approved").Count(&commentCount)
+		h.db.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ? AND is_approved = ?", "news", news[i].ID, true).Count(&commentCount)
 		news[i].CommentCount = int(commentCount)
 
 		// Compter les réactions

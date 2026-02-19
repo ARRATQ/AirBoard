@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"airboard/models"
@@ -32,6 +34,8 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 	if amount <= 0 {
 		return nil
 	}
+
+	metadata = normalizeXPMetadata(metadata)
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		// 1. Récupérer ou créer le profil
@@ -74,6 +78,19 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 		// 5. Vérifier les achievements liés à cette action
 		return s.CheckAchievements(tx, userID, reason)
 	})
+}
+
+func normalizeXPMetadata(metadata string) string {
+	trimmed := strings.TrimSpace(metadata)
+	if trimmed == "" {
+		return "{}"
+	}
+
+	if json.Valid([]byte(trimmed)) {
+		return trimmed
+	}
+
+	return "{}"
 }
 
 // CheckAchievements vérifie si l'utilisateur a débloqué de nouveaux badges
