@@ -14,9 +14,9 @@
         </div>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          class="poll-create-btn"
         >
-          <Icon icon="mdi:plus" class="h-5 w-5" />
+          <Icon icon="mdi:plus-circle" class="h-5 w-5" />
           {{ $t('polls.adminPollsManagement.newPoll') }}
         </button>
       </div>
@@ -228,7 +228,7 @@
         </p>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+          class="poll-create-btn"
         >
           {{ $t('polls.adminPollsManagement.empty.createButton') }}
         </button>
@@ -403,5 +403,13 @@ onMounted(() => {
 <style scoped>
 .card {
   @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm;
+}
+
+.poll-create-btn {
+  @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white;
+  @apply bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm;
+  @apply hover:from-amber-600 hover:to-orange-600 hover:shadow-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
+  @apply dark:focus:ring-offset-gray-900 transition-all duration-200;
 }
 </style>

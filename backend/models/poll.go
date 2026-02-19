@@ -9,14 +9,14 @@ import (
 // Poll représente un sondage/mini-enquête
 type Poll struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
-	Title       string         `json:"title" gorm:"not null"`                 // Question du sondage
-	Description string         `json:"description" gorm:"type:text"`          // Description détaillée
-	PollType    string         `json:"poll_type" gorm:"default:'single'"`     // single (choix unique), multiple (choix multiples)
-	IsAnonymous bool           `json:"is_anonymous" gorm:"default:false"`     // Résultats anonymes ou non
-	IsActive    bool           `json:"is_active" gorm:"default:true"`         // Sondage actif (ouvert) ou fermé
-	ShowResults string         `json:"show_results" gorm:"default:'after'"`   // always (toujours), after (après avoir voté), closed (après fermeture)
-	StartDate   *time.Time     `json:"start_date"`                            // Date de début (optionnel)
-	EndDate     *time.Time     `json:"end_date"`                              // Date de fin (optionnel)
+	Title       string         `json:"title" gorm:"not null"`               // Question du sondage
+	Description string         `json:"description" gorm:"type:text"`        // Description détaillée
+	PollType    string         `json:"poll_type" gorm:"default:'single'"`   // single (choix unique), multiple (choix multiples)
+	IsAnonymous bool           `json:"is_anonymous" gorm:"default:false"`   // Résultats anonymes ou non
+	IsActive    bool           `json:"is_active" gorm:"default:true"`       // Sondage actif (ouvert) ou fermé
+	ShowResults string         `json:"show_results" gorm:"default:'after'"` // always (toujours), after (après avoir voté), closed (après fermeture)
+	StartDate   *time.Time     `json:"start_date"`                          // Date de début (optionnel)
+	EndDate     *time.Time     `json:"end_date"`                            // Date de fin (optionnel)
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
@@ -48,6 +48,7 @@ type PollOption struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	PollID    uint           `json:"poll_id" gorm:"not null;index"`
 	Text      string         `json:"text" gorm:"not null"`
+	IsOther   bool           `json:"is_other" gorm:"default:false"`
 	Order     int            `json:"order" gorm:"default:0"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -94,9 +95,10 @@ type PollRequest struct {
 
 // PollOptionRequest pour créer/modifier une option
 type PollOptionRequest struct {
-	ID    uint   `json:"id"`    // Pour modification (si existe déjà)
-	Text  string `json:"text" binding:"required,min=1,max=200"`
-	Order int    `json:"order"`
+	ID      uint   `json:"id"` // Pour modification (si existe déjà)
+	Text    string `json:"text" binding:"required,min=1,max=200"`
+	IsOther bool   `json:"is_other"`
+	Order   int    `json:"order"`
 }
 
 // PollVoteRequest pour voter
@@ -115,45 +117,45 @@ type PollListResponse struct {
 
 // PollResultsResponse pour les résultats d'un sondage
 type PollResultsResponse struct {
-	Poll         Poll                   `json:"poll"`
-	TotalVotes   int64                  `json:"total_votes"`
-	UniqueVoters int64                  `json:"unique_voters"`
-	Options      []PollOptionResult     `json:"options"`
-	UserVoted    bool                   `json:"user_voted"`
-	UserVotes    []uint                 `json:"user_votes"` // IDs des options votées par l'utilisateur
-	VoterDetails []PollVoterDetail      `json:"voter_details,omitempty"` // Seulement si non anonyme et autorisé
+	Poll         Poll               `json:"poll"`
+	TotalVotes   int64              `json:"total_votes"`
+	UniqueVoters int64              `json:"unique_voters"`
+	Options      []PollOptionResult `json:"options"`
+	UserVoted    bool               `json:"user_voted"`
+	UserVotes    []uint             `json:"user_votes"`              // IDs des options votées par l'utilisateur
+	VoterDetails []PollVoterDetail  `json:"voter_details,omitempty"` // Seulement si non anonyme et autorisé
 }
 
 // PollOptionResult pour le résultat d'une option
 type PollOptionResult struct {
-	PollOption   PollOption `json:"poll_option"`
-	VoteCount    int64      `json:"vote_count"`
-	Percentage   float64    `json:"percentage"`
+	PollOption PollOption `json:"poll_option"`
+	VoteCount  int64      `json:"vote_count"`
+	Percentage float64    `json:"percentage"`
 }
 
 // PollVoterDetail pour afficher qui a voté (sondages non anonymes)
 type PollVoterDetail struct {
-	User          User   `json:"user"`
-	PollOptionID  uint   `json:"poll_option_id"`
-	VotedAt       time.Time `json:"voted_at"`
+	User         User      `json:"user"`
+	PollOptionID uint      `json:"poll_option_id"`
+	VotedAt      time.Time `json:"voted_at"`
 }
 
 // PollStatsResponse pour les statistiques globales
 type PollStatsResponse struct {
-	TotalPolls       int64           `json:"total_polls"`
-	ActivePolls      int64           `json:"active_polls"`
-	ClosedPolls      int64           `json:"closed_polls"`
-	TotalVotes       int64           `json:"total_votes"`
-	TotalVoters      int64           `json:"total_voters"`
-	TopPolls         []PollWithStats `json:"top_polls"`
-	RecentPolls      []Poll          `json:"recent_polls"`
+	TotalPolls  int64           `json:"total_polls"`
+	ActivePolls int64           `json:"active_polls"`
+	ClosedPolls int64           `json:"closed_polls"`
+	TotalVotes  int64           `json:"total_votes"`
+	TotalVoters int64           `json:"total_voters"`
+	TopPolls    []PollWithStats `json:"top_polls"`
+	RecentPolls []Poll          `json:"recent_polls"`
 }
 
 // PollWithStats pour les sondages avec stats supplémentaires
 type PollWithStats struct {
 	Poll
-	VoteCount    int64 `json:"vote_count"`
-	VoterCount   int64 `json:"voter_count"`
+	VoteCount  int64 `json:"vote_count"`
+	VoterCount int64 `json:"voter_count"`
 }
 
 // TableName spécifie le nom de la table pour Poll

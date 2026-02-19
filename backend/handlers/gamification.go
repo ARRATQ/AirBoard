@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"airboard/models"
 	"airboard/services"
@@ -13,6 +14,27 @@ import (
 type GamificationHandler struct {
 	db                  *gorm.DB
 	gamificationService *services.GamificationService
+}
+
+type GamificationRuleRequest struct {
+	Reason  string `json:"reason" binding:"required,min=2,max=80"`
+	Points  int64  `json:"points" binding:"required"`
+	Enabled *bool  `json:"enabled"`
+}
+
+type AchievementRequest struct {
+	Code          string `json:"code" binding:"required,min=2,max=100"`
+	Name          string `json:"name" binding:"required,min=2,max=100"`
+	Description   string `json:"description"`
+	Icon          string `json:"icon"`
+	Color         string `json:"color"`
+	XPReward      int64  `json:"xp_reward"`
+	Category      string `json:"category" binding:"required,oneof=user contributor"`
+	IsSecret      bool   `json:"is_secret"`
+	TriggerReason string `json:"trigger_reason"`
+	Metric        string `json:"metric"`
+	Threshold     int64  `json:"threshold"`
+	IsActive      *bool  `json:"is_active"`
 }
 
 func NewGamificationHandler(db *gorm.DB, gs *services.GamificationService) *GamificationHandler {
@@ -118,4 +140,170 @@ func (h *GamificationHandler) GetMyTransactions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transactions)
+}
+
+func (h *GamificationHandler) GetRules(c *gin.Context) {
+	var rules []models.GamificationRule
+	if err := h.db.Order("reason ASC").Find(&rules).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des règles"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rules": rules})
+}
+
+func (h *GamificationHandler) UpsertRule(c *gin.Context) {
+	var req GamificationRuleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	reason := strings.TrimSpace(req.Reason)
+	if reason == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Reason is required"})
+		return
+	}
+
+	enabled := true
+	if req.Enabled != nil {
+		enabled = *req.Enabled
+	}
+
+	var rule models.GamificationRule
+	err := h.db.Where("reason = ?", reason).First(&rule).Error
+	if err == gorm.ErrRecordNotFound {
+		rule = models.GamificationRule{Reason: reason, Points: req.Points, Enabled: enabled}
+		if createErr := h.db.Create(&rule).Error; createErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la règle"})
+			return
+		}
+		c.JSON(http.StatusCreated, rule)
+		return
+	}
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de la règle"})
+		return
+	}
+
+	rule.Points = req.Points
+	rule.Enabled = enabled
+	if err := h.db.Save(&rule).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour de la règle"})
+		return
+	}
+
+	c.JSON(http.StatusOK, rule)
+}
+
+func (h *GamificationHandler) GetAdminAchievements(c *gin.Context) {
+	var achievements []models.Achievement
+	if err := h.db.Order("created_at DESC").Find(&achievements).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des badges"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"achievements": achievements})
+}
+
+func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
+	var req AchievementRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	isActive := true
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
+	achievement := models.Achievement{
+		Code:          strings.TrimSpace(req.Code),
+		Name:          strings.TrimSpace(req.Name),
+		Description:   strings.TrimSpace(req.Description),
+		Icon:          strings.TrimSpace(req.Icon),
+		Color:         strings.TrimSpace(req.Color),
+		XPReward:      req.XPReward,
+		Category:      req.Category,
+		IsSecret:      req.IsSecret,
+		TriggerReason: strings.TrimSpace(req.TriggerReason),
+		Metric:        strings.TrimSpace(req.Metric),
+		Threshold:     req.Threshold,
+		IsActive:      isActive,
+	}
+
+	if achievement.Icon == "" {
+		achievement.Icon = "mdi:medal"
+	}
+	if achievement.Color == "" {
+		achievement.Color = "#FBBF24"
+	}
+
+	if err := h.db.Create(&achievement).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur lors de la création du badge (code peut déjà exister)"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, achievement)
+}
+
+func (h *GamificationHandler) UpdateAchievement(c *gin.Context) {
+	id := c.Param("id")
+
+	var achievement models.Achievement
+	if err := h.db.First(&achievement, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Badge introuvable"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération du badge"})
+		return
+	}
+
+	var req AchievementRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	achievement.Code = strings.TrimSpace(req.Code)
+	achievement.Name = strings.TrimSpace(req.Name)
+	achievement.Description = strings.TrimSpace(req.Description)
+	achievement.Icon = strings.TrimSpace(req.Icon)
+	achievement.Color = strings.TrimSpace(req.Color)
+	achievement.XPReward = req.XPReward
+	achievement.Category = req.Category
+	achievement.IsSecret = req.IsSecret
+	achievement.TriggerReason = strings.TrimSpace(req.TriggerReason)
+	achievement.Metric = strings.TrimSpace(req.Metric)
+	achievement.Threshold = req.Threshold
+	if req.IsActive != nil {
+		achievement.IsActive = *req.IsActive
+	}
+
+	if achievement.Icon == "" {
+		achievement.Icon = "mdi:medal"
+	}
+	if achievement.Color == "" {
+		achievement.Color = "#FBBF24"
+	}
+
+	if err := h.db.Save(&achievement).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur lors de la mise à jour du badge"})
+		return
+	}
+
+	c.JSON(http.StatusOK, achievement)
+}
+
+func (h *GamificationHandler) DeleteAchievement(c *gin.Context) {
+	id := c.Param("id")
+
+	if err := h.db.Delete(&models.Achievement{}, id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression du badge"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Badge supprimé"})
 }

@@ -262,6 +262,12 @@ const getActivityIcon = (reason) => {
     'app_click': 'mdi:mouse-left-click',
     'news_publish': 'mdi:newspaper-plus',
     'event_publish': 'mdi:calendar-plus',
+    'poll_vote': 'mdi:vote-outline',
+    'poll_create': 'mdi:poll',
+    'comment_create': 'mdi:comment-text-outline',
+    'suggestion_create': 'mdi:lightbulb-on-outline',
+    'suggestion_vote': 'mdi:thumb-up-outline',
+    'suggestion_comment': 'mdi:comment-edit-outline',
     'achievement_unlock': 'mdi:medal'
   }
   return icons[reason] || 'mdi:star'
@@ -273,6 +279,12 @@ const getActivityLabel = (reason) => {
     'app_click': 'Ouverture d\'application',
     'news_publish': 'Publication d\'article',
     'event_publish': 'Création d\'événement',
+    'poll_vote': 'Vote sondage',
+    'poll_create': 'Création sondage',
+    'comment_create': 'Commentaire',
+    'suggestion_create': 'Nouvelle suggestion',
+    'suggestion_vote': 'Vote suggestion',
+    'suggestion_comment': 'Commentaire suggestion',
     'achievement_unlock': 'Badge débloqué'
   }
   return labels[reason] || reason

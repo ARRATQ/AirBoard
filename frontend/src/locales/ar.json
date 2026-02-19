@@ -89,6 +89,7 @@
     "dashboardAnalytics": "لوحة التحكم والتحليلات",
     "eventsManagement": "إدارة الأحداث",
     "polls": "الاستطلاعات",
+    "suggestions": "صندوق الاقتراحات",
     "pollsManagement": "إدارة الاستطلاعات",
     "media": "الوسائط",
     "usersAccess": "المستخدمون والوصول",
@@ -1096,6 +1097,11 @@
       "thanksForVote": "شكراً لك على التصويت! انقر أدناه لعرض النتائج.",
       "thanksResultsLater": "شكراً لك على التصويت! ستكون النتائج متاحة بعد إغلاق الاستطلاع.",
       "success": "تم تسجيل التصويت بنجاح!",
+      "redirectToSuggestion": "شكرا لك. صف فكرتك الان في صندوق الاقتراحات.",
+      "removeVote": "سحب تصويتي",
+      "removingVote": "جار سحب التصويت...",
+      "removeVoteSuccess": "تم سحب تصويتك",
+      "removeVoteError": "خطأ أثناء سحب التصويت",
       "error": "خطأ أثناء التصويت"
     },
     "results": {
@@ -1134,7 +1140,10 @@
       "descriptionPlaceholder": "أضف تفاصيل أو سياق...",
       "responseOptions": "خيارات الإجابة",
       "optionPlaceholder": "الخيار {index}",
+      "markAsOther": "تعيين كـ اخر",
+      "optionIsOther": "خيار اخر",
       "addOption": "إضافة خيار",
+      "otherHelp": "يمكن تمييز خيار واحد فقط كـ \"اخر\".",
       "optionsHelp": "حد أدنى 2 خيارات، حد أقصى 10",
       "typeAndSettings": "النوع والإعدادات",
       "pollType": "نوع الاستطلاع",
@@ -1262,6 +1271,92 @@
       "deleteError": "فشل حذف الوسائط"
     }
   },
+  "suggestions": {
+    "title": "صندوق الاقتراحات",
+    "subtitle": "شارك الافكار وتابع تقدمها",
+    "newSuggestion": "اقتراح جديد",
+    "viewDetails": "عرض التفاصيل",
+    "backToList": "العودة الى الاقتراحات",
+    "voteFor": "موافق",
+    "voteAgainst": "غير موافق",
+    "removeVote": "ازالة تصويتي",
+    "loading": "جار تحميل الاقتراحات...",
+    "loadError": "خطأ في تحميل الاقتراحات",
+    "voteError": "خطا اثناء التصويت",
+    "notFound": "الاقتراح غير موجود",
+    "emptyTitle": "لا توجد اقتراحات",
+    "emptyDescription": "كن اول من يقترح فكرة.",
+    "anonymous": "مجهول",
+    "noCategory": "بدون فئة",
+    "manageCategories": "فئات الاقتراحات",
+    "manageCategoriesHelp": "اضف ونظم الفئات المتاحة لكل الموظفين.",
+    "admin": {
+      "title": "ادارة الاقتراحات",
+      "subtitle": "تفعيل وارشفة ومتابعة اقتراحات الموظفين.",
+      "archivedAll": "الكل",
+      "archivedNo": "نشطة",
+      "archivedYes": "مؤرشفة",
+      "archivedBadge": "مؤرشفة",
+      "activeBadge": "نشطة",
+      "activate": "تفعيل",
+      "archive": "ارشفة",
+      "archivedDone": "تمت ارشفة الاقتراح",
+      "activatedDone": "تم تفعيل الاقتراح"
+    },
+    "categoryLoadError": "تعذر تحميل الفئات",
+    "categorySaveError": "تعذر حفظ الفئة",
+    "categoryDeleteError": "تعذر حذف الفئة",
+    "linkedPoll": "مرتبط باستطلاع",
+    "statusUpdated": "تم تحديث الحالة",
+    "statusUpdateError": "تعذر تحديث الحالة",
+    "filters": {
+      "search": "ابحث في الاقتراحات...",
+      "allCategories": "كل الفئات",
+      "allStatuses": "كل الحالات"
+    },
+    "form": {
+      "title": "اقترح فكرة",
+      "subject": "العنوان",
+      "subjectPlaceholder": "مثال: اضافة اختصارات لوحة المفاتيح",
+      "category": "الفئة",
+      "description": "الوصف",
+      "descriptionPlaceholder": "اشرح الحاجة والتاثير، وان امكن اقترح حلا.",
+      "anonymous": "النشر بشكل مجهول",
+      "submit": "ارسال",
+      "validation": "العنوان والوصف مطلوبان",
+      "validationDescriptionMin": "يجب ان يحتوي الوصف على 3 احرف على الاقل",
+      "success": "تم ارسال الاقتراح بنجاح",
+      "error": "خطأ اثناء ارسال الاقتراح",
+      "fromPoll": "من الاستطلاع",
+      "selectedOption": "الخيار المحدد"
+    },
+    "categories": {
+      "general": "عام",
+      "functionality": "وظيفة",
+      "ui": "واجهة",
+      "process": "عملية داخلية",
+      "performance": "الاداء",
+      "bug": "خطا",
+      "other": "اخر"
+    },
+    "statuses": {
+      "new": "تم الاستلام",
+      "reviewing": "قيد المراجعة",
+      "planned": "مخطط",
+      "in_progress": "قيد التنفيذ",
+      "implemented": "تم التسليم",
+      "rejected": "غير معتمد"
+    }
+  },
+  "gamificationAdmin": {
+    "title": "التحفيز",
+    "subtitle": "عدل النقاط واضبط الشارات مع شروط الحصول عليها.",
+    "rules": "قواعد النقاط",
+    "badges": "الشارات",
+    "points": "النقاط",
+    "threshold": "العتبة",
+    "badgeReward": "مكافاة XP"
+  },
   "media": {
     "title": "إدارة الوسائط",
     "subtitle": "إدارة الملفات والصور والوثائق",
@@ -1314,5 +1409,3 @@
     }
   }
 }
-
-

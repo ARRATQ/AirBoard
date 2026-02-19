@@ -20,6 +20,15 @@ func NewGamificationService(db *gorm.DB) *GamificationService {
 
 // AwardXP accorde des points à un utilisateur et vérifie le passage de niveau
 func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, metadata string) error {
+	configuredAmount, enabled, err := s.resolvePointsForReason(reason, amount)
+	if err != nil {
+		return err
+	}
+	if !enabled {
+		return nil
+	}
+	amount = configuredAmount
+
 	if amount <= 0 {
 		return nil
 	}
@@ -69,6 +78,10 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 
 // CheckAchievements vérifie si l'utilisateur a débloqué de nouveaux badges
 func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, triggerReason string) error {
+	if err := s.checkDynamicAchievements(tx, userID, triggerReason); err != nil {
+		return err
+	}
+
 	// Cette fonction sera étendue pour vérifier des conditions complexes
 	// Pour l'instant, implémentons quelques succès simples
 
@@ -89,9 +102,91 @@ func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, trigge
 		return s.checkPollsterAchievement(tx, userID)
 	case "comment_create":
 		return s.checkCommentatorAchievement(tx, userID)
+	case "suggestion_create":
+		return s.checkSuggestionAuthorAchievement(tx, userID)
+	case "suggestion_vote":
+		return s.checkSuggestionVoterAchievement(tx, userID)
+	case "suggestion_comment":
+		return s.checkSuggestionCommenterAchievement(tx, userID)
 	}
 
 	return nil
+}
+
+func (s *GamificationService) checkDynamicAchievements(tx *gorm.DB, userID uint, triggerReason string) error {
+	var achievements []models.Achievement
+	if err := tx.Where("is_active = ? AND trigger_reason = ? AND threshold > 0", true, triggerReason).Find(&achievements).Error; err != nil {
+		return err
+	}
+
+	for _, achievement := range achievements {
+		count, err := s.getMetricCount(tx, userID, achievement.Metric, triggerReason)
+		if err != nil {
+			continue
+		}
+		if count >= achievement.Threshold {
+			if err := s.UnlockAchievement(tx, userID, achievement.Code); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *GamificationService) getMetricCount(tx *gorm.DB, userID uint, metric string, triggerReason string) (int64, error) {
+	var count int64
+
+	switch metric {
+	case "app_click_distinct":
+		err := tx.Model(&models.ApplicationClick{}).Where("user_id = ?", userID).Distinct("application_id").Count(&count).Error
+		return count, err
+	case "news_read_count":
+		err := tx.Model(&models.NewsRead{}).Where("user_id = ?", userID).Count(&count).Error
+		return count, err
+	case "news_publish_count":
+		err := tx.Model(&models.News{}).Where("author_id = ?", userID).Count(&count).Error
+		return count, err
+	case "event_publish_count":
+		err := tx.Model(&models.Event{}).Where("author_id = ?", userID).Count(&count).Error
+		return count, err
+	case "poll_vote_count":
+		err := tx.Model(&models.PollVote{}).Where("user_id = ?", userID).Count(&count).Error
+		return count, err
+	case "poll_create_count":
+		err := tx.Model(&models.Poll{}).Where("author_id = ?", userID).Count(&count).Error
+		return count, err
+	case "comment_count":
+		err := tx.Model(&models.Comment{}).Where("user_id = ?", userID).Count(&count).Error
+		return count, err
+	case "suggestion_create_count":
+		err := tx.Model(&models.Suggestion{}).Where("user_id = ?", userID).Count(&count).Error
+		return count, err
+	case "suggestion_vote_count":
+		err := tx.Model(&models.SuggestionVote{}).Where("user_id = ?", userID).Count(&count).Error
+		return count, err
+	case "suggestion_comment_count":
+		err := tx.Model(&models.Comment{}).Where("user_id = ? AND entity_type = ?", userID, "suggestion").Count(&count).Error
+		return count, err
+	default:
+		err := tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, triggerReason).Count(&count).Error
+		return count, err
+	}
+}
+
+func (s *GamificationService) resolvePointsForReason(reason string, fallback int64) (int64, bool, error) {
+	var rule models.GamificationRule
+	err := s.db.Where("reason = ?", reason).First(&rule).Error
+	if err == gorm.ErrRecordNotFound {
+		return fallback, true, nil
+	}
+	if err != nil {
+		return 0, false, err
+	}
+	if !rule.Enabled {
+		return 0, false, nil
+	}
+	return rule.Points, true, nil
 }
 
 func (s *GamificationService) checkExplorerAchievement(tx *gorm.DB, userID uint) error {
@@ -173,6 +268,36 @@ func (s *GamificationService) checkCommentatorAchievement(tx *gorm.DB, userID ui
 	return nil
 }
 
+func (s *GamificationService) checkSuggestionAuthorAchievement(tx *gorm.DB, userID uint) error {
+	var count int64
+	tx.Model(&models.Suggestion{}).Where("user_id = ?", userID).Count(&count)
+
+	if count >= 1 {
+		return s.UnlockAchievement(tx, userID, "suggestion_author")
+	}
+	return nil
+}
+
+func (s *GamificationService) checkSuggestionVoterAchievement(tx *gorm.DB, userID uint) error {
+	var count int64
+	tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, "suggestion_vote").Count(&count)
+
+	if count >= 10 {
+		return s.UnlockAchievement(tx, userID, "suggestion_voter")
+	}
+	return nil
+}
+
+func (s *GamificationService) checkSuggestionCommenterAchievement(tx *gorm.DB, userID uint) error {
+	var count int64
+	tx.Model(&models.Comment{}).Where("user_id = ? AND entity_type = ?", userID, "suggestion").Count(&count)
+
+	if count >= 5 {
+		return s.UnlockAchievement(tx, userID, "suggestion_commenter")
+	}
+	return nil
+}
+
 // UnlockAchievement débloque un badge pour l'utilisateur
 func (s *GamificationService) UnlockAchievement(tx *gorm.DB, userID uint, code string) error {
 	var achievement models.Achievement
@@ -244,76 +369,136 @@ func (s *GamificationService) UnlockAchievement(tx *gorm.DB, userID uint, code s
 func (s *GamificationService) SeedAchievements() error {
 	achievements := []models.Achievement{
 		{
-			Code:        "early_bird",
-			Name:        "Lève-tôt",
-			Description: "Connectez-vous avant 8h30 du matin",
-			Icon:        "mdi:weather-sunset-up",
-			Color:       "#F59E0B",
-			XPReward:    50,
-			Category:    "user",
+			Code:          "early_bird",
+			Name:          "Lève-tôt",
+			Description:   "Connectez-vous avant 8h30 du matin",
+			Icon:          "mdi:weather-sunset-up",
+			Color:         "#F59E0B",
+			XPReward:      50,
+			Category:      "user",
+			TriggerReason: "daily_login",
+			Metric:        "reason_count",
+			Threshold:     1,
 		},
 		{
-			Code:        "explorer",
-			Name:        "Explorateur",
-			Description: "Cliquez sur 10 applications différentes",
-			Icon:        "mdi:compass-outline",
-			Color:       "#3B82F6",
-			XPReward:    100,
-			Category:    "user",
+			Code:          "explorer",
+			Name:          "Explorateur",
+			Description:   "Cliquez sur 10 applications différentes",
+			Icon:          "mdi:compass-outline",
+			Color:         "#3B82F6",
+			XPReward:      100,
+			Category:      "user",
+			TriggerReason: "app_click",
+			Metric:        "app_click_distinct",
+			Threshold:     10,
 		},
 		{
-			Code:        "informed",
-			Name:        "Bien informé",
-			Description: "Lisez 20 articles d'actualité",
-			Icon:        "mdi:book-open-variant",
-			Color:       "#10B981",
-			XPReward:    150,
-			Category:    "user",
+			Code:          "informed",
+			Name:          "Bien informé",
+			Description:   "Lisez 20 articles d'actualité",
+			Icon:          "mdi:book-open-variant",
+			Color:         "#10B981",
+			XPReward:      150,
+			Category:      "user",
+			TriggerReason: "news_read",
+			Metric:        "news_read_count",
+			Threshold:     20,
 		},
 		{
-			Code:        "first_news",
-			Name:        "Premier scoop",
-			Description: "Publiez votre premier article",
-			Icon:        "mdi:newspaper-variant-outline",
-			Color:       "#8B5CF6",
-			XPReward:    200,
-			Category:    "contributor",
+			Code:          "first_news",
+			Name:          "Premier scoop",
+			Description:   "Publiez votre premier article",
+			Icon:          "mdi:newspaper-variant-outline",
+			Color:         "#8B5CF6",
+			XPReward:      200,
+			Category:      "contributor",
+			TriggerReason: "news_publish",
+			Metric:        "news_publish_count",
+			Threshold:     1,
 		},
 		{
-			Code:        "event_master",
-			Name:        "Maître des événements",
-			Description: "Créez 5 événements",
-			Icon:        "mdi:calendar-star",
-			Color:       "#EF4444",
-			XPReward:    300,
-			Category:    "contributor",
+			Code:          "event_master",
+			Name:          "Maître des événements",
+			Description:   "Créez 5 événements",
+			Icon:          "mdi:calendar-star",
+			Color:         "#EF4444",
+			XPReward:      300,
+			Category:      "contributor",
+			TriggerReason: "event_publish",
+			Metric:        "event_publish_count",
+			Threshold:     5,
 		},
 		{
-			Code:        "citizen",
-			Name:        "Citoyen modèle",
-			Description: "Votez à 5 sondages",
-			Icon:        "mdi:vote",
-			Color:       "#10B981",
-			XPReward:    100,
-			Category:    "user",
+			Code:          "citizen",
+			Name:          "Citoyen modèle",
+			Description:   "Votez à 5 sondages",
+			Icon:          "mdi:vote",
+			Color:         "#10B981",
+			XPReward:      100,
+			Category:      "user",
+			TriggerReason: "poll_vote",
+			Metric:        "poll_vote_count",
+			Threshold:     5,
 		},
 		{
-			Code:        "pollster",
-			Name:        "Sondeur",
-			Description: "Créez 3 sondages",
-			Icon:        "mdi:poll",
-			Color:       "#F59E0B",
-			XPReward:    150,
-			Category:    "contributor",
+			Code:          "pollster",
+			Name:          "Sondeur",
+			Description:   "Créez 3 sondages",
+			Icon:          "mdi:poll",
+			Color:         "#F59E0B",
+			XPReward:      150,
+			Category:      "contributor",
+			TriggerReason: "poll_create",
+			Metric:        "poll_create_count",
+			Threshold:     3,
 		},
 		{
-			Code:        "commentator",
-			Name:        "Commentateur",
-			Description: "Publiez 5 commentaires",
-			Icon:        "mdi:comment-text-multiple",
-			Color:       "#6366F1",
-			XPReward:    80,
-			Category:    "user",
+			Code:          "commentator",
+			Name:          "Commentateur",
+			Description:   "Publiez 5 commentaires",
+			Icon:          "mdi:comment-text-multiple",
+			Color:         "#6366F1",
+			XPReward:      80,
+			Category:      "user",
+			TriggerReason: "comment_create",
+			Metric:        "comment_count",
+			Threshold:     5,
+		},
+		{
+			Code:          "suggestion_author",
+			Name:          "Boite a idees",
+			Description:   "Envoyez votre premiere suggestion",
+			Icon:          "mdi:lightbulb-on-outline",
+			Color:         "#F59E0B",
+			XPReward:      120,
+			Category:      "user",
+			TriggerReason: "suggestion_create",
+			Metric:        "suggestion_create_count",
+			Threshold:     1,
+		},
+		{
+			Code:          "suggestion_voter",
+			Name:          "Voix des idees",
+			Description:   "Votez sur 10 suggestions",
+			Icon:          "mdi:thumb-up-outline",
+			Color:         "#10B981",
+			XPReward:      120,
+			Category:      "user",
+			TriggerReason: "suggestion_vote",
+			Metric:        "suggestion_vote_count",
+			Threshold:     10,
+		},
+		{
+			Code:          "suggestion_commenter",
+			Name:          "Debatteur constructif",
+			Description:   "Commentez 5 suggestions",
+			Icon:          "mdi:comment-edit-outline",
+			Color:         "#3B82F6",
+			XPReward:      120,
+			Category:      "user",
+			TriggerReason: "suggestion_comment",
+			Metric:        "suggestion_comment_count",
+			Threshold:     5,
 		},
 	}
 
@@ -329,10 +514,50 @@ func (s *GamificationService) SeedAchievements() error {
 			}
 		} else {
 			// Update description if changed
-			if existing.Description != ach.Description {
+			if existing.Description != ach.Description ||
+				existing.TriggerReason != ach.TriggerReason ||
+				existing.Metric != ach.Metric ||
+				existing.Threshold != ach.Threshold ||
+				existing.IsActive != ach.IsActive {
 				existing.Description = ach.Description
+				existing.TriggerReason = ach.TriggerReason
+				existing.Metric = ach.Metric
+				existing.Threshold = ach.Threshold
+				existing.IsActive = ach.IsActive
 				s.db.Save(&existing)
 			}
+		}
+	}
+
+	return nil
+}
+
+func (s *GamificationService) SeedGamificationRules() error {
+	rules := []models.GamificationRule{
+		{Reason: "daily_login", Points: 15, Enabled: true},
+		{Reason: "app_click", Points: 5, Enabled: true},
+		{Reason: "news_read", Points: 20, Enabled: true},
+		{Reason: "news_publish", Points: 100, Enabled: true},
+		{Reason: "event_publish", Points: 80, Enabled: true},
+		{Reason: "poll_vote", Points: 10, Enabled: true},
+		{Reason: "poll_create", Points: 50, Enabled: true},
+		{Reason: "comment_create", Points: 10, Enabled: true},
+		{Reason: "suggestion_create", Points: 35, Enabled: true},
+		{Reason: "suggestion_vote", Points: 8, Enabled: true},
+		{Reason: "suggestion_comment", Points: 8, Enabled: true},
+	}
+
+	for _, rule := range rules {
+		var existing models.GamificationRule
+		err := s.db.Where("reason = ?", rule.Reason).First(&existing).Error
+		if err == gorm.ErrRecordNotFound {
+			if createErr := s.db.Create(&rule).Error; createErr != nil {
+				return createErr
+			}
+			continue
+		}
+		if err != nil {
+			return err
 		}
 	}
 

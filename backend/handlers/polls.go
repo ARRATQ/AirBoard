@@ -339,6 +339,17 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		return
 	}
 
+	otherOptionsCount := 0
+	for _, optReq := range req.Options {
+		if optReq.IsOther {
+			otherOptionsCount++
+		}
+	}
+	if otherOptionsCount > 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only one option can be marked as 'other'"})
+		return
+	}
+
 	// Vérifier les permissions pour les groupes cibles (admins de groupe non-global)
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
@@ -382,9 +393,10 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 	// Créer les options
 	for i, optReq := range req.Options {
 		option := models.PollOption{
-			PollID: poll.ID,
-			Text:   optReq.Text,
-			Order:  i,
+			PollID:  poll.ID,
+			Text:    optReq.Text,
+			IsOther: optReq.IsOther,
+			Order:   i,
 		}
 		if err := h.db.Create(&option).Error; err != nil {
 			// Rollback : supprimer le sondage créé
@@ -506,6 +518,17 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		return
 	}
 
+	otherOptionsCount := 0
+	for _, optReq := range req.Options {
+		if optReq.IsOther {
+			otherOptionsCount++
+		}
+	}
+	if otherOptionsCount > 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only one option can be marked as 'other'"})
+		return
+	}
+
 	// Vérifier les permissions pour les nouveaux groupes cibles (admins de groupe non-global)
 	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
 		for _, targetGroupID := range req.TargetGroupIDs {
@@ -553,9 +576,10 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	h.db.Where("poll_id = ?", poll.ID).Delete(&models.PollOption{})
 	for i, optReq := range req.Options {
 		option := models.PollOption{
-			PollID: poll.ID,
-			Text:   optReq.Text,
-			Order:  i,
+			PollID:  poll.ID,
+			Text:    optReq.Text,
+			IsOther: optReq.IsOther,
+			Order:   i,
 		}
 		h.db.Create(&option)
 	}
@@ -790,11 +814,90 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 
 	// Accorder de l'XP pour le vote (10 XP)
 	// On le fait de manière asynchrone pour ne pas ralentir la réponse
-	go func() {
-		if err := h.gamificationService.AwardXP(userID, 10, "poll_vote", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
-			log.Printf("[Gamification] Failed to award XP for poll vote: %v", err)
+	if h.gamificationService != nil {
+		hasReward, rewardErr := h.hasAwardedPollVoteXP(userID, poll.ID)
+		if rewardErr != nil {
+			log.Printf("[Gamification] Failed to check poll vote reward: %v", rewardErr)
+		} else if !hasReward {
+			go func() {
+				if err := h.gamificationService.AwardXP(userID, 10, "poll_vote", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
+					log.Printf("[Gamification] Failed to award XP for poll vote: %v", err)
+				}
+			}()
 		}
-	}()
+	}
+}
+
+// RemoveVote - Retirer le vote d'un sondage (utilisateur connecté)
+func (h *PollsHandler) RemoveVote(c *gin.Context) {
+	id := c.Param("id")
+	userID := c.GetUint("user_id")
+
+	var poll models.Poll
+	if err := h.db.Preload("TargetGroups").First(&poll, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		return
+	}
+
+	if !poll.IsActive {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll is closed"})
+		return
+	}
+
+	now := time.Now()
+	if poll.EndDate != nil && now.After(*poll.EndDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll has ended"})
+		return
+	}
+
+	// Vérifier l'accès utilisateur au sondage
+	hasAccess := false
+	if len(poll.TargetGroups) == 0 {
+		hasAccess = true
+	} else {
+		var managedGroupIDs []uint
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		allGroupIDs := make(map[uint]bool)
+		for _, groupID := range userGroupIDs {
+			allGroupIDs[groupID] = true
+		}
+		for _, groupID := range managedGroupIDs {
+			allGroupIDs[groupID] = true
+		}
+
+		for _, targetGroup := range poll.TargetGroups {
+			if allGroupIDs[targetGroup.ID] {
+				hasAccess = true
+				break
+			}
+		}
+	}
+
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
+		return
+	}
+
+	result := h.db.Where("poll_id = ? AND user_id = ?", poll.ID, userID).Delete(&models.PollVote{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You have not voted in this poll"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":       "Vote removed successfully",
+		"removed_votes": result.RowsAffected,
+		"poll_id":       poll.ID,
+	})
 }
 
 // GetPollResults - Récupérer les résultats d'un sondage
@@ -975,4 +1078,17 @@ func (h *PollsHandler) GetAnalytics(c *gin.Context) {
 		Find(&stats.RecentPolls)
 
 	c.JSON(http.StatusOK, stats)
+}
+
+func (h *PollsHandler) hasAwardedPollVoteXP(userID uint, pollID uint) (bool, error) {
+	metadata := fmt.Sprintf("{\"poll_id\": %d}", pollID)
+	var count int64
+	err := h.db.Model(&models.XPTransaction{}).
+		Where("user_id = ? AND reason = ? AND metadata = ?", userID, "poll_vote", metadata).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

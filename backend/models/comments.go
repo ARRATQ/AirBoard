@@ -8,36 +8,36 @@ import (
 
 // Comment représente un commentaire sur un article, une application ou un événement
 type Comment struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	Content   string         `json:"content" gorm:"type:text;not null"`
-	UserID    uint           `json:"user_id"`
-	User      User           `json:"user" gorm:"foreignKey:UserID"`
+	ID      uint   `json:"id" gorm:"primaryKey"`
+	Content string `json:"content" gorm:"type:text;not null"`
+	UserID  uint   `json:"user_id"`
+	User    User   `json:"user" gorm:"foreignKey:UserID"`
 
 	// Polymorphic relation - can be attached to News, Application, or Event
 	EntityType string `json:"entity_type" gorm:"not null"` // "news", "application", "event"
 	EntityID   uint   `json:"entity_id" gorm:"not null"`
 
 	// Moderation
-	IsApproved   bool       `json:"is_approved" gorm:"default:true"` // Auto-approved by default
-	IsFlagged    bool       `json:"is_flagged" gorm:"default:false"` // Flagged for review
-	ModeratedBy  *uint      `json:"moderated_by"`
-	Moderator    *User      `json:"moderator,omitempty" gorm:"foreignKey:ModeratedBy"`
-	ModeratedAt  *time.Time `json:"moderated_at"`
+	IsApproved  bool       `json:"is_approved" gorm:"default:true"` // Auto-approved by default
+	IsFlagged   bool       `json:"is_flagged" gorm:"default:false"` // Flagged for review
+	ModeratedBy *uint      `json:"moderated_by"`
+	Moderator   *User      `json:"moderator,omitempty" gorm:"foreignKey:ModeratedBy"`
+	ModeratedAt *time.Time `json:"moderated_at"`
 
 	// Parent comment for threaded replies (optional - for future)
-	ParentID     *uint      `json:"parent_id"`
-	Parent       *Comment   `json:"parent,omitempty" gorm:"foreignKey:ParentID"`
+	ParentID *uint    `json:"parent_id"`
+	Parent   *Comment `json:"parent,omitempty" gorm:"foreignKey:ParentID"`
 
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 // Feedback représente un feedback simple (👍/👎) sur un article, app ou événement
 type Feedback struct {
-	ID         uint   `json:"id" gorm:"primaryKey"`
-	UserID     uint   `json:"user_id"`
-	User       User   `json:"user" gorm:"foreignKey:UserID"`
+	ID     uint `json:"id" gorm:"primaryKey"`
+	UserID uint `json:"user_id"`
+	User   User `json:"user" gorm:"foreignKey:UserID"`
 
 	// Polymorphic relation
 	EntityType string `json:"entity_type" gorm:"not null"` // "news", "application", "event"
@@ -54,16 +54,16 @@ type Feedback struct {
 
 // CommentSettings représente les paramètres de configuration pour les commentaires
 type CommentSettings struct {
-	ID                    uint      `json:"id" gorm:"primaryKey"`
-	CommentsEnabled       bool      `json:"comments_enabled" gorm:"default:true"`
-	NewsCommentsEnabled   bool      `json:"news_comments_enabled" gorm:"default:true"`
-	AppCommentsEnabled    bool      `json:"app_comments_enabled" gorm:"default:false"`
-	EventCommentsEnabled  bool      `json:"event_comments_enabled" gorm:"default:true"`
-	RequireModeration     bool      `json:"require_moderation" gorm:"default:false"` // Si true, commentaires nécessitent approbation
-	AllowAnonymous        bool      `json:"allow_anonymous" gorm:"default:false"`
-	MaxCommentLength      int       `json:"max_comment_length" gorm:"default:1000"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	ID                   uint      `json:"id" gorm:"primaryKey"`
+	CommentsEnabled      bool      `json:"comments_enabled" gorm:"default:true"`
+	NewsCommentsEnabled  bool      `json:"news_comments_enabled" gorm:"default:true"`
+	AppCommentsEnabled   bool      `json:"app_comments_enabled" gorm:"default:false"`
+	EventCommentsEnabled bool      `json:"event_comments_enabled" gorm:"default:true"`
+	RequireModeration    bool      `json:"require_moderation" gorm:"default:false"` // Si true, commentaires nécessitent approbation
+	AllowAnonymous       bool      `json:"allow_anonymous" gorm:"default:false"`
+	MaxCommentLength     int       `json:"max_comment_length" gorm:"default:1000"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
 }
 
 // Request/Response structures
@@ -71,7 +71,7 @@ type CommentSettings struct {
 // CommentRequest pour la création/modification de commentaires
 type CommentRequest struct {
 	Content    string `json:"content" binding:"required,min=1,max=1000"`
-	EntityType string `json:"entity_type" binding:"required,oneof=news application event"`
+	EntityType string `json:"entity_type" binding:"required,oneof=news application event suggestion"`
 	EntityID   uint   `json:"entity_id" binding:"required"`
 	ParentID   *uint  `json:"parent_id"` // Pour les réponses (future feature)
 }

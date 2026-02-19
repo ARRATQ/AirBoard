@@ -4,6 +4,8 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -24,9 +26,9 @@ func NewCommentHandler(db *gorm.DB, gamification *services.GamificationService) 
 	}
 }
 
-// GetComments récupère tous les commentaires pour une entité (news, app, event)
+// GetComments récupère tous les commentaires pour une entité (news, app, event, suggestion)
 func (h *CommentHandler) GetComments(c *gin.Context) {
-	entityType := c.Query("entity_type") // news, application, event
+	entityType := c.Query("entity_type") // news, application, event, suggestion
 	entityIDStr := c.Query("entity_id")
 
 	if entityType == "" || entityIDStr == "" {
@@ -97,6 +99,15 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 			})
 			return
 		}
+	case "suggestion":
+		// Suggestions utilisent uniquement le flag global comments_enabled
+	default:
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "INVALID_ENTITY_TYPE",
+			Message: "entity_type invalide",
+			Code:    http.StatusBadRequest,
+		})
+		return
 	}
 
 	// Récupérer les commentaires
@@ -224,7 +235,14 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 			err := h.Gamification.AwardXP(userID.(uint), 10, "comment_create", "{}")
 			if err != nil {
 				// Log error but don't fail request
-				println("Error awarding XP for comment:", err.Error())
+				log.Printf("[Gamification] Failed to award XP for comment creation: %v", err)
+			}
+
+			if req.EntityType == "suggestion" {
+				err = h.Gamification.AwardXP(userID.(uint), 8, "suggestion_comment", fmt.Sprintf("{\"suggestion_id\":%d}", req.EntityID))
+				if err != nil {
+					log.Printf("[Gamification] Failed to award XP for suggestion comment: %v", err)
+				}
 			}
 		}()
 	}

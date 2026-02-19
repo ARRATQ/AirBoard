@@ -75,6 +75,11 @@
           <span>{{ $t('common.polls') }}</span>
         </router-link>
 
+        <router-link to="/suggestions" :class="getLinkClasses('/suggestions')">
+          <Icon icon="mdi:lightbulb-on-outline" class="h-4 w-4" />
+          <span>{{ $t('common.suggestions') }}</span>
+        </router-link>
+
         <router-link to="/gamification" :class="getLinkClasses('/gamification')">
           <Icon icon="mdi:medal" class="h-4 w-4" />
           <span>{{ $t('common.gamification') }}</span>
@@ -153,6 +158,21 @@
           <router-link to="/admin/polls" :class="getLinkClasses('/admin/polls')">
             <Icon icon="mdi:poll" class="h-4 w-4" />
             <span>{{ $t('common.pollsManagement') }}</span>
+          </router-link>
+
+          <router-link to="/admin/gamification" :class="getLinkClasses('/admin/gamification')">
+            <Icon icon="mdi:medal-outline" class="h-4 w-4" />
+            <span>{{ $t('gamificationAdmin.title') }}</span>
+          </router-link>
+
+          <router-link to="/admin/suggestions" :class="getLinkClasses('/admin/suggestions')">
+            <Icon icon="mdi:lightbulb-on-outline" class="h-4 w-4" />
+            <span>{{ $t('suggestions.admin.title') }}</span>
+          </router-link>
+
+          <router-link to="/admin/suggestion-categories" :class="getLinkClasses('/admin/suggestion-categories')">
+            <Icon icon="mdi:format-list-bulleted-square" class="h-4 w-4" />
+            <span>{{ $t('suggestions.manageCategories') }}</span>
           </router-link>
 
           <router-link to="/admin/announcements" :class="getLinkClasses('/admin/announcements')">
@@ -563,6 +583,9 @@ const isContentSectionActive = computed(() => {
   return route.path.startsWith('/admin/news') ||
          route.path.startsWith('/admin/events') ||
          route.path.startsWith('/admin/polls') ||
+         route.path.startsWith('/admin/gamification') ||
+         route.path.startsWith('/admin/suggestions') ||
+         route.path.startsWith('/admin/suggestion-categories') ||
          route.path.startsWith('/admin/announcements') ||
          route.path.startsWith('/admin/media') ||
          route.path.startsWith('/admin/comments')

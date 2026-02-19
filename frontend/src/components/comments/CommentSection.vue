@@ -83,7 +83,7 @@ const props = defineProps({
   entityType: {
     type: String,
     required: true,
-    validator: (value) => ['news', 'application', 'event'].includes(value)
+    validator: (value) => ['news', 'application', 'event', 'suggestion'].includes(value)
   },
   entityId: {
     type: Number,

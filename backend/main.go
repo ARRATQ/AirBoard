@@ -61,11 +61,15 @@ func main() {
 		&models.Poll{},
 		&models.PollOption{},
 		&models.PollVote{},
+		&models.Suggestion{},
+		&models.SuggestionCategory{},
+		&models.SuggestionVote{},
 		&models.ChatMessage{},         // Chat
 		&models.GamificationProfile{}, // Gamification
 		&models.Achievement{},
 		&models.UserAchievement{},
 		&models.XPTransaction{},
+		&models.GamificationRule{},
 		&models.HeroMessage{}, // Dynamic Hero Messages
 	); err != nil {
 		log.Fatal("Erreur lors des migrations:", err)
@@ -79,6 +83,10 @@ func main() {
 	// Index unique pour éviter qu'un utilisateur vote plusieurs fois sur la même option
 	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_poll_vote_user_option ON poll_votes(poll_id, user_id, poll_option_id)").Error; err != nil {
 		log.Printf("Avertissement: Impossible de créer l'index unique pour poll_votes: %v", err)
+	}
+
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_suggestion_vote_user_unique ON suggestion_votes(suggestion_id, user_id)").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique pour suggestion_votes: %v", err)
 	}
 
 	// Fix: Corriger les contraintes d'unicité sur les slugs pour permettre la réutilisation après soft delete
@@ -142,6 +150,7 @@ func main() {
 	if err := createInitialData(db, cfg); err != nil {
 		log.Fatalf("Erreur lors de la création des données initiales: %v", err)
 	}
+	ensureDefaultSuggestionCategories(db)
 
 	// Initialiser le service email global
 	InitEmailService(db, cfg)
@@ -181,12 +190,16 @@ func main() {
 	feedbackHandler := handlers.NewFeedbackHandler(db)
 	notificationHandler := handlers.NewNotificationHandler(db)
 	pollsHandler := handlers.NewPollsHandler(db, gamificationService)
+	suggestionsHandler := handlers.NewSuggestionsHandler(db, gamificationService)
 	gamificationHandler := handlers.NewGamificationHandler(db, gamificationService)
 	searchHandler := handlers.NewSearchHandler(db)
 
 	// Seeding gamification
 	if err := gamificationService.SeedAchievements(); err != nil {
 		log.Printf("Erreur lors du seeding des achievements: %v", err)
+	}
+	if err := gamificationService.SeedGamificationRules(); err != nil {
+		log.Printf("Erreur lors du seeding des règles de gamification: %v", err)
 	}
 
 	// Initialisation du Chat
@@ -418,7 +431,18 @@ func main() {
 			polls.GET("", pollsHandler.GetPolls)                   // Liste des sondages avec filtres
 			polls.GET("/:id", pollsHandler.GetPollByID)            // Récupérer un sondage par ID
 			polls.POST("/:id/vote", pollsHandler.Vote)             // Voter pour un sondage
+			polls.DELETE("/:id/vote", pollsHandler.RemoveVote)     // Retirer son vote
 			polls.GET("/:id/results", pollsHandler.GetPollResults) // Récupérer les résultats d'un sondage
+		}
+
+		// Routes Suggestions (accessible à tous les utilisateurs connectés)
+		suggestions := protected.Group("/suggestions")
+		{
+			suggestions.GET("/categories", suggestionsHandler.GetSuggestionCategories)
+			suggestions.GET("", suggestionsHandler.GetSuggestions)
+			suggestions.GET("/:id", suggestionsHandler.GetSuggestionByID)
+			suggestions.POST("", suggestionsHandler.CreateSuggestion)
+			suggestions.POST("/:id/vote", suggestionsHandler.VoteSuggestion)
 		}
 
 		// Routes Chat (accessible à tous les utilisateurs connectés)
@@ -576,6 +600,23 @@ func main() {
 			admin.DELETE("/polls/:id", pollsHandler.DeletePoll)
 			admin.POST("/polls/:id/close", pollsHandler.ClosePoll)
 			admin.GET("/polls/analytics", pollsHandler.GetAnalytics)
+
+			// Gestion de la gamification (admin)
+			admin.GET("/gamification/rules", gamificationHandler.GetRules)
+			admin.POST("/gamification/rules", gamificationHandler.UpsertRule)
+			admin.GET("/gamification/achievements", gamificationHandler.GetAdminAchievements)
+			admin.POST("/gamification/achievements", gamificationHandler.CreateAchievement)
+			admin.PUT("/gamification/achievements/:id", gamificationHandler.UpdateAchievement)
+			admin.DELETE("/gamification/achievements/:id", gamificationHandler.DeleteAchievement)
+
+			// Gestion des suggestions (admin uniquement)
+			admin.GET("/suggestions", suggestionsHandler.GetAdminSuggestions)
+			admin.PATCH("/suggestions/:id/status", suggestionsHandler.UpdateSuggestionStatus)
+			admin.PATCH("/suggestions/:id/archive", suggestionsHandler.UpdateSuggestionArchiveState)
+			admin.GET("/suggestion-categories", suggestionsHandler.GetAdminSuggestionCategories)
+			admin.POST("/suggestion-categories", suggestionsHandler.CreateSuggestionCategory)
+			admin.PUT("/suggestion-categories/:id", suggestionsHandler.UpdateSuggestionCategory)
+			admin.DELETE("/suggestion-categories/:id", suggestionsHandler.DeleteSuggestionCategory)
 
 			// Gestion des médias (admin uniquement)
 			admin.GET("/media", mediaHandler.GetMediaList)        // Liste des médias avec pagination et filtres
@@ -1298,6 +1339,32 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 	}
 
 	return nil
+}
+
+func ensureDefaultSuggestionCategories(db *gorm.DB) {
+	defaults := []models.SuggestionCategory{
+		{Name: "General", Slug: "general", Order: 1, IsActive: true},
+		{Name: "Fonctionnalite", Slug: "functionality", Order: 2, IsActive: true},
+		{Name: "Interface", Slug: "ui", Order: 3, IsActive: true},
+		{Name: "Process", Slug: "process", Order: 4, IsActive: true},
+		{Name: "Performance", Slug: "performance", Order: 5, IsActive: true},
+		{Name: "Bug", Slug: "bug", Order: 6, IsActive: true},
+		{Name: "Autre", Slug: "other", Order: 7, IsActive: true},
+	}
+
+	for _, category := range defaults {
+		var existing models.SuggestionCategory
+		err := db.Where("slug = ?", category.Slug).First(&existing).Error
+		if err == gorm.ErrRecordNotFound {
+			if createErr := db.Create(&category).Error; createErr != nil {
+				log.Printf("Avertissement: impossible de creer la categorie suggestion %s: %v", category.Slug, createErr)
+			}
+			continue
+		}
+		if err != nil {
+			log.Printf("Avertissement: impossible de verifier la categorie suggestion %s: %v", category.Slug, err)
+		}
+	}
 }
 
 func createDefaultEmailTemplates(db *gorm.DB) error {

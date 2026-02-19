@@ -86,6 +86,19 @@
                     :placeholder="t('polls.editor.optionPlaceholder', { index: index + 1 })"
                   />
                   <button
+                    type="button"
+                    @click="toggleOtherOption(index)"
+                    :class="[
+                      'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap',
+                      option.is_other
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                    ]"
+                  >
+                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 mr-1" />
+                    {{ option.is_other ? t('polls.editor.optionIsOther') : t('polls.editor.markAsOther') }}
+                  </button>
+                  <button
                     v-if="form.options.length > 2"
                     type="button"
                     @click="removeOption(index)"
@@ -99,11 +112,12 @@
                   v-if="form.options.length < 10"
                   type="button"
                   @click="addOption"
-                  class="btn-secondary btn-sm"
+                  class="poll-add-option-btn"
                 >
                   <Icon icon="mdi:plus" />
                   {{ t('polls.editor.addOption') }}
                 </button>
+                <p class="form-help">{{ t('polls.editor.otherHelp') }}</p>
                 <p class="form-help">{{ t('polls.editor.optionsHelp') }}</p>
               </div>
             </div>
@@ -314,14 +328,14 @@
             <button
               type="button"
               @click="closeModal"
-              class="btn-secondary"
+              class="poll-cancel-btn"
             >
               {{ t('polls.editor.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="loading"
-              class="btn-primary"
+              class="poll-submit-btn"
             >
               <Icon v-if="loading" icon="mdi:loading" class="spin" />
               <Icon v-else icon="mdi:check" />
@@ -374,8 +388,8 @@ const form = ref({
   announcement_id: null,
   target_group_ids: [],
   options: [
-    { text: '', order: 0 },
-    { text: '', order: 1 }
+    { text: '', is_other: false, order: 0 },
+    { text: '', is_other: false, order: 1 }
   ]
 })
 
@@ -457,10 +471,11 @@ watch(() => props.poll, (newPoll) => {
       options: newPoll.options?.map((opt, index) => ({
         id: opt.id,
         text: opt.text,
+        is_other: !!opt.is_other,
         order: index
       })) || [
-        { text: '', order: 0 },
-        { text: '', order: 1 }
+        { text: '', is_other: false, order: 0 },
+        { text: '', is_other: false, order: 1 }
       ]
     }
 
@@ -478,9 +493,24 @@ const addOption = () => {
   if (form.value.options.length < 10) {
     form.value.options.push({
       text: '',
+      is_other: false,
       order: form.value.options.length
     })
   }
+}
+
+const toggleOtherOption = (index) => {
+  const target = form.value.options[index]
+  if (!target) return
+
+  if (target.is_other) {
+    target.is_other = false
+    return
+  }
+
+  form.value.options.forEach((opt, idx) => {
+    opt.is_other = idx === index
+  })
 }
 
 // Supprimer une option
@@ -554,6 +584,7 @@ const handleSubmit = async () => {
       target_group_ids: form.value.target_group_ids,
       options: validOptions.map((opt, index) => ({
         text: opt.text.trim(),
+        is_other: !!opt.is_other,
         order: index
       }))
     }
@@ -616,8 +647,8 @@ const closeModal = () => {
     announcement_id: null,
     target_group_ids: [],
     options: [
-      { text: '', order: 0 },
-      { text: '', order: 1 }
+      { text: '', is_other: false, order: 0 },
+      { text: '', is_other: false, order: 1 }
     ]
   }
   errors.value = {}
@@ -636,6 +667,31 @@ const closeModal = () => {
 
 .spin {
   animation: spin 1s linear infinite;
+}
+
+.poll-submit-btn {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-white;
+  @apply bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm;
+  @apply hover:from-amber-600 hover:to-orange-600 hover:shadow-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
+  @apply dark:focus:ring-offset-gray-800 transition-all duration-200;
+  @apply disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+.poll-cancel-btn {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold;
+  @apply border border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
+  @apply dark:border-gray-600 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700;
+  @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+  @apply transition-colors duration-200;
+}
+
+.poll-add-option-btn {
+  @apply inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold;
+  @apply border border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 hover:border-amber-300;
+  @apply dark:border-amber-800 dark:text-amber-300 dark:bg-amber-900/20 dark:hover:bg-amber-900/35;
+  @apply focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+  @apply transition-colors duration-200;
 }
 
 @keyframes spin {

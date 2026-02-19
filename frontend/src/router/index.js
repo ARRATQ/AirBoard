@@ -17,6 +17,8 @@ const AnnouncementsManagement = () => import('@/views/admin/AnnouncementsManagem
 const NewsManagement = () => import('@/views/admin/NewsManagement.vue')
 const NewsEditor = () => import('@/views/admin/NewsEditor.vue')
 const PollsManagement = () => import('@/views/admin/PollsManagement.vue')
+const GamificationSettings = () => import('@/views/admin/GamificationSettings.vue')
+const SuggestionsManagement = () => import('@/views/admin/SuggestionsManagement.vue')
 const MediaManagement = () => import('@/views/admin/MediaManagement.vue')
 
 // Group Admin views
@@ -34,6 +36,9 @@ const NewsDetail = () => import('@/views/NewsDetail.vue')
 // Polls views (public)
 const PollsPage = () => import('@/views/PollsPage.vue')
 const PollDetailPage = () => import('@/views/PollDetailPage.vue')
+const SuggestionsPage = () => import('@/views/SuggestionsPage.vue')
+const SuggestionDetailPage = () => import('@/views/SuggestionDetailPage.vue')
+const SuggestionCategoriesManagement = () => import('@/views/admin/SuggestionCategoriesManagement.vue')
 
 // Events views (public)
 const EventsCenter = () => import('@/views/EventsCenter.vue')
@@ -123,6 +128,24 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: 'Sondage'
+    }
+  },
+  {
+    path: '/suggestions',
+    name: 'Suggestions',
+    component: SuggestionsPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Boite a suggestions'
+    }
+  },
+  {
+    path: '/suggestions/:id',
+    name: 'SuggestionDetail',
+    component: SuggestionDetailPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Suggestion'
     }
   },
   {
@@ -308,6 +331,36 @@ const routes = [
       requiresAuth: true,
       requiresAdmin: true,
       title: 'Sondages'
+    }
+  },
+  {
+    path: '/admin/gamification',
+    name: 'AdminGamification',
+    component: GamificationSettings,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Gamification'
+    }
+  },
+  {
+    path: '/admin/suggestions',
+    name: 'AdminSuggestions',
+    component: SuggestionsManagement,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Gestion suggestions'
+    }
+  },
+  {
+    path: '/admin/suggestion-categories',
+    name: 'AdminSuggestionCategories',
+    component: SuggestionCategoriesManagement,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Categories suggestions'
     }
   },
   {

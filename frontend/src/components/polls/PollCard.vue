@@ -136,6 +136,17 @@
               {{ t('polls.voting.viewResults') }}
             </button>
           </div>
+
+          <button
+            v-if="canRemoveVote"
+            @click="removeVote"
+            :disabled="isRemovingVote"
+            class="btn btn-danger-outline unvote-btn"
+          >
+            <Icon v-if="isRemovingVote" icon="mdi:loading" class="spin" />
+            <Icon v-else icon="mdi:undo" />
+            {{ isRemovingVote ? t('polls.voting.removingVote') : t('polls.voting.removeVote') }}
+          </button>
         </div>
 
         <!-- Actions -->
@@ -165,6 +176,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { pollsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
@@ -190,10 +202,12 @@ const props = defineProps({
 const emit = defineEmits(['vote-success', 'edit', 'delete', 'close', 'view-details'])
 
 const authStore = useAuthStore()
+const router = useRouter()
 const { t } = useI18n()
 
 const selectedOptions = ref([])
 const isVoting = ref(false)
+const isRemovingVote = ref(false)
 const hasVoted = ref(false)
 const showResults = ref(false)
 const userVotes = ref([]) // Stocker les votes de l'utilisateur
@@ -249,6 +263,22 @@ const isExpiringSoon = computed(() => {
 // Vérifier si l'utilisateur peut soumettre son vote
 const canSubmitVote = computed(() => {
   return selectedOptions.value.length > 0
+})
+
+const canRemoveVote = computed(() => {
+  if (!hasVoted.value || !props.poll?.is_active || isVoting.value || isRemovingVote.value) return false
+  if (props.poll.end_date && isAfter(new Date(), new Date(props.poll.end_date))) return false
+  return true
+})
+
+const selectedOtherOption = computed(() => {
+  if (!props.poll?.options?.length || !selectedOptions.value.length) {
+    return null
+  }
+
+  return props.poll.options.find(
+    (option) => option.is_other && selectedOptions.value.includes(option.id)
+  ) || null
 })
 
 // Vérifier si l'utilisateur peut fermer le sondage
@@ -316,6 +346,23 @@ const submitVote = async () => {
     if (window.$toast) {
       window.$toast.success(t('polls.voting.success'))
     }
+
+    if (selectedOtherOption.value) {
+      router.push({
+        path: '/suggestions',
+        query: {
+          from_poll: '1',
+          poll_id: String(props.poll.id),
+          poll_option_id: String(selectedOtherOption.value.id),
+          poll_title: props.poll.title,
+          option_text: selectedOtherOption.value.text
+        }
+      })
+
+      if (window.$toast) {
+        window.$toast.info(t('polls.voting.redirectToSuggestion'))
+      }
+    }
   } catch (error) {
     console.error(t('polls.voting.error'), error)
     if (window.$toast) {
@@ -323,6 +370,30 @@ const submitVote = async () => {
     }
   } finally {
     isVoting.value = false
+  }
+}
+
+const removeVote = async () => {
+  if (!canRemoveVote.value || isRemovingVote.value) return
+
+  try {
+    isRemovingVote.value = true
+    await pollsService.removeVote(props.poll.id)
+
+    hasVoted.value = false
+    userVotes.value = []
+    selectedOptions.value = []
+    showResults.value = props.poll.show_results === 'always'
+
+    if (window.$toast) {
+      window.$toast.success(t('polls.voting.removeVoteSuccess'))
+    }
+  } catch (error) {
+    if (window.$toast) {
+      window.$toast.error(error.response?.data?.error || t('polls.voting.removeVoteError'))
+    }
+  } finally {
+    isRemovingVote.value = false
   }
 }
 
@@ -837,6 +908,22 @@ const getWaitingMessage = () => {
   background: #d1d5db;
 }
 
+.btn-danger-outline {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.btn-danger-outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-ghost {
   background: transparent;
   color: #6b7280;
@@ -849,6 +936,10 @@ const getWaitingMessage = () => {
 .btn-sm {
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
+}
+
+.unvote-btn {
+  margin: 0.5rem auto 0;
 }
 
 .text-danger {

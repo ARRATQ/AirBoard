@@ -815,6 +815,38 @@ export const gamificationService = {
   async getTransactions() {
     const response = await api.get('/gamification/transactions')
     return response.data
+  },
+
+  // Admin - rules
+  async getRules() {
+    const response = await api.get('/admin/gamification/rules')
+    return response.data
+  },
+
+  async upsertRule(data) {
+    const response = await api.post('/admin/gamification/rules', data)
+    return response.data
+  },
+
+  // Admin - achievements
+  async getAdminAchievements() {
+    const response = await api.get('/admin/gamification/achievements')
+    return response.data
+  },
+
+  async createAchievement(data) {
+    const response = await api.post('/admin/gamification/achievements', data)
+    return response.data
+  },
+
+  async updateAchievement(id, data) {
+    const response = await api.put(`/admin/gamification/achievements/${id}`, data)
+    return response.data
+  },
+
+  async deleteAchievement(id) {
+    const response = await api.delete(`/admin/gamification/achievements/${id}`)
+    return response.data
   }
 }
 
@@ -1220,6 +1252,12 @@ export const pollsService = {
     return response.data
   },
 
+  // Retirer son vote d'un sondage
+  async removeVote(id) {
+    const response = await api.delete(`/polls/${id}/vote`)
+    return response.data
+  },
+
   // Récupérer les résultats d'un sondage
   async getResults(id) {
     const response = await api.get(`/polls/${id}/results`)
@@ -1235,6 +1273,69 @@ export const pollsService = {
   // Récupérer les sondages pour group admin
   async getPollsAsGroupAdmin(params = {}) {
     const response = await api.get('/group-admin/polls', { params })
+    return response.data
+  }
+}
+
+// ===== Suggestions Service =====
+export const suggestionsService = {
+  async getSuggestions(params = {}) {
+    const response = await api.get('/suggestions', { params })
+    return response.data
+  },
+
+  async getSuggestionById(id) {
+    const response = await api.get(`/suggestions/${id}`)
+    return response.data
+  },
+
+  async createSuggestion(data) {
+    const response = await api.post('/suggestions', data)
+    return response.data
+  },
+
+  async voteSuggestion(id, voteType) {
+    const response = await api.post(`/suggestions/${id}/vote`, { vote_type: voteType })
+    return response.data
+  },
+
+  async getCategories(params = {}) {
+    const response = await api.get('/suggestions/categories', { params })
+    return response.data
+  },
+
+  async getAdminSuggestions(params = {}) {
+    const response = await api.get('/admin/suggestions', { params })
+    return response.data
+  },
+
+  async updateSuggestionStatus(id, status) {
+    const response = await api.patch(`/admin/suggestions/${id}/status`, { status })
+    return response.data
+  },
+
+  async updateSuggestionArchive(id, isArchived) {
+    const response = await api.patch(`/admin/suggestions/${id}/archive`, { is_archived: isArchived })
+    return response.data
+  },
+
+  async getAdminCategories(params = {}) {
+    const response = await api.get('/admin/suggestion-categories', { params })
+    return response.data
+  },
+
+  async createCategory(data) {
+    const response = await api.post('/admin/suggestion-categories', data)
+    return response.data
+  },
+
+  async updateCategory(id, data) {
+    const response = await api.put(`/admin/suggestion-categories/${id}`, data)
+    return response.data
+  },
+
+  async deleteCategory(id) {
+    const response = await api.delete(`/admin/suggestion-categories/${id}`)
     return response.data
   }
 }

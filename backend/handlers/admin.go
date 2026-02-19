@@ -1433,11 +1433,14 @@ func (h *AdminHandler) ResetDatabase(c *gin.Context) {
 		"comments",
 		"feedbacks",
 		"notifications",
+		"suggestions",
+		"suggestion_votes",
 		"email_notification_logs",
 
 		// Tables avec relations
 		"poll_options",
 		"polls",
+		"suggestion_categories",
 		"events",
 		"event_categories",
 		"news",

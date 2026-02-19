@@ -94,6 +94,7 @@
     "dashboardAnalytics": "Dashboard & Analytics",
     "eventsManagement": "Events Management",
     "polls": "Polls",
+    "suggestions": "Suggestion Box",
     "pollsManagement": "Polls Management",
     "media": "Media",
     "usersAccess": "Users & Access",
@@ -1379,6 +1380,11 @@
       "thanksForVote": "Thank you for voting! Click below to view results.",
       "thanksResultsLater": "Thank you for voting! Results will be available after poll closure.",
       "success": "Vote recorded successfully!",
+      "redirectToSuggestion": "Thanks! Please describe your idea in the suggestion box.",
+      "removeVote": "Remove my vote",
+      "removingVote": "Removing vote...",
+      "removeVoteSuccess": "Your vote has been removed",
+      "removeVoteError": "Error while removing your vote",
       "error": "Error while voting"
     },
     "results": {
@@ -1417,7 +1423,10 @@
       "descriptionPlaceholder": "Add details or context...",
       "responseOptions": "Response Options",
       "optionPlaceholder": "Option {index}",
+      "markAsOther": "Mark as Other",
+      "optionIsOther": "Other option",
       "addOption": "Add an option",
+      "otherHelp": "Only one option can be marked as \"Other\".",
       "optionsHelp": "Minimum 2 options, maximum 10",
       "typeAndSettings": "Type and Settings",
       "pollType": "Poll Type",
@@ -1545,6 +1554,92 @@
       "deleteSuccess": "Media deleted successfully",
       "deleteError": "Failed to delete media"
     }
+  },
+  "suggestions": {
+    "title": "Suggestion Box",
+    "subtitle": "Share ideas and track their progress",
+    "newSuggestion": "New suggestion",
+    "viewDetails": "View details",
+    "backToList": "Back to suggestions",
+    "voteFor": "For",
+    "voteAgainst": "Against",
+    "removeVote": "Remove my vote",
+    "loading": "Loading suggestions...",
+    "loadError": "Error while loading suggestions",
+    "voteError": "Error while voting",
+    "notFound": "Suggestion not found",
+    "emptyTitle": "No suggestions yet",
+    "emptyDescription": "Be the first to propose an idea.",
+    "anonymous": "Anonymous",
+    "noCategory": "No category",
+    "manageCategories": "Suggestion categories",
+    "manageCategoriesHelp": "Create and organize categories available to the whole company.",
+    "admin": {
+      "title": "Suggestions management",
+      "subtitle": "Activate, archive, and track employee suggestions.",
+      "archivedAll": "All",
+      "archivedNo": "Active",
+      "archivedYes": "Archived",
+      "archivedBadge": "Archived",
+      "activeBadge": "Active",
+      "activate": "Activate",
+      "archive": "Archive",
+      "archivedDone": "Suggestion archived",
+      "activatedDone": "Suggestion activated"
+    },
+    "categoryLoadError": "Failed to load categories",
+    "categorySaveError": "Failed to save category",
+    "categoryDeleteError": "Failed to delete category",
+    "linkedPoll": "Linked poll",
+    "statusUpdated": "Status updated",
+    "statusUpdateError": "Failed to update status",
+    "filters": {
+      "search": "Search suggestions...",
+      "allCategories": "All categories",
+      "allStatuses": "All statuses"
+    },
+    "form": {
+      "title": "Submit an idea",
+      "subject": "Title",
+      "subjectPlaceholder": "e.g. Add keyboard shortcuts",
+      "category": "Category",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the need, the impact, and if possible a solution proposal.",
+      "anonymous": "Publish anonymously",
+      "submit": "Submit",
+      "validation": "Title and description are required",
+      "validationDescriptionMin": "Description must contain at least 3 characters",
+      "success": "Suggestion submitted successfully",
+      "error": "Error while submitting suggestion",
+      "fromPoll": "From poll",
+      "selectedOption": "Selected option"
+    },
+    "categories": {
+      "general": "General",
+      "functionality": "Functionality",
+      "ui": "User interface",
+      "process": "Internal process",
+      "performance": "Performance",
+      "bug": "Bug",
+      "other": "Other"
+    },
+    "statuses": {
+      "new": "Received",
+      "reviewing": "Reviewing",
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "implemented": "Delivered",
+      "rejected": "Declined"
+    }
+  },
+  "gamificationAdmin": {
+    "title": "Gamification",
+    "subtitle": "Adjust points and configure badges with unlock conditions.",
+    "rules": "Point rules",
+    "badges": "Badges",
+    "points": "Points",
+    "threshold": "Threshold",
+    "badgeReward": "XP reward"
   },
   "help": {
     "title": "Help",
@@ -1717,5 +1812,3 @@
     "xpReward": "{xp} XP Reward"
   }
 }
-
-

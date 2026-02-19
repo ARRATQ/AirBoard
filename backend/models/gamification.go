@@ -24,18 +24,32 @@ type GamificationProfile struct {
 
 // Achievement représente un badge à débloquer
 type Achievement struct {
-	ID          uint           `json:"id" gorm:"primaryKey"`
-	Code        string         `json:"code" gorm:"uniqueIndex"` // ex: "early_bird", "explorer"
-	Name        string         `json:"name" gorm:"not null"`
-	Description string         `json:"description"`
-	Icon        string         `json:"icon" gorm:"default:'mdi:medal'"`
-	Color       string         `json:"color" gorm:"default:'#FBBF24'"`
-	XPReward    int64          `json:"xp_reward" gorm:"default:0"`
-	Category    string         `json:"category" gorm:"default:'user'"` // user, contributor
-	IsSecret    bool           `json:"is_secret" gorm:"default:false"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	ID            uint           `json:"id" gorm:"primaryKey"`
+	Code          string         `json:"code" gorm:"uniqueIndex"` // ex: "early_bird", "explorer"
+	Name          string         `json:"name" gorm:"not null"`
+	Description   string         `json:"description"`
+	Icon          string         `json:"icon" gorm:"default:'mdi:medal'"`
+	Color         string         `json:"color" gorm:"default:'#FBBF24'"`
+	XPReward      int64          `json:"xp_reward" gorm:"default:0"`
+	Category      string         `json:"category" gorm:"default:'user'"` // user, contributor
+	TriggerReason string         `json:"trigger_reason" gorm:"default:''"`
+	Metric        string         `json:"metric" gorm:"default:''"`
+	Threshold     int64          `json:"threshold" gorm:"default:0"`
+	IsActive      bool           `json:"is_active" gorm:"default:true"`
+	IsSecret      bool           `json:"is_secret" gorm:"default:false"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+type GamificationRule struct {
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Reason    string         `json:"reason" gorm:"uniqueIndex;not null"`
+	Points    int64          `json:"points" gorm:"not null"`
+	Enabled   bool           `json:"enabled" gorm:"default:true"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 // UserAchievement lie un utilisateur à un badge débloqué
