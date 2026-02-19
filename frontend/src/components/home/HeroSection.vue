@@ -1,7 +1,17 @@
 <template>
   <div class="hero-section">
     <!-- Animated Background -->
-    <div class="hero-background">
+    <div
+      class="hero-background"
+      :class="{ 'has-bg-image': !!activeHeroImageUrl }"
+      :style="activeHeroImageUrl ? {
+        backgroundImage: `url(${activeHeroImageUrl})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: heroImagePosition
+      } : {}"
+    >
+      <div v-if="activeHeroImageUrl" class="hero-image-overlay"></div>
       <div class="gradient-orb orb-1"></div>
       <div class="gradient-orb orb-2"></div>
       <div class="gradient-orb orb-3"></div>
@@ -113,11 +123,29 @@ const props = defineProps({
   heroMessages: {
     type: Array,
     default: () => []
+  },
+  heroImageUrl: {
+    type: String,
+    default: ''
+  },
+  heroImageUrlDark: {
+    type: String,
+    default: ''
+  },
+  heroImagePosition: {
+    type: String,
+    default: 'center center'
   }
 })
 
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const { t } = useI18n()
+
+const activeHeroImageUrl = computed(() => {
+  if (appStore.isDarkMode && props.heroImageUrlDark) return props.heroImageUrlDark
+  return props.heroImageUrl
+})
 
 const currentAnnouncementIndex = ref(0)
 const slideDirection = ref('slide-left')
@@ -219,7 +247,7 @@ onUnmounted(() => {
   padding: 2rem 2rem 1.5rem;
   margin: 0 0 1.5rem;
   overflow: hidden;
-  border-radius: 0rem;
+  border-radius: 0;
   min-height: auto;
   width: 100%;
   max-width: 100%;
@@ -238,12 +266,44 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #1a1f3a 0%, #2d1b4e 50%, #3a1f5d 100%);
 }
 
+/* Background image mode */
+.hero-background.has-bg-image {
+  background-color: #0a0a14;
+}
+
+.hero-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 20, 60, 0.30) 0%,
+    rgba(40, 20, 70, 0.22) 50%,
+    rgba(30, 20, 60, 0.30) 100%
+  );
+  z-index: 0;
+}
+
+.dark .hero-image-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 20, 0.72) 0%,
+    rgba(20, 10, 40, 0.60) 50%,
+    rgba(10, 10, 20, 0.72) 100%
+  );
+}
+
 .gradient-orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(60px);
   opacity: 0.6;
   animation: float 20s ease-in-out infinite;
+  transition: opacity 0.6s ease;
+}
+
+/* Orbes atténués quand une image est active */
+.has-bg-image .gradient-orb {
+  opacity: 0.22;
 }
 
 .orb-1 {

@@ -185,6 +185,150 @@
 
             </div>
             </div>
+
+          <!-- Hero Background Image -->
+          <div>
+            <div class="section-header">
+              <Icon icon="mdi:image-outline" class="section-icon" />
+              <h4 class="section-title">Image de fond du Hero</h4>
+            </div>
+
+            <div class="space-y-6">
+              <p class="form-help">Personnalisez l'arrière-plan du bandeau d'accueil pour marquer des événements (Ramadan, fêtes, etc.). Laissez vide pour conserver le dégradé animé par défaut.</p>
+
+              <!-- Light theme image -->
+              <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <Icon icon="mdi:white-balance-sunny" class="h-4 w-4 text-yellow-400" />
+                  <span class="text-sm font-medium text-gray-300">Thème clair</span>
+                </div>
+
+                <!-- Preview light -->
+                <div v-if="form.hero_image_url" class="relative rounded-lg overflow-hidden h-28 bg-gray-800 border border-gray-600">
+                  <img
+                    :src="form.hero_image_url"
+                    alt="Aperçu image thème clair"
+                    class="w-full h-full object-cover"
+                    @error="form.hero_image_url = ''"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30 flex items-center justify-end p-3">
+                    <button
+                      type="button"
+                      @click="form.hero_image_url = ''"
+                      class="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-lg text-white transition-colors"
+                      title="Supprimer l'image"
+                    >
+                      <Icon icon="mdi:close" class="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- URL Input light -->
+                <div class="form-group">
+                  <div class="flex gap-2">
+                    <input
+                      v-model="form.hero_image_url"
+                      type="text"
+                      class="form-input flex-1"
+                      placeholder="https://example.com/hero-light.jpg"
+                    />
+                    <label
+                      class="btn btn-secondary cursor-pointer flex items-center gap-2 whitespace-nowrap"
+                      :class="{ 'opacity-60 pointer-events-none': heroImageUploading }"
+                    >
+                      <Icon v-if="heroImageUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
+                      <Icon v-else icon="mdi:upload" class="h-4 w-4" />
+                      <span>{{ heroImageUploading ? 'Upload...' : 'Uploader' }}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        class="sr-only"
+                        @change="handleHeroImageUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dark theme image -->
+              <div class="space-y-3">
+                <div class="flex items-center gap-2">
+                  <Icon icon="mdi:moon-waning-crescent" class="h-4 w-4 text-blue-400" />
+                  <span class="text-sm font-medium text-gray-300">Thème sombre</span>
+                  <span class="text-xs text-gray-500">(si vide, l'image du thème clair est utilisée)</span>
+                </div>
+
+                <!-- Preview dark -->
+                <div v-if="form.hero_image_url_dark" class="relative rounded-lg overflow-hidden h-28 bg-gray-900 border border-gray-600">
+                  <img
+                    :src="form.hero_image_url_dark"
+                    alt="Aperçu image thème sombre"
+                    class="w-full h-full object-cover"
+                    @error="form.hero_image_url_dark = ''"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-black/30 flex items-center justify-end p-3">
+                    <button
+                      type="button"
+                      @click="form.hero_image_url_dark = ''"
+                      class="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-lg text-white transition-colors"
+                      title="Supprimer l'image sombre"
+                    >
+                      <Icon icon="mdi:close" class="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- URL Input dark -->
+                <div class="form-group">
+                  <div class="flex gap-2">
+                    <input
+                      v-model="form.hero_image_url_dark"
+                      type="text"
+                      class="form-input flex-1"
+                      placeholder="https://example.com/hero-dark.jpg"
+                    />
+                    <label
+                      class="btn btn-secondary cursor-pointer flex items-center gap-2 whitespace-nowrap"
+                      :class="{ 'opacity-60 pointer-events-none': heroImageDarkUploading }"
+                    >
+                      <Icon v-if="heroImageDarkUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
+                      <Icon v-else icon="mdi:upload" class="h-4 w-4" />
+                      <span>{{ heroImageDarkUploading ? 'Upload...' : 'Uploader' }}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        class="sr-only"
+                        @change="handleHeroImageDarkUpload"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <p class="form-help">Format idéal : 1920×480 px. JPEG, PNG ou WebP recommandés.</p>
+
+              <!-- Position selector (visible only when at least one image is set) -->
+              <div v-if="form.hero_image_url || form.hero_image_url_dark" class="form-group">
+                <label class="form-label">Point de cadrage</label>
+                <div class="grid grid-cols-3 gap-1.5 w-36">
+                  <button
+                    v-for="pos in positions"
+                    :key="pos.value"
+                    type="button"
+                    @click="form.hero_image_position = pos.value"
+                    :title="pos.label"
+                    class="h-9 rounded-md border transition-colors flex items-center justify-center"
+                    :class="form.hero_image_position === pos.value
+                      ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                      : 'border-gray-600 bg-gray-800 text-gray-500 hover:border-gray-500 hover:text-gray-300'"
+                  >
+                    <Icon :icon="pos.icon" class="h-4 w-4" />
+                  </button>
+                </div>
+                <p class="form-help mt-2">Choisissez quelle zone de l'image reste visible.</p>
+              </div>
+            </div>
+          </div>
           </div>
 
           <!-- HERO MESSAGES TAB -->
@@ -617,7 +761,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import { adminService } from '@/services/api'
+import { adminService, uploadAdminMedia } from '@/services/api'
 import { authService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import IconInput from '@/components/ui/IconInput.vue'
@@ -652,8 +796,26 @@ const form = reactive({
   dashboard_title: '',
   welcome_message: '',
   signup_enabled: true,
-  default_group_id: null
+  default_group_id: null,
+  hero_image_url: '',
+  hero_image_url_dark: '',
+  hero_image_position: 'center center'
 })
+
+const heroImageUploading = ref(false)
+const heroImageDarkUploading = ref(false)
+
+const positions = [
+  { value: 'left top',     icon: 'mdi:arrow-top-left',     label: 'Haut gauche' },
+  { value: 'center top',   icon: 'mdi:arrow-up',           label: 'Haut centre' },
+  { value: 'right top',    icon: 'mdi:arrow-top-right',    label: 'Haut droite' },
+  { value: 'left center',  icon: 'mdi:arrow-left',         label: 'Milieu gauche' },
+  { value: 'center center',icon: 'mdi:circle-small',       label: 'Centre' },
+  { value: 'right center', icon: 'mdi:arrow-right',        label: 'Milieu droite' },
+  { value: 'left bottom',  icon: 'mdi:arrow-bottom-left',  label: 'Bas gauche' },
+  { value: 'center bottom',icon: 'mdi:arrow-down',         label: 'Bas centre' },
+  { value: 'right bottom', icon: 'mdi:arrow-bottom-right', label: 'Bas droite' },
+]
 
 const groups = ref([])
 
@@ -677,6 +839,46 @@ const loadGroups = async () => {
   }
 }
 
+const handleHeroImageUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  heroImageUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await uploadAdminMedia(formData)
+    form.hero_image_url = response.data.media.url
+    appStore.showSuccess('Image uploadée avec succès')
+  } catch (error) {
+    console.error('Error uploading hero image:', error)
+    appStore.showError("Échec de l'upload de l'image")
+  } finally {
+    heroImageUploading.value = false
+    event.target.value = ''
+  }
+}
+
+const handleHeroImageDarkUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  heroImageDarkUploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await uploadAdminMedia(formData)
+    form.hero_image_url_dark = response.data.media.url
+    appStore.showSuccess('Image sombre uploadée avec succès')
+  } catch (error) {
+    console.error('Error uploading dark hero image:', error)
+    appStore.showError("Échec de l'upload de l'image sombre")
+  } finally {
+    heroImageDarkUploading.value = false
+    event.target.value = ''
+  }
+}
+
 const loadSettings = async () => {
   try {
     appStore.setLoading(true)
@@ -688,7 +890,10 @@ const loadSettings = async () => {
       dashboard_title: data.dashboard_title || 'Dashboard',
       welcome_message: data.welcome_message || 'Welcome to your application portal',
       signup_enabled: data.signup_enabled !== undefined ? data.signup_enabled : true,
-      default_group_id: data.default_group_id || null
+      default_group_id: data.default_group_id || null,
+      hero_image_url: data.hero_image_url || '',
+      hero_image_url_dark: data.hero_image_url_dark || '',
+      hero_image_position: data.hero_image_position || 'center center'
     })
   } catch (error) {
     // Ne pas afficher d'erreur si l'utilisateur n'est pas authentifié (lors de la déconnexion)

@@ -213,7 +213,10 @@ type AppSettings struct {
 	HomePageMessage string    `json:"home_page_message" gorm:"default:'Discover your personalized workspace'"` // Message pour la page d'accueil
 	SignupEnabled   bool      `json:"signup_enabled" gorm:"default:true"`                                      // Activer/désactiver l'inscription
 	DefaultGroupID  *uint     `json:"default_group_id" gorm:"default:null"`
-	CreatedAt       time.Time `json:"created_at"`
+	HeroImageURL      string    `json:"hero_image_url" gorm:"default:''"` // URL de l'image de fond du hero (vide = gradient par défaut)
+	HeroImageURLDark  string    `json:"hero_image_url_dark" gorm:"default:''"` // URL de l'image de fond du hero en mode sombre (vide = utilise hero_image_url)
+	HeroImagePosition string    `json:"hero_image_position" gorm:"default:'center center'"` // Position CSS background-position
+	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
@@ -226,6 +229,9 @@ type AppSettingsRequest struct {
 	HomePageMessage string `json:"home_page_message"`                        // Message pour page d'accueil (optionnel)
 	SignupEnabled   *bool  `json:"signup_enabled"`                           // Activer/désactiver l'inscription
 	DefaultGroupID  *uint  `json:"default_group_id"`
+	HeroImageURL      string `json:"hero_image_url"`       // URL de l'image de fond du hero (optionnel)
+	HeroImageURLDark  string `json:"hero_image_url_dark"`  // URL de l'image en mode sombre (optionnel)
+	HeroImagePosition string `json:"hero_image_position"`  // Position CSS background-position (optionnel)
 }
 
 // ChangePasswordRequest pour les changements de mot de passe

@@ -34,6 +34,9 @@
         :show-quick-stats="true"
         :announcements="homeData.announcements || []"
         :hero-messages="homeData.hero_messages || []"
+        :hero-image-url="homeData.app_settings?.hero_image_url || ''"
+        :hero-image-url-dark="homeData.app_settings?.hero_image_url_dark || ''"
+        :hero-image-position="homeData.app_settings?.hero_image_position || 'center center'"
       />
 
       <!-- Optimized 3-Column Grid Layout -->
@@ -282,10 +285,12 @@ onMounted(() => {
   font-size: 1.25rem;
 }
 
+
 /* Home Content */
 .home-content {
   animation: fadeIn 0.6s ease-out;
 }
+
 
 @keyframes fadeIn {
   from {

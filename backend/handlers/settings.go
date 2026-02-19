@@ -87,13 +87,16 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 				signupEnabled = *request.SignupEnabled
 			}
 			settings = models.AppSettings{
-				AppName:         request.AppName,
-				AppIcon:         request.AppIcon,
-				DashboardTitle:  request.DashboardTitle,
-				WelcomeMessage:  request.WelcomeMessage,
-				HomePageMessage: request.HomePageMessage,
-				SignupEnabled:   signupEnabled,
-				DefaultGroupID:  request.DefaultGroupID,
+				AppName:           request.AppName,
+				AppIcon:           request.AppIcon,
+				DashboardTitle:    request.DashboardTitle,
+				WelcomeMessage:    request.WelcomeMessage,
+				HomePageMessage:   request.HomePageMessage,
+				SignupEnabled:     signupEnabled,
+				DefaultGroupID:    request.DefaultGroupID,
+				HeroImageURL:      request.HeroImageURL,
+				HeroImageURLDark:  request.HeroImageURLDark,
+				HeroImagePosition: request.HeroImagePosition,
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
@@ -123,6 +126,9 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 			settings.SignupEnabled = *request.SignupEnabled
 		}
 		settings.DefaultGroupID = request.DefaultGroupID
+		settings.HeroImageURL = request.HeroImageURL
+		settings.HeroImageURLDark = request.HeroImageURLDark
+		settings.HeroImagePosition = request.HeroImagePosition
 
 		if err := h.DB.Save(&settings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -167,6 +173,9 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	settings.WelcomeMessage = "Welcome to your application portal"
 	settings.HomePageMessage = "Discover your personalized workspace"
 	settings.SignupEnabled = true
+	settings.HeroImageURL = ""
+	settings.HeroImageURLDark = ""
+	settings.HeroImagePosition = "center center"
 
 	if result.Error == gorm.ErrRecordNotFound {
 		// Créer de nouveaux paramètres avec les valeurs par défaut
