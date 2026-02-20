@@ -255,7 +255,19 @@
     "confirmResetButton": "Sí, restablecer",
     "confirmResetCancel": "Cancelar",
     "resetInProgress": "Restableciendo...",
-    "newsArticles": "Artículos de noticias"
+    "newsArticles": "Artículos de noticias",
+    "newsCategories": "Categorías de artículos",
+    "newsCategoriesHelp": "Gestiona las categorías de artículos de noticias",
+    "categoryLoadError": "Error al cargar las categorías",
+    "categorySaveError": "Error al guardar la categoría",
+    "categoryDeleteError": "Error al eliminar la categoría",
+    "noCategory": "Sin categorías",
+    "newsTypes": "Tipos de artículos",
+    "newsTypesHelp": "Gestiona los tipos de artículos (artículo, tutorial, anuncio, FAQ)",
+    "typeLoadError": "Error al cargar los tipos",
+    "typeSaveError": "Error al guardar el tipo",
+    "typeDeleteError": "Error al eliminar el tipo",
+    "noType": "Sin tipos"
   },
   "appGroups": {
     "subtitle": "Organiza tus aplicaciones en grupos",

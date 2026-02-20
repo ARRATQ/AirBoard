@@ -648,6 +648,30 @@ export const newsService = {
     return response.data
   },
 
+  // User - Get types
+  async getTypes() {
+    const response = await api.get('/news/types')
+    return response.data
+  },
+
+  // Admin - Create type
+  async createType(data) {
+    const response = await api.post('/admin/news/types', data)
+    return response.data
+  },
+
+  // Admin - Update type
+  async updateType(id, data) {
+    const response = await api.put(`/admin/news/types/${id}`, data)
+    return response.data
+  },
+
+  // Admin - Delete type
+  async deleteType(id) {
+    const response = await api.delete(`/admin/news/types/${id}`)
+    return response.data
+  },
+
   // Admin - Toggle pin
   async togglePin(id) {
     const response = await api.post(`/admin/news/${id}/pin`)

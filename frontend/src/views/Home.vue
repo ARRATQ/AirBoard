@@ -66,12 +66,21 @@
 
         <!-- Column 2 (50% width) - Content Hub -->
         <div class="column-2">
-          <!-- Recent News (Medium) -->
-          <div v-if="homeData.recent_news?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="100">
-            <RecentNewsWidget :news="homeData.recent_news" />
+          <!-- Recent News by Type - Individual Blocks -->
+          <div
+            v-for="(newsGroup, index) in homeData.recent_news_by_type"
+            :key="newsGroup.type.id"
+            class="bento-item"
+            :data-aos="'fade-up'"
+            :data-aos-delay="100 + index * 50"
+          >
+            <NewsTypeBlock :news-type="newsGroup.type" :news="newsGroup.news" />
           </div>
 
-
+          <!-- Fallback: Recent News (if no grouped news) -->
+          <div v-if="!homeData.recent_news_by_type?.length && homeData.recent_news?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="100">
+            <RecentNewsWidget :news="homeData.recent_news" />
+          </div>
         </div>
 
         <!-- Column 3 (25% width) - Time-based Information -->
@@ -111,6 +120,7 @@ import FavoriteAppsWidget from '@/components/home/FavoriteAppsWidget.vue'
 import NewAppsWidget from '@/components/home/NewAppsWidget.vue'
 import UpcomingEventsWidget from '@/components/home/UpcomingEventsWidget.vue'
 import RecentNewsWidget from '@/components/home/RecentNewsWidget.vue'
+import NewsTypeBlock from '@/components/home/NewsTypeBlock.vue'
 import PollsWidget from '@/components/home/PollsWidget.vue'
 import GamificationWidget from '@/components/home/GamificationWidget.vue'
 

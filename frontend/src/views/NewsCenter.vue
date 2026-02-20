@@ -49,17 +49,21 @@
         </div>
 
         <!-- Type Filter -->
-        <div>
+        <div class="w-full">
+          <div v-if="typesStore.types.length > 0">
+            <TypeSelect
+              :model-value="filters.type || ''"
+              :types="[{ id: 'all', slug: '', name: $t('news.center.allTypes'), icon: 'mdi:filter', color: '#6B7280' }, ...typesStore.types]"
+              @update:model-value="filters.type = $event || null; fetchNews()"
+            />
+          </div>
           <select
+            v-else
             v-model="filters.type"
             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             @change="fetchNews"
           >
             <option :value="null">{{ $t('news.center.allTypes') }}</option>
-            <option value="article">{{ $t('news.types.article') }}</option>
-            <option value="tutorial">{{ $t('news.types.tutorial') }}</option>
-            <option value="announcement">{{ $t('news.types.announcement') }}</option>
-            <option value="faq">{{ $t('news.types.faq') }}</option>
           </select>
         </div>
 
@@ -196,13 +200,16 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useNewsTypesStore } from '@/stores/newsTypes'
 import { newsService } from '@/services/api'
 import NewsCard from '@/components/news/NewsCard.vue'
 import NewsCardCompact from '@/components/news/NewsCardCompact.vue'
 import ViewModeSelector from '@/components/news/ViewModeSelector.vue'
 import SortSelector from '@/components/news/SortSelector.vue'
+import TypeSelect from '@/components/news/TypeSelect.vue'
 
 const router = useRouter()
+const typesStore = useNewsTypesStore()
 
 // View Mode
 const viewMode = ref(localStorage.getItem('news-view-mode') || 'grid')
@@ -372,7 +379,15 @@ const sortNewsList = () => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  await typesStore.fetchTypes()
+
+  // Initialize filters from query parameters
+  const typeParam = router.currentRoute.value.query.type
+  if (typeParam) {
+    filters.value.type = typeParam
+  }
+
   fetchNews()
   fetchCategories()
   fetchTags()

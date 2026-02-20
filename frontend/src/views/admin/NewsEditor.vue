@@ -173,12 +173,7 @@
                   <Icon icon="mdi:shape" class="h-4 w-4" />
                   Type
                 </label>
-                <select v-model="form.type" class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
-                  <option value="article">📄 Article</option>
-                  <option value="tutorial">📚 Tutorial</option>
-                  <option value="announcement">📢 Announcement</option>
-                  <option value="faq">FAQ</option>
-                </select>
+                <TypeSelect v-model="form.type" :types="typesStore.types" />
               </div>
 
               <!-- Priority -->
@@ -379,12 +374,15 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '@/stores/app'
+import { useNewsTypesStore } from '@/stores/newsTypes'
 import { newsService } from '@/services/api'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
+import TypeSelect from '@/components/news/TypeSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const typesStore = useNewsTypesStore()
 
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
 const isSaving = ref(false)
@@ -563,7 +561,8 @@ const saveNews = async () => {
 }
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
+  await typesStore.fetchTypes()
   loadMetadata()
   loadNews()
 })

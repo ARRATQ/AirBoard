@@ -18,7 +18,7 @@ type News struct {
 	Summary     string     `json:"summary" gorm:"type:varchar(300)"` // Résumé court (max 300 chars)
 	Content     string     `json:"content" gorm:"type:text"`         // Contenu riche (JSON Tiptap)
 	CoverImage  string     `json:"cover_image"`                      // URL de l'image de couverture (pour plus tard)
-	Type        string     `json:"type" gorm:"default:'article'"`    // article, tutorial, announcement, faq
+	Type        string     `json:"type" gorm:"default:'article';index"` // article, tutorial, announcement, faq - kept for backward compatibility
 	Priority    string     `json:"priority" gorm:"default:'normal'"` // urgent, important, normal
 	IsPinned    bool       `json:"is_pinned" gorm:"default:false"`
 	IsPublished bool       `json:"is_published" gorm:"default:false"`
@@ -32,6 +32,8 @@ type News struct {
 	Author     User          `json:"author" gorm:"foreignKey:AuthorID"`
 	CategoryID *uint         `json:"category_id"`
 	Category   *NewsCategory `json:"category,omitempty" gorm:"foreignKey:CategoryID"`
+	NewsTypeID *uint         `json:"news_type_id"` // Foreign key to NewsType (preferred over Type string)
+	NewsType   *NewsType     `json:"news_type,omitempty" gorm:"foreignKey:NewsTypeID"`
 	Tags       []Tag         `json:"tags" gorm:"many2many:news_tags;"`
 
 	// Groupes cibles (visibilité)
@@ -63,6 +65,20 @@ type NewsCategory struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+// NewsType représente un type d'article (article, tutorial, announcement, faq)
+type NewsType struct {
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Name      string         `json:"name" gorm:"not null;uniqueIndex"`
+	Slug      string         `json:"slug" gorm:"not null;uniqueIndex:idx_news_type_slug,where:deleted_at IS NULL"`
+	Icon      string         `json:"icon" gorm:"default:'mdi:newspaper'"`
+	Color     string         `json:"color" gorm:"default:'#3B82F6'"`
+	Order     int            `json:"order" gorm:"default:0"`
+	IsActive  bool           `json:"is_active" gorm:"default:true"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 // Tag représente un tag/étiquette
@@ -129,6 +145,15 @@ type CategoryRequest struct {
 	Color       string `json:"color"`
 	Order       int    `json:"order"`
 	IsActive    bool   `json:"is_active"`
+}
+
+// NewsTypeRequest pour la création/modification de types d'articles
+type NewsTypeRequest struct {
+	Name     string `json:"name" binding:"required,max=100"`
+	Icon     string `json:"icon" binding:"max=100"`
+	Color    string `json:"color" binding:"max=7"`
+	Order    int    `json:"order" binding:"min=0,max=999"`
+	IsActive bool   `json:"is_active"`
 }
 
 // TagRequest pour la création/modification de tags
@@ -212,6 +237,28 @@ func (c *NewsCategory) BeforeSave(tx *gorm.DB) error {
 func (t *Tag) BeforeSave(tx *gorm.DB) error {
 	if t.Slug == "" {
 		t.Slug = generateSlug(t.Name)
+	}
+	return nil
+}
+
+// BeforeSave hook pour générer le slug automatiquement
+func (nt *NewsType) BeforeSave(tx *gorm.DB) error {
+	if nt.Slug == "" {
+		baseSlug := generateSlug(nt.Name)
+		slug := baseSlug
+
+		// Vérifier l'unicité du slug (seulement pour les enregistrements non supprimés)
+		var count int64
+		for i := 1; ; i++ {
+			tx.Model(&NewsType{}).Where("slug = ? AND deleted_at IS NULL AND id != ?", slug, nt.ID).Count(&count)
+			if count == 0 {
+				break
+			}
+			// Si le slug existe déjà, ajouter un suffixe numérique
+			slug = fmt.Sprintf("%s-%d", baseSlug, i)
+		}
+
+		nt.Slug = slug
 	}
 	return nil
 }

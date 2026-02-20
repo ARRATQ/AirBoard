@@ -255,7 +255,20 @@
     "confirmResetWarning": "سيتم حذف جميع البيانات الحالية بشكل دائم.",
     "confirmResetButton": "نعم، إعادة التعيين",
     "confirmResetCancel": "إلغاء",
-    "resetInProgress": "جارٍ إعادة التعيين..."
+    "resetInProgress": "جارٍ إعادة التعيين...",
+    "newsArticles": "مقالات الأخبار",
+    "newsCategories": "فئات المقالات",
+    "newsCategoriesHelp": "إدارة فئات مقالات الأخبار",
+    "categoryLoadError": "خطأ في تحميل الفئات",
+    "categorySaveError": "خطأ في حفظ الفئة",
+    "categoryDeleteError": "خطأ في حذف الفئة",
+    "noCategory": "لا توجد فئات",
+    "newsTypes": "أنواع المقالات",
+    "newsTypesHelp": "إدارة أنواع المقالات (مقالة، برنامج تعليمي، إعلان، أسئلة شائعة)",
+    "typeLoadError": "خطأ في تحميل الأنواع",
+    "typeSaveError": "خطأ في حفظ النوع",
+    "typeDeleteError": "خطأ في حذف النوع",
+    "noType": "لا توجد أنواع"
   },
   "appGroups": {
     "subtitle": "نظم تطبيقاتك في مجموعات",

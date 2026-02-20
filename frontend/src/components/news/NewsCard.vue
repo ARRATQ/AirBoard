@@ -9,12 +9,10 @@
         <div class="flex items-center gap-2 flex-wrap">
           <!-- Type Badge -->
           <span
-            :class="[
-              'px-3 py-1 rounded-full text-xs font-medium',
-              getTypeBadgeClass(news.type)
-            ]"
+            class="px-3 py-1 rounded-full text-xs font-medium"
+            :style="typeBadgeStyle"
           >
-            {{ $t(`news.types.${news.type}`) }}
+            {{ typeLabel }}
           </span>
 
           <!-- Priority Badge -->
@@ -127,10 +125,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
-import { useRouter } from 'vue-router'
+import { useNewsTypesStore } from '@/stores/newsTypes'
 
-const router = useRouter()
+const typesStore = useNewsTypesStore()
 
 const props = defineProps({
   news: {
@@ -141,23 +140,40 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
-const handleClick = () => {
-  // Emit event for parent components that want to handle it
-  emit('click')
-  // Also navigate directly as fallback
-  if (props.news && props.news.slug) {
-    router.push({ name: 'NewsDetail', params: { slug: props.news.slug } })
+// Get type data from store
+const typeData = computed(() => {
+  if (!typesStore.types.length && !typesStore.loaded) {
+    // If types not loaded yet, use defaults
+    const defaults = {
+      article: { color: '#3B82F6', icon: 'mdi:text-box', name: 'Article' },
+      tutorial: { color: '#10B981', icon: 'mdi:book-open-variant', name: 'Tutorial' },
+      announcement: { color: '#8B5CF6', icon: 'mdi:bullhorn', name: 'Announcement' },
+      faq: { color: '#F59E0B', icon: 'mdi:help-circle', name: 'FAQ' }
+    }
+    return defaults[props.news.type] || defaults.article
   }
-}
+  return typesStore.getTypeBySlug(props.news.type) || {}
+})
 
-const getTypeBadgeClass = (type) => {
-  const classes = {
-    article: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    tutorial: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-    announcement: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-    faq: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+// Get type label - uses store data instead of i18n
+const typeLabel = computed(() => {
+  const type = typeData.value
+  return type.name || props.news.type
+})
+
+// Compute badge style
+const typeBadgeStyle = computed(() => {
+  const color = typeData.value.color || '#3B82F6'
+  // Lighten the color for background
+  return {
+    backgroundColor: color + '20', // Add 20% opacity
+    color: color
   }
-  return classes[type] || classes.article
+})
+
+const handleClick = () => {
+  // Emit event for parent components to handle navigation
+  emit('click')
 }
 
 const formatDate = (dateString) => {

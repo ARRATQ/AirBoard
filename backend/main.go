@@ -44,6 +44,7 @@ func main() {
 		&models.Announcement{},
 		&models.News{},
 		&models.NewsCategory{},
+		&models.NewsType{},
 		&models.Tag{},
 		&models.NewsReaction{},
 		&models.NewsRead{},
@@ -106,6 +107,14 @@ func main() {
 		log.Println("✓ Index unique partiel créé/vérifié pour news_categories.slug")
 	}
 
+	// NewsType slug
+	db.Exec("DROP INDEX IF EXISTS idx_news_type_slug")
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_news_type_slug ON news_types(slug) WHERE deleted_at IS NULL").Error; err != nil {
+		log.Printf("Avertissement: Impossible de créer l'index unique partiel pour news_types.slug: %v", err)
+	} else {
+		log.Println("✓ Index unique partiel créé/vérifié pour news_types.slug")
+	}
+
 	// Tag slug
 	db.Exec("DROP INDEX IF EXISTS idx_tag_slug")
 	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_tag_slug ON tags(slug) WHERE deleted_at IS NULL").Error; err != nil {
@@ -151,6 +160,7 @@ func main() {
 		log.Fatalf("Erreur lors de la création des données initiales: %v", err)
 	}
 	ensureDefaultSuggestionCategories(db)
+	ensureDefaultNewsTypes(db)
 
 	// Initialiser le service email global
 	InitEmailService(db, cfg)
@@ -366,6 +376,7 @@ func main() {
 			// Routes spécifiques d'abord (avant les routes avec paramètres)
 			news.GET("/unread/count", newsHandler.GetUnreadCount) // Nombre de news non lues
 			news.GET("/categories", newsHandler.GetCategories)    // Catégories (lecture seule)
+			news.GET("/types", newsHandler.GetNewsTypes)          // Types d'articles (lecture seule)
 			news.GET("/tags", newsHandler.GetTags)                // Tags (lecture seule)
 
 			// Routes avec ID numérique
@@ -540,6 +551,11 @@ func main() {
 			admin.POST("/news/categories", newsHandler.CreateCategory)
 			admin.PUT("/news/categories/:id", newsHandler.UpdateCategory)
 			admin.DELETE("/news/categories/:id", newsHandler.DeleteCategory)
+
+			// Gestion des types d'articles (admin uniquement)
+			admin.POST("/news/types", newsHandler.CreateNewsType)
+			admin.PUT("/news/types/:id", newsHandler.UpdateNewsType)
+			admin.DELETE("/news/types/:id", newsHandler.DeleteNewsType)
 
 			// Épingler des news (admin uniquement)
 			admin.POST("/news/:id/pin", newsHandler.TogglePin)
@@ -1365,6 +1381,30 @@ func ensureDefaultSuggestionCategories(db *gorm.DB) {
 			log.Printf("Avertissement: impossible de verifier la categorie suggestion %s: %v", category.Slug, err)
 		}
 	}
+}
+
+func ensureDefaultNewsTypes(db *gorm.DB) {
+	defaults := []models.NewsType{
+		{Name: "Article", Slug: "article", Icon: "mdi:text-box", Color: "#3B82F6", Order: 1, IsActive: true},
+		{Name: "Tutorial", Slug: "tutorial", Icon: "mdi:book-open-variant", Color: "#10B981", Order: 2, IsActive: true},
+		{Name: "Announcement", Slug: "announcement", Icon: "mdi:bullhorn", Color: "#8B5CF6", Order: 3, IsActive: true},
+		{Name: "FAQ", Slug: "faq", Icon: "mdi:help-circle", Color: "#F59E0B", Order: 4, IsActive: true},
+	}
+
+	for _, newsType := range defaults {
+		var existing models.NewsType
+		err := db.Where("slug = ?", newsType.Slug).First(&existing).Error
+		if err == gorm.ErrRecordNotFound {
+			if createErr := db.Create(&newsType).Error; createErr != nil {
+				log.Printf("Avertissement: impossible de creer le type de news %s: %v", newsType.Slug, createErr)
+			}
+			continue
+		}
+		if err != nil {
+			log.Printf("Avertissement: impossible de verifier le type de news %s: %v", newsType.Slug, err)
+		}
+	}
+	log.Println("✓ Types d'articles par défaut créés/vérifiés")
 }
 
 func createDefaultEmailTemplates(db *gorm.DB) error {

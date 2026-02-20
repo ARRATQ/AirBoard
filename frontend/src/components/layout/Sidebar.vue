@@ -150,6 +150,16 @@
             <span>{{ $t('admin.newsArticles') }}</span>
           </router-link>
 
+          <router-link to="/admin/news-categories" :class="getLinkClasses('/admin/news-categories')">
+            <Icon icon="mdi:tag-multiple-outline" class="h-4 w-4" />
+            <span>{{ $t('admin.newsCategories') }}</span>
+          </router-link>
+
+          <router-link to="/admin/news-types" :class="getLinkClasses('/admin/news-types')">
+            <Icon icon="mdi:shape-outline" class="h-4 w-4" />
+            <span>{{ $t('admin.newsTypes') }}</span>
+          </router-link>
+
           <router-link to="/admin/events" :class="getLinkClasses('/admin/events')">
             <Icon icon="mdi:calendar-edit" class="h-4 w-4" />
             <span>{{ $t('common.eventsManagement') }}</span>

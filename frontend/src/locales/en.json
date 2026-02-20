@@ -286,7 +286,19 @@
     "confirmResetButton": "Yes, reset",
     "confirmResetCancel": "Cancel",
     "resetInProgress": "Resetting...",
-    "newsArticles": "News Articles"
+    "newsArticles": "News Articles",
+    "newsCategories": "Article Categories",
+    "newsCategoriesHelp": "Manage news article categories",
+    "categoryLoadError": "Error loading categories",
+    "categorySaveError": "Error saving category",
+    "categoryDeleteError": "Error deleting category",
+    "noCategory": "No categories",
+    "newsTypes": "Article Types",
+    "newsTypesHelp": "Manage article types (article, tutorial, announcement, FAQ)",
+    "typeLoadError": "Error loading types",
+    "typeSaveError": "Error saving type",
+    "typeDeleteError": "Error deleting type",
+    "noType": "No types"
   },
   "appGroups": {
     "subtitle": "Organize your applications into groups",

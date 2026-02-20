@@ -303,7 +303,19 @@
     "confirmResetButton": "Oui, réinitialiser",
     "confirmResetCancel": "Annuler",
     "resetInProgress": "Réinitialisation...",
-    "newsArticles": "Articles d'actualité"
+    "newsArticles": "Articles d'actualité",
+    "newsCategories": "Catégories d'articles",
+    "newsCategoriesHelp": "Gérez les catégories d'articles d'actualité",
+    "categoryLoadError": "Erreur lors du chargement des catégories",
+    "categorySaveError": "Erreur lors de l'enregistrement de la catégorie",
+    "categoryDeleteError": "Erreur lors de la suppression de la catégorie",
+    "noCategory": "Aucune catégorie",
+    "newsTypes": "Types d'articles",
+    "newsTypesHelp": "Gérez les types d'articles (article, tutoriel, annonce, FAQ)",
+    "typeLoadError": "Erreur lors du chargement des types",
+    "typeSaveError": "Erreur lors de l'enregistrement du type",
+    "typeDeleteError": "Erreur lors de la suppression du type",
+    "noType": "Aucun type"
   },
   "appGroups": {
     "subtitle": "Organisez vos applications en groupes",

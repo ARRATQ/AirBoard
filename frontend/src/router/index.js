@@ -20,6 +20,8 @@ const PollsManagement = () => import('@/views/admin/PollsManagement.vue')
 const GamificationSettings = () => import('@/views/admin/GamificationSettings.vue')
 const SuggestionsManagement = () => import('@/views/admin/SuggestionsManagement.vue')
 const MediaManagement = () => import('@/views/admin/MediaManagement.vue')
+const NewsCategoriesManagement = () => import('@/views/admin/NewsCategoriesManagement.vue')
+const NewsTypesManagement = () => import('@/views/admin/NewsTypesManagement.vue')
 
 // Group Admin views
 const GroupAdminDashboard = () => import('@/views/group-admin/GroupAdminDashboard.vue')
@@ -321,6 +323,26 @@ const routes = [
       requiresAuth: true,
       requiresEditor: true,
       title: 'News Hub'
+    }
+  },
+  {
+    path: '/admin/news-categories',
+    name: 'AdminNewsCategories',
+    component: NewsCategoriesManagement,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Catégories d\'articles'
+    }
+  },
+  {
+    path: '/admin/news-types',
+    name: 'AdminNewsTypes',
+    component: NewsTypesManagement,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Types d\'articles'
     }
   },
   {
