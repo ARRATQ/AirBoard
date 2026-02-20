@@ -1,7 +1,7 @@
 {
   "name": "airboard-frontend",
-  "version": "1.6.1",
-  "description": "Frontend Vue.js pour Airboard - Portail applicatif",
+  "version": "2.0.0",
+  "description": "Frontend Vue.js pour Airboard - Portail applicatif avec gamification, suggestions et recherche",
   "type": "module",
   "private": true,
   "scripts": {

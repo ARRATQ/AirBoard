@@ -246,6 +246,85 @@ Airboard transforms how organizations manage digital resources, internal communi
   - Activation/deactivation
   - Preview
 
+### Gamification System (NEW in v2.0)
+
+- **User Achievements**
+  - Level-based progression
+  - XP system with customizable rules
+  - Badges for milestones (First login, Article reader, Active contributor, etc.)
+  - Achievement history and tracking
+
+- **Leaderboards**
+  - Global XP rankings
+  - Top users by activity
+  - Weekly/monthly performance tracking
+  - Customizable ranking criteria
+
+- **Rewards**
+  - XP gained from: first login, article views, reactions, comments, poll votes
+  - Badge unlocking at milestones
+  - Achievement notifications
+  - User level progression
+
+- **Gamification Dashboard**
+  - Personal stats (level, XP, badges)
+  - Progress to next level
+  - Recent achievements
+  - Leaderboard widget on home page
+
+### Suggestion Box System (NEW in v2.0)
+
+- **User Suggestions**
+  - Submit suggestions/ideas
+  - Categories (Feature, Bug, Improvement, Other)
+  - Rich text descriptions with attachments
+  - Voting on suggestions (upvote/downvote)
+
+- **Community Engagement**
+  - Comments on suggestions
+  - Threaded discussions
+  - Vote aggregation for popular ideas
+  - Approved/rejected/implemented status tracking
+
+- **Admin Management**
+  - Suggestion dashboard with filtering
+  - Status workflow (Pending → Approved → Implemented)
+  - Response messages to users
+  - Export suggestions for analysis
+
+- **User Experience**
+  - Dedicated suggestions page
+  - Category filtering
+  - Sort by votes/date
+  - Notification when suggestion status changes
+
+### Global Search System (NEW in v2.0)
+
+- **Full-Text Search**
+  - Search across all content types (apps, articles, announcements, FAQs)
+  - Instant results as you type
+  - Keyword highlighting in results
+  - Search history and recent searches
+
+- **Advanced Filters**
+  - Filter by type (Application, Article, Announcement)
+  - Filter by category
+  - Filter by tags
+  - Filter by date range
+  - Permission-based filtering (only show content user has access to)
+
+- **Smart Search**
+  - Relevance scoring
+  - Typo tolerance
+  - Multi-language support
+  - Contextual suggestions
+
+- **Search Performance**
+  - Indexed searching for fast results
+  - Debounced queries to reduce server load
+  - Caching of popular searches
+  - Analytics on search trends
+
 ### Analytics & Reporting
 
 - **Analytics Dashboard**
@@ -1674,9 +1753,9 @@ This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for d
 
 ## Project Status
 
-**Current version:** 1.0.0
+**Current version:** 2.0.0
 
-**Last update:** December 2025
+**Last update:** February 2026
 
 **Maintenance:** Active
 

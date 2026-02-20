@@ -1678,9 +1678,9 @@ Ce projet est sous license **MIT**. Voir [LICENSE](LICENSE) pour détails.
 
 ## Statut du Projet
 
-**Version actuelle :** 1.0.0
+**Version actuelle :** 2.0.0
 
-**Dernière mise à jour :** Décembre 2025
+**Dernière mise à jour :** Février 2026
 
 **Maintenance :** Active
 
