@@ -49,20 +49,26 @@ type GamificationSummary struct {
 	RecentBadges    []models.Achievement `json:"recent_badges"`
 }
 
+type NewsGroup struct {
+	Type *models.NewsType `json:"type"`
+	News []models.News    `json:"news"`
+}
+
 type HomeResponse struct {
-	FavoriteApps    []models.Application  `json:"favorite_apps"`
-	NewApps         []models.Application  `json:"new_apps"`
-	TodayEvents     []models.Event        `json:"today_events"`
-	UpcomingEvents  []models.Event        `json:"upcoming_events"`
-	RecentNews      []models.News         `json:"recent_news"`
-	Polls           []models.Poll         `json:"polls"`
-	Announcements   []models.Announcement `json:"announcements"`
-	Stats           *HomeStats            `json:"stats,omitempty"`
-	Gamification    *GamificationSummary  `json:"gamification,omitempty"`
-	UserRole        string                `json:"user_role"`
-	ManagedGroupIDs []uint                `json:"managed_group_ids,omitempty"`
-	AppSettings     *models.AppSettings   `json:"app_settings,omitempty"`
-	HeroMessages    []models.HeroMessage  `json:"hero_messages,omitempty"`
+	FavoriteApps      []models.Application  `json:"favorite_apps"`
+	NewApps           []models.Application  `json:"new_apps"`
+	TodayEvents       []models.Event        `json:"today_events"`
+	UpcomingEvents    []models.Event        `json:"upcoming_events"`
+	RecentNews        []models.News         `json:"recent_news"`
+	RecentNewsByType  []NewsGroup           `json:"recent_news_by_type"`
+	Polls             []models.Poll         `json:"polls"`
+	Announcements     []models.Announcement `json:"announcements"`
+	Stats             *HomeStats            `json:"stats,omitempty"`
+	Gamification      *GamificationSummary  `json:"gamification,omitempty"`
+	UserRole          string                `json:"user_role"`
+	ManagedGroupIDs   []uint                `json:"managed_group_ids,omitempty"`
+	AppSettings       *models.AppSettings   `json:"app_settings,omitempty"`
+	HeroMessages      []models.HeroMessage  `json:"hero_messages,omitempty"`
 }
 
 // Main handler
@@ -162,7 +168,21 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 6. Load Recent Polls
+	// 6. Load Recent News By Type (grouped)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		newsByType, err := h.getRecentNewsByType(userID.(uint), role.(string))
+		if err != nil {
+			log.Printf("[HOME] Failed to load recent news by type: %v", err)
+			newsByType = []NewsGroup{}
+		}
+		mu.Lock()
+		response.RecentNewsByType = newsByType
+		mu.Unlock()
+	}()
+
+	// 7. Load Recent Polls
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -176,7 +196,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 7. Load Announcements (cached)
+	// 8. Load Announcements (cached)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -190,7 +210,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 8. Load Stats (role-specific)
+	// 9. Load Stats (role-specific)
 	if role == "admin" || len(response.ManagedGroupIDs) > 0 {
 		wg.Add(1)
 		go func() {
@@ -202,7 +222,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		}()
 	}
 
-	// 9. Load App Settings (cached)
+	// 10. Load App Settings (cached)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -216,7 +236,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 10. Load Hero Messages (cached)
+	// 11. Load Hero Messages (cached)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -230,7 +250,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 11. Load Gamification Summary
+	// 12. Load Gamification Summary
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -420,6 +440,107 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 	}
 
 	return news, err
+}
+
+// Helper: Get recent news grouped by type (3 articles per type)
+func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup, error) {
+	// First, fetch all active news types ordered by order
+	var types []models.NewsType
+	if err := h.db.Where("is_active = ?", true).Order("\"order\" ASC, name ASC").Find(&types).Error; err != nil {
+		return []NewsGroup{}, err
+	}
+
+	var result []NewsGroup
+
+	// Pre-fetch user's groups once (before the loop) for permission checks
+	var managedGroupIDs []uint
+	var userGroupIDs []uint
+	if role != "admin" {
+		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+	}
+
+	for _, newsType := range types {
+		var news []models.News
+
+		// Build the base query for this type
+		query := h.db.Where("is_published = ? AND type = ?", true, newsType.Slug)
+
+		// Apply permission filters based on role
+		if role == "admin" {
+			// Admins see all articles of this type
+			query = query.Preload("Author").
+				Preload("Category").
+				Preload("Tags").
+				Preload("TargetGroups").
+				Order("is_pinned DESC, published_at DESC").
+				Limit(3)
+		} else {
+			// Non-admins: use pre-fetched group IDs
+			// Combine groups
+			allGroupIDs := make(map[uint]bool)
+			for _, id := range userGroupIDs {
+				allGroupIDs[id] = true
+			}
+			for _, id := range managedGroupIDs {
+				allGroupIDs[id] = true
+			}
+
+			var combinedGroupIDs []uint
+			for id := range allGroupIDs {
+				combinedGroupIDs = append(combinedGroupIDs, id)
+			}
+
+			// Apply permission filter
+			if len(combinedGroupIDs) > 0 {
+				query = query.Where(`
+					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
+					OR EXISTS (
+						SELECT 1 FROM news_target_groups
+						WHERE news_target_groups.news_id = news.id
+						AND news_target_groups.group_id IN (?)
+					)
+				`, combinedGroupIDs)
+			} else {
+				// User has no groups: only see non-targeted articles
+				query = query.Where("(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0")
+			}
+
+			query = query.Preload("Author").
+				Preload("Category").
+				Preload("Tags").
+				Preload("TargetGroups").
+				Order("is_pinned DESC, published_at DESC").
+				Limit(3)
+		}
+
+		if err := query.Find(&news).Error; err != nil {
+			log.Printf("[HOME] Failed to load news for type %s: %v", newsType.Slug, err)
+			continue
+		}
+
+		// Add comment and reaction counts
+		for i := range news {
+			var commentCount int64
+			h.db.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ? AND is_approved = ?", "news", news[i].ID, true).Count(&commentCount)
+			news[i].CommentCount = int(commentCount)
+
+			var reactionCount int64
+			h.db.Model(&models.Feedback{}).Where("entity_type = ? AND entity_id = ?", "news", news[i].ID).Count(&reactionCount)
+			news[i].ReactionCount = int(reactionCount)
+		}
+
+		// Only add group if there are articles
+		if len(news) > 0 {
+			nt := newsType
+			result = append(result, NewsGroup{
+				Type: &nt,
+				News: news,
+			})
+		}
+	}
+
+	return result, nil
 }
 
 // Helper: Get recent polls (last 10 polls - active and closed)
