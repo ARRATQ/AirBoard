@@ -102,7 +102,6 @@ dev-*.sh
 # Documentation temporaire
 TEMP-*.md
 DEBUG-*.md
-CHANGELOG.md
 COOLIFY-*.md
 DEPLOIEMENT-*.md
 DEPLOYMENT-*.md
@@ -121,7 +120,10 @@ ONBOARDING_*.md
 PHASE2_*.md
 test_*.go
 ANALYTICS_*.md
-CHANGELOG*.md
+# NOTE: CHANGELOG.md is kept in git (official release notes)
+# Only ignore draft/temporary changelog files
+CHANGELOG-*.md
+CHANGELOG_*.md
 
 # Integration documentation
 COMMENTS_FEEDBACK_GUIDE.md
@@ -150,3 +152,19 @@ releases/
 
 # Documentation
 docs/
+
+# Uploads générés (fichiers utilisateur)
+backend/uploads/
+uploads/
+
+# Cache et fichiers temporaires générés
+.cache/
+tmp/
+temp/
+
+# Node
+.pnpm-lock.yaml
+pnpm-lock.yaml
+
+# Vite
+.vite/
