@@ -443,7 +443,7 @@ import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
-import Image from '@tiptap/extension-image'
+import { ResizableImage } from './ResizableImage.js'
 import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
@@ -618,11 +618,8 @@ const editor = useEditor({
         class: 'text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300',
       },
     }),
-    Image.configure({
+    ResizableImage.configure({
       inline: false,
-      HTMLAttributes: {
-        class: 'rounded-lg max-w-full h-auto',
-      },
     }),
     Underline,
     Table.configure({

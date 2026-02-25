@@ -7,7 +7,7 @@ import { computed } from 'vue'
 import { generateHTML } from '@tiptap/html'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
-import Image from '@tiptap/extension-image'
+import { ResizableImage } from './ResizableImage.js'
 import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
@@ -55,11 +55,8 @@ const renderedContent = computed(() => {
     Link.configure({
       openOnClick: false
     }),
-    Image.configure({
+    ResizableImage.configure({
       inline: false,
-      HTMLAttributes: {
-        class: 'rounded-lg max-w-full h-auto',
-      },
     }),
     Underline,
     Table,
