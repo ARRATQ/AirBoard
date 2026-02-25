@@ -1,6 +1,6 @@
 <template>
   <div class="rich-text-editor">
-    <!-- Toolbar -->
+    <!-- Toolbar (sticky) -->
     <div v-if="editor" class="editor-toolbar">
       <!-- Text formatting -->
       <div class="toolbar-group">
@@ -9,7 +9,7 @@
           @click="editor.chain().focus().toggleBold().run()"
           :class="{ 'is-active': editor.isActive('bold') }"
           class="toolbar-button"
-          title="Bold (Ctrl+B)"
+          title="Gras (Ctrl+B)"
         >
           <Icon icon="mdi:format-bold" class="h-5 w-5" />
         </button>
@@ -18,16 +18,25 @@
           @click="editor.chain().focus().toggleItalic().run()"
           :class="{ 'is-active': editor.isActive('italic') }"
           class="toolbar-button"
-          title="Italic (Ctrl+I)"
+          title="Italique (Ctrl+I)"
         >
           <Icon icon="mdi:format-italic" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          @click="editor.chain().focus().toggleUnderline().run()"
+          :class="{ 'is-active': editor.isActive('underline') }"
+          class="toolbar-button"
+          title="Souligné (Ctrl+U)"
+        >
+          <Icon icon="mdi:format-underline" class="h-5 w-5" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleStrike().run()"
           :class="{ 'is-active': editor.isActive('strike') }"
           class="toolbar-button"
-          title="Strikethrough"
+          title="Barré"
         >
           <Icon icon="mdi:format-strikethrough" class="h-5 w-5" />
         </button>
@@ -36,10 +45,61 @@
           @click="editor.chain().focus().toggleCode().run()"
           :class="{ 'is-active': editor.isActive('code') }"
           class="toolbar-button"
-          title="Inline Code"
+          title="Code inline"
         >
           <Icon icon="mdi:code-tags" class="h-5 w-5" />
         </button>
+      </div>
+
+      <!-- Color & Highlight -->
+      <div class="toolbar-group">
+        <!-- Text color -->
+        <div class="color-picker-wrapper" title="Couleur du texte">
+          <button type="button" class="toolbar-button color-button" @click="toggleColorPicker">
+            <Icon icon="mdi:format-color-text" class="h-5 w-5" />
+            <span class="color-swatch" :style="{ background: activeTextColor }"></span>
+          </button>
+          <div v-if="showColorPicker" class="color-dropdown" @mouseleave="closeColorPicker">
+            <div class="color-grid">
+              <button
+                v-for="color in textColors"
+                :key="color.value"
+                type="button"
+                class="color-dot"
+                :style="{ background: color.value }"
+                :title="color.name"
+                @click="setTextColor(color.value)"
+              ></button>
+            </div>
+            <button type="button" class="color-remove-btn" @click="removeTextColor">
+              <Icon icon="mdi:format-color-reset" class="h-4 w-4" /> Effacer
+            </button>
+          </div>
+        </div>
+
+        <!-- Highlight color -->
+        <div class="color-picker-wrapper" title="Surbrillance">
+          <button type="button" class="toolbar-button color-button" @click="toggleHighlightPicker">
+            <Icon icon="mdi:marker" class="h-5 w-5" />
+            <span class="color-swatch" :style="{ background: activeHighlightColor }"></span>
+          </button>
+          <div v-if="showHighlightPicker" class="color-dropdown" @mouseleave="closeHighlightPicker">
+            <div class="color-grid">
+              <button
+                v-for="color in highlightColors"
+                :key="color.value"
+                type="button"
+                class="color-dot"
+                :style="{ background: color.value }"
+                :title="color.name"
+                @click="setHighlight(color.value)"
+              ></button>
+            </div>
+            <button type="button" class="color-remove-btn" @click="removeHighlight">
+              <Icon icon="mdi:format-color-reset" class="h-4 w-4" /> Effacer
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Headings -->
@@ -49,7 +109,7 @@
           @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
           class="toolbar-button"
-          title="Heading 1"
+          title="Titre 1"
         >
           <Icon icon="mdi:format-header-1" class="h-5 w-5" />
         </button>
@@ -58,7 +118,7 @@
           @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
           class="toolbar-button"
-          title="Heading 2"
+          title="Titre 2"
         >
           <Icon icon="mdi:format-header-2" class="h-5 w-5" />
         </button>
@@ -67,9 +127,49 @@
           @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
           class="toolbar-button"
-          title="Heading 3"
+          title="Titre 3"
         >
           <Icon icon="mdi:format-header-3" class="h-5 w-5" />
+        </button>
+      </div>
+
+      <!-- Text Alignment -->
+      <div class="toolbar-group">
+        <button
+          type="button"
+          @click="editor.chain().focus().setTextAlign('left').run()"
+          :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
+          class="toolbar-button"
+          title="Aligner à gauche"
+        >
+          <Icon icon="mdi:format-align-left" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          @click="editor.chain().focus().setTextAlign('center').run()"
+          :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
+          class="toolbar-button"
+          title="Centrer"
+        >
+          <Icon icon="mdi:format-align-center" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          @click="editor.chain().focus().setTextAlign('right').run()"
+          :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
+          class="toolbar-button"
+          title="Aligner à droite"
+        >
+          <Icon icon="mdi:format-align-right" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          @click="editor.chain().focus().setTextAlign('justify').run()"
+          :class="{ 'is-active': editor.isActive({ textAlign: 'justify' }) }"
+          class="toolbar-button"
+          title="Justifier"
+        >
+          <Icon icon="mdi:format-align-justify" class="h-5 w-5" />
         </button>
       </div>
 
@@ -80,7 +180,7 @@
           @click="editor.chain().focus().toggleBulletList().run()"
           :class="{ 'is-active': editor.isActive('bulletList') }"
           class="toolbar-button"
-          title="Bullet List"
+          title="Liste à puces"
         >
           <Icon icon="mdi:format-list-bulleted" class="h-5 w-5" />
         </button>
@@ -89,7 +189,7 @@
           @click="editor.chain().focus().toggleOrderedList().run()"
           :class="{ 'is-active': editor.isActive('orderedList') }"
           class="toolbar-button"
-          title="Ordered List"
+          title="Liste numérotée"
         >
           <Icon icon="mdi:format-list-numbered" class="h-5 w-5" />
         </button>
@@ -102,7 +202,7 @@
           @click="editor.chain().focus().toggleCodeBlock().run()"
           :class="{ 'is-active': editor.isActive('codeBlock') }"
           class="toolbar-button"
-          title="Code Block"
+          title="Bloc de code"
         >
           <Icon icon="mdi:code-braces" class="h-5 w-5" />
         </button>
@@ -111,7 +211,7 @@
           @click="editor.chain().focus().toggleBlockquote().run()"
           :class="{ 'is-active': editor.isActive('blockquote') }"
           class="toolbar-button"
-          title="Blockquote"
+          title="Citation"
         >
           <Icon icon="mdi:format-quote-close" class="h-5 w-5" />
         </button>
@@ -119,10 +219,55 @@
           type="button"
           @click="editor.chain().focus().setHorizontalRule().run()"
           class="toolbar-button"
-          title="Horizontal Rule"
+          title="Séparateur horizontal"
         >
           <Icon icon="mdi:minus" class="h-5 w-5" />
         </button>
+      </div>
+
+      <!-- Table -->
+      <div class="toolbar-group">
+        <div class="color-picker-wrapper" title="Tableau">
+          <button
+            type="button"
+            @click="toggleTableMenu"
+            :class="{ 'is-active': editor.isActive('table') }"
+            class="toolbar-button"
+          >
+            <Icon icon="mdi:table" class="h-5 w-5" />
+          </button>
+          <div v-if="showTableMenu" class="table-dropdown" @mouseleave="closeTableMenu">
+            <button type="button" class="table-menu-item" @click="insertTable">
+              <Icon icon="mdi:table-plus" class="h-4 w-4" /> Insérer un tableau
+            </button>
+            <template v-if="editor.isActive('table')">
+              <hr class="table-menu-divider" />
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnBefore().run()">
+                <Icon icon="mdi:table-column-plus-before" class="h-4 w-4" /> Colonne avant
+              </button>
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnAfter().run()">
+                <Icon icon="mdi:table-column-plus-after" class="h-4 w-4" /> Colonne après
+              </button>
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteColumn().run()">
+                <Icon icon="mdi:table-column-remove" class="h-4 w-4" /> Supprimer colonne
+              </button>
+              <hr class="table-menu-divider" />
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowBefore().run()">
+                <Icon icon="mdi:table-row-plus-before" class="h-4 w-4" /> Ligne avant
+              </button>
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowAfter().run()">
+                <Icon icon="mdi:table-row-plus-after" class="h-4 w-4" /> Ligne après
+              </button>
+              <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteRow().run()">
+                <Icon icon="mdi:table-row-remove" class="h-4 w-4" /> Supprimer ligne
+              </button>
+              <hr class="table-menu-divider" />
+              <button type="button" class="table-menu-item table-menu-danger" @click="editor.chain().focus().deleteTable().run()">
+                <Icon icon="mdi:table-remove" class="h-4 w-4" /> Supprimer tableau
+              </button>
+            </template>
+          </div>
+        </div>
       </div>
 
       <!-- Link -->
@@ -132,7 +277,7 @@
           @click="setLink"
           :class="{ 'is-active': editor.isActive('link') }"
           class="toolbar-button"
-          title="Add Link"
+          title="Ajouter un lien"
         >
           <Icon icon="mdi:link-variant" class="h-5 w-5" />
         </button>
@@ -141,7 +286,7 @@
           type="button"
           @click="editor.chain().focus().unsetLink().run()"
           class="toolbar-button"
-          title="Remove Link"
+          title="Supprimer le lien"
         >
           <Icon icon="mdi:link-variant-off" class="h-5 w-5" />
         </button>
@@ -153,7 +298,7 @@
           type="button"
           @click="showMediaModal = true"
           class="toolbar-button"
-          title="Insert Image"
+          title="Insérer une image"
         >
           <Icon icon="mdi:image-plus" class="h-5 w-5" />
         </button>
@@ -161,23 +306,11 @@
           type="button"
           @click="showFileModal = true"
           class="toolbar-button"
-          title="Attach File"
+          title="Joindre un fichier"
         >
           <Icon icon="mdi:file-plus" class="h-5 w-5" />
         </button>
       </div>
-
-      <!-- Table (for later when we want to add tables) -->
-      <!-- <div class="toolbar-group">
-        <button
-          type="button"
-          @click="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
-          class="toolbar-button"
-          title="Insert Table"
-        >
-          <Icon icon="mdi:table" class="h-5 w-5" />
-        </button>
-      </div> -->
 
       <!-- Undo/Redo -->
       <div class="toolbar-group ml-auto">
@@ -186,7 +319,7 @@
           @click="editor.chain().focus().undo().run()"
           :disabled="!editor.can().undo()"
           class="toolbar-button"
-          title="Undo (Ctrl+Z)"
+          title="Annuler (Ctrl+Z)"
         >
           <Icon icon="mdi:undo" class="h-5 w-5" />
         </button>
@@ -195,7 +328,7 @@
           @click="editor.chain().focus().redo().run()"
           :disabled="!editor.can().redo()"
           class="toolbar-button"
-          title="Redo (Ctrl+Y)"
+          title="Rétablir (Ctrl+Y)"
         >
           <Icon icon="mdi:redo" class="h-5 w-5" />
         </button>
@@ -210,7 +343,7 @@
       <div v-if="showMediaModal" class="modal-overlay" @click.self="showMediaModal = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title">Insert Image</h3>
+            <h3 class="modal-title">Insérer une image</h3>
             <button @click="showMediaModal = false" class="modal-close">
               <Icon icon="mdi:close" class="h-6 w-6" />
             </button>
@@ -223,7 +356,7 @@
                 class="tab-button"
               >
                 <Icon icon="mdi:upload" class="h-5 w-5" />
-                Upload New
+                Téléverser
               </button>
               <button
                 @click="mediaTab = 'gallery'"
@@ -231,7 +364,7 @@
                 class="tab-button"
               >
                 <Icon icon="mdi:image-multiple" class="h-5 w-5" />
-                Media Library
+                Médiathèque
               </button>
             </div>
 
@@ -259,7 +392,7 @@
       <div v-if="showFileModal" class="modal-overlay" @click.self="showFileModal = false">
         <div class="modal-content">
           <div class="modal-header">
-            <h3 class="modal-title">Attach File</h3>
+            <h3 class="modal-title">Joindre un fichier</h3>
             <button @click="showFileModal = false" class="modal-close">
               <Icon icon="mdi:close" class="h-6 w-6" />
             </button>
@@ -272,7 +405,7 @@
                 class="tab-button"
               >
                 <Icon icon="mdi:upload" class="h-5 w-5" />
-                Upload New
+                Téléverser
               </button>
               <button
                 @click="fileTab = 'gallery'"
@@ -280,7 +413,7 @@
                 class="tab-button"
               >
                 <Icon icon="mdi:file-multiple" class="h-5 w-5" />
-                Media Library
+                Médiathèque
               </button>
             </div>
 
@@ -306,17 +439,21 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
+import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
 import { createLowlight } from 'lowlight'
 import { Icon } from '@iconify/vue'
@@ -351,7 +488,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Start writing...'
+    default: 'Commencez à écrire...'
   },
   editable: {
     type: Boolean,
@@ -369,14 +506,111 @@ const showMediaModal = ref(false)
 const showFileModal = ref(false)
 const mediaTab = ref('upload')
 const fileTab = ref('upload')
+const showColorPicker = ref(false)
+const showHighlightPicker = ref(false)
+const showTableMenu = ref(false)
+
+// Palette de couleurs pour le texte
+const textColors = [
+  { name: 'Noir', value: '#000000' },
+  { name: 'Gris foncé', value: '#374151' },
+  { name: 'Gris', value: '#6B7280' },
+  { name: 'Rouge', value: '#EF4444' },
+  { name: 'Orange', value: '#F97316' },
+  { name: 'Jaune', value: '#EAB308' },
+  { name: 'Vert', value: '#22C55E' },
+  { name: 'Cyan', value: '#06B6D4' },
+  { name: 'Bleu', value: '#3B82F6' },
+  { name: 'Indigo', value: '#6366F1' },
+  { name: 'Violet', value: '#A855F7' },
+  { name: 'Rose', value: '#EC4899' },
+]
+
+// Palette de couleurs pour la surbrillance
+const highlightColors = [
+  { name: 'Jaune', value: '#FEF08A' },
+  { name: 'Vert clair', value: '#BBF7D0' },
+  { name: 'Bleu clair', value: '#BAE6FD' },
+  { name: 'Rose clair', value: '#FBCFE8' },
+  { name: 'Orange clair', value: '#FED7AA' },
+  { name: 'Violet clair', value: '#DDD6FE' },
+  { name: 'Rouge clair', value: '#FECACA' },
+  { name: 'Cyan clair', value: '#A5F3FC' },
+]
+
+const activeTextColor = computed(() => {
+  if (!editor.value) return 'transparent'
+  const color = editor.value.getAttributes('textStyle').color
+  return color || 'transparent'
+})
+
+const activeHighlightColor = computed(() => {
+  if (!editor.value) return 'transparent'
+  const color = editor.value.getAttributes('highlight').color
+  return color || 'transparent'
+})
+
+const toggleColorPicker = () => {
+  showColorPicker.value = !showColorPicker.value
+  showHighlightPicker.value = false
+  showTableMenu.value = false
+}
+
+const closeColorPicker = () => {
+  showColorPicker.value = false
+}
+
+const toggleHighlightPicker = () => {
+  showHighlightPicker.value = !showHighlightPicker.value
+  showColorPicker.value = false
+  showTableMenu.value = false
+}
+
+const closeHighlightPicker = () => {
+  showHighlightPicker.value = false
+}
+
+const toggleTableMenu = () => {
+  showTableMenu.value = !showTableMenu.value
+  showColorPicker.value = false
+  showHighlightPicker.value = false
+}
+
+const closeTableMenu = () => {
+  showTableMenu.value = false
+}
+
+const setTextColor = (color) => {
+  editor.value.chain().focus().setColor(color).run()
+  showColorPicker.value = false
+}
+
+const removeTextColor = () => {
+  editor.value.chain().focus().unsetColor().run()
+  showColorPicker.value = false
+}
+
+const setHighlight = (color) => {
+  editor.value.chain().focus().setHighlight({ color }).run()
+  showHighlightPicker.value = false
+}
+
+const removeHighlight = () => {
+  editor.value.chain().focus().unsetHighlight().run()
+  showHighlightPicker.value = false
+}
+
+const insertTable = () => {
+  editor.value.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+  showTableMenu.value = false
+}
 
 const editor = useEditor({
   content: props.modelValue,
   editable: props.editable,
   extensions: [
     StarterKit.configure({
-      codeBlock: false, // Disable default code block, we use lowlight
-      link: false, // Disable default link, we configure it separately
+      codeBlock: false,
     }),
     Link.configure({
       openOnClick: false,
@@ -390,6 +624,7 @@ const editor = useEditor({
         class: 'rounded-lg max-w-full h-auto',
       },
     }),
+    Underline,
     Table.configure({
       resizable: true,
     }),
@@ -401,6 +636,11 @@ const editor = useEditor({
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph'],
+    }),
+    TextStyle,
+    Color,
+    Highlight.configure({
+      multicolor: true,
     }),
     Placeholder.configure({
       placeholder: props.placeholder,
@@ -452,7 +692,6 @@ watch(() => props.editable, (value) => {
 
 // Media handlers
 const handleMediaUpload = (media) => {
-  // Automatically insert uploaded image
   if (media.mime_type.startsWith('image/')) {
     insertImage(media)
   }
@@ -466,30 +705,17 @@ const insertImage = (media) => {
 }
 
 const handleFileUpload = (media) => {
-  // Insert file as a link
   insertFile(media)
 }
 
 const insertFile = (media) => {
   if (editor.value) {
-    // Insert file as a formatted link with icon
-    const fileIcon = getFileIcon(media.mime_type)
     const fileLink = `📎 ${media.filename}`
     editor.value.chain().focus().insertContent(`<p><a href="${media.url}" target="_blank" class="file-attachment">${fileLink}</a></p>`).run()
     showFileModal.value = false
   }
 }
 
-const getFileIcon = (mimeType) => {
-  if (mimeType === 'application/pdf') return '📄'
-  if (mimeType.includes('word') || mimeType.includes('document')) return '📝'
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📽️'
-  if (mimeType.includes('zip') || mimeType.includes('rar')) return '🗜️'
-  return '📎'
-}
-
-// Cleanup
 onBeforeUnmount(() => {
   if (editor.value) {
     editor.value.destroy()
@@ -499,15 +725,22 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .rich-text-editor {
-  @apply border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800;
+  @apply border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .editor-toolbar {
-  @apply flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600;
+  @apply flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600 rounded-t-lg;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .toolbar-group {
   @apply flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2 mr-2;
+  position: relative;
 }
 
 .toolbar-group:last-child {
@@ -520,6 +753,80 @@ onBeforeUnmount(() => {
 
 .toolbar-button.is-active {
   @apply bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400;
+}
+
+/* Color picker */
+.color-picker-wrapper {
+  position: relative;
+}
+
+.color-button {
+  @apply flex flex-col items-center gap-0.5 p-1.5;
+}
+
+.color-swatch {
+  display: block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+.color-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-3;
+  min-width: 160px;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.color-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+  border-color: rgba(0,0,0,0.3);
+}
+
+.color-remove-btn {
+  @apply flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 w-full pt-1 border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Table menu */
+.table-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1;
+  min-width: 200px;
+}
+
+.table-menu-item {
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left;
+}
+
+.table-menu-danger {
+  @apply text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20;
+}
+
+.table-menu-divider {
+  @apply border-gray-200 dark:border-gray-700 my-1;
 }
 
 .editor-content {
@@ -592,7 +899,7 @@ onBeforeUnmount(() => {
 
 /* Table styling */
 .editor-content :deep(.ProseMirror table) {
-  @apply border-collapse table-auto w-full;
+  @apply border-collapse table-auto w-full my-4;
 }
 
 .editor-content :deep(.ProseMirror th),
@@ -612,6 +919,12 @@ onBeforeUnmount(() => {
 /* File attachment styling */
 .editor-content :deep(.ProseMirror a.file-attachment) {
   @apply inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg no-underline hover:bg-gray-200 dark:hover:bg-gray-700;
+}
+
+/* Highlight mark */
+.editor-content :deep(.ProseMirror mark) {
+  border-radius: 3px;
+  padding: 0 2px;
 }
 
 /* Modal styles */

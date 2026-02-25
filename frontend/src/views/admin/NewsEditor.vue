@@ -68,7 +68,7 @@
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
                 Article Content *
               </label>
-              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg">
                 <RichTextEditor
                   v-model="form.content"
                   placeholder="Write your article content here. Use the toolbar to format your text, add links, code blocks, and more..."

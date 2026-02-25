@@ -68,7 +68,7 @@
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.contentLabel') }} *
               </label>
-              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg">
                 <RichTextEditor
                   v-model="form.content"
                   placeholder="Rédigez le contenu de votre article ici. Utilisez la barre d'outils pour formater votre texte, ajouter des liens, des blocs de code, etc..."

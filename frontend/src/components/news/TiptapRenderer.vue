@@ -8,12 +8,16 @@ import { generateHTML } from '@tiptap/html'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
+import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Color from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import { createLowlight, common } from 'lowlight'
 import DOMPurify from 'dompurify'
 
@@ -57,6 +61,7 @@ const renderedContent = computed(() => {
         class: 'rounded-lg max-w-full h-auto',
       },
     }),
+    Underline,
     Table,
     TableRow,
     TableCell,
@@ -66,7 +71,12 @@ const renderedContent = computed(() => {
     }),
     TextAlign.configure({
       types: ['heading', 'paragraph']
-    })
+    }),
+    TextStyle,
+    Color,
+    Highlight.configure({
+      multicolor: true,
+    }),
   ])
 })
 
