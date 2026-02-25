@@ -1,9 +1,6 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-# Installation des dépendances système
-RUN apk add --no-cache git
-
 # Définition du répertoire de travail
 WORKDIR /app
 
@@ -25,9 +22,6 @@ RUN npm run build
 
 # Production stage
 FROM nginx:alpine
-
-# Installation des certificats CA
-RUN apk --no-cache add ca-certificates
 
 # Copie de la configuration Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
