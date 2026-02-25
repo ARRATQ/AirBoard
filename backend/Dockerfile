@@ -22,8 +22,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 # Production stage
 FROM alpine:latest
 
-# Installation des certificats CA
-RUN apk --no-cache add ca-certificates tzdata
+# Copie des certificats CA et des données de timezone depuis le stage builder
+# (évite les appels réseau apk en production, plus robuste sur Coolify)
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Création d'un utilisateur non-root
 RUN adduser -D -s /bin/sh airboard
