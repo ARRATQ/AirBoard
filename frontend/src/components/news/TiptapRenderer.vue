@@ -8,6 +8,8 @@ import { generateHTML } from '@tiptap/html'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import { ResizableImage } from './ResizableImage.js'
+import { CalloutExtension } from './CalloutExtension.js'
+import { VideoEmbed } from './VideoEmbed.js'
 import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
@@ -58,6 +60,8 @@ const renderedContent = computed(() => {
     ResizableImage.configure({
       inline: false,
     }),
+    CalloutExtension,
+    VideoEmbed,
     Underline,
     Table,
     TableRow,
@@ -85,11 +89,12 @@ const sanitizedContent = computed(() => {
       'ul', 'ol', 'li', 'strong', 'em', 'u', 's', 'del',
       'a', 'code', 'pre', 'blockquote', 'hr',
       'table', 'thead', 'tbody', 'tr', 'th', 'td',
-      'img', 'span', 'div'
+      'img', 'span', 'div', 'iframe'
     ],
     ALLOWED_ATTR: [
       'href', 'class', 'target', 'rel', 'src', 'alt',
-      'width', 'height', 'style', 'data-*'
+      'width', 'height', 'style', 'data-*',
+      'frameborder', 'allowfullscreen', 'allow', 'loading', 'scrolling'
     ],
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     ALLOW_DATA_ATTR: true,
@@ -189,5 +194,41 @@ const sanitizedContent = computed(() => {
 
 .tiptap-content img {
   @apply max-w-full h-auto rounded-lg my-4;
+}
+
+/* ── Callout blocks ──────────────────────────────── */
+.tiptap-content [data-callout-type] {
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 1rem 0;
+}
+.tiptap-content [data-callout-type="info"]    { background: #EFF6FF; border-color: #3B82F6; }
+.tiptap-content [data-callout-type="warning"] { background: #FFFBEB; border-color: #F59E0B; }
+.tiptap-content [data-callout-type="success"] { background: #F0FDF4; border-color: #22C55E; }
+.tiptap-content [data-callout-type="danger"]  { background: #FEF2F2; border-color: #EF4444; }
+
+.dark .tiptap-content [data-callout-type="info"]    { background: #1E3A5F; border-color: #3B82F6; }
+.dark .tiptap-content [data-callout-type="warning"] { background: #3D2C00; border-color: #F59E0B; }
+.dark .tiptap-content [data-callout-type="success"] { background: #052E16; border-color: #22C55E; }
+.dark .tiptap-content [data-callout-type="danger"]  { background: #3B0A0A; border-color: #EF4444; }
+
+.tiptap-content [data-callout-type] p:last-child { margin-bottom: 0; }
+
+/* ── Video embed ─────────────────────────────────── */
+.tiptap-content .video-embed-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  background: #000;
+}
+.tiptap-content .video-embed-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
 }
 </style>

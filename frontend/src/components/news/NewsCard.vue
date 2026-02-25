@@ -100,10 +100,14 @@
 
         <!-- Reactions -->
         <div class="flex items-center gap-3">
-          <!-- View Count -->
+          <!-- View Count + Reading time -->
           <div class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
             <Icon icon="mdi:eye" class="h-4 w-4" />
             <span>{{ news.view_count || 0 }}</span>
+          </div>
+          <div v-if="articleReadingTime" class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+            <Icon icon="mdi:clock-outline" class="h-4 w-4" />
+            <span>{{ articleReadingTime }}</span>
           </div>
 
           <!-- Reaction Counts -->
@@ -128,6 +132,7 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNewsTypesStore } from '@/stores/newsTypes'
+import { readingTime } from '@/utils/readingTime'
 
 const typesStore = useNewsTypesStore()
 
@@ -139,6 +144,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['click'])
+
+const articleReadingTime = computed(() => readingTime(props.news.content))
 
 // Get type data from store
 const typeData = computed(() => {

@@ -108,6 +108,10 @@
             <Icon icon="mdi:eye" class="h-5 w-5" />
             <span>{{ news.view_count || 0 }} {{ $t('news.detail.views') }}</span>
           </div>
+          <div v-if="articleReadingTime" class="flex items-center gap-2">
+            <Icon icon="mdi:clock-outline" class="h-5 w-5" />
+            <span>{{ articleReadingTime }} de lecture</span>
+          </div>
         </div>
 
         <!-- Tags -->
@@ -187,6 +191,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { newsService, pollsService } from '@/services/api'
+import { readingTime } from '@/utils/readingTime'
 import { useAuthStore } from '@/stores/auth'
 import TiptapRenderer from '@/components/news/TiptapRenderer.vue'
 import FeedbackWidget from '@/components/feedback/FeedbackWidget.vue'
@@ -201,6 +206,8 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const news = ref(null)
 const linkedPoll = ref(null)
+
+const articleReadingTime = computed(() => readingTime(news.value?.content))
 
 // Computed
 const canEdit = computed(() => {

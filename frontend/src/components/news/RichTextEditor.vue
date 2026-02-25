@@ -223,6 +223,30 @@
         >
           <Icon icon="mdi:minus" class="h-5 w-5" />
         </button>
+
+        <!-- Callout -->
+        <div class="color-picker-wrapper" title="Callout">
+          <button
+            type="button"
+            @click="toggleCalloutMenu"
+            :class="{ 'is-active': editor.isActive('callout') }"
+            class="toolbar-button"
+          >
+            <Icon icon="mdi:message-alert-outline" class="h-5 w-5" />
+          </button>
+          <div v-if="showCalloutMenu" class="callout-type-dropdown" @mouseleave="closeCalloutMenu">
+            <button
+              v-for="t in calloutTypes"
+              :key="t.value"
+              type="button"
+              class="callout-type-item"
+              @click="insertCallout(t.value)"
+            >
+              <Icon :icon="t.icon" class="h-4 w-4" :style="{ color: t.color }" />
+              <span>{{ t.label }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Table -->
@@ -309,6 +333,14 @@
           title="Joindre un fichier"
         >
           <Icon icon="mdi:file-plus" class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          @click="insertVideo"
+          class="toolbar-button"
+          title="Intégrer une vidéo YouTube / Vimeo"
+        >
+          <Icon icon="mdi:video-plus" class="h-5 w-5" />
         </button>
       </div>
 
@@ -444,6 +476,8 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import { ResizableImage } from './ResizableImage.js'
+import { CalloutExtension, CALLOUT_TYPES } from './CalloutExtension.js'
+import { VideoEmbed, getEmbedUrl, detectService } from './VideoEmbed.js'
 import Underline from '@tiptap/extension-underline'
 import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
@@ -509,6 +543,8 @@ const fileTab = ref('upload')
 const showColorPicker = ref(false)
 const showHighlightPicker = ref(false)
 const showTableMenu = ref(false)
+const showCalloutMenu = ref(false)
+const calloutTypes = CALLOUT_TYPES
 
 // Palette de couleurs pour le texte
 const textColors = [
@@ -580,6 +616,40 @@ const closeTableMenu = () => {
   showTableMenu.value = false
 }
 
+const toggleCalloutMenu = () => {
+  showCalloutMenu.value = !showCalloutMenu.value
+  showColorPicker.value = false
+  showHighlightPicker.value = false
+  showTableMenu.value = false
+}
+
+const closeCalloutMenu = () => {
+  showCalloutMenu.value = false
+}
+
+const insertCallout = (type) => {
+  editor.value.chain().focus().insertContent({
+    type: 'callout',
+    attrs: { type },
+    content: [{ type: 'paragraph' }],
+  }).run()
+  showCalloutMenu.value = false
+}
+
+const insertVideo = () => {
+  const url = window.prompt('URL YouTube ou Vimeo')
+  if (!url) return
+  const embedUrl = getEmbedUrl(url)
+  if (!embedUrl) {
+    window.alert('URL non reconnue. Utilisez une URL YouTube ou Vimeo.')
+    return
+  }
+  editor.value.chain().focus().insertContent({
+    type: 'videoEmbed',
+    attrs: { src: embedUrl, service: detectService(url) },
+  }).run()
+}
+
 const setTextColor = (color) => {
   editor.value.chain().focus().setColor(color).run()
   showColorPicker.value = false
@@ -621,6 +691,8 @@ const editor = useEditor({
     ResizableImage.configure({
       inline: false,
     }),
+    CalloutExtension,
+    VideoEmbed,
     Underline,
     Table.configure({
       resizable: true,
@@ -964,5 +1036,19 @@ onBeforeUnmount(() => {
 
 .tab-content {
   @apply py-4;
+}
+
+/* Callout dropdown */
+.callout-type-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1;
+  min-width: 140px;
+}
+
+.callout-type-item {
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left;
 }
 </style>
