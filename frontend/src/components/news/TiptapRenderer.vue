@@ -170,6 +170,9 @@ const sanitizedContent = computed(() => {
 
 .tiptap-content table {
   @apply w-full border-collapse mb-4;
+  table-layout: fixed;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap-content th {
@@ -194,6 +197,31 @@ const sanitizedContent = computed(() => {
 
 .tiptap-content img {
   @apply max-w-full h-auto rounded-lg my-4;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tiptap-content img[data-align="left"] {
+  margin-left: 0;
+  margin-right: 1.5rem;
+  float: left;
+}
+
+.tiptap-content img[data-align="right"] {
+  margin-right: 0;
+  margin-left: 1.5rem;
+  float: right;
+}
+
+/* Clear floats after floated images */
+.tiptap-content p::after,
+.tiptap-content h1::after,
+.tiptap-content h2::after,
+.tiptap-content h3::after {
+  content: '';
+  display: table;
+  clear: both;
 }
 
 /* ── Callout blocks ──────────────────────────────── */

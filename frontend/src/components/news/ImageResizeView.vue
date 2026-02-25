@@ -1,5 +1,5 @@
 <template>
-  <node-view-wrapper as="div" class="image-view-outer">
+  <node-view-wrapper as="div" class="image-view-outer" :style="outerStyle">
     <div
       ref="containerRef"
       class="image-view-inner"
@@ -14,8 +14,9 @@
         class="image-view-img"
       />
 
-      <!-- Size toolbar (visible when selected) -->
+      <!-- Floating toolbar (visible when selected) -->
       <div v-if="selected" class="image-size-bar">
+        <!-- Size presets -->
         <button
           v-for="p in presets"
           :key="p.value"
@@ -27,6 +28,22 @@
           {{ p.label }}
         </button>
         <span class="image-size-indicator">{{ currentWidth }}</span>
+
+        <!-- Divider -->
+        <span class="image-bar-divider" />
+
+        <!-- Alignment buttons -->
+        <button
+          v-for="a in alignOptions"
+          :key="a.value"
+          type="button"
+          class="image-align-btn"
+          :class="{ 'image-size-active': currentAlign === a.value }"
+          :title="a.label"
+          @mousedown.prevent="setAlign(a.value)"
+        >
+          <Icon :icon="a.icon" class="h-3.5 w-3.5" />
+        </button>
       </div>
 
       <!-- Right resize handle -->
@@ -42,6 +59,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from 'vue'
 import { NodeViewWrapper } from '@tiptap/vue-3'
+import { Icon } from '@iconify/vue'
 
 const props = defineProps({
   editor: Object,
@@ -63,10 +81,34 @@ const presets = [
   { label: '100%', value: '100%' },
 ]
 
+const alignOptions = [
+  { value: 'left', label: 'Aligner à gauche', icon: 'mdi:format-align-left' },
+  { value: 'center', label: 'Centrer', icon: 'mdi:format-align-center' },
+  { value: 'right', label: 'Aligner à droite', icon: 'mdi:format-align-right' },
+]
+
 const currentWidth = computed(() => props.node.attrs.width || '100%')
+const currentAlign = computed(() => props.node.attrs.align || 'center')
+
+// Outer wrapper style drives the alignment
+const outerStyle = computed(() => {
+  const align = currentAlign.value
+  if (align === 'left') {
+    return { float: 'left', marginTop: '0.5rem', marginRight: '1.5rem', marginBottom: '0.5rem', width: 'auto' }
+  }
+  if (align === 'right') {
+    return { float: 'right', marginTop: '0.5rem', marginLeft: '1.5rem', marginBottom: '0.5rem', width: 'auto' }
+  }
+  // center (default)
+  return { float: 'none', textAlign: 'center', width: '100%', margin: '1rem 0' }
+})
 
 const setWidth = (value) => {
   props.updateAttributes({ width: value })
+}
+
+const setAlign = (value) => {
+  props.updateAttributes({ align: value })
 }
 
 // Drag resize
@@ -108,8 +150,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .image-view-outer {
   display: block;
-  width: 100%;
-  margin: 1rem 0;
 }
 
 .image-view-inner {
@@ -136,7 +176,7 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
-/* Floating size bar */
+/* Floating toolbar */
 .image-size-bar {
   position: absolute;
   bottom: 10px;
@@ -146,7 +186,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 2px;
   padding: 4px 8px;
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   backdrop-filter: blur(6px);
   border-radius: 20px;
   z-index: 10;
@@ -182,6 +222,35 @@ onBeforeUnmount(() => {
   padding-left: 6px;
   margin-left: 4px;
   border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Divider between size and align controls */
+.image-bar-divider {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+/* Alignment buttons */
+.image-align-btn {
+  padding: 4px 6px;
+  color: rgba(255, 255, 255, 0.65);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.image-align-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Right drag handle */

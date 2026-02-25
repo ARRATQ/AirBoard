@@ -795,15 +795,16 @@ onBeforeUnmount(() => {
 <style scoped>
 .rich-text-editor {
   @apply border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800;
-  position: relative;
+  display: flex;
+  flex-direction: column;
   max-height: 80vh;
-  overflow-y: auto;
+  /* overflow must NOT be set here — it would clip the toolbar dropdowns */
 }
 
 .editor-toolbar {
   @apply flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600 rounded-t-lg;
-  position: sticky;
-  top: 0;
+  /* flex-shrink: 0 keeps the toolbar always visible; no sticky needed */
+  flex-shrink: 0;
   z-index: 20;
 }
 
@@ -900,6 +901,10 @@ onBeforeUnmount(() => {
 
 .editor-content {
   @apply min-h-[300px];
+  /* This is now the scrollable zone — toolbar stays above and is never clipped */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* Tiptap editor styles */
@@ -970,11 +975,14 @@ onBeforeUnmount(() => {
 .editor-content :deep(.ProseMirror .tableWrapper) {
   overflow-x: auto;
   margin: 1rem 0;
+  /* Allow resize handles to overflow the wrapper edges */
+  padding-right: 4px;
 }
 
 .editor-content :deep(.ProseMirror table) {
-  @apply border-collapse table-auto w-full;
-  min-width: 100%;
+  @apply border-collapse w-full;
+  /* table-fixed is required so Tiptap's colgroup widths are respected */
+  table-layout: fixed;
 }
 
 .editor-content :deep(.ProseMirror th),
@@ -982,6 +990,9 @@ onBeforeUnmount(() => {
   @apply border border-gray-300 dark:border-gray-600 px-3 py-2;
   position: relative; /* required for the resize handle */
   min-width: 40px;
+  /* Allow text to wrap rather than forcing column expansion */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .editor-content :deep(.ProseMirror th) {

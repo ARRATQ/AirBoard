@@ -6,6 +6,32 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.0.1] - 2026-02-25
+
+### ✨ Enhancements
+
+#### **Rich Text Editor — Image Controls**
+- Image alignment buttons (left / center / right) in the floating toolbar
+- Alignment persisted as `data-align` attribute and rendered correctly in article view
+- Default alignment is centered; left/right use float for text wrapping
+
+#### **Rich Text Editor — Table Column Resizing**
+- Fixed column resize not visible in editor: switched to `table-layout: fixed` so Tiptap's `<colgroup>` widths are respected
+- Added `word-break: break-word` to prevent content from forcing columns wider
+- Same `table-layout: fixed` applied in `TiptapRenderer` for consistent rendering after save
+
+#### **Rich Text Editor — Toolbar Dropdowns**
+- Fixed table/callout/color menus being clipped by the editor frame
+- Moved `overflow-y: auto` + `max-height` from the root editor wrapper to only the content zone
+- Toolbar now uses `flex-shrink: 0` instead of `position: sticky` — always visible, never clips dropdowns
+
+### 🐛 Bug Fixes
+
+- **Dropdown clipping**: Table, callout and color pickers no longer get cut off by the editor's overflow boundary
+- **Table resize not rendering**: Column widths now update visually in real time when dragging resize handles
+
+---
+
 ## [2.0.0] - 2026-02-20
 
 ### 🎉 Major Features

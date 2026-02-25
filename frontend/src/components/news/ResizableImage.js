@@ -5,10 +5,11 @@ import ImageResizeView from './ImageResizeView.vue'
 /**
  * Extends the base Image extension with:
  * - `width` attribute (stored as percentage string, e.g. "50%")
- * - Interactive NodeView with size presets + drag-to-resize handle
+ * - `align` attribute (left | center | right)
+ * - Interactive NodeView with size presets, alignment buttons + drag-to-resize handle
  *
- * The `renderHTML` method ensures the width is serialised as an inline style
- * so `generateHTML()` in TiptapRenderer correctly outputs `style="width: 50%"`.
+ * The `renderHTML` methods ensure attributes are serialised so `generateHTML()`
+ * in TiptapRenderer correctly outputs `style="width: 50%"` and `data-align="center"`.
  */
 export const ResizableImage = Image.extend({
   addAttributes() {
@@ -21,6 +22,14 @@ export const ResizableImage = Image.extend({
         renderHTML: ({ width }) => {
           if (!width) return {}
           return { style: `width: ${width}` }
+        },
+      },
+      align: {
+        default: 'center',
+        parseHTML: (element) => element.getAttribute('data-align') || 'center',
+        renderHTML: ({ align }) => {
+          if (!align) return {}
+          return { 'data-align': align }
         },
       },
     }
