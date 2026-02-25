@@ -967,17 +967,76 @@ onBeforeUnmount(() => {
 }
 
 /* Table styling */
+.editor-content :deep(.ProseMirror .tableWrapper) {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
 .editor-content :deep(.ProseMirror table) {
-  @apply border-collapse table-auto w-full my-4;
+  @apply border-collapse table-auto w-full;
+  min-width: 100%;
 }
 
 .editor-content :deep(.ProseMirror th),
 .editor-content :deep(.ProseMirror td) {
   @apply border border-gray-300 dark:border-gray-600 px-3 py-2;
+  position: relative; /* required for the resize handle */
+  min-width: 40px;
 }
 
 .editor-content :deep(.ProseMirror th) {
   @apply bg-gray-100 dark:bg-gray-800 font-semibold;
+}
+
+/* ── Column resize handle ── */
+.editor-content :deep(.ProseMirror .column-resize-handle) {
+  position: absolute;
+  right: -3px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 20;
+  pointer-events: all;
+}
+
+.editor-content :deep(.ProseMirror .column-resize-handle::after) {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 10%;
+  bottom: 10%;
+  width: 2px;
+  border-radius: 2px;
+  background: #6366F1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* Appear on hover */
+.editor-content :deep(.ProseMirror th:hover > .column-resize-handle::after),
+.editor-content :deep(.ProseMirror td:hover > .column-resize-handle::after) {
+  opacity: 0.45;
+}
+
+/* Bright while dragging */
+.editor-content :deep(.ProseMirror.resize-cursor .column-resize-handle::after) {
+  opacity: 1 !important;
+  background: #4F46E5;
+}
+
+.editor-content :deep(.ProseMirror.resize-cursor) {
+  cursor: col-resize;
+}
+
+/* ── Selected cell highlight ── */
+.editor-content :deep(.ProseMirror .selectedCell::after) {
+  z-index: 2;
+  position: absolute;
+  content: '';
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(99, 102, 241, 0.12);
+  pointer-events: none;
 }
 
 /* Image styling */
