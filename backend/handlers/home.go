@@ -219,7 +219,10 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			stats := h.getStats(userID.(uint), role.(string), response.ManagedGroupIDs)
+			userIDVal := userID.(uint)
+			roleVal := role.(string)
+			stats := h.getStats(userIDVal, roleVal, response.ManagedGroupIDs)
+			log.Printf("[Home] GetHomeData: userID=%d, role=%s, stats=%+v", userIDVal, roleVal, stats)
 			mu.Lock()
 			response.Stats = stats
 			mu.Unlock()
