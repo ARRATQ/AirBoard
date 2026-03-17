@@ -80,23 +80,43 @@
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Utilisateur
+                <th @click="setSortColumn('username')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
+                  <div class="flex items-center gap-2">
+                    Utilisateur
+                    <Icon v-if="sortBy === 'username'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
+                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
+                  </div>
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Email
+                <th @click="setSortColumn('email')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
+                  <div class="flex items-center gap-2">
+                    Email
+                    <Icon v-if="sortBy === 'email'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
+                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
+                  </div>
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Rôle
+                <th @click="setSortColumn('role')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
+                  <div class="flex items-center gap-2">
+                    Rôle
+                    <Icon v-if="sortBy === 'role'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
+                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
+                  </div>
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Groupes
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {{ $t('users.last_connection') }}
+                <th @click="setSortColumn('last_login')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
+                  <div class="flex items-center gap-2">
+                    {{ $t('users.last_connection') }}
+                    <Icon v-if="sortBy === 'last_login'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
+                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
+                  </div>
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Statut
+                <th @click="setSortColumn('is_active')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
+                  <div class="flex items-center gap-2">
+                    Statut
+                    <Icon v-if="sortBy === 'is_active'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
+                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
+                  </div>
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
@@ -296,6 +316,8 @@ const deleteLoading = ref(false)
 const searchQuery = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
+const sortBy = ref('username')
+const sortOrder = ref('asc')
 
 // Computed
 const filteredUsers = computed(() => {
@@ -304,7 +326,7 @@ const filteredUsers = computed(() => {
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user => 
+    filtered = filtered.filter(user =>
       user.username.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query) ||
       user.first_name?.toLowerCase().includes(query) ||
@@ -324,7 +346,35 @@ const filteredUsers = computed(() => {
     filtered = filtered.filter(user => !user.is_active)
   }
 
-  return Array.isArray(filtered) ? filtered.sort((a, b) => a.username.localeCompare(b.username)) : []
+  // Sort based on current sort column and order
+  if (Array.isArray(filtered)) {
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy.value]
+      let bValue = b[sortBy.value]
+
+      // Handle null values
+      if (aValue === null || aValue === undefined) aValue = ''
+      if (bValue === null || bValue === undefined) bValue = ''
+
+      // Compare values based on type
+      let comparison = 0
+      if (typeof aValue === 'string') {
+        comparison = aValue.toLowerCase().localeCompare(bValue.toString().toLowerCase())
+      } else if (typeof aValue === 'boolean') {
+        comparison = aValue === bValue ? 0 : aValue ? 1 : -1
+      } else if (aValue instanceof Date || bValue instanceof Date) {
+        const aDate = new Date(aValue)
+        const bDate = new Date(bValue)
+        comparison = aDate - bDate
+      } else {
+        comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0
+      }
+
+      return sortOrder.value === 'asc' ? comparison : -comparison
+    })
+  }
+
+  return filtered
 })
 
 // Computed pour afficher soit les utilisateurs actifs, soit les supprimés
@@ -333,6 +383,17 @@ const displayedUsers = computed(() => {
 })
 
 // Methods
+const setSortColumn = (column) => {
+  if (sortBy.value === column) {
+    // Toggle sort order if clicking the same column
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Change to new column with ascending order
+    sortBy.value = column
+    sortOrder.value = 'asc'
+  }
+}
+
 const getUserInitials = (user) => {
   if (user.first_name && user.last_name) {
     return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
