@@ -72,11 +72,16 @@ func (h *ChatHandler) GetContacts(c *gin.Context) {
 	// Optimization: Only users in same groups or all users depending on privacy policy
 	// For MVP: All active users
 	h.db.Where("id != ? AND is_active = ?", userID, true).
-		Select("id, username, first_name, last_name, avatar_url, role").
+		Select("id, username, first_name, last_name, avatar_url, role, job_title").
 		Preload("Groups", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id, name, color")
 		}).
 		Find(&users)
+
+	log.Printf("[Chat] GetContacts for userID=%d, returned %d users", userID, len(users))
+	for i, user := range users {
+		log.Printf("[Chat]   User %d: id=%d, username=%s", i, user.ID, user.Username)
+	}
 
 	// 2. Get user's groups
 	h.db.Joins("JOIN user_groups on user_groups.group_id = groups.id").

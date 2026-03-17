@@ -43,14 +43,16 @@ export const useChatStore = defineStore('chat', {
         avatar: item.avatar_url || item.icon,
         ...item
       };
-      
+
+      console.log('[Chat] Opening conversation:', type, 'id=', this.activeConversation.id, 'item.id=', item.id);
+
       // Load history if needed
       this.loadHistory(type, item.id);
-      
+
       // Reset unread
       const key = `${type}_${item.id}`;
       this.unreadCounts[key] = 0;
-      
+
       this.isOpen = true;
     },
     
@@ -62,6 +64,11 @@ export const useChatStore = defineStore('chat', {
       try {
         const response = await api.get('/chat/contacts');
         this.contacts = response.data; // { users: [], groups: [] }
+
+        console.log('[Chat] Fetched contacts:', this.contacts.users.length, 'users');
+        this.contacts.users.forEach((user, i) => {
+          console.log(`[Chat]   User ${i}: id=${user.id}, username=${user.username}`);
+        });
 
         // Enrich all existing messages with sender info from newly fetched contacts
         for (const key in this.messages) {
@@ -218,6 +225,7 @@ export const useChatStore = defineStore('chat', {
           // If I am recipient, valid key is sender.
           const otherId = payload.sender_id === myId ? payload.recipient_id : payload.sender_id;
           key = `user_${otherId}`;
+          console.log('[Chat] Received DM: myId=', myId, 'sender_id=', payload.sender_id, 'recipient_id=', payload.recipient_id, 'otherId=', otherId, 'key=', key);
         }
 
         if (!this.messages[key]) {
@@ -262,18 +270,20 @@ export const useChatStore = defineStore('chat', {
         console.error('Socket not connected');
         return;
       }
-      
+
       const toSend = {
         content,
         // Add recipients
       };
-      
+
       if (this.activeConversation.type === 'user') {
         toSend.recipient_id = this.activeConversation.id;
+        console.log('[Chat] Sending DM: recipient_id=', toSend.recipient_id, 'content=', content);
       } else {
         toSend.group_id = this.activeConversation.id;
+        console.log('[Chat] Sending group message: group_id=', toSend.group_id, 'content=', content);
       }
-      
+
       this.socket.send(JSON.stringify(toSend));
     },
 
