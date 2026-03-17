@@ -2,7 +2,7 @@
 FROM golang:1.24-alpine AS builder
 
 # Installation des dépendances système
-RUN apk add --no-cache git ca-certificates tzdata
+RUN apk add --no-cache git ca-certificates tzdata curl
 
 # Définition du répertoire de travail
 WORKDIR /app
@@ -10,8 +10,12 @@ WORKDIR /app
 # Copie des fichiers de dépendances
 COPY go.mod go.sum ./
 
-# Téléchargement des dépendances
-RUN go mod download
+# Téléchargement des dépendances avec meilleure gestion du réseau
+RUN set -eux && \
+    export GOPROXY="https://goproxy.io,https://proxy.golang.org,direct" && \
+    export GOFLAGS="-mod=readonly" && \
+    go mod download -x && \
+    go mod verify
 
 # Copie du code source
 COPY . .
