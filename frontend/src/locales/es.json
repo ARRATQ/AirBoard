@@ -874,7 +874,9 @@
       "managedAppGroups": "Grupos de apps gestionados",
       "managedApps": "Mis aplicaciones",
       "managedNews": "Artículos gestionados",
-      "managedPolls": "Encuestas gestionadas"
+      "managedPolls": "Encuestas gestionadas",
+      "accessibleApps": "Aplicaciones disponibles",
+      "accessibleEvents": "Eventos disponibles"
     },
     "favorites": {
       "title": "Aplicaciones favoritas",

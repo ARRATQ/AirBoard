@@ -1155,7 +1155,9 @@
       "managedAppGroups": "Managed app groups",
       "managedApps": "My applications",
       "managedNews": "Managed articles",
-      "managedPolls": "Managed polls"
+      "managedPolls": "Managed polls",
+      "accessibleApps": "Available apps",
+      "accessibleEvents": "Available events"
     },
     "favorites": {
       "title": "Favorite applications",

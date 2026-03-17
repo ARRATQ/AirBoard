@@ -1147,7 +1147,9 @@
       "managedAppGroups": "Groupes d'apps gérés",
       "managedApps": "Mes applications",
       "managedNews": "Articles gérés",
-      "managedPolls": "Sondages gérés"
+      "managedPolls": "Sondages gérés",
+      "accessibleApps": "Applications disponibles",
+      "accessibleEvents": "Événements disponibles"
     },
     "favorites": {
       "title": "Applications favorites",
