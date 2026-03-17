@@ -553,10 +553,11 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 	var polls []models.Poll
 	var err error
 
-	// Les admins voient tous les sondages
+	// Les admins voient tous les sondages actifs
 	if role == "admin" {
 		err = h.db.Preload("Author").
 			Preload("Options").
+			Where("is_active = ?", true).
 			Order("created_at DESC").
 			Limit(10).
 			Find(&polls).Error
@@ -590,6 +591,7 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 			// L'utilisateur appartient à des groupes ou en administre
 			err = h.db.Preload("Author").
 				Preload("Options").
+				Where("is_active = ?", true).
 				Where(`
 					(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
 					OR EXISTS (
@@ -606,9 +608,10 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 				return polls, err
 			}
 		} else {
-			// L'utilisateur n'appartient à aucun groupe : seulement les sondages globaux
+			// L'utilisateur n'appartient à aucun groupe : seulement les sondages globaux actifs
 			err = h.db.Preload("Author").
 				Preload("Options").
+				Where("is_active = ?", true).
 				Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0").
 				Order("created_at DESC").
 				Limit(10).
