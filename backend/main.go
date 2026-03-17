@@ -164,6 +164,7 @@ func main() {
 
 	// Initialiser le service email global
 	InitEmailService(db, cfg)
+	ensureChatMessageTemplate(db)
 
 	// Initialiser le service de stockage
 	storageService, err := services.NewLocalStorage(cfg.Storage.UploadDir, cfg.Storage.BaseURL)
@@ -214,6 +215,7 @@ func main() {
 
 	// Initialisation du Chat
 	chatHub := chat.NewHub()
+	chatHub.EmailService = GetEmailService()
 	go chatHub.Run()
 	chatHandler := handlers.NewChatHandler(db, chatHub)
 
@@ -1441,4 +1443,26 @@ func InitEmailService(db *gorm.DB, cfg *config.Config) {
 // GetEmailService retourne le service email global
 func GetEmailService() *services.EmailService {
 	return emailService
+}
+
+// ensureChatMessageTemplate crée le template email chat_message s'il n'existe pas encore
+// (pour les installations existantes qui ont déjà les 4 templates de base)
+func ensureChatMessageTemplate(db *gorm.DB) {
+	var count int64
+	db.Model(&models.EmailTemplate{}).Where("type = ?", "chat_message").Count(&count)
+	if count > 0 {
+		return
+	}
+
+	defaults := models.GetDefaultEmailTemplates()
+	for _, t := range defaults {
+		if t.Type == "chat_message" {
+			if err := db.Create(&t).Error; err != nil {
+				log.Printf("Avertissement: impossible de créer le template email chat_message: %v", err)
+			} else {
+				log.Println("✅ Template email chat_message créé")
+			}
+			return
+		}
+	}
 }

@@ -954,6 +954,7 @@
     "templateApplication": "تطبيق جديد",
     "templateEvent": "حدث جديد",
     "templateAnnouncement": "إعلان",
+    "templateChatMessage": "رسالة محادثة",
     "enableTemplate": "تفعيل الإشعارات لهذا النوع",
     "subject": "الموضوع",
     "subjectPlaceholder": "موضوع البريد",

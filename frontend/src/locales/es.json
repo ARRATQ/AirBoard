@@ -954,6 +954,7 @@
     "templateApplication": "Nueva aplicación",
     "templateEvent": "Nuevo evento",
     "templateAnnouncement": "Anuncio",
+    "templateChatMessage": "Mensaje de chat",
     "enableTemplate": "Activar notificaciones para este tipo",
     "subject": "Asunto",
     "subjectPlaceholder": "Asunto del email",

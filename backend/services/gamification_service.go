@@ -396,6 +396,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "daily_login",
 			Metric:        "reason_count",
 			Threshold:     1,
+			IsActive:      true,
 		},
 		{
 			Code:          "explorer",
@@ -408,6 +409,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "app_click",
 			Metric:        "app_click_distinct",
 			Threshold:     10,
+			IsActive:      true,
 		},
 		{
 			Code:          "informed",
@@ -420,6 +422,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "news_read",
 			Metric:        "news_read_count",
 			Threshold:     20,
+			IsActive:      true,
 		},
 		{
 			Code:          "first_news",
@@ -432,6 +435,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "news_publish",
 			Metric:        "news_publish_count",
 			Threshold:     1,
+			IsActive:      true,
 		},
 		{
 			Code:          "event_master",
@@ -444,6 +448,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "event_publish",
 			Metric:        "event_publish_count",
 			Threshold:     5,
+			IsActive:      true,
 		},
 		{
 			Code:          "citizen",
@@ -456,6 +461,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "poll_vote",
 			Metric:        "poll_vote_count",
 			Threshold:     5,
+			IsActive:      true,
 		},
 		{
 			Code:          "pollster",
@@ -468,6 +474,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "poll_create",
 			Metric:        "poll_create_count",
 			Threshold:     3,
+			IsActive:      true,
 		},
 		{
 			Code:          "commentator",
@@ -480,6 +487,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "comment_create",
 			Metric:        "comment_count",
 			Threshold:     5,
+			IsActive:      true,
 		},
 		{
 			Code:          "suggestion_author",
@@ -492,6 +500,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "suggestion_create",
 			Metric:        "suggestion_create_count",
 			Threshold:     1,
+			IsActive:      true,
 		},
 		{
 			Code:          "suggestion_voter",
@@ -504,6 +513,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "suggestion_vote",
 			Metric:        "suggestion_vote_count",
 			Threshold:     10,
+			IsActive:      true,
 		},
 		{
 			Code:          "suggestion_commenter",
@@ -516,6 +526,7 @@ func (s *GamificationService) SeedAchievements() error {
 			TriggerReason: "suggestion_comment",
 			Metric:        "suggestion_comment_count",
 			Threshold:     5,
+			IsActive:      true,
 		},
 	}
 

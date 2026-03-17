@@ -73,6 +73,15 @@ type AnnouncementEmailData struct {
 	AppName string
 }
 
+// ChatMessageEmailData contient les données pour le template chat_message
+type ChatMessageEmailData struct {
+	SenderName     string
+	MessagePreview string
+	SentAt         string
+	ChatLink       string
+	AppName        string
+}
+
 // SendNotification envoie des notifications email aux groupes cibles
 func (s *EmailService) SendNotification(templateType string, contentID uint, targetGroupIDs []uint) error {
 	// Récupérer la config SMTP avec la config OAuth si disponible
@@ -194,6 +203,100 @@ func (s *EmailService) SendNotification(templateType string, contentID uint, tar
 	s.db.Save(&notifLog)
 
 	log.Printf("[Email] Notification terminée: %d succès, %d échecs", successCount, failureCount)
+	return nil
+}
+
+// SendChatNotificationEmail envoie un email à un utilisateur hors ligne pour l'informer d'un nouveau message chat
+func (s *EmailService) SendChatNotificationEmail(senderID, recipientID uint) error {
+	// Récupérer la config SMTP avec OAuth
+	var smtpConfig models.SMTPConfig
+	if err := s.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
+		return fmt.Errorf("SMTP non configuré: %w", err)
+	}
+	if !smtpConfig.IsEnabled {
+		return nil
+	}
+	if smtpConfig.EmailOAuthConfig == nil || !smtpConfig.EmailOAuthConfig.IsEnabled {
+		return nil
+	}
+
+	// Récupérer le template chat_message
+	var emailTemplate models.EmailTemplate
+	if err := s.db.Where("type = ? AND is_enabled = ?", "chat_message", true).First(&emailTemplate).Error; err != nil {
+		return nil // Template non trouvé ou désactivé
+	}
+
+	// Récupérer l'expéditeur
+	var sender models.User
+	if err := s.db.First(&sender, senderID).Error; err != nil {
+		return fmt.Errorf("expéditeur non trouvé: %w", err)
+	}
+
+	// Récupérer le destinataire
+	var recipient models.User
+	if err := s.db.First(&recipient, recipientID).Error; err != nil {
+		return fmt.Errorf("destinataire non trouvé: %w", err)
+	}
+
+	// Le destinataire doit avoir un email valide
+	if recipient.Email == "" {
+		return nil
+	}
+
+	// Récupérer le dernier message de l'expéditeur vers le destinataire
+	var lastMessage models.ChatMessage
+	if err := s.db.Where("sender_id = ? AND recipient_id = ?", senderID, recipientID).
+		Order("created_at desc").First(&lastMessage).Error; err != nil {
+		return fmt.Errorf("message non trouvé: %w", err)
+	}
+
+	// Nom d'affichage de l'expéditeur
+	senderName := strings.TrimSpace(sender.FirstName + " " + sender.LastName)
+	if senderName == "" {
+		senderName = sender.Username
+	}
+
+	// Tronquer l'aperçu du message
+	messagePreview := lastMessage.Content
+	if len(messagePreview) > 100 {
+		messagePreview = messagePreview[:100] + "..."
+	}
+
+	// Nom de l'application
+	var appSettings models.AppSettings
+	s.db.First(&appSettings)
+	appName := appSettings.AppName
+	if appName == "" {
+		appName = "Airboard"
+	}
+
+	// Construire les données du template
+	emailData := ChatMessageEmailData{
+		SenderName:     senderName,
+		MessagePreview: messagePreview,
+		SentAt:         lastMessage.CreatedAt.Format("02/01/2006 à 15:04"),
+		ChatLink:       fmt.Sprintf("%s/chat", s.config.Server.PublicURL),
+		AppName:        appName,
+	}
+
+	// Exécuter les templates
+	subject, err := s.ExecuteTemplate(emailTemplate.Subject, emailData)
+	if err != nil {
+		return fmt.Errorf("erreur template sujet: %w", err)
+	}
+
+	htmlBody, err := s.ExecuteTemplate(emailTemplate.HTMLBody, emailData)
+	if err != nil {
+		return fmt.Errorf("erreur template corps: %w", err)
+	}
+
+	// Envoyer l'email
+	if err := s.sendEmail(&smtpConfig, recipient.Email, subject, htmlBody); err != nil {
+		log.Printf("[Chat Email] Échec envoi à %s: %v", recipient.Email, err)
+		return err
+	}
+
+	log.Printf("[Chat Email] Notification envoyée à %s (de %s)", recipient.Email, senderName)
 	return nil
 }
 
@@ -569,6 +672,14 @@ func (s *EmailService) GetSampleData(templateType string) interface{} {
 			Content: "Ceci est un contenu d'annonce exemple pour prévisualiser le template.",
 			Type:    "info",
 			AppName: appName,
+		}
+	case "chat_message":
+		return ChatMessageEmailData{
+			SenderName:     "Jean Dupont",
+			MessagePreview: "Bonjour, avez-vous vu le dernier rapport ? Je l'ai partagé dans le dossier commun...",
+			SentAt:         time.Now().Format("02/01/2006 à 15:04"),
+			ChatLink:       fmt.Sprintf("%s/chat", s.config.Server.PublicURL),
+			AppName:        appName,
 		}
 	}
 	return nil

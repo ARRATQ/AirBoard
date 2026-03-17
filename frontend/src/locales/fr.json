@@ -1227,6 +1227,7 @@
     "templateApplication": "Nouvelle application",
     "templateEvent": "Nouvel événement",
     "templateAnnouncement": "Annonce",
+    "templateChatMessage": "Message de chat",
     "enableTemplate": "Activer les notifications pour ce type",
     "subject": "Sujet",
     "subjectPlaceholder": "Sujet de l'email",

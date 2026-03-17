@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -103,7 +104,9 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 		First(&event, event.ID)
 
 	// Award Contributor XP
-	go h.gamificationService.AwardXP(userID, 150, "event_publish", "")
+	if err := h.gamificationService.AwardXP(userID, 150, "event_publish", ""); err != nil {
+		log.Printf("[Gamification] Error awarding event publish XP for user %d: %v", userID, err)
+	}
 
 	c.JSON(http.StatusCreated, event)
 }

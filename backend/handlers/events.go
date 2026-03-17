@@ -146,22 +146,65 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 				query = query.Where("author_id = ?", userID)
 			}
 		} else {
-			// Interface publique : événements publiés publics + ceux de ses groupes
+			// Interface publique : événements publiés + ceux des groupes membres ET administrés
+			var userGroupIDs []uint
+			h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+			groupIDSet := make(map[uint]bool)
+			for _, id := range managedGroupIDs {
+				groupIDSet[id] = true
+			}
+			for _, id := range userGroupIDs {
+				groupIDSet[id] = true
+			}
+			var allGroupIDs []uint
+			for id := range groupIDSet {
+				allGroupIDs = append(allGroupIDs, id)
+			}
+
+			if len(allGroupIDs) > 0 {
+				query = query.Where(`
+					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
+						(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0 OR
+						EXISTS (
+							SELECT 1 FROM event_target_groups
+							WHERE event_target_groups.event_id = events.id
+							AND event_target_groups.group_id IN (?)
+						)
+					))
+				`, true, time.Now(), allGroupIDs)
+			} else {
+				query = query.Where(`
+					is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
+					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				`, true, time.Now())
+			}
+		}
+	} else if userRole == "editor" {
+		// Editor voit : ses propres brouillons + événements publiés selon ses groupes
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		if len(userGroupIDs) > 0 {
 			query = query.Where(`
+				author_id = ? OR
 				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0 OR
-					EXISTS (
+					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+					OR EXISTS (
 						SELECT 1 FROM event_target_groups
 						WHERE event_target_groups.event_id = events.id
 						AND event_target_groups.group_id IN (?)
 					)
 				))
-			`, true, time.Now(), managedGroupIDs)
+			`, userID, true, time.Now(), userGroupIDs)
+		} else {
+			query = query.Where(`
+				author_id = ? OR
+				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
+					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				)
+			`, userID, true, time.Now())
 		}
-	} else if userRole == "editor" {
-		// Editor voit : événements publiques + ses propres brouillons
-		query = query.Where("(is_published = ? AND (published_at IS NULL OR published_at <= ?)) OR author_id = ?",
-			true, time.Now(), userID)
 	} else {
 		// User régulier voit : événements publiques + événements ciblant ses groupes
 		query = query.Where("is_published = ?", true).
@@ -264,8 +307,23 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 	if userRole == "admin" {
 		// Admin voit tout
 	} else if len(managedGroupIDs) > 0 {
-		// Utilisateur qui administre au moins un groupe
-		if len(managedGroupIDs) > 0 {
+		// Group admin : événements des groupes membres ET administrés
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		groupIDSet := make(map[uint]bool)
+		for _, id := range managedGroupIDs {
+			groupIDSet[id] = true
+		}
+		for _, id := range userGroupIDs {
+			groupIDSet[id] = true
+		}
+		var allGroupIDs []uint
+		for id := range groupIDSet {
+			allGroupIDs = append(allGroupIDs, id)
+		}
+
+		if len(allGroupIDs) > 0 {
 			query = query.Where(`
 				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
 				OR EXISTS (
@@ -273,7 +331,7 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 					WHERE event_target_groups.event_id = events.id
 					AND event_target_groups.group_id IN (?)
 				)
-			`, managedGroupIDs)
+			`, allGroupIDs)
 		} else {
 			query = query.Where("(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0")
 		}

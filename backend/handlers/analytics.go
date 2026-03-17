@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -63,7 +64,9 @@ func (h *AnalyticsHandler) TrackClick(c *gin.Context) {
 	}
 
 	// Gamification XP
-	go h.gamificationService.AwardXP(userID.(uint), 5, "app_click", fmt.Sprintf("{\"app_id\": %d}", requestData.ApplicationID))
+	if err := h.gamificationService.AwardXP(userID.(uint), 5, "app_click", fmt.Sprintf("{\"app_id\": %d}", requestData.ApplicationID)); err != nil {
+		log.Printf("[Gamification] Error awarding app click XP for user %d: %v", userID.(uint), err)
+	}
 
 	c.JSON(http.StatusCreated, models.SuccessResponse{
 		Message: "Clic enregistré avec succès",

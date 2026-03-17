@@ -22,7 +22,7 @@
           <!-- Title -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              <label class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
                 <Icon icon="mdi:format-title" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.titleLabel') }} *
               </label>
@@ -39,7 +39,7 @@
           <!-- Summary -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              <label class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
                 <Icon icon="mdi:text-short" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.summaryLabel') }}
               </label>
@@ -64,7 +64,7 @@
           <!-- Content -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <label class="flex text-sm font-semibold text-gray-900 dark:text-white mb-3 items-center gap-2">
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.contentLabel') }} *
               </label>

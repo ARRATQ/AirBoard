@@ -469,7 +469,9 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 	}
 
 	// Award Contributor XP
-	go h.gamificationService.AwardXP(userID, 100, "news_publish", fmt.Sprintf("{\"news_id\": %d}", news.ID))
+	if err := h.gamificationService.AwardXP(userID, 100, "news_publish", fmt.Sprintf("{\"news_id\": %d}", news.ID)); err != nil {
+		log.Printf("[Gamification] Error awarding news publish XP for user %d: %v", userID, err)
+	}
 
 	c.JSON(http.StatusCreated, news)
 }
@@ -766,7 +768,9 @@ func (h *NewsHandler) IncrementView(c *gin.Context) {
 		}
 		if err := h.db.Create(&read).Error; err == nil {
 			// 3. Attribuer de l'XP (20 points par lecture unique)
-			go h.gamificationService.AwardXP(userID, 20, "news_read", fmt.Sprintf("{\"news_id\": %d}", id))
+			if err := h.gamificationService.AwardXP(userID, 20, "news_read", fmt.Sprintf("{\"news_id\": %d}", id)); err != nil {
+				log.Printf("[Gamification] Error awarding news read XP for user %d: %v", userID, err)
+			}
 		}
 	}
 

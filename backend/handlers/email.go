@@ -299,6 +299,13 @@ func (h *EmailHandler) GetTemplateVariables(c *gin.Context) {
 			{"name": "{{.Type}}", "description": "Type d'annonce (info, warning, success, error)"},
 			{"name": "{{.AppName}}", "description": "Nom de l'application"},
 		},
+		"chat_message": {
+			{"name": "{{.SenderName}}", "description": "Nom de l'expéditeur du message"},
+			{"name": "{{.MessagePreview}}", "description": "Aperçu du message (tronqué à 100 caractères)"},
+			{"name": "{{.SentAt}}", "description": "Date et heure d'envoi"},
+			{"name": "{{.ChatLink}}", "description": "Lien vers la conversation"},
+			{"name": "{{.AppName}}", "description": "Nom de l'application"},
+		},
 	}
 
 	c.JSON(http.StatusOK, variables)

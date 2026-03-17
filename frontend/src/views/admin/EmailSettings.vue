@@ -849,6 +849,7 @@ const getTemplateIcon = (type) => {
     application: "mdi:application",
     event: "mdi:calendar",
     announcement: "mdi:bullhorn",
+    chat_message: "mdi:chat",
   };
   return icons[type] || "mdi:email";
 };
@@ -859,6 +860,7 @@ const getTemplateName = (type) => {
     application: t("email.templateApplication"),
     event: t("email.templateEvent"),
     announcement: t("email.templateAnnouncement"),
+    chat_message: t("email.templateChatMessage"),
   };
   return translations[type] || type;
 };

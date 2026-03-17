@@ -342,5 +342,55 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 </body>
 </html>`,
 		},
+		{
+			Type:      "chat_message",
+			Name:      "Notification Message Chat",
+			Subject:   "{{.AppName}} - Nouveau message de {{.SenderName}}",
+			IsEnabled: true,
+			HTMLBody: `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
+.container { max-width: 600px; margin: 0 auto; background: white; }
+.header { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); color: white; padding: 30px; text-align: center; }
+.header h1 { margin: 0; font-size: 24px; font-weight: 600; }
+.content { padding: 30px; }
+.content h2 { color: #1f2937; margin-top: 0; font-size: 22px; }
+.message-card { background: #f5f3ff; border-left: 4px solid #8B5CF6; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+.message-card .sender { font-weight: 600; color: #6D28D9; margin-bottom: 8px; }
+.message-card .preview { color: #4B5563; font-style: italic; }
+.meta { color: #6b7280; font-size: 14px; margin: 15px 0; }
+.button { display: inline-block; padding: 12px 24px; background: #8B5CF6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; margin-top: 20px; }
+.button:hover { background: #7C3AED; }
+.footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>{{.AppName}}</h1>
+</div>
+<div class="content">
+<h2>Nouveau message</h2>
+<div class="message-card">
+<div class="sender">{{.SenderName}}</div>
+<div class="preview">{{.MessagePreview}}</div>
+</div>
+<div class="meta">
+<span>Envoy&eacute; le {{.SentAt}}</span>
+</div>
+<a href="{{.ChatLink}}" class="button">Ouvrir la conversation</a>
+</div>
+<div class="footer">
+<p>Vous recevez cet email car vous avez re&ccedil;u un message hors ligne sur l'intranet.</p>
+<p>&copy; {{.AppName}}</p>
+</div>
+</div>
+</body>
+</html>`,
+		},
 	}
 }

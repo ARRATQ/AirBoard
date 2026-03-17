@@ -141,6 +141,9 @@ func (c *Client) handleMessage(msg []byte) {
 		// DM: Send to recipient AND sender (so it appears in their own chat window immediately via WS)
 		c.Hub.SendToUser(*incoming.RecipientID, jsonResponse)
 		c.Hub.SendToUser(c.UserID, jsonResponse)
+
+		// Notify offline recipient via email
+		c.Hub.NotifyOfflineUser(c.UserID, *incoming.RecipientID)
 	} else if incoming.GroupID != nil {
 		// Group Chat: Logic to find users in group and send to all
 		// TODO: Implement group broadcast optimization

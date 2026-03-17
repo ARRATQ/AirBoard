@@ -97,7 +97,9 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 	}
 
 	// Award Contributor XP
-	go h.gamificationService.AwardXP(userID, 150, "event_publish", "")
+	if err := h.gamificationService.AwardXP(userID, 150, "event_publish", ""); err != nil {
+		log.Printf("[Gamification] Error awarding event publish XP for user %d: %v", userID, err)
+	}
 
 	c.JSON(http.StatusCreated, event)
 }
@@ -265,12 +267,11 @@ func (h *EventsHandler) ListEvents(c *gin.Context) {
 		query = query.Where("category_id = ?", categoryID)
 	}
 
-	if status := c.Query("status"); status != "" {
-		if status == "published" {
-			query = query.Where("is_published = ?", true)
-		} else if status == "draft" {
-			query = query.Where("is_published = ?", false)
-		}
+	switch status := c.Query("status"); status {
+	case "published":
+		query = query.Where("is_published = ?", true)
+	case "draft":
+		query = query.Where("is_published = ?", false)
 	}
 
 	if eventType := c.Query("event_type"); eventType != "" {

@@ -132,6 +132,14 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	// car on veut seulement les sondages explicitement liés à cette entité
 	isEntityFilter := newsIDFilter != "" || c.Query("announcement_id") != ""
 
+	// Pour les non-admins sur l'interface publique, forcer is_active = true
+	// (les admins peuvent voir les sondages inactifs via l'interface d'administration)
+	isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls") ||
+		strings.HasPrefix(c.Request.URL.Path, "/api/v1/admin/polls")
+	if userRole != "admin" && !isAdminInterface && c.Query("status") == "" {
+		query = query.Where("is_active = ?", true)
+	}
+
 	if userRole == "admin" {
 		// Admin voit tout
 	} else if !isEntityFilter && len(managedGroupIDs) > 0 {
@@ -315,6 +323,12 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 
 	if !hasAccess {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this poll"})
+		return
+	}
+
+	// Les non-admins ne peuvent pas voir un sondage inactif
+	if !poll.IsActive {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
 		return
 	}
 

@@ -486,6 +486,7 @@ import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useEventsStore } from '@/stores/events'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
 
 const route = useRoute()
@@ -493,9 +494,12 @@ const router = useRouter()
 const { t } = useI18n()
 const eventsStore = useEventsStore()
 const appStore = useAppStore()
+const authStore = useAuthStore()
 
 // Déterminer si on est en mode group-admin
 const isGroupAdminMode = computed(() => route.path.startsWith('/group-admin'))
+// Un editor (non-admin) doit utiliser les routes /editor/events
+const isEditorMode = computed(() => !isGroupAdminMode.value && authStore.user?.role === 'editor')
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
 const isSaving = ref(false)
 const categories = ref([])
@@ -719,6 +723,8 @@ const saveEvent = async () => {
     if (isEditMode.value) {
       if (isGroupAdminMode.value) {
         await eventsStore.updateGroupAdminEvent(route.params.slug, data)
+      } else if (isEditorMode.value) {
+        await eventsStore.updateEditorEvent(route.params.slug, data)
       } else {
         await eventsStore.updateEvent(route.params.slug, data)
       }
@@ -726,6 +732,8 @@ const saveEvent = async () => {
     } else {
       if (isGroupAdminMode.value) {
         await eventsStore.createGroupAdminEvent(data)
+      } else if (isEditorMode.value) {
+        await eventsStore.createEditorEvent(data)
       } else {
         await eventsStore.createEvent(data)
       }

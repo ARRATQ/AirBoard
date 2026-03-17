@@ -2,9 +2,17 @@ package chat
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"sync"
+	"time"
 )
+
+// EmailNotifier is an interface for sending chat email notifications.
+// Defined here to avoid circular imports with the services package.
+type EmailNotifier interface {
+	SendChatNotificationEmail(senderID, recipientID uint) error
+}
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -26,19 +34,32 @@ type Hub struct {
 	UserClients map[uint][]*Client
 
 	mu sync.RWMutex
+
+	// Email notification for offline users
+	EmailService EmailNotifier
+
+	// Rate limiting: map["senderID:recipientID"] -> lastEmailSentAt
+	emailRateLimit map[string]time.Time
+	rateMu         sync.Mutex
 }
+
+const chatEmailCooldown = 5 * time.Minute
 
 func NewHub() *Hub {
 	return &Hub{
-		Broadcast:   make(chan []byte),
-		Register:    make(chan *Client),
-		Unregister:  make(chan *Client),
-		Clients:     make(map[*Client]bool),
-		UserClients: make(map[uint][]*Client),
+		Broadcast:      make(chan []byte),
+		Register:       make(chan *Client),
+		Unregister:     make(chan *Client),
+		Clients:        make(map[*Client]bool),
+		UserClients:    make(map[uint][]*Client),
+		emailRateLimit: make(map[string]time.Time),
 	}
 }
 
 func (h *Hub) Run() {
+	rateLimitCleanup := time.NewTicker(10 * time.Minute)
+	defer rateLimitCleanup.Stop()
+
 	for {
 		select {
 		case client := <-h.Register:
@@ -93,6 +114,15 @@ func (h *Hub) Run() {
 					delete(h.Clients, client)
 				}
 			}
+
+		case <-rateLimitCleanup.C:
+			h.rateMu.Lock()
+			for key, lastSent := range h.emailRateLimit {
+				if time.Since(lastSent) > chatEmailCooldown*2 {
+					delete(h.emailRateLimit, key)
+				}
+			}
+			h.rateMu.Unlock()
 		}
 	}
 }
@@ -117,6 +147,44 @@ func (h *Hub) SendToUser(userID uint, message []byte) {
 			// but for now we skip.
 		}
 	}
+}
+
+// IsUserOnline checks if a user has any active WebSocket connections
+func (h *Hub) IsUserOnline(userID uint) bool {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	clients, ok := h.UserClients[userID]
+	return ok && len(clients) > 0
+}
+
+// NotifyOfflineUser sends an email notification if the recipient is offline
+// and the rate limit allows it.
+func (h *Hub) NotifyOfflineUser(senderID, recipientID uint) {
+	if h.EmailService == nil {
+		return
+	}
+
+	if h.IsUserOnline(recipientID) {
+		return
+	}
+
+	// Rate limiting per sender-recipient pair
+	key := fmt.Sprintf("%d:%d", senderID, recipientID)
+	h.rateMu.Lock()
+	lastSent, exists := h.emailRateLimit[key]
+	if exists && time.Since(lastSent) < chatEmailCooldown {
+		h.rateMu.Unlock()
+		log.Printf("[Chat Email] Rate limited: %s (last sent %v ago)", key, time.Since(lastSent).Round(time.Second))
+		return
+	}
+	h.emailRateLimit[key] = time.Now()
+	h.rateMu.Unlock()
+
+	go func() {
+		if err := h.EmailService.SendChatNotificationEmail(senderID, recipientID); err != nil {
+			log.Printf("[Chat Email] Error sending notification: %v", err)
+		}
+	}()
 }
 
 // BroadcastStatus sends a status update (online/offline) to all clients
