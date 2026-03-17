@@ -214,20 +214,18 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 9. Load Stats (role-specific)
-	if role == "admin" || len(response.ManagedGroupIDs) > 0 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			userIDVal := userID.(uint)
-			roleVal := role.(string)
-			stats := h.getStats(userIDVal, roleVal, response.ManagedGroupIDs)
-			log.Printf("[Home] GetHomeData: userID=%d, role=%s, stats=%+v", userIDVal, roleVal, stats)
-			mu.Lock()
-			response.Stats = stats
-			mu.Unlock()
-		}()
-	}
+	// 9. Load Stats (for all users)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		userIDVal := userID.(uint)
+		roleVal := role.(string)
+		stats := h.getStats(userIDVal, roleVal, response.ManagedGroupIDs)
+		log.Printf("[Home] GetHomeData: userID=%d, role=%s, stats=%+v", userIDVal, roleVal, stats)
+		mu.Lock()
+		response.Stats = stats
+		mu.Unlock()
+	}()
 
 	// 10. Load App Settings (cached)
 	wg.Add(1)
