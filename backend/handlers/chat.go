@@ -53,6 +53,8 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		UserID: userID,
 	}
 
+	log.Printf("[Chat] WebSocket connected: userID=%d", userID)
+
 	client.Hub.Register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
