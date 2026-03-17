@@ -67,7 +67,7 @@ type HomeResponse struct {
 	RecentNewsByType  []NewsGroup           `json:"recent_news_by_type"`
 	Polls             []models.Poll         `json:"polls"`
 	Announcements     []models.Announcement `json:"announcements"`
-	Stats             *HomeStats            `json:"stats,omitempty"`
+	Stats             *HomeStats            `json:"stats"`
 	Gamification      *GamificationSummary  `json:"gamification,omitempty"`
 	UserRole          string                `json:"user_role"`
 	ManagedGroupIDs   []uint                `json:"managed_group_ids,omitempty"`
