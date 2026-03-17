@@ -139,6 +139,7 @@ func (c *Client) handleMessage(msg []byte) {
 	// Route the message
 	if incoming.RecipientID != nil {
 		// DM: Send to recipient AND sender (so it appears in their own chat window immediately via WS)
+		log.Printf("[Chat] DM routing: Sender=%d, Recipient=%d, Message='%s'", c.UserID, *incoming.RecipientID, incoming.Content)
 		c.Hub.SendToUser(*incoming.RecipientID, jsonResponse)
 		c.Hub.SendToUser(c.UserID, jsonResponse)
 
