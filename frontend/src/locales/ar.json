@@ -874,7 +874,9 @@
       "managedAppGroups": "مجموعات التطبيقات المدارة",
       "managedApps": "تطبيقاتي",
       "managedNews": "المقالات المدارة",
-      "managedPolls": "الاستطلاعات المدارة"
+      "managedPolls": "الاستطلاعات المدارة",
+      "accessibleApps": "التطبيقات المتاحة",
+      "accessibleEvents": "الأحداث المتاحة"
     },
     "favorites": {
       "title": "التطبيقات المفضلة",
