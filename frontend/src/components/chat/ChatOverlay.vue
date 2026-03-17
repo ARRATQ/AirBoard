@@ -258,25 +258,25 @@
               </div>
            </div>
 
-           <div class="p-3 border-t dark:border-gray-700 flex gap-2 bg-white dark:bg-gray-900 items-center">
-              <button 
+           <div class="p-3 border-t dark:border-gray-700 flex gap-2 bg-white dark:bg-gray-900 items-center overflow-hidden">
+              <button
                 @click="showEmojiPicker = !showEmojiPicker"
-                class="text-gray-500 hover:text-blue-500 transition-colors p-1"
+                class="text-gray-500 hover:text-blue-500 transition-colors p-1 flex-shrink-0"
                 :class="{'text-blue-500': showEmojiPicker}"
                 title="Ajouter un emoji"
               >
                 <Icon icon="mdi:emoticon-outline" class="text-xl" />
               </button>
 
-              <input 
-                v-model="newMessage" 
+              <input
+                v-model="newMessage"
                 @keyup.enter="sendMessage"
                 @focus="showEmojiPicker = false"
-                type="text" 
-                placeholder="Écrivez un message..." 
-                class="flex-1 border dark:border-gray-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+                type="text"
+                placeholder="Écrivez un message..."
+                class="flex-1 min-w-0 border dark:border-gray-700 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white overflow-hidden text-ellipsis"
               >
-              <button 
+              <button
                 @click="sendMessage"
                 class="bg-blue-600 text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 flex-shrink-0"
                 :disabled="!newMessage.trim()"
