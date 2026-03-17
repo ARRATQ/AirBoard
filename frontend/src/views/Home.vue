@@ -25,13 +25,6 @@
     <div v-else class="home-content">
       <!-- Hero Section -->
       <HeroSection
-        :stats="{
-          apps: homeData.stats?.total_apps || homeData.new_apps?.length || 0,
-          events: (homeData.today_events?.length || 0) + (homeData.upcoming_events?.length || 0),
-          news: homeData.recent_news?.length || 0,
-          polls: homeData.polls?.length || 0
-        }"
-        :show-quick-stats="true"
         :announcements="homeData.announcements || []"
         :hero-messages="homeData.hero_messages || []"
         :hero-image-url="homeData.app_settings?.hero_image_url || ''"
@@ -133,7 +126,7 @@ const error = ref(null)
 
 // Computed
 const showStats = computed(() => {
-  return homeData.value.stats && (homeData.value.user_role === 'admin' || homeData.value.managed_group_ids?.length > 0)
+  return homeData.value.stats
 })
 
 

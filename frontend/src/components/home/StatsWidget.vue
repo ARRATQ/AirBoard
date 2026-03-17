@@ -90,6 +90,34 @@
         <Icon icon="mdi:chevron-right" class="stat-arrow" />
       </div>
     </div>
+
+    <!-- Regular User Stats - Compact List -->
+    <div v-else class="stats-list">
+      <div class="stat-row clickable" @click="navigateTo('/dashboard')">
+        <Icon icon="mdi:application" class="stat-icon stat-icon-green" />
+        <span class="stat-value">{{ stats.total_accessible_apps || 0 }}</span>
+        <span class="stat-label">{{ $t('home.stats.accessibleApps') }}</span>
+        <Icon icon="mdi:chevron-right" class="stat-arrow" />
+      </div>
+      <div class="stat-row clickable" @click="navigateTo('/events')">
+        <Icon icon="mdi:calendar-star" class="stat-icon stat-icon-red" />
+        <span class="stat-value">{{ stats.total_accessible_events || 0 }}</span>
+        <span class="stat-label">{{ $t('home.stats.accessibleEvents') }}</span>
+        <Icon icon="mdi:chevron-right" class="stat-arrow" />
+      </div>
+      <div class="stat-row clickable" @click="navigateTo('/news')">
+        <Icon icon="mdi:newspaper-variant-outline" class="stat-icon stat-icon-orange" />
+        <span class="stat-value">{{ stats.total_news || 0 }}</span>
+        <span class="stat-label">{{ $t('home.stats.news') }}</span>
+        <Icon icon="mdi:chevron-right" class="stat-arrow" />
+      </div>
+      <div class="stat-row clickable" @click="navigateTo('/news')">
+        <Icon icon="mdi:poll" class="stat-icon stat-icon-yellow" />
+        <span class="stat-value">{{ stats.total_polls || 0 }}</span>
+        <span class="stat-label">{{ $t('home.stats.polls') }}</span>
+        <Icon icon="mdi:chevron-right" class="stat-arrow" />
+      </div>
+    </div>
   </div>
 </template>
 

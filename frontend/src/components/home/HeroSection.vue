@@ -43,29 +43,6 @@
           </div>
         </div>
 
-        <!-- Quick Stats Bar (Mini) -->
-        <div v-if="showQuickStats" class="quick-stats-bar">
-          <div class="stat-badge">
-            <Icon icon="mdi:apps" class="stat-icon" />
-            <span class="stat-value">{{ stats.apps || 0 }}</span>
-            <span class="stat-label">{{ $t('home.hero.apps') }}</span>
-          </div>
-          <div class="stat-badge">
-            <Icon icon="mdi:calendar-star" class="stat-icon" />
-            <span class="stat-value">{{ stats.events || 0 }}</span>
-            <span class="stat-label">{{ $t('home.hero.events') }}</span>
-          </div>
-          <div class="stat-badge">
-            <Icon icon="mdi:newspaper-variant-outline" class="stat-icon" />
-            <span class="stat-value">{{ stats.news || 0 }}</span>
-            <span class="stat-label">{{ $t('home.hero.news') }}</span>
-          </div>
-          <div class="stat-badge">
-            <Icon icon="mdi:poll" class="stat-icon" />
-            <span class="stat-value">{{ stats.polls || 0 }}</span>
-            <span class="stat-label">{{ $t('home.hero.polls') }}</span>
-          </div>
-        </div>
       </div>
 
       <!-- Announcements Carousel (Integrated) -->
@@ -108,14 +85,6 @@ import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
-  stats: {
-    type: Object,
-    default: () => ({})
-  },
-  showQuickStats: {
-    type: Boolean,
-    default: true
-  },
   announcements: {
     type: Array,
     default: () => []
