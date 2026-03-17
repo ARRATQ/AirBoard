@@ -322,11 +322,32 @@ func (h *HomeHandler) getTodayEvents(userID uint, role string) ([]models.Event, 
 
 	var events []models.Event
 
-	query := h.db.Where("is_published = ? AND ((start_date >= ? AND start_date < ?) OR (start_date < ? AND end_date >= ?))",
-		true, startOfDay, endOfDay, startOfDay, startOfDay).
-		Preload("Author").
+	baseWhere := "is_published = ? AND ((start_date >= ? AND start_date < ?) OR (start_date < ? AND end_date >= ?))"
+	baseArgs := []interface{}{true, startOfDay, endOfDay, startOfDay, startOfDay}
+
+	query := h.db.Preload("Author").
 		Preload("Category").
 		Order("start_date ASC")
+
+	// Admins see all published events
+	if role == "admin" {
+		query = query.Where(baseWhere, baseArgs...)
+	} else {
+		// Get user's groups
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Filter: events that are either public (no target groups) OR targeted to user's groups
+		query = query.Where(baseWhere, baseArgs...).
+			Where(`
+				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				OR EXISTS (
+					SELECT 1 FROM event_target_groups
+					WHERE event_target_groups.event_id = events.id
+					AND event_target_groups.group_id IN (?)
+				)
+			`, userGroupIDs)
+	}
 
 	err := query.Find(&events).Error
 	return events, err
@@ -339,11 +360,30 @@ func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Even
 
 	var events []models.Event
 
-	query := h.db.Where("is_published = ? AND start_date > ?", true, startOfTomorrow).
-		Preload("Author").
+	query := h.db.Preload("Author").
 		Preload("Category").
 		Order("start_date ASC").
 		Limit(5)
+
+	// Admins see all published events
+	if role == "admin" {
+		query = query.Where("is_published = ? AND start_date > ?", true, startOfTomorrow)
+	} else {
+		// Get user's groups
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Filter: events that are either public (no target groups) OR targeted to user's groups
+		query = query.Where("is_published = ? AND start_date > ?", true, startOfTomorrow).
+			Where(`
+				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				OR EXISTS (
+					SELECT 1 FROM event_target_groups
+					WHERE event_target_groups.event_id = events.id
+					AND event_target_groups.group_id IN (?)
+				)
+			`, userGroupIDs)
+	}
 
 	err := query.Find(&events).Error
 	return events, err
