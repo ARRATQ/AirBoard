@@ -126,6 +126,7 @@ const error = ref(null)
 
 // Computed
 const showStats = computed(() => {
+  console.log('[Home] showStats computed: homeData.stats=', homeData.value.stats, 'truthy?', !!homeData.value.stats)
   return homeData.value.stats
 })
 
@@ -144,6 +145,9 @@ const loadHomeData = async () => {
     isLoading.value = true
     error.value = null
     homeData.value = await homeService.getHomeData()
+    console.log('[Home] Loaded homeData:', homeData.value)
+    console.log('[Home] Stats:', homeData.value.stats)
+    console.log('[Home] User role:', homeData.value.user_role)
   } catch (err) {
     console.error('Failed to load home data:', err)
     error.value = err
