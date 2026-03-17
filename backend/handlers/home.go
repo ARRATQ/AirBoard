@@ -39,6 +39,10 @@ type HomeStats struct {
 	ManagedAppsCount      int64 `json:"managed_apps_count,omitempty"`
 	ManagedNewsCount      int64 `json:"managed_news_count,omitempty"`
 	ManagedPollsCount     int64 `json:"managed_polls_count,omitempty"`
+
+	// Regular user stats
+	TotalAccessibleApps   int64 `json:"total_accessible_apps,omitempty"`
+	TotalAccessibleEvents int64 `json:"total_accessible_events,omitempty"`
 }
 
 type GamificationSummary struct {
@@ -783,6 +787,30 @@ func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint)
 			Where("poll_target_groups.group_id IN ?", managedGroupIDs).
 			Distinct("polls.id").
 			Count(&stats.ManagedPollsCount)
+	} else {
+		// Regular user stats
+		// Get user's groups
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		// Count accessible apps (public + in user's groups)
+		h.db.Model(&models.Application{}).
+			Joins("LEFT JOIN app_groups ON applications.app_group_id = app_groups.id").
+			Joins("LEFT JOIN group_app_groups ON group_app_groups.app_group_id = app_groups.id").
+			Where("(app_groups.is_private = ? OR group_app_groups.group_id IN ?) AND applications.is_active = ?", false, userGroupIDs, true).
+			Distinct("applications.id").
+			Count(&stats.TotalAccessibleApps)
+
+		// Count accessible events (public + in user's groups)
+		h.db.Model(&models.Event{}).
+			Where("is_published = ?", true).
+			Count(&stats.TotalAccessibleEvents)
+
+		// Count all published news
+		h.db.Model(&models.News{}).Where("is_published = ?", true).Count(&stats.TotalNews)
+
+		// Count polls (basic count - frontend filters by accessibility)
+		h.db.Model(&models.Poll{}).Count(&stats.TotalPolls)
 	}
 
 	return stats
