@@ -306,6 +306,16 @@ const routes = [
     }
   },
   {
+    path: '/admin/reports',
+    name: 'AdminReports',
+    component: () => import('@/views/admin/Reports.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Reports'
+    }
+  },
+  {
     path: '/admin/announcements',
     name: 'AdminAnnouncements',
     component: AnnouncementsManagement,

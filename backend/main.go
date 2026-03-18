@@ -191,6 +191,7 @@ func main() {
 	oauthHandler := handlers.NewOAuthHandler(db, authMiddleware)
 	favoritesHandler := handlers.NewFavoritesHandler(db)
 	analyticsHandler := handlers.NewAnalyticsHandler(db, gamificationService)
+	reportsHandler := handlers.NewReportsHandler(db)
 	announcementHandler := handlers.NewAnnouncementHandler(db)
 	newsHandler := handlers.NewNewsHandler(db, cfg, gamificationService)
 	eventsHandler := handlers.NewEventsHandler(db, gamificationService)
@@ -538,6 +539,12 @@ func main() {
 			admin.GET("/analytics/dashboard", analyticsHandler.GetDashboard)
 			admin.GET("/analytics/applications/:id", analyticsHandler.GetApplicationStats)
 			admin.GET("/analytics/users/:id", analyticsHandler.GetUserStats)
+
+			// Reporting (réservé aux admins)
+			admin.GET("/reports/roles", reportsHandler.GetRoleReport)
+			admin.GET("/reports/groups", reportsHandler.GetGroupReport)
+			admin.GET("/reports/users", reportsHandler.GetUserReport)
+			admin.GET("/reports/users/:id", reportsHandler.GetUserDetailReport)
 
 			// Gestion des annonces (réservé aux admins)
 			admin.GET("/announcements", announcementHandler.GetAllAnnouncements)

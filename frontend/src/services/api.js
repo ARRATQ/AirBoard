@@ -493,6 +493,29 @@ export const analyticsService = {
   }
 }
 
+// Reports Service
+export const reportsService = {
+  async getRoleReport(params = {}) {
+    const response = await api.get('/admin/reports/roles', { params })
+    return response.data
+  },
+
+  async getGroupReport(params = {}) {
+    const response = await api.get('/admin/reports/groups', { params })
+    return response.data
+  },
+
+  async getUserReport(params = {}) {
+    const response = await api.get('/admin/reports/users', { params })
+    return response.data
+  },
+
+  async getUserDetailReport(userId, params = {}) {
+    const response = await api.get(`/admin/reports/users/${userId}`, { params })
+    return response.data
+  }
+}
+
 // Announcements Service
 export const announcementsService = {
   // Public - Get active announcements for users

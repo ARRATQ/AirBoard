@@ -263,6 +263,11 @@
             <Icon icon="mdi:chart-line" class="h-4 w-4" />
             <span>{{ $t('common.analytics') }}</span>
           </router-link>
+
+          <router-link to="/admin/reports" :class="getLinkClasses('/admin/reports')">
+            <Icon icon="mdi:chart-timeline-variant" class="h-4 w-4" />
+            <span>{{ $t('reports.title') }}</span>
+          </router-link>
         </CollapsibleMenu>
       </div>
 
@@ -615,7 +620,8 @@ const isAppsSectionActive = computed(() => {
 const isSystemSectionActive = computed(() => {
   return route.path.startsWith('/admin/settings') ||
          route.path.startsWith('/admin/email') ||
-         route.path.startsWith('/admin/analytics')
+         route.path.startsWith('/admin/analytics') ||
+         route.path.startsWith('/admin/reports')
 })
 
 const isEditorContentActive = computed(() => {
