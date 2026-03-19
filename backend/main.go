@@ -543,6 +543,7 @@ func main() {
 			// Reporting (réservé aux admins)
 			admin.GET("/reports/roles", reportsHandler.GetRoleReport)
 			admin.GET("/reports/groups", reportsHandler.GetGroupReport)
+			admin.GET("/reports/groups/:id", reportsHandler.GetGroupDetailReport)
 			admin.GET("/reports/users", reportsHandler.GetUserReport)
 			admin.GET("/reports/users/:id", reportsHandler.GetUserDetailReport)
 

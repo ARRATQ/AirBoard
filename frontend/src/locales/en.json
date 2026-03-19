@@ -44,6 +44,8 @@
     "daysAgo": "{count} days ago",
     "daysRemaining": "{count} day(s) remaining",
     "retry": "Retry",
+    "refresh": "Refresh",
+    "loading": "Loading...",
     "users": "Users",
     "groups": "Groups",
     "settings": "Settings",

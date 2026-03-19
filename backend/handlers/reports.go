@@ -58,6 +58,7 @@ type RoleStat struct {
 	ReactionsGiven       int64         `json:"reactions_given"`
 	PollVotes            int64         `json:"poll_votes"`
 	AppsCreated          int64         `json:"apps_created"`
+	AppsCreatedTotal     int64         `json:"apps_created_total"`
 	ArticlesPublished    int64         `json:"articles_published"`
 	TotalViewsGenerated  int64         `json:"total_views_generated"`
 	TotalReactionsEarned int64         `json:"total_reactions_earned"`
@@ -144,10 +145,14 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Where("user_id IN (?) AND voted_at BETWEEN ? AND ?", gaSubQ, from, to).
 				Count(&stat.PollVotes)
 
-			// Applications créées par les admins de groupe
+			// Applications créées dans la période
 			h.db.Model(&models.Application{}).
 				Where("created_by_id IN (?) AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", gaSubQ, from, to).
 				Count(&stat.AppsCreated)
+			// Total toutes périodes confondues
+			h.db.Model(&models.Application{}).
+				Where("created_by_id IN (?) AND deleted_at IS NULL", gaSubQ).
+				Count(&stat.AppsCreatedTotal)
 
 			// Production : articles publiés par les admins de groupe
 			h.db.Model(&models.News{}).
@@ -213,11 +218,16 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Count(&stat.PollVotes)
 
 			if role == "admin" || role == "editor" {
-				// Applications créées par ce rôle
+				// Applications créées dans la période
 				h.db.Model(&models.Application{}).
 					Joins("JOIN users ON users.id = applications.created_by_id").
 					Where("users.role = ? AND users.deleted_at IS NULL AND applications.created_at BETWEEN ? AND ? AND applications.deleted_at IS NULL", role, from, to).
 					Count(&stat.AppsCreated)
+				// Total toutes périodes confondues
+				h.db.Model(&models.Application{}).
+					Joins("JOIN users ON users.id = applications.created_by_id").
+					Where("users.role = ? AND users.deleted_at IS NULL AND applications.deleted_at IS NULL", role).
+					Count(&stat.AppsCreatedTotal)
 
 				h.db.Model(&models.News{}).
 					Joins("JOIN users ON users.id = news.author_id").
@@ -284,19 +294,20 @@ type NewsSummary struct {
 }
 
 type GroupStat struct {
-	GroupID        uint          `json:"group_id"`
-	GroupName      string        `json:"group_name"`
-	GroupColor     string        `json:"group_color"`
-	MemberCount    int64         `json:"member_count"`
-	ActiveMembers  int64         `json:"active_members"`
-	EngagementRate float64       `json:"engagement_rate"`
-	AppClicks      int64         `json:"app_clicks"`
-	NewsRead       int64         `json:"news_read"`
-	ReactionsGiven int64         `json:"reactions_given"`
-	PollVotes      int64         `json:"poll_votes"`
-	AppsCreated    int64         `json:"apps_created"`
-	TopApps        []AppSummary  `json:"top_apps"`
-	TopNews        []NewsSummary `json:"top_news"`
+	GroupID          uint          `json:"group_id"`
+	GroupName        string        `json:"group_name"`
+	GroupColor       string        `json:"group_color"`
+	MemberCount      int64         `json:"member_count"`
+	ActiveMembers    int64         `json:"active_members"`
+	EngagementRate   float64       `json:"engagement_rate"`
+	AppClicks        int64         `json:"app_clicks"`
+	NewsRead         int64         `json:"news_read"`
+	ReactionsGiven   int64         `json:"reactions_given"`
+	PollVotes        int64         `json:"poll_votes"`
+	AppsCreated      int64         `json:"apps_created"`
+	AppsCreatedTotal int64         `json:"apps_created_total"`
+	TopApps          []AppSummary  `json:"top_apps"`
+	TopNews          []NewsSummary `json:"top_news"`
 }
 
 type GroupReportResponse struct {
@@ -366,11 +377,16 @@ func (h *ReportsHandler) GetGroupReport(c *gin.Context) {
 			Where("ug.group_id = ? AND poll_votes.voted_at BETWEEN ? AND ?", group.ID, from, to).
 			Count(&stat.PollVotes)
 
-		// Applications créées par des membres du groupe
+		// Applications créées dans la période
 		h.db.Model(&models.Application{}).
 			Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
 			Where("ug.group_id = ? AND applications.created_at BETWEEN ? AND ? AND applications.deleted_at IS NULL", group.ID, from, to).
 			Count(&stat.AppsCreated)
+		// Total toutes périodes confondues
+		h.db.Model(&models.Application{}).
+			Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
+			Where("ug.group_id = ? AND applications.deleted_at IS NULL", group.ID).
+			Count(&stat.AppsCreatedTotal)
 
 		// Top applications du groupe
 		type TopAppRow struct {
@@ -436,6 +452,7 @@ type UserReportItem struct {
 	ReactionsGiven    int64      `json:"reactions_given"`
 	PollVotes         int64      `json:"poll_votes"`
 	AppsCreated       int64      `json:"apps_created"`
+	AppsCreatedTotal  int64      `json:"apps_created_total"`
 	ArticlesPublished int64      `json:"articles_published"`
 	ViewsGenerated    int64      `json:"views_generated"`
 	ReactionsEarned   int64      `json:"reactions_earned"`
@@ -503,10 +520,14 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 		h.db.Model(&models.PollVote{}).
 			Where("user_id = ? AND voted_at BETWEEN ? AND ?", user.ID, from, to).Count(&item.PollVotes)
 
-		// Apps créées par cet utilisateur dans la période
+		// Apps créées dans la période
 		h.db.Model(&models.Application{}).
 			Where("created_by_id = ? AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", user.ID, from, to).
 			Count(&item.AppsCreated)
+		// Total toutes périodes confondues
+		h.db.Model(&models.Application{}).
+			Where("created_by_id = ? AND deleted_at IS NULL", user.ID).
+			Count(&item.AppsCreatedTotal)
 
 		if user.Role == "admin" || user.Role == "editor" || item.IsGroupAdmin {
 			h.db.Model(&models.News{}).
@@ -608,9 +629,14 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 	h.db.Model(&models.NewsReaction{}).Where("user_id = ? AND created_at BETWEEN ? AND ?", user.ID, from, to).Count(&item.ReactionsGiven)
 	h.db.Model(&models.PollVote{}).Where("user_id = ? AND voted_at BETWEEN ? AND ?", user.ID, from, to).Count(&item.PollVotes)
 
+	// Apps créées dans la période
 	h.db.Model(&models.Application{}).
 		Where("created_by_id = ? AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", user.ID, from, to).
 		Count(&item.AppsCreated)
+	// Total toutes périodes confondues
+	h.db.Model(&models.Application{}).
+		Where("created_by_id = ? AND deleted_at IS NULL", user.ID).
+		Count(&item.AppsCreatedTotal)
 
 	if user.Role == "admin" || user.Role == "editor" || isGroupAdmin {
 		h.db.Model(&models.News{}).
@@ -711,5 +737,125 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 		TopApps:          topApps,
 		TopNews:          topNews,
 		ArticlesAuthored: articlesAuthored,
+	})
+}
+
+// ========================
+// RAPPORT PAR GROUPE - DÉTAIL
+// ========================
+
+type GroupMonthlyActivity struct {
+	Month          string `json:"month"`
+	AppClicks      int64  `json:"app_clicks"`
+	NewsRead       int64  `json:"news_read"`
+	ReactionsGiven int64  `json:"reactions_given"`
+	AppsCreated    int64  `json:"apps_created"`
+}
+
+type GroupDetailReportResponse struct {
+	Group           GroupStat              `json:"group"`
+	MonthlyActivity []GroupMonthlyActivity `json:"monthly_activity"`
+}
+
+// GetGroupDetailReport retourne le profil d'activité mensuel d'un groupe
+func (h *ReportsHandler) GetGroupDetailReport(c *gin.Context) {
+	groupIDParam := c.Param("id")
+	from, to := parsePeriod(c)
+
+	var group models.Group
+	if err := h.db.Where("deleted_at IS NULL").First(&group, groupIDParam).Error; err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Not Found",
+			Message: "Groupe non trouvé",
+			Code:    http.StatusNotFound,
+		})
+		return
+	}
+
+	// Recalculer les stats du groupe pour la période demandée
+	var stat GroupStat
+	stat.GroupID = group.ID
+	stat.GroupName = group.Name
+	stat.GroupColor = group.Color
+
+	h.db.Table("user_groups").Where("group_id = ?", group.ID).Count(&stat.MemberCount)
+
+	var clickUsers, readUsers []uint
+	h.db.Model(&models.ApplicationClick{}).
+		Joins("JOIN user_groups ug ON ug.user_id = application_clicks.user_id").
+		Where("ug.group_id = ? AND application_clicks.clicked_at BETWEEN ? AND ?", group.ID, from, to).
+		Distinct("application_clicks.user_id").Pluck("application_clicks.user_id", &clickUsers)
+	h.db.Model(&models.NewsRead{}).
+		Joins("JOIN user_groups ug ON ug.user_id = news_reads.user_id").
+		Where("ug.group_id = ? AND news_reads.read_at BETWEEN ? AND ?", group.ID, from, to).
+		Distinct("news_reads.user_id").Pluck("news_reads.user_id", &readUsers)
+	seenIDs := map[uint]bool{}
+	for _, id := range clickUsers {
+		seenIDs[id] = true
+	}
+	for _, id := range readUsers {
+		seenIDs[id] = true
+	}
+	stat.ActiveMembers = int64(len(seenIDs))
+	if stat.MemberCount > 0 {
+		stat.EngagementRate = float64(stat.ActiveMembers) / float64(stat.MemberCount) * 100
+	}
+
+	h.db.Model(&models.ApplicationClick{}).
+		Joins("JOIN user_groups ug ON ug.user_id = application_clicks.user_id").
+		Where("ug.group_id = ? AND application_clicks.clicked_at BETWEEN ? AND ?", group.ID, from, to).
+		Count(&stat.AppClicks)
+	h.db.Model(&models.NewsRead{}).
+		Joins("JOIN user_groups ug ON ug.user_id = news_reads.user_id").
+		Where("ug.group_id = ? AND news_reads.read_at BETWEEN ? AND ?", group.ID, from, to).
+		Count(&stat.NewsRead)
+	h.db.Model(&models.NewsReaction{}).
+		Joins("JOIN user_groups ug ON ug.user_id = news_reactions.user_id").
+		Where("ug.group_id = ? AND news_reactions.created_at BETWEEN ? AND ?", group.ID, from, to).
+		Count(&stat.ReactionsGiven)
+	h.db.Model(&models.PollVote{}).
+		Joins("JOIN user_groups ug ON ug.user_id = poll_votes.user_id").
+		Where("ug.group_id = ? AND poll_votes.voted_at BETWEEN ? AND ?", group.ID, from, to).
+		Count(&stat.PollVotes)
+	h.db.Model(&models.Application{}).
+		Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
+		Where("ug.group_id = ? AND applications.created_at BETWEEN ? AND ? AND applications.deleted_at IS NULL", group.ID, from, to).
+		Count(&stat.AppsCreated)
+	h.db.Model(&models.Application{}).
+		Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
+		Where("ug.group_id = ? AND applications.deleted_at IS NULL", group.ID).
+		Count(&stat.AppsCreatedTotal)
+
+	// Activité mensuelle (12 derniers mois)
+	monthly := make([]GroupMonthlyActivity, 0, 12)
+	for i := 11; i >= 0; i-- {
+		t := time.Now().AddDate(0, -i, 0)
+		mStart := time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC)
+		mEnd := mStart.AddDate(0, 1, 0).Add(-time.Second)
+
+		var ma GroupMonthlyActivity
+		ma.Month = mStart.Format("2006-01")
+		h.db.Model(&models.ApplicationClick{}).
+			Joins("JOIN user_groups ug ON ug.user_id = application_clicks.user_id").
+			Where("ug.group_id = ? AND application_clicks.clicked_at BETWEEN ? AND ?", group.ID, mStart, mEnd).
+			Count(&ma.AppClicks)
+		h.db.Model(&models.NewsRead{}).
+			Joins("JOIN user_groups ug ON ug.user_id = news_reads.user_id").
+			Where("ug.group_id = ? AND news_reads.read_at BETWEEN ? AND ?", group.ID, mStart, mEnd).
+			Count(&ma.NewsRead)
+		h.db.Model(&models.NewsReaction{}).
+			Joins("JOIN user_groups ug ON ug.user_id = news_reactions.user_id").
+			Where("ug.group_id = ? AND news_reactions.created_at BETWEEN ? AND ?", group.ID, mStart, mEnd).
+			Count(&ma.ReactionsGiven)
+		h.db.Model(&models.Application{}).
+			Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
+			Where("ug.group_id = ? AND applications.created_at BETWEEN ? AND ? AND applications.deleted_at IS NULL", group.ID, mStart, mEnd).
+			Count(&ma.AppsCreated)
+		monthly = append(monthly, ma)
+	}
+
+	c.JSON(http.StatusOK, GroupDetailReportResponse{
+		Group:           stat,
+		MonthlyActivity: monthly,
 	})
 }

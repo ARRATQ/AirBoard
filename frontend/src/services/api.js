@@ -505,6 +505,11 @@ export const reportsService = {
     return response.data
   },
 
+  async getGroupDetailReport(groupId, params = {}) {
+    const response = await api.get(`/admin/reports/groups/${groupId}`, { params })
+    return response.data
+  },
+
   async getUserReport(params = {}) {
     const response = await api.get('/admin/reports/users', { params })
     return response.data

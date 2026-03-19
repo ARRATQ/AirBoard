@@ -44,6 +44,8 @@
     "daysAgo": "Il y a {count} jours",
     "daysRemaining": "{count} jour(s) restant(s)",
     "retry": "Réessayer",
+    "refresh": "Rafraîchir",
+    "loading": "Chargement...",
     "users": "Utilisateurs",
     "groups": "Groupes d'utilisateurs",
     "settings": "Paramètres",
