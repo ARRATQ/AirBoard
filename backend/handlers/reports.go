@@ -71,17 +71,47 @@ type RoleReportResponse struct {
 	RoleStats []RoleStat `json:"role_stats"`
 }
 
-// GetRoleReport retourne les métriques d'activité par rôle utilisateur
-func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
-	from, to := parsePeriod(c)
-
-	type TopUserRow struct {
+// topContributorsByScore retourne le top 5 des utilisateurs par score d'activité
+// whereClause doit filtrer la table "u" (alias de users), ex: "u.role = ?" ou "u.id IN (?)"
+func (h *ReportsHandler) topContributorsByScore(from, to time.Time, whereClause string, whereArgs ...interface{}) []UserSummary {
+	type TopRow struct {
 		UserID    uint
 		Username  string
 		FirstName string
 		LastName  string
 		Score     int64
 	}
+	scoreSQL := `
+		SELECT u.id as user_id, u.username, u.first_name, u.last_name,
+		(
+			COALESCE((SELECT COUNT(*) FROM application_clicks WHERE user_id = u.id AND clicked_at BETWEEN ? AND ?), 0) * 1 +
+			COALESCE((SELECT COUNT(*) FROM news_reads WHERE user_id = u.id AND read_at BETWEEN ? AND ?), 0) * 2 +
+			COALESCE((SELECT COUNT(*) FROM news_reactions WHERE user_id = u.id AND created_at BETWEEN ? AND ?), 0) * 1 +
+			COALESCE((SELECT COUNT(*) FROM poll_votes WHERE user_id = u.id AND voted_at BETWEEN ? AND ?), 0) * 1 +
+			COALESCE((SELECT COUNT(*) FROM applications WHERE created_by_id = u.id AND deleted_at IS NULL), 0) * 5 +
+			COALESCE((SELECT COUNT(*) FROM news WHERE author_id = u.id AND is_published = true AND created_at BETWEEN ? AND ? AND deleted_at IS NULL), 0) * 10
+		) as score
+		FROM users u
+		WHERE u.deleted_at IS NULL AND ` + whereClause + `
+		ORDER BY score DESC
+		LIMIT 5`
+
+	args := []interface{}{from, to, from, to, from, to, from, to, from, to}
+	args = append(args, whereArgs...)
+
+	var rows []TopRow
+	h.db.Raw(scoreSQL, args...).Scan(&rows)
+
+	result := make([]UserSummary, 0, len(rows))
+	for _, r := range rows {
+		result = append(result, UserSummary{r.UserID, r.Username, r.FirstName, r.LastName, r.Score})
+	}
+	return result
+}
+
+// GetRoleReport retourne les métriques d'activité par rôle utilisateur
+func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
+	from, to := parsePeriod(c)
 
 	// Helper : construit les conditions WHERE selon le type de rôle
 	// Pour "group_admin", on identifie les utilisateurs via la table group_admins (junction),
@@ -168,16 +198,7 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Where("news.author_id IN (?) AND news.deleted_at IS NULL AND news_reactions.created_at BETWEEN ? AND ?", gaSubQ, from, to).
 				Count(&stat.TotalReactionsEarned)
 
-			var rows []TopUserRow
-			h.db.Model(&models.ApplicationClick{}).
-				Select("users.id as user_id, users.username, users.first_name, users.last_name, COUNT(application_clicks.id) as score").
-				Joins("JOIN users ON users.id = application_clicks.user_id").
-				Where("application_clicks.user_id IN (?) AND application_clicks.clicked_at BETWEEN ? AND ?", gaSubQ, from, to).
-				Group("users.id, users.username, users.first_name, users.last_name").
-				Order("score DESC").Limit(5).Scan(&rows)
-			for _, r := range rows {
-				stat.TopContributors = append(stat.TopContributors, UserSummary{r.UserID, r.Username, r.FirstName, r.LastName, r.Score})
-			}
+			stat.TopContributors = h.topContributorsByScore(from, to, "u.id IN (SELECT DISTINCT user_id FROM group_admins)")
 		} else {
 			role := rf.filter.roleValue
 			h.db.Model(&models.User{}).Where("role = ? AND deleted_at IS NULL", role).Count(&stat.MemberCount)
@@ -245,27 +266,9 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 					Where("users.role = ? AND users.deleted_at IS NULL AND news.deleted_at IS NULL AND news_reactions.created_at BETWEEN ? AND ?", role, from, to).
 					Count(&stat.TotalReactionsEarned)
 
-				var rows []TopUserRow
-				h.db.Model(&models.News{}).
-					Select("users.id as user_id, users.username, users.first_name, users.last_name, COUNT(news.id) as score").
-					Joins("JOIN users ON users.id = news.author_id").
-					Where("users.role = ? AND users.deleted_at IS NULL AND news.is_published = true AND news.deleted_at IS NULL AND news.created_at BETWEEN ? AND ?", role, from, to).
-					Group("users.id, users.username, users.first_name, users.last_name").
-					Order("score DESC").Limit(5).Scan(&rows)
-				for _, r := range rows {
-					stat.TopContributors = append(stat.TopContributors, UserSummary{r.UserID, r.Username, r.FirstName, r.LastName, r.Score})
-				}
+				stat.TopContributors = h.topContributorsByScore(from, to, "u.role = ?", role)
 			} else {
-				var rows []TopUserRow
-				h.db.Model(&models.ApplicationClick{}).
-					Select("users.id as user_id, users.username, users.first_name, users.last_name, COUNT(application_clicks.id) as score").
-					Joins("JOIN users ON users.id = application_clicks.user_id").
-					Where("users.role = ? AND users.deleted_at IS NULL AND application_clicks.clicked_at BETWEEN ? AND ?", role, from, to).
-					Group("users.id, users.username, users.first_name, users.last_name").
-					Order("score DESC").Limit(5).Scan(&rows)
-				for _, r := range rows {
-					stat.TopContributors = append(stat.TopContributors, UserSummary{r.UserID, r.Username, r.FirstName, r.LastName, r.Score})
-				}
+				stat.TopContributors = h.topContributorsByScore(from, to, "u.role = ?", role)
 			}
 		}
 
