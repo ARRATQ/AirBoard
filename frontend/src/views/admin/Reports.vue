@@ -277,6 +277,9 @@
                   <th class="px-4 py-3 text-right text-xs font-medium text-amber-500 uppercase tracking-wider cursor-pointer hover:text-amber-600 select-none" @click="sortGroupBy('apps_created')">
                     {{ $t('reports.appsCreated') }} <Icon :icon="groupSortField === 'apps_created' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
                   </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-indigo-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600 select-none" @click="sortGroupBy('articles_published')">
+                    {{ $t('reports.articles') }} <Icon :icon="groupSortField === 'articles_published' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
                   <th class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.topApps') }}</th>
                   <th class="px-4 py-3"></th>
                 </tr>
@@ -311,6 +314,10 @@
                   <td class="px-4 py-3 text-right">
                     <span class="font-medium text-amber-600 dark:text-amber-400">{{ group.apps_created }}</span>
                     <span class="text-gray-400 text-xs"> / {{ group.apps_created_total }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <span v-if="group.articles_published > 0" class="font-medium text-indigo-600 dark:text-indigo-400">{{ group.articles_published }}</span>
+                    <span v-else class="text-gray-300 dark:text-gray-600">—</span>
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex gap-1">
@@ -527,6 +534,10 @@
               </p>
               <p class="text-xs text-amber-500 mt-0.5">{{ $t('reports.appsCreated') }}</p>
             </div>
+            <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ groupDetail.group?.articles_published ?? 0 }}</p>
+              <p class="text-xs text-indigo-500 mt-0.5">{{ $t('reports.articles') }}</p>
+            </div>
           </div>
 
           <!-- Monthly activity chart -->
@@ -560,6 +571,12 @@
                     :style="{ height: maxGroupMonthlyValue > 0 ? (m.apps_created / maxGroupMonthlyValue * 64) + 'px' : '0' }"
                     :title="$t('reports.appsCreated') + ': ' + m.apps_created"
                   ></div>
+                  <div
+                    v-if="m.articles_published > 0"
+                    class="w-full bg-indigo-400 rounded-sm"
+                    :style="{ height: maxGroupMonthlyValue > 0 ? (m.articles_published / maxGroupMonthlyValue * 64) + 'px' : '0' }"
+                    :title="$t('reports.articles') + ': ' + m.articles_published"
+                  ></div>
                 </div>
                 <p class="text-gray-400 text-[9px] truncate w-full text-center">{{ m.month.slice(5) }}</p>
               </div>
@@ -569,6 +586,7 @@
               <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-green-400 inline-block"></span>{{ $t('reports.newsRead') }}</span>
               <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-pink-400 inline-block"></span>{{ $t('reports.reactions') }}</span>
               <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400 inline-block"></span>{{ $t('reports.appsCreated') }}</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-indigo-400 inline-block"></span>{{ $t('reports.articles') }}</span>
             </div>
           </div>
 
@@ -878,7 +896,7 @@ async function openGroupDetail(group) {
 const maxGroupMonthlyValue = computed(() => {
   if (!groupDetail.value?.monthly_activity) return 1
   return Math.max(1, ...groupDetail.value.monthly_activity.map(m =>
-    Math.max(m.app_clicks, m.news_read, m.reactions_given, m.apps_created || 0)
+    Math.max(m.app_clicks, m.news_read, m.reactions_given, m.apps_created || 0, m.articles_published || 0)
   ))
 })
 

@@ -307,10 +307,11 @@ type GroupStat struct {
 	NewsRead         int64         `json:"news_read"`
 	ReactionsGiven   int64         `json:"reactions_given"`
 	PollVotes        int64         `json:"poll_votes"`
-	AppsCreated      int64         `json:"apps_created"`
-	AppsCreatedTotal int64         `json:"apps_created_total"`
-	TopApps          []AppSummary  `json:"top_apps"`
-	TopNews          []NewsSummary `json:"top_news"`
+	AppsCreated       int64         `json:"apps_created"`
+	AppsCreatedTotal  int64         `json:"apps_created_total"`
+	ArticlesPublished int64         `json:"articles_published"`
+	TopApps           []AppSummary  `json:"top_apps"`
+	TopNews           []NewsSummary `json:"top_news"`
 }
 
 type GroupReportResponse struct {
@@ -390,6 +391,12 @@ func (h *ReportsHandler) GetGroupReport(c *gin.Context) {
 			Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
 			Where("ug.group_id = ? AND applications.deleted_at IS NULL", group.ID).
 			Count(&stat.AppsCreatedTotal)
+
+		// Articles publiés par les membres du groupe dans la période
+		h.db.Model(&models.News{}).
+			Joins("JOIN user_groups ug ON ug.user_id = news.author_id").
+			Where("ug.group_id = ? AND news.is_published = true AND news.created_at BETWEEN ? AND ? AND news.deleted_at IS NULL", group.ID, from, to).
+			Count(&stat.ArticlesPublished)
 
 		// Top applications du groupe
 		type TopAppRow struct {
@@ -748,11 +755,12 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 // ========================
 
 type GroupMonthlyActivity struct {
-	Month          string `json:"month"`
-	AppClicks      int64  `json:"app_clicks"`
-	NewsRead       int64  `json:"news_read"`
-	ReactionsGiven int64  `json:"reactions_given"`
-	AppsCreated    int64  `json:"apps_created"`
+	Month             string `json:"month"`
+	AppClicks         int64  `json:"app_clicks"`
+	NewsRead          int64  `json:"news_read"`
+	ReactionsGiven    int64  `json:"reactions_given"`
+	AppsCreated       int64  `json:"apps_created"`
+	ArticlesPublished int64  `json:"articles_published"`
 }
 
 type GroupDetailReportResponse struct {
@@ -829,6 +837,11 @@ func (h *ReportsHandler) GetGroupDetailReport(c *gin.Context) {
 		Where("ug.group_id = ? AND applications.deleted_at IS NULL", group.ID).
 		Count(&stat.AppsCreatedTotal)
 
+	h.db.Model(&models.News{}).
+		Joins("JOIN user_groups ug ON ug.user_id = news.author_id").
+		Where("ug.group_id = ? AND news.is_published = true AND news.created_at BETWEEN ? AND ? AND news.deleted_at IS NULL", group.ID, from, to).
+		Count(&stat.ArticlesPublished)
+
 	// Activité mensuelle (12 derniers mois)
 	monthly := make([]GroupMonthlyActivity, 0, 12)
 	for i := 11; i >= 0; i-- {
@@ -854,6 +867,10 @@ func (h *ReportsHandler) GetGroupDetailReport(c *gin.Context) {
 			Joins("JOIN user_groups ug ON ug.user_id = applications.created_by_id").
 			Where("ug.group_id = ? AND applications.created_at BETWEEN ? AND ? AND applications.deleted_at IS NULL", group.ID, mStart, mEnd).
 			Count(&ma.AppsCreated)
+		h.db.Model(&models.News{}).
+			Joins("JOIN user_groups ug ON ug.user_id = news.author_id").
+			Where("ug.group_id = ? AND news.is_published = true AND news.created_at BETWEEN ? AND ? AND news.deleted_at IS NULL", group.ID, mStart, mEnd).
+			Count(&ma.ArticlesPublished)
 		monthly = append(monthly, ma)
 	}
 
