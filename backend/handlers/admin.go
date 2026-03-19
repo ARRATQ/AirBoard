@@ -361,7 +361,7 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 	}
 
 	query.Count(&total)
-	if err := query.Preload("AppGroup").
+	if err := query.Preload("AppGroup").Preload("CreatedBy").
 		Order("\"order\" ASC, name ASC").
 		Limit(limit).Offset(offset).
 		Find(&applications).Error; err != nil {
@@ -405,6 +405,14 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 			Code:    http.StatusBadRequest,
 		})
 		return
+	}
+
+	// Auto-renseigner le créateur si non fourni
+	if application.CreatedByID == nil {
+		if userIDVal, exists := c.Get("user_id"); exists {
+			uid := userIDVal.(uint)
+			application.CreatedByID = &uid
+		}
 	}
 
 	// Vérification des permissions pour les admins de groupe
@@ -516,8 +524,13 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	// Charger la relation AppGroup
-	h.db.Preload("AppGroup").First(&application, application.ID)
+	// Mettre à jour CreatedByID séparément (Updates() ignore les pointeurs nil)
+	if updateData.CreatedByID != nil {
+		h.db.Model(&application).Update("created_by_id", updateData.CreatedByID)
+	}
+
+	// Charger les relations
+	h.db.Preload("AppGroup").Preload("CreatedBy").First(&application, application.ID)
 
 	c.JSON(http.StatusOK, application)
 }

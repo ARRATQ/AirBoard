@@ -120,6 +120,7 @@
       :show="showModal"
       :application="selectedApplication"
       :appGroups="appGroups"
+      :users="users"
       @close="closeModal"
       @submit="handleSubmit"
     />
@@ -173,6 +174,7 @@ const appStore = useAppStore()
 // State
 const applications = ref([])
 const appGroups = ref([])
+const users = ref([])
 const showModal = ref(false)
 const selectedApplication = ref(null)
 const showDeleteModal = ref(false)
@@ -240,6 +242,16 @@ const loadAppGroups = async () => {
   } catch (error) {
     console.error('Error loading app groups:', error)
     appGroups.value = []
+  }
+}
+
+const loadUsers = async () => {
+  try {
+    const data = await adminService.getUsers({ limit: 500 })
+    users.value = Array.isArray(data) ? data : (data?.data || [])
+  } catch (error) {
+    console.error('Error loading users:', error)
+    users.value = []
   }
 }
 
@@ -316,7 +328,8 @@ const deleteApplication = async () => {
 onMounted(async () => {
   await Promise.all([
     loadApplications(),
-    loadAppGroups()
+    loadAppGroups(),
+    loadUsers()
   ])
 })
 </script>

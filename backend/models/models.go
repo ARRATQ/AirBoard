@@ -86,13 +86,15 @@ type Application struct {
 	Order        int            `json:"order" gorm:"default:0"`
 	IsActive     bool           `json:"is_active" gorm:"default:true"`
 	OpenInNewTab bool           `json:"open_in_new_tab" gorm:"default:true"`
-	AppGroupID   uint           `json:"app_group_id"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+	AppGroupID  uint  `json:"app_group_id"`
+	CreatedByID *uint `json:"created_by_id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relations
-	AppGroup *AppGroup `json:"app_group,omitempty"`
+	AppGroup  *AppGroup `json:"app_group,omitempty"`
+	CreatedBy *User     `json:"created_by,omitempty" gorm:"foreignKey:CreatedByID"`
 }
 
 // JWT Claims structure

@@ -355,11 +355,14 @@
     "last90days": "90 jours",
     "thisYear": "Cette année",
     "members": "membres",
+    "group": "Groupe",
+    "groups": "groupes",
     "activeMembers": "Membres actifs",
     "appClicks": "Clics apps",
     "newsRead": "Articles lus",
     "reactions": "Réactions",
     "pollVotes": "Votes sondages",
+    "appsCreated": "Applis créées",
     "production": "Production",
     "articles": "Articles",
     "views": "Vues",
@@ -378,9 +381,10 @@
     "never": "Jamais",
     "monthlyActivity": "Activité mensuelle (12 mois)",
     "articlesAuthored": "Articles rédigés",
+    "groupAdminNote": "Utilisateurs désignés admins de groupe",
     "roles": {
       "admin": "Administrateur",
-      "group_admin": "Admin Groupe",
+      "group_admin": "Admins de Groupe",
       "editor": "Éditeur",
       "user": "Utilisateur"
     }

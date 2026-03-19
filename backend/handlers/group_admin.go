@@ -177,16 +177,23 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		}
 	}
 
+	var createdByID *uint
+	if userIDVal, exists := c.Get("user_id"); exists {
+		uid := userIDVal.(uint)
+		createdByID = &uid
+	}
+
 	application := models.Application{
-		Name:         req.Name,
-		Description:  req.Description,
-		URL:          req.URL,
-		Icon:         req.Icon,
-		Color:        req.Color,
-		Order:        req.Order,
+		Name:        req.Name,
+		Description: req.Description,
+		URL:         req.URL,
+		Icon:        req.Icon,
+		Color:       req.Color,
+		Order:       req.Order,
 		OpenInNewTab: req.OpenInNewTab,
-		IsActive:     req.IsActive,
-		AppGroupID:   req.AppGroupID,
+		IsActive:    req.IsActive,
+		AppGroupID:  req.AppGroupID,
+		CreatedByID: createdByID,
 	}
 
 	if err := h.db.Create(&application).Error; err != nil {

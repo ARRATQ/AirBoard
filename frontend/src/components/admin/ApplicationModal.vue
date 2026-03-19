@@ -14,8 +14,8 @@
                   {{ isEdit ? 'Modify application settings' : 'Add a new application to the portal' }}
                 </p>
               </div>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 @click="closeModal"
                 class="btn-ghost p-2"
               >
@@ -32,7 +32,7 @@
                 <Icon icon="mdi:information-outline" class="section-icon" />
                 <h4 class="section-title">Basic Information</h4>
               </div>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="form-group">
                   <label for="name" class="form-label form-label-required">
@@ -108,14 +108,14 @@
                 <Icon icon="mdi:palette-outline" class="section-icon" />
                 <h4 class="section-title">Appearance</h4>
               </div>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Preview -->
                 <div class="form-group">
                   <label class="form-label">Preview</label>
                   <div class="card p-4">
                     <div class="flex items-center space-x-4">
-                      <div 
+                      <div
                         class="h-12 w-12 rounded-lg flex items-center justify-center"
                         :style="{ backgroundColor: form.color }"
                       >
@@ -180,7 +180,7 @@
                 <Icon icon="mdi:tune" class="section-icon" />
                 <h4 class="section-title">Behavior Options</h4>
               </div>
-              
+
               <div class="space-y-3">
                 <div class="card p-4">
                   <label class="flex items-center space-x-3 cursor-pointer">
@@ -207,6 +207,35 @@
                     </span>
                   </label>
                 </div>
+              </div>
+            </div>
+
+            <!-- Creator (admin only, visible en édition et création) -->
+            <div v-if="props.users && props.users.length">
+              <div class="section-header">
+                <Icon icon="mdi:account-edit" class="section-icon" />
+                <h4 class="section-title">Créateur</h4>
+              </div>
+              <div class="form-group">
+                <label for="created_by_id" class="form-label">
+                  Attribuer à un utilisateur
+                </label>
+                <select
+                  id="created_by_id"
+                  v-model="form.created_by_id"
+                  class="form-select"
+                >
+                  <option :value="null">— Non attribué —</option>
+                  <option
+                    v-for="u in props.users"
+                    :key="u.id"
+                    :value="u.id"
+                  >
+                    {{ u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username }}
+                    <template v-if="u.first_name || u.last_name"> ({{ u.username }})</template>
+                  </option>
+                </select>
+                <p class="form-help">Définit le créateur pour les rapports d'activité.</p>
               </div>
             </div>
           </div>
@@ -252,6 +281,10 @@ const props = defineProps({
   appGroups: {
     type: Array,
     default: () => []
+  },
+  users: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -269,12 +302,12 @@ const form = reactive({
   icon: 'mdi:application',
   order: 0,
   open_in_new_tab: true,
-  is_active: true
+  is_active: true,
+  created_by_id: null
 })
 
 const isEdit = computed(() => !!props.application)
 
-// Reset form when modal opens/closes
 watch(() => props.show, (newVal) => {
   if (newVal) {
     resetForm()
@@ -292,7 +325,8 @@ watch(() => props.application, (newVal) => {
       icon: newVal.icon || 'mdi:application',
       order: newVal.order || 0,
       open_in_new_tab: newVal.open_in_new_tab ?? true,
-      is_active: newVal.is_active ?? true
+      is_active: newVal.is_active ?? true,
+      created_by_id: newVal.created_by_id || null
     })
   }
 }, { immediate: true })
@@ -308,7 +342,8 @@ const resetForm = () => {
       icon: props.application.icon || 'mdi:application',
       order: props.application.order || 0,
       open_in_new_tab: props.application.open_in_new_tab ?? true,
-      is_active: props.application.is_active ?? true
+      is_active: props.application.is_active ?? true,
+      created_by_id: props.application.created_by_id || null
     })
   } else {
     Object.assign(form, {
@@ -320,7 +355,8 @@ const resetForm = () => {
       icon: 'mdi:application',
       order: 0,
       open_in_new_tab: true,
-      is_active: true
+      is_active: true,
+      created_by_id: null
     })
   }
   errors.value = {}
@@ -328,21 +364,21 @@ const resetForm = () => {
 
 const validateForm = () => {
   errors.value = {}
-  
+
   if (!form.name.trim()) {
     errors.value.name = 'Name is required'
   }
-  
+
   if (!form.url.trim()) {
     errors.value.url = 'URL is required'
   } else if (!isValidUrl(form.url)) {
     errors.value.url = 'Invalid URL format'
   }
-  
+
   if (!form.app_group_id) {
     errors.value.app_group_id = 'App group is required'
   }
-  
+
   return Object.keys(errors.value).length === 0
 }
 
@@ -357,14 +393,14 @@ const isValidUrl = (url) => {
 
 const handleSubmit = async () => {
   if (!validateForm()) return
-  
+
   loading.value = true
   try {
     const formData = { ...form }
     if (isEdit.value) {
       formData.id = props.application.id
     }
-    
+
     emit('submit', formData)
   } finally {
     loading.value = false

@@ -98,7 +98,10 @@
                 <div :class="['p-2 rounded-lg', roleColors[stat.role]?.bg]">
                   <Icon :icon="roleIcons[stat.role]" :class="['h-5 w-5', roleColors[stat.role]?.text]" />
                 </div>
-                <span class="font-semibold text-gray-700 dark:text-gray-300 capitalize">{{ $t('reports.roles.' + stat.role) }}</span>
+                <div>
+                  <span class="font-semibold text-gray-700 dark:text-gray-300 capitalize">{{ $t('reports.roles.' + stat.role) }}</span>
+                  <p v-if="stat.role === 'group_admin'" class="text-xs text-gray-400 mt-0.5">{{ $t('reports.groupAdminNote') }}</p>
+                </div>
               </div>
               <span class="text-xs text-gray-400">{{ stat.member_count }} {{ $t('reports.members') }}</span>
             </div>
@@ -140,11 +143,17 @@
             <!-- Production metrics (editors/admins) -->
             <div v-if="['admin', 'editor', 'group_admin'].includes(stat.role)" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{{ $t('reports.production') }}</p>
-              <div class="grid grid-cols-3 gap-1 text-xs">
+              <div class="grid grid-cols-2 gap-1 text-xs mb-1">
                 <div class="text-center">
                   <p class="font-bold text-gray-800 dark:text-white text-base">{{ stat.articles_published }}</p>
                   <p class="text-gray-400">{{ $t('reports.articles') }}</p>
                 </div>
+                <div class="text-center">
+                  <p class="font-bold text-amber-600 dark:text-amber-400 text-base">{{ stat.apps_created }}</p>
+                  <p class="text-gray-400">{{ $t('reports.appsCreated') }}</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-1 text-xs">
                 <div class="text-center">
                   <p class="font-bold text-gray-800 dark:text-white text-base">{{ stat.total_views_generated.toLocaleString() }}</p>
                   <p class="text-gray-400">{{ $t('reports.views') }}</p>
@@ -186,6 +195,7 @@
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.activeRate') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.appClicks') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.newsRead') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.appsCreated') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.articles') }}</th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.views') }}</th>
                 </tr>
@@ -206,6 +216,7 @@
                   </td>
                   <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ stat.app_clicks.toLocaleString() }}</td>
                   <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ stat.news_read.toLocaleString() }}</td>
+                  <td class="px-4 py-3 text-right text-amber-600 dark:text-amber-400 font-medium">{{ stat.apps_created }}</td>
                   <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ stat.articles_published }}</td>
                   <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ stat.total_views_generated.toLocaleString() }}</td>
                 </tr>
@@ -219,6 +230,94 @@
       <!-- TAB: PAR GROUPE         -->
       <!-- ======================== -->
       <div v-else-if="activeTab === 'groups' && groupData">
+
+        <!-- Recap table -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ $t('reports.comparisonTable') }}</h2>
+            <span class="text-xs text-gray-400">{{ sortedGroups.length }} {{ $t('reports.groups') }}</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.group') }}</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('member_count')">
+                    {{ $t('reports.members') }} <Icon :icon="groupSortField === 'member_count' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('engagement_rate')">
+                    {{ $t('reports.activeRate') }} <Icon :icon="groupSortField === 'engagement_rate' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('app_clicks')">
+                    {{ $t('reports.appClicks') }} <Icon :icon="groupSortField === 'app_clicks' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('news_read')">
+                    {{ $t('reports.newsRead') }} <Icon :icon="groupSortField === 'news_read' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('reactions_given')">
+                    {{ $t('reports.reactions') }} <Icon :icon="groupSortField === 'reactions_given' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none" @click="sortGroupBy('poll_votes')">
+                    {{ $t('reports.pollVotes') }} <Icon :icon="groupSortField === 'poll_votes' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-amber-500 uppercase tracking-wider cursor-pointer hover:text-amber-600 select-none" @click="sortGroupBy('apps_created')">
+                    {{ $t('reports.appsCreated') }} <Icon :icon="groupSortField === 'apps_created' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                  </th>
+                  <th class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.topApps') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tr
+                  v-for="group in sortedGroups"
+                  :key="group.group_id"
+                  class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer"
+                  @click="toggleGroup(group.group_id)"
+                >
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: group.group_color || '#6B7280' }"></div>
+                      <span class="font-medium text-gray-800 dark:text-white">{{ group.group_name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ group.member_count }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <div class="w-12 bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-500 h-full rounded-full" :style="{ width: Math.min(group.engagement_rate, 100) + '%' }"></div>
+                      </div>
+                      <span :class="['font-medium text-xs w-8 text-right', group.engagement_rate >= 50 ? 'text-green-600' : 'text-orange-500']">
+                        {{ group.engagement_rate.toFixed(0) }}%
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">{{ group.app_clicks.toLocaleString() }}</td>
+                  <td class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">{{ group.news_read.toLocaleString() }}</td>
+                  <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ group.reactions_given.toLocaleString() }}</td>
+                  <td class="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{{ group.poll_votes.toLocaleString() }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <span v-if="group.apps_created > 0" class="font-medium text-amber-600 dark:text-amber-400">{{ group.apps_created }}</span>
+                    <span v-else class="text-gray-300 dark:text-gray-600">—</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex gap-1">
+                      <div
+                        v-for="app in (group.top_apps || []).slice(0, 3)"
+                        :key="app.app_id"
+                        class="w-5 h-5 rounded flex items-center justify-center text-white"
+                        :style="{ backgroundColor: app.color || '#6B7280' }"
+                        :title="app.app_name + ' (' + app.clicks + ')'"
+                      >
+                        <Icon v-if="app.icon" :icon="app.icon" class="h-3 w-3" />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accordion detail -->
         <div class="grid grid-cols-1 gap-4">
           <div
             v-for="group in groupData.group_stats"
@@ -251,6 +350,7 @@
                   <span class="flex items-center gap-1"><Icon icon="mdi:cursor-default-click" class="h-3.5 w-3.5" />{{ group.app_clicks }}</span>
                   <span class="flex items-center gap-1"><Icon icon="mdi:newspaper-variant" class="h-3.5 w-3.5" />{{ group.news_read }}</span>
                   <span class="flex items-center gap-1"><Icon icon="mdi:heart" class="h-3.5 w-3.5" />{{ group.reactions_given }}</span>
+                  <span v-if="group.apps_created > 0" class="flex items-center gap-1 text-amber-500"><Icon icon="mdi:application-plus" class="h-3.5 w-3.5" />{{ group.apps_created }}</span>
                 </div>
                 <Icon :icon="expandedGroups.includes(group.group_id) ? 'mdi:chevron-up' : 'mdi:chevron-down'" class="h-4 w-4 text-gray-400" />
               </div>
@@ -276,6 +376,10 @@
                   <div class="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-3 text-center">
                     <p class="text-2xl font-bold text-pink-600 dark:text-pink-400">{{ group.poll_votes }}</p>
                     <p class="text-xs text-pink-500 mt-0.5">{{ $t('reports.pollVotes') }}</p>
+                  </div>
+                  <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 text-center col-span-2">
+                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ group.apps_created }}</p>
+                    <p class="text-xs text-amber-500 mt-0.5">{{ $t('reports.appsCreated') }}</p>
                   </div>
                 </div>
 
@@ -354,6 +458,9 @@
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700" @click="sortBy('news_read')">
                     {{ $t('reports.newsRead') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
                   </th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700" @click="sortBy('apps_created')">
+                    {{ $t('reports.appsCreated') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                  </th>
                   <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700" @click="sortBy('articles_published')">
                     {{ $t('reports.articles') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
                   </th>
@@ -394,6 +501,10 @@
                   </td>
                   <td class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">{{ user.app_clicks }}</td>
                   <td class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">{{ user.news_read }}</td>
+                  <td class="px-4 py-3 text-right">
+                    <span v-if="user.apps_created > 0" class="font-medium text-amber-600 dark:text-amber-400">{{ user.apps_created }}</span>
+                    <span v-else class="text-gray-300 dark:text-gray-600">—</span>
+                  </td>
                   <td class="px-4 py-3 text-right">
                     <span v-if="user.articles_published > 0" class="font-medium text-indigo-600 dark:text-indigo-400">{{ user.articles_published }}</span>
                     <span v-else class="text-gray-300 dark:text-gray-600">—</span>
@@ -458,7 +569,7 @@
 
         <div class="p-6 space-y-6">
           <!-- KPI row -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-center">
               <p class="text-xl font-bold text-blue-600">{{ userDetail.user.app_clicks }}</p>
               <p class="text-xs text-blue-400 mt-0.5">{{ $t('reports.appClicks') }}</p>
@@ -470,6 +581,10 @@
             <div class="bg-pink-50 dark:bg-pink-900/20 rounded-lg p-3 text-center">
               <p class="text-xl font-bold text-pink-600">{{ userDetail.user.reactions_given }}</p>
               <p class="text-xs text-pink-400 mt-0.5">{{ $t('reports.reactions') }}</p>
+            </div>
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 text-center">
+              <p class="text-xl font-bold text-amber-600">{{ userDetail.user.apps_created }}</p>
+              <p class="text-xs text-amber-400 mt-0.5">{{ $t('reports.appsCreated') }}</p>
             </div>
             <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3 text-center">
               <p class="text-xl font-bold text-indigo-600">{{ userDetail.user.activity_score }}</p>
@@ -497,6 +612,12 @@
                     :style="{ height: maxMonthlyValue > 0 ? (m.news_read / maxMonthlyValue * 64) + 'px' : '0' }"
                     :title="'Lus: ' + m.news_read"
                   ></div>
+                  <div
+                    v-if="m.apps_created > 0"
+                    class="w-full bg-amber-400 rounded-sm"
+                    :style="{ height: maxMonthlyValue > 0 ? (m.apps_created / maxMonthlyValue * 64) + 'px' : '0' }"
+                    :title="$t('reports.appsCreated') + ': ' + m.apps_created"
+                  ></div>
                 </div>
                 <p class="text-gray-400 text-[9px] truncate w-full text-center">{{ m.month.slice(5) }}</p>
               </div>
@@ -504,6 +625,7 @@
             <div class="flex gap-3 mt-2 text-xs text-gray-400">
               <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-400 inline-block"></span>{{ $t('reports.appClicks') }}</span>
               <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-green-400 inline-block"></span>{{ $t('reports.newsRead') }}</span>
+              <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-400 inline-block"></span>{{ $t('reports.appsCreated') }}</span>
             </div>
           </div>
 
@@ -677,7 +799,7 @@ const roleColors = {
 }
 
 // ========================
-// Group expand
+// Group expand + sort
 // ========================
 const expandedGroups = ref([])
 function toggleGroup(id) {
@@ -685,6 +807,23 @@ function toggleGroup(id) {
   if (idx >= 0) expandedGroups.value.splice(idx, 1)
   else expandedGroups.value.push(id)
 }
+
+const groupSortField = ref('app_clicks')
+const groupSortDesc = ref(true)
+
+function sortGroupBy(field) {
+  if (groupSortField.value === field) groupSortDesc.value = !groupSortDesc.value
+  else { groupSortField.value = field; groupSortDesc.value = true }
+}
+
+const sortedGroups = computed(() => {
+  if (!groupData.value?.group_stats) return []
+  const field = groupSortField.value
+  return [...groupData.value.group_stats].sort((a, b) => {
+    const va = a[field] ?? 0, vb = b[field] ?? 0
+    return groupSortDesc.value ? vb - va : va - vb
+  })
+})
 
 // ========================
 // User table
@@ -752,7 +891,7 @@ async function openUserDetail(userId) {
 
 const maxMonthlyValue = computed(() => {
   if (!userDetail.value?.monthly_activity) return 1
-  return Math.max(1, ...userDetail.value.monthly_activity.map(m => Math.max(m.app_clicks, m.news_read)))
+  return Math.max(1, ...userDetail.value.monthly_activity.map(m => Math.max(m.app_clicks, m.news_read, m.apps_created || 0)))
 })
 
 // ========================
