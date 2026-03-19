@@ -483,7 +483,9 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 	groupIDFilter := c.Query("group_id")
 
 	query := h.db.Model(&models.User{}).Where("users.deleted_at IS NULL AND users.is_active = true")
-	if roleFilter != "" {
+	if roleFilter == "group_admin" {
+		query = query.Joins("JOIN group_admins ga_filter ON ga_filter.user_id = users.id")
+	} else if roleFilter != "" {
 		query = query.Where("users.role = ?", roleFilter)
 	}
 	if groupIDFilter != "" {
