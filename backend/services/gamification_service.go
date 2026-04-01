@@ -227,9 +227,28 @@ func (s *GamificationService) checkInformedAchievement(tx *gorm.DB, userID uint)
 }
 
 func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint) error {
+	// Get today's date at midnight
 	now := time.Now()
-	// Check if current time is before 8:30 AM
-	if now.Hour() < 8 || (now.Hour() == 8 && now.Minute() < 30) {
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	todayEnd := todayStart.Add(24 * time.Hour)
+
+	// Find the most recent daily_login transaction for today
+	var lastLogin models.XPTransaction
+	err := tx.Where("user_id = ? AND reason = ? AND created_at >= ? AND created_at < ?",
+		userID, "daily_login", todayStart, todayEnd).
+		Order("created_at DESC").
+		First(&lastLogin).Error
+
+	if err == gorm.ErrRecordNotFound {
+		// No login today
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	// Check if the login was before 8:30 AM
+	if lastLogin.CreatedAt.Hour() < 8 || (lastLogin.CreatedAt.Hour() == 8 && lastLogin.CreatedAt.Minute() < 30) {
 		return s.UnlockAchievement(tx, userID, "early_bird")
 	}
 	return nil
@@ -394,8 +413,8 @@ func (s *GamificationService) SeedAchievements() error {
 			XPReward:      50,
 			Category:      "user",
 			TriggerReason: "daily_login",
-			Metric:        "reason_count",
-			Threshold:     1,
+			Metric:        "early_bird_check",
+			Threshold:     0,
 			IsActive:      true,
 		},
 		{
