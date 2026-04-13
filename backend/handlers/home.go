@@ -509,7 +509,7 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup
 		var news []models.News
 
 		// Build the base query for this type
-		query := h.db.Where("is_published = ? AND type = ?", true, newsType.Slug)
+		query := h.db.Model(&models.News{}).Where("is_published = ? AND type = ?", true, newsType.Slug)
 
 		// Apply permission filters based on role
 		if role == "admin" {
@@ -536,19 +536,19 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup
 				combinedGroupIDs = append(combinedGroupIDs, id)
 			}
 
-			// Apply permission filter
+			// Apply permission filter using quoted table name to avoid GORM subquery aliasing issues
 			if len(combinedGroupIDs) > 0 {
 				query = query.Where(`
-					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
+					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = "news"."id") = 0
 					OR EXISTS (
 						SELECT 1 FROM news_target_groups
-						WHERE news_target_groups.news_id = news.id
+						WHERE news_target_groups.news_id = "news"."id"
 						AND news_target_groups.group_id IN (?)
 					)
 				`, combinedGroupIDs)
 			} else {
 				// User has no groups: only see non-targeted articles
-				query = query.Where("(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0")
+				query = query.Where(`(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = "news"."id") = 0`)
 			}
 
 			query = query.Preload("Author").
