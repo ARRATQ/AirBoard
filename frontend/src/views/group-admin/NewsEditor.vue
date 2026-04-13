@@ -225,11 +225,7 @@
                   <Icon icon="mdi:shape" class="h-4 w-4" />
                   Type
                 </label>
-                <select v-model="form.type" class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
-                  <option v-for="t in types" :key="t.id" :value="t.slug">
-                    {{ t.icon }} {{ t.name }}
-                  </option>
-                </select>
+                <TypeSelect v-model="form.type" :types="types" />
               </div>
 
               <!-- Priority -->
@@ -454,6 +450,7 @@ import { Icon } from '@iconify/vue'
 import { useAppStore } from '@/stores/app'
 import { newsService, groupAdminService } from '@/services/api'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
+import TypeSelect from '@/components/news/TypeSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
