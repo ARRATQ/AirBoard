@@ -505,59 +505,57 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup
 		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
 	}
 
+	// Pre-compute combined group IDs once for non-admins
+	var combinedGroupIDs []uint
+	if role != "admin" {
+		allGroupIDs := make(map[uint]bool)
+		for _, id := range userGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for _, id := range managedGroupIDs {
+			allGroupIDs[id] = true
+		}
+		for id := range allGroupIDs {
+			combinedGroupIDs = append(combinedGroupIDs, id)
+		}
+	}
+
 	for _, newsType := range types {
 		var news []models.News
 
-		// Build the base query for this type
-		query := h.db.Model(&models.News{}).Where("is_published = ? AND type = ?", true, newsType.Slug)
+		// Fresh session per iteration to prevent statement pollution across the loop
+		db := h.db.Session(&gorm.Session{NewDB: true})
 
-		// Apply permission filters based on role
-		if role == "admin" {
-			// Admins see all articles of this type
-			query = query.Preload("Author").
-				Preload("Category").
-				Preload("Tags").
-				Preload("TargetGroups").
-				Order("is_pinned DESC, published_at DESC").
-				Limit(3)
-		} else {
-			// Non-admins: use pre-fetched group IDs
-			// Combine groups
-			allGroupIDs := make(map[uint]bool)
-			for _, id := range userGroupIDs {
-				allGroupIDs[id] = true
-			}
-			for _, id := range managedGroupIDs {
-				allGroupIDs[id] = true
-			}
+		query := db.Model(&models.News{}).
+			Where("is_published = ? AND type = ?", true, newsType.Slug)
 
-			var combinedGroupIDs []uint
-			for id := range allGroupIDs {
-				combinedGroupIDs = append(combinedGroupIDs, id)
-			}
+		// Apply visibility filter for non-admins using non-correlated subqueries
+		if role != "admin" {
+			// Subquery: all news IDs that have at least one target group (restricted articles)
+			restrictedIDs := h.db.Session(&gorm.Session{NewDB: true}).
+				Table("news_target_groups").
+				Select("news_id")
 
-			// Apply permission filter using quoted table name to avoid GORM subquery aliasing issues
 			if len(combinedGroupIDs) > 0 {
-				query = query.Where(`
-					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = "news"."id") = 0
-					OR EXISTS (
-						SELECT 1 FROM news_target_groups
-						WHERE news_target_groups.news_id = "news"."id"
-						AND news_target_groups.group_id IN (?)
-					)
-				`, combinedGroupIDs)
+				// Subquery: news IDs accessible to the user via their groups
+				accessibleIDs := h.db.Session(&gorm.Session{NewDB: true}).
+					Table("news_target_groups").
+					Select("news_id").
+					Where("group_id IN ?", combinedGroupIDs)
+				// Article is visible if: no target groups at all, OR user's group is in target groups
+				query = query.Where("id NOT IN (?) OR id IN (?)", restrictedIDs, accessibleIDs)
 			} else {
-				// User has no groups: only see non-targeted articles
-				query = query.Where(`(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = "news"."id") = 0`)
+				// User has no groups: only see articles with no target groups
+				query = query.Where("id NOT IN (?)", restrictedIDs)
 			}
-
-			query = query.Preload("Author").
-				Preload("Category").
-				Preload("Tags").
-				Preload("TargetGroups").
-				Order("is_pinned DESC, published_at DESC").
-				Limit(3)
 		}
+
+		query = query.Preload("Author").
+			Preload("Category").
+			Preload("Tags").
+			Preload("TargetGroups").
+			Order("is_pinned DESC, published_at DESC").
+			Limit(3)
 
 		if err := query.Find(&news).Error; err != nil {
 			log.Printf("[HOME] Failed to load news for type %s: %v", newsType.Slug, err)
