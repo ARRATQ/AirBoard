@@ -199,6 +199,11 @@
             <Icon icon="mdi:comment-text-outline" class="h-4 w-4" />
             <span>{{ $t('moderation.title') }}</span>
           </router-link>
+
+          <router-link to="/admin/chatbots" :class="getLinkClasses('/admin/chatbots')">
+            <Icon icon="mdi:robot-outline" class="h-4 w-4" />
+            <span>{{ $t('chatbots.sidebarTitle') }}</span>
+          </router-link>
         </CollapsibleMenu>
 
         <!-- Utilisateurs & Accès -->

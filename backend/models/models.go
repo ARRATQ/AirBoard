@@ -438,3 +438,35 @@ type HeroMessageRequest struct {
 	Author   string `json:"author"`
 	IsActive *bool  `json:"is_active"`
 }
+
+// Chatbot représente un chatbot n8n intégré dans le portail
+type Chatbot struct {
+	ID              uint           `json:"id" gorm:"primaryKey"`
+	Name            string         `json:"name" gorm:"not null"`
+	Description     string         `json:"description"`
+	WebhookURL      string         `json:"webhook_url" gorm:"not null"`
+	Icon            string         `json:"icon" gorm:"default:'mdi:robot-outline'"`
+	Color           string         `json:"color" gorm:"default:'#4f46e5'"`               // Couleur principale du widget
+	WelcomeTitle    string         `json:"welcome_title"`                                // Titre de l'écran d'accueil
+	WelcomeSubtitle string         `json:"welcome_subtitle"`                             // Sous-titre de l'écran d'accueil
+	HideHeader      bool           `json:"hide_header" gorm:"default:false"`             // Masquer totalement l'en-tête n8n
+	IsActive        bool           `json:"is_active" gorm:"default:true"`
+	InitialMessages string         `json:"initial_messages" gorm:"type:text;default:'[]'"` // JSON array string
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+// ChatbotRequest pour les requêtes de création/mise à jour
+type ChatbotRequest struct {
+	Name            string `json:"name" binding:"required,min=1"`
+	Description     string `json:"description"`
+	WebhookURL      string `json:"webhook_url" binding:"required,min=1"`
+	Icon            string `json:"icon"`
+	Color           string `json:"color"`
+	WelcomeTitle    string `json:"welcome_title"`
+	WelcomeSubtitle string `json:"welcome_subtitle"`
+	HideHeader      *bool  `json:"hide_header"`
+	IsActive        *bool  `json:"is_active"`
+	InitialMessages string `json:"initial_messages"` // raw JSON array string
+}

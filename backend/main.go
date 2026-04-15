@@ -72,6 +72,7 @@ func main() {
 		&models.XPTransaction{},
 		&models.GamificationRule{},
 		&models.HeroMessage{}, // Dynamic Hero Messages
+		&models.Chatbot{},     // Chatbots n8n
 	); err != nil {
 		log.Fatal("Erreur lors des migrations:", err)
 	}
@@ -205,6 +206,7 @@ func main() {
 	suggestionsHandler := handlers.NewSuggestionsHandler(db, gamificationService)
 	gamificationHandler := handlers.NewGamificationHandler(db, gamificationService)
 	searchHandler := handlers.NewSearchHandler(db)
+	chatbotHandler := handlers.NewChatbotHandler(db)
 
 	// Seeding gamification
 	if err := gamificationService.SeedAchievements(); err != nil {
@@ -370,6 +372,9 @@ func main() {
 
 		// Routes announcements (accessible à tous les utilisateurs connectés)
 		protected.GET("/announcements", announcementHandler.GetActiveAnnouncements)
+
+		// Chatbots actifs (accessible à tous les utilisateurs connectés)
+		protected.GET("/chatbots/active", chatbotHandler.GetActiveChatbots)
 
 		// Routes News Hub (accessible à tous les utilisateurs connectés)
 		news := protected.Group("/news")
@@ -553,6 +558,12 @@ func main() {
 			admin.POST("/announcements", announcementHandler.CreateAnnouncement)
 			admin.PUT("/announcements/:id", announcementHandler.UpdateAnnouncement)
 			admin.DELETE("/announcements/:id", announcementHandler.DeleteAnnouncement)
+
+			// Gestion des chatbots n8n (réservé aux admins)
+			admin.GET("/chatbots", chatbotHandler.GetChatbots)
+			admin.POST("/chatbots", chatbotHandler.CreateChatbot)
+			admin.PUT("/chatbots/:id", chatbotHandler.UpdateChatbot)
+			admin.DELETE("/chatbots/:id", chatbotHandler.DeleteChatbot)
 
 			// Gestion de la base de données
 			admin.POST("/database/reset", adminHandler.ResetDatabase)

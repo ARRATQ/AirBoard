@@ -54,6 +54,9 @@
 
     <!-- Chat Overlay -->
     <ChatOverlay v-if="isAuthenticated && !isAuthPage" />
+
+    <!-- Chatbots n8n -->
+    <ChatbotWidget v-if="isAuthenticated && !isAuthPage" />
   </div>
 </template>
 
@@ -69,6 +72,7 @@ import Sidebar from '@/components/layout/Sidebar.vue'
 import LoadingOverlay from '@/components/ui/LoadingOverlay.vue'
 import NotificationContainer from '@/components/ui/NotificationContainer.vue'
 import ChatOverlay from '@/components/chat/ChatOverlay.vue'
+import ChatbotWidget from '@/components/ChatbotWidget.vue'
 
 // Stores
 const authStore = useAuthStore()

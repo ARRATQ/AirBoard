@@ -1503,4 +1503,34 @@ export const deleteAdminMedia = (id) => api.delete(`/admin/media/${id}`)
 // ==================== Search ====================
 export const globalSearch = (q, type = '') => api.get('/search', { params: { q, ...(type ? { type } : {}) } })
 
+// ==================== Chatbots ====================
+
+// Service admin : CRUD complet (réservé aux admins)
+export const chatbotsAdminService = {
+  async getChatbots(params = {}) {
+    const response = await api.get('/admin/chatbots', { params })
+    return response.data
+  },
+  async createChatbot(data) {
+    const response = await api.post('/admin/chatbots', data)
+    return response.data
+  },
+  async updateChatbot(id, data) {
+    const response = await api.put(`/admin/chatbots/${id}`, data)
+    return response.data
+  },
+  async deleteChatbot(id) {
+    const response = await api.delete(`/admin/chatbots/${id}`)
+    return response.data
+  }
+}
+
+// Service utilisateurs : chatbots actifs uniquement
+export const chatbotsService = {
+  async getActiveChatbots() {
+    const response = await api.get('/chatbots/active')
+    return response.data
+  }
+}
+
 export default api

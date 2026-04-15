@@ -14,6 +14,7 @@ const UsersManagement = () => import('@/views/admin/UsersManagement.vue')
 const GroupsManagement = () => import('@/views/admin/GroupsManagement.vue')
 const Analytics = () => import('@/views/admin/Analytics.vue')
 const AnnouncementsManagement = () => import('@/views/admin/AnnouncementsManagement.vue')
+const ChatbotsManagement = () => import('@/views/admin/ChatbotsManagement.vue')
 const NewsManagement = () => import('@/views/admin/NewsManagement.vue')
 const NewsEditor = () => import('@/views/admin/NewsEditor.vue')
 const PollsManagement = () => import('@/views/admin/PollsManagement.vue')
@@ -323,6 +324,16 @@ const routes = [
       requiresAuth: true,
       requiresAdmin: true,
       title: 'Announcements'
+    }
+  },
+  {
+    path: '/admin/chatbots',
+    name: 'AdminChatbots',
+    component: ChatbotsManagement,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Chatbots IA'
     }
   },
   {
