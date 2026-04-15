@@ -92,6 +92,10 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 	if req.HideHeader != nil {
 		hideHeader = *req.HideHeader
 	}
+	showAvatarIntro := false
+	if req.ShowAvatarIntro != nil {
+		showAvatarIntro = *req.ShowAvatarIntro
+	}
 
 	chatbot := models.Chatbot{
 		Name:            req.Name,
@@ -102,6 +106,7 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 		WelcomeTitle:    req.WelcomeTitle,
 		WelcomeSubtitle: req.WelcomeSubtitle,
 		HideHeader:      hideHeader,
+		ShowAvatarIntro: showAvatarIntro,
 		IsActive:        isActive,
 		InitialMessages: initialMessages,
 	}
@@ -164,6 +169,9 @@ func (h *ChatbotHandler) UpdateChatbot(c *gin.Context) {
 	}
 	if req.HideHeader != nil {
 		chatbot.HideHeader = *req.HideHeader
+	}
+	if req.ShowAvatarIntro != nil {
+		chatbot.ShowAvatarIntro = *req.ShowAvatarIntro
 	}
 	if req.IsActive != nil {
 		chatbot.IsActive = *req.IsActive

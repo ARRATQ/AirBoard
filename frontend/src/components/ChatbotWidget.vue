@@ -1,7 +1,7 @@
 <template>
   <div v-if="activeChatbots.length > 0" class="chatbot-widget-root">
 
-    <!-- Panneau de chat -->
+    <!-- ── Panneau de chat ──────────────────────────────── -->
     <transition name="chatbot-panel-anim">
       <div
         v-if="chatOpen && selectedBot"
@@ -25,7 +25,6 @@
             </div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0">
-            <!-- Changer de bot -->
             <button
               v-if="activeChatbots.length > 1"
               @click="backToSelector"
@@ -34,7 +33,6 @@
             >
               <Icon icon="mdi:swap-horizontal" class="h-4 w-4" />
             </button>
-            <!-- Plein écran / Réduire -->
             <button
               @click="isFullscreen = !isFullscreen"
               class="chatbot-panel-btn"
@@ -42,14 +40,13 @@
             >
               <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
             </button>
-            <!-- Fermer -->
             <button @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')">
               <Icon icon="mdi:close" class="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <!-- Conteneur @n8n/chat — :key force réinitialisation si bot change -->
+        <!-- Conteneur @n8n/chat -->
         <div
           :key="selectedBot.id"
           :id="`n8n-chat-${selectedBot.id}`"
@@ -63,7 +60,56 @@
       </div>
     </transition>
 
-    <!-- Sélecteur multi-bots -->
+    <!-- ── Zone avatar — EXTÉRIEURE au panel, à sa gauche ── -->
+    <transition name="avatar-zone-anim">
+      <div
+        v-if="showAvatar && selectedBot?.show_avatar_intro && !isFullscreen"
+        class="chatbot-avatar-zone"
+      >
+        <!-- Bulle de bienvenue (temporaire) au-dessus du visage -->
+        <transition name="bubble-anim">
+          <div
+            v-if="showBubble"
+            class="chatbot-bubble"
+            @click="dismissBubble"
+          >
+            <button class="chatbot-bubble-close" @click.stop="dismissBubble" :title="$t('common.close')">
+              <Icon icon="mdi:close" class="h-3 w-3" />
+            </button>
+            <p class="font-semibold text-sm text-gray-900 dark:text-white leading-tight">
+              {{ selectedBot.welcome_title || selectedBot.name }}
+            </p>
+            <p
+              v-if="selectedBot.welcome_subtitle"
+              class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug"
+            >
+              {{ selectedBot.welcome_subtitle }}
+            </p>
+          </div>
+        </transition>
+
+        <!-- Visage de l'avatar -->
+        <div
+          class="chatbot-avatar-face"
+          :style="{
+            background: `radial-gradient(circle at 38% 38%, ${lighten(selectedBot.color || '#4f46e5')}, ${selectedBot.color || '#4f46e5'})`
+          }"
+        >
+          <!-- Reflet -->
+          <div class="chatbot-avatar-shine" />
+          <!-- Icône / visage -->
+          <Icon
+            :icon="selectedBot.icon || 'mdi:robot-outline'"
+            class="chatbot-avatar-icon"
+          />
+        </div>
+
+        <!-- Nom du bot -->
+        <span class="chatbot-avatar-label">{{ selectedBot.name }}</span>
+      </div>
+    </transition>
+
+    <!-- ── Sélecteur multi-bots ─────────────────────────── -->
     <transition name="chatbot-menu-anim">
       <div v-if="chatOpen && !selectedBot && activeChatbots.length > 1" class="chatbot-selector-menu">
         <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 px-3 pt-2 pb-1 uppercase tracking-wide">
@@ -91,7 +137,7 @@
       </div>
     </transition>
 
-    <!-- Bouton toggle -->
+    <!-- ── Bouton toggle ────────────────────────────────── -->
     <button
       class="chatbot-toggle-btn"
       :class="{ 'chatbot-toggle-btn--open': chatOpen }"
@@ -116,16 +162,34 @@ const activeChatbots = ref([])
 const selectedBot = ref(null)
 const chatOpen = ref(false)
 const isFullscreen = ref(false)
-// true dès que le premier message utilisateur est envoyé → masque l'en-tête n8n
 const headerHidden = ref(false)
+
+// Avatar de bienvenue
+const showAvatar = ref(false)
+const showBubble = ref(false)
+let bubbleDismissTimer = null
 let messageObserver = null
 
-// Couleur principale (du bot sélectionné ou premier bot ou défaut)
 const primaryColor = computed(() => {
   if (selectedBot.value?.color) return selectedBot.value.color
   if (activeChatbots.value[0]?.color) return activeChatbots.value[0].color
   return '#4f46e5'
 })
+
+/**
+ * Éclaircit légèrement une couleur hex pour le dégradé radial du visage.
+ */
+const lighten = (hex) => {
+  try {
+    const n = parseInt(hex.replace('#', ''), 16)
+    const r = Math.min(255, ((n >> 16) & 0xff) + 60)
+    const g = Math.min(255, ((n >> 8) & 0xff) + 60)
+    const b = Math.min(255, (n & 0xff) + 60)
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`
+  } catch {
+    return hex
+  }
+}
 
 const loadActiveChatbots = async () => {
   try {
@@ -139,21 +203,38 @@ const loadActiveChatbots = async () => {
   }
 }
 
+const resetAvatarState = () => {
+  showAvatar.value = false
+  showBubble.value = false
+  clearTimeout(bubbleDismissTimer)
+  bubbleDismissTimer = null
+}
+
+const dismissBubble = () => {
+  showBubble.value = false
+  clearTimeout(bubbleDismissTimer)
+  bubbleDismissTimer = null
+}
+
 const toggleChat = () => {
   chatOpen.value = !chatOpen.value
-  // Quitter le plein écran quand on ferme
-  if (!chatOpen.value) isFullscreen.value = false
+  if (!chatOpen.value) {
+    isFullscreen.value = false
+    resetAvatarState()
+  }
 }
 
 const selectBot = (bot) => {
   selectedBot.value = bot
   headerHidden.value = false
+  resetAvatarState()
 }
 
 const backToSelector = () => {
   selectedBot.value = null
   isFullscreen.value = false
   headerHidden.value = false
+  resetAvatarState()
   stopObserver()
 }
 
@@ -164,27 +245,34 @@ const stopObserver = () => {
   }
 }
 
-/**
- * Observe le conteneur n8n pour détecter le premier message utilisateur
- * et masquer l'en-tête n8n avec une transition douce.
- */
 const startMessageObserver = (containerId) => {
   stopObserver()
   const container = document.getElementById(containerId)
   if (!container) return
 
   messageObserver = new MutationObserver(() => {
-    // Les messages utilisateur ont la classe "chat-message--from-me" dans @n8n/chat
     const userMsg = container.querySelector(
       '.chat-message--from-me, [data-author="user"], .chat-message-bubble--user'
     )
     if (userMsg) {
       headerHidden.value = true
+      dismissBubble()
       stopObserver()
     }
   })
 
   messageObserver.observe(container, { childList: true, subtree: true })
+}
+
+const launchAvatar = (bot) => {
+  const hasBubbleContent = bot.welcome_title || bot.welcome_subtitle
+  setTimeout(() => {
+    showAvatar.value = true
+    if (hasBubbleContent) {
+      showBubble.value = true
+      bubbleDismissTimer = setTimeout(dismissBubble, 6000)
+    }
+  }, 350)
 }
 
 const mountChat = async (bot) => {
@@ -195,10 +283,9 @@ const mountChat = async (bot) => {
   const container = document.getElementById(containerId)
   if (!container) return
 
-  // Éviter la double initialisation (ex: fermer/rouvrir sans changer de bot)
   if (container.children.length > 0) {
-    // Relancer l'observateur si la session précédente n'avait pas encore de message
     if (!headerHidden.value && !bot.hide_header) startMessageObserver(containerId)
+    if (bot.show_avatar_intro && !showAvatar.value) launchAvatar(bot)
     return
   }
 
@@ -213,7 +300,6 @@ const mountChat = async (bot) => {
       initialMessages = []
     }
 
-    // i18n personnalisé (titre + sous-titre de la fenêtre @n8n/chat)
     const i18nConfig = {}
     if (bot.welcome_title || bot.welcome_subtitle) {
       i18nConfig.en = {
@@ -233,10 +319,8 @@ const mountChat = async (bot) => {
       ...(Object.keys(i18nConfig).length > 0 ? { i18n: i18nConfig } : {})
     })
 
-    // Lancer l'observateur seulement si le header n8n est visible
-    if (!bot.hide_header) {
-      startMessageObserver(containerId)
-    }
+    if (!bot.hide_header) startMessageObserver(containerId)
+    if (bot.show_avatar_intro) launchAvatar(bot)
   } catch (error) {
     console.error("ChatbotWidget: impossible d'initialiser @n8n/chat", error)
   }
@@ -248,6 +332,7 @@ watch([selectedBot, chatOpen], ([bot, open]) => {
     mountChat(bot)
   } else {
     stopObserver()
+    if (!open) resetAvatarState()
   }
 })
 
@@ -257,7 +342,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Positionné à GAUCHE du ChatOverlay (right: 20px + 56px + 14px = 90px) */
+/* Positionné à GAUCHE du ChatOverlay */
 .chatbot-widget-root {
   position: fixed;
   bottom: 20px;
@@ -286,7 +371,7 @@ onMounted(() => {
   transform: scale(1.05);
 }
 
-/* ── Panneau de chat (mode normal) ────────────────────── */
+/* ── Panneau de chat ───────────────────────────────────── */
 .chatbot-panel {
   position: absolute;
   bottom: 70px;
@@ -302,7 +387,10 @@ onMounted(() => {
   transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease, right 0.25s ease, border-radius 0.25s ease;
 }
 
-/* ── Mode plein écran ─────────────────────────────────── */
+:global(.dark) .chatbot-panel {
+  background: #111827;
+}
+
 .chatbot-panel--fullscreen {
   position: fixed;
   bottom: 0;
@@ -315,7 +403,6 @@ onMounted(() => {
   z-index: 10001;
 }
 
-/* En-tête du panneau */
 .chatbot-panel-header {
   display: flex;
   align-items: center;
@@ -342,26 +429,20 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Zone de chat */
+/* Zone de chat (occupe tout le reste du panel) */
 .chatbot-chat-container {
   flex: 1;
   overflow: hidden;
   --chat--window--height: 100%;
 }
 
-:global(.dark) .chatbot-panel {
-  background: #111827;
-}
-
 /* ── Réduction de l'en-tête interne @n8n/chat ─────────── */
-/*
-  @n8n/chat rend son propre header (titre + sous-titre) au-dessus des messages.
-  On le rend compact par défaut (on a déjà notre propre en-tête coloré).
-*/
-:global(#n8n-chat-root .chat-header),
 :global([id^="n8n-chat-"] .chat-header) {
   padding: 0.5rem 0.75rem !important;
   min-height: unset !important;
+  transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
+  max-height: 80px;
+  overflow: hidden;
 }
 
 :global([id^="n8n-chat-"] .chat-header p),
@@ -372,15 +453,6 @@ onMounted(() => {
   margin: 0 !important;
 }
 
-/* Transition douce pour masquer l'en-tête n8n au premier message */
-:global([id^="n8n-chat-"] .chat-header) {
-  transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
-  max-height: 80px;
-  opacity: 1;
-  overflow: hidden;
-}
-
-/* État masqué (classe ajoutée dynamiquement) */
 .n8n-header-hidden :global(.chat-header) {
   max-height: 0 !important;
   opacity: 0 !important;
@@ -388,9 +460,156 @@ onMounted(() => {
   padding-bottom: 0 !important;
 }
 
-/* Option admin : masquer le header n8n dès le départ */
 .n8n-hide-header :global(.chat-header) {
   display: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   Zone avatar — EXTÉRIEURE au panneau, à sa gauche
+   Position : right: 395px = 380px (panel) + 15px (gap)
+   ══════════════════════════════════════════════════════════ */
+.chatbot-avatar-zone {
+  position: absolute;
+  bottom: 70px;
+  right: 395px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+}
+
+/* Visage */
+.chatbot-avatar-face {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Anneau blanc extérieur pour le contraste */
+  box-shadow:
+    0 0 0 3px white,
+    0 8px 32px rgba(0, 0, 0, 0.35);
+  animation: avatar-float 3s ease-in-out infinite;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Reflet brillant en haut à gauche */
+.chatbot-avatar-shine {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  width: 26px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(-30deg);
+  pointer-events: none;
+}
+
+/* Icône (le visage) */
+.chatbot-avatar-icon {
+  width: 48px;
+  height: 48px;
+  color: white;
+  position: relative;
+  z-index: 1;
+  /* Légère ombre portée pour que l'icône se détache */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+/* Badge nom sous le visage */
+.chatbot-avatar-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: white;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Flottement idle ───────────────────────────────────── */
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ── Bulle de bienvenue (dans la zone avatar) ──────────── */
+.chatbot-bubble {
+  position: relative;
+  background: white;
+  border-radius: 14px 14px 14px 4px;  /* queue en bas-gauche vers l'avatar */
+  padding: 0.75rem 2rem 0.75rem 1rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  max-width: 210px;
+  cursor: pointer;
+}
+
+:global(.dark) .chatbot-bubble {
+  background: #1f2937;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+.chatbot-bubble-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #9ca3af;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s;
+}
+
+.chatbot-bubble-close:hover {
+  color: #4b5563;
+}
+
+/* ── Transitions zone avatar ───────────────────────────── */
+.avatar-zone-anim-enter-active {
+  animation: avatar-zone-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.avatar-zone-anim-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.avatar-zone-anim-leave-to {
+  opacity: 0;
+  transform: translateY(24px) scale(0.7);
+}
+
+@keyframes avatar-zone-in {
+  from { opacity: 0; transform: translateY(36px) scale(0.55); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Transitions bulle ────────────────────────────────── */
+.bubble-anim-enter-active {
+  animation: bubble-in 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+.bubble-anim-leave-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.bubble-anim-leave-to {
+  opacity: 0;
+  transform: scale(0.88) translateY(6px);
+}
+
+@keyframes bubble-in {
+  from { opacity: 0; transform: scale(0.7) translateY(10px); transform-origin: bottom center; }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ── Sélecteur multi-bots ──────────────────────────────── */
@@ -432,7 +651,7 @@ onMounted(() => {
   background: #374151;
 }
 
-/* ── Transitions ───────────────────────────────────────── */
+/* ── Transitions panel / menu ──────────────────────────── */
 .chatbot-panel-anim-enter-active,
 .chatbot-panel-anim-leave-active,
 .chatbot-menu-anim-enter-active,
@@ -446,5 +665,12 @@ onMounted(() => {
 .chatbot-menu-anim-leave-to {
   opacity: 0;
   transform: translateY(10px) scale(0.97);
+}
+
+/* ── Masquer l'avatar sur petits écrans ────────────────── */
+@media (max-width: 640px) {
+  .chatbot-avatar-zone {
+    display: none;
+  }
 }
 </style>

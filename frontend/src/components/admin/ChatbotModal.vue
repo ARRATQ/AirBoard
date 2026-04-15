@@ -147,6 +147,18 @@
           </div>
         </div>
 
+        <!-- Avatar de bienvenue animé -->
+        <div class="flex items-start gap-2">
+          <input v-model="form.show_avatar_intro" type="checkbox" id="chatbot_show_avatar"
+            class="w-4 h-4 mt-0.5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500 flex-shrink-0" />
+          <div>
+            <label for="chatbot_show_avatar" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+              {{ $t('chatbots.showAvatarIntro') }}
+            </label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('chatbots.showAvatarIntroHelp') }}</p>
+          </div>
+        </div>
+
         <!-- Actif -->
         <div class="flex items-center gap-2">
           <input v-model="form.is_active" type="checkbox" id="chatbot_is_active"
@@ -198,6 +210,7 @@ const defaultForm = () => ({
   welcome_title: '',
   welcome_subtitle: '',
   hide_header: false,
+  show_avatar_intro: false,
   is_active: true
 })
 
@@ -216,6 +229,7 @@ watch(
         welcome_title: val.welcome_title || '',
         welcome_subtitle: val.welcome_subtitle || '',
         hide_header: val.hide_header === true,
+        show_avatar_intro: val.show_avatar_intro === true,
         is_active: val.is_active !== false
       }
       try {

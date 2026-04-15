@@ -450,6 +450,7 @@ type Chatbot struct {
 	WelcomeTitle    string         `json:"welcome_title"`                                // Titre de l'écran d'accueil
 	WelcomeSubtitle string         `json:"welcome_subtitle"`                             // Sous-titre de l'écran d'accueil
 	HideHeader      bool           `json:"hide_header" gorm:"default:false"`             // Masquer totalement l'en-tête n8n
+	ShowAvatarIntro bool           `json:"show_avatar_intro" gorm:"default:false"`       // Afficher un avatar animé de bienvenue
 	IsActive        bool           `json:"is_active" gorm:"default:true"`
 	InitialMessages string         `json:"initial_messages" gorm:"type:text;default:'[]'"` // JSON array string
 	CreatedAt       time.Time      `json:"created_at"`
@@ -467,6 +468,7 @@ type ChatbotRequest struct {
 	WelcomeTitle    string `json:"welcome_title"`
 	WelcomeSubtitle string `json:"welcome_subtitle"`
 	HideHeader      *bool  `json:"hide_header"`
+	ShowAvatarIntro *bool  `json:"show_avatar_intro"`
 	IsActive        *bool  `json:"is_active"`
 	InitialMessages string `json:"initial_messages"` // raw JSON array string
 }

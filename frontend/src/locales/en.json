@@ -458,7 +458,9 @@
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
     "hideHeader": "Hide chat header",
-    "hideHeaderHelp": "Remove the title and subtitle displayed by the n8n widget (useful if you already have a custom header)"
+    "hideHeaderHelp": "Remove the title and subtitle displayed by the n8n widget (useful if you already have a custom header)",
+    "showAvatarIntro": "Show animated welcome avatar",
+    "showAvatarIntroHelp": "When the chat opens, an animated avatar appears in the corner and gently floats while the window is open. A welcome bubble pops up then closes automatically after a few seconds."
   },
   "news": {
     "widget": {

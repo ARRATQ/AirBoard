@@ -450,7 +450,9 @@
     "fullscreen": "Plein écran",
     "exitFullscreen": "Quitter le plein écran",
     "hideHeader": "Masquer l'en-tête du chat",
-    "hideHeaderHelp": "Supprime le titre et le sous-titre affichés par le widget n8n (utile si vous avez déjà un en-tête personnalisé)"
+    "hideHeaderHelp": "Supprime le titre et le sous-titre affichés par le widget n8n (utile si vous avez déjà un en-tête personnalisé)",
+    "showAvatarIntro": "Afficher un avatar de bienvenue animé",
+    "showAvatarIntroHelp": "À l'ouverture du chat, un avatar animé surgit dans le coin et flotte doucement tant que la fenêtre est ouverte. Une bulle de bienvenue apparaît puis se referme automatiquement après quelques secondes."
   },
   "news": {
     "widget": {

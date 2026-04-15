@@ -349,7 +349,9 @@
     "fullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa",
     "hideHeader": "Ocultar encabezado del chat",
-    "hideHeaderHelp": "Elimina el título y subtítulo mostrados por el widget n8n (útil si ya tienes un encabezado personalizado)"
+    "hideHeaderHelp": "Elimina el título y subtítulo mostrados por el widget n8n (útil si ya tienes un encabezado personalizado)",
+    "showAvatarIntro": "Mostrar avatar de bienvenida animado",
+    "showAvatarIntroHelp": "Al abrir el chat, un avatar animado aparece en la esquina y flota suavemente mientras la ventana está abierta. Aparece una burbuja de bienvenida que se cierra automáticamente tras unos segundos."
   },
   "news": {
     "widget": {
