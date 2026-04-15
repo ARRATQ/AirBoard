@@ -1,64 +1,68 @@
 <template>
   <div v-if="activeChatbots.length > 0" class="chatbot-widget-root">
 
-    <!-- ── Panneau de chat ──────────────────────────────── -->
-    <transition name="chatbot-panel-anim">
-      <div
-        v-if="chatOpen && selectedBot"
-        class="chatbot-panel"
-        :class="{ 'chatbot-panel--fullscreen': isFullscreen }"
-      >
-        <!-- En-tête coloré -->
+    <!--
+      v-if="selectedBot"  → détruit/recrée le DOM quand on change de bot (nouvelle session n8n)
+      v-show="chatOpen"   → masque/affiche sans détruire le DOM (session n8n préservée entre ouvertures)
+    -->
+    <template v-if="selectedBot">
+      <transition name="chatbot-panel-anim">
         <div
-          class="chatbot-panel-header"
-          :style="{ background: `linear-gradient(135deg, ${selectedBot.color || '#7c3aed'}, ${selectedBot.color || '#4f46e5'})` }"
+          v-show="chatOpen"
+          class="chatbot-panel"
+          :class="{ 'chatbot-panel--fullscreen': isFullscreen }"
         >
-          <div class="flex items-center gap-2 min-w-0">
-            <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="h-5 w-5 text-white flex-shrink-0" />
-            <div class="min-w-0">
-              <p class="font-semibold text-white text-sm leading-tight truncate">
-                {{ selectedBot.welcome_title || selectedBot.name }}
-              </p>
-              <p v-if="selectedBot.welcome_subtitle" class="text-white/70 text-xs leading-tight truncate">
-                {{ selectedBot.welcome_subtitle }}
-              </p>
+          <!-- En-tête coloré -->
+          <div
+            class="chatbot-panel-header"
+            :style="{ background: `linear-gradient(135deg, ${selectedBot.color || '#7c3aed'}, ${selectedBot.color || '#4f46e5'})` }"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="h-5 w-5 text-white flex-shrink-0" />
+              <div class="min-w-0">
+                <p class="font-semibold text-white text-sm leading-tight truncate">
+                  {{ selectedBot.welcome_title || selectedBot.name }}
+                </p>
+                <p v-if="selectedBot.welcome_subtitle" class="text-white/70 text-xs leading-tight truncate">
+                  {{ selectedBot.welcome_subtitle }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button
+                v-if="activeChatbots.length > 1"
+                @click="backToSelector"
+                class="chatbot-panel-btn"
+                :title="$t('chatbots.switchBot')"
+              >
+                <Icon icon="mdi:swap-horizontal" class="h-4 w-4" />
+              </button>
+              <button
+                @click="isFullscreen = !isFullscreen"
+                class="chatbot-panel-btn"
+                :title="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
+              >
+                <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
+              </button>
+              <button @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')">
+                <Icon icon="mdi:close" class="h-4 w-4" />
+              </button>
             </div>
           </div>
-          <div class="flex items-center gap-1 flex-shrink-0">
-            <button
-              v-if="activeChatbots.length > 1"
-              @click="backToSelector"
-              class="chatbot-panel-btn"
-              :title="$t('chatbots.switchBot')"
-            >
-              <Icon icon="mdi:swap-horizontal" class="h-4 w-4" />
-            </button>
-            <button
-              @click="isFullscreen = !isFullscreen"
-              class="chatbot-panel-btn"
-              :title="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
-            >
-              <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
-            </button>
-            <button @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')">
-              <Icon icon="mdi:close" class="h-4 w-4" />
-            </button>
-          </div>
-        </div>
 
-        <!-- Conteneur @n8n/chat -->
-        <div
-          :key="selectedBot.id"
-          :id="`n8n-chat-${selectedBot.id}`"
-          class="chatbot-chat-container"
-          :class="{
-            'n8n-hide-header': selectedBot.hide_header,
-            'n8n-header-hidden': headerHidden
-          }"
-          :style="{ '--chat--color-primary': selectedBot.color || '#4f46e5', '--chat--color-secondary': selectedBot.color || '#7c3aed' }"
-        />
-      </div>
-    </transition>
+          <!-- Conteneur @n8n/chat (jamais détruit tant que selectedBot ne change pas) -->
+          <div
+            :id="`n8n-chat-${selectedBot.id}`"
+            class="chatbot-chat-container"
+            :class="{
+              'n8n-hide-header': selectedBot.hide_header,
+              'n8n-header-hidden': headerHidden
+            }"
+            :style="{ '--chat--color-primary': selectedBot.color || '#4f46e5', '--chat--color-secondary': selectedBot.color || '#7c3aed' }"
+          />
+        </div>
+      </transition>
+    </template>
 
     <!-- ── Zone avatar — EXTÉRIEURE au panel, à sa gauche ── -->
     <transition name="avatar-zone-anim">
@@ -95,13 +99,8 @@
             background: `radial-gradient(circle at 38% 38%, ${lighten(selectedBot.color || '#4f46e5')}, ${selectedBot.color || '#4f46e5'})`
           }"
         >
-          <!-- Reflet -->
           <div class="chatbot-avatar-shine" />
-          <!-- Icône / visage -->
-          <Icon
-            :icon="selectedBot.icon || 'mdi:robot-outline'"
-            class="chatbot-avatar-icon"
-          />
+          <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="chatbot-avatar-icon" />
         </div>
 
         <!-- Nom du bot -->
@@ -164,7 +163,6 @@ const chatOpen = ref(false)
 const isFullscreen = ref(false)
 const headerHidden = ref(false)
 
-// Avatar de bienvenue
 const showAvatar = ref(false)
 const showBubble = ref(false)
 let bubbleDismissTimer = null
@@ -176,9 +174,6 @@ const primaryColor = computed(() => {
   return '#4f46e5'
 })
 
-/**
- * Éclaircit légèrement une couleur hex pour le dégradé radial du visage.
- */
 const lighten = (hex) => {
   try {
     const n = parseInt(hex.replace('#', ''), 16)
@@ -283,12 +278,15 @@ const mountChat = async (bot) => {
   const container = document.getElementById(containerId)
   if (!container) return
 
+  // Conteneur déjà initialisé (v-show : DOM préservé entre ouvertures)
+  // → on relance juste l'observateur et l'avatar si besoin
   if (container.children.length > 0) {
     if (!headerHidden.value && !bot.hide_header) startMessageObserver(containerId)
     if (bot.show_avatar_intro && !showAvatar.value) launchAvatar(bot)
     return
   }
 
+  // Première ouverture pour ce bot → initialisation complète
   try {
     const { createChat } = await import('@n8n/chat')
     await import('@n8n/chat/style.css')
@@ -326,9 +324,14 @@ const mountChat = async (bot) => {
   }
 }
 
-watch([selectedBot, chatOpen], ([bot, open]) => {
+// Quand le bot change (sélection d'un nouveau bot) → le v-if recrée le DOM,
+// on monte le chat dès que le panel est ouvert.
+// Quand chatOpen passe à true pour le même bot → mountChat trouve le DOM
+// déjà initialisé (container.children.length > 0) et ne recrée pas l'instance.
+watch([selectedBot, chatOpen], ([bot, open], [oldBot]) => {
   if (bot && open) {
-    headerHidden.value = false
+    // Réinitialiser headerHidden uniquement si le bot a changé
+    if (bot !== oldBot) headerHidden.value = false
     mountChat(bot)
   } else {
     stopObserver()
@@ -384,7 +387,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: white;
-  transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease, right 0.25s ease, border-radius 0.25s ease;
+  transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease,
+              right 0.25s ease, border-radius 0.25s ease;
 }
 
 :global(.dark) .chatbot-panel {
@@ -429,14 +433,52 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Zone de chat (occupe tout le reste du panel) */
+/* Zone de chat */
 .chatbot-chat-container {
   flex: 1;
   overflow: hidden;
+  min-height: 0;
   --chat--window--height: 100%;
 }
 
-/* ── Réduction de l'en-tête interne @n8n/chat ─────────── */
+/* ── Correctifs CSS @n8n/chat ──────────────────────────── */
+
+/* La fenêtre n8n doit occuper exactement le conteneur */
+:global([id^="n8n-chat-"] .chat-window) {
+  height: 100% !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Supprimer l'outline bleue au focus du champ de saisie */
+:global([id^="n8n-chat-"] textarea),
+:global([id^="n8n-chat-"] input[type="text"]) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+:global([id^="n8n-chat-"] textarea:focus),
+:global([id^="n8n-chat-"] input[type="text"]:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+/* Supprimer le cadre/ring autour de la zone de saisie */
+:global([id^="n8n-chat-"] .chat-input),
+:global([id^="n8n-chat-"] .chat-inputs),
+:global([id^="n8n-chat-"] .chat-inputs-wrapper),
+:global([id^="n8n-chat-"] .chat-input__wrapper),
+:global([id^="n8n-chat-"] .chat-input-wrapper) {
+  outline: none !important;
+  box-shadow: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+/* En-tête interne n8n — compact */
 :global([id^="n8n-chat-"] .chat-header) {
   padding: 0.5rem 0.75rem !important;
   min-height: unset !important;
@@ -466,7 +508,7 @@ onMounted(() => {
 
 /* ══════════════════════════════════════════════════════════
    Zone avatar — EXTÉRIEURE au panneau, à sa gauche
-   Position : right: 395px = 380px (panel) + 15px (gap)
+   right: 395px = 380px (panel) + 15px (gap)
    ══════════════════════════════════════════════════════════ */
 .chatbot-avatar-zone {
   position: absolute;
@@ -479,7 +521,6 @@ onMounted(() => {
   z-index: 9999;
 }
 
-/* Visage */
 .chatbot-avatar-face {
   position: relative;
   width: 88px;
@@ -488,7 +529,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Anneau blanc extérieur pour le contraste */
   box-shadow:
     0 0 0 3px white,
     0 8px 32px rgba(0, 0, 0, 0.35);
@@ -497,7 +537,6 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Reflet brillant en haut à gauche */
 .chatbot-avatar-shine {
   position: absolute;
   top: 10px;
@@ -510,18 +549,15 @@ onMounted(() => {
   pointer-events: none;
 }
 
-/* Icône (le visage) */
 .chatbot-avatar-icon {
   width: 48px;
   height: 48px;
   color: white;
   position: relative;
   z-index: 1;
-  /* Légère ombre portée pour que l'icône se détache */
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
 }
 
-/* Badge nom sous le visage */
 .chatbot-avatar-label {
   font-size: 0.7rem;
   font-weight: 600;
@@ -536,17 +572,16 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-/* ── Flottement idle ───────────────────────────────────── */
 @keyframes avatar-float {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-8px); }
 }
 
-/* ── Bulle de bienvenue (dans la zone avatar) ──────────── */
+/* ── Bulle de bienvenue ───────────────────────────────── */
 .chatbot-bubble {
   position: relative;
   background: white;
-  border-radius: 14px 14px 14px 4px;  /* queue en bas-gauche vers l'avatar */
+  border-radius: 14px 14px 14px 4px;
   padding: 0.75rem 2rem 0.75rem 1rem;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
   max-width: 210px;
@@ -667,8 +702,48 @@ onMounted(() => {
   transform: translateY(10px) scale(0.97);
 }
 
-/* ── Masquer l'avatar sur petits écrans ────────────────── */
-@media (max-width: 640px) {
+/* ══════════════════════════════════════════════════════════
+   Responsive mobile (≤ 600px)
+   Le panel passe en position: fixed pleine largeur.
+   Le widget-root se rapproche du bord droit.
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .chatbot-widget-root {
+    right: 12px;
+  }
+
+  .chatbot-panel {
+    /* Surcharge : fixed pleine largeur avec marges latérales */
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    bottom: 80px !important;
+    height: 72vh !important;
+    max-height: 520px;
+    border-radius: 12px !important;
+  }
+
+  /* Fullscreen reste intact */
+  .chatbot-panel--fullscreen {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+
+  .chatbot-selector-menu {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 80px !important;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Avatar caché sur mobile (pas assez de place à gauche du panel) */
   .chatbot-avatar-zone {
     display: none;
   }
