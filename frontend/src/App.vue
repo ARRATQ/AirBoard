@@ -52,11 +52,8 @@
     <!-- Notifications -->
     <NotificationContainer />
 
-    <!-- Chat Overlay -->
-    <ChatOverlay v-if="isAuthenticated && !isAuthPage" />
-
-    <!-- Chatbots n8n -->
-    <ChatbotWidget v-if="isAuthenticated && !isAuthPage" />
+    <!-- Speed Dial FAB (chat + chatbots fusionnés en un seul bouton flottant) -->
+    <FloatingSpeedDial v-if="isAuthenticated && !isAuthPage" />
   </div>
 </template>
 
@@ -71,8 +68,7 @@ import { useAppStore } from '@/stores/app'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import LoadingOverlay from '@/components/ui/LoadingOverlay.vue'
 import NotificationContainer from '@/components/ui/NotificationContainer.vue'
-import ChatOverlay from '@/components/chat/ChatOverlay.vue'
-import ChatbotWidget from '@/components/ChatbotWidget.vue'
+import FloatingSpeedDial from '@/components/layout/FloatingSpeedDial.vue'
 
 // Stores
 const authStore = useAuthStore()

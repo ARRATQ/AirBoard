@@ -1,5 +1,16 @@
 <template>
-  <div v-if="activeChatbots.length > 0" class="chatbot-widget-root">
+  <!-- Backdrop — ferme le sélecteur multi-bots quand on clique en dehors (mode hideToggle) -->
+  <div
+    v-if="props.hideToggle && chatOpen && !selectedBot && activeChatbots.length > 1"
+    class="chatbot-selector-backdrop"
+    @click="chatOpen = false"
+  />
+
+  <div
+    v-if="activeChatbots.length > 0"
+    class="chatbot-widget-root"
+    :style="props.hideToggle ? { right: '20px', pointerEvents: 'none' } : {}"
+  >
 
     <!--
       v-if="selectedBot"  → détruit/recrée le DOM quand on change de bot (nouvelle session n8n)
@@ -136,8 +147,9 @@
       </div>
     </transition>
 
-    <!-- ── Bouton toggle ────────────────────────────────── -->
+    <!-- ── Bouton toggle (caché quand hideToggle — le FAB le remplace) ── -->
     <button
+      v-if="!props.hideToggle"
       class="chatbot-toggle-btn"
       :class="{ 'chatbot-toggle-btn--open': chatOpen }"
       :style="{ background: chatOpen ? 'linear-gradient(135deg, #374151, #1f2937)' : `linear-gradient(135deg, ${primaryColor}, ${primaryColor})` }"
@@ -156,6 +168,10 @@
 import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import { chatbotsService } from '@/services/api'
+
+const props = defineProps({
+  hideToggle: { type: Boolean, default: false }
+})
 
 const activeChatbots = ref([])
 const selectedBot = ref(null)
@@ -342,15 +358,34 @@ watch([selectedBot, chatOpen], ([bot, open], [oldBot]) => {
 onMounted(() => {
   loadActiveChatbots()
 })
+
+defineExpose({
+  openChat: () => { chatOpen.value = true },
+  closeChat: () => { chatOpen.value = false; resetAvatarState() },
+  get isOpen() { return chatOpen.value }
+})
 </script>
 
 <style scoped>
-/* Positionné à GAUCHE du ChatOverlay */
+/* Positionné à GAUCHE du ChatOverlay (ou right:20px quand hideToggle) */
 .chatbot-widget-root {
   position: fixed;
   bottom: 20px;
   right: 90px;
   z-index: 10000;
+}
+
+/* Backdrop pour fermer le sélecteur multi-bots (mode FAB) */
+.chatbot-selector-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+/* Réactiver pointer-events sur panel et sélecteur quand le root est en mode hideToggle */
+.chatbot-panel,
+.chatbot-selector-menu {
+  pointer-events: auto;
 }
 
 /* ── Bouton toggle ─────────────────────────────────────── */
