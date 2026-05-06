@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"airboard/models"
+	"airboard/services"
 	"airboard/services/chat"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +14,13 @@ import (
 )
 
 type ChatHandler struct {
-	db  *gorm.DB
-	hub *chat.Hub
+	db                  *gorm.DB
+	hub                 *chat.Hub
+	gamificationService *services.GamificationService
 }
 
-func NewChatHandler(db *gorm.DB, hub *chat.Hub) *ChatHandler {
-	return &ChatHandler{db: db, hub: hub}
+func NewChatHandler(db *gorm.DB, hub *chat.Hub, gs *services.GamificationService) *ChatHandler {
+	return &ChatHandler{db: db, hub: hub, gamificationService: gs}
 }
 
 // ServeWS handles WebSocket requests from the peer.
@@ -45,12 +47,16 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		return
 	}
 
+	gs := h.gamificationService
 	client := &chat.Client{
 		Hub:    h.hub,
 		Conn:   conn,
 		Send:   make(chan []byte, 256),
 		DB:     h.db,
 		UserID: userID,
+		OnMessageSent: func(uid uint) {
+			gs.AwardXP(uid, 5, "chat_message", "")
+		},
 	}
 
 	log.Printf("[Chat] WebSocket connected: userID=%d", userID)

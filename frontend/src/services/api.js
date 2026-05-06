@@ -1530,6 +1530,9 @@ export const chatbotsService = {
   async getActiveChatbots() {
     const response = await api.get('/chatbots/active')
     return response.data
+  },
+  async trackInteraction(botId) {
+    await api.post(`/chatbots/${botId}/interact`)
   }
 }
 

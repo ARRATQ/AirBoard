@@ -55,6 +55,9 @@ type Client struct {
 
 	// Authenticated User ID
 	UserID uint
+
+	// OnMessageSent is called after a message is persisted to award XP
+	OnMessageSent func(userID uint)
 }
 
 // WSMessage represents the structure of messages sent over WebSocket
@@ -123,6 +126,10 @@ func (c *Client) handleMessage(msg []byte) {
 	if err := c.DB.Create(&chatMsg).Error; err != nil {
 		log.Printf("[WS] DB Save Error: %v", err)
 		return
+	}
+
+	if c.OnMessageSent != nil {
+		go c.OnMessageSent(c.UserID)
 	}
 
 	// Load sender for response

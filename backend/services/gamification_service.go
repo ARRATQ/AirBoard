@@ -125,6 +125,10 @@ func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, trigge
 		return s.checkSuggestionVoterAchievement(tx, userID)
 	case "suggestion_comment":
 		return s.checkSuggestionCommenterAchievement(tx, userID)
+	case "chat_message":
+		return s.checkChatUserAchievement(tx, userID)
+	case "chatbot_use":
+		return s.checkAIPioneerAchievement(tx, userID)
 	}
 
 	return nil
@@ -185,6 +189,12 @@ func (s *GamificationService) getMetricCount(tx *gorm.DB, userID uint, metric st
 	case "suggestion_comment_count":
 		err := tx.Model(&models.Comment{}).Where("user_id = ? AND entity_type = ?", userID, "suggestion").Count(&count).Error
 		return count, err
+	case "chat_message_count":
+		err := tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, "chat_message").Count(&count).Error
+		return count, err
+	case "chatbot_use_count":
+		err := tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, "chatbot_use").Count(&count).Error
+		return count, err
 	default:
 		err := tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, triggerReason).Count(&count).Error
 		return count, err
@@ -232,11 +242,11 @@ func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	todayEnd := todayStart.Add(24 * time.Hour)
 
-	// Find the most recent daily_login transaction for today
+	// Find the first daily_login transaction for today
 	var lastLogin models.XPTransaction
 	err := tx.Where("user_id = ? AND reason = ? AND created_at >= ? AND created_at < ?",
 		userID, "daily_login", todayStart, todayEnd).
-		Order("created_at DESC").
+		Order("created_at ASC").
 		First(&lastLogin).Error
 
 	if err == gorm.ErrRecordNotFound {
@@ -330,6 +340,26 @@ func (s *GamificationService) checkSuggestionCommenterAchievement(tx *gorm.DB, u
 
 	if count >= 5 {
 		return s.UnlockAchievement(tx, userID, "suggestion_commenter")
+	}
+	return nil
+}
+
+func (s *GamificationService) checkChatUserAchievement(tx *gorm.DB, userID uint) error {
+	var count int64
+	tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, "chat_message").Count(&count)
+
+	if count >= 10 {
+		return s.UnlockAchievement(tx, userID, "chat_user")
+	}
+	return nil
+}
+
+func (s *GamificationService) checkAIPioneerAchievement(tx *gorm.DB, userID uint) error {
+	var count int64
+	tx.Model(&models.XPTransaction{}).Where("user_id = ? AND reason = ?", userID, "chatbot_use").Count(&count)
+
+	if count >= 1 {
+		return s.UnlockAchievement(tx, userID, "ai_pioneer")
 	}
 	return nil
 }
@@ -547,6 +577,32 @@ func (s *GamificationService) SeedAchievements() error {
 			Threshold:     5,
 			IsActive:      true,
 		},
+		{
+			Code:          "chat_user",
+			Name:          "Bavard",
+			Description:   "Envoyez 10 messages dans le chat",
+			Icon:          "mdi:chat-processing-outline",
+			Color:         "#06B6D4",
+			XPReward:      100,
+			Category:      "user",
+			TriggerReason: "chat_message",
+			Metric:        "chat_message_count",
+			Threshold:     10,
+			IsActive:      true,
+		},
+		{
+			Code:          "ai_pioneer",
+			Name:          "Pionnier de l'IA",
+			Description:   "Utilisez un assistant IA pour la première fois",
+			Icon:          "mdi:robot-excited-outline",
+			Color:         "#A855F7",
+			XPReward:      75,
+			Category:      "user",
+			TriggerReason: "chatbot_use",
+			Metric:        "chatbot_use_count",
+			Threshold:     1,
+			IsActive:      true,
+		},
 	}
 
 	for _, ach := range achievements {
@@ -592,6 +648,8 @@ func (s *GamificationService) SeedGamificationRules() error {
 		{Reason: "suggestion_create", Points: 35, Enabled: true},
 		{Reason: "suggestion_vote", Points: 8, Enabled: true},
 		{Reason: "suggestion_comment", Points: 8, Enabled: true},
+		{Reason: "chat_message", Points: 5, Enabled: true},
+		{Reason: "chatbot_use", Points: 10, Enabled: true},
 	}
 
 	for _, rule := range rules {

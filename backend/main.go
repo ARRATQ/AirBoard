@@ -206,7 +206,7 @@ func main() {
 	suggestionsHandler := handlers.NewSuggestionsHandler(db, gamificationService)
 	gamificationHandler := handlers.NewGamificationHandler(db, gamificationService)
 	searchHandler := handlers.NewSearchHandler(db)
-	chatbotHandler := handlers.NewChatbotHandler(db)
+	chatbotHandler := handlers.NewChatbotHandler(db, gamificationService)
 
 	// Seeding gamification
 	if err := gamificationService.SeedAchievements(); err != nil {
@@ -220,7 +220,7 @@ func main() {
 	chatHub := chat.NewHub()
 	chatHub.EmailService = GetEmailService()
 	go chatHub.Run()
-	chatHandler := handlers.NewChatHandler(db, chatHub)
+	chatHandler := handlers.NewChatHandler(db, chatHub, gamificationService)
 
 	// Configuration du routeur sécurisée
 	gin.SetMode(cfg.Server.Mode)
@@ -375,6 +375,7 @@ func main() {
 
 		// Chatbots actifs (accessible à tous les utilisateurs connectés)
 		protected.GET("/chatbots/active", chatbotHandler.GetActiveChatbots)
+		protected.POST("/chatbots/:id/interact", chatbotHandler.TrackInteraction)
 
 		// Routes News Hub (accessible à tous les utilisateurs connectés)
 		news := protected.Group("/news")

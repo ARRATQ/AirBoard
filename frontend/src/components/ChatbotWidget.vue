@@ -11,7 +11,6 @@
     class="chatbot-widget-root"
     :style="props.hideToggle ? { right: '20px', pointerEvents: 'none' } : {}"
   >
-
     <!--
       v-if="selectedBot"  → détruit/recrée le DOM quand on change de bot (nouvelle session n8n)
       v-show="chatOpen"   → masque/affiche sans détruire le DOM (session n8n préservée entre ouvertures)
@@ -302,7 +301,9 @@ const mountChat = async (bot) => {
     return
   }
 
-  // Première ouverture pour ce bot → initialisation complète
+  // Première ouverture pour ce bot → initialisation complète + tracking gamification
+  chatbotsService.trackInteraction(bot.id).catch(() => {})
+
   try {
     const { createChat } = await import('@n8n/chat')
     await import('@n8n/chat/style.css')

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"airboard/models"
+	"airboard/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,12 +13,13 @@ import (
 
 // ChatbotHandler gère les endpoints liés aux chatbots n8n
 type ChatbotHandler struct {
-	db *gorm.DB
+	db                  *gorm.DB
+	gamificationService *services.GamificationService
 }
 
 // NewChatbotHandler crée un nouveau ChatbotHandler
-func NewChatbotHandler(db *gorm.DB) *ChatbotHandler {
-	return &ChatbotHandler{db: db}
+func NewChatbotHandler(db *gorm.DB, gs *services.GamificationService) *ChatbotHandler {
+	return &ChatbotHandler{db: db, gamificationService: gs}
 }
 
 // GetChatbots retourne la liste paginée de tous les chatbots (admin)
@@ -214,6 +216,34 @@ func (h *ChatbotHandler) DeleteChatbot(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.SuccessResponse{Message: "Chatbot supprimé avec succès"})
+}
+
+// TrackInteraction enregistre l'utilisation d'un chatbot pour la gamification
+func (h *ChatbotHandler) TrackInteraction(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		return
+	}
+
+	var chatbot models.Chatbot
+	if err := h.db.Where("id = ? AND is_active = ?", id, true).First(&chatbot).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chatbot non trouvé"})
+		return
+	}
+
+	if err := h.gamificationService.AwardXP(userID, 10, "chatbot_use", ""); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur gamification"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 // GetActiveChatbots retourne uniquement les chatbots actifs (tous les utilisateurs connectés)
