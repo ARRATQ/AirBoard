@@ -237,28 +237,10 @@ func (s *GamificationService) checkInformedAchievement(tx *gorm.DB, userID uint)
 }
 
 func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint) error {
-	// Get today's date at midnight
+	// Cette fonction est appelée directement depuis AwardXP("daily_login"),
+	// donc time.Now() correspond à l'heure de connexion réelle.
 	now := time.Now()
-	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	todayEnd := todayStart.Add(24 * time.Hour)
-
-	// Find the first daily_login transaction for today
-	var lastLogin models.XPTransaction
-	err := tx.Where("user_id = ? AND reason = ? AND created_at >= ? AND created_at < ?",
-		userID, "daily_login", todayStart, todayEnd).
-		Order("created_at ASC").
-		First(&lastLogin).Error
-
-	if err == gorm.ErrRecordNotFound {
-		// No login today
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-
-	// Check if the login was before 8:30 AM
-	if lastLogin.CreatedAt.Hour() < 8 || (lastLogin.CreatedAt.Hour() == 8 && lastLogin.CreatedAt.Minute() < 30) {
+	if now.Hour() < 8 || (now.Hour() == 8 && now.Minute() < 30) {
 		return s.UnlockAchievement(tx, userID, "early_bird")
 	}
 	return nil
