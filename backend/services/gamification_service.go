@@ -35,6 +35,18 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 		return nil
 	}
 
+	// Pour daily_login : une seule fois par jour (XP + badge early_bird)
+	if reason == "daily_login" {
+		today := time.Now().Truncate(24 * time.Hour)
+		var count int64
+		s.db.Model(&models.XPTransaction{}).
+			Where("user_id = ? AND reason = ? AND created_at >= ?", userID, "daily_login", today).
+			Count(&count)
+		if count > 0 {
+			return nil
+		}
+	}
+
 	metadata = normalizeXPMetadata(metadata)
 
 	return s.db.Transaction(func(tx *gorm.DB) error {

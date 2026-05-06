@@ -704,6 +704,11 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 		user.AdminOfGroups = adminGroups
 	}
 
+	// Gamification XP (Daily Login)
+	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", ""); err != nil {
+		log.Printf("[Gamification] Error awarding daily login XP for SSO user %d: %v", user.ID, err)
+	}
+
 	// Masquer le mot de passe (même si vide pour SSO)
 	user.Password = ""
 
