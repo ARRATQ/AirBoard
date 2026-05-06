@@ -104,9 +104,26 @@ func (h *GamificationHandler) GetAllAchievements(c *gin.Context) {
 	c.JSON(http.StatusOK, achievements)
 }
 
-// GetLeaderboard récupère le classement XP
+type LeaderboardBadge struct {
+	Code  string `json:"code"`
+	Icon  string `json:"icon"`
+	Color string `json:"color"`
+	Name  string `json:"name"`
+}
+
+type LeaderboardEntry struct {
+	UserID    uint               `json:"user_id"`
+	Username  string             `json:"username"`
+	XP        int64              `json:"xp"`
+	Level     int                `json:"level"`
+	FirstName string             `json:"first_name"`
+	LastName  string             `json:"last_name"`
+	Badges    []LeaderboardBadge `json:"badges"`
+}
+
+// GetLeaderboard récupère le classement XP avec les badges de chaque utilisateur
 func (h *GamificationHandler) GetLeaderboard(c *gin.Context) {
-	var leaderboard []struct {
+	var rows []struct {
 		UserID    uint   `json:"user_id"`
 		Username  string `json:"username"`
 		XP        int64  `json:"xp"`
@@ -121,9 +138,63 @@ func (h *GamificationHandler) GetLeaderboard(c *gin.Context) {
 		Where("users.is_active = ? AND users.deleted_at IS NULL", true).
 		Order("gamification_profiles.xp DESC").
 		Limit(10).
-		Scan(&leaderboard)
+		Scan(&rows)
 
-	c.JSON(http.StatusOK, leaderboard)
+	if len(rows) == 0 {
+		c.JSON(http.StatusOK, []LeaderboardEntry{})
+		return
+	}
+
+	userIDs := make([]uint, len(rows))
+	for i, r := range rows {
+		userIDs[i] = r.UserID
+	}
+
+	var userAchievements []struct {
+		UserID      uint   `json:"user_id"`
+		Code        string `json:"code"`
+		Icon        string `json:"icon"`
+		Color       string `json:"color"`
+		Name        string `json:"name"`
+		UnlockedAt  string `json:"unlocked_at"`
+	}
+	h.db.Table("user_achievements").
+		Select("user_achievements.user_id, achievements.code, achievements.icon, achievements.color, achievements.name, user_achievements.unlocked_at").
+		Joins("JOIN achievements ON achievements.id = user_achievements.achievement_id").
+		Where("user_achievements.user_id IN ? AND achievements.deleted_at IS NULL", userIDs).
+		Order("user_achievements.unlocked_at DESC").
+		Scan(&userAchievements)
+
+	badgesMap := make(map[uint][]LeaderboardBadge)
+	for _, ua := range userAchievements {
+		if len(badgesMap[ua.UserID]) < 4 {
+			badgesMap[ua.UserID] = append(badgesMap[ua.UserID], LeaderboardBadge{
+				Code:  ua.Code,
+				Icon:  ua.Icon,
+				Color: ua.Color,
+				Name:  ua.Name,
+			})
+		}
+	}
+
+	entries := make([]LeaderboardEntry, len(rows))
+	for i, r := range rows {
+		badges := badgesMap[r.UserID]
+		if badges == nil {
+			badges = []LeaderboardBadge{}
+		}
+		entries[i] = LeaderboardEntry{
+			UserID:    r.UserID,
+			Username:  r.Username,
+			XP:        r.XP,
+			Level:     r.Level,
+			FirstName: r.FirstName,
+			LastName:  r.LastName,
+			Badges:    badges,
+		}
+	}
+
+	c.JSON(http.StatusOK, entries)
 }
 
 // GetMyTransactions récupère l'historique des gains de points de l'utilisateur
