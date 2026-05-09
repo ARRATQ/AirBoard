@@ -194,6 +194,40 @@
             </div>
             </div>
 
+          <!-- News Hub -->
+          <div>
+            <div class="section-header">
+              <Icon icon="mdi:newspaper-variant-outline" class="section-icon" />
+              <h4 class="section-title">Fil d'actualités</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label for="news_per_tab" class="form-label">Articles par onglet</label>
+                <div class="flex items-center gap-3">
+                  <input
+                    id="news_per_tab"
+                    v-model.number="form.news_per_tab"
+                    type="number"
+                    min="1"
+                    max="20"
+                    class="form-input w-24"
+                  />
+                  <div class="flex gap-1.5">
+                    <button v-for="n in [3, 5, 8, 10]" :key="n" type="button"
+                      @click="form.news_per_tab = n"
+                      class="px-2.5 py-1 rounded text-xs font-medium transition-colors"
+                      :class="form.news_per_tab === n
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'">
+                      {{ n }}
+                    </button>
+                  </div>
+                </div>
+                <p class="form-help">Nombre d'articles affichés par onglet sur la page d'accueil (les articles épinglés apparaissent toujours en tête).</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Hero Background Image -->
           <div>
             <div class="section-header">
@@ -991,6 +1025,7 @@ const form = reactive({
   color_palette: appStore.currentPalette,
   custom_accent_color: localStorage.getItem('airboard_custom_accent') || '#d97757',
   custom_palettes: [],
+  news_per_tab: 5,
 })
 
 const heroImageUploading = ref(false)
@@ -1108,6 +1143,7 @@ const loadSettings = async () => {
       color_palette: data.color_palette || 'claude',
       custom_accent_color: data.custom_accent_color || localStorage.getItem('airboard_custom_accent') || '#d97757',
       custom_palettes: parsedCustomPalettes,
+      news_per_tab: data.news_per_tab || 5,
     })
     appStore.setCustomPalettes(parsedCustomPalettes)
   } catch (error) {
@@ -1289,6 +1325,7 @@ const confirmReset = async () => {
     form.color_palette = 'claude'
     form.custom_accent_color = '#d97757'
     form.custom_palettes = []
+    form.news_per_tab = 5
     appStore.setCustomPalettes([])
     appStore.applyPalette('claude')
     await loadSettings()

@@ -37,6 +37,7 @@ func (h *SettingsHandler) GetAppSettings(c *gin.Context) {
 				HomePageMessage: "Discover your personalized workspace",
 				SignupEnabled:   true,
 				CustomPalettes:  "[]",
+				NewsPerTab:      5,
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
@@ -87,6 +88,10 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 			if request.SignupEnabled != nil {
 				signupEnabled = *request.SignupEnabled
 			}
+			newsPerTab := request.NewsPerTab
+			if newsPerTab <= 0 {
+				newsPerTab = 5
+			}
 			settings = models.AppSettings{
 				AppName:           request.AppName,
 				AppIcon:           request.AppIcon,
@@ -101,6 +106,7 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 				ColorPalette:      request.ColorPalette,
 				CustomAccentColor: request.CustomAccentColor,
 				CustomPalettes:    request.CustomPalettes,
+				NewsPerTab:        newsPerTab,
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
@@ -136,6 +142,9 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 		settings.ColorPalette = request.ColorPalette
 		settings.CustomAccentColor = request.CustomAccentColor
 		settings.CustomPalettes = request.CustomPalettes
+		if request.NewsPerTab > 0 {
+			settings.NewsPerTab = request.NewsPerTab
+		}
 
 		if err := h.DB.Save(&settings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -186,6 +195,7 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	settings.ColorPalette = "claude"
 	settings.CustomAccentColor = "#d97757"
 	settings.CustomPalettes = "[]"
+	settings.NewsPerTab = 5
 
 	if result.Error == gorm.ErrRecordNotFound {
 		// Créer de nouveaux paramètres avec les valeurs par défaut
@@ -257,10 +267,16 @@ func (h *SettingsHandler) GetPublicSettings(c *gin.Context) {
 		customPalettes = "[]"
 	}
 
+	newsPerTab := settings.NewsPerTab
+	if newsPerTab <= 0 {
+		newsPerTab = 5
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"color_palette":       palette,
 		"custom_accent_color": customAccent,
 		"custom_palettes":     customPalettes,
+		"news_per_tab":        newsPerTab,
 		"app_name":            settings.AppName,
 		"app_icon":            settings.AppIcon,
 	})

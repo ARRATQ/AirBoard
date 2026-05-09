@@ -191,11 +191,11 @@
                   :key="tab.key"
                   class="news-tab"
                   :class="{ 'news-tab--active': activeTab === tab.key }"
-                  @click="activeTab = tab.key"
+                  @click="selectTab(tab.key)"
                 >
                   <Icon :icon="tab.icon || 'mdi:newspaper'" class="h-3.5 w-3.5" />
                   {{ tab.label }}
-                  <span class="news-tab-count">{{ tab.count }}</span>
+                  <span v-if="tab.newCount > 0" class="news-tab-count">{{ tab.newCount }}</span>
                 </button>
               </div>
             </div>
@@ -239,7 +239,7 @@
 
                 <!-- Skeleton filler rows -->
                 <div
-                  v-for="i in Math.max(0, 3 - activeNewsItems.length)"
+                  v-for="i in Math.max(0, newsPerTab - activeNewsItems.length)"
                   :key="'sk' + i"
                   class="news-row news-row--skeleton"
                 >
@@ -379,6 +379,19 @@ const error = ref(null)
 const activeTab = ref('')
 const hoveredKpi = ref(null)
 
+// Per-tab "last seen" timestamps (ISO strings in localStorage)
+const tabLastSeen = ref({})
+
+const loadTabLastSeen = () => {
+  const stored = localStorage.getItem('airboard_tab_last_seen')
+  tabLastSeen.value = stored ? JSON.parse(stored) : {}
+}
+
+const markTabSeen = (slug) => {
+  tabLastSeen.value[slug] = new Date().toISOString()
+  localStorage.setItem('airboard_tab_last_seen', JSON.stringify(tabLastSeen.value))
+}
+
 // ── Colors ──────────────────────────────────────────────────────────
 const accentColor = 'var(--accent)'
 
@@ -470,14 +483,27 @@ const kpiCards = computed(() => {
 })
 
 // ── News Tabs ────────────────────────────────────────────────────────
+const newsPerTab = computed(() => homeData.value.app_settings?.news_per_tab || 5)
+
 const newsTabs = computed(() => {
-  return (homeData.value.recent_news_by_type || []).map(g => ({
-    key: g.type.slug,
-    label: g.type.name,
-    icon: g.type.icon,
-    count: g.news.length
-  }))
+  return (homeData.value.recent_news_by_type || []).map(g => {
+    const lastSeen = tabLastSeen.value[g.type.slug]
+    const newCount = lastSeen
+      ? g.news.filter(n => new Date(n.published_at || n.created_at) > new Date(lastSeen)).length
+      : g.news.length
+    return {
+      key: g.type.slug,
+      label: g.type.name,
+      icon: g.type.icon,
+      newCount,
+    }
+  })
 })
+
+const selectTab = (slug) => {
+  activeTab.value = slug
+  markTabSeen(slug)
+}
 
 const activeNewsItems = computed(() => {
   if (!activeTab.value) return []
@@ -535,10 +561,13 @@ const loadHomeData = async () => {
   try {
     isLoading.value = true
     error.value = null
+    loadTabLastSeen()
     homeData.value = await homeService.getHomeData()
-    // Set default tab to first news type
+    // Set default tab to first news type and mark it seen
     if (homeData.value.recent_news_by_type?.length) {
-      activeTab.value = homeData.value.recent_news_by_type[0].type.slug
+      const firstSlug = homeData.value.recent_news_by_type[0].type.slug
+      activeTab.value = firstSlug
+      markTabSeen(firstSlug)
     }
   } catch (err) {
     console.error('Failed to load home data:', err)

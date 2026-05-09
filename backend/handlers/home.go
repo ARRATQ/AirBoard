@@ -98,6 +98,13 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		response.ManagedGroupIDs = managedGroupIDs.([]uint)
 	}
 
+	// Load settings upfront (needed for newsPerTab before goroutines start)
+	settings, _ := h.getAppSettingsWithCache()
+	newsPerTab := 5
+	if settings != nil && settings.NewsPerTab > 0 {
+		newsPerTab = settings.NewsPerTab
+	}
+
 	// Use WaitGroup for parallel queries
 	var wg sync.WaitGroup
 	var mu sync.Mutex // Protect response writes
@@ -176,7 +183,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		newsByType, err := h.getRecentNewsByType(userID.(uint), role.(string))
+		newsByType, err := h.getRecentNewsByType(userID.(uint), role.(string), newsPerTab)
 		if err != nil {
 			log.Printf("[HOME] Failed to load recent news by type: %v", err)
 			newsByType = []NewsGroup{}
@@ -488,7 +495,7 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 }
 
 // Helper: Get recent news grouped by type (3 articles per type)
-func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup, error) {
+func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab int) ([]NewsGroup, error) {
 	// First, fetch all active news types ordered by order
 	var types []models.NewsType
 	if err := h.db.Where("is_active = ?", true).Order("\"order\" ASC, name ASC").Find(&types).Error; err != nil {
@@ -555,7 +562,7 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string) ([]NewsGroup
 			Preload("Tags").
 			Preload("TargetGroups").
 			Order("is_pinned DESC, published_at DESC").
-			Limit(3)
+			Limit(newsPerTab)
 
 		if err := query.Find(&news).Error; err != nil {
 			log.Printf("[HOME] Failed to load news for type %s: %v", newsType.Slug, err)

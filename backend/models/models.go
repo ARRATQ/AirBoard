@@ -221,6 +221,7 @@ type AppSettings struct {
 	ColorPalette      string    `json:"color_palette" gorm:"default:'claude'"`        // Palette de couleurs de l'interface
 	CustomAccentColor string    `json:"custom_accent_color" gorm:"default:'#d97757'"` // Couleur accent personnalisée (legacy)
 	CustomPalettes    string    `json:"custom_palettes" gorm:"type:text;default:'[]'"` // Palettes personnalisées (JSON)
+	NewsPerTab        int       `json:"news_per_tab" gorm:"default:5"`                // Nombre d'articles par onglet sur la home
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
@@ -240,6 +241,7 @@ type AppSettingsRequest struct {
 	ColorPalette      string `json:"color_palette"`          // Palette de couleurs (optionnel)
 	CustomAccentColor string `json:"custom_accent_color"`    // Couleur accent personnalisée (optionnel)
 	CustomPalettes    string `json:"custom_palettes"`         // Palettes personnalisées JSON (optionnel)
+	NewsPerTab        int    `json:"news_per_tab"`            // Nombre d'articles par onglet (optionnel)
 }
 
 // ChangePasswordRequest pour les changements de mot de passe
