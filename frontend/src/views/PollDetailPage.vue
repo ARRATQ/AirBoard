@@ -263,9 +263,9 @@ onMounted(() => {
 .error-state {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
 }
 
 .loading-icon {
@@ -282,12 +282,12 @@ onMounted(() => {
 
 .loading-state p,
 .error-state p {
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0.5rem 0 1rem 0;
 }
 
 .error-state h3 {
-  color: #1f2937;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
@@ -305,7 +305,7 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -315,12 +315,12 @@ onMounted(() => {
 }
 
 .breadcrumb-separator {
-  color: #d1d5db;
+  color: var(--border);
   font-size: 1rem;
 }
 
 .breadcrumb-current {
-  color: #1f2937;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -337,10 +337,10 @@ onMounted(() => {
 }
 
 .info-section {
-  background: white;
+  background: var(--bg-card);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
 }
 
 .info-title {
@@ -349,7 +349,7 @@ onMounted(() => {
   gap: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
 }
 
@@ -376,7 +376,7 @@ onMounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--bg-surface);
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
@@ -384,7 +384,7 @@ onMounted(() => {
 }
 
 .linked-item:hover {
-  background: #f3f4f6;
+  background: var(--hover);
 }
 
 .linked-icon {
@@ -400,13 +400,13 @@ onMounted(() => {
 .linked-content h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary);
   margin: 0 0 0.25rem 0;
 }
 
 .linked-content p {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;

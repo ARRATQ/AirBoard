@@ -1,153 +1,545 @@
 <template>
-  <div class="home-page">
-    <!-- Loading State -->
-    <div v-if="isLoading" class="loading-state">
-      <div class="loading-spinner">
-        <Icon icon="mdi:loading" class="spinner-icon" />
-        <p class="loading-text">{{ $t('home.loading') }}</p>
-      </div>
-    </div>
+  <div class="pulse-home" :class="{ dark: appStore.isDarkMode }">
+    <!-- ─── TOPBAR ──────────────────────────────────────────────────── -->
+    <header class="pulse-topbar">
+      <button class="pulse-search" @click="router.push('/search')">
+        <Icon icon="mdi:magnify" class="pulse-search-icon" />
+        <span class="pulse-search-placeholder">{{ $t('search.placeholder') || 'Cherche une app, un article…' }}</span>
+        <kbd class="pulse-search-kbd">⌘K</kbd>
+      </button>
 
-    <!-- Error State -->
-    <div v-else-if="error" class="error-state">
-      <div class="error-card">
-        <Icon icon="mdi:alert-circle" class="error-icon" />
-        <h3 class="error-title">{{ $t('home.error.title') }}</h3>
-        <p class="error-message">{{ $t('home.error.message') }}</p>
-        <button @click="loadHomeData" class="retry-btn">
-          <Icon icon="mdi:refresh" class="btn-icon" />
+      <div class="pulse-topbar-meta">
+        <Icon icon="mdi:weather-cloudy" class="text-sm" />
+        <span>{{ currentDateLabel }}</span>
+      </div>
+
+      <div class="pulse-topbar-spacer" />
+
+      <NotificationBell />
+    </header>
+
+    <!-- ─── SCROLLABLE BODY ────────────────────────────────────────── -->
+    <div class="pulse-body">
+
+      <!-- Loading State -->
+      <div v-if="isLoading" class="pulse-loading">
+        <Icon icon="mdi:loading" class="pulse-loading-icon" />
+        <p>{{ $t('home.loading') }}</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="pulse-error">
+        <Icon icon="mdi:alert-circle" class="text-red-500 text-4xl mb-2" />
+        <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('home.error.title') }}</h3>
+        <p class="text-sm text-gray-500 mb-3">{{ $t('home.error.message') }}</p>
+        <button class="pulse-retry-btn" @click="loadHomeData">
+          <Icon icon="mdi:refresh" class="h-4 w-4" />
           {{ $t('common.retry') }}
         </button>
       </div>
-    </div>
 
-    <!-- Home Content -->
-    <div v-else class="home-content">
-      <!-- Hero Section -->
-      <HeroSection
-        :announcements="homeData.announcements || []"
-        :hero-messages="homeData.hero_messages || []"
-        :hero-image-url="homeData.app_settings?.hero_image_url || ''"
-        :hero-image-url-dark="homeData.app_settings?.hero_image_url_dark || ''"
-        :hero-image-position="homeData.app_settings?.hero_image_position || 'center center'"
-      />
+      <template v-else>
 
-      <!-- Optimized 3-Column Grid Layout -->
-      <div class="content-layout">
-        <!-- Column 1 (25% width) - Administrative & Personal -->
-        <div class="column-1">
-          <!-- Statistics Widget (Adaptive Height) - Admin/Group Admin Only -->
-          <div v-if="showStats" class="bento-item stats-widget-container" data-aos="fade-up">
-            <StatsWidget :stats="homeData.stats" :role="homeData.user_role" :managedGroupIds="homeData.managed_group_ids" />
+        <!-- ① GREETING HERO + XP ─────────────────────────────────── -->
+        <div class="pulse-hero">
+          <!-- LEFT: gradient greeting -->
+          <div class="pulse-greeting" :style="greetingStyle">
+            <div class="pulse-greeting-blobs">
+              <div class="blob blob-1" />
+              <div class="blob blob-2" />
+            </div>
+            <div class="pulse-greeting-inner">
+              <p class="greeting-eyebrow">{{ currentDateFull }}</p>
+              <h1 class="greeting-title">
+                <em>{{ greetingWord }},</em><br />
+                <span class="greeting-name">{{ firstName }}.</span>
+              </h1>
+              <p class="greeting-sub" v-if="pendingActionsText">{{ pendingActionsText }}</p>
+              <div class="greeting-pills">
+                <button
+                  v-if="activePoll"
+                  class="greeting-pill"
+                  @click="router.push('/polls')"
+                >
+                  <Icon icon="mdi:poll" class="h-3.5 w-3.5" />
+                  {{ $t('home.vote') || 'Voter' }}
+                </button>
+                <button
+                  v-if="latestNewsGroup"
+                  class="greeting-pill"
+                  @click="router.push('/news')"
+                >
+                  <Icon icon="mdi:newspaper-variant-outline" class="h-3.5 w-3.5" />
+                  {{ latestNewsGroup.type.name }}
+                </button>
+                <button
+                  v-if="nextEvent"
+                  class="greeting-pill"
+                  @click="router.push('/events')"
+                >
+                  <Icon icon="mdi:calendar" class="h-3.5 w-3.5" />
+                  {{ nextEvent.title }}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Gamification Widget -->
-          <div v-if="homeData.gamification" class="bento-item" data-aos="fade-up" data-aos-delay="100">
-            <GamificationWidget :summary="homeData.gamification" />
-          </div>
+          <!-- RIGHT: XP / gamification panel -->
+          <div class="pulse-xp">
+            <div class="xp-header">
+              <span class="xp-title">My XP</span>
+              <router-link to="/gamification" class="xp-detail-link">{{ $t('common.details') || 'Détails' }} →</router-link>
+            </div>
 
-          <!-- Favorite Apps -->
-          <div v-if="homeData.favorite_apps?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="200">
-            <FavoriteAppsWidget :apps="homeData.favorite_apps" />
-          </div>
+            <!-- Level ring + score -->
+            <div class="xp-progress-row" v-if="homeData.gamification">
+              <div class="xp-ring-wrap">
+                <svg class="xp-ring" viewBox="0 0 60 60">
+                  <circle cx="30" cy="30" r="26" fill="none" stroke-width="5" class="xp-ring-track" />
+                  <circle
+                    cx="30" cy="30" r="26" fill="none" stroke-width="5"
+                    class="xp-ring-fill"
+                    :style="ringStyle"
+                    stroke-linecap="round"
+                    transform="rotate(-90 30 30)"
+                  />
+                </svg>
+                <span class="xp-level">{{ homeData.gamification.level }}</span>
+              </div>
+              <div class="xp-score-col">
+                <div class="xp-score">{{ homeData.gamification.xp.toLocaleString('fr-FR') }} <span class="xp-unit">XP</span></div>
+                <div class="xp-next">{{ homeData.gamification.next_level_xp - homeData.gamification.xp }} avant niveau {{ homeData.gamification.level + 1 }}</div>
+                <div class="xp-bar-wrap">
+                  <div class="xp-bar-fill" :style="{ width: homeData.gamification.progress_percent + '%' }" />
+                </div>
+              </div>
+            </div>
 
-          <!-- New Apps (3 dernières apps ajoutées) -->
-          <div v-if="homeData.new_apps?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="250">
-            <NewAppsWidget :apps="homeData.new_apps.slice(0, 3)" />
+            <!-- Mini stats -->
+            <div class="xp-mini-stats">
+              <div class="xp-mini-stat">
+                <Icon icon="mdi:fire" class="text-orange-500" />
+                <span class="xp-mini-val">{{ homeData.gamification?.streak_days || '–' }}</span>
+                <span class="xp-mini-label">Série</span>
+              </div>
+              <div class="xp-mini-stat">
+                <Icon icon="mdi:trophy" class="text-amber-500" />
+                <span class="xp-mini-val">{{ homeData.gamification?.badges_count || homeData.gamification?.recent_badges?.length || 0 }}</span>
+                <span class="xp-mini-label">Badges</span>
+              </div>
+              <div class="xp-mini-stat">
+                <Icon icon="mdi:star" class="text-yellow-400" />
+                <span class="xp-mini-val">{{ homeData.gamification?.rank ? '#' + homeData.gamification.rank : '–' }}</span>
+                <span class="xp-mini-label">Rang</span>
+              </div>
+            </div>
+
+            <!-- Badge row -->
+            <div class="xp-badges" v-if="homeData.gamification?.recent_badges?.length">
+              <div
+                v-for="badge in homeData.gamification.recent_badges.slice(0, 5)"
+                :key="badge.id"
+                class="xp-badge-chip"
+                :style="{ background: badge.color + '22' }"
+                :title="badge.name"
+              >
+                <Icon :icon="badge.icon" :style="{ color: badge.color }" class="text-base" />
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Column 2 (50% width) - Content Hub -->
-        <div class="column-2">
-          <!-- Recent News by Type - Individual Blocks -->
+        <!-- ② 7 KPI CARDS ─────────────────────────────────────────── -->
+        <div class="pulse-kpis" v-if="kpiCards.length">
           <div
-            v-for="(newsGroup, index) in homeData.recent_news_by_type"
-            :key="newsGroup.type.id"
-            class="bento-item"
-            :data-aos="'fade-up'"
-            :data-aos-delay="100 + index * 50"
+            v-for="kpi in kpiCards"
+            :key="kpi.label"
+            class="pulse-kpi"
+            :class="{ 'pulse-kpi--hover': hoveredKpi === kpi.label }"
+            @mouseenter="hoveredKpi = kpi.label"
+            @mouseleave="hoveredKpi = null"
+            @click="router.push(kpi.link)"
           >
-            <NewsTypeBlock :news-type="newsGroup.type" :news="newsGroup.news" />
+            <div class="kpi-top-bar" :class="{ 'kpi-top-bar--visible': hoveredKpi === kpi.label, 'kpi-top-bar--live': kpi.live }" />
+            <span class="kpi-icon">{{ kpi.icon }}</span>
+            <div class="kpi-text">
+              <div class="kpi-value">{{ kpi.value }}</div>
+              <div class="kpi-label">{{ kpi.label }}</div>
+            </div>
+            <Icon
+              icon="mdi:chevron-right"
+              class="kpi-arrow"
+              :class="{ 'kpi-arrow--visible': hoveredKpi === kpi.label }"
+            />
+          </div>
+        </div>
+
+        <!-- ③ MAIN GRID: News + Right Rail ──────────────────────── -->
+        <div class="pulse-main-grid">
+
+          <!-- LEFT: TABBED NEWS (dominant) -->
+          <div class="pulse-news-card">
+            <!-- Tab header -->
+            <div class="news-header">
+              <div class="news-header-top">
+                <span class="news-title">{{ $t('home.newsHub') || 'Fil d\'actualités' }}</span>
+                <router-link to="/news" class="news-see-all">{{ $t('home.viewAll') }} →</router-link>
+              </div>
+              <div class="news-tabs" v-if="newsTabs.length > 1">
+                <button
+                  v-for="tab in newsTabs"
+                  :key="tab.key"
+                  class="news-tab"
+                  :class="{ 'news-tab--active': activeTab === tab.key }"
+                  @click="activeTab = tab.key"
+                >
+                  <Icon :icon="tab.icon || 'mdi:newspaper'" class="h-3.5 w-3.5" />
+                  {{ tab.label }}
+                  <span class="news-tab-count">{{ tab.count }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- News items -->
+            <div class="news-list-scroll">
+              <template v-if="activeNewsItems.length">
+                <div
+                  v-for="article in activeNewsItems"
+                  :key="article.id"
+                  class="news-row"
+                  @click="router.push('/news/' + article.slug)"
+                >
+                  <div
+                    class="news-row-icon"
+                    :style="{ background: (article.news_type?.color || article.category?.color || '#3b82f6') + '22', borderColor: (article.news_type?.color || article.category?.color || '#3b82f6') + '44' }"
+                  >
+                    <Icon
+                      :icon="article.news_type?.icon || article.category?.icon || 'mdi:newspaper'"
+                      :style="{ color: article.news_type?.color || article.category?.color || '#3b82f6' }"
+                      class="text-xl"
+                    />
+                  </div>
+                  <div class="news-row-body">
+                    <div class="news-row-title">{{ article.title }}</div>
+                    <div class="news-row-meta">
+                      <span
+                        class="news-row-tag"
+                        :style="{
+                          background: (article.news_type?.color || article.category?.color || '#3b82f6') + '22',
+                          color: article.news_type?.color || article.category?.color || '#3b82f6'
+                        }"
+                      >{{ article.news_type?.name || article.category?.name || 'Article' }}</span>
+                      <span class="news-row-author">{{ article.author?.username || article.author_name }}</span>
+                      <span class="news-row-dot">·</span>
+                      <span class="news-row-date">{{ formatRelDate(article.published_at || article.created_at) }}</span>
+                    </div>
+                  </div>
+                  <Icon icon="mdi:chevron-right" class="news-row-arrow" />
+                </div>
+
+                <!-- Skeleton filler rows -->
+                <div
+                  v-for="i in Math.max(0, 3 - activeNewsItems.length)"
+                  :key="'sk' + i"
+                  class="news-row news-row--skeleton"
+                >
+                  <div class="news-skeleton-icon" />
+                  <div class="news-skeleton-body">
+                    <div class="news-skeleton-line" :style="{ width: (75 - i * 10) + '%' }" />
+                    <div class="news-skeleton-line" style="width: 40%" />
+                  </div>
+                </div>
+              </template>
+
+              <div v-else class="news-empty">
+                <Icon icon="mdi:newspaper-variant-outline" class="text-4xl text-gray-300 dark:text-gray-600 mb-2" />
+                <p class="text-sm text-gray-400">{{ $t('home.noNews') || 'Aucun article pour le moment' }}</p>
+              </div>
+            </div>
           </div>
 
-          <!-- Fallback: Recent News (if no grouped news) -->
-          <div v-if="!homeData.recent_news_by_type?.length && homeData.recent_news?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="100">
-            <RecentNewsWidget :news="homeData.recent_news" />
+          <!-- RIGHT RAIL ────────────────────────────────────────── -->
+          <div class="pulse-rail">
+
+            <!-- Favorite Apps -->
+            <div class="rail-card" v-if="homeData.favorite_apps?.length">
+              <div class="rail-card-header">
+                <span class="rail-card-title">
+                  <Icon icon="mdi:star" class="text-amber-400" />
+                  {{ $t('home.favorites.title') || 'Tes applications' }}
+                </span>
+                <router-link to="/dashboard" class="rail-see-all">Portail →</router-link>
+              </div>
+              <div class="apps-grid">
+                <div
+                  v-for="app in homeData.favorite_apps.slice(0, 4)"
+                  :key="app.id"
+                  class="app-tile"
+                  @click="openApp(app)"
+                >
+                  <div
+                    class="app-tile-icon"
+                    :style="{ background: app.color || '#6366f1' }"
+                  >
+                    <Icon :icon="app.icon || 'mdi:application'" class="text-white text-sm" />
+                  </div>
+                  <span class="app-tile-name">{{ app.name }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Poll -->
+            <div class="rail-card" v-if="activePoll">
+              <div class="rail-card-header">
+                <span class="rail-card-title">
+                  <Icon icon="mdi:poll" class="text-violet-500" />
+                  {{ $t('home.polls.title') || 'Sondage actif' }}
+                </span>
+                <span class="poll-live-badge">
+                  <span class="poll-live-dot" />
+                  {{ daysLeft(activePoll.end_date) }}
+                </span>
+              </div>
+              <p class="poll-question">{{ activePoll.title }}</p>
+              <div class="poll-options">
+                <div
+                  v-for="opt in (activePoll.options || []).slice(0, 4)"
+                  :key="opt.id"
+                  class="poll-option"
+                >
+                  <div class="poll-option-label">
+                    <span>{{ opt.text }}</span>
+                    <span class="poll-option-pct">{{ pollPercent(opt, activePoll) }}%</span>
+                  </div>
+                  <div class="poll-bar-track">
+                    <div
+                      class="poll-bar-fill"
+                      :class="{ 'poll-bar-fill--lead': isLeading(opt, activePoll) }"
+                      :style="{ width: pollPercent(opt, activePoll) + '%' }"
+                    />
+                  </div>
+                </div>
+              </div>
+              <button class="poll-vote-btn" @click="router.push('/polls')">
+                {{ $t('home.polls.vote') || 'Voter maintenant' }}
+              </button>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div class="rail-card rail-card--flex" v-if="homeData.upcoming_events?.length">
+              <div class="rail-card-header">
+                <span class="rail-card-title">
+                  <Icon icon="mdi:calendar-clock" class="text-blue-500" />
+                  {{ $t('home.upcomingEvents.title') || 'Événements' }}
+                </span>
+                <router-link to="/events" class="rail-see-all">Agenda →</router-link>
+              </div>
+              <div class="events-list">
+                <div
+                  v-for="ev in homeData.upcoming_events.slice(0, 4)"
+                  :key="ev.id"
+                  class="ev-row"
+                  @click="router.push('/events/' + ev.slug)"
+                >
+                  <div class="ev-date">
+                    <div class="ev-month">{{ formatMonth(ev.start_date) }}</div>
+                    <div class="ev-day">{{ formatDay(ev.start_date) }}</div>
+                  </div>
+                  <div class="ev-bar" :style="{ background: ev.color || accentColor }" />
+                  <div class="ev-title">{{ ev.title }}</div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Column 3 (25% width) - Time-based Information -->
-        <div class="column-3">
-          <!-- Today's Events -->
-          <div v-if="homeData.today_events" class="bento-item" data-aos="fade-up" data-aos-delay="100">
-            <TodayEventsWidget :events="homeData.today_events" />
-          </div>
-
-          <!-- Upcoming Events (limit to 3) -->
-          <div v-if="homeData.upcoming_events" class="bento-item" data-aos="fade-up" data-aos-delay="150">
-            <UpcomingEventsWidget :events="homeData.upcoming_events.slice(0, 3)" />
-          </div>
-
-          <!-- Polls Widget -->
-          <div v-if="homeData.polls?.length > 0" class="bento-item" data-aos="fade-up" data-aos-delay="300">
-            <PollsWidget :polls="homeData.polls" />
-          </div>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { homeService } from '@/services/api'
+import NotificationBell from '@/components/notifications/NotificationBell.vue'
 
-// Components
-import HeroSection from '@/components/home/HeroSection.vue'
-import StatsWidget from '@/components/home/StatsWidget.vue'
-import TodayEventsWidget from '@/components/home/TodayEventsWidget.vue'
-import FavoriteAppsWidget from '@/components/home/FavoriteAppsWidget.vue'
-import NewAppsWidget from '@/components/home/NewAppsWidget.vue'
-import UpcomingEventsWidget from '@/components/home/UpcomingEventsWidget.vue'
-import RecentNewsWidget from '@/components/home/RecentNewsWidget.vue'
-import NewsTypeBlock from '@/components/home/NewsTypeBlock.vue'
-import PollsWidget from '@/components/home/PollsWidget.vue'
-import GamificationWidget from '@/components/home/GamificationWidget.vue'
-
+const router = useRouter()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 
-// State
+// ── State ───────────────────────────────────────────────────────────
 const homeData = ref({})
 const isLoading = ref(true)
 const error = ref(null)
+const activeTab = ref('')
+const hoveredKpi = ref(null)
 
-// Computed
-const showStats = computed(() => {
-  console.log('[Home] showStats computed: homeData.stats=', homeData.value.stats, 'truthy?', !!homeData.value.stats)
-  return homeData.value.stats
+// ── Colors ──────────────────────────────────────────────────────────
+const accentColor = 'var(--accent)'
+
+const greetingStyle = computed(() => ({
+  background: 'linear-gradient(120deg, var(--gradient-from), var(--gradient-mid) 58%, var(--gradient-to))'
+}))
+
+const ringStyle = computed(() => {
+  const pct = homeData.value.gamification?.progress_percent || 0
+  const circumference = 2 * Math.PI * 26
+  const dash = (pct / 100) * circumference
+  return { strokeDasharray: `${dash} ${circumference}` }
 })
 
+// ── Greeting ─────────────────────────────────────────────────────────
+const currentDateFull = computed(() => {
+  const now = new Date()
+  return now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase() +
+    ' · ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+})
 
+const currentDateLabel = computed(() => {
+  const now = new Date()
+  return now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+})
 
-// Helper function to get welcome message with fallback
-const getWelcomeMessage = () => {
-  return homeData.value.app_settings?.welcome_message || 
-         homeData.value.app_settings?.WelcomeMessage || 
-         ''
+const greetingWord = computed(() => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Bon matin'
+  if (h < 18) return 'Bon après-midi'
+  return 'Bonsoir'
+})
+
+const firstName = computed(() => {
+  const name = authStore.userDisplayName || authStore.user?.username || ''
+  return name.split(' ')[0]
+})
+
+const pendingActionsText = computed(() => {
+  const polls = homeData.value.polls?.filter(p => p.is_active).length || 0
+  const news = homeData.value.recent_news_by_type?.reduce((s, g) => s + g.news.length, 0) || 0
+  if (!polls && !news) return ''
+  const parts = []
+  if (polls) parts.push(`${polls} sondage${polls > 1 ? 's' : ''} actif${polls > 1 ? 's' : ''}`)
+  if (news) parts.push(`${news} nouveaux articles`)
+  return `Tu as ${parts.join(' et ')} depuis hier.`
+})
+
+const activePoll = computed(() => homeData.value.polls?.find(p => p.is_active) || null)
+const latestNewsGroup = computed(() => homeData.value.recent_news_by_type?.[0] || null)
+const nextEvent = computed(() => homeData.value.upcoming_events?.[0] || null)
+
+// ── KPI Cards ────────────────────────────────────────────────────────
+const kpiCards = computed(() => {
+  const stats = homeData.value.stats
+  const role = homeData.value.user_role
+  if (!stats) return []
+
+  if (role === 'admin') {
+    return [
+      { value: stats.total_users ?? 0, label: 'Utilisateurs', icon: '👥', link: '/admin/users' },
+      { value: stats.total_groups ?? 0, label: 'Groupes', icon: '🏷️', link: '/admin/groups' },
+      { value: stats.total_app_groups ?? 0, label: 'Groupes d\'apps', icon: '📦', link: '/admin/app-groups' },
+      { value: stats.total_apps ?? 0, label: 'Applications', icon: '🔲', link: '/admin/applications' },
+      { value: stats.total_news ?? 0, label: 'Articles', icon: '📰', link: '/admin/news' },
+      { value: stats.total_events ?? 0, label: 'Événements', icon: '📅', link: '/admin/events' },
+      { value: stats.total_polls ?? 0, label: 'Sondages', icon: '📊', link: '/admin/polls', live: (stats.total_polls ?? 0) > 0 },
+    ]
+  }
+
+  if (homeData.value.managed_group_ids?.length) {
+    return [
+      { value: stats.managed_groups_count ?? 0, label: 'Groupes gérés', icon: '🏷️', link: '/group-admin' },
+      { value: stats.total_members_count ?? 0, label: 'Membres', icon: '👥', link: '/group-admin' },
+      { value: stats.managed_app_groups_count ?? 0, label: 'Groupes d\'apps', icon: '📦', link: '/group-admin/app-groups' },
+      { value: stats.managed_apps_count ?? 0, label: 'Applications', icon: '🔲', link: '/group-admin/applications' },
+      { value: stats.managed_news_count ?? 0, label: 'Articles', icon: '📰', link: '/group-admin/news' },
+      { value: stats.managed_polls_count ?? 0, label: 'Sondages', icon: '📊', link: '/group-admin/polls', live: true },
+      { value: stats.total_accessible_apps ?? 0, label: 'Apps dispo.', icon: '✅', link: '/dashboard' },
+    ]
+  }
+
+  return [
+    { value: stats.total_accessible_apps ?? 0, label: 'Applications', icon: '🔲', link: '/dashboard' },
+    { value: stats.total_news ?? 0, label: 'Articles', icon: '📰', link: '/news' },
+    { value: stats.total_polls ?? 0, label: 'Sondages', icon: '📊', link: '/polls', live: true },
+    { value: stats.total_accessible_events ?? 0, label: 'Événements', icon: '📅', link: '/events' },
+  ]
+})
+
+// ── News Tabs ────────────────────────────────────────────────────────
+const newsTabs = computed(() => {
+  return (homeData.value.recent_news_by_type || []).map(g => ({
+    key: g.type.slug,
+    label: g.type.name,
+    icon: g.type.icon,
+    count: g.news.length
+  }))
+})
+
+const activeNewsItems = computed(() => {
+  if (!activeTab.value) return []
+  const group = homeData.value.recent_news_by_type?.find(g => g.type.slug === activeTab.value)
+  return group?.news || []
+})
+
+// ── Poll helpers ─────────────────────────────────────────────────────
+const pollPercent = (opt, poll) => {
+  const total = poll.total_votes || poll.options?.reduce((s, o) => s + (o.votes || 0), 0) || 1
+  return Math.round(((opt.votes || 0) / total) * 100)
 }
 
-// Methods
+const isLeading = (opt, poll) => {
+  const maxVotes = Math.max(...(poll.options || []).map(o => o.votes || 0))
+  return (opt.votes || 0) === maxVotes && maxVotes > 0
+}
+
+const daysLeft = (endDate) => {
+  if (!endDate) return 'Actif'
+  const diff = Math.ceil((new Date(endDate) - new Date()) / (1000 * 60 * 60 * 24))
+  if (diff <= 0) return 'Expiré'
+  return diff + 'j'
+}
+
+// ── Date helpers ─────────────────────────────────────────────────────
+const formatRelDate = (dateStr) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const diff = Math.floor((Date.now() - d) / 86400000)
+  if (diff === 0) return 'Aujourd\'hui'
+  if (diff === 1) return 'Hier'
+  if (diff < 7) return `il y a ${diff}j`
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+const formatMonth = (dateStr) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase()
+}
+
+const formatDay = (dateStr) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).getDate()
+}
+
+// ── App opener ───────────────────────────────────────────────────────
+const openApp = (app) => {
+  if (app.open_in_new_tab) window.open(app.url, '_blank', 'noopener,noreferrer')
+  else window.location.href = app.url
+}
+
+// ── Data loading ─────────────────────────────────────────────────────
 const loadHomeData = async () => {
   try {
     isLoading.value = true
     error.value = null
     homeData.value = await homeService.getHomeData()
-    console.log('[Home] Loaded homeData:', homeData.value)
-    console.log('[Home] Stats:', homeData.value.stats)
-    console.log('[Home] User role:', homeData.value.user_role)
+    // Set default tab to first news type
+    if (homeData.value.recent_news_by_type?.length) {
+      activeTab.value = homeData.value.recent_news_by_type[0].type.slug
+    }
   } catch (err) {
     console.error('Failed to load home data:', err)
     error.value = err
@@ -156,664 +548,975 @@ const loadHomeData = async () => {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  loadHomeData()
-
-  // Initialize AOS (Animate On Scroll) if available
-  if (typeof AOS !== 'undefined') {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-out-cubic',
-      once: true,
-      offset: 50
-    })
-  }
-})
+onMounted(loadHomeData)
 </script>
 
+<style>
+/* Google Fonts — unscoped so they load globally */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,wght@1,400;1,600&display=swap');
+</style>
+
 <style scoped>
-.home-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-  box-sizing: border-box;
+/* ── Root ────────────────────────────────────────────────────────── */
+.pulse-home {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-page);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  overflow: hidden;
 }
 
-.dark .home-page {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-/* Loading State */
-.loading-state {
+/* ── Topbar ──────────────────────────────────────────────────────── */
+.pulse-topbar {
+  height: 60px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+.pulse-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: 340px;
+  padding: 8px 12px;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.pulse-search:hover {
+  border-color: var(--accent);
+}
+
+.pulse-search-icon {
+  color: var(--text-muted);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.pulse-search-placeholder {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.pulse-search-kbd {
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  font-family: inherit;
+}
+
+.pulse-topbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pulse-topbar-spacer {
+  flex: 1;
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
+.pulse-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ── Loading / Error ─────────────────────────────────────────────── */
+.pulse-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 300px;
+  gap: 12px;
+  color: var(--text-muted);
 }
 
-.loading-spinner {
-  text-align: center;
-}
-
-.spinner-icon {
-  font-size: 3rem;
-  color: #667eea;
+.pulse-loading-icon {
+  font-size: 2.5rem;
+  color: var(--accent);
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-.loading-text {
-  margin-top: 1rem;
-  color: #6b7280;
-  font-size: 1rem;
+.pulse-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
 }
 
-.dark .loading-text {
-  color: #9ca3af;
+.pulse-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
 }
 
-/* Error State */
-.error-state {
+/* ── Hero ────────────────────────────────────────────────────────── */
+.pulse-hero {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(var(--shadow-rgb), 0.12);
+  flex-shrink: 0;
+}
+
+/* Greeting */
+.pulse-greeting {
+  position: relative;
+  padding: 26px 32px;
+  overflow: hidden;
+}
+
+.pulse-greeting-blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.blob-1 {
+  width: 280px;
+  height: 280px;
+  top: -80px;
+  right: -60px;
+}
+
+.blob-2 {
+  width: 160px;
+  height: 160px;
+  bottom: -50px;
+  left: -30px;
+}
+
+.pulse-greeting-inner {
+  position: relative;
+}
+
+.greeting-eyebrow {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.greeting-title {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 34px;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 12px;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.greeting-name {
+  font-style: normal;
+}
+
+.greeting-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 18px;
+  line-height: 1.6;
+}
+
+.greeting-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.greeting-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s;
+}
+
+.greeting-pill:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* XP Panel */
+.pulse-xp {
+  padding: 20px 22px;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.xp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.xp-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.xp-detail-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.xp-progress-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.xp-ring-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.xp-ring {
+  width: 56px;
+  height: 56px;
+}
+
+.xp-ring-track {
+  stroke: var(--border);
+}
+
+.xp-ring-fill {
+  stroke: var(--accent);
+  transition: stroke-dasharray 0.8s ease;
+}
+
+.xp-level {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  padding: 2rem;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
 }
 
-.error-card {
-  background: white;
-  border-radius: 24px;
-  padding: 3rem 2rem;
-  text-align: center;
-  max-width: 400px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+.xp-score-col {
+  flex: 1;
+  min-width: 0;
 }
 
-.dark .error-card {
-  background: #1e293b;
+.xp-score {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
-.error-icon {
-  font-size: 4rem;
-  color: #ef4444;
-  margin-bottom: 1rem;
+.xp-unit {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
-.error-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
+.xp-next {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
 }
 
-.dark .error-title {
-  color: white;
+.xp-bar-wrap {
+  margin-top: 8px;
+  height: 5px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
 }
 
-.error-message {
-  color: #6b7280;
-  margin-bottom: 1.5rem;
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 99px;
+  transition: width 0.8s ease;
 }
 
-.dark .error-message {
-  color: #9ca3af;
-}
-
-.retry-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.retry-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-}
-
-.btn-icon {
-  font-size: 1.25rem;
-}
-
-
-/* Home Content */
-.home-content {
-  animation: fadeIn 0.6s ease-out;
-}
-
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Optimized 3-Column Content Layout: 25% - 50% - 25% */
-.content-layout {
+.xp-mini-stats {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.125rem;
-  padding: 0 1rem 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
-/* Optimisation spécifique pour 1280x720 */
-@media (width: 1280px) and (height: 720px) {
-  .content-layout {
-    max-width: 1100px;
-    padding: 0 0 1.25rem;
-    gap: 1rem;
-  }
-  
-  .bento-item {
-    padding: 1rem;
-    border-radius: 16px;
-  }
-  
-  /* Réduire la hauteur minimum des éléments pour éviter le défilement */
-  .main-column .bento-tall {
-    min-height: 400px;
-  }
-  
-  /* Optimiser les espacements internes */
-  .bento-item :deep(.widget-header) {
-    margin-bottom: 0.5rem !important;
-    padding-bottom: 0.375rem !important;
-  }
-  
-  .bento-item :deep(.header-icon-wrapper) {
-    width: 28px !important;
-    height: 28px !important;
-  }
-  
-  .bento-item :deep(.header-icon) {
-    font-size: 1rem !important;
-  }
-  
-  .bento-item :deep(.widget-title) {
-    font-size: 0.85rem !important;
-  }
-  
-  .bento-item :deep(.app-card-inner),
-  .bento-item :deep(.event-card) {
-    padding: 0.75rem !important;
-  }
-  
-  .bento-item :deep(.app-icon) {
-    width: 36px !important;
-    height: 36px !important;
-    margin-bottom: 0.375rem !important;
-  }
-  
-  .bento-item :deep(.icon) {
-    font-size: 1.125rem !important;
-  }
-  
-  .bento-item :deep(.app-name),
-  .bento-item :deep(.event-title) {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.2rem !important;
-  }
-  
-  .bento-item :deep(.app-description),
-  .bento-item :deep(.event-description),
-  .bento-item :deep(.event-time) {
-    font-size: 0.65rem !important;
-  }
-}
-
-/* 3-Column Grid System */
-.column-1,
-.column-2,
-.column-3 {
+.xp-mini-stat {
   display: flex;
   flex-direction: column;
-  gap: 1.125rem;
-  min-width: 0; /* Prevent overflow */
-  width: 100%;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
 }
 
-/* Desktop layout: 25% - 50% - 25% */
-@media (min-width: 1024px) {
-  .content-layout {
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 1.5rem;
-    padding: 0 0 1.5rem;
-    width: 100%;
-    max-width: 1400px;
-  }
-  
-  .column-1 {
-    display: flex;
-    flex-direction: column;
-    gap: 1.125rem;
-    min-width: 0;
-    width: 100%;
-  }
-  
-  .column-2 {
-    display: flex;
-    flex-direction: column;
-    gap: 1.125rem;
-    min-width: 0;
-    width: 100%;
-  }
-  
-  .column-3 {
-    display: flex;
-    flex-direction: column;
-    gap: 1.125rem;
-    min-width: 0;
-    width: 100%;
-  }
-  
-  /* Ensure bento items don't overflow */
-  .bento-item {
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-  
-  /* Ensure the grid items respect their column boundaries */
-  .column-1,
-  .column-2,
-  .column-3 {
-    overflow: hidden;
-  }
+.dark .xp-mini-stat {
+  background: var(--bg-surface);
+  border-color: var(--border);
 }
 
-/* Optimisation pour 1280x720 et résolutions similaires */
-@media (max-width: 1366px) {
-  .content-layout {
-    max-width: 1200px;
-    padding: 0 0 1.5rem;
-  }
+.xp-mini-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
 }
 
-.bento-item {
-  background: white;
-  border-radius: 20px;
-  padding: 1.125rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.xp-mini-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.xp-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.xp-badge-chip {
+  flex: 1;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--shadow-rgb), 0.08);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.xp-badge-chip:hover {
+  transform: scale(1.1);
+}
+
+/* ── KPI Strip ───────────────────────────────────────────────────── */
+.pulse-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pulse-kpi {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
   overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  box-shadow: 0 2px 8px rgba(var(--shadow-rgb), 0.05);
 }
 
-/* Réduire les espacements internes de tous les widgets */
-.bento-item :deep(.widget-header) {
-  margin-bottom: 0.5rem !important;
-  padding-bottom: 0.375rem !important;
+.pulse-kpi--hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 6px 18px rgba(var(--shadow-rgb), 0.10);
 }
 
-.bento-item :deep(.header-icon-wrapper) {
-  width: 28px !important;
-  height: 28px !important;
-}
-
-.bento-item :deep(.header-icon) {
-  font-size: 1rem !important;
-}
-
-.bento-item :deep(.widget-title) {
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-}
-
-.bento-item :deep(.apps-grid),
-.bento-item :deep(.events-list),
-.bento-item :deep(.polls-list),
-.bento-item :deep(.news-list) {
-  gap: 0.25rem !important;
-}
-
-.bento-item :deep(.app-card-inner),
-.bento-item :deep(.event-card),
-.bento-item :deep(.poll-item),
-.bento-item :deep(.news-list-item) {
-  padding: 0.375rem 0.5rem !important;
-}
-
-.bento-item :deep(.app-icon) {
-  width: 32px !important;
-  height: 32px !important;
-  margin-bottom: 0.375rem !important;
-}
-
-.bento-item :deep(.icon) {
-  font-size: 1rem !important;
-}
-
-.bento-item :deep(.app-name),
-.bento-item :deep(.event-title) {
-  font-size: 0.75rem !important;
-  margin-bottom: 0.2rem !important;
-}
-
-.bento-item :deep(.app-description),
-.bento-item :deep(.event-description),
-.bento-item :deep(.event-time) {
-  font-size: 0.65rem !important;
-}
-
-/* Styles spécifiques pour le widget statistiques */
-.bento-item :deep(.stats-widget) {
-  height: auto !important;
-}
-
-.bento-item.stats-widget-container {
-  height: auto !important;
-  min-height: auto !important;
-  max-height: none !important;
-}
-
-.bento-item.stats-widget-container :deep(.stats-widget) {
-  height: auto !important;
-}
-
-.bento-item.stats-widget-container :deep(.stats-list) {
-  flex: none !important;
-  max-height: none !important;
-}
-
-.bento-item :deep(.stats-widget .widget-header) {
-  margin-bottom: 0.375rem !important;
-  padding-bottom: 0.375rem !important;
-}
-
-.bento-item :deep(.stats-widget .header-icon) {
-  font-size: 1rem !important;
-}
-
-.bento-item :deep(.stats-widget .widget-title) {
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-}
-
-.bento-item :deep(.stats-widget .stats-list) {
-  gap: 0.25rem !important;
-}
-
-.bento-item :deep(.stats-widget .stat-row) {
-  padding: 0.3rem 0.4rem !important;
-  gap: 0.375rem !important;
-  border-radius: 6px !important;
-}
-
-.bento-item :deep(.stats-widget .stat-icon) {
-  font-size: 1.125rem !important;
-}
-
-.bento-item :deep(.stats-widget .stat-value) {
-  font-size: 1rem !important;
-  min-width: 2rem !important;
-  font-weight: 600 !important;
-}
-
-.bento-item :deep(.stats-widget .stat-label) {
-  font-size: 0.6875rem !important;
-}
-
-.bento-item :deep(.stats-widget .stat-arrow) {
-  font-size: 0.875rem !important;
-}
-
-/* Optimisations générales pour tous les widgets */
-.bento-item :deep(.event-item) {
-  padding: 0.25rem !important;
-}
-
-.bento-item :deep(.event-date-badge) {
-  width: 36px !important;
-  height: 36px !important;
-}
-
-.bento-item :deep(.event-date-badge .text-xs) {
-  font-size: 0.625rem !important;
-}
-
-.bento-item :deep(.event-date-badge .text-lg) {
-  font-size: 0.875rem !important;
-}
-
-.bento-item :deep(.news-list-item .h-9) {
-  width: 28px !important;
-  height: 28px !important;
-}
-
-.bento-item :deep(.news-list-item .h-4) {
-  font-size: 0.875rem !important;
-}
-
-.bento-item :deep(.badge-stat) {
-  padding: 0.0625rem 0.25rem !important;
-  font-size: 0.625rem !important;
-}
-
-.bento-item :deep(.header-icon-wrapper) {
-  width: 36px !important;
-  height: 36px !important;
-}
-
-.bento-item :deep(.header-icon) {
-  font-size: 1.25rem !important;
-}
-
-.bento-item :deep(.widget-title) {
-  font-size: 1rem !important;
-}
-
-.bento-item :deep(.apps-grid),
-.bento-item :deep(.events-list) {
-  gap: 0.75rem !important;
-}
-
-.bento-item :deep(.app-card-inner),
-.bento-item :deep(.event-card) {
-  padding: 1rem !important;
-}
-
-.bento-item :deep(.app-icon) {
-  width: 48px !important;
-  height: 48px !important;
-  margin-bottom: 0.75rem !important;
-}
-
-.bento-item :deep(.icon) {
-  font-size: 1.5rem !important;
-}
-
-.bento-item :deep(.app-name),
-.bento-item :deep(.event-title) {
-  font-size: 0.875rem !important;
-  margin-bottom: 0.25rem !important;
-}
-
-.bento-item :deep(.app-description),
-.bento-item :deep(.event-description),
-.bento-item :deep(.event-time) {
-  font-size: 0.75rem !important;
-}
-
-.dark .bento-item {
-  background: #1e293b;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.bento-item::before {
-  content: '';
+.kpi-top-bar {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  transform: scaleX(0);
-  transition: transform 0.4s ease;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.18s;
 }
 
-.bento-item:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+.kpi-top-bar--live {
+  background: #22c55e;
 }
 
-.dark .bento-item:hover {
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+.kpi-top-bar--visible {
+  opacity: 1;
 }
 
-.bento-item:hover::before {
-  transform: scaleX(1);
+.kpi-icon {
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-
-
-/* Special styling for tall items */
-.column-1 .bento-tall,
-.column-2 .bento-tall,
-.column-3 .bento-tall {
-  min-height: 500px;
+.kpi-text {
+  flex: 1;
+  min-width: 0;
 }
 
-/* Tablet layout: 2-column stack */
-@media (max-width: 1023px) and (min-width: 769px) {
-  .home-page {
-    margin: 0;
+.kpi-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpi-arrow {
+  color: var(--accent);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.18s;
+  flex-shrink: 0;
+}
+
+.kpi-arrow--visible {
+  opacity: 1;
+}
+
+/* ── Main Grid ───────────────────────────────────────────────────── */
+.pulse-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── News Card ───────────────────────────────────────────────────── */
+.pulse-news-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.06);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.news-header {
+  padding: 18px 20px 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.news-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.news-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.news-see-all {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.news-tabs {
+  display: flex;
+  gap: 3px;
+  margin-bottom: -1px;
+}
+
+.news-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 8px 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+
+.news-tab--active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.news-tab:not(.news-tab--active):hover {
+  background: var(--hover);
+  color: var(--text-primary);
+}
+
+.news-tab-count {
+  display: inline-flex;
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.news-tab:not(.news-tab--active) .news-tab-count {
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.news-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* News Row */
+.news-row {
+  display: flex;
+  gap: 12px;
+  padding: 13px 10px;
+  border-radius: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.news-row:hover {
+  background: var(--hover);
+}
+
+.news-row-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.news-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.news-row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 7px;
+}
+
+.news-row-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.news-row-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.news-row-author,
+.news-row-date,
+.news-row-dot {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.news-row-arrow {
+  color: var(--text-muted);
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  opacity: 0.5;
+}
+
+/* Skeleton rows */
+.news-row--skeleton {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.news-skeleton-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.news-skeleton-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.news-skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--border);
+}
+
+.news-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* ── Right Rail ──────────────────────────────────────────────────── */
+.pulse-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.rail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 15px 16px;
+  box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.05);
+  flex-shrink: 0;
+}
+
+.rail-card--flex {
+  flex: 1;
+}
+
+.rail-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rail-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rail-see-all {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Apps Grid */
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.app-tile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-page);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.app-tile:hover {
+  background: var(--hover);
+}
+
+.app-tile-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.app-tile-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Poll */
+.poll-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #22c55e22;
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.poll-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  display: inline-block;
+}
+
+.poll-question {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.poll-option {}
+
+.poll-option-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.poll-option-pct {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.poll-bar-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.poll-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--text-muted) 33%, transparent);
+  transition: width 0.6s ease;
+}
+
+.poll-bar-fill--lead {
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+}
+
+.poll-vote-btn {
+  width: 100%;
+  padding: 9px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.poll-vote-btn:hover {
+  background: var(--accent-dark);
+}
+
+/* Events */
+.events-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ev-row {
+  display: flex;
+  gap: 10px;
+  padding: 11px 0;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ev-row:first-child {
+  border-top: none;
+}
+
+.ev-row:hover {
+  opacity: 0.72;
+}
+
+.ev-date {
+  width: 38px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.ev-month {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.ev-day {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.ev-bar {
+  width: 3px;
+  height: 32px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.ev-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+/* ── Responsive tweaks ───────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .pulse-main-grid {
+    grid-template-columns: 1fr 260px;
   }
 
-  .content-layout {
-    padding: 0 1rem 1.25rem;
-    gap: 1rem;
-    max-width: 900px;
-    grid-template-columns: 1fr 1fr; /* 2-column layout for tablets */
-    width: 100%;
+  .pulse-hero {
+    grid-template-columns: 1fr 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  .pulse-hero {
+    grid-template-columns: 1fr;
   }
 
-  /* Column 1 and 2 on top row, Column 3 on bottom row */
-  .column-1 {
-    grid-column: 1;
+  .pulse-xp {
+    display: none;
   }
-  
-  .column-2 {
-    grid-column: 2;
+
+  .pulse-main-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .column-3 {
-    grid-column: 1 / -1; /* Span full width */
+
+  .pulse-rail {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  
-  .column-3 .bento-item {
-    margin: 0;
   }
 
-  .bento-item {
-    border-radius: 18px;
-    padding: 1.125rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-}
-
-@media (max-width: 768px) {
-  .home-page {
-    margin: 0;
-  }
-
-  .content-layout {
-    padding: 0 1rem 1rem;
-    gap: 0.875rem;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .sidebar-column,
-  .main-column {
-    gap: 0.875rem;
-  }
-
-  .bento-item {
-    border-radius: 16px;
-    padding: 0.875rem;
-  }
-
-  .main-column .bento-tall {
-    min-height: 400px;
-  }
-}
-
-@media (max-width: 480px) {
-  .home-page {
-    margin: 0;
-  }
-
-  .content-layout {
-    padding: 0 0.75rem 0.875rem;
-    gap: 0.75rem;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .sidebar-column,
-  .main-column {
-    gap: 0.75rem;
-  }
-
-  .bento-item {
-    border-radius: 14px;
-    padding: 0.75rem;
-  }
-
-  .main-column .bento-tall {
-    min-height: 350px;
-  }
-
-  /* Réduire encore plus les espacements internes */
-  .bento-item :deep(.widget-header) {
-    margin-bottom: 0.75rem !important;
-  }
-
-  .bento-item :deep(.header-icon-wrapper) {
-    width: 32px !important;
-    height: 32px !important;
-  }
-
-  .bento-item :deep(.header-icon) {
-    font-size: 1.1rem !important;
-  }
-
-  .bento-item :deep(.widget-title) {
-    font-size: 0.875rem !important;
+  .pulse-kpis {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 </style>

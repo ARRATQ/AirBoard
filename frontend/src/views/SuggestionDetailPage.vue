@@ -192,10 +192,13 @@ onMounted(loadSuggestion)
 }
 
 .suggestion-back-btn {
-  @apply inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold;
-  @apply border border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
-  @apply dark:border-gray-600 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700;
-  @apply transition-colors duration-200;
+  @apply inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors duration-200;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.suggestion-back-btn:hover {
+  background-color: var(--hover);
 }
 
 .suggestion-unvote-btn {

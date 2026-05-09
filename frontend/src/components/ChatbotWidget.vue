@@ -422,13 +422,9 @@ defineExpose({
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
-  background: white;
+  background: var(--bg-card);
   transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease,
               right 0.25s ease, border-radius 0.25s ease;
-}
-
-:global(.dark) .chatbot-panel {
-  background: #111827;
 }
 
 .chatbot-panel--fullscreen {
@@ -616,17 +612,12 @@ defineExpose({
 /* ── Bulle de bienvenue ───────────────────────────────── */
 .chatbot-bubble {
   position: relative;
-  background: white;
+  background: var(--bg-card);
   border-radius: 14px 14px 14px 4px;
   padding: 0.75rem 2rem 0.75rem 1rem;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 6px 24px rgba(var(--shadow-rgb), 0.18);
   max-width: 210px;
   cursor: pointer;
-}
-
-:global(.dark) .chatbot-bubble {
-  background: #1f2937;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 .chatbot-bubble-close {
@@ -688,17 +679,12 @@ defineExpose({
   position: absolute;
   bottom: 70px;
   right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 0.5rem;
   min-width: 16rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
-:global(.dark) .chatbot-selector-menu {
-  background: #1f2937;
-  border-color: #374151;
+  box-shadow: 0 10px 25px rgba(var(--shadow-rgb), 0.15);
 }
 
 .chatbot-selector-item {
@@ -715,11 +701,7 @@ defineExpose({
 }
 
 .chatbot-selector-item:hover {
-  background: #f3f4f6;
-}
-
-:global(.dark) .chatbot-selector-item:hover {
-  background: #374151;
+  background: var(--hover);
 }
 
 /* ── Transitions panel / menu ──────────────────────────── */

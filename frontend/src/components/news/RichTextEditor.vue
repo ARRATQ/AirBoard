@@ -794,7 +794,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .rich-text-editor {
-  @apply border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800;
+  @apply rounded-lg;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   max-height: 80vh;
@@ -802,14 +804,17 @@ onBeforeUnmount(() => {
 }
 
 .editor-toolbar {
-  @apply flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-600 rounded-t-lg;
+  @apply flex flex-wrap items-center gap-1 p-2 rounded-t-lg;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
   /* flex-shrink: 0 keeps the toolbar always visible; no sticky needed */
   flex-shrink: 0;
   z-index: 20;
 }
 
 .toolbar-group {
-  @apply flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2 mr-2;
+  @apply flex items-center gap-1 pr-2 mr-2;
+  border-right: 1px solid var(--border);
   position: relative;
 }
 
@@ -847,7 +852,9 @@ onBeforeUnmount(() => {
   top: calc(100% + 4px);
   left: 0;
   z-index: 50;
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-3;
+  @apply rounded-lg shadow-xl p-3;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
   min-width: 160px;
 }
 
@@ -883,12 +890,18 @@ onBeforeUnmount(() => {
   top: calc(100% + 4px);
   left: 0;
   z-index: 50;
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1;
+  @apply rounded-lg shadow-xl py-1;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
   min-width: 200px;
 }
 
 .table-menu-item {
-  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left;
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-left;
+  color: var(--text-primary);
+}
+.table-menu-item:hover {
+  background-color: var(--hover);
 }
 
 .table-menu-danger {
@@ -963,7 +976,8 @@ onBeforeUnmount(() => {
 }
 
 .editor-content :deep(.ProseMirror code) {
-  @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm;
+  @apply px-1 py-0.5 rounded text-sm;
+  background-color: var(--bg-surface);
 }
 
 /* Link styling */
@@ -996,7 +1010,8 @@ onBeforeUnmount(() => {
 }
 
 .editor-content :deep(.ProseMirror th) {
-  @apply bg-gray-100 dark:bg-gray-800 font-semibold;
+  @apply font-semibold;
+  background-color: var(--bg-surface);
 }
 
 /* ── Column resize handle ── */
@@ -1057,7 +1072,11 @@ onBeforeUnmount(() => {
 
 /* File attachment styling */
 .editor-content :deep(.ProseMirror a.file-attachment) {
-  @apply inline-flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg no-underline hover:bg-gray-200 dark:hover:bg-gray-700;
+  @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg no-underline;
+  background-color: var(--bg-surface);
+}
+.editor-content :deep(.ProseMirror a.file-attachment:hover) {
+  background-color: var(--hover);
 }
 
 /* Highlight mark */
@@ -1072,7 +1091,8 @@ onBeforeUnmount(() => {
 }
 
 .modal-content {
-  @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col;
+  @apply rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col;
+  background-color: var(--bg-card);
 }
 
 .modal-header {
@@ -1114,11 +1134,17 @@ onBeforeUnmount(() => {
   top: calc(100% + 4px);
   left: 0;
   z-index: 50;
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl py-1;
+  @apply rounded-lg shadow-xl py-1;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
   min-width: 140px;
 }
 
 .callout-type-item {
-  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left;
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-left;
+  color: var(--text-primary);
+}
+.callout-type-item:hover {
+  background-color: var(--hover);
 }
 </style>

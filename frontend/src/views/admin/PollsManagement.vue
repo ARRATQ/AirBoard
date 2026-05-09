@@ -402,7 +402,8 @@ onMounted(() => {
 
 <style scoped>
 .card {
-  @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm;
+  @apply rounded-lg shadow-sm;
+  background-color: var(--bg-card);
 }
 
 .poll-create-btn {

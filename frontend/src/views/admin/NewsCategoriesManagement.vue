@@ -276,11 +276,13 @@ onMounted(loadCategories)
 }
 
 .cat-btn-secondary {
-  @apply border border-gray-300 bg-white text-gray-700;
-  @apply hover:bg-gray-50 hover:border-gray-400;
-  @apply dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
-  @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
-  @apply dark:focus:ring-offset-gray-900;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.cat-btn-secondary:hover {
+  background-color: var(--hover);
 }
 
 .cat-btn-danger {

@@ -548,11 +548,13 @@ onMounted(() => {
 }
 
 :deep(.prose code) {
-  @apply bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm;
+  @apply px-1.5 py-0.5 rounded text-sm;
+  background-color: var(--bg-surface);
 }
 
 :deep(.prose pre) {
-  @apply bg-gray-900 dark:bg-gray-950 rounded-lg;
+  @apply rounded-lg;
+  background-color: #111827;
 }
 
 :deep(.prose table) {
@@ -560,12 +562,13 @@ onMounted(() => {
 }
 
 :deep(.prose th) {
-  @apply bg-gray-50 dark:bg-gray-800;
+  background-color: var(--bg-surface);
 }
 
 :deep(.prose td),
 :deep(.prose th) {
-  @apply border border-gray-200 dark:border-gray-700 px-3 py-2;
+  @apply px-3 py-2;
+  border: 1px solid var(--border);
 }
 
 :deep(.prose img) {

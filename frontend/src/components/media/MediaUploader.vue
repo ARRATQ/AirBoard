@@ -280,7 +280,8 @@ export default {
 }
 
 .progress-bar {
-  @apply w-full max-w-xs h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+  @apply w-full max-w-xs h-2 rounded-full overflow-hidden;
+  background-color: var(--bg-surface);
 }
 
 .progress-fill {
@@ -300,7 +301,8 @@ export default {
 }
 
 .queue-item {
-  @apply flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-2;
+  @apply flex items-center gap-3 p-3 rounded-lg mb-2;
+  background-color: var(--bg-surface);
 }
 
 .queue-item.success {

@@ -157,11 +157,13 @@ const sanitizedContent = computed(() => {
 }
 
 .tiptap-content code {
-  @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-red-600 dark:text-red-400;
+  @apply px-2 py-1 rounded text-sm font-mono text-red-600;
+  background-color: var(--bg-surface);
 }
 
 .tiptap-content pre {
-  @apply bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  @apply text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  background-color: #111827;
 }
 
 .tiptap-content pre code {
@@ -176,11 +178,14 @@ const sanitizedContent = computed(() => {
 }
 
 .tiptap-content th {
-  @apply bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-4 py-2 text-left font-semibold;
+  @apply px-4 py-2 text-left font-semibold;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
 }
 
 .tiptap-content td {
-  @apply border border-gray-300 dark:border-gray-600 px-4 py-2;
+  @apply px-4 py-2;
+  border: 1px solid var(--border);
 }
 
 .tiptap-content hr {

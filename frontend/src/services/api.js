@@ -1536,4 +1536,12 @@ export const chatbotsService = {
   }
 }
 
+// Paramètres publics (palette, branding — accessible à tous les utilisateurs connectés)
+export const settingsService = {
+  async getPublicSettings() {
+    const response = await api.get('/settings/public')
+    return response.data
+  }
+}
+
 export default api

@@ -538,10 +538,13 @@ onMounted(async () => {
 
 .suggestion-cancel {
   @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold;
-  @apply border border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
-  @apply dark:border-gray-600 dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700;
-  @apply focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
-  @apply transition-colors duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.suggestion-cancel:hover {
+  background-color: var(--hover);
 }
 
 .suggestion-detail-btn {

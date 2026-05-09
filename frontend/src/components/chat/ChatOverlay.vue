@@ -95,8 +95,7 @@
           v-if="!isMobile || !chatStore.activeConversation"
           class="flex flex-col border-r border-gray-100 dark:border-gray-700/60 flex-shrink-0 min-h-0"
           :class="isFullscreen ? 'w-72' : 'w-full md:w-[220px]'"
-          style="background:#fafafa"
-          :style="{ background: isDark ? '#1f2937' : '#fafafa' }"
+          :style="{ background: 'var(--bg-surface)' }"
         >
           <!-- Search -->
           <div class="px-2.5 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0">
@@ -273,7 +272,7 @@
           <div
             ref="messagesContainer"
             class="flex-1 overflow-y-auto flex flex-col gap-2.5 px-3.5 py-3 min-h-0"
-            style="background:#f8faff"
+            :style="{ background: 'var(--bg-page)' }"
             @click="showMenu = false"
           >
             <!-- Empty state -->
@@ -382,7 +381,7 @@
         <div
           v-else-if="!isMobile"
           class="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-600"
-          style="background:#f8faff"
+          :style="{ background: 'var(--bg-page)' }"
         >
           <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style="background:linear-gradient(135deg,#dbeafe,#e0e7ff)">
             <Icon icon="mdi:chat-outline" class="text-3xl text-blue-400" />
@@ -648,17 +647,11 @@ watch(totalUnread, (newTotal, oldTotal) => {
 }
 
 .co-msg-bubble--other {
-  background: white;
-  color: #1f2937;
+  background: var(--bg-card);
+  color: var(--text-primary);
   border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  border: 1px solid #f3f4f6;
-}
-
-:global(.dark) .co-msg-bubble--other {
-  background: #1e293b;
-  color: #e2e8f0;
-  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 1px 4px rgba(var(--shadow-rgb), 0.08);
+  border: 1px solid var(--border);
 }
 
 .co-msg-text { flex: 1; }

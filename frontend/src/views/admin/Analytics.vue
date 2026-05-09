@@ -488,15 +488,25 @@ onMounted(() => {
 
 <style scoped>
 .btn-secondary {
-  @apply px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm;
+  @apply px-4 py-2 border rounded-xl text-sm font-bold transition-all shadow-sm;
+  background-color: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+.btn-secondary:hover {
+  background-color: var(--hover);
 }
 
 .kpi-card {
-  @apply bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  @apply p-6 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
 }
 
 .card {
-  @apply bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800;
+  @apply rounded-3xl shadow-sm;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
 }
 
 .news-kpi {

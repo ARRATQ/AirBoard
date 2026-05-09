@@ -352,6 +352,9 @@ func main() {
 		// Home page
 		protected.GET("/home", homeHandler.GetHomeData)
 
+		// Paramètres publics (palette, branding — accessible à tous les utilisateurs connectés)
+		protected.GET("/settings/public", settingsHandler.GetPublicSettings)
+
 		// Routes favorites
 		user := protected.Group("/user")
 		{

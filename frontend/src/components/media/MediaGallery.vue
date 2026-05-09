@@ -191,8 +191,13 @@ export default {
 }
 
 .filter-button {
-  @apply flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
-  @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  @apply flex items-center gap-2 px-4 py-2 rounded-lg transition-colors;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.filter-button:hover {
+  background-color: var(--hover);
 }
 
 .filter-button.active {
@@ -221,7 +226,8 @@ export default {
 }
 
 .media-preview {
-  @apply aspect-square bg-gray-100 dark:bg-gray-800 flex items-center justify-center;
+  @apply aspect-square flex items-center justify-center;
+  background-color: var(--bg-surface);
 }
 
 .media-preview img {
@@ -233,7 +239,8 @@ export default {
 }
 
 .media-info {
-  @apply p-2 bg-white dark:bg-gray-900;
+  @apply p-2;
+  background-color: var(--bg-card);
 }
 
 .media-filename {
@@ -253,8 +260,13 @@ export default {
 }
 
 .pagination-button {
-  @apply p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
-  @apply hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  @apply p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--hover);
 }
 
 .pagination-info {
@@ -266,8 +278,13 @@ export default {
 }
 
 .button-secondary {
-  @apply px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300;
-  @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  @apply px-4 py-2 rounded-lg transition-colors;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.button-secondary:hover {
+  background-color: var(--hover);
 }
 
 .button-primary {

@@ -426,8 +426,8 @@ const getWaitingMessage = () => {
 
 <style scoped>
 .poll-card {
-  background-color: rgb(255 255 255);
-  border: 2px solid rgb(229 231 235);
+  background-color: var(--bg-card);
+  border: 2px solid var(--border);
   border-radius: 0.75rem;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -489,10 +489,7 @@ const getWaitingMessage = () => {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-:is(.dark .poll-card) {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
-}
+/* dark mode handled by CSS vars */
 
 :is(.dark .poll-card:hover) {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
@@ -505,19 +502,11 @@ const getWaitingMessage = () => {
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
-  border-bottom: 1px solid rgb(229 231 235);
+  border-bottom: 1px solid var(--border);
 }
 
 .poll-header:hover {
-  background-color: rgb(249 250 251);
-}
-
-:is(.dark .poll-header) {
-  border-bottom-color: rgb(55 65 81);
-}
-
-:is(.dark .poll-header:hover) {
-  background-color: rgb(55 65 81 / 0.5);
+  background-color: var(--hover);
 }
 
 .poll-header-content {
@@ -531,7 +520,7 @@ const getWaitingMessage = () => {
 .poll-title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.4;
   word-wrap: break-word;
@@ -558,9 +547,6 @@ const getWaitingMessage = () => {
   font-size: 12px;
 }
 
-:is(.dark .poll-title) {
-  color: #ffffff;
-}
 
 .poll-badges {
   display: flex;
@@ -640,25 +626,17 @@ const getWaitingMessage = () => {
 }
 
 .toggle-btn:hover {
-  background: rgb(243 244 246);
-}
-
-:is(.dark .toggle-btn:hover) {
-  background: rgb(75 85 99);
+  background: var(--hover);
 }
 
 .chevron-icon {
   font-size: 1rem;
-  color: rgb(107 114 128);
+  color: var(--text-muted);
   transition: transform 0.3s ease;
 }
 
 .toggle-btn.expanded .chevron-icon {
   transform: rotate(180deg);
-}
-
-:is(.dark .chevron-icon) {
-  color: rgb(156 163 175);
 }
 
 /* Contenu collapsible avec expansion contrôlée */
@@ -668,7 +646,7 @@ const getWaitingMessage = () => {
   overflow: hidden;
   width: 100%;
   box-sizing: border-box;
-  background-color: rgb(255 255 255);
+  background-color: var(--bg-card);
   position: relative;
   z-index: 1;
   /* Smooth expansion with proper bounds */
@@ -679,23 +657,14 @@ const getWaitingMessage = () => {
   contain: layout;
 }
 
-:is(.dark .collapsible-content) {
-  background-color: rgb(31 41 55);
-}
-
 /* Informations sur le sondage */
 /* Description du sondage */
 .poll-description {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background-color: rgb(249 250 251);
+  background-color: var(--bg-surface);
   border-radius: 0.5rem;
-  border: 1px solid rgb(229 231 235);
-}
-
-:is(.dark .poll-description) {
-  background-color: rgb(55 65 81);
-  border-color: rgb(75 85 99);
+  border: 1px solid var(--border);
 }
 
 /* Transitions Vue simplifiées pour l'ouverture/fermeture */
@@ -735,24 +704,16 @@ const getWaitingMessage = () => {
   gap: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgb(229 231 235);
-}
-
-:is(.dark .poll-meta) {
-  border-bottom-color: rgb(55 65 81);
+  border-bottom: 1px solid var(--border);
 }
 
 .meta-item {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: rgb(107 114 128);
+  color: var(--text-muted);
   font-size: 0.75rem;
   white-space: nowrap;
-}
-
-:is(.dark .meta-item) {
-  color: rgb(156 163 175);
 }
 
 .meta-item svg {
@@ -780,25 +741,16 @@ const getWaitingMessage = () => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  background: white;
-}
-
-:is(.dark .poll-option) {
-  border-color: #4b5563;
-  background: #374151;
+  background: var(--bg-card);
 }
 
 .poll-option:hover {
-  border-color: #8B5CF6;
-  background: #f9fafb;
-}
-
-:is(.dark .poll-option:hover) {
-  background: #4b5563;
+  border-color: var(--accent);
+  background: var(--hover);
 }
 
 .poll-option input[type="radio"],
@@ -811,11 +763,7 @@ const getWaitingMessage = () => {
 .option-text {
   flex: 1;
   font-size: 1rem;
-  color: #374151;
-}
-
-:is(.dark .option-text) {
-  color: #f3f4f6;
+  color: var(--text-primary);
 }
 
 .vote-btn {
@@ -828,49 +776,33 @@ const getWaitingMessage = () => {
 .poll-results-section {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
-  border-top: 2px solid #e5e7eb;
-}
-
-:is(.dark .poll-results-section) {
-  border-top-color: #4b5563;
+  border-top: 2px solid var(--border);
 }
 
 .poll-waiting {
   text-align: center;
   padding: 2rem;
-  background: #f9fafb;
+  background: var(--bg-surface);
   border-radius: 8px;
-}
-
-:is(.dark .poll-waiting) {
-  background: #374151;
 }
 
 .waiting-icon {
   font-size: 3rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin-bottom: 1rem;
 }
 
 .waiting-message {
-  color: #6b7280;
+  color: var(--text-muted);
   font-size: 1rem;
   margin-bottom: 1rem;
-}
-
-:is(.dark .waiting-message) {
-  color: #a1a1aa;
 }
 
 .poll-actions {
   display: flex;
   gap: 0.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-:is(.dark .poll-actions) {
-  border-top-color: #4b5563;
+  border-top: 1px solid var(--border);
 }
 
 .btn {
@@ -886,26 +818,27 @@ const getWaitingMessage = () => {
 }
 
 .btn-primary {
-  background: #8B5CF6;
+  background: var(--accent);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #7c3aed;
+  background: var(--accent-dark);
 }
 
 .btn-primary:disabled {
-  background: #d1d5db;
+  background: var(--bg-surface);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background: #d1d5db;
+  background: var(--hover);
 }
 
 .btn-danger-outline {
@@ -926,11 +859,11 @@ const getWaitingMessage = () => {
 
 .btn-ghost {
   background: transparent;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .btn-ghost:hover {
-  background: #f3f4f6;
+  background: var(--hover);
 }
 
 .btn-sm {

@@ -192,21 +192,15 @@ onUnmounted(() => {
 
 /* ── Labels ─────────────────────────────────────────────── */
 .speed-dial-label {
-  background: white;
-  color: #1f2937;
+  background: var(--bg-card);
+  color: var(--text-primary);
   padding: 5px 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 10px rgba(var(--shadow-rgb), 0.2);
   user-select: none;
-}
-
-:global(.dark) .speed-dial-label {
-  background: #1f2937;
-  color: #f3f4f6;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Boutons secondaires ────────────────────────────────── */
