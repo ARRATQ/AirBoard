@@ -1292,7 +1292,7 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    await adminService.updateAppSettings(form)
+    await adminService.updateAppSettings({ ...form, custom_palettes: JSON.stringify(form.custom_palettes) })
     appStore.showSuccess('Settings updated successfully')
     appStore.applyPalette(form.color_palette)
     await loadSettings()
