@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { setLocale as setI18nLocale, resolveInitialLocale } from '@/i18n'
+import { getPalette, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
 
 export const useAppStore = defineStore('app', () => {
   // Déterminer si on est sur mobile pour l'état initial de la sidebar
@@ -8,6 +9,10 @@ export const useAppStore = defineStore('app', () => {
 
   // État
   const isDarkMode = ref(false)
+  const currentPalette = ref(localStorage.getItem('airboard_palette') || 'claude')
+  const customPalettes = ref(
+    (() => { try { return JSON.parse(localStorage.getItem('airboard_custom_palettes') || '[]') } catch { return [] } })()
+  )
   const sidebarOpen = ref(!isMobile()) // Fermée par défaut sur mobile, ouverte sur desktop
   const showNavbar = ref(true)
   const isLoading = ref(false)
@@ -24,6 +29,52 @@ export const useAppStore = defineStore('app', () => {
   )
   const unreadCount = computed(() => unreadNotifications.value.length)
   const zoomScale = computed(() => parseInt(zoomLevel.value) / 100)
+
+  const _injectPaletteCSS = (paletteObj) => {
+    const toKebab = (str) => str.replace(/([A-Z])/g, m => '-' + m.toLowerCase())
+    const makeCSSVars = (vars) =>
+      Object.entries(vars).map(([k, v]) => `  --${toKebab(k)}: ${v};`).join('\n')
+    const css = `:root {\n${makeCSSVars(paletteObj.light)}\n}\nhtml.dark {\n${makeCSSVars(paletteObj.dark)}\n}`
+    let el = document.getElementById('palette-vars')
+    if (!el) {
+      el = document.createElement('style')
+      el.id = 'palette-vars'
+      document.head.appendChild(el)
+    }
+    el.textContent = css
+  }
+
+  // Applique les CSS vars d'un objet palette sans changer currentPalette (pour la prévisualisation).
+  const previewPaletteColors = (paletteObj) => _injectPaletteCSS(paletteObj)
+
+  // Applique une palette en injectant les CSS custom properties sur <html>
+  const applyPalette = (slug, customHex = null) => {
+    let palette
+    if (slug === 'custom') {
+      const hex = customHex || localStorage.getItem('airboard_custom_accent') || '#d97757'
+      palette = generateCustomPalette(hex)
+      if (customHex) localStorage.setItem('airboard_custom_accent', customHex)
+    } else if (slug.startsWith('cp_')) {
+      const cp = customPalettes.value.find(p => p.id === slug)
+      if (cp) {
+        palette = (cp.auto_bg !== false || !cp.bg)
+          ? generateCustomPalette(cp.accent)
+          : generatePaletteFromColors(cp.accent, cp.bg)
+      } else {
+        palette = getPalette('claude')
+      }
+    } else {
+      palette = getPalette(slug)
+    }
+    currentPalette.value = slug
+    localStorage.setItem('airboard_palette', slug)
+    _injectPaletteCSS(palette)
+  }
+
+  const setCustomPalettes = (palettes) => {
+    customPalettes.value = Array.isArray(palettes) ? palettes : []
+    localStorage.setItem('airboard_custom_palettes', JSON.stringify(customPalettes.value))
+  }
 
   // Actions
   const toggleDarkMode = () => {
@@ -151,6 +202,15 @@ export const useAppStore = defineStore('app', () => {
       // Appliquer le thème
       updateTheme()
 
+      // Appliquer la palette depuis localStorage (synchrone → zero flash)
+      const storedPalette = localStorage.getItem('airboard_palette')
+      if (storedPalette) {
+        const customHex = storedPalette === 'custom' ? localStorage.getItem('airboard_custom_accent') : null
+        applyPalette(storedPalette, customHex)
+      } else {
+        applyPalette('claude')
+      }
+
       // Langue
       const storedLocale = localStorage.getItem('airboard_locale')
       if (storedLocale) {
@@ -269,6 +329,8 @@ export const useAppStore = defineStore('app', () => {
   return {
     // État
     isDarkMode,
+    currentPalette,
+    customPalettes,
     sidebarOpen,
     showNavbar,
     isLoading,
@@ -285,6 +347,9 @@ export const useAppStore = defineStore('app', () => {
     zoomScale,
 
     // Actions
+    applyPalette,
+    setCustomPalettes,
+    previewPaletteColors,
     toggleDarkMode,
     setDarkMode,
     toggleSidebar,

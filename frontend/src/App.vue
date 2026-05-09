@@ -143,7 +143,29 @@ onMounted(async () => {
   // Initialiser le watcher de redimensionnement pour la sidebar
   const cleanupResizeWatcher = appStore.initResizeWatcher()
 
-  // Charger les settings de l'application (admin uniquement)
+  // Charger la palette pour tous les utilisateurs authentifiés
+  if (authStore.isAuthenticated) {
+    try {
+      const { settingsService } = await import('@/services/api')
+      const publicSettings = await settingsService.getPublicSettings()
+      if (publicSettings.custom_palettes) {
+        try {
+          const cp = typeof publicSettings.custom_palettes === 'string'
+            ? JSON.parse(publicSettings.custom_palettes)
+            : publicSettings.custom_palettes
+          appStore.setCustomPalettes(Array.isArray(cp) ? cp : [])
+        } catch (e) {}
+      }
+      if (publicSettings.color_palette) {
+        const customHex = publicSettings.color_palette === 'custom' ? publicSettings.custom_accent_color : null
+        appStore.applyPalette(publicSettings.color_palette, customHex)
+      }
+    } catch (error) {
+      // Silencieux — la palette localStorage reste active comme fallback
+    }
+  }
+
+  // Charger les settings complets (admin uniquement)
   if (authStore.isAuthenticated && authStore.isAdmin) {
     try {
       await appStore.refreshAppSettings()

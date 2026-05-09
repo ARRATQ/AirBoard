@@ -36,6 +36,7 @@ func (h *SettingsHandler) GetAppSettings(c *gin.Context) {
 				WelcomeMessage:  "Welcome to your application portal",
 				HomePageMessage: "Discover your personalized workspace",
 				SignupEnabled:   true,
+				CustomPalettes:  "[]",
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
@@ -97,6 +98,9 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 				HeroImageURL:      request.HeroImageURL,
 				HeroImageURLDark:  request.HeroImageURLDark,
 				HeroImagePosition: request.HeroImagePosition,
+				ColorPalette:      request.ColorPalette,
+				CustomAccentColor: request.CustomAccentColor,
+				CustomPalettes:    request.CustomPalettes,
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
@@ -129,6 +133,9 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 		settings.HeroImageURL = request.HeroImageURL
 		settings.HeroImageURLDark = request.HeroImageURLDark
 		settings.HeroImagePosition = request.HeroImagePosition
+		settings.ColorPalette = request.ColorPalette
+		settings.CustomAccentColor = request.CustomAccentColor
+		settings.CustomPalettes = request.CustomPalettes
 
 		if err := h.DB.Save(&settings).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -176,6 +183,9 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	settings.HeroImageURL = ""
 	settings.HeroImageURLDark = ""
 	settings.HeroImagePosition = "center center"
+	settings.ColorPalette = "claude"
+	settings.CustomAccentColor = "#d97757"
+	settings.CustomPalettes = "[]"
 
 	if result.Error == gorm.ErrRecordNotFound {
 		// Créer de nouveaux paramètres avec les valeurs par défaut
@@ -207,6 +217,52 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	c.JSON(http.StatusOK, models.SuccessResponse{
 		Message: "App settings reset to defaults successfully",
 		Data:    settings,
+	})
+}
+
+// GetPublicSettings retourne les paramètres publics (palette, nom, icône) pour tous les utilisateurs authentifiés
+func (h *SettingsHandler) GetPublicSettings(c *gin.Context) {
+	var settings models.AppSettings
+	result := h.DB.First(&settings)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusOK, gin.H{
+				"color_palette":       "claude",
+				"custom_accent_color": "#d97757",
+				"custom_palettes":     "[]",
+				"app_name":            "Airboard",
+				"app_icon":            "mdi:view-dashboard",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to fetch settings",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	palette := settings.ColorPalette
+	if palette == "" {
+		palette = "claude"
+	}
+	customAccent := settings.CustomAccentColor
+	if customAccent == "" {
+		customAccent = "#d97757"
+	}
+
+	customPalettes := settings.CustomPalettes
+	if customPalettes == "" {
+		customPalettes = "[]"
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"color_palette":       palette,
+		"custom_accent_color": customAccent,
+		"custom_palettes":     customPalettes,
+		"app_name":            settings.AppName,
+		"app_icon":            settings.AppIcon,
 	})
 }
 

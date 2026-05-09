@@ -48,7 +48,15 @@
           <Icon icon="mdi:shield-account" class="inline-block mr-2 h-4 w-4" />
           Access & Auth
         </button>
-        <button 
+        <button
+          @click="activeTab = 'apparence'"
+          class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
+          :class="activeTab === 'apparence' ? 'border-orange-400 text-orange-400' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+        >
+          <Icon icon="mdi:palette" class="inline-block mr-2 h-4 w-4" />
+          Apparence
+        </button>
+        <button
           @click="activeTab = 'danger'"
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'danger' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
@@ -442,6 +450,185 @@
           </div>
 
 
+          <!-- APPARENCE TAB -->
+          <div v-show="activeTab === 'apparence'" class="space-y-8 animate-fade-in">
+
+            <!-- Palettes prédéfinies + personnalisées -->
+            <div>
+              <div class="section-header mb-1">
+                <Icon icon="mdi:palette-outline" class="section-icon text-orange-400" />
+                <h4 class="section-title">Palette de couleurs</h4>
+              </div>
+              <p class="text-sm text-gray-400 mb-5">
+                Cliquez pour prévisualiser, puis sauvegardez pour appliquer à tous les utilisateurs.
+              </p>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <!-- Palettes prédéfinies -->
+                <button
+                  v-for="palette in PALETTES"
+                  :key="palette.slug"
+                  type="button"
+                  @click="selectPalette(palette.slug)"
+                  class="relative flex flex-col overflow-hidden rounded-2xl border-2 transition-all duration-200 focus:outline-none"
+                  :class="appStore.currentPalette === palette.slug
+                    ? 'border-white/60 shadow-xl scale-[1.04] ring-2 ring-white/20'
+                    : 'border-gray-700 hover:border-gray-500 hover:scale-[1.02]'"
+                >
+                  <div class="h-14 w-full relative"
+                    :style="{ background: `linear-gradient(135deg, ${palette.light.gradientFrom} 0%, ${palette.light.accent} 65%, ${palette.light.accentLight} 100%)` }">
+                    <div v-if="appStore.currentPalette === palette.slug"
+                      class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
+                    </div>
+                  </div>
+                  <div class="px-3 py-2 bg-gray-800 flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold text-white truncate">{{ palette.name }}</span>
+                    <div class="flex gap-1 flex-shrink-0">
+                      <div class="w-3 h-3 rounded-full border border-white/20" :style="{ background: palette.light.accent }" />
+                      <div class="w-3 h-3 rounded-full border border-white/20" :style="{ background: palette.light.bgPage }" />
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Palettes personnalisées -->
+                <div
+                  v-for="cp in form.custom_palettes"
+                  :key="cp.id"
+                  class="relative flex flex-col overflow-hidden rounded-2xl border-2 transition-all duration-200"
+                  :class="appStore.currentPalette === cp.id
+                    ? 'border-white/60 shadow-xl scale-[1.04] ring-2 ring-white/20'
+                    : 'border-gray-700 hover:border-gray-500 hover:scale-[1.02]'"
+                >
+                  <button type="button" class="h-14 w-full relative focus:outline-none"
+                    @click="selectPalette(cp.id)"
+                    :style="{ background: `linear-gradient(135deg, ${darkenHex(cp.accent, 70)} 0%, ${cp.accent} 65%, ${lightenHex(cp.accent, 30)} 100%)` }">
+                    <div v-if="appStore.currentPalette === cp.id"
+                      class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
+                    </div>
+                  </button>
+                  <div class="px-2 py-1.5 bg-gray-800 flex items-center gap-1">
+                    <span class="text-xs font-semibold text-white truncate flex-1 cursor-pointer" @click="selectPalette(cp.id)">{{ cp.name }}</span>
+                    <button type="button" @click.stop="openEditCustomPalette(cp)"
+                      class="p-1 text-gray-400 hover:text-white transition-colors focus:outline-none" title="Modifier">
+                      <Icon icon="mdi:pencil-outline" class="h-3 w-3" />
+                    </button>
+                    <button type="button" @click.stop="deleteCustomPalette(cp.id)"
+                      class="p-1 text-gray-400 hover:text-red-400 transition-colors focus:outline-none" title="Supprimer">
+                      <Icon icon="mdi:delete-outline" class="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Bouton Ajouter une palette -->
+                <button
+                  type="button"
+                  @click="openAddCustomPalette"
+                  class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-600 hover:border-gray-400 hover:scale-[1.02] transition-all duration-200 focus:outline-none min-h-[88px]"
+                >
+                  <Icon icon="mdi:plus-circle-outline" class="h-6 w-6 text-gray-400" />
+                  <span class="text-xs text-gray-400 mt-1">Ajouter</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Éditeur de palette personnalisée -->
+            <div v-if="customPaletteEditor.show" class="p-4 rounded-xl bg-gray-800/60 border border-gray-600 space-y-4">
+              <h5 class="text-sm font-semibold text-white flex items-center gap-2">
+                <Icon icon="mdi:palette-advanced" class="h-4 w-4 text-orange-400" />
+                {{ customPaletteEditor.isNew ? 'Nouvelle palette' : 'Modifier la palette' }}
+              </h5>
+
+              <!-- Nom -->
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">Nom</label>
+                <input type="text" v-model="customPaletteEditor.name" placeholder="Ma palette"
+                  class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-orange-400" />
+              </div>
+
+              <!-- Couleur d'accent -->
+              <div>
+                <label class="text-xs text-gray-400 flex items-center gap-1.5 mb-2">
+                  <Icon icon="mdi:eyedropper-variant" class="h-3 w-3" /> Couleur d'accent
+                </label>
+                <div class="flex items-center gap-3">
+                  <input type="color" v-model="customPaletteEditor.accent" @input="previewEditor"
+                    class="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
+                  <input type="text" v-model="customPaletteEditor.accent" @input="onEditorAccentHexInput"
+                    pattern="^#[0-9A-Fa-f]{6}$" placeholder="#5c6ef8"
+                    class="w-28 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm font-mono focus:outline-none focus:border-orange-400" />
+                  <div class="flex-1 h-8 rounded-lg"
+                    :style="{ background: `linear-gradient(135deg, ${darkenHex(customPaletteEditor.accent, 70)}, ${customPaletteEditor.accent}, ${lightenHex(customPaletteEditor.accent, 30)})` }" />
+                </div>
+              </div>
+
+              <!-- Mode de fond -->
+              <div>
+                <label class="text-xs text-gray-400 block mb-2">Fond de page</label>
+                <div class="flex gap-2">
+                  <button type="button" @click="customPaletteEditor.auto_bg = true; previewEditor()"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
+                    :class="customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-300' : 'bg-gray-700 border border-gray-600 text-gray-400 hover:text-white'">
+                    <Icon icon="mdi:auto-fix" class="h-3.5 w-3.5" /> Automatique
+                  </button>
+                  <button type="button" @click="customPaletteEditor.auto_bg = false; previewEditor()"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
+                    :class="!customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-300' : 'bg-gray-700 border border-gray-600 text-gray-400 hover:text-white'">
+                    <Icon icon="mdi:eyedropper-variant" class="h-3.5 w-3.5" /> Personnalisé
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-1.5">
+                  {{ customPaletteEditor.auto_bg ? 'Le fond est calculé automatiquement depuis la teinte de l\'accent.' : 'Choisissez votre propre couleur de fond.' }}
+                </p>
+              </div>
+
+              <!-- Couleur de fond (si personnalisé) -->
+              <div v-if="!customPaletteEditor.auto_bg">
+                <label class="text-xs text-gray-400 flex items-center gap-1.5 mb-2">
+                  <Icon icon="mdi:palette-swatch-outline" class="h-3 w-3" /> Couleur de fond
+                </label>
+                <div class="flex items-center gap-3">
+                  <input type="color" v-model="customPaletteEditor.bg" @input="previewEditor"
+                    class="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
+                  <input type="text" v-model="customPaletteEditor.bg" @input="onEditorBgHexInput"
+                    pattern="^#[0-9A-Fa-f]{6}$" placeholder="#f0f1ff"
+                    class="w-28 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm font-mono focus:outline-none focus:border-orange-400" />
+                  <div class="flex-1 h-8 rounded-lg border border-gray-600/50"
+                    :style="{ background: customPaletteEditor.bg }" />
+                </div>
+              </div>
+
+              <!-- Actions éditeur -->
+              <div class="flex items-center justify-between pt-2 border-t border-gray-700">
+                <button v-if="!customPaletteEditor.isNew" type="button" @click="deleteCurrentEditPalette"
+                  class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors">
+                  <Icon icon="mdi:delete-outline" class="h-3.5 w-3.5" /> Supprimer la palette
+                </button>
+                <div v-else />
+                <div class="flex gap-2">
+                  <button type="button" @click="cancelCustomPaletteEditor" class="btn btn-secondary text-xs py-1.5 px-3">
+                    Annuler
+                  </button>
+                  <button type="button" @click="saveCustomPaletteEditor"
+                    :disabled="!customPaletteEditor.name.trim()"
+                    class="btn btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed">
+                    {{ customPaletteEditor.isNew ? 'Créer la palette' : 'Enregistrer' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bouton sauvegarder pour l'onglet Apparence -->
+            <div class="flex justify-end pt-4 border-t border-gray-700">
+              <button type="button" @click="saveApparence" :disabled="loading" class="btn btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                Sauvegarder la palette
+              </button>
+            </div>
+          </div>
+
           <!-- DANGER ZONE TAB -->
           <div v-show="activeTab === 'danger'" class="space-y-8 animate-fade-in">
             <!-- Danger Zone -->
@@ -765,6 +952,7 @@ import { adminService, uploadAdminMedia } from '@/services/api'
 import { authService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import IconInput from '@/components/ui/IconInput.vue'
+import { PALETTES, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
 
 const appStore = useAppStore()
 const router = useRouter()
@@ -799,11 +987,24 @@ const form = reactive({
   default_group_id: null,
   hero_image_url: '',
   hero_image_url_dark: '',
-  hero_image_position: 'center center'
+  hero_image_position: 'center center',
+  color_palette: appStore.currentPalette,
+  custom_accent_color: localStorage.getItem('airboard_custom_accent') || '#d97757',
+  custom_palettes: [],
 })
 
 const heroImageUploading = ref(false)
 const heroImageDarkUploading = ref(false)
+
+const customPaletteEditor = reactive({
+  show: false,
+  isNew: true,
+  id: null,
+  name: '',
+  accent: '#5c6ef8',
+  bg: '#f0f1ff',
+  auto_bg: true,
+})
 
 const positions = [
   { value: 'left top',     icon: 'mdi:arrow-top-left',     label: 'Haut gauche' },
@@ -884,6 +1085,16 @@ const loadSettings = async () => {
     appStore.setLoading(true)
     const data = await adminService.getAppSettings()
 
+    let parsedCustomPalettes = []
+    if (data.custom_palettes) {
+      try {
+        const cp = typeof data.custom_palettes === 'string'
+          ? JSON.parse(data.custom_palettes)
+          : data.custom_palettes
+        parsedCustomPalettes = Array.isArray(cp) ? cp : []
+      } catch (e) { parsedCustomPalettes = [] }
+    }
+
     Object.assign(form, {
       app_name: data.app_name || 'Airboard',
       app_icon: data.app_icon || 'mdi:view-dashboard',
@@ -893,8 +1104,12 @@ const loadSettings = async () => {
       default_group_id: data.default_group_id || null,
       hero_image_url: data.hero_image_url || '',
       hero_image_url_dark: data.hero_image_url_dark || '',
-      hero_image_position: data.hero_image_position || 'center center'
+      hero_image_position: data.hero_image_position || 'center center',
+      color_palette: data.color_palette || 'claude',
+      custom_accent_color: data.custom_accent_color || localStorage.getItem('airboard_custom_accent') || '#d97757',
+      custom_palettes: parsedCustomPalettes,
     })
+    appStore.setCustomPalettes(parsedCustomPalettes)
   } catch (error) {
     // Ne pas afficher d'erreur si l'utilisateur n'est pas authentifié (lors de la déconnexion)
     if (authStore.isAuthenticated) {
@@ -928,17 +1143,124 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0
 }
 
+// Helpers couleur pour les previews
+const darkenHex = (hex, amount) => {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return '#333'
+  return '#' + [1, 3, 5].map(i => Math.max(0, parseInt(hex.slice(i, i + 2), 16) - amount).toString(16).padStart(2, '0')).join('')
+}
+const lightenHex = (hex, amount) => {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return '#ccc'
+  return '#' + [1, 3, 5].map(i => Math.min(255, parseInt(hex.slice(i, i + 2), 16) + amount).toString(16).padStart(2, '0')).join('')
+}
+
+// Sélectionne une palette et applique un aperçu live immédiat
+const selectPalette = (slug) => {
+  form.color_palette = slug
+  if (slug.startsWith('cp_')) {
+    appStore.setCustomPalettes(form.custom_palettes)
+    appStore.applyPalette(slug)
+  } else {
+    appStore.applyPalette(slug)
+  }
+}
+
+// --- Éditeur de palettes personnalisées ---
+const previewEditor = () => {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(customPaletteEditor.accent)) return
+  const palette = (customPaletteEditor.auto_bg || !/^#[0-9A-Fa-f]{6}$/.test(customPaletteEditor.bg))
+    ? generateCustomPalette(customPaletteEditor.accent)
+    : generatePaletteFromColors(customPaletteEditor.accent, customPaletteEditor.bg)
+  appStore.previewPaletteColors(palette)
+}
+
+const onEditorAccentHexInput = () => {
+  if (/^#[0-9A-Fa-f]{6}$/.test(customPaletteEditor.accent)) previewEditor()
+}
+
+const onEditorBgHexInput = () => {
+  if (/^#[0-9A-Fa-f]{6}$/.test(customPaletteEditor.bg)) previewEditor()
+}
+
+const openAddCustomPalette = () => {
+  Object.assign(customPaletteEditor, { show: true, isNew: true, id: null, name: '', accent: '#5c6ef8', bg: '#f0f1ff', auto_bg: true })
+  previewEditor()
+}
+
+const openEditCustomPalette = (cp) => {
+  Object.assign(customPaletteEditor, {
+    show: true, isNew: false, id: cp.id, name: cp.name,
+    accent: cp.accent, bg: cp.bg || '#f0f1ff', auto_bg: cp.auto_bg !== false,
+  })
+  appStore.setCustomPalettes(form.custom_palettes)
+  appStore.applyPalette(cp.id)
+  form.color_palette = cp.id
+}
+
+const saveCustomPaletteEditor = () => {
+  if (!customPaletteEditor.name.trim()) return
+  const id = customPaletteEditor.isNew ? `cp_${Date.now()}` : customPaletteEditor.id
+  const cp = {
+    id,
+    name: customPaletteEditor.name.trim(),
+    accent: customPaletteEditor.accent,
+    bg: customPaletteEditor.auto_bg ? '' : customPaletteEditor.bg,
+    auto_bg: customPaletteEditor.auto_bg,
+  }
+  if (customPaletteEditor.isNew) {
+    form.custom_palettes.push(cp)
+  } else {
+    const idx = form.custom_palettes.findIndex(p => p.id === cp.id)
+    if (idx >= 0) form.custom_palettes[idx] = cp
+  }
+  appStore.setCustomPalettes(form.custom_palettes)
+  selectPalette(id)
+  customPaletteEditor.show = false
+}
+
+const deleteCustomPalette = (id) => {
+  const idx = form.custom_palettes.findIndex(p => p.id === id)
+  if (idx >= 0) form.custom_palettes.splice(idx, 1)
+  if (form.color_palette === id) selectPalette('claude')
+  appStore.setCustomPalettes(form.custom_palettes)
+}
+
+const deleteCurrentEditPalette = () => {
+  if (customPaletteEditor.id) deleteCustomPalette(customPaletteEditor.id)
+  customPaletteEditor.show = false
+}
+
+const cancelCustomPaletteEditor = () => {
+  customPaletteEditor.show = false
+  appStore.setCustomPalettes(form.custom_palettes)
+  appStore.applyPalette(form.color_palette)
+}
+
+const saveApparence = async () => {
+  loading.value = true
+  try {
+    const settingsData = { ...form, custom_palettes: JSON.stringify(form.custom_palettes) }
+    await adminService.updateAppSettings(settingsData)
+    appStore.showSuccess('Palette sauvegardée avec succès')
+    appStore.setCustomPalettes(form.custom_palettes)
+    appStore.applyPalette(form.color_palette)
+  } catch (error) {
+    console.error('Error saving palette:', error)
+    appStore.showError('Échec de la sauvegarde')
+  } finally {
+    loading.value = false
+  }
+}
+
 const handleSubmit = async () => {
   if (!validateForm()) return
-  
+
   loading.value = true
   try {
     await adminService.updateAppSettings(form)
     appStore.showSuccess('Settings updated successfully')
-    // 🔧 FIX: Recharger les settings et mettre à jour le store global
+    appStore.applyPalette(form.color_palette)
     await loadSettings()
     appStore.invalidateSettings()
-    // Optionnel: rafraîchir les settings dans le store global
     try {
       await appStore.refreshAppSettings()
     } catch (e) {
@@ -964,10 +1286,13 @@ const confirmReset = async () => {
   resetLoading.value = true
   try {
     await adminService.resetAppSettings()
-    // 🔧 FIX: Recharger les settings et mettre à jour le store global
+    form.color_palette = 'claude'
+    form.custom_accent_color = '#d97757'
+    form.custom_palettes = []
+    appStore.setCustomPalettes([])
+    appStore.applyPalette('claude')
     await loadSettings()
     appStore.invalidateSettings()
-    // Optionnel: rafraîchir les settings dans le store global
     try {
       await appStore.refreshAppSettings()
     } catch (e) {
