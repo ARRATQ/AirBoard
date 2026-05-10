@@ -2,20 +2,59 @@
   <div class="pulse-home" :class="{ dark: appStore.isDarkMode }">
     <!-- ─── TOPBAR ──────────────────────────────────────────────────── -->
     <header class="pulse-topbar">
-      <button class="pulse-search" @click="router.push('/search')">
-        <Icon icon="mdi:magnify" class="pulse-search-icon" />
-        <span class="pulse-search-placeholder">{{ $t('search.placeholder') || 'Cherche une app, un article…' }}</span>
-        <kbd class="pulse-search-kbd">⌘K</kbd>
-      </button>
-
-      <div class="pulse-topbar-meta">
-        <Icon icon="mdi:weather-cloudy" class="text-sm" />
-        <span>{{ currentDateLabel }}</span>
+      <!-- ── Announcements Ticker ───────────────────────────────────── -->
+      <div
+        v-if="activeAnnouncements.length"
+        class="pulse-ticker"
+        @mouseenter="pauseTicker"
+        @mouseleave="resumeTicker"
+      >
+        <Icon :icon="tickerIcon" class="pulse-ticker-icon" :class="`pulse-ticker-icon--${activeAnnouncements[tickerIndex]?.type || 'info'}`" />
+        <div class="pulse-ticker-track">
+          <Transition name="ticker-slide" mode="out-in">
+            <span :key="tickerIndex" class="pulse-ticker-text">
+              <strong v-if="activeAnnouncements[tickerIndex]?.title" class="pulse-ticker-title">
+                {{ activeAnnouncements[tickerIndex].title }}
+              </strong>
+              <span v-if="activeAnnouncements[tickerIndex]?.content" class="pulse-ticker-content">
+                {{ activeAnnouncements[tickerIndex].content }}
+              </span>
+            </span>
+          </Transition>
+        </div>
+        <div v-if="activeAnnouncements.length > 1" class="pulse-ticker-nav">
+          <button class="pulse-ticker-dot-btn" @click="prevTicker">
+            <Icon icon="mdi:chevron-up" />
+          </button>
+          <span class="pulse-ticker-counter">{{ tickerIndex + 1 }}/{{ activeAnnouncements.length }}</span>
+          <button class="pulse-ticker-dot-btn" @click="nextTicker">
+            <Icon icon="mdi:chevron-down" />
+          </button>
+        </div>
       </div>
 
       <div class="pulse-topbar-spacer" />
 
-      <NotificationBell />
+      <form class="pulse-search" @submit.prevent="goSearch">
+        <Icon icon="mdi:magnify" class="pulse-search-icon" />
+        <input
+          v-model="searchQuery"
+          class="pulse-search-input"
+          :placeholder="$t('search.placeholder') || 'Cherche une app, un article…'"
+          @keydown.esc="searchQuery = ''"
+        />
+        <kbd class="pulse-search-kbd">⌘K</kbd>
+      </form>
+
+      <div class="pulse-topbar-meta">
+        <div v-if="weather.temp !== null" class="pulse-weather" :title="weather.city">
+          <Icon :icon="weather.icon" class="pulse-weather-icon" />
+          <span class="pulse-weather-temp">{{ weather.temp }}°</span>
+          <span class="pulse-weather-city">{{ weather.city }}</span>
+          <span class="pulse-topbar-sep">·</span>
+        </div>
+        <span>{{ currentDateLabel }}</span>
+      </div>
     </header>
 
     <!-- ─── SCROLLABLE BODY ────────────────────────────────────────── -->
@@ -51,8 +90,7 @@
             <div class="pulse-greeting-inner">
               <p class="greeting-eyebrow">{{ currentDateFull }}</p>
               <h1 class="greeting-title">
-                <em>{{ greetingWord }},</em><br />
-                <span class="greeting-name">{{ firstName }}.</span>
+                <em>{{ greetingWord }},</em> <span class="greeting-name">{{ firstName }}.</span>
               </h1>
               <p class="greeting-sub" v-if="pendingActionsText">{{ pendingActionsText }}</p>
               <div class="greeting-pills">
@@ -62,7 +100,7 @@
                   @click="router.push('/polls')"
                 >
                   <Icon icon="mdi:poll" class="h-3.5 w-3.5" />
-                  {{ $t('home.vote') || 'Voter' }}
+                  {{ $t('home.vote') }}
                 </button>
                 <button
                   v-if="latestNewsGroup"
@@ -87,8 +125,8 @@
           <!-- RIGHT: XP / gamification panel -->
           <div class="pulse-xp">
             <div class="xp-header">
-              <span class="xp-title">My XP</span>
-              <router-link to="/gamification" class="xp-detail-link">{{ $t('common.details') || 'Détails' }} →</router-link>
+              <span class="xp-title">{{ $t('home.xp.title') }}</span>
+              <router-link to="/gamification" class="xp-detail-link">{{ $t('common.details') }} →</router-link>
             </div>
 
             <!-- Level ring + score -->
@@ -108,7 +146,7 @@
               </div>
               <div class="xp-score-col">
                 <div class="xp-score">{{ homeData.gamification.xp.toLocaleString('fr-FR') }} <span class="xp-unit">XP</span></div>
-                <div class="xp-next">{{ homeData.gamification.next_level_xp - homeData.gamification.xp }} avant niveau {{ homeData.gamification.level + 1 }}</div>
+                <div class="xp-next">{{ homeData.gamification.next_level_xp - homeData.gamification.xp }} {{ $t('home.xp.beforeLevel', { level: homeData.gamification.level + 1 }) }}</div>
                 <div class="xp-bar-wrap">
                   <div class="xp-bar-fill" :style="{ width: homeData.gamification.progress_percent + '%' }" />
                 </div>
@@ -120,17 +158,17 @@
               <div class="xp-mini-stat">
                 <Icon icon="mdi:fire" class="text-orange-500" />
                 <span class="xp-mini-val">{{ homeData.gamification?.streak_days || '–' }}</span>
-                <span class="xp-mini-label">Série</span>
+                <span class="xp-mini-label">{{ $t('home.xp.streak') }}</span>
               </div>
               <div class="xp-mini-stat">
                 <Icon icon="mdi:trophy" class="text-amber-500" />
                 <span class="xp-mini-val">{{ homeData.gamification?.badges_count || homeData.gamification?.recent_badges?.length || 0 }}</span>
-                <span class="xp-mini-label">Badges</span>
+                <span class="xp-mini-label">{{ $t('home.xp.badges') }}</span>
               </div>
               <div class="xp-mini-stat">
                 <Icon icon="mdi:star" class="text-yellow-400" />
                 <span class="xp-mini-val">{{ homeData.gamification?.rank ? '#' + homeData.gamification.rank : '–' }}</span>
-                <span class="xp-mini-label">Rang</span>
+                <span class="xp-mini-label">{{ $t('home.xp.rank') }}</span>
               </div>
             </div>
 
@@ -182,7 +220,7 @@
             <!-- Tab header -->
             <div class="news-header">
               <div class="news-header-top">
-                <span class="news-title">{{ $t('home.newsHub') || 'Fil d\'actualités' }}</span>
+                <span class="news-title">{{ $t('home.newsHub') }}</span>
                 <router-link to="/news" class="news-see-all">{{ $t('home.viewAll') }} →</router-link>
               </div>
               <div class="news-tabs" v-if="newsTabs.length > 1">
@@ -321,7 +359,7 @@
                 </div>
               </div>
               <button class="poll-vote-btn" @click="router.push('/polls')">
-                {{ $t('home.polls.vote') || 'Voter maintenant' }}
+                {{ $t('home.polls.vote') }}
               </button>
             </div>
 
@@ -360,19 +398,25 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { homeService } from '@/services/api'
-import NotificationBell from '@/components/notifications/NotificationBell.vue'
-
 const router = useRouter()
+const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // ── State ───────────────────────────────────────────────────────────
+const searchQuery = ref('')
+const goSearch = () => {
+  const q = searchQuery.value.trim()
+  router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search')
+}
+
 const homeData = ref({})
 const isLoading = ref(true)
 const error = ref(null)
@@ -407,22 +451,27 @@ const ringStyle = computed(() => {
 })
 
 // ── Greeting ─────────────────────────────────────────────────────────
+const dateLocale = computed(() => {
+  const map = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', ar: 'ar-MA' }
+  return map[locale.value] || locale.value
+})
+
 const currentDateFull = computed(() => {
   const now = new Date()
-  return now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase() +
-    ' · ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return now.toLocaleDateString(dateLocale.value, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase() +
+    ' · ' + now.toLocaleTimeString(dateLocale.value, { hour: '2-digit', minute: '2-digit' })
 })
 
 const currentDateLabel = computed(() => {
   const now = new Date()
-  return now.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  return now.toLocaleDateString(dateLocale.value, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 })
 
 const greetingWord = computed(() => {
   const h = new Date().getHours()
-  if (h < 12) return 'Bon matin'
-  if (h < 18) return 'Bon après-midi'
-  return 'Bonsoir'
+  if (h < 12) return t('home.hero.greeting.morning')
+  if (h < 18) return t('home.hero.greeting.afternoon')
+  return t('home.hero.greeting.evening')
 })
 
 const firstName = computed(() => {
@@ -435,9 +484,9 @@ const pendingActionsText = computed(() => {
   const news = homeData.value.recent_news_by_type?.reduce((s, g) => s + g.news.length, 0) || 0
   if (!polls && !news) return ''
   const parts = []
-  if (polls) parts.push(`${polls} sondage${polls > 1 ? 's' : ''} actif${polls > 1 ? 's' : ''}`)
-  if (news) parts.push(`${news} nouveaux articles`)
-  return `Tu as ${parts.join(' et ')} depuis hier.`
+  if (polls) parts.push(t('home.hero.pendingPoll', { count: polls }))
+  if (news) parts.push(t('home.hero.pendingNews', { count: news }))
+  return t('home.hero.pendingText', { items: parts.join(t('common.and')) })
 })
 
 const activePoll = computed(() => homeData.value.polls?.find(p => p.is_active) || null)
@@ -569,6 +618,8 @@ const loadHomeData = async () => {
       activeTab.value = firstSlug
       markTabSeen(firstSlug)
     }
+    tickerIndex.value = 0
+    startTicker()
   } catch (err) {
     console.error('Failed to load home data:', err)
     error.value = err
@@ -577,7 +628,63 @@ const loadHomeData = async () => {
   }
 }
 
-onMounted(loadHomeData)
+// ── Weather ──────────────────────────────────────────────────────────
+const weather = ref({ temp: null, icon: 'mdi:weather-cloudy', city: '' })
+
+// WMO weather code → mdi icon
+const wmoIcon = (code) => {
+  if (code === 0) return 'mdi:weather-sunny'
+  if (code <= 2) return 'mdi:weather-partly-cloudy'
+  if (code <= 3) return 'mdi:weather-cloudy'
+  if (code <= 49) return 'mdi:weather-fog'
+  if (code <= 59) return 'mdi:weather-rainy'
+  if (code <= 69) return 'mdi:weather-snowy-rainy'
+  if (code <= 79) return 'mdi:weather-snowy'
+  if (code <= 82) return 'mdi:weather-pouring'
+  if (code <= 84) return 'mdi:weather-hail'
+  if (code <= 99) return 'mdi:weather-lightning-rainy'
+  return 'mdi:weather-cloudy'
+}
+
+const loadWeather = () => {
+  if (!navigator.geolocation) return
+  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+    try {
+      const { latitude: lat, longitude: lon } = coords
+      const [meteo, geo] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius`).then(r => r.json()),
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`).then(r => r.json()),
+      ])
+      weather.value = {
+        temp: Math.round(meteo.current_weather.temperature),
+        icon: wmoIcon(meteo.current_weather.weathercode),
+        city: geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || '',
+      }
+    } catch { /* silently ignore */ }
+  }, () => { /* permission denied — keep no weather */ })
+}
+
+// ── Announcements Ticker ─────────────────────────────────────────────
+const tickerIndex = ref(0)
+let tickerTimer = null
+
+const activeAnnouncements = computed(() => homeData.value.announcements || [])
+
+const tickerIconMap = { info: 'mdi:information-outline', warning: 'mdi:alert-outline', success: 'mdi:check-circle-outline', error: 'mdi:alert-circle-outline' }
+const tickerIcon = computed(() => tickerIconMap[activeAnnouncements.value[tickerIndex.value]?.type] || 'mdi:information-outline')
+
+const nextTicker = () => { tickerIndex.value = (tickerIndex.value + 1) % activeAnnouncements.value.length }
+const prevTicker = () => { tickerIndex.value = (tickerIndex.value - 1 + activeAnnouncements.value.length) % activeAnnouncements.value.length }
+
+const startTicker = () => {
+  if (tickerTimer) clearInterval(tickerTimer)
+  if (activeAnnouncements.value.length > 1) tickerTimer = setInterval(nextTicker, 5000)
+}
+const pauseTicker = () => clearInterval(tickerTimer)
+const resumeTicker = () => startTicker()
+
+onMounted(() => { loadHomeData(); loadWeather() })
+onUnmounted(() => clearInterval(tickerTimer))
 </script>
 
 <style>
@@ -598,7 +705,7 @@ onMounted(loadHomeData)
 
 /* ── Topbar ──────────────────────────────────────────────────────── */
 .pulse-topbar {
-  height: 60px;
+  height: 68px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -611,42 +718,54 @@ onMounted(loadHomeData)
 .pulse-search {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex: 0 0 auto;
-  width: 340px;
-  padding: 8px 12px;
+  width: 440px;
+  padding: 6px 12px;
   background: var(--bg-page);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: border-color 0.15s;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  cursor: text;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.pulse-search:hover {
+.pulse-search:focus-within {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .pulse-search-icon {
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 17px;
   flex-shrink: 0;
 }
 
-.pulse-search-placeholder {
+.pulse-search-input {
   flex: 1;
-  font-size: 13px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.pulse-search-input::placeholder {
   color: var(--text-muted);
-  text-align: left;
 }
 
 .pulse-search-kbd {
   font-size: 11px;
-  padding: 2px 6px;
+  padding: 3px 7px;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 6px;
   color: var(--text-muted);
   background: var(--bg-card);
   font-family: inherit;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
 .pulse-topbar-meta {
@@ -655,10 +774,143 @@ onMounted(loadHomeData)
   gap: 6px;
   font-size: 12px;
   color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.pulse-weather {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pulse-weather-icon {
+  font-size: 15px;
+}
+
+.pulse-weather-temp {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pulse-weather-city {
+  color: var(--text-muted);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pulse-topbar-sep {
+  color: var(--border);
 }
 
 .pulse-topbar-spacer {
   flex: 1;
+}
+
+/* ── Ticker ──────────────────────────────────────────────────────── */
+.pulse-ticker {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.pulse-ticker-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.pulse-ticker-icon--info    { color: #3b82f6; }
+.pulse-ticker-icon--warning { color: #f59e0b; }
+.pulse-ticker-icon--success { color: #10b981; }
+.pulse-ticker-icon--error   { color: #ef4444; }
+
+.pulse-ticker-track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  height: 20px;
+  position: relative;
+}
+
+.pulse-ticker-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  line-height: 20px;
+  position: absolute;
+  inset: 0;
+}
+
+.pulse-ticker-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.pulse-ticker-content {
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pulse-ticker-nav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.pulse-ticker-dot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+  font-size: 14px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.pulse-ticker-dot-btn:hover {
+  color: var(--text-primary);
+  background: var(--border);
+}
+
+.pulse-ticker-counter {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Transition verticale du ticker */
+.ticker-slide-enter-active,
+.ticker-slide-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.ticker-slide-enter-from {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.ticker-slide-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
 }
 
 /* ── Body ────────────────────────────────────────────────────────── */
