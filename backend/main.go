@@ -189,7 +189,7 @@ func main() {
 	adminHandler := handlers.NewAdminHandler(db, cfg, gamificationService)
 	groupAdminHandler := handlers.NewGroupAdminHandler(db)
 	settingsHandler := handlers.NewSettingsHandler(db)
-	oauthHandler := handlers.NewOAuthHandler(db, authMiddleware)
+	oauthHandler := handlers.NewOAuthHandler(db, authMiddleware, gamificationService)
 	favoritesHandler := handlers.NewFavoritesHandler(db)
 	analyticsHandler := handlers.NewAnalyticsHandler(db, gamificationService)
 	reportsHandler := handlers.NewReportsHandler(db)

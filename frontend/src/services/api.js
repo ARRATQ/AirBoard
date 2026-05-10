@@ -437,7 +437,8 @@ export const oauthService = {
     const response = await api.post(`/auth/oauth/${providerName}/callback`, {
       code,
       state,
-      nonce
+      nonce,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     })
     return response.data
   }

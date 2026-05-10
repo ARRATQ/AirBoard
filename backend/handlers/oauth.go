@@ -3,6 +3,7 @@ package handlers
 import (
 	"airboard/middleware"
 	"airboard/models"
+	"airboard/services"
 	"airboard/utils"
 	"encoding/json"
 	"fmt"
@@ -18,16 +19,18 @@ import (
 )
 
 type OAuthHandler struct {
-	db             *gorm.DB
-	authMiddleware *middleware.AuthMiddleware
-	stateManager   *utils.OAuthStateManager
+	db                  *gorm.DB
+	authMiddleware      *middleware.AuthMiddleware
+	stateManager        *utils.OAuthStateManager
+	gamificationService *services.GamificationService
 }
 
-func NewOAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware) *OAuthHandler {
+func NewOAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, gs *services.GamificationService) *OAuthHandler {
 	return &OAuthHandler{
-		db:             db,
-		authMiddleware: authMiddleware,
-		stateManager:   utils.NewOAuthStateManager(),
+		db:                  db,
+		authMiddleware:      authMiddleware,
+		stateManager:        utils.NewOAuthStateManager(),
+		gamificationService: gs,
 	}
 }
 
@@ -185,12 +188,13 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	providerName := c.Param("provider")
 
 	// Accepter le code, state et nonce depuis query params (GET) ou body (POST)
-	var code, state, nonce string
+	var code, state, nonce, timezone string
 	if c.Request.Method == "POST" {
 		var req struct {
-			Code  string `json:"code" binding:"required"`
-			State string `json:"state"`
-			Nonce string `json:"nonce"`
+			Code     string `json:"code" binding:"required"`
+			State    string `json:"state"`
+			Nonce    string `json:"nonce"`
+			Timezone string `json:"timezone"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			log.Printf("[OAuth] Error parsing POST body: %v", err)
@@ -204,10 +208,12 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		code = req.Code
 		state = req.State
 		nonce = req.Nonce
+		timezone = req.Timezone
 	} else {
 		code = c.Query("code")
 		state = c.Query("state")
 		nonce = c.Query("nonce")
+		timezone = c.Query("timezone")
 	}
 
 	log.Printf("[OAuth] Callback received for provider %s - code present: %v, state present: %v, nonce present: %v",
@@ -396,6 +402,11 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	}
 
 	user.Password = ""
+
+	// Gamification XP (Daily Login)
+	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", "", timezone); err != nil {
+		log.Printf("[Gamification] Error awarding daily login XP for OAuth user %d: %v", user.ID, err)
+	}
 
 	c.JSON(http.StatusOK, models.LoginResponse{
 		Token:        jwtToken,
