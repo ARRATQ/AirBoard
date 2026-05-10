@@ -170,7 +170,8 @@ export function setupInterceptors(router, logoutCallback) {
 // Auth Service
 export const authService = {
   async login(credentials) {
-    const response = await api.post('/auth/login', credentials)
+    const payload = { ...credentials, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+    const response = await api.post('/auth/login', payload)
     return response.data
   },
 
@@ -230,7 +231,8 @@ export const authService = {
   },
 
   async ssoAutoLogin() {
-    const response = await api.get('/auth/sso/auto-login')
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const response = await api.get('/auth/sso/auto-login', { params: { timezone: tz } })
     return response.data
   }
 }

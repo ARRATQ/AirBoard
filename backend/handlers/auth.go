@@ -129,7 +129,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Gamification XP (Daily Login)
-	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", ""); err != nil {
+	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", "", req.Timezone); err != nil {
 		log.Printf("[Gamification] Error awarding daily login XP for user %d: %v", user.ID, err)
 	}
 
@@ -705,7 +705,8 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 	}
 
 	// Gamification XP (Daily Login)
-	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", ""); err != nil {
+	ssoTimezone := c.Query("timezone")
+	if err := h.gamificationService.AwardXP(user.ID, 50, "daily_login", "", ssoTimezone); err != nil {
 		log.Printf("[Gamification] Error awarding daily login XP for SSO user %d: %v", user.ID, err)
 	}
 

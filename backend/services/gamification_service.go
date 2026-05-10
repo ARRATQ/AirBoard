@@ -21,7 +21,7 @@ func NewGamificationService(db *gorm.DB) *GamificationService {
 }
 
 // AwardXP accorde des points à un utilisateur et vérifie le passage de niveau
-func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, metadata string) error {
+func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, metadata string, timezone ...string) error {
 	configuredAmount, enabled, err := s.resolvePointsForReason(reason, amount)
 	if err != nil {
 		return err
@@ -35,9 +35,15 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 		return nil
 	}
 
+	tz := ""
+	if len(timezone) > 0 {
+		tz = timezone[0]
+	}
+
 	// Pour daily_login : une seule fois par jour (XP + badge early_bird)
 	if reason == "daily_login" {
-		today := time.Now().Truncate(24 * time.Hour)
+		loc := loadLocation(tz)
+		today := time.Now().In(loc).Truncate(24 * time.Hour)
 		var count int64
 		s.db.Model(&models.XPTransaction{}).
 			Where("user_id = ? AND reason = ? AND created_at >= ?", userID, "daily_login", today).
@@ -88,7 +94,7 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 		}
 
 		// 5. Vérifier les achievements liés à cette action
-		return s.CheckAchievements(tx, userID, reason)
+		return s.CheckAchievements(tx, userID, reason, tz)
 	})
 }
 
@@ -106,13 +112,15 @@ func normalizeXPMetadata(metadata string) string {
 }
 
 // CheckAchievements vérifie si l'utilisateur a débloqué de nouveaux badges
-func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, triggerReason string) error {
+func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, triggerReason string, timezone ...string) error {
 	if err := s.checkDynamicAchievements(tx, userID, triggerReason); err != nil {
 		return err
 	}
 
-	// Cette fonction sera étendue pour vérifier des conditions complexes
-	// Pour l'instant, implémentons quelques succès simples
+	tz := ""
+	if len(timezone) > 0 {
+		tz = timezone[0]
+	}
 
 	switch triggerReason {
 	case "app_click":
@@ -120,7 +128,7 @@ func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, trigge
 	case "news_read":
 		return s.checkInformedAchievement(tx, userID)
 	case "daily_login":
-		return s.checkEarlyBirdAchievement(tx, userID)
+		return s.checkEarlyBirdAchievement(tx, userID, tz)
 	case "news_publish":
 		return s.checkFirstNewsAchievement(tx, userID)
 	case "event_publish":
@@ -248,14 +256,21 @@ func (s *GamificationService) checkInformedAchievement(tx *gorm.DB, userID uint)
 	return nil
 }
 
-func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint) error {
-	// Cette fonction est appelée directement depuis AwardXP("daily_login"),
-	// donc time.Now() correspond à l'heure de connexion réelle.
-	now := time.Now()
+func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint, timezone string) error {
+	now := time.Now().In(loadLocation(timezone))
 	if now.Hour() < 8 || (now.Hour() == 8 && now.Minute() < 30) {
 		return s.UnlockAchievement(tx, userID, "early_bird")
 	}
 	return nil
+}
+
+func loadLocation(timezone string) *time.Location {
+	if timezone != "" {
+		if loc, err := time.LoadLocation(timezone); err == nil {
+			return loc
+		}
+	}
+	return time.UTC
 }
 
 func (s *GamificationService) checkFirstNewsAchievement(tx *gorm.DB, userID uint) error {
