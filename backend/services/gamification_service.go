@@ -279,7 +279,7 @@ func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint
 func (s *GamificationService) checkNightOwlAchievement(tx *gorm.DB, userID uint, timezone string) error {
 	loc := loadLocation(timezone)
 	now := time.Now().In(loc)
-	eligible := now.Hour() > 16 || (now.Hour() == 16 && now.Minute() >= 30)
+	eligible := now.Hour() >= 17
 	log.Printf("[NightOwl] check userID=%d tz=%s local_time=%s hour=%d min=%d eligible=%v",
 		userID, loc.String(), now.Format("15:04:05"), now.Hour(), now.Minute(), eligible)
 	if eligible {
@@ -483,7 +483,7 @@ func (s *GamificationService) SeedAchievements() error {
 		{
 			Code:          "night_owl",
 			Name:          "Après les heures",
-			Description:   "Connectez-vous après 16h30",
+			Description:   "Connectez-vous après 17h00",
 			Icon:          "mdi:moon-waning-crescent",
 			Color:         "#6366F1",
 			XPReward:      50,
