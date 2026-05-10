@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"strings"
 	"time"
@@ -43,12 +44,16 @@ func (s *GamificationService) AwardXP(userID uint, amount int64, reason string, 
 	// Pour daily_login : une seule fois par jour (XP + badge early_bird)
 	if reason == "daily_login" {
 		loc := loadLocation(tz)
-		today := time.Now().In(loc).Truncate(24 * time.Hour)
+		now := time.Now().In(loc)
+		today := now.Truncate(24 * time.Hour)
+		log.Printf("[EarlyBird] userID=%d timezone_received=%q resolved_tz=%s server_utc=%s local_now=%s hour=%d minute=%d",
+			userID, tz, loc.String(), time.Now().UTC().Format("15:04:05"), now.Format("15:04:05"), now.Hour(), now.Minute())
 		var count int64
 		s.db.Model(&models.XPTransaction{}).
 			Where("user_id = ? AND reason = ? AND created_at >= ?", userID, "daily_login", today).
 			Count(&count)
 		if count > 0 {
+			log.Printf("[EarlyBird] userID=%d already_logged_in_today=true (since %s) — skipping", userID, today.Format("2006-01-02 15:04:05"))
 			return nil
 		}
 	}
@@ -257,8 +262,12 @@ func (s *GamificationService) checkInformedAchievement(tx *gorm.DB, userID uint)
 }
 
 func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint, timezone string) error {
-	now := time.Now().In(loadLocation(timezone))
-	if now.Hour() < 8 || (now.Hour() == 8 && now.Minute() < 30) {
+	loc := loadLocation(timezone)
+	now := time.Now().In(loc)
+	eligible := now.Hour() < 8 || (now.Hour() == 8 && now.Minute() < 30)
+	log.Printf("[EarlyBird] check userID=%d tz=%s local_time=%s hour=%d min=%d eligible=%v",
+		userID, loc.String(), now.Format("15:04:05"), now.Hour(), now.Minute(), eligible)
+	if eligible {
 		return s.UnlockAchievement(tx, userID, "early_bird")
 	}
 	return nil
