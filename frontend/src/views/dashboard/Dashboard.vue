@@ -257,12 +257,11 @@
                 @click="openApplication(app)"
               >
                 <!-- App Icon -->
-                <div
-                  class="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
-                  :style="{ backgroundColor: app.color || '#6366f1' }"
-                >
-                  <Icon :icon="app.icon || 'mdi:application'" class="h-4 w-4 text-white" />
-                </div>
+                <Icon
+                  :icon="app.icon || 'mdi:application'"
+                  class="h-7 w-7 flex-shrink-0"
+                  :style="{ color: app.color || '#6366f1' }"
+                />
 
                 <!-- App Info -->
                 <div class="flex-1 min-w-0">

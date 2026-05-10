@@ -315,12 +315,11 @@
                   class="app-tile"
                   @click="openApp(app)"
                 >
-                  <div
+                  <Icon
+                    :icon="app.icon || 'mdi:application'"
                     class="app-tile-icon"
-                    :style="{ background: app.color || '#6366f1' }"
-                  >
-                    <Icon :icon="app.icon || 'mdi:application'" class="text-white text-sm" />
-                  </div>
+                    :style="{ color: app.color || '#6366f1' }"
+                  />
                   <span class="app-tile-name">{{ app.name }}</span>
                 </div>
               </div>
@@ -1611,11 +1610,8 @@ onUnmounted(() => clearInterval(tickerTimer))
 }
 
 .app-tile-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  display: grid;
-  place-items: center;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
