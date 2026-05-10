@@ -847,12 +847,12 @@ onUnmounted(() => clearInterval(tickerTimer))
 }
 
 .pulse-topbar-spacer {
-  flex: 1;
+  flex: 0 0 12px;
 }
 
 /* ── Ticker ──────────────────────────────────────────────────────── */
 .pulse-ticker {
-  flex: 1;
+  flex: 3;
   min-width: 0;
   display: flex;
   align-items: center;
