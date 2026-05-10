@@ -88,7 +88,7 @@ func (h *GamificationHandler) GetMyAchievements(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
 	var userAchievements []models.UserAchievement
-	if err := h.db.Preload("Achievement").Where("user_id = ?", userID).Find(&userAchievements).Error; err != nil {
+	if err := h.db.Preload("Achievement").Where("user_id = ?", userID).Order("user_achievements.unlocked_at DESC").Find(&userAchievements).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des badges"})
 		return
 	}
