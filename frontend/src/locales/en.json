@@ -1237,9 +1237,10 @@
         "groupAdmin": "My Groups",
         "editor": "Editor"
       },
-      "pendingPoll": "{count} active poll(s)",
-      "pendingNews": "{count} article(s)",
-      "pendingText": "You have {items} since yesterday."
+      "pendingNews": "{count} unread article(s)",
+      "pendingPolls": "{count} poll(s) awaiting your vote",
+      "pendingApps": "{count} new app(s) this week",
+      "pendingText": "{items}."
     },
     "stats": {
       "title": "Statistics",

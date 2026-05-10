@@ -61,6 +61,12 @@ type NewsGroup struct {
 	News []models.News    `json:"news"`
 }
 
+type PendingItems struct {
+	UnreadNews    int64 `json:"unread_news"`
+	UnansweredPolls int64 `json:"unanswered_polls"`
+	NewAppsCount  int64 `json:"new_apps_count"`
+}
+
 type HomeResponse struct {
 	FavoriteApps      []models.Application  `json:"favorite_apps"`
 	NewApps           []models.Application  `json:"new_apps"`
@@ -76,6 +82,7 @@ type HomeResponse struct {
 	ManagedGroupIDs   []uint                `json:"managed_group_ids,omitempty"`
 	AppSettings       *models.AppSettings   `json:"app_settings,omitempty"`
 	HeroMessages      []models.HeroMessage  `json:"hero_messages,omitempty"`
+	PendingItems      *PendingItems         `json:"pending_items,omitempty"`
 }
 
 // Main handler
@@ -272,6 +279,16 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		summary := h.getGamificationSummary(userID.(uint))
 		mu.Lock()
 		response.Gamification = summary
+		mu.Unlock()
+	}()
+
+	// 13. Load Pending Items (unread news, unanswered polls, new apps this week)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		pending := h.getPendingItems(userID.(uint), role.(string))
+		mu.Lock()
+		response.PendingItems = pending
 		mu.Unlock()
 	}()
 
@@ -953,6 +970,69 @@ func (cache *HomeCache) InvalidateAnnouncements() {
 	cache.mu.Lock()
 	defer cache.mu.Unlock()
 	cache.announcements = &CachedData{}
+}
+
+// getPendingItems calculates personalized pending counts for the hero banner:
+// - unread news notifications
+// - active polls the user hasn't voted on
+// - new apps added in the last 7 days (accessible to the user)
+func (h *HomeHandler) getPendingItems(userID uint, role string) *PendingItems {
+	pending := &PendingItems{}
+
+	// Unread news notifications
+	h.db.Model(&models.Notification{}).
+		Where("user_id = ? AND type = ? AND is_read = ?", userID, "news", false).
+		Count(&pending.UnreadNews)
+
+	// Active polls the user hasn't voted on
+	var activePollIDs []uint
+	pollQuery := h.db.Model(&models.Poll{}).Where("is_active = ?", true)
+	if role != "admin" {
+		// Respect poll visibility: global polls + polls targeting user's groups
+		var userGroupIDs []uint
+		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+
+		restrictedIDs := h.db.Table("poll_target_groups").Select("poll_id")
+		if len(userGroupIDs) > 0 {
+			accessibleIDs := h.db.Table("poll_target_groups").Select("poll_id").Where("group_id IN ?", userGroupIDs)
+			pollQuery = pollQuery.Where("id NOT IN (?) OR id IN (?)", restrictedIDs, accessibleIDs)
+		} else {
+			pollQuery = pollQuery.Where("id NOT IN (?)", restrictedIDs)
+		}
+	}
+	pollQuery.Pluck("id", &activePollIDs)
+
+	if len(activePollIDs) > 0 {
+		var votedPollIDs []uint
+		h.db.Table("poll_votes").
+			Where("user_id = ? AND poll_id IN ?", userID, activePollIDs).
+			Distinct("poll_id").
+			Pluck("poll_id", &votedPollIDs)
+		pending.UnansweredPolls = int64(len(activePollIDs) - len(votedPollIDs))
+		if pending.UnansweredPolls < 0 {
+			pending.UnansweredPolls = 0
+		}
+	}
+
+	// New apps added in the last 7 days accessible to the user
+	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
+	if role == "admin" {
+		h.db.Model(&models.Application{}).
+			Where("is_active = ? AND created_at >= ?", true, sevenDaysAgo).
+			Count(&pending.NewAppsCount)
+	} else {
+		h.db.Model(&models.Application{}).
+			Distinct("applications.id").
+			Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
+			Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
+			Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id AND user_groups.user_id = ?", userID).
+			Joins("LEFT JOIN group_admins ON group_app_groups.group_id = group_admins.group_id AND group_admins.user_id = ?", userID).
+			Where("applications.is_active = ? AND applications.created_at >= ? AND (app_groups.is_private = ? OR user_groups.user_id = ? OR group_admins.user_id = ?)",
+				true, sevenDaysAgo, false, userID, userID).
+			Count(&pending.NewAppsCount)
+	}
+
+	return pending
 }
 
 // InvalidateAppSettings can be called from admin handlers when settings are modified

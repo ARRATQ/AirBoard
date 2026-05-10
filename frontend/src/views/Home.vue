@@ -479,12 +479,16 @@ const firstName = computed(() => {
 })
 
 const pendingActionsText = computed(() => {
-  const polls = homeData.value.polls?.filter(p => p.is_active).length || 0
-  const news = homeData.value.recent_news_by_type?.reduce((s, g) => s + g.news.length, 0) || 0
-  if (!polls && !news) return ''
+  const pending = homeData.value.pending_items
+  if (!pending) return ''
+  const news = pending.unread_news || 0
+  const polls = pending.unanswered_polls || 0
+  const apps = pending.new_apps_count || 0
+  if (!news && !polls && !apps) return ''
   const parts = []
-  if (polls) parts.push(t('home.hero.pendingPoll', { count: polls }))
   if (news) parts.push(t('home.hero.pendingNews', { count: news }))
+  if (polls) parts.push(t('home.hero.pendingPolls', { count: polls }))
+  if (apps) parts.push(t('home.hero.pendingApps', { count: apps }))
   return t('home.hero.pendingText', { items: parts.join(t('common.and')) })
 })
 
