@@ -12,12 +12,11 @@
       @click="toggleGroup(appGroup.id)"
     >
       <div class="flex items-center gap-2 flex-1">
-        <div
-          class="h-7 w-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0"
-          :style="{ backgroundColor: appGroup.color || '#10b981' }"
-        >
-          <Icon :icon="appGroup.icon || 'mdi:folder'" class="h-4 w-4 text-white" />
-        </div>
+        <Icon
+          :icon="appGroup.icon || 'mdi:folder'"
+          class="h-5 w-5 flex-shrink-0"
+          :style="{ color: appGroup.color || '#10b981' }"
+        />
         <div class="flex items-baseline gap-2 flex-1 min-w-0">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
             {{ appGroup.name }}
@@ -44,12 +43,11 @@
             @click="openApplication(app)"
           >
             <!-- App Icon -->
-            <div
-              class="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm"
-              :style="{ backgroundColor: app.color || '#6366f1' }"
-            >
-              <Icon :icon="app.icon || 'mdi:application'" class="h-4 w-4 text-white" />
-            </div>
+            <Icon
+              :icon="app.icon || 'mdi:application'"
+              class="h-7 w-7 flex-shrink-0"
+              :style="{ color: app.color || '#6366f1' }"
+            />
 
             <!-- App Info -->
             <div class="flex-1 min-w-0">

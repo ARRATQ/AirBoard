@@ -45,12 +45,11 @@
       >
         <div class="card-header">
           <div class="flex items-center space-x-3">
-            <div 
-              class="h-10 w-10 rounded-lg flex items-center justify-center"
-              :style="{ backgroundColor: group.color || '#10b981' }"
-            >
-              <Icon :icon="group.icon || 'mdi:folder'" class="h-5 w-5 text-white" />
-            </div>
+            <Icon
+              :icon="group.icon || 'mdi:folder'"
+              class="h-8 w-8 flex-shrink-0"
+              :style="{ color: group.color || '#10b981' }"
+            />
             <div>
               <h3 class="card-title">{{ group.name }}</h3>
               <p class="text-sm text-gray-400">{{ group.applications?.length || 0 }} applications</p>

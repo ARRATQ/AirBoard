@@ -51,12 +51,11 @@
       >
         <div class="card-header">
           <div class="flex items-center gap-3">
-            <div 
-              class="h-10 w-10 rounded-lg flex items-center justify-center"
-              :style="{ backgroundColor: app.color || '#6366f1' }"
-            >
-              <Icon :icon="app.icon || 'mdi:application'" class="h-5 w-5 text-white" />
-            </div>
+            <Icon
+              :icon="app.icon || 'mdi:application'"
+              class="h-8 w-8 flex-shrink-0"
+              :style="{ color: app.color || '#6366f1' }"
+            />
             <div class="flex-1">
               <h3 class="card-title">{{ app.name }}</h3>
               <p class="text-sm text-gray-400">{{ getAppGroupName(app.app_group_id) }}</p>

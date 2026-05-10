@@ -126,12 +126,11 @@
                   <label class="form-label">{{ $t('groupAdmin.appGroupModal.preview') }}</label>
                   <div class="card p-4">
                     <div class="flex items-center space-x-3">
-                      <div
-                        class="h-12 w-12 rounded-lg flex items-center justify-center"
-                        :style="{ backgroundColor: form.color }"
-                      >
-                        <Icon :icon="form.icon || 'mdi:folder'" class="h-6 w-6 text-white" />
-                      </div>
+                      <Icon
+                        :icon="form.icon || 'mdi:folder'"
+                        class="h-10 w-10 flex-shrink-0"
+                        :style="{ color: form.color }"
+                      />
                       <div>
                         <div class="font-medium text-white">{{ form.name || $t('groupAdmin.appGroupModal.previewName') }}</div>
                         <div class="text-sm text-gray-400">{{ form.description || $t('groupAdmin.appGroupModal.previewDescription') }}</div>

@@ -118,12 +118,11 @@
                   <label class="form-label">{{ $t('groupAdmin.applicationModal.preview') }}</label>
                   <div class="card p-4">
                     <div class="flex items-center space-x-4">
-                      <div
-                        class="h-12 w-12 rounded-lg flex items-center justify-center"
-                        :style="{ backgroundColor: form.color }"
-                      >
-                        <Icon :icon="form.icon || 'mdi:application'" class="h-6 w-6 text-white" />
-                      </div>
+                      <Icon
+                        :icon="form.icon || 'mdi:application'"
+                        class="h-10 w-10 flex-shrink-0"
+                        :style="{ color: form.color }"
+                      />
                       <div class="flex-1">
                         <div class="font-medium text-white">{{ form.name || $t('groupAdmin.applicationModal.previewName') }}</div>
                         <div class="text-sm text-gray-400">{{ form.url || $t('groupAdmin.applicationModal.previewUrl') }}</div>

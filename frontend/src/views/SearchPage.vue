@@ -75,12 +75,11 @@
             rel="noopener noreferrer"
             class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow flex items-start gap-3 group"
           >
-            <div
-              class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-              :style="{ backgroundColor: app.color + '20' }"
-            >
-              <Icon :icon="app.icon || 'mdi:application'" class="h-5 w-5" :style="{ color: app.color }" />
-            </div>
+            <Icon
+              :icon="app.icon || 'mdi:application'"
+              class="h-8 w-8 flex-shrink-0"
+              :style="{ color: app.color || '#6366f1' }"
+            />
             <div class="min-w-0">
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 truncate">
                 {{ app.name }}

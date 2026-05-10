@@ -104,12 +104,11 @@
             <!-- Application Name & Icon -->
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center gap-3">
-                <div
-                  class="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  :style="{ backgroundColor: app.color || '#6366f1' }"
-                >
-                  <Icon :icon="app.icon || 'mdi:application'" class="h-5 w-5 text-white" />
-                </div>
+                <Icon
+                  :icon="app.icon || 'mdi:application'"
+                  class="h-8 w-8 flex-shrink-0"
+                  :style="{ color: app.color || '#6366f1' }"
+                />
                 <div class="flex items-center gap-2">
                   <span class="font-medium text-gray-900 dark:text-white">{{ app.name }}</span>
                   <Icon v-if="app.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -127,12 +126,11 @@
             <!-- Category -->
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center gap-2">
-                <div
-                  class="h-6 w-6 rounded flex items-center justify-center flex-shrink-0"
-                  :style="{ backgroundColor: app.app_group?.color || '#10b981' }"
-                >
-                  <Icon :icon="app.app_group?.icon || 'mdi:folder'" class="h-3 w-3 text-white" />
-                </div>
+                <Icon
+                  :icon="app.app_group?.icon || 'mdi:folder'"
+                  class="h-5 w-5 flex-shrink-0"
+                  :style="{ color: app.app_group?.color || '#10b981' }"
+                />
                 <span class="text-sm text-gray-700 dark:text-gray-300">
                   {{ app.app_group?.name || '-' }}
                 </span>

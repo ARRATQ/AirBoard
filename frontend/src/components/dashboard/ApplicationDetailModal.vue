@@ -18,12 +18,11 @@
         <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-gray-200 dark:border-gray-700">
           <div class="sm:flex sm:items-start justify-between">
             <div class="flex items-center gap-4">
-              <div
-                class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-lg sm:mx-0 sm:h-12 sm:w-12 shadow-sm"
-                :style="{ backgroundColor: app.color || '#6366f1' }"
-              >
-                <Icon :icon="app.icon || 'mdi:application'" class="h-6 w-6 text-white" />
-              </div>
+              <Icon
+                :icon="app.icon || 'mdi:application'"
+                class="h-10 w-10 flex-shrink-0"
+                :style="{ color: app.color || '#6366f1' }"
+              />
               <div class="mt-3 text-center sm:mt-0 sm:text-left">
                 <h3 class="text-xl leading-6 font-semibold text-gray-900 dark:text-white" id="modal-title">
                   {{ app.name }}
