@@ -10,7 +10,7 @@
         @mouseleave="resumeTicker"
       >
         <Icon :icon="tickerIcon" class="pulse-ticker-icon" :class="`pulse-ticker-icon--${activeAnnouncements[tickerIndex]?.type || 'info'}`" />
-        <div class="pulse-ticker-track">
+        <div class="pulse-ticker-track" @click="openAnnouncementModal(activeAnnouncements[tickerIndex])">
           <Transition name="ticker-slide" mode="out-in">
             <span :key="tickerIndex" class="pulse-ticker-text">
               <strong v-if="activeAnnouncements[tickerIndex]?.title" class="pulse-ticker-title">
@@ -21,6 +21,7 @@
               </span>
             </span>
           </Transition>
+          <Icon icon="mdi:arrow-expand" class="pulse-ticker-expand-hint" />
         </div>
         <div v-if="activeAnnouncements.length > 1" class="pulse-ticker-nav">
           <button class="pulse-ticker-dot-btn" @click="prevTicker">
@@ -32,6 +33,26 @@
           </button>
         </div>
       </div>
+
+      <!-- ── Announcement Modal ────────────────────────────────────── -->
+      <Teleport to="body">
+        <Transition name="modal-fade">
+          <div v-if="announcementModal" class="pulse-modal-backdrop" @click.self="announcementModal = null">
+            <div class="pulse-modal" :class="`pulse-modal--${announcementModal.type || 'info'}`">
+              <div class="pulse-modal-header">
+                <Icon :icon="tickerIconMap[announcementModal.type] || 'mdi:information-outline'" class="pulse-modal-icon" />
+                <h3 class="pulse-modal-title">{{ announcementModal.title }}</h3>
+                <button class="pulse-modal-close" @click="announcementModal = null">
+                  <Icon icon="mdi:close" />
+                </button>
+              </div>
+              <div class="pulse-modal-body">
+                <p class="pulse-modal-content">{{ announcementModal.content }}</p>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
 
       <div class="pulse-topbar-spacer" />
 
@@ -397,7 +418,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -686,6 +707,17 @@ const startTicker = () => {
 const pauseTicker = () => clearInterval(tickerTimer)
 const resumeTicker = () => startTicker()
 
+// ── Announcement Modal ────────────────────────────────────────────────
+const announcementModal = ref(null)
+const openAnnouncementModal = (announcement) => {
+  pauseTicker()
+  announcementModal.value = announcement
+}
+
+watch(announcementModal, (val) => {
+  if (!val) resumeTicker()
+})
+
 onMounted(() => { loadHomeData(); loadWeather() })
 onUnmounted(() => clearInterval(tickerTimer))
 </script>
@@ -708,7 +740,7 @@ onUnmounted(() => clearInterval(tickerTimer))
 
 /* ── Topbar ──────────────────────────────────────────────────────── */
 .pulse-topbar {
-  height: 68px;
+  min-height: 68px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -842,33 +874,63 @@ onUnmounted(() => clearInterval(tickerTimer))
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  height: 20px;
+  height: 36px;
   position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.pulse-ticker-track:hover {
+  background: var(--border);
 }
 
 .pulse-ticker-text {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 12.5px;
-  line-height: 20px;
+  line-height: 1.4;
   position: absolute;
-  inset: 0;
+  inset: 0 28px 0 0;
+  padding: 4px 0;
+  overflow: hidden;
 }
 
 .pulse-ticker-title {
   font-weight: 700;
   color: var(--text-primary);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .pulse-ticker-content {
   color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+.pulse-ticker-expand-hint {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.pulse-ticker-track:hover .pulse-ticker-expand-hint {
+  opacity: 0.6;
 }
 
 .pulse-ticker-nav {
@@ -921,6 +983,109 @@ onUnmounted(() => clearInterval(tickerTimer))
 .ticker-slide-leave-to {
   transform: translateY(-100%);
   opacity: 0;
+}
+
+/* ── Announcement Modal ──────────────────────────────────────────── */
+.pulse-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.pulse-modal {
+  background: var(--bg-card);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border-top: 4px solid currentColor;
+}
+
+.pulse-modal--info    { color: #3b82f6; }
+.pulse-modal--warning { color: #f59e0b; }
+.pulse-modal--success { color: #10b981; }
+.pulse-modal--error   { color: #ef4444; }
+
+.pulse-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 20px 14px;
+}
+
+.pulse-modal-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.pulse-modal-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.pulse-modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 18px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pulse-modal-close:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.pulse-modal-body {
+  padding: 0 20px 20px 54px;
+}
+
+.pulse-modal-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Modal transitions */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-active .pulse-modal,
+.modal-fade-leave-active .pulse-modal {
+  transition: transform 0.2s ease;
+}
+.modal-fade-enter-from .pulse-modal {
+  transform: scale(0.95) translateY(-8px);
+}
+.modal-fade-leave-to .pulse-modal {
+  transform: scale(0.95) translateY(-8px);
 }
 
 /* ── Body ────────────────────────────────────────────────────────── */
