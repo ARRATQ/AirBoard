@@ -133,7 +133,10 @@ func (s *GamificationService) CheckAchievements(tx *gorm.DB, userID uint, trigge
 	case "news_read":
 		return s.checkInformedAchievement(tx, userID)
 	case "daily_login":
-		return s.checkEarlyBirdAchievement(tx, userID, tz)
+		if err := s.checkEarlyBirdAchievement(tx, userID, tz); err != nil {
+			return err
+		}
+		return s.checkNightOwlAchievement(tx, userID, tz)
 	case "news_publish":
 		return s.checkFirstNewsAchievement(tx, userID)
 	case "event_publish":
@@ -269,6 +272,18 @@ func (s *GamificationService) checkEarlyBirdAchievement(tx *gorm.DB, userID uint
 		userID, loc.String(), now.Format("15:04:05"), now.Hour(), now.Minute(), eligible)
 	if eligible {
 		return s.UnlockAchievement(tx, userID, "early_bird")
+	}
+	return nil
+}
+
+func (s *GamificationService) checkNightOwlAchievement(tx *gorm.DB, userID uint, timezone string) error {
+	loc := loadLocation(timezone)
+	now := time.Now().In(loc)
+	eligible := now.Hour() > 16 || (now.Hour() == 16 && now.Minute() >= 30)
+	log.Printf("[NightOwl] check userID=%d tz=%s local_time=%s hour=%d min=%d eligible=%v",
+		userID, loc.String(), now.Format("15:04:05"), now.Hour(), now.Minute(), eligible)
+	if eligible {
+		return s.UnlockAchievement(tx, userID, "night_owl")
 	}
 	return nil
 }
@@ -462,6 +477,19 @@ func (s *GamificationService) SeedAchievements() error {
 			Category:      "user",
 			TriggerReason: "daily_login",
 			Metric:        "early_bird_check",
+			Threshold:     0,
+			IsActive:      true,
+		},
+		{
+			Code:          "night_owl",
+			Name:          "Après les heures",
+			Description:   "Connectez-vous après 16h30",
+			Icon:          "mdi:moon-waning-crescent",
+			Color:         "#6366F1",
+			XPReward:      50,
+			Category:      "user",
+			TriggerReason: "daily_login",
+			Metric:        "night_owl_check",
 			Threshold:     0,
 			IsActive:      true,
 		},
