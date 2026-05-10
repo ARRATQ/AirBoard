@@ -747,9 +747,16 @@ onUnmounted(() => clearInterval(tickerTimer))
   background: transparent;
   border: none;
   outline: none;
+  box-shadow: none;
   font-family: inherit;
   min-width: 0;
   line-height: 1.4;
+}
+
+.pulse-search-input:focus,
+.pulse-search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .pulse-search-input::placeholder {
