@@ -898,15 +898,18 @@ func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
 	var userAchievements []models.UserAchievement
 	h.db.Preload("Achievement").
 		Where("user_id = ?", userID).
-		Order("unlocked_at DESC").
+		Order("user_achievements.unlocked_at DESC").
+		Limit(5).
 		Find(&userAchievements)
 
 	recentBadges := make([]models.Achievement, 0)
-	for i, ua := range userAchievements {
-		if i < 5 {
-			recentBadges = append(recentBadges, ua.Achievement)
-		}
+	for _, ua := range userAchievements {
+		recentBadges = append(recentBadges, ua.Achievement)
 	}
+
+	// Total count (sans limite)
+	var totalAchievements []models.UserAchievement
+	h.db.Where("user_id = ?", userID).Find(&totalAchievements)
 
 	// Compute rank (position in leaderboard by XP descending)
 	var rank int64
@@ -920,7 +923,7 @@ func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
 		NextLevelXP:     xpForNextLevel,
 		ProgressPercent: progressPercent,
 		StreakDays:      profile.LoginStreak,
-		BadgesCount:     len(userAchievements),
+		BadgesCount:     len(totalAchievements),
 		Rank:            int(rank) + 1,
 		RecentBadges:    recentBadges,
 	}
