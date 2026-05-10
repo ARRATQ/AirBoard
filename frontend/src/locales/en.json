@@ -109,7 +109,9 @@
     "deleting": "Deleting...",
     "page": "Page",
     "of": "of",
-    "optional": "optional"
+    "optional": "optional",
+    "details": "Details",
+    "and": " and "
   },
   "calendar": {
     "title": "Event Calendar",
@@ -126,7 +128,15 @@
     "month": "Month",
     "week": "Week",
     "day": "Day",
-    "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    "daysOfWeek": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ]
   },
   "agenda": {
     "title": "Event Agenda",
@@ -150,7 +160,15 @@
       "subtitle": "Calculate the number of working days between two dates",
       "weekendDays": "Weekend days",
       "weekendHint": "Click to select/deselect rest days",
-      "daysOfWeek": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "daysOfWeek": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
       "startDate": "Start date",
       "endDate": "End date",
       "excludeHolidays": "Exclude holidays from calculation",
@@ -193,8 +211,7 @@
     "loadError": "Error while loading groups",
     "saveError": "Error while saving group",
     "deleteError": "Error while deleting group"
-  }
-  ,
+  },
   "applications": {
     "title": "Applications",
     "subtitle": "Manage your portal applications",
@@ -366,7 +383,7 @@
     "thisYear": "This year",
     "members": "members",
     "group": "Group",
-    "groups": "groups",
+    "groups": "Groups",
     "activeMembers": "Active members",
     "appClicks": "App clicks",
     "newsRead": "News read",
@@ -386,7 +403,6 @@
     "allRoles": "All roles",
     "usersFound": "users",
     "user": "User",
-    "groups": "Groups",
     "lastLogin": "Last login",
     "never": "Never",
     "monthlyActivity": "Monthly activity (12 months)",
@@ -1220,7 +1236,10 @@
         "admin": "Admin",
         "groupAdmin": "My Groups",
         "editor": "Editor"
-      }
+      },
+      "pendingPoll": "{count} active poll(s)",
+      "pendingNews": "{count} article(s)",
+      "pendingText": "You have {items} since yesterday."
     },
     "stats": {
       "title": "Statistics",
@@ -1267,7 +1286,8 @@
       "expiringSoon": "Ending soon",
       "latestResults": "Latest results",
       "closesIn": "Closes in",
-      "votes": "{count} vote(s)"
+      "votes": "{count} vote(s)",
+      "vote": "Vote now"
     },
     "quickActions": {
       "title": "Quick actions",
@@ -1283,9 +1303,17 @@
     "error": {
       "title": "Unable to load home",
       "message": "An error occurred while loading the home page. Please try again."
+    },
+    "vote": "Vote",
+    "newsHub": "News Feed",
+    "xp": {
+      "title": "My XP",
+      "beforeLevel": "before level {level}",
+      "streak": "Streak",
+      "badges": "Badges",
+      "rank": "Rank"
     }
   },
-
   "email": {
     "title": "Email Notifications",
     "subtitle": "Configure SMTP server and email templates",
@@ -1348,7 +1376,6 @@
     "statusCompleted": "Completed",
     "statusFailed": "Failed"
   },
-
   "comments": {
     "title": "Comments",
     "placeholder": "Add a comment...",
@@ -1369,13 +1396,11 @@
       "days_ago": "{count} d"
     }
   },
-
   "feedback": {
     "helpful": "Was this helpful?",
     "positive": "positive",
     "negative": "negative"
   },
-
   "moderation": {
     "title": "Comment Moderation",
     "description": "Manage pending comments and configure comment settings",

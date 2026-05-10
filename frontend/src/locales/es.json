@@ -101,7 +101,9 @@
     "updating": "Actualizando...",
     "deleting": "Eliminando...",
     "page": "Página",
-    "of": "de"
+    "of": "de",
+    "details": "Detalles",
+    "and": " y "
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -118,7 +120,15 @@
     "month": "Mes",
     "week": "Semana",
     "day": "Día",
-    "daysOfWeek": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+    "daysOfWeek": [
+      "Lun",
+      "Mar",
+      "Mié",
+      "Jue",
+      "Vie",
+      "Sáb",
+      "Dom"
+    ]
   },
   "agenda": {
     "title": "Agenda de Eventos",
@@ -938,7 +948,8 @@
       "expiringSoon": "Termina pronto",
       "latestResults": "Últimos resultados",
       "closesIn": "Cierra en",
-      "votes": "{count} voto(s)"
+      "votes": "{count} voto(s)",
+      "vote": "Votar ahora"
     },
     "quickActions": {
       "title": "Acciones rápidas",
@@ -954,9 +965,30 @@
     "error": {
       "title": "No se puede cargar inicio",
       "message": "Ocurrió un error al cargar la página de inicio. Por favor, inténtalo de nuevo."
+    },
+    "vote": "Votar",
+    "newsHub": "Noticias",
+    "loading": "Cargando tu espacio...",
+    "xp": {
+      "title": "Mi XP",
+      "beforeLevel": "antes del nivel {level}",
+      "streak": "Racha",
+      "badges": "Insignias",
+      "rank": "Rango"
+    },
+    "hero": {
+      "subtitle": "Descubre tu espacio de trabajo personalizado",
+      "searchPlaceholder": "Busca apps, noticias, eventos...",
+      "greeting": {
+        "morning": "Buenos días",
+        "afternoon": "Buenas tardes",
+        "evening": "Buenas noches"
+      },
+      "pendingPoll": "{count} encuesta(s) activa(s)",
+      "pendingNews": "{count} artículo(s)",
+      "pendingText": "Tienes {items} desde ayer."
     }
   },
-
   "email": {
     "title": "Notificaciones por Email",
     "subtitle": "Configurar servidor SMTP y plantillas de email",
@@ -1019,7 +1051,6 @@
     "statusCompleted": "Completado",
     "statusFailed": "Fallido"
   },
-
   "comments": {
     "title": "Comentarios",
     "placeholder": "Añadir un comentario...",
@@ -1040,13 +1071,11 @@
       "days_ago": "{count} d"
     }
   },
-
   "feedback": {
     "helpful": "¿Te ha sido útil?",
     "positive": "positivo",
     "negative": "negativo"
   },
-
   "moderation": {
     "title": "Moderación de comentarios",
     "description": "Gestiona los comentarios pendientes y configura los ajustes de comentarios",

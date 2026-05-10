@@ -95,33 +95,21 @@
           <!-- Stats -->
           <div class="profile-stats">
             <div class="pstat">
-              <div class="pstat-icon trophy">
-                <Icon icon="mdi:trophy-outline" />
-              </div>
-              <div>
-                <div class="pstat-value">{{ unlockedAchievements.length }}</div>
-                <div class="pstat-label">Badges</div>
-              </div>
+              <div class="pstat-icon trophy"><Icon icon="mdi:trophy-outline" /></div>
+              <div class="pstat-value">{{ profile.badges_count ?? unlockedAchievements.length }}</div>
+              <div class="pstat-label">Badges</div>
             </div>
             <div class="pstat-divider" />
             <div class="pstat">
-              <div class="pstat-icon fire">
-                <Icon icon="mdi:fire" />
-              </div>
-              <div>
-                <div class="pstat-value">{{ profile.login_streak || 0 }}</div>
-                <div class="pstat-label">Série</div>
-              </div>
+              <div class="pstat-icon fire"><Icon icon="mdi:fire" /></div>
+              <div class="pstat-value">{{ profile.login_streak || 0 }}</div>
+              <div class="pstat-label">Série</div>
             </div>
             <div class="pstat-divider" />
             <div class="pstat">
-              <div class="pstat-icon rank">
-                <Icon icon="mdi:podium-gold" />
-              </div>
-              <div>
-                <div class="pstat-value">#{{ myRank || '—' }}</div>
-                <div class="pstat-label">Classement</div>
-              </div>
+              <div class="pstat-icon rank"><Icon icon="mdi:podium-gold" /></div>
+              <div class="pstat-value">#{{ myRank || '—' }}</div>
+              <div class="pstat-label">Classement</div>
             </div>
           </div>
 
@@ -303,10 +291,7 @@ const xpToNextLevel = computed(() => {
   return Math.max(xpNext - profile.value.xp, 0)
 })
 
-const myRank = computed(() => {
-  const idx = leaderboard.value.findIndex(u => u.user_id === authStore.user?.id)
-  return idx >= 0 ? idx + 1 : null
-})
+const myRank = computed(() => profile.value.rank || null)
 
 const filteredAchievements = computed(() => {
   if (currentTab.value === 'unlocked') return achievements.value.filter(a => isUnlocked(a.code))
@@ -531,6 +516,8 @@ onMounted(() => {
   border-radius: 16px;
   padding: 1.25rem;
   box-shadow: 0 2px 12px rgba(var(--shadow-rgb),0.06);
+  overflow: hidden;
+  min-width: 0;
 }
 
 .card-title {
@@ -579,8 +566,8 @@ onMounted(() => {
 }
 .dark .level-chip { border-color: var(--bg-card); }
 
-.profile-name { font-size: 1.125rem; font-weight: 700; margin: 0 0 0.125rem; color: var(--text-primary); }
-.profile-username { font-size: 0.8125rem; color: #94a3b8; margin-bottom: 1.125rem; }
+.profile-name { font-size: 1.125rem; font-weight: 700; margin: 0 0 0.125rem; color: var(--text-primary); overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
+.profile-username { font-size: 0.8125rem; color: #94a3b8; margin-bottom: 1.125rem; overflow-wrap: break-word; word-break: break-word; max-width: 100%; }
 
 /* XP */
 .xp-section { margin-bottom: 1.25rem; }
@@ -606,23 +593,26 @@ onMounted(() => {
 
 /* Profile Stats */
 .profile-stats {
-  display: flex; align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  align-items: center;
   background: var(--bg-surface); border-radius: 12px;
-  padding: 0.75rem; margin-bottom: 1.125rem;
+  padding: 0.625rem 0.5rem; margin-bottom: 1.125rem;
   border: 1px solid var(--border);
+  overflow: hidden;
 }
-.pstat { flex: 1; display: flex; align-items: center; gap: 0.625rem; }
-.pstat-divider { width: 1px; height: 32px; background: var(--border); margin: 0 0.5rem; }
+.pstat { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; min-width: 0; padding: 0 0.25rem; }
+.pstat-divider { width: 1px; height: 28px; background: var(--border); justify-self: center; }
 .pstat-icon {
-  width: 32px; height: 32px; border-radius: 8px;
+  width: 26px; height: 26px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
+  font-size: 0.875rem; flex-shrink: 0;
 }
 .pstat-icon.trophy { background: #fef3c7; color: #d97706; }
 .pstat-icon.fire   { background: #fee2e2; color: #ef4444; }
 .pstat-icon.rank   { background: #dcfce7; color: #16a34a; }
-.pstat-value { font-weight: 800; font-size: 1rem; color: var(--text-primary); line-height: 1; }
-.pstat-label { font-size: 0.6875rem; color: #94a3b8; }
+.pstat-value { font-weight: 800; font-size: 0.9375rem; color: var(--text-primary); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pstat-label { font-size: 0.625rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* Badge preview */
 .badge-preview-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem; text-align: left; }

@@ -50,6 +50,9 @@ type GamificationSummary struct {
 	XP              int64                `json:"xp"`
 	NextLevelXP     int64                `json:"next_level_xp"`
 	ProgressPercent int                  `json:"progress_percent"`
+	StreakDays      int                  `json:"streak_days"`
+	BadgesCount     int                  `json:"badges_count"`
+	Rank            int                  `json:"rank"`
 	RecentBadges    []models.Achievement `json:"recent_badges"`
 }
 
@@ -891,24 +894,34 @@ func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
 		progressPercent = int((float64(xpInRange) / float64(rangeNeed)) * 100)
 	}
 
-	// Fetch recent badges
+	// Fetch recent badges + total count
 	var userAchievements []models.UserAchievement
 	h.db.Preload("Achievement").
 		Where("user_id = ?", userID).
 		Order("unlocked_at DESC").
-		Limit(3).
 		Find(&userAchievements)
 
 	recentBadges := make([]models.Achievement, 0)
-	for _, ua := range userAchievements {
-		recentBadges = append(recentBadges, ua.Achievement)
+	for i, ua := range userAchievements {
+		if i < 5 {
+			recentBadges = append(recentBadges, ua.Achievement)
+		}
 	}
+
+	// Compute rank (position in leaderboard by XP descending)
+	var rank int64
+	h.db.Model(&models.GamificationProfile{}).
+		Where("xp > ? AND deleted_at IS NULL", profile.XP).
+		Count(&rank)
 
 	return &GamificationSummary{
 		Level:           profile.Level,
 		XP:              profile.XP,
 		NextLevelXP:     xpForNextLevel,
 		ProgressPercent: progressPercent,
+		StreakDays:      profile.LoginStreak,
+		BadgesCount:     len(userAchievements),
+		Rank:            int(rank) + 1,
 		RecentBadges:    recentBadges,
 	}
 }

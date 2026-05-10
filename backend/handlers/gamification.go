@@ -51,7 +51,6 @@ func (h *GamificationHandler) GetMyProfile(c *gin.Context) {
 	var profile models.GamificationProfile
 	if err := h.db.Where("user_id = ?", userID).First(&profile).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			// Créer un profil par défaut si inexistant
 			profile = models.GamificationProfile{UserID: userID, Level: 1, XP: 0}
 			h.db.Create(&profile)
 		} else {
@@ -60,7 +59,28 @@ func (h *GamificationHandler) GetMyProfile(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, profile)
+	// Rank = nombre d'utilisateurs avec plus de XP + 1
+	var higherCount int64
+	h.db.Model(&models.GamificationProfile{}).
+		Where("xp > ? AND deleted_at IS NULL", profile.XP).
+		Count(&higherCount)
+
+	// Nombre de badges débloqués
+	var badgesCount int64
+	h.db.Model(&models.UserAchievement{}).Where("user_id = ?", userID).Count(&badgesCount)
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":                profile.ID,
+		"user_id":           profile.UserID,
+		"xp":                profile.XP,
+		"level":             profile.Level,
+		"login_streak":      profile.LoginStreak,
+		"last_login_reward": profile.LastDailyLogin,
+		"created_at":        profile.CreatedAt,
+		"updated_at":        profile.UpdatedAt,
+		"rank":              int(higherCount) + 1,
+		"badges_count":      int(badgesCount),
+	})
 }
 
 // GetMyAchievements récupère les badges débloqués par l'utilisateur

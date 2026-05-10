@@ -109,7 +109,9 @@
     "deleting": "Suppression...",
     "page": "Page",
     "of": "sur",
-    "optional": "optionnel"
+    "optional": "optionnel",
+    "details": "Détails",
+    "and": " et "
   },
   "calendar": {
     "title": "Calendrier des Événements",
@@ -358,7 +360,7 @@
     "thisYear": "Cette année",
     "members": "membres",
     "group": "Groupe",
-    "groups": "groupes",
+    "groups": "Groupes",
     "activeMembers": "Membres actifs",
     "appClicks": "Clics apps",
     "newsRead": "Articles lus",
@@ -378,7 +380,6 @@
     "allRoles": "Tous les rôles",
     "usersFound": "utilisateurs",
     "user": "Utilisateur",
-    "groups": "Groupes",
     "lastLogin": "Dernière connexion",
     "never": "Jamais",
     "monthlyActivity": "Activité mensuelle (12 mois)",
@@ -1212,7 +1213,10 @@
         "admin": "Admin",
         "groupAdmin": "Mes Groupes",
         "editor": "Éditeur"
-      }
+      },
+      "pendingPoll": "{count} sondage(s) actif(s)",
+      "pendingNews": "{count} article(s)",
+      "pendingText": "Tu as {items} depuis hier."
     },
     "stats": {
       "title": "Statistiques",
@@ -1259,7 +1263,8 @@
       "expiringSoon": "Se termine bientôt",
       "latestResults": "Derniers résultats",
       "closesIn": "Se ferme dans",
-      "votes": "{count} vote(s)"
+      "votes": "{count} vote(s)",
+      "vote": "Voter maintenant"
     },
     "quickActions": {
       "title": "Actions rapides",
@@ -1275,6 +1280,15 @@
     "error": {
       "title": "Impossible de charger l'accueil",
       "message": "Une erreur est survenue lors du chargement de la page d'accueil. Veuillez réessayer."
+    },
+    "vote": "Voter",
+    "newsHub": "Fil d'actualités",
+    "xp": {
+      "title": "Mon XP",
+      "beforeLevel": "avant niveau {level}",
+      "streak": "Série",
+      "badges": "Badges",
+      "rank": "Rang"
     }
   },
   "email": {
