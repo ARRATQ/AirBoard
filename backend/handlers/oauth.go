@@ -313,10 +313,15 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	}
 
 	// Échanger le code contre un token
-	log.Printf("[OAuth] Exchanging code for token with %s...", provider.ProviderName)
+	log.Printf("[OAuth] Exchanging code for token with %s (redirect_uri: %s)...", provider.ProviderName, provider.RedirectURI)
 	token, err := h.exchangeCodeForToken(provider, code)
 	if err != nil {
 		log.Printf("[OAuth] ❌ Error exchanging code for token: %v", err)
+		errMsg := err.Error()
+		// Extract a meaningful message from Microsoft's error response
+		if strings.Contains(errMsg, "redirect_uri") || strings.Contains(errMsg, "AADSTS") {
+			log.Printf("[OAuth] ❌ Likely redirect_uri mismatch. Stored redirect_uri: %s", provider.RedirectURI)
+		}
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "oauth_error",
 			Message: "Failed to exchange code for token",

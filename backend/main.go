@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"net/http"
 	"time"
 
@@ -1075,9 +1076,9 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 		}
 		log.Printf("✅ Google OAuth provider créé (désactivé par défaut) - Redirect: %s", googleProvider.RedirectURI)
 	} else {
-		// Mettre à jour le redirect URI si différent
+		// Mettre à jour le redirect URI seulement si toujours sur localhost (pas encore configuré en prod)
 		newRedirectURI := publicURL + "/auth/oauth/google/callback"
-		if googleProvider.RedirectURI != newRedirectURI {
+		if googleProvider.RedirectURI != newRedirectURI && strings.Contains(googleProvider.RedirectURI, "localhost") {
 			googleProvider.RedirectURI = newRedirectURI
 			if err = db.Save(&googleProvider).Error; err != nil {
 				return fmt.Errorf("failed to update Google OAuth redirect URI: %w", err)
@@ -1110,9 +1111,9 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 		}
 		log.Printf("✅ Microsoft OAuth provider créé (désactivé par défaut) - Redirect: %s", microsoftProvider.RedirectURI)
 	} else {
-		// Mettre à jour le redirect URI si différent
+		// Mettre à jour le redirect URI seulement si toujours sur localhost (pas encore configuré en prod)
 		newRedirectURI := publicURL + "/auth/oauth/microsoft/callback"
-		if microsoftProvider.RedirectURI != newRedirectURI {
+		if microsoftProvider.RedirectURI != newRedirectURI && strings.Contains(microsoftProvider.RedirectURI, "localhost") {
 			microsoftProvider.RedirectURI = newRedirectURI
 			if err = db.Save(&microsoftProvider).Error; err != nil {
 				return fmt.Errorf("failed to update Microsoft OAuth redirect URI: %w", err)
