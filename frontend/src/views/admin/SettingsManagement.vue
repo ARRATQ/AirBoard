@@ -91,7 +91,7 @@
               <div class="bg-gray-800 rounded-lg p-4">
                 <h2 class="text-lg font-semibold text-white mb-2">{{ form.dashboard_title || $t('settings.previewDashboardTitle') }}</h2>
                 <p class="text-gray-300 text-sm mb-2">{{ form.welcome_message || $t('settings.previewWelcome') }}</p>
-                <p class="text-xs text-gray-400 italic">▲ Message Dashboard (page Applications)</p>
+                <p class="text-xs text-gray-400 italic">▲ Message Dashboard (page Ressources)</p>
                 <!-- Sample App Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div class="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
@@ -188,7 +188,7 @@
                   :placeholder="$t('settings.welcomeMessagePlaceholder')"
                 ></textarea>
                 <p v-if="errors.welcome_message" class="form-error">{{ errors.welcome_message }}</p>
-                <p class="form-help">Friendly message displayed on the applications dashboard page</p>
+                <p class="form-help">Friendly message displayed on the resources page</p>
               </div>
 
             </div>

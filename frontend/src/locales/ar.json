@@ -1,7 +1,7 @@
 {
   "search": {
     "title": "البحث",
-    "subtitle": "ابحث في التطبيقات والأخبار والأحداث والاستطلاعات والإعلانات",
+    "subtitle": "ابحث في الموارد والأخبار والأحداث والاستطلاعات والإعلانات",
     "placeholder": "اكتب بحثك... (حد أدنى حرفان)",
     "noResults": "لم يتم العثور على نتائج",
     "noResultsHint": "جرب مصطلحات أخرى أو تحقق من الإملاء",
@@ -11,14 +11,14 @@
     "closed": "مغلق",
     "tabs": {
       "all": "الكل",
-      "applications": "التطبيقات",
+      "applications": "الموارد",
       "news": "الأخبار",
       "events": "الأحداث",
       "polls": "الاستطلاعات",
       "announcements": "الإعلانات"
     },
     "types": {
-      "applications": "التطبيقات",
+      "applications": "الموارد",
       "news": "الأخبار",
       "events": "الأحداث",
       "polls": "الاستطلاعات",
@@ -36,8 +36,8 @@
     "dashboard": "لوحة التحكم",
     "administration": "الإدارة",
     "overview": "نظرة عامة",
-    "appGroups": "مجموعات التطبيقات",
-    "applications": "التطبيقات",
+    "appGroups": "مجموعات الموارد",
+    "applications": "الموارد",
     "today": "اليوم",
     "yesterday": "أمس",
     "tomorrow": "غداً",
@@ -81,7 +81,7 @@
     "save": "حفظ",
     "noGroup": "لا توجد مجموعة",
     "close": "إغلاق",
-    "applicationsManagement": "إدارة التطبيقات",
+    "applicationsManagement": "إدارة الموارد",
     "contentManagement": "إدارة المحتوى",
     "usersGroups": "المستخدمون والمجموعات",
     "systemSettings": "إعدادات النظام",
@@ -93,7 +93,7 @@
     "pollsManagement": "إدارة الاستطلاعات",
     "media": "الوسائط",
     "usersAccess": "المستخدمون والوصول",
-    "appCatalog": "كتالوج التطبيقات",
+    "appCatalog": "كتالوج الموارد",
     "system": "النظام",
     "view": "عرض",
     "download": "تحميل",
@@ -154,8 +154,8 @@
     "status_active": "النشطة فقط",
     "status_inactive": "غير النشطة فقط",
     "users": "مستخدمين",
-    "appsLabel": "مجموعات التطبيقات",
-    "appsAccess": "الوصول إلى مجموعات التطبيقات:",
+    "appsLabel": "مجموعات الموارد",
+    "appsAccess": "الوصول إلى مجموعات الموارد:",
     "usersLabel": "المستخدمون:",
     "noResultsTitle": "لا توجد نتائج",
     "noResultsText": "لا توجد مجموعة تطابق معايير البحث.",
@@ -175,18 +175,18 @@
     "deleteError": "خطأ أثناء حذف المجموعة"
   },
   "applications": {
-    "title": "التطبيقات",
-    "subtitle": "إدارة تطبيقات البوابة",
-    "new": "تطبيق جديد",
-    "add": "إضافة تطبيق",
-    "searchPlaceholder": "ابحث عن تطبيقات...",
+    "title": "الموارد",
+    "subtitle": "إدارة موارد البوابة",
+    "new": "مورد جديد",
+    "add": "إضافة مورد",
+    "searchPlaceholder": "ابحث عن موارد...",
     "filter_all_groups": "كل المجموعات",
     "noResultsTitle": "لا توجد نتائج",
-    "noResultsText": "لا يوجد تطبيق يطابق معايير البحث.",
-    "emptyTitle": "لا توجد تطبيقات",
-    "emptyText": "ابدأ بإضافة أول تطبيق.",
+    "noResultsText": "لا يوجد مورد يطابق معايير البحث.",
+    "emptyTitle": "لا توجد موارد",
+    "emptyText": "ابدأ بإضافة أول مورد.",
     "order": "الترتيب",
-    "confirmDeleteTitle": "حذف التطبيق",
+    "confirmDeleteTitle": "حذف المورد",
     "confirmDeleteText": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
   },
   "users": {
@@ -249,9 +249,9 @@
   },
   "admin": {
     "overviewTitle": "الإدارة",
-    "overviewSubtitle": "إدارة بوابة التطبيقات والمستخدمين",
-    "manageAppGroups": "إدارة فئات التطبيقات",
-    "manageApplications": "إضافة التطبيقات وتعديلها",
+    "overviewSubtitle": "إدارة بوابة الموارد والمستخدمين",
+    "manageAppGroups": "إدارة فئات الموارد",
+    "manageApplications": "إضافة الموارد وتعديلها",
     "manageUsers": "إدارة حسابات المستخدمين",
     "manageGroups": "إدارة الصلاحيات حسب المجموعات",
     "dangerZone": "منطقة الخطر",
@@ -280,25 +280,25 @@
     "noType": "لا توجد أنواع"
   },
   "appGroups": {
-    "subtitle": "نظم تطبيقاتك في مجموعات",
+    "subtitle": "نظم مواردك في مجموعات",
     "new": "مجموعة جديدة"
   },
   "analytics": {
     "title": "التحليلات",
-    "subtitle": "إحصائيات استخدام التطبيقات",
+    "subtitle": "إحصائيات استخدام الموارد",
     "totalClicks": "إجمالي النقرات",
     "uniqueUsers": "المستخدمون الفريدون",
     "last7Days": "آخر 7 أيام",
     "last30Days": "آخر 30 يومًا",
-    "topApplications": "التطبيقات الأكثر استخدامًا",
+    "topApplications": "الموارد الأكثر استخدامًا",
     "topUsers": "المستخدمون الأكثر نشاطًا",
     "dailyActivity": "النشاط اليومي (آخر 30 يومًا)",
     "clicks": "نقرات",
     "users": "مستخدمين",
-    "apps": "تطبيقات",
+    "apps": "موارد",
     "noData": "لا توجد بيانات متاحة",
     "noAnalytics": "لا توجد بيانات تحليلية",
-    "noAnalyticsText": "ابدأ استخدام التطبيقات لرؤية الإحصائيات هنا."
+    "noAnalyticsText": "ابدأ استخدام الموارد لرؤية الإحصائيات هنا."
   },
   "announcements": {
     "title": "الإعلانات",
@@ -420,19 +420,19 @@
       "normal": "عادي",
       "large": "كبير"
     },
-    "searchApps": "البحث عن تطبيق...",
+    "searchApps": "البحث عن مورد...",
     "allCategories": "جميع الفئات",
     "sortByName": "الترتيب حسب الاسم",
     "sortByCategory": "الترتيب حسب الفئة",
     "sortByRecent": "الأحدث",
     "resetFilters": "إعادة تعيين الفلاتر",
-    "applicationsFound": "تطبيق (تطبيقات) تم العثور عليها",
-    "application": "التطبيق",
+    "applicationsFound": "مورد (موارد) تم العثور عليها",
+    "application": "المورد",
     "description": "الوصف",
     "category": "الفئة",
     "actions": "الإجراءات",
     "open": "فتح",
-    "noApplicationsFound": "لم يتم العثور على تطبيقات",
+    "noApplicationsFound": "لم يتم العثور على موارد",
     "time": {
       "justNow": "الآن",
       "minutesAgo": "منذ {count} دقيقة",
@@ -444,21 +444,21 @@
     "title": "إدارة المجموعة",
     "subtitle": "إدارة موارد المجموعات التي تديرها",
     "managedGroups": "المجموعات المُدارة",
-    "appGroups": "مجموعات التطبيقات",
-    "applications": "التطبيقات",
+    "appGroups": "مجموعات الموارد",
+    "applications": "الموارد",
     "news": "أخبار المجموعة",
     "yourGroups": "مجموعاتك",
     "yourGroupsSubtitle": "المجموعات التي تديرها",
     "noManagedGroups": "لا توجد مجموعات مُدارة",
     "noManagedGroupsHelp": "اتصل بمدير للحصول على حقوق إدارة المجموعة",
-    "manageAppGroups": "إدارة مجموعات التطبيقات",
-    "manageAppGroupsDesc": "إنشاء وتنظيم مجموعات التطبيقات الخاصة بك",
-    "manageApplications": "إدارة التطبيقات",
-    "manageApplicationsDesc": "إضافة وتكوين التطبيقات",
+    "manageAppGroups": "إدارة مجموعات الموارد",
+    "manageAppGroupsDesc": "إنشاء وتنظيم مجموعات الموارد الخاصة بك",
+    "manageApplications": "إدارة الموارد",
+    "manageApplicationsDesc": "إضافة وتكوين الموارد",
     "manageNews": "إدارة الأخبار",
     "dashboard": "لوحة التحكم",
-    "myAppGroups": "مجموعات التطبيقات الخاصة بي",
-    "myApplications": "تطبيقاتي",
+    "myAppGroups": "مجموعات الموارد الخاصة بي",
+    "myApplications": "مواردي",
     "myPolls": "استطلاعاتي",
     "events": "الأحداث",
     "manageNewsDesc": "نشر أخبار لمجموعاتك",
@@ -468,19 +468,19 @@
         "edit": "تعديل المجموعة"
       },
       "subtitle": {
-        "new": "إنشاء مجموعة جديدة لتنظيم التطبيقات",
-        "edit": "تعديل إعدادات مجموعة التطبيقات"
+        "new": "إنشاء مجموعة جديدة لتنظيم الموارد",
+        "edit": "تعديل إعدادات مجموعة الموارد"
       },
       "ownerGroup": "المجموعة المالكة",
       "group": "المجموعة",
       "selectGroup": "اختر مجموعة",
-      "ownerGroupHelp": "ستكون مجموعة التطبيقات هذه خاصة ويمكن الوصول إليها فقط لأعضاء هذه المجموعة.",
+      "ownerGroupHelp": "ستكون مجموعة الموارد هذه خاصة ويمكن الوصول إليها فقط لأعضاء هذه المجموعة.",
       "ownerGroupEditHelp": "لا يمكن تعديل المجموعة المالكة.",
       "basicInfo": "المعلومات الأساسية",
       "groupName": "اسم المجموعة",
       "displayOrder": "ترتيب العرض",
       "description": "الوصف",
-      "descriptionPlaceholder": "وصف مجموعة التطبيقات هذه...",
+      "descriptionPlaceholder": "وصف مجموعة الموارد هذه...",
       "appearance": "المظهر",
       "preview": "معاينة",
       "previewName": "اسم المجموعة",
@@ -499,25 +499,25 @@
     },
     "applicationModal": {
       "title": {
-        "new": "تطبيق جديد",
-        "edit": "تعديل التطبيق"
+        "new": "مورد جديد",
+        "edit": "تعديل المورد"
       },
       "subtitle": {
-        "new": "إضافة تطبيق جديد إلى البوابة",
-        "edit": "تعديل إعدادات التطبيق"
+        "new": "إضافة مورد جديد إلى البوابة",
+        "edit": "تعديل إعدادات المورد"
       },
       "basicInfo": "المعلومات الأساسية",
-      "applicationName": "اسم التطبيق",
-      "appGroup": "مجموعة التطبيقات",
+      "applicationName": "اسم المورد",
+      "appGroup": "مجموعة الموارد",
       "selectGroup": "اختر مجموعة",
-      "applicationUrl": "رابط التطبيق",
+      "applicationUrl": "رابط المورد",
       "urlPlaceholder": "https://gitlab.example.com",
-      "urlHelp": "الرابط الكامل للتطبيق (مع https://)",
+      "urlHelp": "الرابط الكامل للمورد (مع https://)",
       "description": "الوصف",
-      "descriptionPlaceholder": "وصف التطبيق...",
+      "descriptionPlaceholder": "وصف المورد...",
       "appearance": "المظهر",
       "preview": "معاينة",
-      "previewName": "اسم التطبيق",
+      "previewName": "اسم المورد",
       "previewUrl": "الرابط...",
       "color": "اللون",
       "icon": "الأيقونة",
@@ -528,27 +528,27 @@
       "cancel": "إلغاء",
       "update": "تحديث",
       "create": "إنشاء",
-      "noPrivateGroups": "لا توجد مجموعات تطبيقات خاصة متاحة. أنشئ مجموعة تطبيقات خاصة أولاً.",
+      "noPrivateGroups": "لا توجد مجموعات موارد خاصة متاحة. أنشئ مجموعة موارد خاصة أولاً.",
       "errors": {
         "nameRequired": "الاسم مطلوب",
         "urlRequired": "الرابط مطلوب",
         "invalidUrl": "تنسيق رابط غير صحيح",
-        "appGroupRequired": "مجموعة التطبيقات مطلوبة"
+        "appGroupRequired": "مجموعة الموارد مطلوبة"
       }
     },
     "appGroupsManagement": {
-      "title": "مجموعات التطبيقات",
-      "subtitle": "إدارة مجموعات التطبيقات لمجموعاتك المُدارة",
+      "title": "مجموعات الموارد",
+      "subtitle": "إدارة مجموعات الموارد لمجموعاتك المُدارة",
       "newGroup": "مجموعة جديدة",
       "noManagedGroups": "لا توجد مجموعات مُدارة",
-      "noManagedGroupsHelp": "يجب أن تكون مديراً ل至少 مجموعة واحدة لإنشاء مجموعات التطبيقات. اتصل بمدير النظام للحصول على حقوق إدارة المجموعة.",
+      "noManagedGroupsHelp": "يجب أن تكون مديراً لمجموعة واحدة على الأقل لإنشاء مجموعات الموارد. اتصل بمدير النظام للحصول على حقوق إدارة المجموعة.",
       "searchPlaceholder": "البحث عن مجموعات...",
       "status": {
         "all": "جميع الحالات",
         "active": "النشطة فقط",
         "inactive": "غير النشطة فقط"
       },
-      "applications": "تطبيقات",
+      "applications": "موارد",
       "actions": {
         "edit": "تعديل",
         "delete": "حذف"
@@ -560,8 +560,8 @@
       "order": "الترتيب:",
       "ownerGroup": "المجموعة:",
       "empty": {
-        "title": "لا توجد مجموعات تطبيقات",
-        "description": "أنشئ أول مجموعة تطبيقات للبدء.",
+        "title": "لا توجد مجموعات موارد",
+        "description": "أنشئ أول مجموعة موارد للبدء.",
         "createButton": "إنشاء مجموعة"
       },
       "noResults": {
@@ -575,12 +575,12 @@
       "deleteError": "خطأ أثناء حذف المجموعة"
     },
     "applicationsManagement": {
-      "title": "التطبيقات",
-      "subtitle": "إدارة تطبيقات مجموعاتك",
-      "newApplication": "تطبيق جديد",
-      "noAppGroups": "لا توجد مجموعات تطبيقات",
-      "noAppGroupsHelp": "يجب أولاً إنشاء مجموعة تطبيقات قبل إضافة التطبيقات.",
-      "searchPlaceholder": "البحث عن التطبيقات...",
+      "title": "الموارد",
+      "subtitle": "إدارة موارد مجموعاتك",
+      "newApplication": "مورد جديد",
+      "noAppGroups": "لا توجد مجموعات موارد",
+      "noAppGroupsHelp": "يجب أولاً إنشاء مجموعة موارد قبل إضافة الموارد.",
+      "searchPlaceholder": "البحث عن الموارد...",
       "groupFilter": {
         "all": "جميع المجموعات"
       },
@@ -600,19 +600,19 @@
       "order": "الترتيب:",
       "noGroup": "لا توجد مجموعة",
       "empty": {
-        "title": "لا توجد تطبيقات",
-        "description": "أنشئ أول تطبيق للبدء.",
-        "createButton": "إضافة تطبيق"
+        "title": "لا توجد موارد",
+        "description": "أنشئ أول مورد للبدء.",
+        "createButton": "إضافة مورد"
       },
       "noResults": {
         "title": "لا توجد نتائج",
-        "description": "لا يوجد تطبيق يطابق معايير البحث."
+        "description": "لا يوجد مورد يطابق معايير البحث."
       },
       "deleteConfirm": {
-        "title": "حذف التطبيق",
+        "title": "حذف المورد",
         "message": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
       },
-      "deleteError": "خطأ أثناء حذف التطبيق"
+      "deleteError": "خطأ أثناء حذف المورد"
     },
     "newsManagement": {
       "title": "أخبار المجموعة",
@@ -908,27 +908,27 @@
       "title": "الإحصائيات",
       "users": "المستخدمون",
       "groups": "المجموعات",
-      "appGroups": "مجموعات التطبيقات",
-      "apps": "التطبيقات",
+      "appGroups": "مجموعات الموارد",
+      "apps": "الموارد",
       "news": "المقالات",
       "events": "الأحداث",
       "polls": "الاستطلاعات",
       "managedGroups": "المجموعات المدارة",
       "totalMembers": "إجمالي الأعضاء",
-      "managedAppGroups": "مجموعات التطبيقات المدارة",
-      "managedApps": "تطبيقاتي",
+      "managedAppGroups": "مجموعات الموارد المدارة",
+      "managedApps": "مواردي",
       "managedNews": "المقالات المدارة",
       "managedPolls": "الاستطلاعات المدارة",
-      "accessibleApps": "التطبيقات المتاحة",
+      "accessibleApps": "الموارد المتاحة",
       "accessibleEvents": "الأحداث المتاحة"
     },
     "favorites": {
-      "title": "التطبيقات المفضلة",
-      "empty": "لا توجد مفضلات بعد. أضف تطبيقات من لوحة التحكم."
+      "title": "الموارد المفضلة",
+      "empty": "لا توجد مفضلات بعد. أضف موارد من لوحة التحكم."
     },
     "newApps": {
       "title": "المضافة حديثًا",
-      "empty": "لا توجد تطبيقات جديدة",
+      "empty": "لا توجد موارد جديدة",
       "newBadge": "جديد"
     },
     "todayEvents": {
@@ -954,10 +954,10 @@
       "title": "إجراءات سريعة",
       "manageUsers": "إدارة المستخدمين",
       "manageGroups": "إدارة المجموعات",
-      "manageApps": "إدارة التطبيقات",
+      "manageApps": "إدارة الموارد",
       "createAnnouncement": "إنشاء إعلان",
       "myGroups": "مجموعاتي",
-      "myApps": "تطبيقاتي",
+      "myApps": "مواردي",
       "createNews": "إنشاء مقال",
       "createEvent": "إنشاء حدث"
     },
@@ -977,7 +977,7 @@
     },
     "hero": {
       "subtitle": "اكتشف مساحة عملك الشخصية",
-      "searchPlaceholder": "ابحث عن تطبيقات، أخبار، أحداث...",
+      "searchPlaceholder": "ابحث عن موارد، أخبار، أحداث...",
       "greeting": {
         "morning": "صباح الخير",
         "afternoon": "مساء الخير",
@@ -1019,7 +1019,7 @@
     "smtpSaveError": "خطأ في حفظ إعدادات SMTP",
     "templates": "قوالب البريد الإلكتروني",
     "templateNews": "مقال جديد",
-    "templateApplication": "تطبيق جديد",
+    "templateApplication": "مورد جديد",
     "templateEvent": "حدث جديد",
     "templateAnnouncement": "إعلان",
     "templateChatMessage": "رسالة محادثة",
@@ -1090,8 +1090,8 @@
     "enable_comments_desc": "تفعيل أو تعطيل التعليقات في جميع أنحاء الموقع",
     "news_comments": "تعليقات الأخبار",
     "news_comments_desc": "السماح بالتعليقات على مقالات الأخبار",
-    "app_comments": "تعليقات التطبيقات",
-    "app_comments_desc": "السماح بالتعليقات على التطبيقات",
+    "app_comments": "تعليقات الموارد",
+    "app_comments_desc": "السماح بالتعليقات على الموارد",
     "event_comments": "تعليقات الأحداث",
     "event_comments_desc": "السماح بالتعليقات على الأحداث",
     "require_moderation": "يتطلب الإشراف",

@@ -108,13 +108,13 @@
               
               <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Sélectionnez les groupes d'applications auxquels ce groupe d'utilisateurs aura accès :
+                  Sélectionnez les groupes de ressources auxquels ce groupe d'utilisateurs aura accès :
                 </p>
                 
                 <div v-if="appGroups.length === 0" class="text-center py-8">
                   <Icon icon="mdi:folder-open" class="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p class="text-sm text-gray-500">Aucun groupe d'applications disponible</p>
-                  <p class="text-xs text-gray-400">Créez d'abord des groupes d'applications</p>
+                  <p class="text-sm text-gray-500">Aucun groupe de ressources disponible</p>
+                  <p class="text-xs text-gray-400">Créez d'abord des groupes de ressources</p>
                 </div>
                 
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">

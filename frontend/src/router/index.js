@@ -85,7 +85,7 @@ const routes = [
     component: Dashboard,
     meta: {
       requiresAuth: true,
-      title: 'Applications'
+      title: 'Ressources'
     }
   },
   {
@@ -233,7 +233,7 @@ const routes = [
     meta: { 
       requiresAuth: true,
       requiresAdmin: true,
-      title: 'Groupes d\'applications'
+      title: 'Groupes de ressources'
     }
   },
   {
@@ -243,7 +243,7 @@ const routes = [
     meta: { 
       requiresAuth: true,
       requiresAdmin: true,
-      title: 'Applications'
+      title: 'Ressources'
     }
   },
   {
@@ -494,7 +494,7 @@ const routes = [
     meta: {
       requiresAuth: true,
       requiresGroupAdmin: true,
-      title: 'Mes Groupes d\'Applications'
+      title: 'Mes groupes de ressources'
     }
   },
   {
@@ -504,7 +504,7 @@ const routes = [
     meta: {
       requiresAuth: true,
       requiresGroupAdmin: true,
-      title: 'Mes Applications'
+      title: 'Mes ressources'
     }
   },
   {

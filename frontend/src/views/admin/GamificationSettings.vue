@@ -209,7 +209,7 @@ const metricOptions = [
 
 const reasonHelpMap = {
   daily_login: 'Se déclenche à chaque connexion journalière récompensée.',
-  app_click: 'Se déclenche à chaque ouverture d\'application.',
+  app_click: 'Se déclenche à chaque ouverture de ressource.',
   news_read: 'Se déclenche à chaque lecture d\'article.',
   news_publish: 'Se déclenche à chaque publication d\'article.',
   event_publish: 'Se déclenche à chaque création d\'événement.',
@@ -223,7 +223,7 @@ const reasonHelpMap = {
 
 const metricHelpMap = {
   reason_count: 'Compter le nombre de fois que le trigger est reçu.',
-  app_click_distinct: 'Compter le nombre d\'applications différentes ouvertes.',
+  app_click_distinct: 'Compter le nombre de ressources différentes ouvertes.',
   news_read_count: 'Compter le total d\'articles lus.',
   news_publish_count: 'Compter le total d\'articles publiés.',
   event_publish_count: 'Compter le total d\'événements publiés.',

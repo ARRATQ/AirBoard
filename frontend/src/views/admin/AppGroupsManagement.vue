@@ -98,8 +98,8 @@
     <!-- Empty States -->
     <div v-else-if="appGroups.length === 0" class="empty-state">
       <Icon icon="mdi:folder-multiple" class="empty-state-icon" />
-      <h3 class="empty-state-title">No App Groups</h3>
-      <p class="empty-state-description">Create your first application group to get started.</p>
+      <h3 class="empty-state-title">No Resource Groups</h3>
+      <p class="empty-state-description">Create your first resource group to get started.</p>
       <button @click="openCreateModal" class="btn btn-primary">
         <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
         Create Group
@@ -130,7 +130,7 @@
                 <Icon icon="mdi:alert" class="h-6 w-6 text-red-500" />
               </div>
               <div>
-                <h3 class="modal-title">Delete App Group</h3>
+                <h3 class="modal-title">Delete Resource Group</h3>
                 <p class="modal-subtitle">
                   Are you sure you want to delete "<strong>{{ appGroupToDelete?.name }}</strong>"? This action cannot be undone.
                 </p>
@@ -229,7 +229,7 @@ const loadAppGroups = async () => {
   } catch (error) {
     console.error('❌ Error loading app groups:', error)
     appGroups.value = []
-    appStore.showError('Failed to load app groups')
+    appStore.showError('Failed to load resource groups')
   } finally {
     appStore.setLoading(false)
   }
@@ -266,17 +266,17 @@ const handleSubmit = async (formData) => {
     
     if (formData.id) {
       await adminService.updateAppGroup(formData.id, formData)
-      appStore.showSuccess('App group updated successfully')
+      appStore.showSuccess('Resource group updated successfully')
     } else {
       await adminService.createAppGroup(formData)
-      appStore.showSuccess('App group created successfully')
+      appStore.showSuccess('Resource group created successfully')
     }
     
     closeModal()
     await loadAppGroups()
   } catch (error) {
     console.error('Error saving app group:', error)
-    appStore.showError('Failed to save app group')
+    appStore.showError('Failed to save resource group')
   } finally {
     appStore.setLoading(false)
   }
@@ -288,12 +288,12 @@ const deleteGroup = async () => {
   try {
     deleteLoading.value = true
     await adminService.deleteAppGroup(appGroupToDelete.value.id)
-    appStore.showSuccess('App group deleted successfully')
+    appStore.showSuccess('Resource group deleted successfully')
     closeDeleteModal()
     await loadAppGroups()
   } catch (error) {
     console.error('Error deleting app group:', error)
-    appStore.showError('Failed to delete app group')
+    appStore.showError('Failed to delete resource group')
   } finally {
     deleteLoading.value = false
   }

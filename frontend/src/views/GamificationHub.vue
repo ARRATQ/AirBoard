@@ -345,7 +345,7 @@ const getActivityIcon = (reason) => ({
 
 const getActivityLabel = (reason) => ({
   daily_login: 'Connexion',
-  app_click: 'Application',
+  app_click: 'Ressource',
   news_read: 'Article lu',
   news_publish: 'Publication',
   event_publish: 'Événement',

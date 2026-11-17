@@ -1,7 +1,7 @@
 {
   "search": {
     "title": "Recherche",
-    "subtitle": "Recherchez dans les applications, actualités, événements, sondages et annonces",
+    "subtitle": "Recherchez dans les ressources, actualités, événements, sondages et annonces",
     "placeholder": "Tapez votre recherche... (min. 2 caractères)",
     "noResults": "Aucun résultat trouvé",
     "noResultsHint": "Essayez avec d'autres termes ou vérifiez l'orthographe",
@@ -11,14 +11,14 @@
     "closed": "Terminé",
     "tabs": {
       "all": "Tout",
-      "applications": "Applications",
+      "applications": "Ressources",
       "news": "Actualités",
       "events": "Événements",
       "polls": "Sondages",
       "announcements": "Annonces"
     },
     "types": {
-      "applications": "Applications",
+      "applications": "Ressources",
       "news": "Actualités",
       "events": "Événements",
       "polls": "Sondages",
@@ -36,8 +36,8 @@
     "dashboard": "Tableau de bord",
     "administration": "Administration",
     "overview": "Vue d'ensemble",
-    "appGroups": "Groupes d'applications",
-    "applications": "Applications",
+    "appGroups": "Groupes de ressources",
+    "applications": "Ressources",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "tomorrow": "Demain",
@@ -88,7 +88,7 @@
     "delete": "Supprimer",
     "noGroup": "Aucun groupe",
     "close": "Fermer",
-    "applicationsManagement": "Gestion des applications",
+    "applicationsManagement": "Gestion des ressources",
     "contentManagement": "Gestion du contenu",
     "usersGroups": "Utilisateurs & Groupes",
     "systemSettings": "Paramètres système",
@@ -100,7 +100,7 @@
     "pollsManagement": "Gestion des sondages",
     "media": "Médias",
     "usersAccess": "Utilisateurs & Accès",
-    "appCatalog": "Catalogue d'applications",
+    "appCatalog": "Catalogue de ressources",
     "system": "Système",
     "view": "Voir",
     "download": "Télécharger",
@@ -192,8 +192,8 @@
     "status_active": "Actifs seulement",
     "status_inactive": "Inactifs seulement",
     "users": "utilisateurs",
-    "appsLabel": "groupes d'apps",
-    "appsAccess": "Accès aux groupes d'applications :",
+    "appsLabel": "groupes de ressources",
+    "appsAccess": "Accès aux groupes de ressources :",
     "usersLabel": "Utilisateurs :",
     "noResultsTitle": "Aucun résultat",
     "noResultsText": "Aucun groupe ne correspond à vos critères de recherche.",
@@ -213,18 +213,18 @@
     "deleteError": "Erreur lors de la suppression du groupe"
   },
   "applications": {
-    "title": "Applications",
-    "subtitle": "Gérez vos applications du portail",
-    "new": "Nouvelle application",
-    "add": "Ajouter une application",
-    "searchPlaceholder": "Rechercher une application...",
+    "title": "Ressources",
+    "subtitle": "Gérez vos ressources du portail",
+    "new": "Nouvelle ressource",
+    "add": "Ajouter une ressource",
+    "searchPlaceholder": "Rechercher une ressource...",
     "filter_all_groups": "Tous les groupes",
     "noResultsTitle": "Aucun résultat",
-    "noResultsText": "Aucune application ne correspond à vos critères de recherche.",
-    "emptyTitle": "Aucune application",
-    "emptyText": "Ajoutez votre première application pour commencer.",
+    "noResultsText": "Aucune ressource ne correspond à vos critères de recherche.",
+    "emptyTitle": "Aucune ressource",
+    "emptyText": "Ajoutez votre première ressource pour commencer.",
     "order": "Ordre",
-    "confirmDeleteTitle": "Supprimer l'application",
+    "confirmDeleteTitle": "Supprimer la ressource",
     "confirmDeleteText": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
   },
   "users": {
@@ -292,8 +292,8 @@
   "admin": {
     "overviewTitle": "Administration",
     "overviewSubtitle": "Gérez votre portail applicatif et vos utilisateurs",
-    "manageAppGroups": "Gérer les catégories d'applications",
-    "manageApplications": "Ajouter et modifier les applications",
+    "manageAppGroups": "Gérer les catégories de ressources",
+    "manageApplications": "Ajouter et modifier les ressources",
     "manageUsers": "Gérer les comptes utilisateurs",
     "manageGroups": "Gérer les permissions par groupes",
     "dangerZone": "Zone de danger",
@@ -322,22 +322,22 @@
     "noType": "Aucun type"
   },
   "appGroups": {
-    "subtitle": "Organisez vos applications en groupes",
+    "subtitle": "Organisez vos ressources en groupes",
     "new": "Nouveau groupe"
   },
   "analytics": {
     "title": "Analytiques",
-    "subtitle": "Statistiques d'utilisation des applications",
+    "subtitle": "Statistiques d'utilisation des ressources",
     "totalClicks": "Clics totaux",
     "uniqueUsers": "Utilisateurs uniques",
     "last7Days": "7 derniers jours",
     "last30Days": "30 derniers jours",
-    "topApplications": "Applications les plus utilisées",
+    "topApplications": "Ressources les plus utilisées",
     "topUsers": "Utilisateurs les plus actifs",
     "dailyActivity": "Activité quotidienne (30 derniers jours)",
     "clicks": "clics",
     "users": "utilisateurs",
-    "apps": "apps",
+    "apps": "ressources",
     "vsPrevious": "vs période précédente",
     "engagementRate": "Taux d'engagement",
     "hourlyActivity": "Distribution horaire",
@@ -346,7 +346,7 @@
     "peakUsage": "Pic d'utilisation",
     "noData": "Aucune donnée disponible",
     "noAnalytics": "Aucune donnée d'analyse",
-    "noAnalyticsText": "Commencez à utiliser les applications pour voir les statistiques ici."
+    "noAnalyticsText": "Commencez à utiliser les ressources pour voir les statistiques ici."
   },
   "reports": {
     "title": "Rapports",
@@ -362,7 +362,7 @@
     "group": "Groupe",
     "groups": "Groupes",
     "activeMembers": "Membres actifs",
-    "appClicks": "Clics apps",
+    "appClicks": "Clics ressources",
     "newsRead": "Articles lus",
     "reactions": "Réactions",
     "pollVotes": "Votes sondages",
@@ -374,7 +374,7 @@
     "comparisonTable": "Tableau comparatif",
     "role": "Rôle",
     "activeRate": "Taux actif",
-    "topApps": "Top Applications",
+    "topApps": "Top Ressources",
     "topNews": "Top Articles",
     "searchUser": "Rechercher un utilisateur...",
     "allRoles": "Tous les rôles",
@@ -512,19 +512,19 @@
       "normal": "Normal",
       "large": "Grand"
     },
-    "searchApps": "Rechercher une application...",
+    "searchApps": "Rechercher une ressource...",
     "allCategories": "Toutes les catégories",
     "sortByName": "Trier par nom",
     "sortByCategory": "Trier par catégorie",
     "sortByRecent": "Plus récentes",
     "resetFilters": "Réinitialiser les filtres",
-    "applicationsFound": "application(s) trouvée(s)",
-    "application": "Application",
+    "applicationsFound": "ressource(s) trouvée(s)",
+    "application": "Ressource",
     "description": "Description",
     "category": "Catégorie",
     "actions": "Actions",
     "open": "Ouvrir",
-    "noApplicationsFound": "Aucune application trouvée",
+    "noApplicationsFound": "Aucune ressource trouvée",
     "time": {
       "justNow": "À l'instant",
       "minutesAgo": "il y a {count} minute(s)",
@@ -732,12 +732,12 @@
     "title": "Administration de Groupe",
     "subtitle": "Gérez les ressources des groupes dont vous êtes administrateur",
     "managedGroups": "Groupes administrés",
-    "appGroups": "Groupes d'applications",
-    "applications": "Applications",
+    "appGroups": "Groupes de ressources",
+    "applications": "Ressources",
     "news": "Articles de groupe",
     "dashboard": "Tableau de bord",
     "myAppGroups": "Mes AppGroups",
-    "myApplications": "Mes Applications",
+    "myApplications": "Mes Ressources",
     "myPolls": "Mes Sondages",
     "events": "Événements",
     "groupNews": "News de Groupe",
@@ -746,9 +746,9 @@
     "noManagedGroups": "Aucun groupe administré",
     "noManagedGroupsHelp": "Contactez un administrateur pour obtenir des droits d'administration de groupe",
     "manageAppGroups": "Gérer les AppGroups",
-    "manageAppGroupsDesc": "Créer et organiser vos groupes d'applications",
-    "manageApplications": "Gérer les Applications",
-    "manageApplicationsDesc": "Ajouter et configurer des applications",
+    "manageAppGroupsDesc": "Créer et organiser vos groupes de ressources",
+    "manageApplications": "Gérer les Ressources",
+    "manageApplicationsDesc": "Ajouter et configurer des ressources",
     "manageNews": "Gérer les News",
     "manageNewsDesc": "Publier des actualités pour vos groupes",
     "appGroupModal": {
@@ -757,19 +757,19 @@
         "edit": "Modifier le groupe"
       },
       "subtitle": {
-        "new": "Créer un nouveau groupe pour organiser les applications",
-        "edit": "Modifier les paramètres du groupe d'applications"
+        "new": "Créer un nouveau groupe pour organiser les ressources",
+        "edit": "Modifier les paramètres du groupe de ressources"
       },
       "ownerGroup": "Groupe propriétaire",
       "group": "Groupe",
       "selectGroup": "Sélectionner un groupe",
-      "ownerGroupHelp": "Ce groupe d'applications sera privé et accessible uniquement par les membres de ce groupe.",
+      "ownerGroupHelp": "Ce groupe de ressources sera privé et accessible uniquement par les membres de ce groupe.",
       "ownerGroupEditHelp": "Le groupe propriétaire ne peut pas être modifié.",
       "basicInfo": "Informations de base",
       "groupName": "Nom du groupe",
       "displayOrder": "Ordre d'affichage",
       "description": "Description",
-      "descriptionPlaceholder": "Décrivez ce groupe d'applications...",
+      "descriptionPlaceholder": "Décrivez ce groupe de ressources...",
       "appearance": "Apparence",
       "preview": "Aperçu",
       "previewName": "Nom du groupe",
@@ -788,25 +788,25 @@
     },
     "applicationModal": {
       "title": {
-        "new": "Nouvelle Application",
-        "edit": "Modifier l'Application"
+        "new": "Nouvelle Ressource",
+        "edit": "Modifier la Ressource"
       },
       "subtitle": {
-        "new": "Ajouter une nouvelle application au portail",
-        "edit": "Modifier les paramètres de l'application"
+        "new": "Ajouter une nouvelle ressource au portail",
+        "edit": "Modifier les paramètres de la ressource"
       },
       "basicInfo": "Informations de base",
-      "applicationName": "Nom de l'application",
-      "appGroup": "Groupe d'applications",
+      "applicationName": "Nom de la ressource",
+      "appGroup": "Groupe de ressources",
       "selectGroup": "Sélectionner un groupe",
-      "applicationUrl": "URL de l'application",
+      "applicationUrl": "URL de la ressource",
       "urlPlaceholder": "https://gitlab.example.com",
-      "urlHelp": "URL complète vers l'application (avec https://)",
+      "urlHelp": "URL complète vers la ressource (avec https://)",
       "description": "Description",
-      "descriptionPlaceholder": "Description de l'application...",
+      "descriptionPlaceholder": "Description de la ressource...",
       "appearance": "Apparence",
       "preview": "Aperçu",
-      "previewName": "Nom de l'application",
+      "previewName": "Nom de la ressource",
       "previewUrl": "URL...",
       "color": "Couleur",
       "icon": "Icône",
@@ -817,27 +817,27 @@
       "cancel": "Annuler",
       "update": "Mettre à jour",
       "create": "Créer",
-      "noPrivateGroups": "Aucun groupe d'applications privé disponible. Créez d'abord un groupe d'applications privé.",
+      "noPrivateGroups": "Aucun groupe de ressources privé disponible. Créez d'abord un groupe de ressources privé.",
       "errors": {
         "nameRequired": "Le nom est requis",
         "urlRequired": "L'URL est requise",
         "invalidUrl": "Format d'URL invalide",
-        "appGroupRequired": "Le groupe d'applications est requis"
+        "appGroupRequired": "Le groupe de ressources est requis"
       }
     },
     "appGroupsManagement": {
-      "title": "Groupes d'Applications",
-      "subtitle": "Gérez les groupes d'applications de vos groupes administrés",
+      "title": "Groupes de Ressources",
+      "subtitle": "Gérez les groupes de ressources de vos groupes administrés",
       "newGroup": "Nouveau Groupe",
       "noManagedGroups": "Aucun groupe administré",
-      "noManagedGroupsHelp": "Vous devez être administrateur d'au moins un groupe pour créer des groupes d'applications. Contactez un administrateur système pour obtenir des droits d'administration de groupe.",
+      "noManagedGroupsHelp": "Vous devez être administrateur d'au moins un groupe pour créer des groupes de ressources. Contactez un administrateur système pour obtenir des droits d'administration de groupe.",
       "searchPlaceholder": "Rechercher des groupes...",
       "status": {
         "all": "Tous les statuts",
         "active": "Actifs uniquement",
         "inactive": "Inactifs uniquement"
       },
-      "applications": "applications",
+      "applications": "ressources",
       "actions": {
         "edit": "Modifier",
         "delete": "Supprimer"
@@ -849,8 +849,8 @@
       "order": "Ordre:",
       "ownerGroup": "Groupe:",
       "empty": {
-        "title": "Aucun groupe d'applications",
-        "description": "Créez votre premier groupe d'applications pour commencer.",
+        "title": "Aucun groupe de ressources",
+        "description": "Créez votre premier groupe de ressources pour commencer.",
         "createButton": "Créer un groupe"
       },
       "noResults": {
@@ -864,12 +864,12 @@
       "deleteError": "Erreur lors de la suppression du groupe"
     },
     "applicationsManagement": {
-      "title": "Applications",
-      "subtitle": "Gérez les applications de vos groupes",
-      "newApplication": "Nouvelle Application",
-      "noAppGroups": "Aucun groupe d'applications",
-      "noAppGroupsHelp": "Vous devez d'abord créer un groupe d'applications avant de pouvoir ajouter des applications.",
-      "searchPlaceholder": "Rechercher des applications...",
+      "title": "Ressources",
+      "subtitle": "Gérez les ressources de vos groupes",
+      "newApplication": "Nouvelle Ressource",
+      "noAppGroups": "Aucun groupe de ressources",
+      "noAppGroupsHelp": "Vous devez d'abord créer un groupe de ressources avant de pouvoir ajouter des ressources.",
+      "searchPlaceholder": "Rechercher des ressources...",
       "groupFilter": {
         "all": "Tous les groupes"
       },
@@ -889,19 +889,19 @@
       "order": "Ordre:",
       "noGroup": "Aucun groupe",
       "empty": {
-        "title": "Aucune application",
-        "description": "Créez votre première application pour commencer.",
-        "createButton": "Ajouter une application"
+        "title": "Aucune ressource",
+        "description": "Créez votre première ressource pour commencer.",
+        "createButton": "Ajouter une ressource"
       },
       "noResults": {
         "title": "Aucun résultat",
-        "description": "Aucune application ne correspond à vos critères de recherche."
+        "description": "Aucune ressource ne correspond à vos critères de recherche."
       },
       "deleteConfirm": {
-        "title": "Supprimer l'application",
+        "title": "Supprimer la ressource",
         "message": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
       },
-      "deleteError": "Erreur lors de la suppression de l'application"
+      "deleteError": "Erreur lors de la suppression de la ressource"
     },
     "newsManagement": {
       "title": "News de Groupe",
@@ -1191,23 +1191,23 @@
     "welcomeSubtitle": "Voici un aperçu de votre portail aujourd'hui",
     "loading": "Chargement de votre espace...",
     "viewAll": "Voir tout",
-    "noFavorites": "Aucune application favorite",
+    "noFavorites": "Aucune ressource favorite",
     "noEvents": "Aucun événement",
     "noNews": "Aucun article",
     "hero": {
       "subtitle": "Découvrez votre espace de travail personnalisé",
-      "searchPlaceholder": "Rechercher apps, actualités, événements...",
+      "searchPlaceholder": "Rechercher ressources, actualités, événements...",
       "greeting": {
         "morning": "Bonjour",
         "afternoon": "Bon après-midi",
         "evening": "Bonsoir"
       },
-      "apps": "Apps",
+      "apps": "Ressources",
       "events": "Événements",
       "news": "Actualités",
       "polls": "Sondages",
       "chips": {
-        "allApps": "Toutes les Apps",
+        "allApps": "Toutes les Ressources",
         "calendar": "Calendrier",
         "news": "Hub Actualités",
         "admin": "Admin",
@@ -1216,7 +1216,7 @@
       },
       "pendingNews": "{count} article(s) non lu(s)",
       "pendingPolls": "{count} sondage(s) en attente",
-      "pendingApps": "{count} nouvelle(s) app(s) cette semaine",
+      "pendingApps": "{count} nouvelle(s) ressource(s) cette semaine",
       "pendingText": "{items}."
     },
     "stats": {
@@ -1224,28 +1224,28 @@
       "subtitle": "Vue d'ensemble de votre plateforme",
       "users": "Utilisateurs",
       "groups": "Groupes",
-      "appGroups": "Groupes d'apps",
-      "apps": "Applications",
+      "appGroups": "Groupes de ressources",
+      "apps": "Ressources",
       "news": "Articles",
       "events": "Événements",
       "polls": "Sondages",
       "managedGroups": "Groupes gérés",
       "totalMembers": "Membres totaux",
-      "managedAppGroups": "Groupes d'apps gérés",
-      "managedApps": "Mes applications",
+      "managedAppGroups": "Groupes de ressources gérés",
+      "managedApps": "Mes ressources",
       "managedNews": "Articles gérés",
       "managedPolls": "Sondages gérés",
-      "accessibleApps": "Applications disponibles",
+      "accessibleApps": "Ressources disponibles",
       "accessibleEvents": "Événements disponibles"
     },
     "favorites": {
-      "title": "Applications favorites",
-      "empty": "Aucun favori. Ajoutez des applications depuis le tableau de bord.",
-      "browseApps": "Parcourir les Apps"
+      "title": "Ressources favorites",
+      "empty": "Aucun favori. Ajoutez des ressources depuis le tableau de bord.",
+      "browseApps": "Parcourir les Ressources"
     },
     "newApps": {
       "title": "Récemment ajoutées",
-      "empty": "Aucune nouvelle application",
+      "empty": "Aucune nouvelle ressource",
       "newBadge": "Nouveau"
     },
     "todayEvents": {
@@ -1271,10 +1271,10 @@
       "title": "Actions rapides",
       "manageUsers": "Gérer les utilisateurs",
       "manageGroups": "Gérer les groupes",
-      "manageApps": "Gérer les apps",
+      "manageApps": "Gérer les ressources",
       "createAnnouncement": "Créer une annonce",
       "myGroups": "Mes groupes",
-      "myApps": "Mes applications",
+      "myApps": "Mes ressources",
       "createNews": "Créer un article",
       "createEvent": "Créer un événement"
     },
@@ -1323,7 +1323,7 @@
     "smtpSaveError": "Erreur lors de l'enregistrement de la configuration SMTP",
     "templates": "Templates d'email",
     "templateNews": "Nouvel article",
-    "templateApplication": "Nouvelle application",
+    "templateApplication": "Nouvelle ressource",
     "templateEvent": "Nouvel événement",
     "templateAnnouncement": "Annonce",
     "templateChatMessage": "Message de chat",
@@ -1394,8 +1394,8 @@
     "enable_comments_desc": "Activer ou désactiver les commentaires sur tout le site",
     "news_comments": "Commentaires sur les actualités",
     "news_comments_desc": "Autoriser les commentaires sur les articles du News Hub",
-    "app_comments": "Commentaires sur les applications",
-    "app_comments_desc": "Autoriser les commentaires sur les applications",
+    "app_comments": "Commentaires sur les ressources",
+    "app_comments_desc": "Autoriser les commentaires sur les ressources",
     "event_comments": "Commentaires sur les événements",
     "event_comments_desc": "Autoriser les commentaires sur les événements",
     "require_moderation": "Modération obligatoire",
@@ -1764,7 +1764,7 @@
       "basics": "Les bases",
       "advanced": "Avancé",
       "management": "Gestion",
-      "applications": "Applications",
+      "applications": "Ressources",
       "content": "Contenu",
       "system": "Système",
       "installation": "Installation & Configuration"
@@ -1773,7 +1773,7 @@
       "introduction": "Introduction",
       "firstSteps": "Premiers pas",
       "dashboard": "Tableau de bord",
-      "applications": "Applications",
+      "applications": "Ressources",
       "newsHub": "Hub Actualités",
       "events": "Événements",
       "polls": "Sondages",
@@ -1784,12 +1784,12 @@
       "managingTags": "Gérer les tags",
       "bestPractices": "Bonnes pratiques",
       "permissions": "Permissions",
-      "managingAppGroups": "Gérer les groupes d'apps",
-      "managingApplications": "Gérer les applications",
+      "managingAppGroups": "Gérer les groupes de ressources",
+      "managingApplications": "Gérer les ressources",
       "groupMembers": "Membres du groupe",
       "userManagement": "Gestion des utilisateurs",
       "groupManagement": "Gestion des groupes",
-      "appGroups": "Groupes d'applications",
+      "appGroups": "Groupes de ressources",
       "newsManagement": "Gestion des actualités",
       "eventsManagement": "Gestion des événements",
       "pollsManagement": "Gestion des sondages",

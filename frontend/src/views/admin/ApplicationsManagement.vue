@@ -228,7 +228,7 @@ const loadApplications = async () => {
   } catch (error) {
     console.error('Error loading applications:', error)
     applications.value = []
-    appStore.showError('Failed to load applications')
+    appStore.showError('Failed to load resources')
   } finally {
     appStore.setLoading(false)
   }
@@ -290,17 +290,17 @@ const handleSubmit = async (formData) => {
     
     if (formData.id) {
       await adminService.updateApplication(formData.id, formData)
-      appStore.showSuccess('Application updated successfully')
+      appStore.showSuccess('Resource updated successfully')
     } else {
       await adminService.createApplication(formData)
-      appStore.showSuccess('Application created successfully')
+      appStore.showSuccess('Resource created successfully')
     }
     
     closeModal()
     await loadApplications()
   } catch (error) {
     console.error('Error saving application:', error)
-    appStore.showError('Failed to save application')
+    appStore.showError('Failed to save resource')
   } finally {
     appStore.setLoading(false)
   }
@@ -312,12 +312,12 @@ const deleteApplication = async () => {
   try {
     deleteLoading.value = true
     await adminService.deleteApplication(applicationToDelete.value.id)
-    appStore.showSuccess('Application deleted successfully')
+    appStore.showSuccess('Resource deleted successfully')
     closeDeleteModal()
     await loadApplications()
   } catch (error) {
     console.error('Error deleting application:', error)
-    appStore.showError('Failed to delete application')
+    appStore.showError('Failed to delete resource')
   } finally {
     deleteLoading.value = false
   }

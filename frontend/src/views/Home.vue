@@ -61,7 +61,7 @@
         <input
           v-model="searchQuery"
           class="pulse-search-input"
-          :placeholder="$t('search.placeholder') || 'Cherche une app, un article…'"
+          :placeholder="$t('search.placeholder') || 'Cherche une ressource, un article…'"
           @keydown.esc="searchQuery = ''"
         />
         <kbd class="pulse-search-kbd">⌘K</kbd>
@@ -325,7 +325,7 @@
               <div class="rail-card-header">
                 <span class="rail-card-title">
                   <Icon icon="mdi:star" class="text-amber-400" />
-                  {{ $t('home.favorites.title') || 'Tes applications' }}
+                  {{ $t('home.favorites.title') || 'Tes ressources' }}
                 </span>
                 <router-link to="/dashboard" class="rail-see-all">Portail →</router-link>
               </div>
@@ -527,8 +527,8 @@ const kpiCards = computed(() => {
     return [
       { value: stats.total_users ?? 0, label: 'Utilisateurs', icon: '👥', link: '/admin/users' },
       { value: stats.total_groups ?? 0, label: 'Groupes', icon: '🏷️', link: '/admin/groups' },
-      { value: stats.total_app_groups ?? 0, label: 'Groupes d\'apps', icon: '📦', link: '/admin/app-groups' },
-      { value: stats.total_apps ?? 0, label: 'Applications', icon: '🔲', link: '/admin/applications' },
+      { value: stats.total_app_groups ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/app-groups' },
+      { value: stats.total_apps ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/applications' },
       { value: stats.total_news ?? 0, label: 'Articles', icon: '📰', link: '/admin/news' },
       { value: stats.total_events ?? 0, label: 'Événements', icon: '📅', link: '/admin/events' },
       { value: stats.total_polls ?? 0, label: 'Sondages', icon: '📊', link: '/admin/polls', live: (stats.total_polls ?? 0) > 0 },
@@ -539,16 +539,16 @@ const kpiCards = computed(() => {
     return [
       { value: stats.managed_groups_count ?? 0, label: 'Groupes gérés', icon: '🏷️', link: '/group-admin' },
       { value: stats.total_members_count ?? 0, label: 'Membres', icon: '👥', link: '/group-admin' },
-      { value: stats.managed_app_groups_count ?? 0, label: 'Groupes d\'apps', icon: '📦', link: '/group-admin/app-groups' },
-      { value: stats.managed_apps_count ?? 0, label: 'Applications', icon: '🔲', link: '/group-admin/applications' },
+      { value: stats.managed_app_groups_count ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/group-admin/app-groups' },
+      { value: stats.managed_apps_count ?? 0, label: 'Ressources', icon: '🔲', link: '/group-admin/applications' },
       { value: stats.managed_news_count ?? 0, label: 'Articles', icon: '📰', link: '/group-admin/news' },
       { value: stats.managed_polls_count ?? 0, label: 'Sondages', icon: '📊', link: '/group-admin/polls', live: true },
-      { value: stats.total_accessible_apps ?? 0, label: 'Apps dispo.', icon: '✅', link: '/dashboard' },
+      { value: stats.total_accessible_apps ?? 0, label: 'Ressources dispo.', icon: '✅', link: '/dashboard' },
     ]
   }
 
   return [
-    { value: stats.total_accessible_apps ?? 0, label: 'Applications', icon: '🔲', link: '/dashboard' },
+    { value: stats.total_accessible_apps ?? 0, label: 'Ressources', icon: '🔲', link: '/dashboard' },
     { value: stats.total_news ?? 0, label: 'Articles', icon: '📰', link: '/news' },
     { value: stats.total_polls ?? 0, label: 'Sondages', icon: '📊', link: '/polls', live: true },
     { value: stats.total_accessible_events ?? 0, label: 'Événements', icon: '📅', link: '/events' },

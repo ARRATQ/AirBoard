@@ -8,10 +8,10 @@
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="modal-title">
-                  {{ isEdit ? 'Edit App Group' : 'New App Group' }}
+                  {{ isEdit ? 'Edit Resource Group' : 'New Resource Group' }}
                 </h3>
                 <p class="modal-subtitle">
-                  {{ isEdit ? 'Modify the application group settings' : 'Create a new group to organize applications' }}
+                  {{ isEdit ? 'Modify the resource group settings' : 'Create a new group to organize resources' }}
                 </p>
               </div>
               <button 
@@ -73,7 +73,7 @@
                   v-model="form.description"
                   rows="3"
                   class="form-textarea"
-                  placeholder="Describe this application group..."
+                  placeholder="Describe this resource group..."
                 ></textarea>
               </div>
             </div>
@@ -152,7 +152,7 @@
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                     />
                     <div>
-                      <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Private App Group</span>
+                      <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Private Resource Group</span>
                       <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         Private app groups can only be managed by their owner group admin
                       </p>

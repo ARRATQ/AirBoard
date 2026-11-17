@@ -8,10 +8,10 @@
             <div class="flex items-center justify-between">
               <div>
                 <h3 class="modal-title">
-                  {{ isEdit ? 'Edit Application' : 'New Application' }}
+                  {{ isEdit ? 'Edit Resource' : 'New Resource' }}
                 </h3>
                 <p class="modal-subtitle">
-                  {{ isEdit ? 'Modify application settings' : 'Add a new application to the portal' }}
+                  {{ isEdit ? 'Modify resource settings' : 'Add a new resource to the portal' }}
                 </p>
               </div>
               <button
@@ -85,7 +85,7 @@
                   placeholder="https://gitlab.example.com"
                 />
                 <p v-if="errors.url" class="form-error">{{ errors.url }}</p>
-                <p class="form-help">Complete URL to the application (with https://)</p>
+                <p class="form-help">Complete URL to the resource (with https://)</p>
               </div>
 
               <div class="form-group">
@@ -97,7 +97,7 @@
                   v-model="form.description"
                   rows="2"
                   class="form-textarea"
-                  placeholder="Application description..."
+                  placeholder="Resource description..."
                 ></textarea>
               </div>
             </div>
@@ -121,7 +121,7 @@
                         :style="{ color: form.color }"
                       />
                       <div class="flex-1">
-                        <div class="font-medium text-white">{{ form.name || 'Application Name' }}</div>
+                        <div class="font-medium text-white">{{ form.name || 'Resource Name' }}</div>
                         <div class="text-sm text-gray-400">{{ form.url || 'URL...' }}</div>
                       </div>
                       <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
@@ -375,7 +375,7 @@ const validateForm = () => {
   }
 
   if (!form.app_group_id) {
-    errors.value.app_group_id = 'App group is required'
+    errors.value.app_group_id = 'Resource group is required'
   }
 
   return Object.keys(errors.value).length === 0

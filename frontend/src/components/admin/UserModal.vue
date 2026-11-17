@@ -166,7 +166,7 @@
                   <p class="form-help">
                     <span v-if="form.role === 'admin'">Les administrateurs ont accès à toutes les fonctionnalités</span>
                     <span v-else-if="form.role === 'editor'">Les éditeurs peuvent créer et gérer les actualités du News Hub</span>
-                    <span v-else>Les utilisateurs ont accès aux applications assignées via les groupes. Pour donner des droits d'administration de groupe, assignez l'utilisateur comme administrateur d'un groupe dans la gestion des groupes.</span>
+                    <span v-else>Les utilisateurs ont accès aux ressources assignées via les groupes. Pour donner des droits d'administration de groupe, assignez l'utilisateur comme administrateur d'un groupe dans la gestion des groupes.</span>
                   </p>
                 </div>
 
@@ -198,7 +198,7 @@
                       </div>
                     </div>
                   </div>
-                  <p class="form-help">Les groupes déterminent les applications accessibles</p>
+                  <p class="form-help">Les groupes déterminent les ressources accessibles</p>
                 </div>
               </div>
             </div>

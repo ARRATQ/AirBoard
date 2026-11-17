@@ -59,7 +59,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">App Groups</p>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Resource Groups</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
               {{ dashboard.stats.total_app_groups }}
             </p>
@@ -75,7 +75,7 @@
             </div>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Applications</p>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Resources</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">
               {{ dashboard.stats.total_applications }}
             </p>
@@ -124,11 +124,11 @@
     <!-- Empty state -->
     <div v-else-if="!dashboard?.app_groups?.length" class="empty-state">
       <Icon icon="mdi:application" class="empty-state-icon" />
-      <h3 class="empty-state-title">No Applications Available</h3>
+      <h3 class="empty-state-title">No Resources Available</h3>
       <p class="empty-state-description">
         {{ authStore.isAdmin 
-          ? 'Start by creating application groups and applications.' 
-          : 'Contact your administrator to get access to applications.' 
+          ? 'Start by creating resource groups and resources.' 
+          : 'Contact your administrator to get access to resources.' 
         }}
       </p>
       <div v-if="authStore.isAdmin" class="mt-6">
