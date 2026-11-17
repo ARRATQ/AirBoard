@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <div class="modal-panel sm:max-w-2xl sm:w-full">
+      <div class="modal-panel sm:max-w-5xl sm:w-full">
         <form @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -24,18 +24,18 @@
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="modal-content space-y-6">
-            <!-- Owner Group Selection -->
-            <div>
+          <!-- Content : 2 colonnes (infos | apparence) pour un modal large et compact -->
+          <div class="modal-content grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
+            <!-- Colonne gauche : informations -->
+            <div class="space-y-4">
               <div class="section-header">
-                <Icon icon="mdi:shield-account" class="section-icon" />
-                <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.ownerGroup') }}</h4>
+                <Icon icon="mdi:information-outline" class="section-icon" />
+                <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.basicInfo') }}</h4>
               </div>
 
               <div class="form-group">
                 <label for="owner_group_id" class="form-label form-label-required">
-                  {{ $t('groupAdmin.appGroupModal.group') }}
+                  {{ $t('groupAdmin.appGroupModal.ownerGroup') }}
                 </label>
                 <select
                   id="owner_group_id"
@@ -59,16 +59,8 @@
                 </p>
                 <p v-if="errors.owner_group_id" class="form-error">{{ errors.owner_group_id }}</p>
               </div>
-            </div>
 
-            <!-- Basic Information -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:information-outline" class="section-icon" />
-                <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.basicInfo') }}</h4>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-[1fr_7rem] gap-4">
                 <div class="form-group">
                   <label for="name" class="form-label form-label-required">
                     {{ $t('groupAdmin.appGroupModal.groupName') }}
@@ -106,90 +98,70 @@
                 <textarea
                   id="description"
                   v-model="form.description"
-                  rows="3"
+                  rows="2"
                   class="form-textarea"
                   :placeholder="$t('groupAdmin.appGroupModal.descriptionPlaceholder')"
                 ></textarea>
               </div>
+
+              <label class="flex items-center space-x-3 cursor-pointer">
+                <input
+                  v-model="form.is_active"
+                  type="checkbox"
+                  class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
+                />
+                <span class="text-sm text-gray-300">
+                  {{ $t('groupAdmin.appGroupModal.activeAndVisible') }}
+                </span>
+              </label>
             </div>
 
-            <!-- Appearance -->
-            <div>
+            <!-- Colonne droite : apparence -->
+            <div class="space-y-4">
               <div class="section-header">
                 <Icon icon="mdi:palette-outline" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.appearance') }}</h4>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview -->
-                <div class="form-group">
-                  <label class="form-label">{{ $t('groupAdmin.appGroupModal.preview') }}</label>
-                  <div class="card p-4">
-                    <div class="flex items-center space-x-3">
-                      <Icon
-                        :icon="form.icon || 'mdi:folder'"
-                        class="h-10 w-10 flex-shrink-0"
-                        :style="{ color: form.color }"
-                      />
-                      <div>
-                        <div class="font-medium text-white">{{ form.name || $t('groupAdmin.appGroupModal.previewName') }}</div>
-                        <div class="text-sm text-gray-400">{{ form.description || $t('groupAdmin.appGroupModal.previewDescription') }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Color and Icon -->
-                <div class="space-y-4">
-                  <div class="form-group">
-                    <label for="color" class="form-label">{{ $t('groupAdmin.appGroupModal.color') }}</label>
-                    <div class="flex items-center space-x-3">
-                      <input
-                        id="color"
-                        v-model="form.color"
-                        type="color"
-                        class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
-                      />
-                      <input
-                        v-model="form.color"
-                        type="text"
-                        class="form-input flex-1"
-                        placeholder="#10b981"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Icon Input with free text -->
-                  <IconInput
-                    v-model="form.icon"
-                    :label="$t('groupAdmin.appGroupModal.icon')"
-                    placeholder="mdi:folder, lucide:folder, heroicons:folder"
-                    category="group"
-                    :show-suggestions="true"
+              <div class="card p-3">
+                <div class="flex items-center space-x-3">
+                  <Icon
+                    :icon="form.icon || 'mdi:folder'"
+                    class="h-9 w-9 flex-shrink-0"
+                    :style="{ color: form.color }"
                   />
+                  <div class="min-w-0">
+                    <div class="font-medium text-white truncate">{{ form.name || $t('groupAdmin.appGroupModal.previewName') }}</div>
+                    <div class="text-sm text-gray-400 truncate">{{ form.description || $t('groupAdmin.appGroupModal.previewDescription') }}</div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Options -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:tune" class="section-icon" />
-                <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.options') }}</h4>
-              </div>
-
-              <div class="card p-4">
-                <label class="flex items-center space-x-3 cursor-pointer">
+              <div class="form-group">
+                <label for="color" class="form-label">{{ $t('groupAdmin.appGroupModal.color') }}</label>
+                <div class="flex items-center space-x-3">
                   <input
-                    v-model="form.is_active"
-                    type="checkbox"
-                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
+                    id="color"
+                    v-model="form.color"
+                    type="color"
+                    class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
                   />
-                  <span class="text-sm text-gray-300">
-                    {{ $t('groupAdmin.appGroupModal.activeAndVisible') }}
-                  </span>
-                </label>
+                  <input
+                    v-model="form.color"
+                    type="text"
+                    class="form-input flex-1"
+                    placeholder="#10b981"
+                  />
+                </div>
               </div>
+
+              <IconInput
+                v-model="form.icon"
+                :label="$t('groupAdmin.appGroupModal.icon')"
+                placeholder="mdi:folder, lucide:folder, heroicons:folder"
+                category="group"
+                :show-suggestions="true"
+              />
             </div>
           </div>
 
