@@ -111,7 +111,8 @@
     "of": "of",
     "optional": "optional",
     "details": "Details",
-    "and": " and "
+    "and": " and ",
+    "requiredFieldsHint": "* Required fields"
   },
   "calendar": {
     "title": "Event Calendar",

@@ -111,7 +111,8 @@
     "of": "sur",
     "optional": "optionnel",
     "details": "Détails",
-    "and": " et "
+    "and": " et ",
+    "requiredFieldsHint": "* Champs obligatoires"
   },
   "calendar": {
     "title": "Calendrier des Événements",

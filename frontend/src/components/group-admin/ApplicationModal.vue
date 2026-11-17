@@ -2,7 +2,7 @@
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
       <div class="modal-panel sm:max-w-5xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+        <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
             <div class="flex items-center justify-between">
@@ -189,22 +189,18 @@
           </div>
 
           <!-- Footer -->
-          <div class="modal-footer">
-            <button
-              type="button"
-              @click="closeModal"
-              class="btn-secondary w-full sm:w-auto"
-            >
-              {{ $t('groupAdmin.applicationModal.cancel') }}
-            </button>
-            <button
-              type="submit"
-              :disabled="loading || availableAppGroups.length === 0"
-              class="btn-primary w-full sm:w-auto"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">{{ $t('common.requiredFieldsHint') }}</span>
+            <div class="modal-footer-actions">
+              <button type="button" @click="closeModal" class="btn-secondary">
+                {{ $t('groupAdmin.applicationModal.cancel') }}
+              </button>
+              <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}
+              </button>
+            </div>
           </div>
         </form>
       </div>

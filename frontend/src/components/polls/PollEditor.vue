@@ -1,8 +1,8 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <div class="modal-panel sm:max-w-4xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+      <div class="modal-panel sm:max-w-6xl sm:w-full">
+        <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
             <div class="flex items-center justify-between">
@@ -25,7 +25,9 @@
           </div>
 
           <!-- Content -->
-          <div class="modal-content space-y-6">
+          <!-- Content : contenu du sondage à gauche, réglages à droite -->
+          <div class="modal-content grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-x-8 gap-y-6">
+            <div class="space-y-6">
             <!-- Informations de base -->
             <div>
               <div class="section-header">
@@ -122,6 +124,9 @@
               </div>
             </div>
 
+            </div>
+
+            <div class="space-y-6 lg:border-l lg:pl-8 border-gray-200 dark:border-gray-700">
             <!-- Type et paramètres -->
             <div>
               <div class="section-header">
@@ -129,7 +134,7 @@
                 <h4 class="section-title">{{ t('polls.editor.typeAndSettings') }}</h4>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="form-group">
                   <label for="poll_type" class="form-label form-label-required">
                     {{ t('polls.editor.pollType') }}
@@ -321,26 +326,22 @@
               <Icon :icon="showAdvanced ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
               {{ showAdvanced ? t('polls.editor.hideAdvanced') : t('polls.editor.showAdvanced') }} {{ t('polls.editor.advancedOptions') }}
             </button>
+            </div>
           </div>
 
           <!-- Footer -->
-          <div class="modal-footer">
-            <button
-              type="button"
-              @click="closeModal"
-              class="poll-cancel-btn"
-            >
-              {{ t('polls.editor.cancel') }}
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="poll-submit-btn"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="spin" />
-              <Icon v-else icon="mdi:check" />
-              {{ isEdit ? t('polls.editor.save') : t('polls.editor.create') }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">{{ $t('common.requiredFieldsHint') }}</span>
+            <div class="modal-footer-actions">
+              <button type="button" @click="closeModal" class="poll-cancel-btn">
+                {{ t('polls.editor.cancel') }}
+              </button>
+              <button type="submit" :disabled="loading" class="poll-submit-btn">
+                <Icon v-if="loading" icon="mdi:loading" class="spin" />
+                <Icon v-else icon="mdi:check" />
+                {{ isEdit ? t('polls.editor.save') : t('polls.editor.create') }}
+              </button>
+            </div>
           </div>
         </form>
       </div>

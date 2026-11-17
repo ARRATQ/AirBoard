@@ -103,7 +103,8 @@
     "page": "Página",
     "of": "de",
     "details": "Detalles",
-    "and": " y "
+    "and": " y ",
+    "requiredFieldsHint": "* Campos obligatorios"
   },
   "calendar": {
     "title": "Calendario de Eventos",

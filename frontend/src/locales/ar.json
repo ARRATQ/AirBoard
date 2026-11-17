@@ -103,7 +103,8 @@
     "page": "صفحة",
     "of": "من",
     "details": "تفاصيل",
-    "and": " و "
+    "and": " و ",
+    "requiredFieldsHint": "* حقول إلزامية"
   },
   "calendar": {
     "title": "تقويم الأحداث",

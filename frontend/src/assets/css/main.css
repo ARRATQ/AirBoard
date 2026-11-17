@@ -394,7 +394,7 @@ html {
 }
 
 .modal-container {
-  @apply flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0;
+  @apply flex items-center justify-center min-h-screen p-4 sm:p-6;
 }
 
 .modal-panel {
@@ -417,6 +417,31 @@ html {
 
 .modal-content {
   @apply px-6 py-4;
+}
+
+/* Modal form : header & footer fixes, contenu défilant (reste dans la fenêtre) */
+.modal-form {
+  @apply flex flex-col;
+  max-height: calc(100vh - 3rem);
+}
+
+.modal-form > .modal-content {
+  @apply flex-1 min-h-0 overflow-y-auto;
+}
+
+/* Footer : indication à gauche, actions à droite */
+.modal-footer-bar {
+  @apply px-6 py-3 border-t flex flex-wrap items-center justify-between gap-3;
+  background-color: var(--bg-surface);
+  border-color: var(--border);
+}
+
+.modal-footer-hint {
+  @apply text-xs text-gray-400;
+}
+
+.modal-footer-actions {
+  @apply flex items-center gap-3 ml-auto;
 }
 
 .modal-footer {
