@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <div class="modal-panel sm:max-w-2xl sm:w-full">
+      <div class="modal-panel sm:max-w-5xl sm:w-full">
         <form @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -24,10 +24,10 @@
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="modal-content space-y-6">
-            <!-- Basic Information -->
-            <div>
+          <!-- Content : 2 colonnes (infos | apparence) pour un modal large et compact -->
+          <div class="modal-content grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-5">
+            <!-- Colonne gauche : informations + options -->
+            <div class="space-y-4">
               <div class="section-header">
                 <Icon icon="mdi:information-outline" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.applicationModal.basicInfo') }}</h4>
@@ -44,7 +44,7 @@
                     type="text"
                     required
                     class="form-input"
-                    placeholder="{{ $t('groupAdmin.applicationModal.applicationName') }}"
+                    :placeholder="$t('groupAdmin.applicationModal.applicationName')"
                   />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
@@ -103,113 +103,88 @@
                   :placeholder="$t('groupAdmin.applicationModal.descriptionPlaceholder')"
                 ></textarea>
               </div>
-            </div>
 
-            <!-- Appearance -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:palette-outline" class="section-icon" />
-                <h4 class="section-title">{{ $t('groupAdmin.applicationModal.appearance') }}</h4>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview -->
+              <div class="grid grid-cols-[7rem_1fr] gap-4 items-end">
                 <div class="form-group">
-                  <label class="form-label">{{ $t('groupAdmin.applicationModal.preview') }}</label>
-                  <div class="card p-4">
-                    <div class="flex items-center space-x-4">
-                      <Icon
-                        :icon="form.icon || 'mdi:application'"
-                        class="h-10 w-10 flex-shrink-0"
-                        :style="{ color: form.color }"
-                      />
-                      <div class="flex-1">
-                        <div class="font-medium text-white">{{ form.name || $t('groupAdmin.applicationModal.previewName') }}</div>
-                        <div class="text-sm text-gray-400">{{ form.url || $t('groupAdmin.applicationModal.previewUrl') }}</div>
-                      </div>
-                      <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Color, Icon and Order -->
-                <div class="space-y-4">
-                  <div class="form-group">
-                    <label for="color" class="form-label">{{ $t('groupAdmin.applicationModal.color') }}</label>
-                    <div class="flex items-center space-x-3">
-                      <input
-                        id="color"
-                        v-model="form.color"
-                        type="color"
-                        class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
-                      />
-                      <input
-                        v-model="form.color"
-                        type="text"
-                        class="form-input flex-1"
-                        placeholder="#6366f1"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Icon Input -->
-                  <IconInput
-                    v-model="form.icon"
-                    :label="$t('groupAdmin.applicationModal.icon')"
-                    placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
-                    category="application"
-                    :show-suggestions="true"
+                  <label for="order" class="form-label">{{ $t('groupAdmin.applicationModal.displayOrder') }}</label>
+                  <input
+                    id="order"
+                    v-model.number="form.order"
+                    type="number"
+                    min="0"
+                    class="form-input"
+                    placeholder="0"
                   />
-
-                  <div class="form-group">
-                    <label for="order" class="form-label">{{ $t('groupAdmin.applicationModal.displayOrder') }}</label>
-                    <input
-                      id="order"
-                      v-model.number="form.order"
-                      type="number"
-                      min="0"
-                      class="form-input"
-                      placeholder="0"
-                    />
-                  </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Behavior Options -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:tune" class="section-icon" />
-                <h4 class="section-title">{{ $t('groupAdmin.applicationModal.behaviorOptions') }}</h4>
-              </div>
-
-              <div class="space-y-3">
-                <div class="card p-4">
+                <div class="space-y-2 pb-1">
                   <label class="flex items-center space-x-3 cursor-pointer">
                     <input
                       v-model="form.open_in_new_tab"
                       type="checkbox"
                       class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
                     />
-                    <span class="text-sm text-gray-300">
-                      {{ $t('groupAdmin.applicationModal.openInNewTab') }}
-                    </span>
+                    <span class="text-sm text-gray-300">{{ $t('groupAdmin.applicationModal.openInNewTab') }}</span>
                   </label>
-                </div>
-
-                <div class="card p-4">
                   <label class="flex items-center space-x-3 cursor-pointer">
                     <input
                       v-model="form.is_active"
                       type="checkbox"
                       class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
                     />
-                    <span class="text-sm text-gray-300">
-                      {{ $t('groupAdmin.applicationModal.activeAndVisible') }}
-                    </span>
+                    <span class="text-sm text-gray-300">{{ $t('groupAdmin.applicationModal.activeAndVisible') }}</span>
                   </label>
                 </div>
               </div>
+            </div>
+
+            <!-- Colonne droite : apparence -->
+            <div class="space-y-4">
+              <div class="section-header">
+                <Icon icon="mdi:palette-outline" class="section-icon" />
+                <h4 class="section-title">{{ $t('groupAdmin.applicationModal.appearance') }}</h4>
+              </div>
+
+              <div class="card p-3">
+                <div class="flex items-center space-x-3">
+                  <Icon
+                    :icon="form.icon || 'mdi:application'"
+                    class="h-9 w-9 flex-shrink-0"
+                    :style="{ color: form.color }"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-white truncate">{{ form.name || $t('groupAdmin.applicationModal.previewName') }}</div>
+                    <div class="text-sm text-gray-400 truncate">{{ form.url || $t('groupAdmin.applicationModal.previewUrl') }}</div>
+                  </div>
+                  <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="color" class="form-label">{{ $t('groupAdmin.applicationModal.color') }}</label>
+                <div class="flex items-center space-x-3">
+                  <input
+                    id="color"
+                    v-model="form.color"
+                    type="color"
+                    class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
+                  />
+                  <input
+                    v-model="form.color"
+                    type="text"
+                    class="form-input flex-1"
+                    placeholder="#6366f1"
+                  />
+                </div>
+              </div>
+
+              <IconInput
+                v-model="form.icon"
+                :label="$t('groupAdmin.applicationModal.icon')"
+                placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
+                category="application"
+                :show-suggestions="true"
+              />
             </div>
           </div>
 
