@@ -74,6 +74,12 @@ func main() {
 		&models.GamificationRule{},
 		&models.HeroMessage{}, // Dynamic Hero Messages
 		&models.Chatbot{},     // Chatbots n8n
+		// Trombinoscope
+		&models.OrgUnit{},
+		&models.OrgPosition{},
+		&models.DirectoryPerson{},
+		&models.PositionAssignment{},
+		&models.DirectoryField{},
 	); err != nil {
 		log.Fatal("Erreur lors des migrations:", err)
 	}
@@ -198,6 +204,7 @@ func main() {
 	newsHandler := handlers.NewNewsHandler(db, cfg, gamificationService)
 	eventsHandler := handlers.NewEventsHandler(db, gamificationService)
 	homeHandler := handlers.NewHomeHandler(db)
+	directoryHandler := handlers.NewDirectoryHandler(db)
 	versionHandler := handlers.NewVersionHandler()
 	emailHandler := handlers.NewEmailHandler(db, cfg)
 	commentHandler := handlers.NewCommentHandler(db, gamificationService)
@@ -459,6 +466,9 @@ func main() {
 			polls.GET("/:id/results", pollsHandler.GetPollResults) // Récupérer les résultats d'un sondage
 		}
 
+		// Trombinoscope (lecture pour tous les utilisateurs connectés)
+		protected.GET("/directory", directoryHandler.GetDirectory)
+
 		// Routes Suggestions (accessible à tous les utilisateurs connectés)
 		suggestions := protected.Group("/suggestions")
 		{
@@ -666,6 +676,17 @@ func main() {
 			admin.POST("/media/upload", mediaHandler.UploadMedia) // Uploader un média
 			admin.PUT("/media/:id", mediaHandler.UpdateMedia)     // Mettre à jour les métadonnées d'un média
 			admin.DELETE("/media/:id", mediaHandler.DeleteMedia)  // Supprimer un média
+
+			// Trombinoscope : structure et champs dynamiques (admin uniquement)
+			admin.POST("/directory/units", directoryHandler.CreateUnit)
+			admin.PUT("/directory/units/:id", directoryHandler.UpdateUnit)
+			admin.DELETE("/directory/units/:id", directoryHandler.DeleteUnit)
+			admin.POST("/directory/positions", directoryHandler.CreatePosition)
+			admin.PUT("/directory/positions/:id", directoryHandler.UpdatePosition)
+			admin.DELETE("/directory/positions/:id", directoryHandler.DeletePosition)
+			admin.POST("/directory/fields", directoryHandler.CreateField)
+			admin.PUT("/directory/fields/:id", directoryHandler.UpdateField)
+			admin.DELETE("/directory/fields/:id", directoryHandler.DeleteField)
 		}
 
 		// Routes editor (admin et editor peuvent créer/modifier des news et événements)
@@ -750,6 +771,15 @@ func main() {
 
 			// Info sur les groupes administrés
 			groupAdmin.GET("/managed-groups", groupAdminHandler.GetManagedGroups)
+
+			// Trombinoscope : personnes et affectations (admin + admin de groupe)
+			groupAdmin.GET("/directory/users", directoryHandler.SearchUsers)
+			groupAdmin.POST("/directory/people", directoryHandler.CreatePerson)
+			groupAdmin.PUT("/directory/people/:id", directoryHandler.UpdatePerson)
+			groupAdmin.DELETE("/directory/people/:id", directoryHandler.DeletePerson)
+			groupAdmin.POST("/directory/assignments", directoryHandler.CreateAssignment)
+			groupAdmin.PUT("/directory/assignments/:id", directoryHandler.UpdateAssignment)
+			groupAdmin.DELETE("/directory/assignments/:id", directoryHandler.DeleteAssignment)
 		}
 	}
 

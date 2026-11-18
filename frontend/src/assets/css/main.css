@@ -748,3 +748,13 @@ html.dark .dark\:bg-gray-700 { background-color: var(--bg-surface); }
 /* Dark mode borders */
 html.dark .dark\:border-gray-700 { border-color: var(--border); }
 html.dark .dark\:border-gray-600 { border-color: var(--border); }
+
+/* Trombinoscope : badge « intérim » partagé (cartes, organigramme, fiches) */
+.dir-interim {
+  @apply inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wide;
+  color: #b45309;
+  background-color: rgba(245, 158, 11, 0.15);
+}
+.dark .dir-interim {
+  color: #fbbf24;
+}

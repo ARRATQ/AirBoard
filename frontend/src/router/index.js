@@ -58,6 +58,10 @@ const GroupAdminEventEditor = () => import('@/views/group-admin/EventEditor.vue'
 // Comment moderation
 const CommentModeration = () => import('@/views/admin/CommentModeration.vue')
 
+// Trombinoscope
+const DirectoryPage = () => import('@/views/DirectoryPage.vue')
+const DirectoryManagement = () => import('@/views/group-admin/DirectoryManagement.vue')
+
 // Search
 const SearchPage = () => import('@/views/SearchPage.vue')
 
@@ -86,6 +90,25 @@ const routes = [
     meta: {
       requiresAuth: true,
       title: 'Ressources'
+    }
+  },
+  {
+    path: '/directory',
+    name: 'Directory',
+    component: DirectoryPage,
+    meta: {
+      requiresAuth: true,
+      title: 'Trombinoscope'
+    }
+  },
+  {
+    path: '/group-admin/directory',
+    name: 'DirectoryManagement',
+    component: DirectoryManagement,
+    meta: {
+      requiresAuth: true,
+      requiresGroupAdmin: true,
+      title: 'Gestion du trombinoscope'
     }
   },
   {

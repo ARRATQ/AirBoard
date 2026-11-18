@@ -85,6 +85,11 @@
           <span>{{ $t('common.gamification') }}</span>
         </router-link>
 
+        <router-link to="/directory" :class="getLinkClasses('/directory')">
+          <Icon icon="mdi:account-group-outline" class="h-4 w-4" />
+          <span>{{ $t('directory.title') }}</span>
+        </router-link>
+
         <router-link to="/search" :class="getLinkClasses('/search')">
           <Icon icon="mdi:magnify" class="h-4 w-4" />
           <span>{{ $t('search.title') }}</span>
@@ -127,6 +132,11 @@
         <router-link to="/group-admin/polls" :class="getLinkClasses('/group-admin/polls')">
           <Icon icon="mdi:poll" class="h-4 w-4" />
           <span>{{ $t('groupAdmin.myPolls') }}</span>
+        </router-link>
+
+        <router-link to="/group-admin/directory" :class="getLinkClasses('/group-admin/directory')">
+          <Icon icon="mdi:sitemap-outline" class="h-4 w-4" />
+          <span>{{ $t('directory.manageTitle') }}</span>
         </router-link>
       </div>
 

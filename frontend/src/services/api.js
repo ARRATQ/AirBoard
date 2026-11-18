@@ -1547,4 +1547,67 @@ export const settingsService = {
   }
 }
 
+// ===== Trombinoscope =====
+export const directoryService = {
+  // Lecture (tous les utilisateurs connectés)
+  async getDirectory() {
+    const response = await api.get('/directory')
+    return response.data
+  },
+
+  // Structure (admin)
+  async createUnit(data) {
+    return (await api.post('/admin/directory/units', data)).data
+  },
+  async updateUnit(id, data) {
+    return (await api.put(`/admin/directory/units/${id}`, data)).data
+  },
+  async deleteUnit(id) {
+    return (await api.delete(`/admin/directory/units/${id}`)).data
+  },
+  async createPosition(data) {
+    return (await api.post('/admin/directory/positions', data)).data
+  },
+  async updatePosition(id, data) {
+    return (await api.put(`/admin/directory/positions/${id}`, data)).data
+  },
+  async deletePosition(id) {
+    return (await api.delete(`/admin/directory/positions/${id}`)).data
+  },
+
+  // Champs dynamiques (admin)
+  async createField(data) {
+    return (await api.post('/admin/directory/fields', data)).data
+  },
+  async updateField(id, data) {
+    return (await api.put(`/admin/directory/fields/${id}`, data)).data
+  },
+  async deleteField(id) {
+    return (await api.delete(`/admin/directory/fields/${id}`)).data
+  },
+
+  // Personnes et affectations (admin + admin de groupe)
+  async searchUsers(q) {
+    return (await api.get('/group-admin/directory/users', { params: { q } })).data
+  },
+  async createPerson(data) {
+    return (await api.post('/group-admin/directory/people', data)).data
+  },
+  async updatePerson(id, data) {
+    return (await api.put(`/group-admin/directory/people/${id}`, data)).data
+  },
+  async deletePerson(id) {
+    return (await api.delete(`/group-admin/directory/people/${id}`)).data
+  },
+  async createAssignment(data) {
+    return (await api.post('/group-admin/directory/assignments', data)).data
+  },
+  async updateAssignment(id, data) {
+    return (await api.put(`/group-admin/directory/assignments/${id}`, data)).data
+  },
+  async deleteAssignment(id) {
+    return (await api.delete(`/group-admin/directory/assignments/${id}`)).data
+  },
+}
+
 export default api
