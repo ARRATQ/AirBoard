@@ -61,20 +61,16 @@ onMounted(async () => {
       throw new Error('Code d\'autorisation manquant')
     }
 
-    // Récupérer le state et nonce depuis sessionStorage si pas dans les query params
-    let state = route.query.state
-    let nonce = route.query.nonce
+    // SECURITY (CSRF / login forcé) : le state renvoyé par le provider doit être
+    // celui généré dans CE navigateur. Le nonce vient uniquement du sessionStorage,
+    // jamais de l'URL (qu'un attaquant pourrait forger).
+    const state = route.query.state
+    const savedState = sessionStorage.getItem('oauth_state')
+    const nonce = sessionStorage.getItem('oauth_nonce')
+    clearOAuthSession()
 
-    if (!state || !nonce) {
-      console.log('⚠️ State/nonce not in query params, trying sessionStorage...')
-      state = state || sessionStorage.getItem('oauth_state')
-      nonce = nonce || sessionStorage.getItem('oauth_nonce')
-      
-      if (!state || !nonce) {
-        console.log('⚠️ No state/nonce found anywhere, proceeding without validation')
-        // Pour Microsoft, on peut procéder sans state si pas de sessionStorage
-        // (cela réduit la sécurité mais permet l'authentification)
-      }
+    if (!state || !savedState || state !== savedState || !nonce) {
+      throw new Error('La session de connexion a expiré ou est invalide. Veuillez relancer la connexion.')
     }
 
     // Appeler le backend pour échanger le code contre un token
@@ -133,6 +129,12 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+function clearOAuthSession() {
+  sessionStorage.removeItem('oauth_state')
+  sessionStorage.removeItem('oauth_nonce')
+  sessionStorage.removeItem('oauth_provider')
+}
 
 const redirectToLogin = () => {
   router.push('/auth/login')

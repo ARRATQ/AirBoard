@@ -239,62 +239,50 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		return
 	}
 
-	// Valider le state et nonce pour protection CSRF (optionnel selon le provider)
-	var validatedNonce string
-	var err error
-	
-	if state != "" && nonce != "" {
-		// Validation complète si state et nonce sont présents
-		log.Printf("[OAuth] Validating state and nonce for %s", providerName)
-		
-		validatedNonce, err = h.stateManager.ValidateState(state, providerName, provider.ClientID)
-		if err != nil {
-			log.Printf("[OAuth] State validation failed: %v", err)
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "invalid_state",
-				Message: "Invalid or expired state parameter",
-				Code:    http.StatusForbidden,
-			})
-			return
-		}
-
-		// Valider le nonce
-		if err := h.stateManager.ValidateNonce(state, nonce); err != nil {
-			log.Printf("[OAuth] Nonce validation failed: %v", err)
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "invalid_nonce",
-				Message: "Invalid nonce parameter",
-				Code:    http.StatusForbidden,
-			})
-			return
-		}
-
-		// Vérifier que les nonces correspondent
-		if validatedNonce != nonce {
-			log.Printf("[OAuth] Nonce mismatch: expected %s, got %s", validatedNonce, nonce)
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "nonce_mismatch",
-				Message: "Nonce validation failed",
-				Code:    http.StatusForbidden,
-			})
-			return
-		}
-		
-		log.Printf("[OAuth] State and nonce validation successful for %s", providerName)
-	} else {
-		// Pour certains providers (comme Microsoft), on peut continuer sans state/nonce
-		// ATTENTION: Ceci réduit la sécurité CSRF, mais permet l'authentification
-		log.Printf("[OAuth] No state/nonce provided for %s, proceeding without CSRF validation", providerName)
-		
-		// Optionnel: Valider que le provider supporte l'authentification sans state
-		if providerName == "microsoft" {
-			log.Printf("[OAuth] Microsoft provider detected, allowing authentication without state")
-		} else {
-			log.Printf("[OAuth] Warning: Authentication without state for provider %s", providerName)
-		}
+	// SECURITY: state et nonce sont OBLIGATOIRES (protection CSRF / login forcé).
+	// Le frontend les conserve en sessionStorage et Microsoft renvoie toujours le state.
+	if state == "" || nonce == "" {
+		log.Printf("[OAuth] Callback rejected for %s: missing state or nonce", providerName)
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "missing_state",
+			Message: "Missing state or nonce parameter",
+			Code:    http.StatusBadRequest,
+		})
+		return
 	}
 
-	log.Printf("[OAuth] State and nonce validation successful")
+	validatedNonce, err := h.stateManager.ValidateState(state, providerName, provider.ClientID)
+	if err != nil {
+		log.Printf("[OAuth] State validation failed: %v", err)
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "invalid_state",
+			Message: "Invalid or expired state parameter",
+			Code:    http.StatusForbidden,
+		})
+		return
+	}
+
+	if err := h.stateManager.ValidateNonce(state, nonce); err != nil {
+		log.Printf("[OAuth] Nonce validation failed: %v", err)
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "invalid_nonce",
+			Message: "Invalid nonce parameter",
+			Code:    http.StatusForbidden,
+		})
+		return
+	}
+
+	if validatedNonce != nonce {
+		log.Printf("[OAuth] Nonce mismatch for %s", providerName)
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "nonce_mismatch",
+			Message: "Nonce validation failed",
+			Code:    http.StatusForbidden,
+		})
+		return
+	}
+
+	log.Printf("[OAuth] State and nonce validation successful for %s", providerName)
 
 	// Valider la callback URL pour sécurité supplémentaire
 	if err := utils.ValidateOAuthCallbackURL(provider.RedirectURI, c.Request.Host); err != nil {

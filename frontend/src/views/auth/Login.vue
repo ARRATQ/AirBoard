@@ -262,7 +262,8 @@ const handleOAuthCallback = async (code, state, nonce) => {
 
   try {
     loading.value = true
-    const response = await oauthService.handleCallback(provider, code, state, nonce)
+    // Nonce pris uniquement du sessionStorage, jamais de l'URL
+    const response = await oauthService.handleCallback(provider, code, state, savedNonce)
 
     // Enrichir l'objet user avec managed_group_ids du JWT si absent
     const userData = { ...response.user }
