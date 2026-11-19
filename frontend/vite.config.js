@@ -33,8 +33,13 @@ function copyDocsPlugin() {
   }
 }
 
-export default defineConfig({
+// Dev proxy target (override with API_PROXY_TARGET when 8080 is taken)
+const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:8080'
+
+export default defineConfig(({ command }) => ({
   plugins: [vue(), copyDocsPlugin()],
+  // En prod, les console.log/debug sont retirés (console.warn/error restent)
+  esbuild: command === 'build' ? { pure: ['console.log', 'console.debug'] } : {},
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -49,17 +54,18 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: apiTarget,
         changeOrigin: true,
+        ws: true, // WebSocket du chat (/api/v1/ws)
         secure: false,
       },
       '/uploads': {
-        target: 'http://localhost:8080',
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       '/ws': {
-        target: 'ws://localhost:8080',
+        target: apiTarget.replace(/^http/, 'ws'),
         ws: true,
         changeOrigin: true,
         secure: false,
@@ -75,7 +81,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-          ui: ['@headlessui/vue', '@heroicons/vue'],
           icons: ['@iconify/vue'],
         },
       },
@@ -84,4 +89,4 @@ export default defineConfig({
   optimizeDeps: {
     include: ['vue', 'vue-router', 'pinia', '@iconify/vue', 'vue-i18n'],
   },
-})
+}))
