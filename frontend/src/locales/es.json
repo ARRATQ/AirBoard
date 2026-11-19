@@ -1653,5 +1653,31 @@
     "layoutList": "Lista",
     "goToUnit": "Ir a una unidad…",
     "backToRoot": "Toda la organización"
+  },
+  "ui": {
+    "close": "Cerrar",
+    "confirm": {
+      "title": "Confirmar",
+      "ok": "Confirmar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "table": {
+      "search": "Buscar…",
+      "empty": "Sin resultados.",
+      "prev": "Página anterior",
+      "next": "Página siguiente",
+      "range": "{from}–{to} de {total}",
+      "sortAsc": "Orden ascendente",
+      "sortDesc": "Orden descendente"
+    },
+    "toast": {
+      "region": "Notificaciones",
+      "close": "Cerrar la notificación",
+      "success": "Éxito",
+      "error": "Error",
+      "warning": "Atención",
+      "info": "Información"
+    }
   }
 }

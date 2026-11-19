@@ -52,6 +52,9 @@
     <!-- Notifications -->
     <NotificationContainer />
 
+    <!-- Confirmation (await confirm(…) via composables/useConfirm) -->
+    <ConfirmDialog />
+
     <!-- Speed Dial FAB (chat + chatbots fusionnés en un seul bouton flottant) -->
     <FloatingSpeedDial v-if="isAuthenticated && !isAuthPage" />
   </div>
@@ -68,6 +71,7 @@ import { useAppStore } from '@/stores/app'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import LoadingOverlay from '@/components/ui/LoadingOverlay.vue'
 import NotificationContainer from '@/components/ui/NotificationContainer.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import FloatingSpeedDial from '@/components/layout/FloatingSpeedDial.vue'
 
 // Stores

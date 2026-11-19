@@ -89,4 +89,24 @@ export default defineConfig(({ command }) => ({
   optimizeDeps: {
     include: ['vue', 'vue-router', 'pinia', '@iconify/vue', 'vue-i18n'],
   },
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.js'],
+    setupFiles: ['src/test/setup.js'],
+    // En environnement DOM, Vitest transforme vue/index.mjs, qui réexporte un CJS
+    // conditionnel : les exports sont perdus. Les builds ESM des paquets Vue évitent ce détour.
+    alias: [
+      { find: /^vue$/, replacement: 'vue/dist/vue.esm-bundler.js' },
+      {
+        find: /^@vue\/(runtime-dom|runtime-core|reactivity|shared|compiler-dom|compiler-core)$/,
+        replacement: '@vue/$1/dist/$1.esm-bundler.js',
+      },
+      {
+        find: /^@vue\/test-utils$/,
+        replacement: resolve(__dirname, 'node_modules/@vue/test-utils/dist/vue-test-utils.esm-bundler.mjs'),
+      },
+    ],
+    // Ces bibliothèques passent par Vite pour utiliser la même instance de Vue que les SFC.
+    server: { deps: { inline: [/@vue\/test-utils/, /@headlessui\/vue/, /vue-i18n/, /@intlify/, /@iconify\/vue/] } },
+  },
 }))

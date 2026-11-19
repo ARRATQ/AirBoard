@@ -2099,5 +2099,31 @@
     "layoutList": "List",
     "goToUnit": "Go to a unit…",
     "backToRoot": "Whole organization"
+  },
+  "ui": {
+    "close": "Close",
+    "confirm": {
+      "title": "Confirm",
+      "ok": "Confirm",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "table": {
+      "search": "Search…",
+      "empty": "No results.",
+      "prev": "Previous page",
+      "next": "Next page",
+      "range": "{from}–{to} of {total}",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending"
+    },
+    "toast": {
+      "region": "Notifications",
+      "close": "Dismiss notification",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Information"
+    }
   }
 }
