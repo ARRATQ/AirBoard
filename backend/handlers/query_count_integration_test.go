@@ -1,0 +1,144 @@
+//go:build integration
+
+package handlers
+
+// Compte les requêtes SQL émises par les endpoints les plus lourds, pour repérer
+// les N+1. Nécessite une base Postgres peuplée ; exclu de `go test ./...`.
+//
+//	AIRBOARD_TEST_DSN="host=localhost user=airboard password=... dbname=airboard sslmode=disable" \
+//	  go test -tags integration -run TestQueryCounts -v ./handlers/
+//
+// Utilisateurs lus en base : AIRBOARD_TEST_ADMIN (défaut "admin") et
+// AIRBOARD_TEST_USER (défaut : premier utilisateur actif de rôle "user").
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strconv"
+	"sync/atomic"
+	"testing"
+
+	"airboard/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+)
+
+func openCountingDB(t *testing.T) (*gorm.DB, *atomic.Int64) {
+	t.Helper()
+	dsn := os.Getenv("AIRBOARD_TEST_DSN")
+	if dsn == "" {
+		t.Skip("AIRBOARD_TEST_DSN non défini")
+	}
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
+	if err != nil {
+		t.Fatalf("connexion: %v", err)
+	}
+	var n atomic.Int64
+	count := func(*gorm.DB) { n.Add(1) }
+	cb := db.Callback()
+	register := []error{
+		cb.Query().After("gorm:query").Register("test:count_query", count),
+		cb.Row().After("gorm:row").Register("test:count_row", count),
+		cb.Raw().After("gorm:raw").Register("test:count_raw", count),
+		cb.Create().After("gorm:create").Register("test:count_create", count),
+		cb.Update().After("gorm:update").Register("test:count_update", count),
+		cb.Delete().After("gorm:delete").Register("test:count_delete", count),
+	}
+	for _, err := range register {
+		if err != nil {
+			t.Fatalf("callback: %v", err)
+		}
+	}
+	return db, &n
+}
+
+type identity struct {
+	id      uint
+	role    string
+	managed []uint
+}
+
+func loadIdentity(t *testing.T, db *gorm.DB, username, role string) identity {
+	t.Helper()
+	var u models.User
+	q := db.Where("is_active = ?", true)
+	if username != "" {
+		q = q.Where("username = ?", username)
+	} else {
+		q = q.Where("role = ?", role).Order("id")
+	}
+	if err := q.First(&u).Error; err != nil {
+		t.Fatalf("utilisateur %q/%q introuvable: %v", username, role, err)
+	}
+	var managed []uint
+	db.Table("group_admins").Where("user_id = ?", u.ID).Pluck("group_id", &managed)
+	return identity{id: u.ID, role: u.Role, managed: managed}
+}
+
+func runHandler(h gin.HandlerFunc, who identity, params gin.Params) int {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	c.Params = params
+	c.Set("user_id", who.id)
+	c.Set("role", who.role)
+	c.Set("managed_group_ids", who.managed)
+	h(c)
+	return w.Code
+}
+
+func TestQueryCounts(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, n := openCountingDB(t)
+
+	adminName := os.Getenv("AIRBOARD_TEST_ADMIN")
+	if adminName == "" {
+		adminName = "admin"
+	}
+	admin := loadIdentity(t, db, adminName, "")
+	user := loadIdentity(t, db, os.Getenv("AIRBOARD_TEST_USER"), "user")
+
+	var groupIDs []uint
+	db.Model(&models.Group{}).Order("id").Limit(1).Pluck("id", &groupIDs)
+	if len(groupIDs) == 0 {
+		t.Fatal("aucun groupe en base")
+	}
+
+	home := NewHomeHandler(db)
+	dash := NewDashboardHandler(db)
+	reports := NewReportsHandler(db)
+	idParam := func(id uint) gin.Params {
+		return gin.Params{{Key: "id", Value: strconv.FormatUint(uint64(id), 10)}}
+	}
+
+	cases := []struct {
+		name   string
+		h      gin.HandlerFunc
+		who    identity
+		params gin.Params
+	}{
+		{"dashboard/user", dash.GetDashboard, user, nil},
+		{"dashboard/admin", dash.GetDashboard, admin, nil},
+		{"home/user", home.GetHomeData, user, nil},
+		{"home/admin", home.GetHomeData, admin, nil},
+		{"reports/roles", reports.GetRoleReport, admin, nil},
+		{"reports/groups", reports.GetGroupReport, admin, nil},
+		{"reports/groups/:id", reports.GetGroupDetailReport, admin, idParam(groupIDs[0])},
+		{"reports/users", reports.GetUserReport, admin, nil},
+		{"reports/users/:id", reports.GetUserDetailReport, admin, idParam(user.id)},
+	}
+
+	for _, tc := range cases {
+		runHandler(tc.h, tc.who, tc.params) // chauffe les caches applicatifs
+		n.Store(0)
+		code := runHandler(tc.h, tc.who, tc.params)
+		if code != http.StatusOK {
+			t.Errorf("%s: statut %d", tc.name, code)
+		}
+		t.Logf("%-20s %4d requêtes", tc.name, n.Load())
+	}
+}

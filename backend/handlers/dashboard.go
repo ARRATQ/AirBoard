@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"airboard/models"
@@ -54,17 +55,7 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 			return
 		}
 
-		for _, ag := range allAppGroups {
-			var apps []models.Application
-			h.db.Where("app_group_id = ? AND is_active = ?", ag.ID, true).
-				Order("\"order\" ASC, name ASC").
-				Find(&apps)
-
-			appGroups = append(appGroups, models.AppGroupWithApps{
-				AppGroup:     ag,
-				Applications: apps,
-			})
-		}
+		appGroups = h.withApplications(allAppGroups)
 	} else {
 		// Récupérer les groupes administrés par l'utilisateur
 		var managedGroupIDs []uint
@@ -106,17 +97,7 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 				return
 			}
 
-			for _, ag := range userAppGroups {
-				var apps []models.Application
-				h.db.Where("app_group_id = ? AND is_active = ?", ag.ID, true).
-					Order("\"order\" ASC, name ASC").
-					Find(&apps)
-
-				appGroups = append(appGroups, models.AppGroupWithApps{
-					AppGroup:     ag,
-					Applications: apps,
-				})
-			}
+			appGroups = h.withApplications(userAppGroups)
 		}
 	}
 
@@ -135,4 +116,43 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// withApplications charge les applications actives de tous les groupes en une requête
+// (au lieu d'une requête par groupe) et les range sous leur groupe, dans l'ordre donné.
+func (h *DashboardHandler) withApplications(groups []models.AppGroup) []models.AppGroupWithApps {
+	if len(groups) == 0 {
+		return nil
+	}
+	ids := make([]uint, 0, len(groups))
+	for _, ag := range groups {
+		ids = append(ids, ag.ID)
+	}
+
+	var apps []models.Application
+	if err := h.db.Where("app_group_id IN ? AND is_active = ?", ids, true).
+		Order("\"order\" ASC, name ASC").
+		Find(&apps).Error; err != nil {
+		log.Printf("[DASHBOARD] Failed to load applications: %v", err)
+	}
+	return groupApplications(groups, apps)
+}
+
+// groupApplications range les applications (déjà triées) sous leur groupe.
+// Chaque groupe a une liste non nulle, vide s'il n'a pas d'application.
+func groupApplications(groups []models.AppGroup, apps []models.Application) []models.AppGroupWithApps {
+	byGroup := make(map[uint][]models.Application, len(groups))
+	for _, app := range apps {
+		byGroup[app.AppGroupID] = append(byGroup[app.AppGroupID], app)
+	}
+
+	result := make([]models.AppGroupWithApps, 0, len(groups))
+	for _, ag := range groups {
+		list := byGroup[ag.ID]
+		if list == nil {
+			list = []models.Application{}
+		}
+		result = append(result, models.AppGroupWithApps{AppGroup: ag, Applications: list})
+	}
+	return result
 }

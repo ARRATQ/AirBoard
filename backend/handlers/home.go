@@ -462,7 +462,7 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 			// Afficher les articles globaux (sans target_groups) OU les articles ciblant ses groupes
 			err = h.db.Where("is_published = ?", true).
 				Where(`
-					(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
+					NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
 					OR EXISTS (
 						SELECT 1 FROM news_target_groups
 						WHERE news_target_groups.news_id = news.id
@@ -483,7 +483,7 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 		} else {
 			// L'utilisateur n'appartient à aucun groupe : seulement les articles globaux
 			err = h.db.Where("is_published = ?", true).
-				Where("(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0").
+				Where("NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)").
 				Preload("Author").
 				Preload("Category").
 				Preload("Tags").
@@ -498,18 +498,8 @@ func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, er
 		}
 	}
 
-	// Ajouter les compteurs de commentaires et réactions pour chaque article
-	for i := range news {
-		// Compter les commentaires
-		var commentCount int64
-		h.db.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ? AND is_approved = ?", "news", news[i].ID, true).Count(&commentCount)
-		news[i].CommentCount = int(commentCount)
-
-		// Compter les réactions
-		var reactionCount int64
-		h.db.Model(&models.Feedback{}).Where("entity_type = ? AND entity_id = ?", "news", news[i].ID).Count(&reactionCount)
-		news[i].ReactionCount = int(reactionCount)
-	}
+	// Compteurs de commentaires et réactions (2 requêtes pour tous les articles)
+	applyNewsEngagementCounts(h.db, news)
 
 	return news, err
 }
@@ -521,8 +511,6 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab i
 	if err := h.db.Where("is_active = ?", true).Order("\"order\" ASC, name ASC").Find(&types).Error; err != nil {
 		return []NewsGroup{}, err
 	}
-
-	var result []NewsGroup
 
 	// Pre-fetch user's groups once (before the loop) for permission checks
 	var managedGroupIDs []uint
@@ -547,70 +535,76 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab i
 		}
 	}
 
-	for _, newsType := range types {
-		var news []models.News
+	if len(types) == 0 {
+		return nil, nil
+	}
+	slugs := make([]string, 0, len(types))
+	for _, t := range types {
+		slugs = append(slugs, t.Slug)
+	}
 
-		// Fresh session per iteration to prevent statement pollution across the loop
-		db := h.db.Session(&gorm.Session{NewDB: true})
+	// Les newsPerTab articles les plus récents de chaque type, en une seule requête
+	// (au lieu d'une requête + 4 préchargements par type).
+	ranked := h.db.Session(&gorm.Session{NewDB: true}).
+		Model(&models.News{}).
+		Select("id, type, ROW_NUMBER() OVER (PARTITION BY type ORDER BY is_pinned DESC, published_at DESC) AS rn").
+		Where("is_published = ? AND type IN ? AND deleted_at IS NULL", true, slugs)
 
-		query := db.Model(&models.News{}).
-			Where("is_published = ? AND type = ?", true, newsType.Slug)
+	// Visibilité pour les non-admins : articles sans groupe cible, ou ciblant un de ses groupes
+	if role != "admin" {
+		restrictedIDs := h.db.Session(&gorm.Session{NewDB: true}).
+			Table("news_target_groups").
+			Select("news_id")
 
-		// Apply visibility filter for non-admins using non-correlated subqueries
-		if role != "admin" {
-			// Subquery: all news IDs that have at least one target group (restricted articles)
-			restrictedIDs := h.db.Session(&gorm.Session{NewDB: true}).
+		if len(combinedGroupIDs) > 0 {
+			accessibleIDs := h.db.Session(&gorm.Session{NewDB: true}).
 				Table("news_target_groups").
-				Select("news_id")
-
-			if len(combinedGroupIDs) > 0 {
-				// Subquery: news IDs accessible to the user via their groups
-				accessibleIDs := h.db.Session(&gorm.Session{NewDB: true}).
-					Table("news_target_groups").
-					Select("news_id").
-					Where("group_id IN ?", combinedGroupIDs)
-				// Article is visible if: no target groups at all, OR user's group is in target groups
-				query = query.Where("id NOT IN (?) OR id IN (?)", restrictedIDs, accessibleIDs)
-			} else {
-				// User has no groups: only see articles with no target groups
-				query = query.Where("id NOT IN (?)", restrictedIDs)
-			}
-		}
-
-		query = query.Preload("Author").
-			Preload("Category").
-			Preload("Tags").
-			Preload("TargetGroups").
-			Order("is_pinned DESC, published_at DESC").
-			Limit(newsPerTab)
-
-		if err := query.Find(&news).Error; err != nil {
-			log.Printf("[HOME] Failed to load news for type %s: %v", newsType.Slug, err)
-			continue
-		}
-
-		// Add comment and reaction counts
-		for i := range news {
-			var commentCount int64
-			h.db.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ? AND is_approved = ?", "news", news[i].ID, true).Count(&commentCount)
-			news[i].CommentCount = int(commentCount)
-
-			var reactionCount int64
-			h.db.Model(&models.Feedback{}).Where("entity_type = ? AND entity_id = ?", "news", news[i].ID).Count(&reactionCount)
-			news[i].ReactionCount = int(reactionCount)
-		}
-
-		// Only add group if there are articles
-		if len(news) > 0 {
-			nt := newsType
-			result = append(result, NewsGroup{
-				Type: &nt,
-				News: news,
-			})
+				Select("news_id").
+				Where("group_id IN ?", combinedGroupIDs)
+			ranked = ranked.Where("(id NOT IN (?) OR id IN (?))", restrictedIDs, accessibleIDs)
+		} else {
+			ranked = ranked.Where("id NOT IN (?)", restrictedIDs)
 		}
 	}
 
-	return result, nil
+	var refs []rankedNewsRef
+	if err := h.db.Session(&gorm.Session{NewDB: true}).
+		Table("(?) AS ranked", ranked).
+		Select("id, type").
+		Where("rn <= ?", newsPerTab).
+		Order("type, rn").
+		Scan(&refs).Error; err != nil {
+		log.Printf("[HOME] Failed to rank news by type: %v", err)
+		return []NewsGroup{}, err
+	}
+	if len(refs) == 0 {
+		return nil, nil
+	}
+
+	ids := make([]uint, 0, len(refs))
+	for _, ref := range refs {
+		ids = append(ids, ref.ID)
+	}
+
+	var news []models.News
+	if err := h.db.Session(&gorm.Session{NewDB: true}).
+		Where("id IN ?", ids).
+		Preload("Author").
+		Preload("Category").
+		Preload("Tags").
+		Preload("TargetGroups").
+		Find(&news).Error; err != nil {
+		log.Printf("[HOME] Failed to load news by type: %v", err)
+		return []NewsGroup{}, err
+	}
+
+	applyNewsEngagementCounts(h.db, news)
+
+	byID := make(map[uint]models.News, len(news))
+	for _, n := range news {
+		byID[n.ID] = n
+	}
+	return groupNewsByType(types, refs, byID), nil
 }
 
 // Helper: Get recent polls (last 10 polls - active and closed)
@@ -658,7 +652,7 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 				Preload("Options").
 				Where("is_active = ?", true).
 				Where(`
-					(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
+					NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
 					OR EXISTS (
 						SELECT 1 FROM poll_target_groups
 						WHERE poll_target_groups.poll_id = polls.id
@@ -677,7 +671,7 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 			err = h.db.Preload("Author").
 				Preload("Options").
 				Where("is_active = ?", true).
-				Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0").
+				Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)").
 				Order("created_at DESC").
 				Limit(10).
 				Find(&polls).Error
@@ -688,12 +682,8 @@ func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, e
 		}
 	}
 
-	// Calculer le nombre total de votes pour chaque sondage
-	for i := range polls {
-		var voteCount int64
-		h.db.Model(&models.PollVote{}).Where("poll_id = ?", polls[i].ID).Count(&voteCount)
-		polls[i].TotalVotes = int(voteCount)
-	}
+	// Nombre total de votes de chaque sondage (1 requête)
+	applyPollVoteCounts(h.db, polls)
 
 	return polls, err
 }
@@ -924,9 +914,9 @@ func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
 		recentBadges = append(recentBadges, ua.Achievement)
 	}
 
-	// Total count (sans limite)
-	var totalAchievements []models.UserAchievement
-	h.db.Where("user_id = ?", userID).Find(&totalAchievements)
+	// Total count (sans limite) : un COUNT plutôt que charger toutes les lignes
+	var totalAchievements int64
+	h.db.Model(&models.UserAchievement{}).Where("user_id = ?", userID).Count(&totalAchievements)
 
 	// Compute rank (position in leaderboard by XP descending)
 	var rank int64
@@ -940,7 +930,7 @@ func (h *HomeHandler) getGamificationSummary(userID uint) *GamificationSummary {
 		NextLevelXP:     xpForNextLevel,
 		ProgressPercent: progressPercent,
 		StreakDays:      profile.LoginStreak,
-		BadgesCount:     len(totalAchievements),
+		BadgesCount:     int(totalAchievements),
 		Rank:            int(rank) + 1,
 		RecentBadges:    recentBadges,
 	}
