@@ -254,8 +254,10 @@ import { pollsService, adminService } from '@/services/api'
 import PollEditor from '@/components/polls/PollEditor.vue'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const polls = ref([])
 const groups = ref([])
@@ -296,7 +298,7 @@ const loadPolls = async () => {
     stats.value.closed = polls.value.filter(p => !p.is_active).length
     // TODO: Charger les stats de votes depuis l'API analytics
   } catch (error) {
-    console.error($t('polls.adminPollsManagement.messages.loadError'), error)
+    console.error(t('polls.adminPollsManagement.messages.loadError'), error)
   } finally {
     isLoading.value = false
   }
@@ -350,40 +352,40 @@ const viewResults = (poll) => {
 
 // Fermer un sondage
 const closePoll = async (poll) => {
-  if (!confirm($t('polls.adminPollsManagement.confirmation.closeMessage'))) {
+  if (!confirm(t('polls.adminPollsManagement.confirmation.closeMessage'))) {
     return
   }
 
   try {
     await pollsService.closePoll(poll.id)
     if (window.$toast) {
-      window.$toast.success($t('polls.adminPollsManagement.messages.closeSuccess'))
+      window.$toast.success(t('polls.adminPollsManagement.messages.closeSuccess'))
     }
     await loadPolls()
   } catch (error) {
     console.error('Erreur lors de la fermeture:', error)
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || $t('polls.adminPollsManagement.messages.closeError'))
+      window.$toast.error(error.response?.data?.error || t('polls.adminPollsManagement.messages.closeError'))
     }
   }
 }
 
 // Confirmer la suppression
 const confirmDelete = async (poll) => {
-  if (!confirm($t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }))) {
+  if (!confirm(t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }))) {
     return
   }
 
   try {
     await pollsService.deletePoll(poll.id)
     if (window.$toast) {
-      window.$toast.success($t('polls.adminPollsManagement.messages.deleteSuccess'))
+      window.$toast.success(t('polls.adminPollsManagement.messages.deleteSuccess'))
     }
     await loadPolls()
   } catch (error) {
     console.error('Erreur lors de la suppression:', error)
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || $t('polls.adminPollsManagement.messages.deleteError'))
+      window.$toast.error(error.response?.data?.error || t('polls.adminPollsManagement.messages.deleteError'))
     }
   }
 }

@@ -317,7 +317,7 @@ const deleteApplication = async () => {
     await loadApplications()
   } catch (error) {
     console.error('Error deleting application:', error)
-    appStore.showError($t('groupAdmin.applicationsManagement.deleteError'))
+    appStore.showError(t('groupAdmin.applicationsManagement.deleteError'))
   } finally {
     deleteLoading.value = false
   }

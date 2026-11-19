@@ -985,10 +985,12 @@ import { Icon } from '@iconify/vue'
 import { adminService, uploadAdminMedia } from '@/services/api'
 import { authService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import IconInput from '@/components/ui/IconInput.vue'
 import { PALETTES, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
 
 const appStore = useAppStore()
+const authStore = useAuthStore()
 const router = useRouter()
 
 // State

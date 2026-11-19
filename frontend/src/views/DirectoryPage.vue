@@ -36,7 +36,7 @@
         </label>
         <select v-if="view === 'grid'" v-model="unitFilter" class="form-select directory-unit-select">
           <option :value="null">{{ $t('directory.allUnits') }}</option>
-          <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '  '.repeat(u.depth) }}{{ u.name }}</option>
+          <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '\u00a0\u00a0'.repeat(u.depth) }}{{ u.name }}</option>
         </select>
         <template v-else>
           <button type="button" class="btn btn-ghost" @click="toggleAll(true)">

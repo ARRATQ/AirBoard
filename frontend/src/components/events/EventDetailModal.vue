@@ -255,10 +255,11 @@ const formatRecurrenceRule = (ruleJson) => {
     switch (rule.type) {
       case 'daily':
         return 'Tous les jours'
-      case 'weekly':
+      case 'weekly': {
         const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
         const dayNames = rule.days_of_week?.map(day => days[day]).join(', ') || 'Semanalement'
         return `Hebdomadaire (${dayNames})`
+      }
       case 'monthly':
         return 'Mensuel'
       case 'yearly':

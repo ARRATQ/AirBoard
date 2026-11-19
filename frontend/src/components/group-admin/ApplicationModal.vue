@@ -211,6 +211,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import IconInput from '@/components/ui/IconInput.vue'
 
 const props = defineProps({
@@ -229,6 +230,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'submit'])
+const { t } = useI18n()
 
 const loading = ref(false)
 const errors = ref({})
@@ -308,17 +310,17 @@ const validateForm = () => {
   errors.value = {}
 
   if (!form.name.trim()) {
-    errors.value.name = $t('groupAdmin.applicationModal.errors.nameRequired')
+    errors.value.name = t('groupAdmin.applicationModal.errors.nameRequired')
   }
 
   if (!form.url.trim()) {
-    errors.value.url = $t('groupAdmin.applicationModal.errors.urlRequired')
+    errors.value.url = t('groupAdmin.applicationModal.errors.urlRequired')
   } else if (!isValidUrl(form.url)) {
-    errors.value.url = $t('groupAdmin.applicationModal.errors.invalidUrl')
+    errors.value.url = t('groupAdmin.applicationModal.errors.invalidUrl')
   }
 
   if (!form.app_group_id) {
-    errors.value.app_group_id = $t('groupAdmin.applicationModal.errors.appGroupRequired')
+    errors.value.app_group_id = t('groupAdmin.applicationModal.errors.appGroupRequired')
   }
 
   return Object.keys(errors.value).length === 0

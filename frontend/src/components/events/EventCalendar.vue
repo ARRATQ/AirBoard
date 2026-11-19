@@ -311,10 +311,11 @@ const currentPeriodDisplay = computed(() => {
         month: 'long', 
         day: 'numeric' 
       })
-    case 'week':
+    case 'week': {
       const weekStart = getWeekStart(currentDate.value)
       const weekEnd = getWeekEnd(currentDate.value)
       return `${weekStart.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}`
+    }
     case 'month':
     default:
       return currentDate.value.toLocaleDateString(locale, { month: 'long', year: 'numeric' })

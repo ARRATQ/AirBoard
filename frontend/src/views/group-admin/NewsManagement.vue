@@ -291,8 +291,10 @@ import { Icon } from '@iconify/vue'
 import { newsService, groupAdminService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
@@ -405,10 +407,10 @@ const deleteNews = async () => {
     console.log('[DEBUG] Reloading news list...')
     await loadNews()
     console.log('[DEBUG] News list after reload:', newsList.value.map(n => ({ id: n.id, title: n.title })))
-    appStore.showSuccess($t('groupAdmin.newsManagement.deleteSuccess'))
+    appStore.showSuccess(t('groupAdmin.newsManagement.deleteSuccess'))
   } catch (error) {
     console.error('[ERROR] Error deleting news:', error)
-    appStore.showError($t('groupAdmin.newsManagement.deleteError'))
+    appStore.showError(t('groupAdmin.newsManagement.deleteError'))
   } finally {
     deleteLoading.value = false
   }
