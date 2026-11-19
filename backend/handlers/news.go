@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type NewsHandler struct {
@@ -753,28 +754,36 @@ func (h *NewsHandler) IncrementView(c *gin.Context) {
 	}
 	userID := c.GetUint("user_id")
 
-	// Vérifier si l'utilisateur a déjà lu cet article
+	// Déjà lu : rien à faire (cas courant, évite une écriture)
 	var exists int64
 	h.db.Model(&models.NewsRead{}).Where("news_id = ? AND user_id = ?", id, userID).Count(&exists)
+	if exists > 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "View counted"})
+		return
+	}
 
-	if exists == 0 {
-		// 1. Incrémenter le compteur de vues UNIQUEMENT pour les lectures uniques
+	// Enregistrer la lecture avant de compter : avec l'index unique (news_id, user_id),
+	// deux requêtes simultanées ne peuvent pas toutes deux compter la vue ni donner l'XP.
+	read := models.NewsRead{
+		NewsID: uint(id),
+		UserID: userID,
+		ReadAt: time.Now(),
+	}
+	result := h.db.Clauses(clause.OnConflict{DoNothing: true}).Create(&read)
+	if result.Error != nil {
+		log.Printf("[ERROR IncrementView] Failed to record read for news %d: %v", id, result.Error)
+		c.JSON(http.StatusOK, gin.H{"message": "View counted"})
+		return
+	}
+
+	if result.RowsAffected == 1 {
+		// Lecture unique : compteur de vues + 20 XP
 		if err := h.db.Model(&models.News{}).Where("id = ?", id).
 			UpdateColumn("view_count", gorm.Expr("view_count + ?", 1)).Error; err != nil {
 			log.Printf("[ERROR IncrementView] Failed to increment view for news %d: %v", id, err)
 		}
-
-		// 2. Enregistrer la lecture
-		read := models.NewsRead{
-			NewsID: uint(id),
-			UserID: userID,
-			ReadAt: time.Now(),
-		}
-		if err := h.db.Create(&read).Error; err == nil {
-			// 3. Attribuer de l'XP (20 points par lecture unique)
-			if err := h.gamificationService.AwardXP(userID, 20, "news_read", fmt.Sprintf("{\"news_id\": %d}", id)); err != nil {
-				log.Printf("[Gamification] Error awarding news read XP for user %d: %v", userID, err)
-			}
+		if err := h.gamificationService.AwardXP(userID, 20, "news_read", fmt.Sprintf("{\"news_id\": %d}", id)); err != nil {
+			log.Printf("[Gamification] Error awarding news read XP for user %d: %v", userID, err)
 		}
 	}
 
