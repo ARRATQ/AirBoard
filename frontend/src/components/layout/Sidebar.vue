@@ -578,12 +578,12 @@
     </Teleport>
 
     <!-- Help Drawer -->
-    <HelpDrawer v-model="showHelpDrawer" />
+    <HelpDrawer v-if="helpDrawerLoaded" v-model="showHelpDrawer" />
   </aside>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -591,7 +591,8 @@ import { useAppStore } from '@/stores/app'
 import { useVersionStore } from '@/stores/version'
 import ZoomControl from '@/components/dashboard/ZoomControl.vue'
 import NotificationBell from '@/components/notifications/NotificationBell.vue'
-import HelpDrawer from '@/components/help/HelpDrawer.vue'
+// Chargé à la première ouverture (embarque marked et les guides)
+const HelpDrawer = defineAsyncComponent(() => import('@/components/help/HelpDrawer.vue'))
 import CollapsibleMenu from '@/components/layout/CollapsibleMenu.vue'
 
 const authStore = useAuthStore()
@@ -603,6 +604,10 @@ const router = useRouter()
 // State for update modal
 const showUpdateModal = ref(false)
 const showHelpDrawer = ref(false)
+const helpDrawerLoaded = ref(false)
+watch(showHelpDrawer, (open) => {
+  if (open) helpDrawerLoaded.value = true
+})
 
 // State for user menu
 const showUserMenu = ref(false)

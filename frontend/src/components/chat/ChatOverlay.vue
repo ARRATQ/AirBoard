@@ -401,6 +401,7 @@ import { useAuthStore } from '@/stores/auth';
 import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
 import DOMPurify from 'dompurify';
+import { CHAT_NOTIFICATIONS_KEY, chatNotificationsEnabled } from '@/utils/chatNotificationSound';
 
 const props = defineProps({
   hideToggle: { type: Boolean, default: false }
@@ -470,33 +471,13 @@ const groupedUsers = computed(() => {
 
 const otherUsers = computed(() => filteredUsers.value.filter(u => !u.groups || u.groups.length === 0));
 
-const notificationsEnabled = ref(localStorage.getItem('chat_notifications') !== 'false');
+const notificationsEnabled = ref(chatNotificationsEnabled());
 const toggleNotifications = () => {
   notificationsEnabled.value = !notificationsEnabled.value;
-  localStorage.setItem('chat_notifications', String(notificationsEnabled.value));
+  localStorage.setItem(CHAT_NOTIFICATIONS_KEY, String(notificationsEnabled.value));
   showMenu.value = false;
 };
 const toggleMenu = () => { showMenu.value = !showMenu.value; };
-
-const playNotificationSound = async () => {
-  if (!notificationsEnabled.value) return;
-  try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') await audioCtx.resume();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.4);
-    setTimeout(() => audioCtx.close(), 500);
-  } catch (e) { console.warn('Audio notification error:', e); }
-};
 
 const formatMessage = (content) => {
   if (!content) return '';
@@ -541,7 +522,6 @@ const confirmClearHistory = () => {
   if (confirm("Voulez-vous vraiment effacer tout l'historique de cette conversation ?")) chatStore.clearHistory();
 };
 
-const previousTotalUnread = ref(0);
 const faceMode = ref('user');
 let faceInterval = null;
 
@@ -549,8 +529,9 @@ onMounted(() => {
   window.addEventListener('resize', () => { isMobile.value = window.innerWidth < 768; });
   const observer = new MutationObserver(() => { isDark.value = document.documentElement.classList.contains('dark'); });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  // La connexion WebSocket et le son des nouveaux messages sont gérés par FloatingSpeedDial,
+  // toujours monté ; ce panneau n'est chargé qu'à la première ouverture du chat.
   if (authStore.token) chatStore.connect();
-  previousTotalUnread.value = totalUnread.value;
 
   faceInterval = setInterval(() => {
     faceMode.value = faceMode.value === 'user' ? 'ai' : 'user';
@@ -563,10 +544,6 @@ onUnmounted(() => {
 
 watch(currentMessages, () => scrollToBottom(), { deep: true });
 watch(activeConversation, (val) => { if (val) scrollToBottom(); });
-watch(totalUnread, (newTotal, oldTotal) => {
-  if (newTotal > oldTotal && newTotal > 0) playNotificationSound();
-  previousTotalUnread.value = newTotal;
-});
 </script>
 
 <style scoped>

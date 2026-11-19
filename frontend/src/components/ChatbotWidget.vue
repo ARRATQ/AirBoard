@@ -169,7 +169,11 @@ import { Icon } from '@iconify/vue'
 import { chatbotsService } from '@/services/api'
 
 const props = defineProps({
-  hideToggle: { type: Boolean, default: false }
+  hideToggle: { type: Boolean, default: false },
+  // Liste déjà chargée par le parent (évite un second appel à getActiveChatbots)
+  bots: { type: Array, default: null },
+  // Ouvrir le panneau au montage (le widget est chargé au premier clic)
+  startOpen: { type: Boolean, default: false }
 })
 
 const activeChatbots = ref([])
@@ -203,7 +207,7 @@ const lighten = (hex) => {
 
 const loadActiveChatbots = async () => {
   try {
-    const bots = await chatbotsService.getActiveChatbots()
+    const bots = props.bots ?? await chatbotsService.getActiveChatbots()
     activeChatbots.value = Array.isArray(bots) ? bots : []
     if (activeChatbots.value.length === 1) {
       selectedBot.value = activeChatbots.value[0]
@@ -356,8 +360,9 @@ watch([selectedBot, chatOpen], ([bot, open], [oldBot]) => {
   }
 })
 
-onMounted(() => {
-  loadActiveChatbots()
+onMounted(async () => {
+  await loadActiveChatbots()
+  if (props.startOpen) chatOpen.value = true
 })
 
 defineExpose({

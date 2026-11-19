@@ -1,7 +1,14 @@
 <template>
-  <!-- Panneaux chat (positionnés fixed par leurs propres composants) -->
-  <ChatbotWidget v-if="hasChatbots" ref="chatbotRef" :hide-toggle="true" />
-  <ChatOverlay :hide-toggle="true" />
+  <!-- Panneaux chat (positionnés fixed par leurs propres composants).
+       Chargés au premier clic : leur code n'est pas téléchargé avant. -->
+  <ChatbotWidget
+    v-if="hasChatbots && botLoaded"
+    ref="chatbotRef"
+    :hide-toggle="true"
+    :bots="bots"
+    :start-open="true"
+  />
+  <ChatOverlay v-if="chatLoaded" :hide-toggle="true" />
 
   <!-- Speed Dial -->
   <div class="speed-dial-container">
@@ -80,23 +87,42 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useChatStore } from '@/stores/chat'
+import { useAuthStore } from '@/stores/auth'
 import { chatbotsService } from '@/services/api'
-import ChatOverlay from '@/components/chat/ChatOverlay.vue'
-import ChatbotWidget from '@/components/ChatbotWidget.vue'
+import { playChatNotificationSound } from '@/utils/chatNotificationSound'
+
+const ChatOverlay = defineAsyncComponent(() => import('@/components/chat/ChatOverlay.vue'))
+const ChatbotWidget = defineAsyncComponent(() => import('@/components/ChatbotWidget.vue'))
 
 const chatStore = useChatStore()
+const authStore = useAuthStore()
 const chatbotRef = ref(null)
 const dialOpen = ref(false)
-const hasChatbots = ref(false)
+const bots = ref([])
+const hasChatbots = computed(() => bots.value.length > 0)
+const botLoaded = ref(false)
+const chatLoaded = ref(chatStore.isOpen)
 const faceMode = ref('user')
 let faceInterval = null
+let idleHandle = null
 
 const totalUnread = computed(() =>
   Object.values(chatStore.unreadCounts).reduce((a, b) => a + b, 0)
 )
+
+// Le panneau de messagerie est chargé dès que le chat s'ouvre (clic ou ouverture
+// d'une conversation depuis une autre page), puis reste monté.
+watch(() => chatStore.isOpen, (open) => {
+  if (open) chatLoaded.value = true
+})
+
+// Son à l'arrivée d'un message, même quand le panneau n'a jamais été ouvert.
+watch(totalUnread, (newTotal, oldTotal) => {
+  if (newTotal > oldTotal && newTotal > 0) playChatNotificationSound()
+})
 
 const toggleDial = () => {
   if (!hasChatbots.value) {
@@ -113,6 +139,11 @@ const openChat = () => {
 
 const openBot = () => {
   dialOpen.value = false
+  // Premier clic : le widget se charge puis s'ouvre lui-même (start-open)
+  if (!botLoaded.value) {
+    botLoaded.value = true
+    return
+  }
   if (chatbotRef.value?.isOpen) {
     chatbotRef.value?.closeChat()
   } else {
@@ -120,21 +151,40 @@ const openBot = () => {
   }
 }
 
-onMounted(async () => {
-  try {
-    const bots = await chatbotsService.getActiveChatbots()
-    hasChatbots.value = Array.isArray(bots) && bots.length > 0
-  } catch {
-    hasChatbots.value = false
+// Connexion WebSocket (badge des messages non lus) une fois la page affichée.
+const connectChatWhenIdle = () => {
+  const connect = () => {
+    idleHandle = null
+    if (authStore.token) chatStore.connect()
   }
+  if ('requestIdleCallback' in window) {
+    idleHandle = window.requestIdleCallback(connect, { timeout: 3000 })
+  } else {
+    idleHandle = window.setTimeout(connect, 1500)
+  }
+}
+
+onMounted(async () => {
+  connectChatWhenIdle()
 
   faceInterval = setInterval(() => {
     if (!dialOpen.value) faceMode.value = faceMode.value === 'user' ? 'ai' : 'user'
   }, 3000)
+
+  try {
+    const list = await chatbotsService.getActiveChatbots()
+    bots.value = Array.isArray(list) ? list : []
+  } catch {
+    bots.value = []
+  }
 })
 
 onUnmounted(() => {
   if (faceInterval) clearInterval(faceInterval)
+  if (idleHandle !== null) {
+    if ('cancelIdleCallback' in window) window.cancelIdleCallback(idleHandle)
+    else window.clearTimeout(idleHandle)
+  }
 })
 </script>
 
