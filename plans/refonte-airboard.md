@@ -27,6 +27,19 @@ pour un utilisateur comme pour un administrateur.
 | `ef33e9f` | OAuth : `state` obligatoire et lié au navigateur (anti login-CSRF) |
 | (chantier 1) | Refresh token refusé comme access token ; rôle/compte actif relus en base (cache 1 min) ; limite 20/min/IP sur login/register + verrouillage IP+compte et compte (compteur réparé) ; démo derrière `SEED_DEMO_DATA` ; avatar vérifié par contenu ; corps limités (5 Mo / 12 Mo, nginx 12 Mo) ; origine WebSocket ; mot de passe 8 car. ; recherche avec apostrophes ; `TRUSTED_PROXIES` |
 
+| `330875b` | Chantier 2, front : transition de page sans `out-in` (fondu 120 ms, navigation ~700 ms → ~200 ms) ; profil, palette et réglages admin en parallèle au démarrage ; `getAppSettings` partagé (3 → 1 appel), version une fois par session, mises à jour vérifiées au plus toutes les 4 h, intervalle nettoyé |
+| `627be0c` | Chantier 2, front : ChatOverlay, ChatbotWidget (+ `@n8n/chat`) et HelpDrawer (+ `marked`) chargés au premier clic ; `getActiveChatbots` appelé une fois. Le WebSocket du chat reste ouvert au démarrage (au moment d'inactivité) car il alimente le badge des messages non lus et le son |
+| `c50e23f` | Chantier 2, front : compteur de notifications toutes les 60 s, en pause quand l'onglet est caché, relu au retour |
+| `2ccbd96` | Chantier 2, build : chunk `ui` vide supprimé, `console.log`/`debug` retirés en prod ; proxy de dev configurable (`API_PROXY_TARGET`) |
+| `a5f47d3` | Chantier 2, back : pool DB (25/10, 30 min) ; 16 index (clics, commentaires, clés étrangères, côté inverse des tables de jointure dont `user_groups(user_id)`) ; unicité `news_reads` et `news_reactions` (index simple + avertissement si doublons en prod) — package `backend/database` |
+| `9a29669` | Chantier 2, back : vue et XP comptées une seule fois en concurrence (`ON CONFLICT DO NOTHING`, point 7) |
+| `4a73cfb` | Chantier 2, back : N+1 supprimés sur `/home` (108 → 55 requêtes SQL), `/dashboard`, rapports par groupe et par utilisateur (nombre de requêtes constant). Comptage par `go test -tags integration -run TestQueryCounts ./handlers/` |
+| `7b4e0f5` | Chantier 2 : gzip des réponses API dans nginx aussi derrière un proxy (`gzip_proxied any`) |
+
+Mesures du chantier 2 (local) : JS+CSS au premier chargement 240 → 205 kB compressés ; appels API au
+chargement de `/home` 9 → 8 (utilisateur) et 11 → 9 (admin), puis 7 / 8 quand la vérification de mise à
+jour a moins de 4 h.
+
 À vérifier après déploiement : une connexion Microsoft réelle, le chat (WebSocket : `FRONTEND_URL` doit être
 l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactivation du compte démo `user`.
 
@@ -55,7 +68,13 @@ l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactiv
      (`models.go:251`) ;
    - la liste noire de la recherche bloque les apostrophes (« l'équipe » échoue, `search.go:96`).
 
-## Chantier 2 — Performance (gains rapides)
+## Chantier 2 — Performance (gains rapides) — en partie fait
+
+Fait : front 1, 4, 5, 6 et le chunk `ui` / `console.log` du point 8 ; back 1, 3, 4, 7 et 8 (cache du
+middleware, chantier 1). Gzip (back 2) traité dans nginx, par où passe toute l'API en prod.
+Reste : front 2 (icônes locales), 3 (langues à la demande), 7 (polices, `loading="lazy"`), le reste du 8 ;
+back 5 (`NOT EXISTS` : seules les requêtes de `home.go` touchées ici sont converties), 6 (pagination),
+et les rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1).
 
 **Frontend** (premier chargement : environ 235 kB de JS compressé avant la moindre route)
 1. Retirer la transition de page `out-in` de 0,3 s (`App.vue:31-41`), qui ajoute environ 600 ms à chaque
