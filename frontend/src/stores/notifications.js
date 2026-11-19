@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { notificationService } from '@/services/api'
 
+export const NOTIFICATION_POLL_MS = 60000
+
+// Hors du state : un handler DOM n'a rien à faire dans l'état réactif.
+let visibilityHandler = null
+
 export const useNotificationStore = defineStore('notifications', {
   state: () => ({
     notifications: [],
@@ -156,12 +161,35 @@ export const useNotificationStore = defineStore('notifications', {
       }
     },
 
-    // Démarrer le polling automatique (toutes les 30 secondes)
-    startPolling(interval = 30000) {
+    // Démarrer le polling automatique du compteur.
+    // En pause quand l'onglet est caché ; au retour, le compteur est relu tout de suite.
+    startPolling(interval = NOTIFICATION_POLL_MS) {
       this.stopPolling()
-      this.pollInterval = setInterval(() => {
-        this.fetchUnreadCount()
-      }, interval)
+
+      const startTimer = () => {
+        if (this.pollInterval) return
+        this.pollInterval = setInterval(() => {
+          this.fetchUnreadCount()
+        }, interval)
+      }
+      const stopTimer = () => {
+        if (this.pollInterval) {
+          clearInterval(this.pollInterval)
+          this.pollInterval = null
+        }
+      }
+
+      visibilityHandler = () => {
+        if (document.hidden) {
+          stopTimer()
+        } else {
+          this.fetchUnreadCount()
+          startTimer()
+        }
+      }
+      document.addEventListener('visibilitychange', visibilityHandler)
+
+      if (!document.hidden) startTimer()
     },
 
     // Arrêter le polling
@@ -169,6 +197,10 @@ export const useNotificationStore = defineStore('notifications', {
       if (this.pollInterval) {
         clearInterval(this.pollInterval)
         this.pollInterval = null
+      }
+      if (visibilityHandler) {
+        document.removeEventListener('visibilitychange', visibilityHandler)
+        visibilityHandler = null
       }
     },
 

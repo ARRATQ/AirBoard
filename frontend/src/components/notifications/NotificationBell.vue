@@ -278,8 +278,8 @@ onMounted(() => {
   // Charger le compteur initial
   notificationStore.fetchUnreadCount()
 
-  // Démarrer le polling (toutes les 30 secondes)
-  notificationStore.startPolling(30000)
+  // Démarrer le polling (60 s, en pause quand l'onglet est caché)
+  notificationStore.startPolling()
 
   // Ajouter le listener de clic extérieur
   document.addEventListener('click', handleClickOutside)
