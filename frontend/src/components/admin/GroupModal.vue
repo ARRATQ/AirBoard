@@ -1,237 +1,218 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
-      <div 
-        class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
-        @click="closeModal"
-      ></div>
-
-      <!-- Modal panel -->
-      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+  <div v-if="show" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-container" @click.self="closeModal">
+      <div class="modal-panel w-full sm:max-w-3xl">
+        <form class="modal-form" novalidate @submit.prevent="handleSubmit">
           <!-- Header -->
-          <div class="bg-white dark:bg-gray-800 px-6 pt-6 pb-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                  <Icon icon="mdi:account-group" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <div class="modal-header">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
+                  :style="{ backgroundColor: form.color || '#6B7280' }"
+                >
+                  <Icon icon="mdi:account-group" class="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <div class="min-w-0">
+                  <h3 class="modal-title truncate">
                     {{ isEdit ? 'Modifier le groupe' : 'Nouveau groupe d\'utilisateurs' }}
                   </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="modal-subtitle truncate">
                     {{ isEdit ? 'Modifiez les informations du groupe' : 'Créez un groupe pour organiser les permissions' }}
                   </p>
                 </div>
               </div>
-              <button 
-                type="button" 
-                @click="closeModal"
-                class="btn-ghost"
-              >
+              <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <!-- Form content -->
-          <div class="px-6 py-4 space-y-6">
-            <!-- Section: Informations de base -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:information-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Informations générales
-              </h4>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Nom -->
-                <div class="form-group">
-                  <label for="name" class="form-label form-label-required">
-                    Nom du groupe
-                  </label>
+          <!-- Tabs -->
+          <div class="modal-tabs" role="tablist">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === tab.id"
+              class="modal-tab"
+              :class="{ 'modal-tab-active': activeTab === tab.id }"
+              @click="activeTab = tab.id"
+            >
+              <Icon :icon="tab.icon" class="h-4 w-4" />
+              {{ tab.label }}
+              <span v-if="tab.count !== undefined" class="modal-tab-count">{{ tab.count }}</span>
+              <span v-if="tab.hasError" class="modal-tab-error" aria-label="Erreur"></span>
+            </button>
+          </div>
+
+          <!-- Content -->
+          <div class="modal-content modal-body-tabbed">
+            <!-- Onglet : Général -->
+            <div v-show="activeTab === 'general'" class="space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-[1fr_15rem] gap-4">
+                <div class="form-group mb-0">
+                  <label for="name" class="form-label form-label-required">Nom du groupe</label>
                   <input
                     id="name"
                     v-model="form.name"
                     type="text"
                     required
                     class="form-input"
-                    placeholder="Ex: Développeurs"
+                    placeholder="Ex : Développeurs"
                   />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
 
-                <!-- Couleur -->
-                <div class="form-group">
-                  <label for="color" class="form-label">
-                    Couleur d'identification
-                  </label>
-                  <div class="flex items-center space-x-3">
+                <div class="form-group mb-0">
+                  <label for="color" class="form-label">Couleur d'identification</label>
+                  <div class="flex items-center gap-2">
                     <input
                       id="color"
                       v-model="form.color"
                       type="color"
-                      class="h-10 w-16 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+                      class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
+                      style="border-color: var(--border); background-color: var(--bg-card)"
                     />
-                    <input
-                      v-model="form.color"
-                      type="text"
-                      class="form-input flex-1"
-                      placeholder="#6B7280"
-                    />
+                    <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#6B7280" />
                   </div>
                 </div>
               </div>
 
-              <!-- Description -->
-              <div class="form-group">
-                <label for="description" class="form-label">
-                  Description
-                </label>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="c in presetColors"
+                  :key="c"
+                  type="button"
+                  class="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2"
+                  :class="form.color?.toLowerCase() === c.toLowerCase() ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'"
+                  :style="{ backgroundColor: c }"
+                  :aria-label="`Couleur ${c}`"
+                  @click="form.color = c"
+                ></button>
+              </div>
+
+              <div class="form-group mb-0">
+                <label for="description" class="form-label">Description</label>
                 <textarea
                   id="description"
                   v-model="form.description"
-                  rows="2"
-                  class="form-textarea"
+                  rows="3"
+                  class="form-textarea resize-none"
                   placeholder="Description du groupe d'utilisateurs..."
                 ></textarea>
               </div>
+
+              <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">Groupe actif</span>
+                  <span class="toggle-row-desc">Les permissions du groupe sont appliquées à ses membres</span>
+                </span>
+                <input v-model="form.is_active" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
             </div>
 
-            <!-- Section: Permissions d'accès -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:shield-key-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Permissions d'accès aux applications
-              </h4>
-              
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Sélectionnez les groupes de ressources auxquels ce groupe d'utilisateurs aura accès :
-                </p>
-                
-                <div v-if="appGroups.length === 0" class="text-center py-8">
-                  <Icon icon="mdi:folder-open" class="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p class="text-sm text-gray-500">Aucun groupe de ressources disponible</p>
-                  <p class="text-xs text-gray-400">Créez d'abord des groupes de ressources</p>
+            <!-- Onglet : Accès -->
+            <div v-show="activeTab === 'access'" class="flex flex-col h-full gap-3">
+              <div class="flex flex-wrap items-center gap-3">
+                <div class="search-container flex-1 min-w-[12rem]">
+                  <Icon icon="mdi:magnify" class="search-icon" />
+                  <input
+                    v-model="appGroupSearch"
+                    type="search"
+                    class="form-input search-input"
+                    placeholder="Rechercher un groupe de ressources..."
+                  />
                 </div>
-                
-                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                  <div v-for="appGroup in appGroups" :key="appGroup.id" 
-                       class="flex items-center p-3 rounded-lg border-2 transition-all duration-200"
-                       :class="form.app_group_ids.includes(appGroup.id) 
-                         ? 'border-gray-400 bg-white dark:bg-gray-800' 
-                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'"
-                  >
-                    <input
-                      :id="`appgroup_${appGroup.id}`"
-                      v-model="form.app_group_ids"
-                      :value="appGroup.id"
-                      type="checkbox"
-                      class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                    />
-                    <label :for="`appgroup_${appGroup.id}`" class="ml-3 flex-1 cursor-pointer">
-                      <div class="flex items-center space-x-3">
-                        <div 
-                          class="h-8 w-8 rounded-lg flex items-center justify-center"
-                          :style="{ backgroundColor: appGroup.color || '#6B7280' }"
-                        >
-                          <Icon :icon="appGroup.icon || 'mdi:folder'" class="h-4 w-4 text-white" />
-                        </div>
-                        <div class="flex-1">
-                          <div class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ appGroup.name }}
-                          </div>
-                          <div class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ appGroup.applications?.length || 0 }} applications
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-                
-                <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div class="flex items-start space-x-2">
-                    <Icon icon="mdi:information" class="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <div class="text-sm text-blue-800 dark:text-blue-200">
-                      <strong>Permissions sélectionnées :</strong> 
-                      {{ form.app_group_ids.length }} groupe(s) d'applications
-                    </div>
-                  </div>
+                <div class="flex items-center gap-3">
+                  <button type="button" class="btn-link" @click="selectAllAppGroups">Tout sélectionner</button>
+                  <span class="text-gray-300 dark:text-gray-600">|</span>
+                  <button type="button" class="btn-link" @click="form.app_group_ids = []">Aucun</button>
                 </div>
               </div>
-            </div>
 
-            <!-- Section: Membres (en lecture seule pour édition) -->
-            <div v-if="isEdit && form.users && form.users.length > 0">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:account-multiple-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Membres du groupe ({{ form.users.length }})
-              </h4>
-              
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div v-for="user in form.users" :key="user.id" 
-                       class="flex items-center space-x-3 p-2 bg-white dark:bg-gray-800 rounded-lg"
+              <div v-if="appGroups.length === 0" class="empty-state flex-1 flex flex-col items-center justify-center text-center">
+                <Icon icon="mdi:folder-open-outline" class="h-12 w-12 text-gray-400 mb-2" />
+                <p class="text-sm text-gray-500">Aucun groupe de ressources disponible</p>
+                <p class="text-xs text-gray-400">Créez d'abord des groupes de ressources</p>
+              </div>
+
+              <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label
+                    v-for="appGroup in filteredAppGroups"
+                    :key="appGroup.id"
+                    class="choice-card"
+                    :class="{ 'choice-card-active': form.app_group_ids.includes(appGroup.id) }"
                   >
-                    <div class="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center">
-                      <span class="text-xs font-medium text-white">
-                        {{ getUserInitials(user) }}
+                    <input v-model="form.app_group_ids" :value="appGroup.id" type="checkbox" />
+                    <span
+                      class="h-8 w-8 flex-shrink-0 rounded-lg flex items-center justify-center"
+                      :style="{ backgroundColor: appGroup.color || '#6B7280' }"
+                    >
+                      <Icon :icon="appGroup.icon || 'mdi:folder'" class="h-4 w-4 text-white" />
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                        <span class="truncate">{{ appGroup.name }}</span>
+                        <Icon v-if="appGroup.is_private" icon="mdi:lock" class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
                       </span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {{ getUserDisplayName(user) }}
-                      </div>
-                      <div class="text-xs text-gray-500 truncate">
-                        {{ user.email }}
-                      </div>
-                    </div>
-                  </div>
+                      <span class="block text-xs text-gray-500 dark:text-gray-400">
+                        {{ appGroup.applications?.length || 0 }} ressource(s)
+                      </span>
+                    </span>
+                  </label>
                 </div>
+                <p v-if="filteredAppGroups.length === 0" class="text-sm text-gray-500 text-center py-8">
+                  Aucun résultat pour « {{ appGroupSearch }} »
+                </p>
               </div>
             </div>
 
-            <!-- Section: Options -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:tune" class="h-4 w-4 mr-2 text-gray-500" />
-                Options du groupe
-              </h4>
-              
-              <div class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <input
-                  id="is_active"
-                  v-model="form.is_active"
-                  type="checkbox"
-                  class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                />
-                <label for="is_active" class="text-sm text-gray-700 dark:text-gray-300">
-                  Groupe actif et permissions appliquées
-                </label>
+            <!-- Onglet : Membres (édition uniquement) -->
+            <div v-if="isEdit" v-show="activeTab === 'members'" class="h-full">
+              <div v-if="!form.users?.length" class="h-full flex flex-col items-center justify-center text-center">
+                <Icon icon="mdi:account-off-outline" class="h-12 w-12 text-gray-400 mb-2" />
+                <p class="text-sm text-gray-500">Aucun membre dans ce groupe</p>
+                <p class="text-xs text-gray-400">Ajoutez des membres depuis la gestion des utilisateurs</p>
+              </div>
+              <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div
+                  v-for="user in form.users"
+                  :key="user.id"
+                  class="flex items-center gap-3 p-2.5 rounded-lg border"
+                  style="border-color: var(--border); background-color: var(--bg-surface)"
+                >
+                  <div
+                    class="h-8 w-8 flex-shrink-0 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+                    :style="{ backgroundColor: form.color || '#6B7280' }"
+                  >
+                    {{ getUserInitials(user) }}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ getUserDisplayName(user) }}</div>
+                    <div class="text-xs text-gray-500 truncate">{{ user.email }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-3 space-y-reverse sm:space-y-0">
-            <button
-              type="button"
-              @click="closeModal"
-              class="btn-secondary w-full sm:w-auto"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary w-full sm:w-auto"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ isEdit ? 'Enregistrer' : 'Créer' }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">
+              * Champs obligatoires · {{ form.app_group_ids.length }} groupe(s) de ressources sélectionné(s)
+            </span>
+            <div class="modal-footer-actions">
+              <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
+              <button type="submit" :disabled="loading" class="btn btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                {{ isEdit ? 'Enregistrer' : 'Créer le groupe' }}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -271,6 +252,33 @@ const form = reactive({
 })
 
 const isEdit = computed(() => !!props.group)
+
+const activeTab = ref('general')
+const appGroupSearch = ref('')
+
+const presetColors = ['#6B7280', '#d97757', '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']
+
+const tabs = computed(() => {
+  const list = [
+    { id: 'general', label: 'Général', icon: 'mdi:information-outline', hasError: !!errors.value.name },
+    { id: 'access', label: 'Accès', icon: 'mdi:shield-key-outline', count: form.app_group_ids.length }
+  ]
+  if (isEdit.value) {
+    list.push({ id: 'members', label: 'Membres', icon: 'mdi:account-multiple-outline', count: form.users?.length || 0 })
+  }
+  return list
+})
+
+const filteredAppGroups = computed(() => {
+  const q = appGroupSearch.value.trim().toLowerCase()
+  if (!q) return appGroups.value
+  return appGroups.value.filter(ag => ag.name?.toLowerCase().includes(q))
+})
+
+const selectAllAppGroups = () => {
+  const ids = new Set([...form.app_group_ids, ...filteredAppGroups.value.map(ag => ag.id)])
+  form.app_group_ids = [...ids]
+}
 
 // Load app groups when component mounts
 onMounted(async () => {
@@ -324,6 +332,8 @@ const resetForm = () => {
     })
   }
   errors.value = {}
+  activeTab.value = 'general'
+  appGroupSearch.value = ''
 }
 
 const getUserInitials = (user) => {
@@ -351,7 +361,10 @@ const validateForm = () => {
 }
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) {
+    activeTab.value = 'general'
+    return
+  }
   
   loading.value = true
   try {

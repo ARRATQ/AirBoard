@@ -141,102 +141,95 @@
     />
 
     <!-- Group Admins Modal -->
-    <div v-if="showGroupAdminsModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeGroupAdminsModal"></div>
-        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="mb-6">
-              <div class="flex items-center">
-                <div class="h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mr-3">
-                  <Icon icon="mdi:shield-account" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+    <div v-if="showGroupAdminsModal" class="modal-overlay" @click.self="closeGroupAdminsModal">
+      <div class="modal-container" @click.self="closeGroupAdminsModal">
+        <div class="modal-panel w-full sm:max-w-2xl">
+          <div class="modal-form">
+            <div class="modal-header">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div
+                    class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
+                    :style="{ backgroundColor: selectedGroupForAdmins?.color || '#6B7280' }"
+                  >
+                    <Icon icon="mdi:shield-account" class="h-5 w-5" />
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="modal-title truncate">Administrateurs du groupe</h3>
+                    <p class="modal-subtitle truncate">{{ selectedGroupForAdmins?.name }}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Administrateurs du groupe
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ selectedGroupForAdmins?.name }}
-                  </p>
-                </div>
+                <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeGroupAdminsModal">
+                  <Icon icon="mdi:close" class="h-5 w-5" />
+                </button>
               </div>
             </div>
 
-            <div class="mb-4">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <div class="modal-content modal-body-tabbed flex flex-col gap-3">
+              <p class="text-sm text-gray-500 dark:text-gray-400">
                 Sélectionnez les utilisateurs qui pourront administrer ce groupe et ses ressources.
               </p>
 
-              <!-- Search -->
-              <div class="mb-4">
+              <div class="search-container">
+                <Icon icon="mdi:magnify" class="search-icon" />
                 <input
                   v-model="adminSearchQuery"
-                  type="text"
+                  type="search"
                   placeholder="Rechercher un utilisateur..."
-                  class="form-input"
+                  class="form-input search-input"
                 />
               </div>
 
-              <!-- Loading -->
-              <div v-if="loadingUsers" class="flex justify-center py-8">
+              <div v-if="loadingUsers" class="flex-1 flex justify-center items-center">
                 <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-gray-400" />
               </div>
 
-              <!-- Users list -->
-              <div v-else class="max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                <div v-if="filteredUsersForAdmins.length === 0" class="p-4 text-center text-sm text-gray-500">
+              <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+                <p v-if="filteredUsersForAdmins.length === 0" class="py-8 text-center text-sm text-gray-500">
                   Aucun utilisateur trouvé
-                </div>
-                <div
+                </p>
+                <label
                   v-for="user in filteredUsersForAdmins"
                   :key="user.id"
-                  class="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+                  class="choice-card py-2.5"
+                  :class="{ 'choice-card-active': selectedAdminIds.includes(user.id) }"
                 >
-                  <input
-                    :id="`admin_${user.id}`"
-                    v-model="selectedAdminIds"
-                    :value="user.id"
-                    type="checkbox"
-                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  />
-                  <label :for="`admin_${user.id}`" class="ml-3 flex items-center flex-1 cursor-pointer">
-                    <div class="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center mr-3">
-                      <span class="text-sm font-medium text-white">{{ getUserInitials(user) }}</span>
-                    </div>
-                    <div class="flex-1">
-                      <p class="text-sm font-medium text-gray-900 dark:text-white">{{ getUserDisplayName(user) }}</p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">@{{ user.username }} • {{ user.email }}</p>
-                    </div>
-                    <span
-                      :class="{
-                        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': user.role === 'admin',
-                        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': user.role === 'editor',
-                        'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role === 'user'
-                      }"
-                      class="badge text-xs"
-                    >
-                      {{ user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Editor' : 'User' }}
-                    </span>
-                  </label>
-                </div>
+                  <input v-model="selectedAdminIds" :value="user.id" type="checkbox" />
+                  <span
+                    class="h-8 w-8 flex-shrink-0 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+                    style="background-color: var(--accent)"
+                  >
+                    {{ getUserInitials(user) }}
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ getUserDisplayName(user) }}</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">@{{ user.username }} • {{ user.email }}</span>
+                  </span>
+                  <span
+                    :class="{
+                      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': user.role === 'admin',
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': user.role === 'editor',
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role !== 'admin' && user.role !== 'editor'
+                    }"
+                    class="badge text-xs flex-shrink-0"
+                  >
+                    {{ user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Editor' : 'User' }}
+                  </span>
+                </label>
               </div>
             </div>
-          </div>
-          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              @click="saveGroupAdmins"
-              :disabled="savingAdmins"
-              class="btn-primary w-full sm:w-auto sm:ml-3"
-            >
-              <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              Enregistrer
-            </button>
-            <button
-              @click="closeGroupAdminsModal"
-              class="btn btn-secondary w-full sm:w-auto mt-3 sm:mt-0"
-            >
-              Annuler
-            </button>
+
+            <div class="modal-footer-bar">
+              <span class="modal-footer-hint">{{ selectedAdminIds.length }} administrateur(s) sélectionné(s)</span>
+              <div class="modal-footer-actions">
+                <button type="button" class="btn btn-secondary" @click="closeGroupAdminsModal">Annuler</button>
+                <button type="button" :disabled="savingAdmins" class="btn btn-primary" @click="saveGroupAdmins">
+                  <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                  Enregistrer
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +261,7 @@
             <button
               @click="deleteGroup"
               :disabled="deleteLoading"
-              class="btn-danger w-full sm:w-auto sm:ml-3"
+              class="btn btn-danger w-full sm:w-auto sm:ml-3"
             >
               <Icon v-if="deleteLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
               {{ $t('common.delete') }}

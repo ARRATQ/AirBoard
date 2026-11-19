@@ -1,261 +1,167 @@
 <template>
-  <div v-if="show" class="modal-overlay">
-    <div class="modal-container">
-      <div class="modal-panel sm:max-w-2xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+  <div v-if="show" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-container" @click.self="closeModal">
+      <div class="modal-panel w-full sm:max-w-5xl">
+        <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="modal-title">
-                  {{ isEdit ? 'Edit Resource' : 'New Resource' }}
-                </h3>
-                <p class="modal-subtitle">
-                  {{ isEdit ? 'Modify resource settings' : 'Add a new resource to the portal' }}
-                </p>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
+                  :style="{ backgroundColor: form.color }"
+                >
+                  <Icon :icon="form.icon || 'mdi:application'" class="h-5 w-5" />
+                </div>
+                <div class="min-w-0">
+                  <h3 class="modal-title truncate">{{ isEdit ? 'Edit Resource' : 'New Resource' }}</h3>
+                  <p class="modal-subtitle truncate">{{ isEdit ? 'Modify resource settings' : 'Add a new resource to the portal' }}</p>
+                </div>
               </div>
-              <button
-                type="button"
-                @click="closeModal"
-                class="btn-ghost p-2"
-              >
+              <button type="button" class="btn btn-ghost p-2" aria-label="Close" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="modal-content space-y-6">
-            <!-- Basic Information -->
-            <div>
-              <div class="section-header">
+          <!-- Content : infos | apparence -->
+          <div class="modal-content grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            <!-- Colonne gauche -->
+            <div class="space-y-4">
+              <div class="section-header mb-0">
                 <Icon icon="mdi:information-outline" class="section-icon" />
                 <h4 class="section-title">Basic Information</h4>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-group">
-                  <label for="name" class="form-label form-label-required">
-                    Application Name
-                  </label>
-                  <input
-                    id="name"
-                    v-model="form.name"
-                    type="text"
-                    required
-                    class="form-input"
-                    placeholder="GitLab"
-                  />
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="form-group mb-0">
+                  <label for="name" class="form-label form-label-required">Resource Name</label>
+                  <input id="name" v-model="form.name" type="text" required class="form-input" placeholder="GitLab" />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
-
-                <div class="form-group">
-                  <label for="app_group_id" class="form-label form-label-required">
-                    App Group
-                  </label>
-                  <select
-                    id="app_group_id"
-                    v-model="form.app_group_id"
-                    required
-                    class="form-select"
-                  >
+                <div class="form-group mb-0">
+                  <label for="app_group_id" class="form-label form-label-required">Resource Group</label>
+                  <select id="app_group_id" v-model="form.app_group_id" required class="form-select">
                     <option value="">Select a group</option>
-                    <option
-                      v-for="group in props.appGroups"
-                      :key="group.id"
-                      :value="group.id"
-                    >
-                      {{ group.name }}
-                    </option>
+                    <option v-for="group in props.appGroups" :key="group.id" :value="group.id">{{ group.name }}</option>
                   </select>
                   <p v-if="errors.app_group_id" class="form-error">{{ errors.app_group_id }}</p>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="url" class="form-label form-label-required">
-                  Application URL
-                </label>
-                <input
-                  id="url"
-                  v-model="form.url"
-                  type="url"
-                  required
-                  class="form-input"
-                  placeholder="https://gitlab.example.com"
-                />
+              <div class="form-group mb-0">
+                <label for="url" class="form-label form-label-required">Resource URL</label>
+                <div class="relative">
+                  <Icon icon="mdi:link-variant" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input id="url" v-model="form.url" type="url" required class="form-input !pl-9" placeholder="https://gitlab.example.com" />
+                </div>
                 <p v-if="errors.url" class="form-error">{{ errors.url }}</p>
-                <p class="form-help">Complete URL to the resource (with https://)</p>
+                <p v-else class="text-xs text-gray-400 mt-1">Complete URL to the resource (with https://)</p>
               </div>
 
-              <div class="form-group">
-                <label for="description" class="form-label">
-                  Description
-                </label>
+              <div class="form-group mb-0">
+                <label for="description" class="form-label">Description</label>
                 <textarea
                   id="description"
                   v-model="form.description"
                   rows="2"
-                  class="form-textarea"
+                  class="form-textarea resize-none"
                   placeholder="Resource description..."
                 ></textarea>
               </div>
-            </div>
 
-            <!-- Appearance -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:palette-outline" class="section-icon" />
-                <h4 class="section-title">Appearance</h4>
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview -->
-                <div class="form-group">
-                  <label class="form-label">Preview</label>
-                  <div class="card p-4">
-                    <div class="flex items-center space-x-4">
-                      <Icon
-                        :icon="form.icon || 'mdi:application'"
-                        class="h-10 w-10 flex-shrink-0"
-                        :style="{ color: form.color }"
-                      />
-                      <div class="flex-1">
-                        <div class="font-medium text-white">{{ form.name || 'Resource Name' }}</div>
-                        <div class="text-sm text-gray-400">{{ form.url || 'URL...' }}</div>
-                      </div>
-                      <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Color, Icon and Order -->
-                <div class="space-y-4">
-                  <div class="form-group">
-                    <label for="color" class="form-label">Color</label>
-                    <div class="flex items-center space-x-3">
-                      <input
-                        id="color"
-                        v-model="form.color"
-                        type="color"
-                        class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
-                      />
-                      <input
-                        v-model="form.color"
-                        type="text"
-                        class="form-input flex-1"
-                        placeholder="#6366f1"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Icon Input -->
-                  <IconInput
-                    v-model="form.icon"
-                    label="Icon"
-                    placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
-                    category="application"
-                    :show-suggestions="true"
-                  />
-
-                  <div class="form-group">
-                    <label for="order" class="form-label">Display Order</label>
-                    <input
-                      id="order"
-                      v-model.number="form.order"
-                      type="number"
-                      min="0"
-                      class="form-input"
-                      placeholder="0"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Behavior Options -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:tune" class="section-icon" />
-                <h4 class="section-title">Behavior Options</h4>
-              </div>
-
-              <div class="space-y-3">
-                <div class="card p-4">
-                  <label class="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      v-model="form.open_in_new_tab"
-                      type="checkbox"
-                      class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
-                    />
-                    <span class="text-sm text-gray-300">
-                      Open in new tab
-                    </span>
-                  </label>
-                </div>
-
-                <div class="card p-4">
-                  <label class="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      v-model="form.is_active"
-                      type="checkbox"
-                      class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded bg-gray-700"
-                    />
-                    <span class="text-sm text-gray-300">
-                      Active and visible to users
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Creator (admin only, visible en édition et création) -->
-            <div v-if="props.users && props.users.length">
-              <div class="section-header">
-                <Icon icon="mdi:account-edit" class="section-icon" />
-                <h4 class="section-title">Créateur</h4>
-              </div>
-              <div class="form-group">
-                <label for="created_by_id" class="form-label">
-                  Attribuer à un utilisateur
-                </label>
-                <select
-                  id="created_by_id"
-                  v-model="form.created_by_id"
-                  class="form-select"
-                >
+              <div v-if="props.users && props.users.length" class="form-group mb-0">
+                <label for="created_by_id" class="form-label">Créateur</label>
+                <select id="created_by_id" v-model="form.created_by_id" class="form-select">
                   <option :value="null">— Non attribué —</option>
-                  <option
-                    v-for="u in props.users"
-                    :key="u.id"
-                    :value="u.id"
-                  >
+                  <option v-for="u in props.users" :key="u.id" :value="u.id">
                     {{ u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username }}
                     <template v-if="u.first_name || u.last_name"> ({{ u.username }})</template>
                   </option>
                 </select>
-                <p class="form-help">Définit le créateur pour les rapports d'activité.</p>
+                <p class="text-xs text-gray-400 mt-1">Définit le créateur pour les rapports d'activité.</p>
               </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">New tab</span>
+                  <span class="toggle-row-desc">Open in a new tab</span>
+                </span>
+                <input v-model="form.open_in_new_tab" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+                <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">Active</span>
+                  <span class="toggle-row-desc">Visible to users</span>
+                </span>
+                <input v-model="form.is_active" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+              </div>
+            </div>
+
+            <!-- Colonne droite -->
+            <div class="space-y-4">
+              <div class="section-header mb-0">
+                <Icon icon="mdi:palette-outline" class="section-icon" />
+                <h4 class="section-title">Appearance</h4>
+              </div>
+
+              <div class="card p-3">
+                <div class="flex items-center gap-3">
+                  <Icon :icon="form.icon || 'mdi:application'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium text-gray-900 dark:text-white truncate">{{ form.name || 'Resource Name' }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ form.url || 'URL...' }}</div>
+                  </div>
+                  <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-[1fr_7rem] gap-4">
+                <div class="form-group mb-0">
+                <label for="color" class="form-label">Color</label>
+                <div class="flex items-center gap-2">
+                  <input
+                    id="color"
+                    v-model="form.color"
+                    type="color"
+                    class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
+                    style="border-color: var(--border); background-color: var(--bg-card)"
+                  />
+                  <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#6366f1" />
+                </div>
+              </div>
+                <div class="form-group mb-0">
+                  <label for="order" class="form-label">Order</label>
+                  <input id="order" v-model.number="form.order" type="number" min="0" class="form-input" placeholder="0" />
+                </div>
+              </div>
+
+              <IconInput
+                v-model="form.icon"
+                label="Icon"
+                placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
+                category="application"
+                :show-suggestions="true"
+              />
+
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="modal-footer">
-            <button
-              type="button"
-              @click="closeModal"
-              class="btn-secondary w-full sm:w-auto"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary w-full sm:w-auto"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ isEdit ? 'Update' : 'Create' }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">* Required fields</span>
+            <div class="modal-footer-actions">
+              <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
+              <button type="submit" :disabled="loading" class="btn btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                {{ isEdit ? 'Update' : 'Create' }}
+              </button>
+            </div>
           </div>
         </form>
       </div>

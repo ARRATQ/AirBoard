@@ -1,227 +1,145 @@
 <template>
-  <div v-if="show" class="modal-overlay">
-    <div class="modal-container">
-      <div class="modal-panel sm:max-w-2xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+  <div v-if="show" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-container" @click.self="closeModal">
+      <div class="modal-panel w-full sm:max-w-5xl">
+        <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="modal-title">
-                  {{ isEdit ? 'Edit Resource Group' : 'New Resource Group' }}
-                </h3>
-                <p class="modal-subtitle">
-                  {{ isEdit ? 'Modify the resource group settings' : 'Create a new group to organize resources' }}
-                </p>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
+                  :style="{ backgroundColor: form.color }"
+                >
+                  <Icon :icon="form.icon || 'mdi:folder'" class="h-5 w-5" />
+                </div>
+                <div class="min-w-0">
+                  <h3 class="modal-title truncate">{{ isEdit ? 'Edit Resource Group' : 'New Resource Group' }}</h3>
+                  <p class="modal-subtitle truncate">{{ isEdit ? 'Modify the resource group settings' : 'Create a new group to organize resources' }}</p>
+                </div>
               </div>
-              <button 
-                type="button" 
-                @click="closeModal"
-                class="btn-ghost p-2"
-              >
+              <button type="button" class="btn btn-ghost p-2" aria-label="Close" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <!-- Content -->
-          <div class="modal-content space-y-6">
-            <!-- Basic Information -->
-            <div>
-              <div class="section-header">
+          <!-- Content : infos | apparence -->
+          <div class="modal-content grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            <!-- Colonne gauche -->
+            <div class="space-y-4">
+              <div class="section-header mb-0">
                 <Icon icon="mdi:information-outline" class="section-icon" />
                 <h4 class="section-title">Basic Information</h4>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-group">
-                  <label for="name" class="form-label form-label-required">
-                    Group Name
-                  </label>
-                  <input
-                    id="name"
-                    v-model="form.name"
-                    type="text"
-                    required
-                    class="form-input"
-                    placeholder="Development Tools"
-                  />
+
+              <div class="grid grid-cols-[1fr_7rem] gap-4">
+                <div class="form-group mb-0">
+                  <label for="name" class="form-label form-label-required">Group Name</label>
+                  <input id="name" v-model="form.name" type="text" required class="form-input" placeholder="Development Tools" />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
-
-                <div class="form-group">
-                  <label for="order" class="form-label">
-                    Display Order
-                  </label>
-                  <input
-                    id="order"
-                    v-model.number="form.order"
-                    type="number"
-                    min="0"
-                    class="form-input"
-                    placeholder="0"
-                  />
+                <div class="form-group mb-0">
+                  <label for="order" class="form-label">Order</label>
+                  <input id="order" v-model.number="form.order" type="number" min="0" class="form-input" placeholder="0" />
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="description" class="form-label">
-                  Description
-                </label>
+              <div class="form-group mb-0">
+                <label for="description" class="form-label">Description</label>
                 <textarea
                   id="description"
                   v-model="form.description"
-                  rows="3"
-                  class="form-textarea"
+                  rows="2"
+                  class="form-textarea resize-none"
                   placeholder="Describe this resource group..."
                 ></textarea>
               </div>
+
+              <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">Active</span>
+                  <span class="toggle-row-desc">Visible to users on their dashboard</span>
+                </span>
+                <input v-model="form.is_active" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+
+              <template v-if="userRole === 'admin'">
+                <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">Private Resource Group</span>
+                  <span class="toggle-row-desc">Can only be managed by the admins of its owner group</span>
+                </span>
+                <input v-model="form.is_private" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+
+                <div v-if="form.is_private" class="form-group mb-0">
+                  <label for="owner_group_id" class="form-label form-label-required">Owner Group</label>
+                  <select id="owner_group_id" v-model.number="form.owner_group_id" required class="form-select">
+                    <option :value="null" disabled>Select owner group...</option>
+                    <option v-for="group in groups" :key="group.id" :value="group.id">{{ group.name }}</option>
+                  </select>
+                  <p v-if="errors.owner_group_id" class="form-error">{{ errors.owner_group_id }}</p>
+                  <p v-else class="text-xs text-gray-400 mt-1">The group admins of this group will manage this resource group</p>
+                </div>
+              </template>
             </div>
 
-            <!-- Appearance -->
-            <div>
-              <div class="section-header">
+            <!-- Colonne droite -->
+            <div class="space-y-4">
+              <div class="section-header mb-0">
                 <Icon icon="mdi:palette-outline" class="section-icon" />
                 <h4 class="section-title">Appearance</h4>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview -->
-                <div class="form-group">
-                  <label class="form-label">Preview</label>
-                  <div class="card p-4">
-                    <div class="flex items-center space-x-3">
-                      <Icon
-                        :icon="form.icon || 'mdi:folder'"
-                        class="h-10 w-10 flex-shrink-0"
-                        :style="{ color: form.color }"
-                      />
-                      <div>
-                        <div class="font-medium text-gray-900 dark:text-white">{{ form.name || 'Group Name' }}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">{{ form.description || 'Description...' }}</div>
-                      </div>
-                    </div>
+
+              <div class="card p-3">
+                <div class="flex items-center gap-3">
+                  <Icon :icon="form.icon || 'mdi:folder'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium text-gray-900 dark:text-white truncate">{{ form.name || 'Group Name' }}</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ form.description || 'Description...' }}</div>
                   </div>
-                </div>
-
-                <!-- Color and Icon -->
-                <div class="space-y-4">
-                  <div class="form-group">
-                    <label for="color" class="form-label">Color</label>
-                    <div class="flex items-center space-x-3">
-                      <input
-                        id="color"
-                        v-model="form.color"
-                        type="color"
-                        class="h-10 w-16 rounded-lg border border-gray-600 cursor-pointer bg-gray-800"
-                      />
-                      <input
-                        v-model="form.color"
-                        type="text"
-                        class="form-input flex-1"
-                        placeholder="#10b981"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Icon Input with free text -->
-                  <IconInput
-                    v-model="form.icon"
-                    label="Icon"
-                    placeholder="mdi:folder, lucide:folder, heroicons:folder"
-                    category="group"
-                    :show-suggestions="true"
-                  />
+                  <Icon v-if="form.is_private" icon="mdi:lock" class="h-4 w-4 text-gray-400" />
                 </div>
               </div>
-            </div>
 
-            <!-- Access Control (Admin only) -->
-            <div v-if="userRole === 'admin'">
-              <div class="section-header">
-                <Icon icon="mdi:shield-lock-outline" class="section-icon" />
-                <h4 class="section-title">Access Control</h4>
-              </div>
-
-              <div class="card p-4 space-y-4">
-                <div>
-                  <label class="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      v-model="form.is_private"
-                      type="checkbox"
-                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-                    />
-                    <div>
-                      <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Private Resource Group</span>
-                      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        Private app groups can only be managed by their owner group admin
-                      </p>
-                    </div>
-                  </label>
-                </div>
-
-                <div v-if="form.is_private" class="form-group">
-                  <label for="owner_group_id" class="form-label form-label-required">
-                    Owner Group
-                  </label>
-                  <select
-                    id="owner_group_id"
-                    v-model.number="form.owner_group_id"
-                    required
-                    class="form-select"
-                  >
-                    <option :value="null" disabled>Select owner group...</option>
-                    <option v-for="group in groups" :key="group.id" :value="group.id">
-                      {{ group.name }}
-                    </option>
-                  </select>
-                  <p v-if="errors.owner_group_id" class="form-error">{{ errors.owner_group_id }}</p>
-                  <p v-else class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    The group admin of this group will be able to manage this app group
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Options -->
-            <div>
-              <div class="section-header">
-                <Icon icon="mdi:tune" class="section-icon" />
-                <h4 class="section-title">Options</h4>
-              </div>
-
-              <div class="card p-4">
-                <label class="flex items-center space-x-3 cursor-pointer">
+              <div class="form-group mb-0">
+                <label for="color" class="form-label">Color</label>
+                <div class="flex items-center gap-2">
                   <input
-                    v-model="form.is_active"
-                    type="checkbox"
-                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                    id="color"
+                    v-model="form.color"
+                    type="color"
+                    class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
+                    style="border-color: var(--border); background-color: var(--bg-card)"
                   />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">
-                    Active and visible to users
-                  </span>
-                </label>
+                  <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#10b981" />
+                </div>
               </div>
+
+              <IconInput
+                v-model="form.icon"
+                label="Icon"
+                placeholder="mdi:folder, lucide:folder, heroicons:folder"
+                category="group"
+                :show-suggestions="true"
+              />
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="modal-footer">
-            <button
-              type="button"
-              @click="closeModal"
-              class="btn-secondary w-full sm:w-auto"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary w-full sm:w-auto"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ isEdit ? 'Update' : 'Create' }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">* Required fields</span>
+            <div class="modal-footer-actions">
+              <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
+              <button type="submit" :disabled="loading" class="btn btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                {{ isEdit ? 'Update' : 'Create' }}
+              </button>
+            </div>
           </div>
         </form>
       </div>

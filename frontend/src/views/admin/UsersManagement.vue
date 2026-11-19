@@ -234,7 +234,7 @@
           <Icon icon="mdi:account-multiple" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('users.emptyTitle') }}</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('users.emptyText') }}</p>
-          <button @click="openCreateModal" class="btn-primary mt-4">
+          <button @click="openCreateModal" class="btn btn-primary mt-4">
             <Icon icon="mdi:plus" class="h-5 w-5 mr-2" />
             {{ $t('users.create') }}
           </button>
@@ -277,14 +277,14 @@
             <button
               @click="deleteUser"
               :disabled="deleteLoading"
-              class="btn-danger w-full sm:w-auto sm:ml-3"
+              class="btn btn-danger w-full sm:w-auto sm:ml-3"
             >
               <Icon v-if="deleteLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
               Supprimer
             </button>
             <button
               @click="closeDeleteModal"
-              class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0 sm:ml-3"
+              class="btn btn-secondary w-full sm:w-auto mt-3 sm:mt-0 sm:ml-3"
             >
               Annuler
             </button>

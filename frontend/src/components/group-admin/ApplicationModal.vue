@@ -17,7 +17,7 @@
               <button
                 type="button"
                 @click="closeModal"
-                class="btn-ghost p-2"
+                class="btn btn-ghost p-2"
               >
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
@@ -192,10 +192,10 @@
           <div class="modal-footer-bar">
             <span class="modal-footer-hint">{{ $t('common.requiredFieldsHint') }}</span>
             <div class="modal-footer-actions">
-              <button type="button" @click="closeModal" class="btn-secondary">
+              <button type="button" @click="closeModal" class="btn btn-secondary">
                 {{ $t('groupAdmin.applicationModal.cancel') }}
               </button>
-              <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn-primary">
+              <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn btn-primary">
                 <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
                 <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
                 {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}

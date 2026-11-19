@@ -1,56 +1,60 @@
 <template>
-  <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
-      <div 
-        class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
-        @click="closeModal"
-      ></div>
-
-      <!-- Modal panel -->
-      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-        <form @submit.prevent="handleSubmit">
+  <div v-if="show" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-container" @click.self="closeModal">
+      <div class="modal-panel w-full sm:max-w-3xl">
+        <form class="modal-form" novalidate @submit.prevent="handleSubmit">
           <!-- Header -->
-          <div class="bg-white dark:bg-gray-800 px-6 pt-6 pb-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <div class="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                  <Icon icon="mdi:account" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <div class="modal-header">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div
+                  class="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm"
+                  style="background-color: var(--accent)"
+                >
+                  <span v-if="initials">{{ initials }}</span>
+                  <Icon v-else icon="mdi:account" class="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <div class="min-w-0">
+                  <h3 class="modal-title truncate">
                     {{ isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
                   </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="modal-subtitle truncate">
                     {{ isEdit ? 'Modifiez les informations du compte' : 'Créez un nouveau compte utilisateur' }}
                   </p>
                 </div>
               </div>
-              <button 
-                type="button" 
-                @click="closeModal"
-                class="btn-ghost"
-              >
+              <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <!-- Form content -->
-          <div class="px-6 py-4 space-y-6">
-            <!-- Section: Informations d'authentification -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:key-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Informations d'authentification
-              </h4>
-              
+          <!-- Tabs -->
+          <div class="modal-tabs" role="tablist">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              type="button"
+              role="tab"
+              :aria-selected="activeTab === tab.id"
+              class="modal-tab"
+              :class="{ 'modal-tab-active': activeTab === tab.id }"
+              @click="activeTab = tab.id"
+            >
+              <Icon :icon="tab.icon" class="h-4 w-4" />
+              {{ tab.label }}
+              <span v-if="tab.count !== undefined" class="modal-tab-count">{{ tab.count }}</span>
+              <span v-if="tab.hasError" class="modal-tab-error" aria-label="Erreur"></span>
+            </button>
+          </div>
+
+          <!-- Content -->
+          <div class="modal-content modal-body-tabbed">
+            <!-- Onglet : Compte -->
+            <div v-show="activeTab === 'account'" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Username -->
-                <div class="form-group">
-                  <label for="username" class="form-label form-label-required">
-                    Nom d'utilisateur
-                  </label>
+                <div class="form-group mb-0">
+                  <label for="username" class="form-label form-label-required">Nom d'utilisateur</label>
                   <input
                     id="username"
                     v-model="form.username"
@@ -58,18 +62,15 @@
                     required
                     :disabled="isEdit"
                     class="form-input"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed': isEdit }"
+                    :class="{ 'opacity-60 cursor-not-allowed': isEdit }"
                     placeholder="johndoe"
                   />
                   <p v-if="errors.username" class="form-error">{{ errors.username }}</p>
-                  <p v-if="isEdit" class="form-help">Le nom d'utilisateur ne peut pas être modifié</p>
+                  <p v-else-if="isEdit" class="text-xs text-gray-400 mt-1">Le nom d'utilisateur ne peut pas être modifié</p>
                 </div>
 
-                <!-- Email -->
-                <div class="form-group">
-                  <label for="email" class="form-label form-label-required">
-                    Adresse email
-                  </label>
+                <div class="form-group mb-0">
+                  <label for="email" class="form-label form-label-required">Adresse email</label>
                   <input
                     id="email"
                     v-model="form.email"
@@ -80,167 +81,116 @@
                   />
                   <p v-if="errors.email" class="form-error">{{ errors.email }}</p>
                 </div>
-              </div>
 
-              <!-- Password (only for new users) -->
-              <div v-if="!isEdit" class="form-group">
-                <label for="password" class="form-label form-label-required">
-                  Mot de passe
-                </label>
-                <input
-                  id="password"
-                  v-model="form.password"
-                  type="password"
-                  required
-                  class="form-input"
-                  placeholder="••••••••"
-                  minlength="6"
-                />
-                <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
-                <p class="form-help">Minimum 6 caractères</p>
-              </div>
-            </div>
-
-            <!-- Section: Informations personnelles -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:account-details-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Informations personnelles
-              </h4>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- First Name -->
-                <div class="form-group">
-                  <label for="first_name" class="form-label">
-                    Prénom
-                  </label>
-                  <input
-                    id="first_name"
-                    v-model="form.first_name"
-                    type="text"
-                    class="form-input"
-                    placeholder="John"
-                  />
+                <div class="form-group mb-0">
+                  <label for="first_name" class="form-label">Prénom</label>
+                  <input id="first_name" v-model="form.first_name" type="text" class="form-input" placeholder="John" />
                 </div>
 
-                <!-- Last Name -->
-                <div class="form-group">
-                  <label for="last_name" class="form-label">
-                    Nom de famille
-                  </label>
-                  <input
-                    id="last_name"
-                    v-model="form.last_name"
-                    type="text"
-                    class="form-input"
-                    placeholder="Doe"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Section: Permissions -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:shield-account-outline" class="h-4 w-4 mr-2 text-gray-500" />
-                Permissions et groupes
-              </h4>
-              
-              <div class="space-y-4">
-                <!-- Role -->
-                <div class="form-group">
-                  <label for="role" class="form-label form-label-required">
-                    Rôle
-                  </label>
-                  <select
-                    id="role"
-                    v-model="form.role"
-                    required
-                    class="form-select"
-                  >
-                    <option value="user">Utilisateur standard</option>
-                    <option value="editor">Éditeur (gestion des actualités)</option>
-                    <option value="admin">Administrateur</option>
-                  </select>
-                  <p v-if="errors.role" class="form-error">{{ errors.role }}</p>
-                  <p class="form-help">
-                    <span v-if="form.role === 'admin'">Les administrateurs ont accès à toutes les fonctionnalités</span>
-                    <span v-else-if="form.role === 'editor'">Les éditeurs peuvent créer et gérer les actualités du News Hub</span>
-                    <span v-else>Les utilisateurs ont accès aux ressources assignées via les groupes. Pour donner des droits d'administration de groupe, assignez l'utilisateur comme administrateur d'un groupe dans la gestion des groupes.</span>
-                  </p>
+                <div class="form-group mb-0">
+                  <label for="last_name" class="form-label">Nom de famille</label>
+                  <input id="last_name" v-model="form.last_name" type="text" class="form-input" placeholder="Doe" />
                 </div>
 
-                <!-- Groups -->
-                <div class="form-group">
-                  <label class="form-label">
-                    Groupes d'utilisateurs
-                  </label>
-                  <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 max-h-40 overflow-y-auto">
-                    <div v-if="groups.length === 0" class="text-sm text-gray-500 text-center py-4">
-                      Aucun groupe disponible
-                    </div>
-                    <div v-else class="space-y-3">
-                      <div v-for="group in groups" :key="group.id" class="flex items-center">
-                        <input
-                          :id="`group_${group.id}`"
-                          v-model="form.group_ids"
-                          :value="group.id"
-                          type="checkbox"
-                          class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                        />
-                        <label :for="`group_${group.id}`" class="ml-3 flex items-center space-x-2">
-                          <div 
-                            class="h-3 w-3 rounded-full"
-                            :style="{ backgroundColor: group.color || '#6B7280' }"
-                          ></div>
-                          <span class="text-sm text-gray-700 dark:text-gray-300">{{ group.name }}</span>
-                        </label>
-                      </div>
-                    </div>
+                <div v-if="!isEdit" class="form-group mb-0 md:col-span-2">
+                  <label for="password" class="form-label form-label-required">Mot de passe</label>
+                  <div class="relative">
+                    <input
+                      id="password"
+                      v-model="form.password"
+                      :type="showPassword ? 'text' : 'password'"
+                      required
+                      class="form-input !pr-10"
+                      placeholder="••••••••"
+                      minlength="6"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                      @click="showPassword = !showPassword"
+                    >
+                      <Icon :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="h-4 w-4" />
+                    </button>
                   </div>
-                  <p class="form-help">Les groupes déterminent les ressources accessibles</p>
+                  <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
+                  <p v-else class="text-xs text-gray-400 mt-1">Minimum 6 caractères</p>
                 </div>
               </div>
+
+              <label class="toggle-row">
+                <span>
+                  <span class="toggle-row-title">Compte actif</span>
+                  <span class="toggle-row-desc">L'utilisateur est autorisé à se connecter</span>
+                </span>
+                <input v-model="form.is_active" type="checkbox" class="switch-input" />
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
             </div>
 
-            <!-- Section: Options -->
-            <div>
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                <Icon icon="mdi:tune" class="h-4 w-4 mr-2 text-gray-500" />
-                Options du compte
-              </h4>
-              
-              <div class="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <input
-                  id="is_active"
-                  v-model="form.is_active"
-                  type="checkbox"
-                  class="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
-                />
-                <label for="is_active" class="text-sm text-gray-700 dark:text-gray-300">
-                  Compte actif et autorisé à se connecter
-                </label>
+            <!-- Onglet : Rôle & groupes -->
+            <div v-show="activeTab === 'access'" class="space-y-5">
+              <div>
+                <span class="form-label form-label-required">Rôle</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label
+                    v-for="role in roles"
+                    :key="role.value"
+                    class="choice-card items-start"
+                    :class="{ 'choice-card-active': form.role === role.value }"
+                  >
+                    <input v-model="form.role" type="radio" name="role" :value="role.value" class="mt-0.5" />
+                    <span class="min-w-0">
+                      <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
+                        <Icon :icon="role.icon" class="h-4 w-4 text-gray-500" />
+                        {{ role.label }}
+                      </span>
+                      <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ role.desc }}</span>
+                    </span>
+                  </label>
+                </div>
+                <p v-if="errors.role" class="form-error">{{ errors.role }}</p>
+                <p v-if="form.role === 'user'" class="text-xs text-gray-400 mt-2">
+                  Pour déléguer l'administration d'un groupe, assignez l'utilisateur comme administrateur depuis la gestion des groupes.
+                </p>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="form-label mb-0">Groupes d'utilisateurs</span>
+                  <span class="text-xs text-gray-400">Les groupes déterminent les ressources accessibles</span>
+                </div>
+                <div v-if="groups.length === 0" class="text-sm text-gray-500 text-center py-6">
+                  Aucun groupe disponible
+                </div>
+                <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
+                  <label
+                    v-for="group in groups"
+                    :key="group.id"
+                    class="choice-card py-2"
+                    :class="{ 'choice-card-active': form.group_ids.includes(group.id) }"
+                  >
+                    <input v-model="form.group_ids" :value="group.id" type="checkbox" />
+                    <span class="h-2.5 w-2.5 flex-shrink-0 rounded-full" :style="{ backgroundColor: group.color || '#6B7280' }"></span>
+                    <span class="text-sm text-gray-700 dark:text-gray-200 truncate">{{ group.name }}</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-3 space-y-reverse sm:space-y-0">
-            <button
-              type="button"
-              @click="closeModal"
-              class="btn-secondary w-full sm:w-auto"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary w-full sm:w-auto"
-            >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ isEdit ? 'Enregistrer' : 'Créer' }}
-            </button>
+          <div class="modal-footer-bar">
+            <span class="modal-footer-hint">* Champs obligatoires</span>
+            <div class="modal-footer-actions">
+              <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
+              <button type="submit" :disabled="loading" class="btn btn-primary">
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:account-plus'" class="h-4 w-4 mr-2" />
+                {{ isEdit ? 'Enregistrer' : 'Créer l\'utilisateur' }}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -282,6 +232,38 @@ const form = reactive({
 })
 
 const isEdit = computed(() => !!props.user)
+
+const activeTab = ref('account')
+const showPassword = ref(false)
+
+const roles = [
+  { value: 'user', label: 'Utilisateur', icon: 'mdi:account-outline', desc: 'Accès aux ressources de ses groupes' },
+  { value: 'editor', label: 'Éditeur', icon: 'mdi:pencil-outline', desc: 'Gère les actualités du News Hub' },
+  { value: 'admin', label: 'Administrateur', icon: 'mdi:shield-crown-outline', desc: 'Accès à toutes les fonctionnalités' }
+]
+
+const initials = computed(() => {
+  const f = form.first_name?.trim()
+  const l = form.last_name?.trim()
+  if (f || l) return `${f?.charAt(0) || ''}${l?.charAt(0) || ''}`.toUpperCase()
+  return form.username?.trim().charAt(0).toUpperCase() || ''
+})
+
+const tabs = computed(() => [
+  {
+    id: 'account',
+    label: 'Compte',
+    icon: 'mdi:card-account-details-outline',
+    hasError: !!(errors.value.username || errors.value.email || errors.value.password)
+  },
+  {
+    id: 'access',
+    label: 'Rôle & groupes',
+    icon: 'mdi:shield-account-outline',
+    count: form.group_ids.length,
+    hasError: !!errors.value.role
+  }
+])
 
 // Load groups when component mounts
 onMounted(async () => {
@@ -341,6 +323,8 @@ const resetForm = () => {
     })
   }
   errors.value = {}
+  activeTab.value = 'account'
+  showPassword.value = false
 }
 
 const validateForm = () => {
@@ -379,7 +363,11 @@ const isValidEmail = (email) => {
 }
 
 const handleSubmit = async () => {
-  if (!validateForm()) return
+  if (!validateForm()) {
+    const e = errors.value
+    activeTab.value = (e.username || e.email || e.password) ? 'account' : 'access'
+    return
+  }
   
   loading.value = true
   try {

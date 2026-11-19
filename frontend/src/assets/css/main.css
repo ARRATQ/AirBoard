@@ -444,6 +444,149 @@ html {
   @apply flex items-center gap-3 ml-auto;
 }
 
+/* Onglets de modal : barre sous le header, corps à hauteur fixe pour éviter les sauts */
+.modal-tabs {
+  @apply flex flex-shrink-0 gap-1 px-6 border-b overflow-x-auto overflow-y-hidden;
+  border-color: var(--border);
+  scrollbar-width: none;
+}
+
+.modal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-tab {
+  @apply relative inline-flex items-center gap-2 px-3 py-3 text-sm font-medium whitespace-nowrap rounded-t-md transition-colors focus:outline-none;
+  color: var(--text-muted);
+}
+
+.modal-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--hover);
+}
+
+.modal-tab:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.modal-tab::after {
+  content: '';
+  @apply absolute left-2 right-2 bottom-0 h-0.5 rounded-full transition-transform duration-200;
+  background-color: var(--accent);
+  transform: scaleX(0);
+}
+
+.modal-tab-active {
+  color: var(--text-primary);
+}
+
+.modal-tab-active::after {
+  transform: scaleX(1);
+}
+
+.modal-tab-count {
+  @apply inline-flex items-center justify-center h-5 px-1.5 rounded-full text-xs font-semibold;
+  min-width: 1.25rem;
+  background-color: var(--bg-surface);
+}
+
+.modal-tab-active .modal-tab-count {
+  background-color: rgba(var(--accent-rgb), 0.15);
+  color: var(--accent-dark);
+}
+
+.modal-tab-error {
+  @apply h-2 w-2 rounded-full bg-red-500;
+}
+
+.modal-form > .modal-content.modal-body-tabbed {
+  flex: 0 1 auto;
+  height: min(30rem, calc(100vh - 15rem));
+}
+
+/* Carte sélectionnable (checkbox / radio) */
+.choice-card {
+  @apply relative flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150;
+  border-color: var(--border);
+  background-color: var(--bg-card);
+}
+
+.choice-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.choice-card:focus-within {
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.35);
+}
+
+.choice-card-active {
+  border-color: var(--accent);
+  background-color: rgba(var(--accent-rgb), 0.06);
+}
+
+.choice-card input[type='checkbox'],
+.choice-card input[type='radio'] {
+  @apply h-4 w-4 flex-shrink-0 cursor-pointer;
+  accent-color: var(--accent);
+}
+
+/* Ligne d'option avec interrupteur */
+.toggle-row {
+  @apply flex items-center justify-between gap-4 p-3 rounded-lg border cursor-pointer transition-colors;
+  border-color: var(--border);
+  background-color: var(--bg-surface);
+}
+
+.toggle-row:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.toggle-row-title {
+  @apply block text-sm font-medium;
+  color: var(--text-primary);
+}
+
+.toggle-row-desc {
+  @apply block text-xs mt-0.5;
+  color: var(--text-muted);
+}
+
+.switch-input {
+  @apply sr-only;
+}
+
+.switch-track {
+  @apply relative inline-flex flex-shrink-0 h-5 w-9 rounded-full bg-gray-300 dark:bg-gray-600 transition-colors duration-200;
+}
+
+.switch-track::before {
+  content: '';
+  @apply absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200;
+  inset-inline-start: 0.125rem;
+}
+
+.switch-input:checked + .switch-track {
+  background-color: var(--accent);
+}
+
+.switch-input:checked + .switch-track::before {
+  transform: translateX(1rem);
+}
+
+[dir='rtl'] .switch-input:checked + .switch-track::before {
+  transform: translateX(-1rem);
+}
+
+.switch-input:focus-visible + .switch-track {
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--accent);
+}
+
+/* Petits boutons texte (tout sélectionner, etc.) */
+.btn-link {
+  @apply text-xs font-medium hover:underline focus:outline-none focus-visible:underline;
+  color: var(--accent);
+}
+
 .modal-footer {
   @apply px-6 py-4 border-t flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-3 space-y-reverse sm:space-y-0;
   background-color: var(--bg-surface);
