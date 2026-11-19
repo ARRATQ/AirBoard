@@ -9,6 +9,7 @@ import (
 	"airboard/config"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -290,13 +291,11 @@ func (h *EventsHandler) ListEvents(c *gin.Context) {
 	}
 
 	// Tri
-	sortBy := c.DefaultQuery("sort", "start_date")
-	sortOrder := c.DefaultQuery("order", "desc")
-	if sortBy == "start_date" || sortBy == "created_at" || sortBy == "priority" {
-		query = query.Order(sortBy + " " + sortOrder)
-	} else {
-		query = query.Order("start_date desc")
-	}
+	query = query.Order(utils.SafeOrderClause(
+		c.Query("sort"), c.Query("order"),
+		[]string{"start_date", "created_at", "priority"},
+		"start_date", "desc",
+	))
 
 	// Compter le total
 	var total int64

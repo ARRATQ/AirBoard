@@ -500,6 +500,7 @@ PUBLIC_URL=https://votre-domaine.com
 
 # SSO (si utilisé)
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_ADMIN_GROUPS=airboard-admins,votre-groupe-admin
 
 # GitHub Updates (optionnel)
@@ -603,6 +604,7 @@ SIGNUP_ENABLED=true
 
 # SSO (si Authentik utilisé)
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_AUTO_PROVISION=true
 SSO_DEFAULT_ROLE=user
 SSO_DEFAULT_GROUP=Common
@@ -692,6 +694,7 @@ location / {
     proxy_set_header X-authentik-username $authentik_username;
     proxy_set_header X-authentik-groups $authentik_groups;
     proxy_set_header X-authentik-uid $authentik_uid;
+    proxy_set_header X-Airboard-Proxy-Secret "<SSO_PROXY_SECRET>";
 }
 ```
 
@@ -700,6 +703,7 @@ location / {
 Dans Coolify, définir :
 ```env
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_AUTO_PROVISION=true
 SSO_DEFAULT_ROLE=user
 SSO_DEFAULT_GROUP=Common
@@ -926,6 +930,7 @@ DB_PASSWORD=K8$mP9#nQ2@vL5*wR7&xT4!yU6
 JWT_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
 PUBLIC_URL=https://tools.company.com
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_ADMIN_GROUPS=airboard-admins,it-admins,sysadmins
 GIN_MODE=release
 BCRYPT_COST=13
@@ -1423,7 +1428,8 @@ curl -X PUT http://localhost:8080/api/v1/notifications/1/read \
 4. Vérifier NPM forward headers (Advanced config)
 5. Tester avec curl :
 ```bash
-curl -H "X-authentik-email: test@example.com" \
+curl -H "X-Airboard-Proxy-Secret: $SSO_PROXY_SECRET" \
+     -H "X-authentik-email: test@example.com" \
      -H "X-authentik-username: test" \
      http://localhost:8080/api/v1/auth/sso/auto-login
 ```

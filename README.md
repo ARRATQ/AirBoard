@@ -579,6 +579,7 @@ PUBLIC_URL=https://your-domain.com
 
 # SSO (if used)
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_ADMIN_GROUPS=airboard-admins,your-admin-group
 
 # GitHub Updates (optional)
@@ -682,6 +683,7 @@ SIGNUP_ENABLED=true
 
 # SSO (if using Authentik)
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_AUTO_PROVISION=true
 SSO_DEFAULT_ROLE=user
 SSO_DEFAULT_GROUP=Common
@@ -771,6 +773,7 @@ location / {
     proxy_set_header X-authentik-username $authentik_username;
     proxy_set_header X-authentik-groups $authentik_groups;
     proxy_set_header X-authentik-uid $authentik_uid;
+    proxy_set_header X-Airboard-Proxy-Secret "<SSO_PROXY_SECRET>";
 }
 ```
 
@@ -779,6 +782,7 @@ location / {
 In Coolify, set:
 ```env
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_AUTO_PROVISION=true
 SSO_DEFAULT_ROLE=user
 SSO_DEFAULT_GROUP=Common
@@ -941,7 +945,7 @@ JWT_SECRET=
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `SSO_ENABLED` | Enable SSO | `true` | **YES (disable if no SSO)** |
+| `SSO_ENABLED` | Enable SSO (requires `SSO_PROXY_SECRET`) | `false` | **YES (disable if no SSO)** |
 | `SSO_AUTO_PROVISION` | Auto-create SSO users | `true` | No |
 | `SSO_DEFAULT_ROLE` | Default role (`user`/`admin`) | `user` | No |
 | `SSO_DEFAULT_GROUP` | Default group | `Common` | No |
@@ -1005,6 +1009,7 @@ DB_PASSWORD=K8$mP9#nQ2@vL5*wR7&xT4!yU6
 JWT_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
 PUBLIC_URL=https://tools.company.com
 SSO_ENABLED=true
+SSO_PROXY_SECRET=<openssl rand -hex 32>
 SSO_ADMIN_GROUPS=airboard-admins,it-admins,sysadmins
 GIN_MODE=release
 BCRYPT_COST=13
@@ -1503,7 +1508,8 @@ curl -X PUT http://localhost:8080/api/v1/notifications/1/read \
 4. Verify NPM forwards headers (Advanced config)
 5. Test with curl:
 ```bash
-curl -H "X-authentik-email: test@example.com" \
+curl -H "X-Airboard-Proxy-Secret: $SSO_PROXY_SECRET" \
+     -H "X-authentik-email: test@example.com" \
      -H "X-authentik-username: test" \
      http://localhost:8080/api/v1/auth/sso/auto-login
 ```

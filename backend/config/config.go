@@ -54,6 +54,9 @@ type SSOConfig struct {
 	DefaultGroup  string
 	GroupMapping  map[string]string // map[AuthentikGroup]AirboardGroup
 	AdminGroups   []string          // Groupes Authentik qui ont le rôle admin
+	// ProxySecret doit être envoyé par le reverse proxy (NPM) dans le header
+	// X-Airboard-Proxy-Secret. Sans lui, les headers X-authentik-* sont ignorés.
+	ProxySecret string
 }
 
 type StorageConfig struct {
@@ -100,8 +103,7 @@ func LoadConfig() *Config {
 		// Générer un secret sécurisé par défaut
 		generatedSecret, err := authSecurity.GenerateSecureSecret()
 		if err != nil {
-			log.Printf("⚠️ Erreur lors de la génération du secret JWT: %v", err)
-			jwtSecret = "airboard-super-secret-key-2024-unsafe-default"
+			log.Fatalf("❌ Impossible de générer un secret JWT: %v - définissez JWT_SECRET", err)
 		} else {
 			jwtSecret = generatedSecret
 			log.Printf("✅ Secret JWT sécurisé généré automatiquement (512 bits)")
@@ -109,6 +111,9 @@ func LoadConfig() *Config {
 		log.Printf("⚠️ IMPORTANT: JWT_SECRET non défini - le secret change à chaque redémarrage!")
 		log.Printf("⚠️ Les tokens OAuth email et sessions JWT seront invalidés au prochain redémarrage.")
 		log.Printf("⚠️ Définissez JWT_SECRET dans vos variables d'environnement pour persister le chiffrement.")
+	} else if isPublicDefaultJWTSecret(jwtSecret) {
+		// SECURITY: ces valeurs ont été publiées dans le dépôt ; n'importe qui pourrait forger un token admin.
+		log.Fatalf("❌ JWT_SECRET utilise une valeur par défaut publique. Générez-en une avec: openssl rand -base64 48")
 	} else {
 		// Valider le secret JWT fourni - avertir mais NE PAS remplacer
 		// Remplacer le secret casserait le chiffrement des données stockées (OAuth tokens, etc.)
@@ -177,6 +182,7 @@ func LoadConfig() *Config {
 			DefaultGroup:  getEnv("SSO_DEFAULT_GROUP", "Common"),
 			GroupMapping:  make(map[string]string), // Sera peuplé par les groupes Authentik
 			AdminGroups:   adminGroups,
+			ProxySecret:   getEnv("SSO_PROXY_SECRET", ""),
 		},
 		Storage: StorageConfig{
 			Type:        getEnv("STORAGE_TYPE", "local"),
@@ -204,6 +210,23 @@ func (c *Config) GetDSN() string {
 		c.Database.DBName,
 		c.Database.SSLMode,
 	)
+}
+
+// publicDefaultJWTSecrets lists secrets that were committed to the repository
+// as defaults. Anyone can read them, so they must never sign tokens.
+var publicDefaultJWTSecrets = []string{
+	"airboard-super-secret-key-2024",
+	"airboard-super-secret-key-2024-unsafe-default",
+	"your-super-secret-jwt-key-change-in-production",
+}
+
+func isPublicDefaultJWTSecret(secret string) bool {
+	for _, s := range publicDefaultJWTSecrets {
+		if secret == s {
+			return true
+		}
+	}
+	return false
 }
 
 func getEnv(key, defaultValue string) string {

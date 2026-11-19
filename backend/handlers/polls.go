@@ -11,6 +11,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -221,9 +222,11 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	// les sondages liés à l'entité spécifiée (news ou announcement)
 
 	// Tri
-	sortBy := c.DefaultQuery("sort", "created_at")
-	sortOrder := c.DefaultQuery("order", "desc")
-	query = query.Order(sortBy + " " + sortOrder)
+	query = query.Order(utils.SafeOrderClause(
+		c.Query("sort"), c.Query("order"),
+		[]string{"created_at", "updated_at", "title", "start_date", "end_date"},
+		"created_at", "desc",
+	))
 
 	// Compte total
 	var total int64

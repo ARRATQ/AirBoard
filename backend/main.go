@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"net/http"
 	"time"
@@ -815,10 +816,16 @@ func createInitialData(db *gorm.DB, cfg *config.Config) (err error) {
 		}
 	}()
 
-	// Créer ou réinitialiser un utilisateur admin par défaut
+	// Créer l'utilisateur admin par défaut s'il n'existe pas.
+	// SECURITY: un admin existant n'est JAMAIS modifié au démarrage, sauf si
+	// ADMIN_RESET_PASSWORD=true est défini explicitement (procédure de récupération).
 	var adminUser models.User
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		adminPassword = "admin123"
+	}
 	// Utiliser coût bcrypt sécurisé (12 minimum - OWASP 2025)
-	hashedAdminPassword, bcryptErr := bcrypt.GenerateFromPassword([]byte("admin123"), cfg.Security.BcryptCost)
+	hashedAdminPassword, bcryptErr := bcrypt.GenerateFromPassword([]byte(adminPassword), cfg.Security.BcryptCost)
 	if bcryptErr != nil {
 		return fmt.Errorf("failed to hash admin password: %w", bcryptErr)
 	}
@@ -839,21 +846,26 @@ func createInitialData(db *gorm.DB, cfg *config.Config) (err error) {
 				tx.Rollback()
 				return fmt.Errorf("failed to create admin user: %w", err)
 			}
-			log.Println("✅ Utilisateur admin créé: admin@airboard.com / admin123")
+			if os.Getenv("ADMIN_PASSWORD") == "" {
+				log.Println("⚠️ Utilisateur admin créé avec le mot de passe par défaut 'admin123' - changez-le immédiatement ou définissez ADMIN_PASSWORD")
+			} else {
+				log.Println("✅ Utilisateur admin créé avec le mot de passe défini dans ADMIN_PASSWORD")
+			}
 		} else {
 			tx.Rollback()
 			return fmt.Errorf("failed to check for existing admin user: %w", err)
 		}
-	} else {
-		// Réinitialiser le mot de passe si l'utilisateur existe déjà
+	} else if os.Getenv("ADMIN_RESET_PASSWORD") == "true" {
+		// Récupération explicite : réactive le compte et applique ADMIN_PASSWORD (ou admin123)
 		adminUser.Password = string(hashedAdminPassword)
 		adminUser.IsActive = true
 		adminUser.Role = "admin"
-		if err = tx.Save(&adminUser).Error; err != nil {
+		adminUser.DeletedAt = gorm.DeletedAt{}
+		if err = tx.Unscoped().Save(&adminUser).Error; err != nil {
 			tx.Rollback()
-			return fmt.Errorf("failed to update admin user: %w", err)
+			return fmt.Errorf("failed to reset admin user: %w", err)
 		}
-		log.Println("🔄 Mot de passe admin réinitialisé: admin@airboard.com / admin123")
+		log.Println("🔄 ADMIN_RESET_PASSWORD=true : compte admin réinitialisé. Retirez cette variable après connexion.")
 	}
 
 	// Créer un utilisateur normal par défaut

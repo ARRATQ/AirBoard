@@ -10,6 +10,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -229,13 +230,11 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 	}
 
 	// Tri
-	sortBy := c.DefaultQuery("sort", "start_date")
-	sortOrder := c.DefaultQuery("order", "asc")
-	if sortBy == "start_date" || sortBy == "created_at" || sortBy == "priority" {
-		query = query.Order(sortBy + " " + sortOrder)
-	} else {
-		query = query.Order("start_date asc")
-	}
+	query = query.Order(utils.SafeOrderClause(
+		c.Query("sort"), c.Query("order"),
+		[]string{"start_date", "created_at", "priority"},
+		"start_date", "asc",
+	))
 
 	// Compter le total
 	var total int64

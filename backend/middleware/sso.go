@@ -3,12 +3,40 @@ package middleware
 import (
 	"airboard/config"
 	"airboard/services"
+	"crypto/subtle"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+// SSOProxySecretHeader is the header the trusted reverse proxy must set to
+// the value of SSO_PROXY_SECRET for X-authentik-* headers to be honoured.
+const SSOProxySecretHeader = "X-Airboard-Proxy-Secret"
+
+type ssoProxyCheck int
+
+const (
+	ssoProxyNotConfigured ssoProxyCheck = iota
+	ssoProxyRejected
+	ssoProxyTrusted
+)
+
+var warnSSOProxySecretMissing sync.Once
+
+// checkSSOProxySecret compares the secret sent by the proxy with the configured
+// one in constant time. With no configured secret, SSO headers are never trusted.
+func checkSSOProxySecret(configured, provided string) ssoProxyCheck {
+	if configured == "" {
+		return ssoProxyNotConfigured
+	}
+	if subtle.ConstantTimeCompare([]byte(configured), []byte(provided)) != 1 {
+		return ssoProxyRejected
+	}
+	return ssoProxyTrusted
+}
 
 // SSOMiddleware détecte et traite les headers Authentik pour l'authentification SSO
 type SSOMiddleware struct {
@@ -45,37 +73,29 @@ func (m *SSOMiddleware) DetectSSO() gin.HandlerFunc {
 			return
 		}
 
-		// SECURITY: Valider que les headers SSO proviennent d'une source de confiance
+		// SECURITY: les headers X-authentik-* peuvent être envoyés par n'importe quel client.
+		// Seul le reverse proxy connaît SSO_PROXY_SECRET : on exige ce secret partagé.
 		clientIP := c.ClientIP()
-		trustedSources := []string{
-			"127.0.0.1",
-			"::1",
-			"localhost",
-			"172.", // Docker networks (commence par 172.)
-			"192.168.", // Private networks
-			"10.", // Private networks
-		}
-
-		isTrusted := false
-		for _, trusted := range trustedSources {
-			if clientIP == trusted || strings.HasPrefix(clientIP, trusted) {
-				isTrusted = true
-				break
-			}
-		}
-
-		if !isTrusted {
-			log.Printf("[SECURITY] Tentative de SSO spoofing détectée depuis IP non autorisée: %s (email: %s, username: %s)",
+		switch checkSSOProxySecret(m.config.SSO.ProxySecret, c.GetHeader(SSOProxySecretHeader)) {
+		case ssoProxyNotConfigured:
+			warnSSOProxySecretMissing.Do(func() {
+				log.Printf("[SECURITY] SSO_ENABLED=true mais SSO_PROXY_SECRET est vide : headers SSO ignorés. "+
+					"Configurez le secret dans le proxy (header %s) et dans SSO_PROXY_SECRET.", SSOProxySecretHeader)
+			})
+			c.Next()
+			return
+		case ssoProxyRejected:
+			log.Printf("[SECURITY] Headers SSO rejetés (secret proxy absent ou invalide) depuis %s (email: %s, username: %s)",
 				clientIP, email, username)
 			c.JSON(403, gin.H{
-				"error": "Forbidden",
+				"error":   "Forbidden",
 				"message": "Headers SSO non autorisés depuis cette source",
 			})
 			c.Abort()
 			return
 		}
 
-		log.Printf("[SSO] Headers Authentik détectés pour: %s (%s) depuis IP autorisée: %s", username, email, clientIP)
+		log.Printf("[SSO] Headers Authentik détectés pour: %s (%s) depuis le proxy de confiance (%s)", username, email, clientIP)
 
 		// Extraire les informations SSO
 		ssoInfo := &services.SSOUserInfo{

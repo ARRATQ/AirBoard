@@ -12,6 +12,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -207,12 +208,15 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 	}
 
 	// Tri
-	sortBy := c.DefaultQuery("sort", "published_at")
-	sortOrder := c.DefaultQuery("order", "desc")
+	sortBy := c.Query("sort")
 	if sortBy == "pinned" {
 		query = query.Order("is_pinned DESC, published_at DESC")
 	} else {
-		query = query.Order(sortBy + " " + sortOrder)
+		query = query.Order(utils.SafeOrderClause(
+			sortBy, c.Query("order"),
+			[]string{"published_at", "created_at", "updated_at", "title", "view_count"},
+			"published_at", "desc",
+		))
 	}
 
 	// Compte total
