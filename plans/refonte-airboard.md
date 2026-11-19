@@ -16,6 +16,8 @@ pour un utilisateur comme pour un administrateur.
 - Les utilisateurs se connectent via **OAuth Microsoft** (`handlers/oauth.go`). Le SSO par en-têtes
   Authentik est désactivé en prod (`SSO_ENABLED=false`).
 - Prod sur Coolify avec `JWT_SECRET` défini.
+- Catégories d'actualités, modification/suppression de tags et annuaire (personnes, affectations) :
+  **admins globaux seuls** (2026-11-19). Les admins de groupe gardent la **création** de tags.
 
 ## Déjà fait
 
@@ -23,12 +25,14 @@ pour un utilisateur comme pour un administrateur.
 |---|---|
 | `8cc4c99` | Admin plus jamais réinitialisé au démarrage (`ADMIN_PASSWORD`, `ADMIN_RESET_PASSWORD`) ; secrets JWT publics refusés ; SSO Authentik protégé par `SSO_PROXY_SECRET` ; tri ORDER BY en liste blanche (`utils.SafeOrderClause`) |
 | `ef33e9f` | OAuth : `state` obligatoire et lié au navigateur (anti login-CSRF) |
+| (chantier 1) | Refresh token refusé comme access token ; rôle/compte actif relus en base (cache 1 min) ; limite 20/min/IP sur login/register + verrouillage IP+compte et compte (compteur réparé) ; démo derrière `SEED_DEMO_DATA` ; avatar vérifié par contenu ; corps limités (5 Mo / 12 Mo, nginx 12 Mo) ; origine WebSocket ; mot de passe 8 car. ; recherche avec apostrophes ; `TRUSTED_PROXIES` |
 
-À vérifier après déploiement : une connexion Microsoft réelle.
+À vérifier après déploiement : une connexion Microsoft réelle, le chat (WebSocket : `FRONTEND_URL` doit être
+l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactivation du compte démo `user`.
 
 ---
 
-## Chantier 1 — Sécurité restante (petit, à faire en premier)
+## Chantier 1 — Sécurité restante ✅ fait
 
 1. **Refresh token accepté comme access token** : `verifyToken` (`middleware/auth.go:151-196`) ne vérifie
    pas le champ `type`. → Rejeter `type=refresh`.

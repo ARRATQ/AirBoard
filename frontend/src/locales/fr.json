@@ -1887,7 +1887,7 @@
     "newPasswordPlaceholder": "Entrez votre nouveau mot de passe",
     "confirmPassword": "Confirmer le nouveau mot de passe",
     "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
-    "passwordMinLength": "Minimum 6 caractères",
+    "passwordMinLength": "Minimum 8 caractères",
     "passwordMismatch": "Les mots de passe ne correspondent pas",
     "passwordChanged": "Mot de passe modifié avec succès",
     "currentPasswordIncorrect": "Le mot de passe actuel est incorrect",

@@ -134,7 +134,7 @@
           <span>{{ $t('groupAdmin.myPolls') }}</span>
         </router-link>
 
-        <router-link to="/group-admin/directory" :class="getLinkClasses('/group-admin/directory')">
+        <router-link v-if="authStore.isAdmin" to="/group-admin/directory" :class="getLinkClasses('/group-admin/directory')">
           <Icon icon="mdi:sitemap-outline" class="h-4 w-4" />
           <span>{{ $t('directory.manageTitle') }}</span>
         </router-link>

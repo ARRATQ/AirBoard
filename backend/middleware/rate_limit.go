@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"airboard/models"
@@ -18,13 +20,7 @@ func RateLimitMiddleware(rate limiter.Rate) gin.HandlerFunc {
 	instance := limiter.New(store, rate)
 
 	return func(c *gin.Context) {
-		// Utiliser l'IP du client comme identifiant
-		key := c.ClientIP()
-
-		// Si l'utilisateur est authentifié, utiliser son ID pour un meilleur contrôle
-		if userID, exists := c.Get("user_id"); exists {
-			key = userID.(string)
-		}
+		key := rateLimitKey(c)
 
 		context, err := instance.Get(c.Request.Context(), key)
 		if err != nil {
@@ -39,9 +35,9 @@ func RateLimitMiddleware(rate limiter.Rate) gin.HandlerFunc {
 		}
 
 		// Ajouter les headers de rate limit
-		c.Header("X-RateLimit-Limit", string(rune(context.Limit)))
-		c.Header("X-RateLimit-Remaining", string(rune(context.Remaining)))
-		c.Header("X-RateLimit-Reset", string(rune(context.Reset)))
+		c.Header("X-RateLimit-Limit", strconv.FormatInt(context.Limit, 10))
+		c.Header("X-RateLimit-Remaining", strconv.FormatInt(context.Remaining, 10))
+		c.Header("X-RateLimit-Reset", strconv.FormatInt(context.Reset, 10))
 
 		// Si la limite est dépassée, retourner une erreur 429
 		if context.Reached {
@@ -59,6 +55,15 @@ func RateLimitMiddleware(rate limiter.Rate) gin.HandlerFunc {
 	}
 }
 
+// rateLimitKey identifie le client : l'utilisateur s'il est authentifié, sinon son IP.
+// user_id est un uint dans le contexte ; fmt.Sprint évite toute assertion de type.
+func rateLimitKey(c *gin.Context) string {
+	if userID, exists := c.Get("user_id"); exists {
+		return fmt.Sprintf("user:%v", userID)
+	}
+	return "ip:" + c.ClientIP()
+}
+
 // GlobalRateLimit limite globale pour toutes les requêtes
 // 100 requêtes par minute par IP
 func GlobalRateLimit() gin.HandlerFunc {
@@ -69,12 +74,14 @@ func GlobalRateLimit() gin.HandlerFunc {
 	return RateLimitMiddleware(rate)
 }
 
-// AuthRateLimit limite stricte pour les endpoints d'authentification
-// 5 tentatives par minute par IP pour éviter le brute-force
+// AuthRateLimit limite les endpoints de connexion par mot de passe et d'inscription :
+// 20 requêtes par minute par IP. Le seuil reste large car plusieurs collègues
+// peuvent partager l'IP publique du bureau ; le verrouillage par compte
+// (handlers.AuthHandler.Login) bloque le brute-force sur un compte précis.
 func AuthRateLimit() gin.HandlerFunc {
 	rate := limiter.Rate{
 		Period: 1 * time.Minute,
-		Limit:  5,
+		Limit:  20,
 	}
 	return RateLimitMiddleware(rate)
 }

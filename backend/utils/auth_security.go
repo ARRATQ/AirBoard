@@ -11,12 +11,16 @@ import (
 	"time"
 )
 
+// maxTrackedIdentifiers déclenche un nettoyage des échecs périmés pour borner la mémoire.
+const maxTrackedIdentifiers = 10000
+
 // AuthSecurityManager gère la sécurité d'authentification
 type AuthSecurityManager struct {
-	failedAttempts  map[string]FailedAttempt // IP/username -> FailedAttempt
+	failedAttempts  map[string]FailedAttempt // identifiant -> FailedAttempt
 	mu              sync.RWMutex
 	lockoutDuration time.Duration
 	maxAttempts     int
+	now             func() time.Time
 }
 
 // FailedAttempt représente une tentative d'authentification échouée
@@ -39,12 +43,18 @@ type PasswordPolicy struct {
 	BannedWords    []string
 }
 
-// NewAuthSecurityManager crée un nouveau gestionnaire de sécurité d'authentification
+// NewAuthSecurityManager crée un gestionnaire : 5 échecs, verrouillage de 30 minutes.
 func NewAuthSecurityManager() *AuthSecurityManager {
+	return NewAuthSecurityManagerWithLimits(5, 30*time.Minute)
+}
+
+// NewAuthSecurityManagerWithLimits crée un gestionnaire avec des seuils personnalisés.
+func NewAuthSecurityManagerWithLimits(maxAttempts int, lockoutDuration time.Duration) *AuthSecurityManager {
 	return &AuthSecurityManager{
 		failedAttempts:  make(map[string]FailedAttempt),
-		lockoutDuration: 30 * time.Minute, // 30 minutes de lockout
-		maxAttempts:     5,                // 5 tentatives max
+		lockoutDuration: lockoutDuration,
+		maxAttempts:     maxAttempts,
+		now:             time.Now,
 	}
 }
 
@@ -136,70 +146,81 @@ func (asm *AuthSecurityManager) validatePasswordWithPolicy(password string, poli
 	return nil
 }
 
-// CheckFailedLogin vérifie si une tentative de connexion a échoué
+// CheckFailedLogin indique si l'identifiant est verrouillé et pour combien de temps.
 func (asm *AuthSecurityManager) CheckFailedLogin(identifier string) (bool, time.Duration) {
-	asm.mu.RLock()
-	defer asm.mu.RUnlock()
+	asm.mu.Lock()
+	defer asm.mu.Unlock()
 
 	attempt, exists := asm.failedAttempts[identifier]
-	if !exists {
+	if !exists || attempt.LockedUntil.IsZero() {
 		return false, 0
 	}
 
-	// Vérifier si encore locké
-	if time.Now().Before(attempt.LockedUntil) {
-		remaining := attempt.LockedUntil.Sub(time.Now())
-		return true, remaining
+	now := asm.now()
+	if now.Before(attempt.LockedUntil) {
+		return true, attempt.LockedUntil.Sub(now)
 	}
 
-	// Si le lockout a expiré, nettoyer
-	if time.Now().After(attempt.LockedUntil) {
-		delete(asm.failedAttempts, identifier)
-	}
-
+	// Verrou expiré : on repart de zéro.
+	delete(asm.failedAttempts, identifier)
 	return false, 0
 }
 
-// RecordFailedLogin enregistre une tentative de connexion échouée
+// RecordFailedLogin enregistre un échec. Les échecs sont comptés sur une fenêtre
+// égale à la durée de verrouillage ; au-delà de maxAttempts, l'identifiant est verrouillé.
 func (asm *AuthSecurityManager) RecordFailedLogin(identifier string) (bool, time.Duration) {
 	asm.mu.Lock()
 	defer asm.mu.Unlock()
 
-	now := time.Now()
+	now := asm.now()
 	attempt, exists := asm.failedAttempts[identifier]
 
-	if !exists {
-		attempt = FailedAttempt{
-			Count:   1,
-			FirstAt: now,
-			LastAt:  now,
-		}
-	} else {
-		// Réinitialiser si le lockout a expiré
-		if now.After(attempt.LockedUntil) {
-			attempt = FailedAttempt{
-				Count:   1,
-				FirstAt: now,
-				LastAt:  now,
-			}
-		} else {
-			attempt.Count++
-			attempt.LastAt = now
-		}
+	lockExpired := !attempt.LockedUntil.IsZero() && !now.Before(attempt.LockedUntil)
+	windowExpired := attempt.LockedUntil.IsZero() && now.Sub(attempt.FirstAt) > asm.lockoutDuration
+	if !exists || lockExpired || windowExpired {
+		attempt = FailedAttempt{FirstAt: now}
 	}
+	attempt.Count++
+	attempt.LastAt = now
 
-	// Appliquer le lockout si nécessaire
 	if attempt.Count >= asm.maxAttempts {
 		attempt.LockedUntil = now.Add(asm.lockoutDuration)
 	}
 
+	if !exists && len(asm.failedAttempts) >= maxTrackedIdentifiers {
+		asm.pruneLocked(now)
+	}
 	asm.failedAttempts[identifier] = attempt
 
 	if attempt.Count >= asm.maxAttempts {
 		return true, asm.lockoutDuration
 	}
-
 	return false, 0
+}
+
+// pruneLocked retire les entrées qui ne verrouillent plus rien et dont la fenêtre est close.
+func (asm *AuthSecurityManager) pruneLocked(now time.Time) {
+	for id, attempt := range asm.failedAttempts {
+		stillLocked := now.Before(attempt.LockedUntil)
+		inWindow := now.Sub(attempt.FirstAt) <= asm.lockoutDuration
+		if !stillLocked && !inWindow {
+			delete(asm.failedAttempts, id)
+		}
+	}
+}
+
+// HasRecentFailures indique si l'identifiant a des échecs encore pris en compte
+// (dans la fenêtre de comptage ou sous verrou).
+func (asm *AuthSecurityManager) HasRecentFailures(identifier string) bool {
+	asm.mu.Lock()
+	defer asm.mu.Unlock()
+
+	attempt, exists := asm.failedAttempts[identifier]
+	if !exists {
+		return false
+	}
+	now := asm.now()
+	return now.Before(attempt.LockedUntil) || now.Sub(attempt.FirstAt) <= asm.lockoutDuration
 }
 
 // RecordSuccessfulLogin enregistre une connexion réussie et nettoie les tentatives échouées

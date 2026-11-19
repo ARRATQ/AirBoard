@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"airboard/models"
@@ -34,10 +36,39 @@ var (
 var Upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// Allo cross-origin for development
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin:     checkOrigin,
+}
+
+// allowedOrigins liste les origines cross-origin autorisées (FRONTEND_URL, serveurs de dev).
+var allowedOrigins = map[string]bool{}
+
+// SetAllowedOrigins fixe les origines autorisées à ouvrir le WebSocket en plus de la même origine.
+func SetAllowedOrigins(origins []string) {
+	allowed := make(map[string]bool, len(origins))
+	for _, o := range origins {
+		if o = strings.TrimRight(strings.TrimSpace(o), "/"); o != "" {
+			allowed[strings.ToLower(o)] = true
+		}
+	}
+	allowedOrigins = allowed
+}
+
+// checkOrigin bloque le détournement de WebSocket depuis un site tiers :
+// même origine (servie par nginx) ou origine explicitement autorisée.
+// Une requête sans en-tête Origin ne vient pas d'un navigateur et reste acceptée.
+func checkOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
 		return true
-	},
+	}
+	u, err := url.Parse(origin)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	if strings.EqualFold(u.Host, r.Host) {
+		return true
+	}
+	return allowedOrigins[strings.ToLower(strings.TrimRight(origin, "/"))]
 }
 
 // Client is a middleman between the websocket connection and the hub.

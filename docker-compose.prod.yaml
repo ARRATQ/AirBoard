@@ -43,6 +43,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET doit etre defini - generez-le avec openssl rand -base64 48}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       - ADMIN_RESET_PASSWORD=${ADMIN_RESET_PASSWORD:-false}
+      - SEED_DEMO_DATA=${SEED_DEMO_DATA:-false}
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-}
       - GIN_MODE=release
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost}
       - UPLOAD_DIR=/app/uploads

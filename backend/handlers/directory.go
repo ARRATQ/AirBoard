@@ -40,17 +40,9 @@ var (
 	nonKeyChars = regexp.MustCompile(`[^a-z0-9]+`)
 )
 
-// canManageDirectory : admin global ou admin d'au moins un groupe
+// canManageDirectory : seul un admin global gère l'annuaire, partagé par toute l'organisation
 func canManageDirectory(c *gin.Context) bool {
-	if c.GetString("role") == "admin" {
-		return true
-	}
-	if ids, ok := c.Get("managed_group_ids"); ok {
-		if list, ok := ids.([]uint); ok && len(list) > 0 {
-			return true
-		}
-	}
-	return false
+	return c.GetString("role") == "admin"
 }
 
 func parseIDParam(c *gin.Context) (uint, bool) {

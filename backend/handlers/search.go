@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -91,20 +90,9 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les caractères interdits
-	forbiddenChars := []string{"<", ">", "&", "\"", "'", "(", ")", "=", "+", ";", "--", "/*", "*/", "union", "select", "insert", "update", "delete", "drop", "create"}
-	lowerSearch := strings.ToLower(q)
-	for _, char := range forbiddenChars {
-		if strings.Contains(lowerSearch, char) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Caractère ou terme interdit dans la recherche: %s", char)})
-			return
-		}
-	}
-
-	// Assainir l'input pour les requêtes LIKE
-	sanitized := strings.ReplaceAll(q, "%", "\\%")
-	sanitized = strings.ReplaceAll(sanitized, "_", "\\_")
-	likePattern := "%" + sanitized + "%"
+	// Toutes les requêtes sont paramétrées : pas de liste noire de caractères
+	// (elle bloquait « l'équipe »). On échappe seulement les jokers de LIKE.
+	likePattern := "%" + escapeLikePattern(q) + "%"
 
 	// Récupérer le contexte utilisateur
 	userID := c.GetUint("user_id")
@@ -348,4 +336,9 @@ func (h *SearchHandler) searchAnnouncements(likePattern string) []SearchResultAn
 		Find(&results)
 
 	return results
+}
+
+// escapeLikePattern neutralise les jokers de LIKE/ILIKE (« \ » est l'échappement par défaut de PostgreSQL).
+func escapeLikePattern(s string) string {
+	return strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(s)
 }

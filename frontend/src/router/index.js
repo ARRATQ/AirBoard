@@ -107,7 +107,7 @@ const routes = [
     component: DirectoryManagement,
     meta: {
       requiresAuth: true,
-      requiresGroupAdmin: true,
+      requiresAdmin: true,
       title: 'Gestion du trombinoscope'
     }
   },

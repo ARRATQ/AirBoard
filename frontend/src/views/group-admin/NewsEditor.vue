@@ -203,6 +203,7 @@
                     Catégorie
                   </span>
                   <button
+                    v-if="authStore.isAdmin"
                     type="button"
                     @click="showCreateCategoryModal = true"
                     class="text-xs px-2 py-1 bg-primary-100 hover:bg-primary-200 dark:bg-primary-900 dark:hover:bg-primary-800 text-primary-700 dark:text-primary-300 rounded transition-colors flex items-center gap-1"
@@ -448,6 +449,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import { newsService, groupAdminService } from '@/services/api'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
 import TypeSelect from '@/components/news/TypeSelect.vue'
@@ -455,6 +457,7 @@ import TypeSelect from '@/components/news/TypeSelect.vue'
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const authStore = useAuthStore()
 
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
 const isSaving = ref(false)

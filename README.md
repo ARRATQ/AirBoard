@@ -472,7 +472,7 @@ docker-compose ps
 
 **Default accounts:**
 - **Admin**: `admin` / `admin123`
-- **User**: `user` / `user123`
+- **User**: `user` / `user123` (uniquement avec `SEED_DEMO_DATA=true`)
 
 **IMPORTANT:** Change default passwords on first login.
 
@@ -887,7 +887,7 @@ Frontend starts on **http://localhost:3000**
 
 **Test accounts:**
 - Admin: `admin` / `admin123`
-- User: `user` / `user123`
+- User: `user` / `user123` (uniquement avec `SEED_DEMO_DATA=true`)
 
 ---
 

@@ -41,6 +41,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:-}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       - ADMIN_RESET_PASSWORD=${ADMIN_RESET_PASSWORD:-false}
+      - SEED_DEMO_DATA=${SEED_DEMO_DATA:-false}
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-}
       - GIN_MODE=release
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:5173}
       - UPLOAD_DIR=/app/uploads

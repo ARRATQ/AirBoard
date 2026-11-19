@@ -1,11 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
-	"net/http"
 	"time"
 
 	"airboard/config"
@@ -226,6 +227,7 @@ func main() {
 	}
 
 	// Initialisation du Chat
+	chat.SetAllowedOrigins(cfg.Server.Origins)
 	chatHub := chat.NewHub()
 	chatHub.EmailService = GetEmailService()
 	go chatHub.Run()
@@ -237,23 +239,16 @@ func main() {
 	// Créer un routeur personnalisé avec configuration sécurisée
 	router := gin.New()
 
-	// Configuration des proxies de confiance (sécurisée)
-	trustedProxies := []string{
-		"127.0.0.1", // Localhost
-		"::1",       // IPv6 localhost
+	// Proxies de confiance : seuls eux peuvent fixer l'IP client via X-Forwarded-For.
+	// En prod (Coolify), la chaîne est Traefik -> nginx -> backend, tous sur le réseau
+	// Docker privé : il faut les faire tous confiance pour retrouver l'IP réelle, sinon
+	// tous les utilisateurs partageraient l'IP de Traefik (et donc la même limite).
+	// TRUSTED_PROXIES permet de restreindre la liste (CIDR ou IP, séparés par des virgules).
+	trustedProxies := trustedProxiesFromEnv(cfg.Server.Mode)
+	if err := router.SetTrustedProxies(trustedProxies); err != nil {
+		log.Fatalf("TRUSTED_PROXIES invalide: %v", err)
 	}
-
-	// En production, ajouter les réseaux privés si nécessaire
-	if cfg.Server.Mode == "release" {
-		trustedProxies = append(trustedProxies,
-			"172.16.0.0/12",  // Docker networks
-			"192.168.0.0/16", // Private networks
-			"10.0.0.0/8",     // Private networks
-		)
-	}
-
-	// Définir les proxies de confiance pour éviter l'IP spoofing
-	router.SetTrustedProxies(trustedProxies)
+	log.Printf("Proxies de confiance: %v", trustedProxies)
 
 	// Middleware de logging sécurisé avec vraie IP
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
@@ -280,6 +275,9 @@ func main() {
 		})
 	}))
 
+	// Taille maximale des corps de requête
+	router.Use(middleware.LimitRequestBody())
+
 	// Middleware CORS
 	router.Use(middleware.SetupCORS(cfg))
 
@@ -305,8 +303,9 @@ func main() {
 
 		auth := api.Group("/auth")
 		{
-			auth.POST("/login", authHandler.Login)
-			auth.POST("/register", authHandler.Register)
+			// Limite par IP contre le brute-force (le verrouillage par compte est dans Login)
+			auth.POST("/login", middleware.AuthRateLimit(), authHandler.Login)
+			auth.POST("/register", middleware.AuthRateLimit(), authHandler.Register)
 			auth.POST("/refresh", authHandler.RefreshToken)
 
 			// Route pour vérifier si l'inscription est activée
@@ -747,15 +746,17 @@ func main() {
 			// Upload de médias
 			groupAdmin.POST("/media/upload", mediaHandler.UploadMedia)
 
-			// Tags (group admin peut créer/modifier des tags)
+			// Tags : un admin de groupe peut en créer (en rédigeant un article ou un événement).
+			// Modifier ou supprimer un tag partagé est réservé aux admins globaux.
+			adminOnly := authMiddleware.RequireAdmin()
 			groupAdmin.POST("/news/tags", newsHandler.CreateTag)
-			groupAdmin.PUT("/news/tags/:id", newsHandler.UpdateTag)
-			groupAdmin.DELETE("/news/tags/:id", newsHandler.DeleteTag)
+			groupAdmin.PUT("/news/tags/:id", adminOnly, newsHandler.UpdateTag)
+			groupAdmin.DELETE("/news/tags/:id", adminOnly, newsHandler.DeleteTag)
 
-			// Categories (group admin peut créer/modifier des catégories)
-			groupAdmin.POST("/news/categories", newsHandler.CreateCategory)
-			groupAdmin.PUT("/news/categories/:id", newsHandler.UpdateCategory)
-			groupAdmin.DELETE("/news/categories/:id", newsHandler.DeleteCategory)
+			// Catégories : partagées par toute l'organisation, réservées aux admins globaux
+			groupAdmin.POST("/news/categories", adminOnly, newsHandler.CreateCategory)
+			groupAdmin.PUT("/news/categories/:id", adminOnly, newsHandler.UpdateCategory)
+			groupAdmin.DELETE("/news/categories/:id", adminOnly, newsHandler.DeleteCategory)
 
 			// Events (scoped)
 			groupAdmin.GET("/events", eventsHandler.GetEvents) // Liste des événements avec filtrage automatique par rôle
@@ -773,14 +774,15 @@ func main() {
 			// Info sur les groupes administrés
 			groupAdmin.GET("/managed-groups", groupAdminHandler.GetManagedGroups)
 
-			// Trombinoscope : personnes et affectations (admin + admin de groupe)
-			groupAdmin.GET("/directory/users", directoryHandler.SearchUsers)
-			groupAdmin.POST("/directory/people", directoryHandler.CreatePerson)
-			groupAdmin.PUT("/directory/people/:id", directoryHandler.UpdatePerson)
-			groupAdmin.DELETE("/directory/people/:id", directoryHandler.DeletePerson)
-			groupAdmin.POST("/directory/assignments", directoryHandler.CreateAssignment)
-			groupAdmin.PUT("/directory/assignments/:id", directoryHandler.UpdateAssignment)
-			groupAdmin.DELETE("/directory/assignments/:id", directoryHandler.DeleteAssignment)
+			// Trombinoscope : personnes et affectations, réservées aux admins globaux
+			// (l'annuaire est partagé par toute l'organisation, sans notion de groupe)
+			groupAdmin.GET("/directory/users", adminOnly, directoryHandler.SearchUsers)
+			groupAdmin.POST("/directory/people", adminOnly, directoryHandler.CreatePerson)
+			groupAdmin.PUT("/directory/people/:id", adminOnly, directoryHandler.UpdatePerson)
+			groupAdmin.DELETE("/directory/people/:id", adminOnly, directoryHandler.DeletePerson)
+			groupAdmin.POST("/directory/assignments", adminOnly, directoryHandler.CreateAssignment)
+			groupAdmin.PUT("/directory/assignments/:id", adminOnly, directoryHandler.UpdateAssignment)
+			groupAdmin.DELETE("/directory/assignments/:id", adminOnly, directoryHandler.DeleteAssignment)
 		}
 	}
 
@@ -868,187 +870,16 @@ func createInitialData(db *gorm.DB, cfg *config.Config) (err error) {
 		log.Println("🔄 ADMIN_RESET_PASSWORD=true : compte admin réinitialisé. Retirez cette variable après connexion.")
 	}
 
-	// Créer un utilisateur normal par défaut
-	var normalUser models.User
-	var userExists bool
-	if err = tx.Unscoped().Where("username = ?", "user").First(&normalUser).Error; err == nil {
-		userExists = true
-	} else if err != gorm.ErrRecordNotFound {
+	// Données de démonstration (compte user/user123, applications et groupe exemples) :
+	// uniquement si SEED_DEMO_DATA=true, jamais par défaut en production.
+	if os.Getenv("SEED_DEMO_DATA") == "true" {
+		if err = seedDemoData(tx, cfg); err != nil {
+			tx.Rollback()
+			return err
+		}
+	} else if err = disableDemoUserWithDefaultPassword(tx); err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to check for existing user: %w", err)
-	}
-
-	if !userExists {
-		// Utiliser coût bcrypt sécurisé (12 minimum - OWASP 2025)
-		hashedUserPassword, bcryptErr := bcrypt.GenerateFromPassword([]byte("user123"), cfg.Security.BcryptCost)
-		if bcryptErr != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to hash user password: %w", bcryptErr)
-		}
-
-		user := models.User{
-			Username:  "user",
-			Email:     "user@airboard.com",
-			Password:  string(hashedUserPassword),
-			FirstName: "User",
-			LastName:  "Demo",
-			Role:      "user",
-			IsActive:  true,
-		}
-		if err = tx.Create(&user).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to create default user: %w", err)
-		}
-		log.Println("✅ Utilisateur demo créé: user@airboard.com / user123")
-	} else {
-		// Récupérer l'utilisateur existant (y compris les soft-deleted)
-		if err = tx.Unscoped().Where("username = ?", "user").First(&normalUser).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to retrieve existing user: %w", err)
-		}
-	}
-
-	// Créer des groupes d'applications de démonstration
-	var devGroup models.AppGroup
-	if err = tx.Unscoped().Where("name = ?", "Développement").First(&devGroup).Error; err == gorm.ErrRecordNotFound {
-		devGroup = models.AppGroup{
-			Name:        "Développement",
-			Description: "Applications de développement",
-			Color:       "#3B82F6",
-			Icon:        "mdi:code-tags",
-			Order:       1,
-			IsActive:    true,
-		}
-		if err = tx.Create(&devGroup).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to create development app group: %w", err)
-		}
-
-		// Applications de développement
-		apps := []models.Application{
-			{
-				Name:         "GitLab",
-				Description:  "Gestion de code source",
-				URL:          "https://gitlab.com",
-				Icon:         "mdi:gitlab",
-				Color:        "#FC6D26",
-				Order:        1,
-				IsActive:     true,
-				OpenInNewTab: true,
-				AppGroupID:   devGroup.ID,
-			},
-			{
-				Name:         "Jenkins",
-				Description:  "Intégration continue",
-				URL:          "https://jenkins.io",
-				Icon:         "mdi:robot-industrial",
-				Color:        "#D33833",
-				Order:        2,
-				IsActive:     true,
-				OpenInNewTab: true,
-				AppGroupID:   devGroup.ID,
-			},
-		}
-		for _, app := range apps {
-			if err = tx.Create(&app).Error; err != nil {
-				tx.Rollback()
-				return fmt.Errorf("failed to create application %s: %w", app.Name, err)
-			}
-		}
-		log.Println("✅ Groupe Développement créé avec applications de demo")
-	} else if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to check for development app group: %w", err)
-	}
-
-	// Créer un groupe Production
-	var prodGroup models.AppGroup
-	if err = tx.Unscoped().Where("name = ?", "Production").First(&prodGroup).Error; err == gorm.ErrRecordNotFound {
-		prodGroup = models.AppGroup{
-			Name:        "Production",
-			Description: "Applications de production",
-			Color:       "#10B981",
-			Icon:        "mdi:server",
-			Order:       2,
-			IsActive:    true,
-		}
-		if err = tx.Create(&prodGroup).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to create production app group: %w", err)
-		}
-
-		// Applications de production
-		apps := []models.Application{
-			{
-				Name:         "Grafana",
-				Description:  "Monitoring et métriques",
-				URL:          "https://grafana.com",
-				Icon:         "mdi:chart-line",
-				Color:        "#F46800",
-				Order:        1,
-				IsActive:     true,
-				OpenInNewTab: true,
-				AppGroupID:   prodGroup.ID,
-			},
-			{
-				Name:         "Prometheus",
-				Description:  "Collecte de métriques",
-				URL:          "https://prometheus.io",
-				Icon:         "mdi:database-search",
-				Color:        "#E6522C",
-				Order:        2,
-				IsActive:     true,
-				OpenInNewTab: true,
-				AppGroupID:   prodGroup.ID,
-			},
-		}
-		for _, app := range apps {
-			if err = tx.Create(&app).Error; err != nil {
-				tx.Rollback()
-				return fmt.Errorf("failed to create application %s: %w", app.Name, err)
-			}
-		}
-		log.Println("✅ Groupe Production créé avec applications de demo")
-	} else if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to check for production app group: %w", err)
-	}
-
-	// Créer un groupe d'utilisateurs de démonstration
-	var demoGroup models.Group
-	if err = tx.Unscoped().Where("name = ?", "Développeurs").First(&demoGroup).Error; err == gorm.ErrRecordNotFound {
-		demoGroup = models.Group{
-			Name:        "Développeurs",
-			Description: "Équipe de développement",
-			Color:       "#8B5CF6",
-			IsActive:    true,
-		}
-		if err = tx.Create(&demoGroup).Error; err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to create developers group: %w", err)
-		}
-
-		// Associer l'utilisateur normal au groupe
-		if err = tx.Model(&demoGroup).Association("Users").Append(&normalUser); err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to associate user with developers group: %w", err)
-		}
-
-		// Associer le groupe aux groupes d'applications
-		if err = tx.Model(&demoGroup).Association("AppGroups").Append(&devGroup); err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to associate dev group with developers group: %w", err)
-		}
-
-		if err = tx.Model(&demoGroup).Association("AppGroups").Append(&prodGroup); err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to associate prod group with developers group: %w", err)
-		}
-
-		log.Println("✅ Groupe d'utilisateurs Développeurs créé avec permissions")
-	} else if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to check for developers group: %w", err)
+		return err
 	}
 
 	// Créer un groupe "Common" par défaut pour tous les nouveaux utilisateurs
@@ -1531,4 +1362,220 @@ func ensureChatMessageTemplate(db *gorm.DB) {
 			return
 		}
 	}
+}
+
+// trustedProxiesFromEnv lit TRUSTED_PROXIES, sinon renvoie la liste par défaut :
+// localhost, plus les réseaux privés (Docker) en mode release.
+func trustedProxiesFromEnv(mode string) []string {
+	if raw := strings.TrimSpace(os.Getenv("TRUSTED_PROXIES")); raw != "" {
+		var proxies []string
+		for _, p := range strings.Split(raw, ",") {
+			if p = strings.TrimSpace(p); p != "" {
+				proxies = append(proxies, p)
+			}
+		}
+		return proxies
+	}
+
+	proxies := []string{"127.0.0.1", "::1"}
+	if mode == "release" {
+		proxies = append(proxies, "172.16.0.0/12", "192.168.0.0/16", "10.0.0.0/8")
+	}
+	return proxies
+}
+
+// seedDemoData crée le compte de démonstration user/user123, des groupes
+// d'applications exemples et le groupe "Développeurs". Idempotent.
+func seedDemoData(tx *gorm.DB, cfg *config.Config) (err error) {
+
+	// Créer un utilisateur normal par défaut
+	var normalUser models.User
+	var userExists bool
+	if err = tx.Unscoped().Where("username = ?", "user").First(&normalUser).Error; err == nil {
+		userExists = true
+	} else if err != gorm.ErrRecordNotFound {
+		return fmt.Errorf("failed to check for existing user: %w", err)
+	}
+
+	if !userExists {
+		// Utiliser coût bcrypt sécurisé (12 minimum - OWASP 2025)
+		hashedUserPassword, bcryptErr := bcrypt.GenerateFromPassword([]byte("user123"), cfg.Security.BcryptCost)
+		if bcryptErr != nil {
+			return fmt.Errorf("failed to hash user password: %w", bcryptErr)
+		}
+
+		user := models.User{
+			Username:  "user",
+			Email:     "user@airboard.com",
+			Password:  string(hashedUserPassword),
+			FirstName: "User",
+			LastName:  "Demo",
+			Role:      "user",
+			IsActive:  true,
+		}
+		if err = tx.Create(&user).Error; err != nil {
+			return fmt.Errorf("failed to create default user: %w", err)
+		}
+		log.Println("✅ Utilisateur demo créé: user@airboard.com / user123")
+	} else {
+		// Récupérer l'utilisateur existant (y compris les soft-deleted)
+		if err = tx.Unscoped().Where("username = ?", "user").First(&normalUser).Error; err != nil {
+			return fmt.Errorf("failed to retrieve existing user: %w", err)
+		}
+	}
+
+	// Créer des groupes d'applications de démonstration
+	var devGroup models.AppGroup
+	if err = tx.Unscoped().Where("name = ?", "Développement").First(&devGroup).Error; err == gorm.ErrRecordNotFound {
+		devGroup = models.AppGroup{
+			Name:        "Développement",
+			Description: "Applications de développement",
+			Color:       "#3B82F6",
+			Icon:        "mdi:code-tags",
+			Order:       1,
+			IsActive:    true,
+		}
+		if err = tx.Create(&devGroup).Error; err != nil {
+			return fmt.Errorf("failed to create development app group: %w", err)
+		}
+
+		// Applications de développement
+		apps := []models.Application{
+			{
+				Name:         "GitLab",
+				Description:  "Gestion de code source",
+				URL:          "https://gitlab.com",
+				Icon:         "mdi:gitlab",
+				Color:        "#FC6D26",
+				Order:        1,
+				IsActive:     true,
+				OpenInNewTab: true,
+				AppGroupID:   devGroup.ID,
+			},
+			{
+				Name:         "Jenkins",
+				Description:  "Intégration continue",
+				URL:          "https://jenkins.io",
+				Icon:         "mdi:robot-industrial",
+				Color:        "#D33833",
+				Order:        2,
+				IsActive:     true,
+				OpenInNewTab: true,
+				AppGroupID:   devGroup.ID,
+			},
+		}
+		for _, app := range apps {
+			if err = tx.Create(&app).Error; err != nil {
+				return fmt.Errorf("failed to create application %s: %w", app.Name, err)
+			}
+		}
+		log.Println("✅ Groupe Développement créé avec applications de demo")
+	} else if err != nil {
+		return fmt.Errorf("failed to check for development app group: %w", err)
+	}
+
+	// Créer un groupe Production
+	var prodGroup models.AppGroup
+	if err = tx.Unscoped().Where("name = ?", "Production").First(&prodGroup).Error; err == gorm.ErrRecordNotFound {
+		prodGroup = models.AppGroup{
+			Name:        "Production",
+			Description: "Applications de production",
+			Color:       "#10B981",
+			Icon:        "mdi:server",
+			Order:       2,
+			IsActive:    true,
+		}
+		if err = tx.Create(&prodGroup).Error; err != nil {
+			return fmt.Errorf("failed to create production app group: %w", err)
+		}
+
+		// Applications de production
+		apps := []models.Application{
+			{
+				Name:         "Grafana",
+				Description:  "Monitoring et métriques",
+				URL:          "https://grafana.com",
+				Icon:         "mdi:chart-line",
+				Color:        "#F46800",
+				Order:        1,
+				IsActive:     true,
+				OpenInNewTab: true,
+				AppGroupID:   prodGroup.ID,
+			},
+			{
+				Name:         "Prometheus",
+				Description:  "Collecte de métriques",
+				URL:          "https://prometheus.io",
+				Icon:         "mdi:database-search",
+				Color:        "#E6522C",
+				Order:        2,
+				IsActive:     true,
+				OpenInNewTab: true,
+				AppGroupID:   prodGroup.ID,
+			},
+		}
+		for _, app := range apps {
+			if err = tx.Create(&app).Error; err != nil {
+				return fmt.Errorf("failed to create application %s: %w", app.Name, err)
+			}
+		}
+		log.Println("✅ Groupe Production créé avec applications de demo")
+	} else if err != nil {
+		return fmt.Errorf("failed to check for production app group: %w", err)
+	}
+
+	// Créer un groupe d'utilisateurs de démonstration
+	var demoGroup models.Group
+	if err = tx.Unscoped().Where("name = ?", "Développeurs").First(&demoGroup).Error; err == gorm.ErrRecordNotFound {
+		demoGroup = models.Group{
+			Name:        "Développeurs",
+			Description: "Équipe de développement",
+			Color:       "#8B5CF6",
+			IsActive:    true,
+		}
+		if err = tx.Create(&demoGroup).Error; err != nil {
+			return fmt.Errorf("failed to create developers group: %w", err)
+		}
+
+		// Associer l'utilisateur normal au groupe
+		if err = tx.Model(&demoGroup).Association("Users").Append(&normalUser); err != nil {
+			return fmt.Errorf("failed to associate user with developers group: %w", err)
+		}
+
+		// Associer le groupe aux groupes d'applications
+		if err = tx.Model(&demoGroup).Association("AppGroups").Append(&devGroup); err != nil {
+			return fmt.Errorf("failed to associate dev group with developers group: %w", err)
+		}
+
+		if err = tx.Model(&demoGroup).Association("AppGroups").Append(&prodGroup); err != nil {
+			return fmt.Errorf("failed to associate prod group with developers group: %w", err)
+		}
+
+		log.Println("✅ Groupe d'utilisateurs Développeurs créé avec permissions")
+	} else if err != nil {
+		return fmt.Errorf("failed to check for developers group: %w", err)
+	}
+
+	return nil
+}
+
+// disableDemoUserWithDefaultPassword désactive le compte de démonstration "user"
+// s'il a encore le mot de passe public "user123" (créé par une ancienne version).
+func disableDemoUserWithDefaultPassword(tx *gorm.DB) error {
+	var demo models.User
+	err := tx.Where("username = ? AND is_active = ?", "user", true).First(&demo).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("failed to check demo user: %w", err)
+	}
+	if bcrypt.CompareHashAndPassword([]byte(demo.Password), []byte("user123")) != nil {
+		return nil // mot de passe changé : compte réellement utilisé, on n'y touche pas
+	}
+	if err := tx.Model(&demo).Update("is_active", false).Error; err != nil {
+		return fmt.Errorf("failed to disable demo user: %w", err)
+	}
+	log.Println("🔒 Compte de démonstration 'user' désactivé (mot de passe public user123). Définissez SEED_DEMO_DATA=true pour le garder.")
+	return nil
 }

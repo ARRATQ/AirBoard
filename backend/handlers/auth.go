@@ -1,10 +1,15 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"math"
+	"mime/multipart"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"airboard/config"
@@ -18,14 +23,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// Verrouillage d'un compte toutes IP confondues : freine une attaque distribuée.
+// Il ne s'applique qu'aux IP ayant déjà échoué sur ce compte (voir Login).
+const (
+	accountLockoutMaxAttempts = 10
+	accountLockoutDuration    = 15 * time.Minute
+)
+
 type AuthHandler struct {
 	db                  *gorm.DB
 	authMiddleware      *middleware.AuthMiddleware
 	signupEnabled       bool
 	notificationService *services.NotificationService
-	authSecurity        *utils.AuthSecurityManager
+	authSecurity        *utils.AuthSecurityManager // échecs par IP + identifiant
+	accountLockout      *utils.AuthSecurityManager // échecs par identifiant, toutes IP confondues
 	bcryptCost          int
 	gamificationService *services.GamificationService
+	dummyHashOnce       sync.Once
+	dummyHash           []byte
 }
 
 func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, signupEnabled bool, cfg *config.Config, gs *services.GamificationService) *AuthHandler {
@@ -35,6 +50,7 @@ func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, sign
 		signupEnabled:       signupEnabled,
 		notificationService: services.NewNotificationService(db),
 		authSecurity:        utils.NewAuthSecurityManager(),
+		accountLockout:      utils.NewAuthSecurityManagerWithLimits(accountLockoutMaxAttempts, accountLockoutDuration),
 		bcryptCost:          cfg.Security.BcryptCost,
 		gamificationService: gs,
 	}
@@ -61,51 +77,42 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Vérifier le lockout avant de tenter la connexion
-	clientIP := c.ClientIP()
-	identifier := fmt.Sprintf("%s:%s", clientIP, req.Username)
-
-	// Vérifier si l'identifiant est locké
-	if isLocked, remaining := h.authSecurity.CheckFailedLogin(identifier); isLocked {
-		c.JSON(http.StatusTooManyRequests, models.ErrorResponse{
-			Error:   "Too Many Requests",
-			Message: fmt.Sprintf("Trop de tentatives échouées. Réessayez dans %.0f minutes", remaining.Minutes()),
-			Code:    http.StatusTooManyRequests,
-		})
-		return
-	}
-
 	// Rechercher l'utilisateur avec ses relations
 	var user models.User
-	if err := h.db.Preload("Groups").Preload("AdminOfGroups").Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Nom d'utilisateur ou mot de passe incorrect",
-			Code:    http.StatusUnauthorized,
-		})
+	userErr := h.db.Preload("Groups").Preload("AdminOfGroups").Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
+
+	// Le compteur suit le compte réel (nom ou email donnent la même clé), sinon la saisie
+	clientIP := c.ClientIP()
+	accountKey := "name:" + strings.ToLower(strings.TrimSpace(req.Username))
+	if userErr == nil {
+		accountKey = fmt.Sprintf("id:%d", user.ID)
+	}
+	identifier := clientIP + "|" + accountKey
+
+	// Verrou IP + compte : cette IP a trop échoué sur ce compte
+	if isLocked, remaining := h.authSecurity.CheckFailedLogin(identifier); isLocked {
+		respondLoginLocked(c, remaining)
+		return
+	}
+	// Verrou du compte : ne bloque que les IP ayant déjà échoué sur ce compte, pour
+	// qu'un attaquant ne puisse pas empêcher le vrai titulaire de se connecter
+	if isLocked, remaining := h.accountLockout.CheckFailedLogin(accountKey); isLocked && h.authSecurity.HasRecentFailures(identifier) {
+		respondLoginLocked(c, remaining)
 		return
 	}
 
-	// Vérifier le compte actif
-	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Compte désactivé",
-			Code:    http.StatusUnauthorized,
-		})
-		return
+	// Compte inconnu et mauvais mot de passe sont traités pareil : même réponse, même
+	// compteur, et même coût bcrypt (pas d'indice de timing sur l'existence du compte)
+	passwordHash := []byte(user.Password)
+	if userErr != nil {
+		passwordHash = h.dummyPasswordHash()
 	}
-
-	// Vérifier le mot de passe
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		// Enregistrer la tentative échouée
-		if isLocked, remaining := h.authSecurity.RecordFailedLogin(identifier); isLocked {
-			log.Printf("[Auth] Account locked for %s after failed attempts: %v", identifier, remaining)
-			c.JSON(http.StatusTooManyRequests, models.ErrorResponse{
-				Error:   "Too Many Requests",
-				Message: fmt.Sprintf("Compte verrouillé après trop de tentatives échouées. Réessayez dans %.0f minutes", remaining.Minutes()),
-				Code:    http.StatusTooManyRequests,
-			})
+	if bcrypt.CompareHashAndPassword(passwordHash, []byte(req.Password)) != nil || userErr != nil {
+		_, ipRemaining := h.authSecurity.RecordFailedLogin(identifier)
+		_, accountRemaining := h.accountLockout.RecordFailedLogin(accountKey)
+		if remaining := max(ipRemaining, accountRemaining); remaining > 0 {
+			log.Printf("[Auth] Login locked for %q from IP %s for %v", accountKey, clientIP, remaining)
+			respondLoginLocked(c, remaining)
 			return
 		}
 
@@ -117,8 +124,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Vérifier le compte actif (après le mot de passe, pour ne rien révéler aux inconnus)
+	if !user.IsActive {
+		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "Compte désactivé",
+			Code:    http.StatusUnauthorized,
+		})
+		return
+	}
+
 	// Enregistrer la connexion réussie et nettoyer les tentatives échouées
 	h.authSecurity.RecordSuccessfulLogin(identifier)
+	h.accountLockout.RecordSuccessfulLogin(accountKey)
 	log.Printf("[Auth] Successful login for %s from IP %s", req.Username, clientIP)
 
 	// Mettre à jour la date de dernière connexion
@@ -184,6 +202,30 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Token:        token,
 		RefreshToken: refreshToken,
 		User:         user,
+	})
+}
+
+// dummyPasswordHash renvoie un hash bcrypt jetable, au même coût que les vrais,
+// comparé quand le compte n'existe pas.
+func (h *AuthHandler) dummyPasswordHash() []byte {
+	h.dummyHashOnce.Do(func() {
+		hash, err := bcrypt.GenerateFromPassword([]byte("airboard-dummy-password"), h.bcryptCost)
+		if err != nil {
+			log.Printf("[Auth] Impossible de générer le hash factice: %v", err)
+			return
+		}
+		h.dummyHash = hash
+	})
+	return h.dummyHash
+}
+
+// respondLoginLocked répond 429 avec le temps d'attente restant.
+func respondLoginLocked(c *gin.Context, remaining time.Duration) {
+	minutes := int(math.Ceil(remaining.Minutes()))
+	c.JSON(http.StatusTooManyRequests, models.ErrorResponse{
+		Error:   "Too Many Requests",
+		Message: fmt.Sprintf("Trop de tentatives échouées. Réessayez dans %d minute(s)", minutes),
+		Code:    http.StatusTooManyRequests,
 	})
 }
 
@@ -834,15 +876,9 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// Vérifier le type MIME
-	contentType := file.Header.Get("Content-Type")
-	allowedTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/gif":  true,
-		"image/webp": true,
-	}
-	if !allowedTypes[contentType] {
+	// Vérifier le type réel du fichier (octets de tête), pas le Content-Type envoyé par le client
+	contentType, err := sniffImageType(file)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Type de fichier non autorisé (JPG, PNG, GIF, WEBP uniquement)",
@@ -874,16 +910,8 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// Générer un nom de fichier unique
-	ext := ".jpg"
-	switch contentType {
-	case "image/png":
-		ext = ".png"
-	case "image/gif":
-		ext = ".gif"
-	case "image/webp":
-		ext = ".webp"
-	}
+	// Générer un nom de fichier unique (extension déduite du contenu réel)
+	ext := avatarImageTypes[contentType]
 	filename := fmt.Sprintf("avatar_%d_%d%s", user.ID, time.Now().Unix(), ext)
 	filepath := fmt.Sprintf("%s/%s", avatarDir, filename)
 
@@ -925,6 +953,34 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	user.Password = ""
 
 	c.JSON(http.StatusOK, user)
+}
+
+// avatarImageTypes associe les types d'image acceptés pour un avatar à leur extension.
+var avatarImageTypes = map[string]string{
+	"image/jpeg": ".jpg",
+	"image/png":  ".png",
+	"image/gif":  ".gif",
+	"image/webp": ".webp",
+}
+
+// sniffImageType détecte le type d'image à partir du contenu du fichier.
+func sniffImageType(fh *multipart.FileHeader) (string, error) {
+	f, err := fh.Open()
+	if err != nil {
+		return "", fmt.Errorf("ouverture du fichier: %w", err)
+	}
+	defer f.Close()
+
+	head := make([]byte, 512)
+	n, err := io.ReadFull(f, head)
+	if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
+		return "", fmt.Errorf("lecture du fichier: %w", err)
+	}
+	contentType := http.DetectContentType(head[:n])
+	if _, ok := avatarImageTypes[contentType]; !ok {
+		return "", fmt.Errorf("type d'image non autorisé: %s", contentType)
+	}
+	return contentType, nil
 }
 
 // @Summary Supprimer l'avatar

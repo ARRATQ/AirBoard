@@ -320,7 +320,7 @@
                   v-model="passwordForm.new_password"
                   :type="showNewPassword ? 'text' : 'password'"
                   required
-                  minlength="6"
+                  minlength="8"
                   class="form-input pr-10"
                   :placeholder="$t('profile.newPasswordPlaceholder')"
                 />
@@ -448,7 +448,7 @@ const selectedAvatarFile = ref(null)
 const isPasswordFormValid = computed(() => {
   return passwordForm.current_password &&
          passwordForm.new_password &&
-         passwordForm.new_password.length >= 6 &&
+         passwordForm.new_password.length >= 8 &&
          passwordForm.new_password === passwordForm.confirm_password
 })
 

@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -14,13 +17,44 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	tokenTypeAccess  = "access"
+	tokenTypeRefresh = "refresh"
+)
+
 type AuthMiddleware struct {
-	config *config.Config
-	db     *gorm.DB
+	config    *config.Config
+	db        *gorm.DB
+	userCache *userStatusCache
 }
 
 func NewAuthMiddleware(cfg *config.Config, db *gorm.DB) *AuthMiddleware {
-	return &AuthMiddleware{config: cfg, db: db}
+	am := &AuthMiddleware{config: cfg, db: db}
+	am.userCache = newUserStatusCache(userStatusTTL, am.loadUserStatus)
+	return am
+}
+
+// loadUserStatus relit en base le rôle, l'état actif et les groupes administrés.
+func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (userStatus, error) {
+	var user models.User
+	err := am.db.WithContext(ctx).
+		Select("id", "role", "is_active").
+		First(&user, userID).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return userStatus{}, errUserUnavailable
+	}
+	if err != nil {
+		return userStatus{}, fmt.Errorf("lecture de l'utilisateur %d: %w", userID, err)
+	}
+
+	managedGroupIDs := []uint{}
+	if err := am.db.WithContext(ctx).Table("group_admins").
+		Where("user_id = ?", userID).
+		Pluck("group_id", &managedGroupIDs).Error; err != nil {
+		return userStatus{}, fmt.Errorf("lecture des groupes administrés de %d: %w", userID, err)
+	}
+
+	return userStatus{Role: user.Role, IsActive: user.IsActive, ManagedGroupIDs: managedGroupIDs}, nil
 }
 
 // RequireAuth middleware pour vérifier l'authentification
@@ -67,19 +101,34 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			return
 		}
 
-		// Stocker les informations de l'utilisateur dans le contexte
+		// Le rôle et l'état du compte viennent de la base (cache court), pas du JWT :
+		// un utilisateur rétrogradé ou désactivé perd ses droits sans attendre l'expiration.
+		status, err := am.userCache.Get(c.Request.Context(), claims.UserID)
+		if err != nil && !errors.Is(err, errUserUnavailable) {
+			log.Printf("[Auth] Impossible de vérifier l'utilisateur %d: %v", claims.UserID, err)
+			c.JSON(http.StatusServiceUnavailable, models.ErrorResponse{
+				Error:   "Service Unavailable",
+				Message: "Vérification du compte impossible, réessayez",
+				Code:    http.StatusServiceUnavailable,
+			})
+			c.Abort()
+			return
+		}
+		if err != nil || !status.IsActive {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Error:   "Unauthorized",
+				Message: "Compte désactivé ou supprimé",
+				Code:    http.StatusUnauthorized,
+			})
+			c.Abort()
+			return
+		}
+
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
-		c.Set("role", claims.Role)
+		c.Set("role", status.Role)
 		c.Set("email", claims.Email)
-
-		// Charger dynamiquement les groupes administrés depuis la BDD
-		// (au lieu d'utiliser ceux du JWT qui peuvent être obsolètes)
-		var managedGroupIDs []uint
-		am.db.Table("group_admins").
-			Where("user_id = ?", claims.UserID).
-			Pluck("group_id", &managedGroupIDs)
-		c.Set("managed_group_ids", managedGroupIDs)
+		c.Set("managed_group_ids", status.ManagedGroupIDs)
 
 		c.Next()
 	}
@@ -118,6 +167,7 @@ func (am *AuthMiddleware) GenerateToken(user *models.User) (string, error) {
 		"managed_group_ids": managedGroupIDs,
 		"exp":               time.Now().Add(time.Hour * time.Duration(am.config.JWT.TokenExpirationHours)).Unix(),
 		"iat":               time.Now().Unix(),
+		"type":              tokenTypeAccess,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -140,104 +190,74 @@ func (am *AuthMiddleware) GenerateRefreshToken(user *models.User) (string, error
 		"managed_group_ids": managedGroupIDs,
 		"exp":               time.Now().Add(time.Hour * 24 * time.Duration(am.config.JWT.RefreshExpirationDays)).Unix(),
 		"iat":               time.Now().Unix(),
-		"type":              "refresh",
+		"type":              tokenTypeRefresh,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(am.config.JWT.Secret))
 }
 
-// VerifyToken vérifie et parse un token JWT
+// verifyToken vérifie un access token. Un refresh token est refusé, même bien signé.
+// Les access tokens émis avant l'ajout du champ "type" restent acceptés.
 func (am *AuthMiddleware) verifyToken(tokenString string) (*models.Claims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return []byte(am.config.JWT.Secret), nil
-	})
-
+	claims, err := am.parseSignedClaims(tokenString)
 	if err != nil {
 		return nil, err
 	}
-
-	if !token.Valid {
+	if tokenType, _ := claims["type"].(string); tokenType != "" && tokenType != tokenTypeAccess {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, jwt.ErrTokenInvalidClaims
-	}
-
-	// Vérifier l'expiration
-	if exp, ok := claims["exp"].(float64); ok {
-		if time.Now().Unix() > int64(exp) {
-			return nil, jwt.ErrTokenExpired
-		}
-	}
-
-	// Extraire managed_group_ids si présent
-	managedGroupIDs := []uint{}
-	if mgids, ok := claims["managed_group_ids"].([]interface{}); ok {
-		for _, id := range mgids {
-			if idFloat, ok := id.(float64); ok {
-				managedGroupIDs = append(managedGroupIDs, uint(idFloat))
-			}
-		}
-	}
-
-	// Extraire les informations utilisateur
-	userClaims := &models.Claims{
-		UserID:          uint(claims["user_id"].(float64)),
-		Username:        claims["username"].(string),
-		Role:            claims["role"].(string),
-		Email:           claims["email"].(string),
-		ManagedGroupIDs: managedGroupIDs,
-	}
-
-	return userClaims, nil
+	return claimsToUser(claims)
 }
 
-// VerifyRefreshToken vérifie un refresh token
+// VerifyRefreshToken vérifie un refresh token.
 func (am *AuthMiddleware) VerifyRefreshToken(tokenString string) (*models.Claims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return []byte(am.config.JWT.Secret), nil
-	})
-
+	claims, err := am.parseSignedClaims(tokenString)
 	if err != nil {
-		// Si c'est une erreur de signature invalide, c'est probablement parce que
-		// le secret JWT a changé (redémarrage du serveur)
-		if err == jwt.ErrSignatureInvalid {
+		// Signature invalide : le secret JWT a probablement changé depuis l'émission.
+		if errors.Is(err, jwt.ErrSignatureInvalid) || errors.Is(err, jwt.ErrTokenSignatureInvalid) {
 			return nil, fmt.Errorf("secret_jwt_changed: refresh token signé avec un ancien secret")
 		}
 		return nil, err
 	}
+	if tokenType, _ := claims["type"].(string); tokenType != tokenTypeRefresh {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+	return claimsToUser(claims)
+}
 
+// parseSignedClaims vérifie la signature HMAC et l'expiration d'un JWT.
+func (am *AuthMiddleware) parseSignedClaims(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return []byte(am.config.JWT.Secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
 	if !token.Valid {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
-
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
+	// jwt v5 vérifie "exp" seulement s'il est présent : un jeton sans expiration est refusé.
+	if _, ok := claims["exp"].(float64); !ok {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+	return claims, nil
+}
 
-	// Vérifier que c'est bien un refresh token
-	if tokenType, ok := claims["type"].(string); !ok || tokenType != "refresh" {
+// claimsToUser extrait les informations utilisateur sans paniquer sur un champ absent.
+func claimsToUser(claims jwt.MapClaims) (*models.Claims, error) {
+	rawID, ok := claims["user_id"].(float64)
+	if !ok || rawID <= 0 {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
 
-	// Vérifier l'expiration
-	if exp, ok := claims["exp"].(float64); ok {
-		if time.Now().Unix() > int64(exp) {
-			return nil, jwt.ErrTokenExpired
-		}
-	}
-
-	// Extraire managed_group_ids si présent
 	managedGroupIDs := []uint{}
 	if mgids, ok := claims["managed_group_ids"].([]interface{}); ok {
 		for _, id := range mgids {
@@ -247,14 +267,15 @@ func (am *AuthMiddleware) VerifyRefreshToken(tokenString string) (*models.Claims
 		}
 	}
 
-	// Extraire les informations utilisateur
-	userClaims := &models.Claims{
-		UserID:          uint(claims["user_id"].(float64)),
-		Username:        claims["username"].(string),
-		Role:            claims["role"].(string),
-		Email:           claims["email"].(string),
-		ManagedGroupIDs: managedGroupIDs,
-	}
+	username, _ := claims["username"].(string)
+	role, _ := claims["role"].(string)
+	email, _ := claims["email"].(string)
 
-	return userClaims, nil
+	return &models.Claims{
+		UserID:          uint(rawID),
+		Username:        username,
+		Role:            role,
+		Email:           email,
+		ManagedGroupIDs: managedGroupIDs,
+	}, nil
 }
