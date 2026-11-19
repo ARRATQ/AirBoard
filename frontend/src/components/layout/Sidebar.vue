@@ -662,6 +662,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  versionStore.stopPeriodicUpdateCheck()
 })
 
 // Fermer la sidebar sur mobile lors de la navigation
@@ -674,9 +675,9 @@ watch(() => route.path, () => {
 
 // Load app settings and version when component mounts
 onMounted(async () => {
-  if (!appStore.appSettings && authStore.isAuthenticated && authStore.isAdmin) {
+  if (authStore.isAuthenticated && authStore.isAdmin) {
     try {
-      await appStore.refreshAppSettings()
+      await appStore.ensureAppSettings()
     } catch (error) {
       console.error('Failed to load app settings in sidebar:', error)
     }

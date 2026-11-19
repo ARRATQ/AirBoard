@@ -33,11 +33,27 @@ export const useVersionStore = defineStore('version', () => {
     }
   })
 
+  const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000 // 4 heures
+  let versionLoaded = false
+  let versionRequest = null
+  let updateCheckTimer = null
+
   // Actions
+  // La version du serveur ne change pas pendant la session : un seul appel.
   async function fetchVersion() {
+    if (versionLoaded) return currentVersion.value
+    if (versionRequest) return versionRequest
+    versionRequest = loadVersion().finally(() => {
+      versionRequest = null
+    })
+    return versionRequest
+  }
+
+  async function loadVersion() {
     try {
       const response = await api.get('/version')
       currentVersion.value = response.data
+      versionLoaded = true
       return response.data
     } catch (error) {
       console.error('Failed to fetch version:', error)
@@ -129,15 +145,28 @@ export const useVersionStore = defineStore('version', () => {
     }
   }
 
-  // Auto-check for updates periodically (every 4 hours)
-  function startPeriodicUpdateCheck() {
-    // Check immediately on start
-    checkForUpdates()
+  function lastCheckIsRecent() {
+    const last = Date.parse(lastCheckTime.value || localStorage.getItem('lastUpdateCheck') || '')
+    return Number.isFinite(last) && Date.now() - last < UPDATE_CHECK_INTERVAL_MS
+  }
 
-    // Then check every 4 hours
-    setInterval(() => {
+  // Vérifie les mises à jour toutes les 4 heures. Le résultat est gardé dans le localStorage :
+  // pas de nouvel appel au chargement si la dernière vérification a moins de 4 heures.
+  function startPeriodicUpdateCheck() {
+    if (updateCheckTimer) return
+    if (!lastCheckIsRecent()) {
       checkForUpdates()
-    }, 4 * 60 * 60 * 1000) // 4 hours in milliseconds
+    }
+    updateCheckTimer = setInterval(() => {
+      checkForUpdates()
+    }, UPDATE_CHECK_INTERVAL_MS)
+  }
+
+  function stopPeriodicUpdateCheck() {
+    if (updateCheckTimer) {
+      clearInterval(updateCheckTimer)
+      updateCheckTimer = null
+    }
   }
 
   return {
@@ -160,6 +189,7 @@ export const useVersionStore = defineStore('version', () => {
     dismissUpdate,
     shouldShowUpdateBadge,
     initializeFromCache,
-    startPeriodicUpdateCheck
+    startPeriodicUpdateCheck,
+    stopPeriodicUpdateCheck
   }
 })

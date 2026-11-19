@@ -337,7 +337,7 @@ import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useFavoritesStore } from '@/stores/favorites'
-import { dashboardService, adminService, analyticsService, announcementsService } from '@/services/api'
+import { dashboardService, analyticsService, announcementsService } from '@/services/api'
 import ViewModeSelector from '@/components/dashboard/ViewModeSelector.vue'
 import TableView from '@/components/dashboard/TableView.vue'
 import ListView from '@/components/dashboard/ListView.vue'
@@ -579,9 +579,7 @@ const loadAppSettings = async () => {
       }
       return
     }
-    const settings = await adminService.getAppSettings()
-    appSettings.value = settings
-    appStore.setAppSettings(settings)
+    appSettings.value = await appStore.ensureAppSettings()
   } catch (error) {
     console.error('Error loading app settings:', error)
     // Use defaults if settings can't be loaded

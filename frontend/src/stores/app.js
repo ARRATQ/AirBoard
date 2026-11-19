@@ -309,17 +309,32 @@ export const useAppStore = defineStore('app', () => {
     settingsLastUpdated.value = Date.now()
   }
 
-  const refreshAppSettings = async () => {
-    try {
-      // Import dynamique pour éviter les dépendances circulaires
-      const { adminService } = await import('@/services/api')
-      const settings = await adminService.getAppSettings()
-      setAppSettings(settings)
-      return settings
-    } catch (error) {
-      console.error('Failed to refresh app settings:', error)
-      throw error
-    }
+  // Un seul appel en vol : App, Sidebar et Dashboard partagent la même requête.
+  let appSettingsRequest = null
+
+  const refreshAppSettings = () => {
+    if (appSettingsRequest) return appSettingsRequest
+    appSettingsRequest = (async () => {
+      try {
+        // Import dynamique pour éviter les dépendances circulaires
+        const { adminService } = await import('@/services/api')
+        const settings = await adminService.getAppSettings()
+        setAppSettings(settings)
+        return settings
+      } catch (error) {
+        console.error('Failed to refresh app settings:', error)
+        throw error
+      } finally {
+        appSettingsRequest = null
+      }
+    })()
+    return appSettingsRequest
+  }
+
+  // Réglages déjà chargés : aucun appel réseau.
+  const ensureAppSettings = () => {
+    if (appSettings.value) return Promise.resolve(appSettings.value)
+    return refreshAppSettings()
   }
 
   const invalidateSettings = () => {
@@ -370,6 +385,7 @@ export const useAppStore = defineStore('app', () => {
     // App Settings
     setAppSettings,
     refreshAppSettings,
+    ensureAppSettings,
     invalidateSettings,
 
     // Helpers
