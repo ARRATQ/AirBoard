@@ -287,7 +287,7 @@ onMounted(loadTypes)
 }
 
 code {
-  font-family: 'Courier New', monospace;
+  font-family: var(--f-num);
   font-size: 0.875rem;
 }
 </style>

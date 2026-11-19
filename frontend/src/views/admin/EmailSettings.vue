@@ -18,7 +18,7 @@
           :class="[
             'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
             activeTab === 'smtp'
-              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
@@ -42,7 +42,7 @@
           :class="[
             'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
             activeTab === 'templates'
-              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
@@ -54,7 +54,7 @@
           :class="[
             'py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
             activeTab === 'logs'
-              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
@@ -71,7 +71,7 @@
         <div class="card">
           <div class="card-header flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <Icon icon="mdi:email-cog" class="h-6 w-6 text-blue-400" />
+              <Icon icon="mdi:email-cog" class="h-6 w-6 text-primary-400" />
               <h3 class="card-title">{{ $t("email.smtpSettings") }}</h3>
             </div>
             <div class="flex items-center gap-2">
@@ -316,7 +316,7 @@
                 :class="[
                   'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                   selectedTemplate?.type === template.type
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-primary-600 text-white'
                     : 'bg-gray-700 dark:bg-gray-600 text-gray-300 dark:text-gray-200 hover:bg-gray-600 dark:hover:bg-gray-500',
                 ]"
               >
@@ -337,7 +337,7 @@
                 <div class="flex items-center gap-3">
                   <Icon
                     :icon="getTemplateIcon(selectedTemplate.type)"
-                    class="h-6 w-6 text-blue-400"
+                    class="h-6 w-6 text-primary-400"
                   />
                   <div>
                     <h4 class="font-medium text-white">
@@ -407,7 +407,7 @@
                   }}</label>
                   <button
                     @click="previewTemplate"
-                    class="text-sm text-blue-400 dark:text-blue-300 hover:text-blue-300 dark:hover:text-blue-200 flex items-center gap-1"
+                    class="text-sm text-primary-400 dark:text-primary-300 hover:text-primary-300 dark:hover:text-primary-200 flex items-center gap-1"
                   >
                     <Icon icon="mdi:eye" class="h-4 w-4" />
                     {{ $t("email.preview") }}
@@ -912,6 +912,6 @@ onMounted(async () => {
 
 <style scoped>
 .form-checkbox {
-  @apply h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-white dark:focus:ring-offset-gray-900;
+  @apply h-4 w-4 rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-600 text-primary-500 focus:ring-primary-500 focus:ring-offset-white dark:focus:ring-offset-gray-900;
 }
 </style>

@@ -11,7 +11,7 @@
               v-model="filters.search"
               type="text"
               :placeholder="$t('dashboard.searchApps')"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -20,7 +20,7 @@
         <div class="w-full sm:w-64">
           <select
             v-model="filters.category"
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="">{{ $t('dashboard.allCategories') }}</option>
             <option v-for="category in availableCategories" :key="category.id" :value="category.id">
@@ -33,7 +33,7 @@
         <div class="w-full sm:w-48">
           <select
             v-model="filters.sortBy"
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="name">{{ $t('dashboard.sortByName') }}</option>
             <option value="category">{{ $t('dashboard.sortByCategory') }}</option>
@@ -141,7 +141,7 @@
             <td class="px-6 py-4 whitespace-nowrap">
               <button
                 @click.stop="openApplication(app)"
-                class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 <Icon icon="mdi:open-in-new" class="h-4 w-4" />
                 {{ $t('dashboard.open') }}

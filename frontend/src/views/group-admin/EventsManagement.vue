@@ -171,7 +171,7 @@
                       <span
                         v-for="group in event.target_groups.slice(0, 2)"
                         :key="group.id"
-                        class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-xs"
+                        class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900 rounded text-xs"
                       >
                         {{ group.name }}
                       </span>

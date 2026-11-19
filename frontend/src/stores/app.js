@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { setLocale as setI18nLocale, resolveInitialLocale } from '@/i18n'
 import { getPalette, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
+import { paletteCSS } from '@/config/tokens'
 
 export const useAppStore = defineStore('app', () => {
   // Déterminer si on est sur mobile pour l'état initial de la sidebar
@@ -31,10 +32,7 @@ export const useAppStore = defineStore('app', () => {
   const zoomScale = computed(() => parseInt(zoomLevel.value) / 100)
 
   const _injectPaletteCSS = (paletteObj) => {
-    const toKebab = (str) => str.replace(/([A-Z])/g, m => '-' + m.toLowerCase())
-    const makeCSSVars = (vars) =>
-      Object.entries(vars).map(([k, v]) => `  --${toKebab(k)}: ${v};`).join('\n')
-    const css = `:root {\n${makeCSSVars(paletteObj.light)}\n}\nhtml.dark {\n${makeCSSVars(paletteObj.dark)}\n}`
+    const css = paletteCSS(paletteObj)
     let el = document.getElementById('palette-vars')
     if (!el) {
       el = document.createElement('style')

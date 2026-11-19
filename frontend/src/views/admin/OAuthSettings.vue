@@ -56,7 +56,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon :icon="selectedProvider.icon" class="h-6 w-6 text-blue-500" />
+                <Icon :icon="selectedProvider.icon" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
                 <h3 class="modal-title">{{ $t('oauth.configure') }} {{ selectedProvider.display_name }}</h3>

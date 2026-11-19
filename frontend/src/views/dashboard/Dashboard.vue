@@ -194,7 +194,7 @@
                 @click="goToAnnouncement(index)"
                 class="transition-all duration-200"
                 :class="index === currentAnnouncementIndex
-                  ? 'w-6 h-2 rounded-full bg-blue-600 dark:bg-blue-400'
+                  ? 'w-6 h-2 rounded-full bg-primary-600 dark:bg-primary-400'
                   : 'w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'"
                 :title="`Announcement ${index + 1}`"
               ></button>

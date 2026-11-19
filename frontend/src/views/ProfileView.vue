@@ -615,7 +615,7 @@ onMounted(() => {
 }
 
 .section-icon {
-  @apply h-5 w-5 text-blue-400;
+  @apply h-5 w-5 text-primary-400;
 }
 
 .section-title {

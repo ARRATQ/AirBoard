@@ -137,9 +137,9 @@
           </div>
 
           <!-- Target Groups (NOUVEAU pour Group Admin) -->
-          <div class="card bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-200 dark:border-blue-800">
+          <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Icon icon="mdi:account-group" class="h-5 w-5 text-blue-500" />
+              <Icon icon="mdi:account-group" class="h-5 w-5 text-primary-500" />
               Groupes Cibles *
             </h3>
 
@@ -149,11 +149,11 @@
               </p>
 
               <!-- Selected groups -->
-              <div v-if="form.target_group_ids.length > 0" class="flex flex-wrap gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div v-if="form.target_group_ids.length > 0" class="flex flex-wrap gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-primary-200 dark:border-primary-700">
                 <span
                   v-for="groupId in form.target_group_ids"
                   :key="groupId"
-                  class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-sm font-medium"
                 >
                   <Icon icon="mdi:account-group" class="h-3 w-3" />
                   {{ getGroupName(groupId) }}
@@ -173,7 +173,7 @@
               <!-- Add group -->
               <select
                 @change="addGroup"
-                class="w-full px-3 py-2 border-2 border-blue-200 dark:border-blue-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white text-sm"
+                class="w-full px-3 py-2 border-2 border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
               >
                 <option value="">+ Ajouter un groupe</option>
                 <option

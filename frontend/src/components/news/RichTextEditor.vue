@@ -685,7 +685,7 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
-        class: 'text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300',
+        class: 'text-primary-600 dark:text-primary-400 underline hover:text-primary-800 dark:hover:text-primary-300',
       },
     }),
     ResizableImage.configure({
@@ -827,7 +827,7 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-button.is-active {
-  @apply bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400;
+  @apply bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400;
 }
 
 /* Color picker */
@@ -982,7 +982,7 @@ onBeforeUnmount(() => {
 
 /* Link styling */
 .editor-content :deep(.ProseMirror a) {
-  @apply text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300;
+  @apply text-primary-600 dark:text-primary-400 underline hover:text-primary-800 dark:hover:text-primary-300;
 }
 
 /* Table styling */
@@ -1121,7 +1121,7 @@ onBeforeUnmount(() => {
 }
 
 .tab-button.active {
-  @apply border-blue-500 text-blue-600 dark:text-blue-400 font-medium;
+  @apply border-primary-500 text-primary-600 dark:text-primary-400 font-medium;
 }
 
 .tab-content {

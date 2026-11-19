@@ -99,7 +99,7 @@
             :class="[
               'min-h-[100px] p-1 bg-white dark:bg-gray-800 relative transition-colors hover:bg-gray-50 dark:hover:bg-gray-750',
               !day.isCurrentMonth && 'bg-gray-50/50 dark:bg-gray-900/50 text-gray-400',
-              day.isToday && 'bg-blue-50/30 dark:bg-blue-900/10'
+              day.isToday && 'bg-primary-50/30 dark:bg-primary-900/10'
             ]"
 
           >
@@ -109,7 +109,7 @@
                 :class="[
                   'text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full',
                   day.isToday 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-primary-600 text-white' 
                     : 'text-gray-700 dark:text-gray-300'
                 ]"
               >
@@ -162,7 +162,7 @@
             :class="[
               'p-2 text-sm border border-gray-200 dark:border-gray-700 min-h-[200px] relative',
               'bg-white dark:bg-gray-800',
-              day.isToday ? 'bg-blue-50 dark:bg-blue-900' : ''
+              day.isToday ? 'bg-primary-50 dark:bg-primary-900' : ''
             ]"
           >
             <div class="font-medium mb-2">{{ day.date.getDate() }} {{ day.date.toLocaleDateString(i18n.global.locale.value, { month: 'short' }) }}</div>

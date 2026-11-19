@@ -27,7 +27,7 @@
         <button 
           @click="activeTab = 'general'"
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
-          :class="activeTab === 'general' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
+          :class="activeTab === 'general' ? 'border-primary-500 text-primary-500' : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'"
         >
           <Icon icon="mdi:cog" class="inline-block mr-2 h-4 w-4" />
           {{ $t('settings.general') || 'General' }}
@@ -361,7 +361,7 @@
                     :title="pos.label"
                     class="h-9 rounded-md border transition-colors flex items-center justify-center"
                     :class="form.hero_image_position === pos.value
-                      ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                      ? 'border-primary-500 bg-primary-500/20 text-primary-400'
                       : 'border-gray-600 bg-gray-800 text-gray-500 hover:border-gray-500 hover:text-gray-300'"
                   >
                     <Icon :icon="pos.icon" class="h-4 w-4" />
@@ -398,7 +398,7 @@
 
                 <div v-else class="grid grid-cols-1 gap-4">
                   <div v-for="hero in heroMessages" :key="hero.id" 
-                    class="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-blue-500/50 transition-colors"
+                    class="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-primary-500/50 transition-colors"
                     :class="{ 'opacity-60': !hero.is_active }">
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex-1">
@@ -412,7 +412,7 @@
                           :title="hero.is_active ? 'Deactivate' : 'Activate'">
                           <Icon :icon="hero.is_active ? 'mdi:eye' : 'mdi:eye-off'" class="h-5 w-5" />
                         </button>
-                        <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors">
+                        <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors">
                           <Icon icon="mdi:pencil" class="h-5 w-5" />
                         </button>
                         <button type="button" @click="deleteHeroMessage(hero.id)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
@@ -902,7 +902,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon icon="mdi:format-quote-close" class="h-6 w-6 text-blue-500" />
+                <Icon icon="mdi:format-quote-close" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
                 <h3 class="modal-title">{{ editingHero ? 'Edit Message' : 'Add Hero Message' }}</h3>
@@ -950,7 +950,7 @@
                       v-model="heroForm.is_active"
                       class="sr-only peer"
                     />
-                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                   </label>
                 </div>
               </div>

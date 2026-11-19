@@ -4,7 +4,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
       <div>
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-          <Icon icon="mdi:bell" class="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          <Icon icon="mdi:bell" class="h-8 w-8 text-primary-600 dark:text-primary-400" />
           {{ $t('notifications.center') }}
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
@@ -84,7 +84,7 @@
         @click="notificationStore.toggleUnreadOnly"
         class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border"
         :class="notificationStore.showUnreadOnly 
-          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800' 
+          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800' 
           : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
       >
         <Icon icon="mdi:filter" class="h-4 w-4" />
@@ -95,7 +95,7 @@
     <!-- Notifications List -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden min-h-[400px]">
       <div v-if="notificationStore.loading" class="flex flex-col items-center justify-center py-20">
-        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-blue-600 dark:text-blue-400" />
+        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-primary-600 dark:text-primary-400" />
         <p class="text-gray-600 dark:text-gray-400 mt-4">{{ $t('common.loading') }}</p>
       </div>
 
@@ -114,7 +114,7 @@
             :key="notification.id"
             class="group relative flex items-start gap-4 p-5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
             :class="{
-              'bg-blue-50/40 dark:bg-blue-900/10': !notification.is_read,
+              'bg-primary-50/40 dark:bg-primary-900/10': !notification.is_read,
               'border-l-4 border-l-red-500': notification.priority === 2,
               'border-l-4 border-l-yellow-500': notification.priority === 1,
               'border-l-4 border-l-transparent': notification.priority === 0
@@ -180,7 +180,7 @@
               <button
                 v-if="!notification.is_read"
                 @click="markAsRead(notification.id)"
-                class="p-2 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                class="p-2 rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
                 :title="$t('notifications.markAsRead')"
               >
                 <Icon icon="mdi:check" class="h-5 w-5" />

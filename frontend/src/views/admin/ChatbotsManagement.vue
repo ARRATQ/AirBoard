@@ -13,7 +13,7 @@
         </div>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
           <Icon icon="mdi:plus" class="h-5 w-5" />
           {{ $t('chatbots.new') }}
@@ -22,7 +22,7 @@
 
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center items-center py-12">
-        <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-blue-600" />
+        <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-600" />
       </div>
 
       <!-- Table -->
@@ -93,7 +93,7 @@
                 <div class="flex items-center justify-end gap-2">
                   <button
                     @click="openEditModal(chatbot)"
-                    class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    class="p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     :title="$t('common.edit')"
                   >
                     <Icon icon="mdi:pencil" class="h-4 w-4" />
@@ -123,7 +123,7 @@
         </p>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
         >
           {{ $t('chatbots.create') }}
         </button>
