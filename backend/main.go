@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"airboard/config"
+	"airboard/database"
 	"airboard/handlers"
 	"airboard/middleware"
 	"airboard/models"
@@ -33,6 +34,9 @@ func main() {
 	db, err := gorm.Open(postgres.Open(cfg.GetDSN()), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Erreur de connexion à la base de données:", err)
+	}
+	if err := database.ConfigurePool(db); err != nil {
+		log.Fatal("Erreur de configuration du pool de connexions:", err)
 	}
 
 	// Migrations
@@ -164,6 +168,8 @@ func main() {
 	} else {
 		log.Println("✓ Index unique partiel créé/vérifié pour event_categories.slug")
 	}
+
+	database.EnsurePerformanceIndexes(db)
 
 	// Créer les données initiales
 	if err := createInitialData(db, cfg); err != nil {
