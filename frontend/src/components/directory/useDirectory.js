@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { directoryService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 
 // Couleurs d'avatar déterministes (quand une personne n'a pas de photo)
 const AVATAR_COLORS = ['#2563EB', '#7C3AED', '#DB2777', '#EA580C', '#059669', '#0891B2', '#4F46E5', '#B45309']
@@ -43,7 +44,7 @@ export function notify(type, message) {
   if (window.$toast && typeof window.$toast[type] === 'function') {
     window.$toast[type](message)
   } else if (type === 'error') {
-    window.alert(message)
+    useAppStore().showError(message)
   }
 }
 

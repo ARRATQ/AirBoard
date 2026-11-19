@@ -121,11 +121,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { newsService } from '@/services/api'
 import { useNewsTypesStore } from '@/stores/newsTypes'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const typesStore = useNewsTypesStore()
 
 const loading = ref(false)
@@ -214,7 +216,7 @@ const saveType = async () => {
 }
 
 const removeType = async (type) => {
-  if (!confirm(`${t('common.delete')} "${type.name}" ?`)) return
+  if (!(await askConfirm({ message: `${t('common.delete')} "${type.name}" ?`, tone: 'danger' }))) return
 
   try {
     await newsService.deleteType(type.id)

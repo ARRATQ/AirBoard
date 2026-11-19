@@ -128,10 +128,12 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { newsService } from '@/services/api'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const loading = ref(false)
 const categories = ref([])
@@ -221,7 +223,7 @@ const saveCategory = async () => {
 }
 
 const removeCategory = async (category) => {
-  if (!confirm(`${t('common.delete')} "${category.name}" ?`)) return
+  if (!(await askConfirm({ message: `${t('common.delete')} "${category.name}" ?`, tone: 'danger' }))) return
 
   try {
     await newsService.deleteCategory(category.id)

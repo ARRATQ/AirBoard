@@ -249,7 +249,9 @@
     "activate": "Activer",
     "deactivate": "Désactiver",
     "last_connection": "Dernière connexion",
-    "never_connected": "Jamais connecté"
+    "never_connected": "Jamais connecté",
+    "permanentDeleteTitle": "Suppression définitive",
+    "permanentDeleteMessage": "Supprimer définitivement l'utilisateur « {username} » ?\n\nCette action est irréversible et supprimera toutes les données associées."
   },
   "settings": {
     "title": "Paramètres de l'application",
@@ -320,7 +322,11 @@
     "typeLoadError": "Erreur lors du chargement des types",
     "typeSaveError": "Erreur lors de l'enregistrement du type",
     "typeDeleteError": "Erreur lors de la suppression du type",
-    "noType": "Aucun type"
+    "noType": "Aucun type",
+    "tagSaveError": "Erreur lors de l'enregistrement du tag",
+    "resetDatabaseSuccess": "Base de données réinitialisée avec succès. {message} Vous allez être déconnecté.",
+    "resetDatabaseError": "Erreur lors de la réinitialisation de la base de données : {error}",
+    "confirmDeleteHeroMessage": "Voulez-vous vraiment supprimer ce message ?"
   },
   "appGroups": {
     "subtitle": "Organisez vos ressources en groupes",
@@ -347,7 +353,8 @@
     "peakUsage": "Pic d'utilisation",
     "noData": "Aucune donnée disponible",
     "noAnalytics": "Aucune donnée d'analyse",
-    "noAnalyticsText": "Commencez à utiliser les ressources pour voir les statistiques ici."
+    "noAnalyticsText": "Commencez à utiliser les ressources pour voir les statistiques ici.",
+    "exportStarted": "Export des données au format CSV initié..."
   },
   "reports": {
     "title": "Rapports",
@@ -497,6 +504,9 @@
       "mostReacted": "Plus de réactions",
       "titleAZ": "Titre (A-Z)",
       "titleZA": "Titre (Z-A)"
+    },
+    "editor": {
+      "invalidVideoUrl": "URL non reconnue. Utilisez une URL YouTube ou Vimeo."
     }
   },
   "dashboard": {
@@ -1373,7 +1383,11 @@
       "minutes_ago": "{count} min",
       "hours_ago": "{count} h",
       "days_ago": "{count} j"
-    }
+    },
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce commentaire ?",
+    "createError": "Erreur lors de la création du commentaire",
+    "updateError": "Erreur lors de la mise à jour du commentaire",
+    "deleteError": "Erreur lors de la suppression du commentaire"
   },
   "feedback": {
     "helpful": "Cet article vous a-t-il été utile ?",
@@ -1403,7 +1417,10 @@
     "require_moderation_desc": "Les commentaires nécessitent une approbation avant d'être publiés",
     "max_length": "Longueur maximale des commentaires",
     "max_length_desc": "Nombre maximum de caractères autorisés par commentaire",
-    "save_settings": "Enregistrer les paramètres"
+    "save_settings": "Enregistrer les paramètres",
+    "moderateError": "Erreur lors de la modération du commentaire",
+    "settingsSaved": "Paramètres mis à jour avec succès",
+    "settingsSaveError": "Erreur lors de la mise à jour des paramètres"
   },
   "notifications": {
     "title": "Notifications",
@@ -1740,7 +1757,8 @@
     "badges": "Badges",
     "points": "Points",
     "threshold": "Seuil",
-    "badgeReward": "Recompense XP"
+    "badgeReward": "Recompense XP",
+    "confirmDeleteBadge": "Supprimer le badge « {name} » ?"
   },
   "help": {
     "title": "Aide",
@@ -2102,5 +2120,10 @@
       "warning": "Attention",
       "info": "Information"
     }
+  },
+  "chat": {
+    "confirmDeleteMessage": "Supprimer ce message ?",
+    "confirmClearHistory": "Voulez-vous vraiment effacer tout l'historique de cette conversation ?",
+    "clearHistory": "Vider l'historique"
   }
 }

@@ -408,10 +408,12 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
 import { authService } from '@/services/api'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const appStore = useAppStore()
 const authStore = useAuthStore()
 
 // Form state
@@ -495,13 +497,13 @@ const handleAvatarChange = (event) => {
   // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    alert(t('profile.avatarTypeError'))
+    appStore.showWarning(t('profile.avatarTypeError'))
     return
   }
 
   // Validate file size (max 5MB)
   if (file.size > 5 * 1024 * 1024) {
-    alert(t('profile.avatarSizeError'))
+    appStore.showWarning(t('profile.avatarSizeError'))
     return
   }
 
@@ -536,7 +538,7 @@ const uploadAvatar = async () => {
     }
   } catch (error) {
     console.error('Error uploading avatar:', error)
-    alert(t('profile.avatarUploadError'))
+    appStore.showError(t('profile.avatarUploadError'))
   } finally {
     isUploading.value = false
   }
@@ -553,7 +555,7 @@ const deleteAvatar = async () => {
     showDeleteAvatarModal.value = false
   } catch (error) {
     console.error('Error deleting avatar:', error)
-    alert(t('profile.avatarDeleteError'))
+    appStore.showError(t('profile.avatarDeleteError'))
   } finally {
     isDeletingAvatar.value = false
   }
@@ -572,7 +574,7 @@ const handleSubmit = async () => {
     })
   } catch (error) {
     console.error('Error saving profile:', error)
-    alert(t('profile.saveError'))
+    appStore.showError(t('profile.saveError'))
   } finally {
     isSaving.value = false
   }
@@ -591,13 +593,13 @@ const handlePasswordChange = async () => {
     passwordForm.current_password = ''
     passwordForm.new_password = ''
     passwordForm.confirm_password = ''
-    alert(t('profile.passwordChanged'))
+    appStore.showSuccess(t('profile.passwordChanged'))
   } catch (error) {
     console.error('Error changing password:', error)
     if (error.response?.status === 401) {
-      alert(t('profile.currentPasswordIncorrect'))
+      appStore.showError(t('profile.currentPasswordIncorrect'))
     } else {
-      alert(t('profile.passwordChangeError'))
+      appStore.showError(t('profile.passwordChangeError'))
     }
   } finally {
     isChangingPassword.value = false

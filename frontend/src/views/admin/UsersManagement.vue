@@ -298,10 +298,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
+import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
 
+const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 // State
@@ -561,7 +565,13 @@ const restoreUser = async (user) => {
 }
 
 const confirmPermanentDelete = async (user) => {
-  if (confirm(`⚠️ ATTENTION: Supprimer DÉFINITIVEMENT l'utilisateur "${user.username}" ?\n\nCette action est IRRÉVERSIBLE et supprimera toutes les données associées.`)) {
+  if (
+    await askConfirm({
+      title: t('users.permanentDeleteTitle'),
+      message: t('users.permanentDeleteMessage', { username: user.username }),
+      tone: 'danger'
+    })
+  ) {
     try {
       await adminService.permanentlyDeleteUser(user.id)
       appStore.showSuccess('Utilisateur supprimé définitivement')

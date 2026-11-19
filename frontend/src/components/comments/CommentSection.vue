@@ -74,7 +74,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
+import { useConfirm } from '@/composables/useConfirm'
 import { getComments, createComment, updateComment, deleteComment, getCommentSettings } from '@/services/api'
 import CommentItem from './CommentItem.vue'
 import CommentEditModal from './CommentEditModal.vue'
@@ -91,7 +94,10 @@ const props = defineProps({
   }
 })
 
+const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const authStore = useAuthStore()
+const appStore = useAppStore()
 const comments = ref([])
 const newComment = ref('')
 const isSubmitting = ref(false)
@@ -151,7 +157,7 @@ const submitComment = async () => {
     await loadComments()
   } catch (error) {
     console.error('Erreur lors de la création du commentaire:', error)
-    alert('Erreur lors de la création du commentaire')
+    appStore.showError(t('comments.createError'))
   } finally {
     isSubmitting.value = false
   }
@@ -172,19 +178,19 @@ const updateCommentData = async (updatedComment) => {
     await loadComments()
   } catch (error) {
     console.error('Erreur lors de la mise à jour du commentaire:', error)
-    alert('Erreur lors de la mise à jour du commentaire')
+    appStore.showError(t('comments.updateError'))
   }
 }
 
 const deleteCommentData = async (commentId) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return
+  if (!(await askConfirm({ message: t('comments.confirmDelete'), tone: 'danger' }))) return
 
   try {
     await deleteComment(commentId)
     await loadComments()
   } catch (error) {
     console.error('Erreur lors de la suppression du commentaire:', error)
-    alert('Erreur lors de la suppression du commentaire')
+    appStore.showError(t('comments.deleteError'))
   }
 }
 

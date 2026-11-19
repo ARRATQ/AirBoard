@@ -329,9 +329,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { analyticsService, newsService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 
+const { t } = useI18n()
 const router = useRouter()
+const appStore = useAppStore()
 const analytics = ref(null)
 const newsStats = ref(null)
 const isLoading = ref(false)
@@ -477,7 +481,7 @@ const viewArticle = (slug) => {
 }
 
 const mockExport = () => {
-  alert('Export des données au format CSV initié...')
+  appStore.showInfo(t('analytics.exportStarted'))
 }
 
 onMounted(() => {

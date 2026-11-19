@@ -373,6 +373,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useNewsTypesStore } from '@/stores/newsTypes'
 import { newsService } from '@/services/api'
@@ -381,6 +382,7 @@ import TypeSelect from '@/components/news/TypeSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const appStore = useAppStore()
 const typesStore = useNewsTypesStore()
 
@@ -458,7 +460,7 @@ const createCategory = async () => {
     }
   } catch (error) {
     console.error('Error creating category:', error)
-    alert('Failed to create category')
+    appStore.showError(t('admin.categorySaveError'))
   }
 }
 
@@ -476,7 +478,7 @@ const createTag = async () => {
     }
   } catch (error) {
     console.error('Error creating tag:', error)
-    alert('Failed to create tag')
+    appStore.showError(t('admin.tagSaveError'))
   }
 }
 

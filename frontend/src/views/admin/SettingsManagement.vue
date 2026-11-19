@@ -981,14 +981,18 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { adminService, uploadAdminMedia } from '@/services/api'
 import { authService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
+import { useConfirm } from '@/composables/useConfirm'
 import IconInput from '@/components/ui/IconInput.vue'
 import { PALETTES, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
 
+const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 const router = useRouter()
@@ -1405,7 +1409,7 @@ const handleResetDatabase = async () => {
     const response = await adminService.resetDatabase()
 
     // Afficher un message de succès
-    alert('Base de données réinitialisée avec succès!\n\n' + response.message + '\n\nVous allez être déconnecté.')
+    appStore.showSuccess(t('admin.resetDatabaseSuccess', { message: response.message || '' }))
 
     // Fermer le modal
     showResetDatabaseModal.value = false
@@ -1423,7 +1427,7 @@ const handleResetDatabase = async () => {
     }, 1000)
   } catch (error) {
     console.error('Erreur lors de la réinitialisation:', error)
-    alert('Erreur lors de la réinitialisation de la base de données: ' + (error.response?.data?.message || error.message))
+    appStore.showError(t('admin.resetDatabaseError', { error: error.response?.data?.message || error.message }))
   } finally {
     isResetting.value = false
   }
@@ -1482,7 +1486,7 @@ const handleHeroSubmit = async () => {
 }
 
 const deleteHeroMessage = async (id) => {
-  if (!confirm('Are you sure you want to delete this message?')) return
+  if (!(await askConfirm({ message: t('admin.confirmDeleteHeroMessage'), tone: 'danger' }))) return
 
   try {
     await adminService.deleteHeroMessage(id)

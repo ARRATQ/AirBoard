@@ -223,6 +223,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { pollsService } from '@/services/api'
@@ -233,6 +234,7 @@ import { fr } from 'date-fns/locale'
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const polls = ref([])
 const managedGroups = ref([])
@@ -324,7 +326,7 @@ const viewResults = (poll) => {
 
 // Fermer un sondage
 const closePoll = async (poll) => {
-  if (!confirm(t('polls.actions.confirmClose'))) {
+  if (!(await askConfirm({ message: t('polls.actions.confirmClose'), tone: 'danger', confirmLabel: t('polls.actions.close') }))) {
     return
   }
 
@@ -344,7 +346,7 @@ const closePoll = async (poll) => {
 
 // Confirmer la suppression
 const confirmDelete = async (poll) => {
-  if (!confirm(t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }))) {
+  if (!(await askConfirm({ message: t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }), tone: 'danger' }))) {
     return
   }
 

@@ -384,9 +384,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
+import { useAppStore } from '@/stores/app'
 import { getAdminMediaList, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
 
 const { t } = useI18n()
+const appStore = useAppStore()
 
 // State
 const mediaList = ref([])
@@ -523,7 +525,7 @@ const uploadFile = async () => {
     closeUploadModal()
   } catch (error) {
     console.error('Failed to upload file:', error)
-    alert(t('media.upload_error'))
+    appStore.showError(t('media.upload_error'))
   } finally {
     uploading.value = false
   }
@@ -556,7 +558,7 @@ const updateMedia = async () => {
     closeEditModal()
   } catch (error) {
     console.error('Failed to update media:', error)
-    alert(t('media.update_error'))
+    appStore.showError(t('media.update_error'))
   } finally {
     updating.value = false
   }
@@ -575,7 +577,7 @@ const closeViewModal = () => {
 const copyUrl = (media) => {
   const url = getMediaUrl(media.url)
   navigator.clipboard.writeText(url)
-  alert(t('media.url_copied'))
+  appStore.showSuccess(t('media.url_copied'))
 }
 
 const downloadMedia = (media) => {
@@ -606,7 +608,7 @@ const deleteMedia = async () => {
     closeDeleteModal()
   } catch (error) {
     console.error('Failed to delete media:', error)
-    alert(t('media.delete_error'))
+    appStore.showError(t('media.delete_error'))
   } finally {
     deleting.value = false
   }

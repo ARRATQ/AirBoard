@@ -662,10 +662,12 @@ import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import EmailOAuthConfig from "@/components/admin/EmailOAuthConfig.vue";
 import { useI18n } from "vue-i18n";
+import { useConfirm } from "@/composables/useConfirm";
 import { emailService } from "@/services/api";
 import { useAppStore } from "@/stores/app";
 
 const { t } = useI18n();
+const { confirm: askConfirm } = useConfirm();
 const appStore = useAppStore();
 
 // State
@@ -781,7 +783,14 @@ const saveTemplate = async () => {
 
 const resetTemplate = async () => {
   if (!selectedTemplate.value) return;
-  if (!confirm(t("email.resetConfirm"))) return;
+  if (
+    !(await askConfirm({
+      message: t("email.resetConfirm"),
+      tone: "danger",
+      confirmLabel: t("email.resetTemplate"),
+    }))
+  )
+    return;
 
   try {
     const result = await emailService.resetTemplate(

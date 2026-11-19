@@ -255,9 +255,11 @@ import PollEditor from '@/components/polls/PollEditor.vue'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const router = useRouter()
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const polls = ref([])
 const groups = ref([])
@@ -352,7 +354,7 @@ const viewResults = (poll) => {
 
 // Fermer un sondage
 const closePoll = async (poll) => {
-  if (!confirm(t('polls.adminPollsManagement.confirmation.closeMessage'))) {
+  if (!(await askConfirm({ message: t('polls.adminPollsManagement.confirmation.closeMessage'), tone: 'danger', confirmLabel: t('polls.actions.close') }))) {
     return
   }
 
@@ -372,7 +374,7 @@ const closePoll = async (poll) => {
 
 // Confirmer la suppression
 const confirmDelete = async (poll) => {
-  if (!confirm(t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }))) {
+  if (!(await askConfirm({ message: t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }), tone: 'danger' }))) {
     return
   }
 

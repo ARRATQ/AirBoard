@@ -241,8 +241,10 @@ import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/notifications'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const router = useRouter()
 const notificationStore = useNotificationStore()
 
@@ -257,7 +259,7 @@ const markAllAsRead = async () => {
 
 // Supprimer toutes les lues
 const deleteAllRead = async () => {
-  if (confirm(t('notifications.confirmDeleteAllRead'))) {
+  if (await askConfirm({ message: t('notifications.confirmDeleteAllRead'), tone: 'danger' })) {
     try {
       await notificationStore.deleteAllRead()
     } catch (error) {

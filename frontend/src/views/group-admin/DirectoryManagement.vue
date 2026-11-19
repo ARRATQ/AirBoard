@@ -257,6 +257,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import PersonAvatar from '@/components/directory/PersonAvatar.vue'
 import UnitFormModal from '@/components/directory/UnitFormModal.vue'
@@ -268,6 +269,7 @@ import { directoryService } from '@/services/api'
 import { useDirectory, fullName, notify, apiError, FIELD_TYPE_ICONS } from '@/components/directory/useDirectory'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const route = useRoute()
 const router = useRouter()
 
@@ -319,7 +321,7 @@ const onSaved = async (messageKey) => {
 
 // ---- Suppressions ----
 const confirmAndRun = async (message, action, successKey) => {
-  if (!window.confirm(message)) return
+  if (!(await askConfirm({ message, tone: 'danger' }))) return
   try {
     await action()
     notify('success', t(successKey))

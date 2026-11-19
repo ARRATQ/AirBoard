@@ -491,6 +491,8 @@ import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
 import { createLowlight } from 'lowlight'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
+import { useAppStore } from '@/stores/app'
 import MediaUploader from '@/components/media/MediaUploader.vue'
 import MediaGallery from '@/components/media/MediaGallery.vue'
 
@@ -514,6 +516,9 @@ lowlight.register('bash', bash)
 lowlight.register('json', json)
 lowlight.register('xml', xml)
 lowlight.register('css', css)
+
+const { t } = useI18n()
+const appStore = useAppStore()
 
 const props = defineProps({
   modelValue: {
@@ -641,7 +646,7 @@ const insertVideo = () => {
   if (!url) return
   const embedUrl = getEmbedUrl(url)
   if (!embedUrl) {
-    window.alert('URL non reconnue. Utilisez une URL YouTube ou Vimeo.')
+    appStore.showWarning(t('news.editor.invalidVideoUrl'))
     return
   }
   editor.value.chain().focus().insertContent({

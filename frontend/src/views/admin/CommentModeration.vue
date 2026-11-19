@@ -305,9 +305,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { commentsService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
+const appStore = useAppStore()
 
 const activeTab = ref('pending')
 const loading = ref(false)
@@ -371,29 +375,29 @@ const moderateComment = async (commentId, isApproved, isFlagged) => {
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la modération du commentaire:', error)
-    alert('Erreur lors de la modération du commentaire')
+    appStore.showError(t('moderation.moderateError'))
   }
 }
 
 const deleteComment = async (commentId) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) return
+  if (!(await askConfirm({ message: t('comments.confirmDelete'), tone: 'danger' }))) return
 
   try {
     await commentsService.deleteComment(commentId)
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la suppression du commentaire:', error)
-    alert('Erreur lors de la suppression du commentaire')
+    appStore.showError(t('comments.deleteError'))
   }
 }
 
 const saveSettings = async () => {
   try {
     await commentsService.updateSettings(settings.value)
-    alert('Paramètres mis à jour avec succès')
+    appStore.showSuccess(t('moderation.settingsSaved'))
   } catch (error) {
     console.error('Erreur lors de la mise à jour des paramètres:', error)
-    alert('Erreur lors de la mise à jour des paramètres')
+    appStore.showError(t('moderation.settingsSaveError'))
   }
 }
 

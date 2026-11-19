@@ -398,6 +398,8 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/composables/useConfirm';
 import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
 import DOMPurify from 'dompurify';
@@ -409,6 +411,8 @@ const props = defineProps({
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
+const { t } = useI18n();
+const { confirm: askConfirm } = useConfirm();
 const { activeConversation, messages } = storeToRefs(chatStore);
 
 const newMessage = ref('');
@@ -513,13 +517,13 @@ const sendMessage = () => {
 
 const formatTime = (dateStr) => new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-const deleteMessage = (msgId) => {
-  if (confirm('Supprimer ce message ?')) chatStore.deleteMessage(msgId);
+const deleteMessage = async (msgId) => {
+  if (await askConfirm({ message: t('chat.confirmDeleteMessage'), tone: 'danger' })) chatStore.deleteMessage(msgId);
 };
 
-const confirmClearHistory = () => {
+const confirmClearHistory = async () => {
   showMenu.value = false;
-  if (confirm("Voulez-vous vraiment effacer tout l'historique de cette conversation ?")) chatStore.clearHistory();
+  if (await askConfirm({ message: t('chat.confirmClearHistory'), tone: 'danger', confirmLabel: t('chat.clearHistory') })) chatStore.clearHistory();
 };
 
 const faceMode = ref('user');
