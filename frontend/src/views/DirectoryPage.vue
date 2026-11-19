@@ -66,18 +66,78 @@
     </div>
 
     <!-- Organigramme -->
-    <ul v-else-if="view === 'org'" class="directory-org">
-      <OrgChartNode
-        v-for="unit in rootUnits"
-        :key="unit.id"
-        :unit="unit"
-        :children-of="childrenOf"
-        :people-by-id="peopleById"
-        :count-people="countPeopleInSubtree"
-        :force-open="forceOpen"
-        @open-person="openPerson"
-      />
-    </ul>
+    <template v-else-if="view === 'org'">
+      <div class="directory-orgbar">
+        <div class="directory-layout" role="group" :aria-label="$t('directory.viewOrg')">
+          <button
+            v-for="l in layouts"
+            :key="l.id"
+            type="button"
+            class="directory-layout__btn"
+            :class="{ 'directory-layout__btn--active': layout === l.id }"
+            :aria-pressed="layout === l.id"
+            @click="setLayout(l.id)"
+          >
+            <Icon :icon="l.icon" class="h-4 w-4" /> {{ $t(l.label) }}
+          </button>
+        </div>
+
+        <nav v-if="focusUnit" class="directory-crumbs" :aria-label="$t('directory.focusUnit')">
+          <button type="button" class="directory-crumbs__item" @click="setFocus(null)">
+            <Icon icon="mdi:home-outline" class="h-4 w-4" /> {{ $t('directory.backToRoot') }}
+          </button>
+          <template v-for="u in unitPath(focusUnit.id)" :key="u.id">
+            <Icon icon="mdi:chevron-right" class="h-4 w-4 directory-crumbs__sep" />
+            <button
+              type="button"
+              class="directory-crumbs__item"
+              :class="{ 'directory-crumbs__item--current': u.id === focusUnit.id }"
+              @click="setFocus(u.id)"
+            >{{ u.name }}</button>
+          </template>
+        </nav>
+
+        <select
+          class="form-select directory-unit-select directory-goto"
+          :value="focusUnit ? focusUnit.id : ''"
+          :aria-label="$t('directory.goToUnit')"
+          @change="setFocus($event.target.value ? Number($event.target.value) : null)"
+        >
+          <option value="">{{ $t('directory.goToUnit') }}</option>
+          <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '\u00a0\u00a0'.repeat(u.depth) }}{{ u.name }}</option>
+        </select>
+      </div>
+
+      <OrgTreeViewport v-if="layout === 'tree'" ref="treeViewport" :key="focusUnit ? focusUnit.id : 'all'">
+        <ul class="ot-root" dir="ltr">
+          <OrgTreeNode
+            v-for="unit in displayedRoots"
+            :key="unit.id"
+            :unit="unit"
+            :children-of="childrenOf"
+            :people-by-id="peopleById"
+            :count-people="countPeopleInSubtree"
+            :force-open="forceOpen"
+            :text-dir="textDir"
+            @open-person="openPerson"
+            @focus="setFocus"
+          />
+        </ul>
+      </OrgTreeViewport>
+
+      <ul v-else class="directory-org">
+        <OrgChartNode
+          v-for="unit in displayedRoots"
+          :key="unit.id"
+          :unit="unit"
+          :children-of="childrenOf"
+          :people-by-id="peopleById"
+          :count-people="countPeopleInSubtree"
+          :force-open="forceOpen"
+          @open-person="openPerson"
+        />
+      </ul>
+    </template>
 
     <!-- Grille de cartes -->
     <template v-else>
@@ -114,8 +174,11 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import OrgChartNode from '@/components/directory/OrgChartNode.vue'
+import OrgTreeNode from '@/components/directory/OrgTreeNode.vue'
+import OrgTreeViewport from '@/components/directory/OrgTreeViewport.vue'
 import PersonCard from '@/components/directory/PersonCard.vue'
 import PersonDetailModal from '@/components/directory/PersonDetailModal.vue'
 import { useDirectory, fullName } from '@/components/directory/useDirectory'
@@ -125,7 +188,7 @@ const router = useRouter()
 
 const {
   loading, error, units, people, fields, canManage, load,
-  peopleById, childrenOf, rootUnits, flatUnits, rolesByPerson,
+  peopleById, unitsById, childrenOf, rootUnits, flatUnits, rolesByPerson,
   unitPath, descendantIds, countPeopleInSubtree,
 } = useDirectory()
 
@@ -134,7 +197,21 @@ const tabs = [
   { id: 'grid', icon: 'mdi:view-grid-outline', label: 'directory.viewGrid' },
 ]
 
+const layouts = [
+  { id: 'tree', icon: 'mdi:family-tree', label: 'directory.layoutTree' },
+  { id: 'list', icon: 'mdi:format-list-bulleted-type', label: 'directory.layoutList' },
+]
+// L'arbre graphique est peu lisible sur petit écran : liste par défaut sous 768 px
+const MOBILE_BREAKPOINT = 768
+const defaultLayout = () => (window.innerWidth < MOBILE_BREAKPOINT ? 'list' : 'tree')
+
+const { locale } = useI18n()
+const textDir = computed(() => (locale.value === 'ar' ? 'rtl' : 'ltr'))
+
 const view = ref(route.query.view === 'grid' ? 'grid' : 'org')
+const layout = ref(['tree', 'list'].includes(route.query.layout) ? route.query.layout : defaultLayout())
+const focusId = ref(route.query.focus ? Number(route.query.focus) : null)
+const treeViewport = ref(null)
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 const unitFilter = ref(route.query.unit ? Number(route.query.unit) : null)
 const selectedPerson = ref(null)
@@ -145,7 +222,25 @@ const syncQuery = () => {
   if (view.value === 'grid') query.view = 'grid'
   if (search.value) query.q = search.value
   if (unitFilter.value) query.unit = String(unitFilter.value)
+  if (view.value === 'org') {
+    if (layout.value !== defaultLayout()) query.layout = layout.value
+    if (focusUnit.value) query.focus = String(focusUnit.value.id)
+  }
   router.replace({ query })
+}
+
+// Unité affichée comme racine (null = organisation complète)
+const focusUnit = computed(() => (focusId.value ? unitsById.value.get(focusId.value) || null : null))
+const displayedRoots = computed(() => (focusUnit.value ? [focusUnit.value] : rootUnits.value))
+
+const setLayout = (l) => {
+  layout.value = l
+  syncQuery()
+}
+
+const setFocus = (id) => {
+  focusId.value = id
+  syncQuery()
 }
 
 const setView = (v) => {
@@ -161,7 +256,11 @@ const onSearch = () => {
 
 const toggleAll = (value) => {
   forceOpen.value = null
-  requestAnimationFrame(() => { forceOpen.value = value })
+  requestAnimationFrame(() => {
+    forceOpen.value = value
+    // Recadrer l'arbre une fois les branches dépliées ou repliées
+    requestAnimationFrame(() => treeViewport.value?.fit())
+  })
 }
 
 const normalize = (s) => (s || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -304,6 +403,56 @@ onMounted(load)
 .directory-search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--text-primary); }
 .directory-unit-select { width: auto; max-width: 16rem; height: 2.5rem; }
 
+.directory-orgbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.directory-layout {
+  display: inline-flex;
+  padding: 0.2rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.directory-layout__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.directory-layout__btn:hover { color: var(--text-primary); }
+.directory-layout__btn--active { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.directory-layout__btn:focus-visible, .directory-crumbs__item:focus-visible { outline: 2px solid var(--accent); }
+.directory-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.directory-crumbs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 0.4rem;
+  color: var(--text-muted);
+}
+.directory-crumbs__item:hover { background: var(--hover); color: var(--text-primary); }
+.directory-crumbs__item--current { color: var(--text-primary); font-weight: 700; }
+.directory-crumbs__sep { color: var(--text-muted); opacity: 0.6; }
+[dir='rtl'] .directory-crumbs__sep { transform: scaleX(-1); }
+.directory-goto { margin-inline-start: auto; }
+.ot-root { display: flex; justify-content: center; padding: 0; margin: 0; }
 .directory-org { display: flex; flex-direction: column; gap: 1rem; padding: 0; }
 .directory-count { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
 .directory-grid {

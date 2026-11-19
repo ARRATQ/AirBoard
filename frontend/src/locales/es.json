@@ -1640,6 +1640,18 @@
       "searchFailed": "Búsqueda imposible.",
       "saveFailed": "No se pudo guardar.",
       "deleteFailed": "No se pudo eliminar."
-    }
+    },
+    "collapse": "Contraer",
+    "expand": "Desplegar",
+    "focusUnit": "Mostrar esta unidad como raíz",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "fitToScreen": "Ajustar a la pantalla",
+    "actualSize": "Tamaño real",
+    "panHint": "Arrastre para mover · rueda o pellizco para hacer zoom",
+    "layoutTree": "Árbol",
+    "layoutList": "Lista",
+    "goToUnit": "Ir a una unidad…",
+    "backToRoot": "Toda la organización"
   }
 }

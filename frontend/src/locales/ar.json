@@ -1639,6 +1639,18 @@
       "searchFailed": "تعذر البحث.",
       "saveFailed": "تعذر الحفظ.",
       "deleteFailed": "تعذر الحذف."
-    }
+    },
+    "collapse": "طي",
+    "expand": "توسيع",
+    "focusUnit": "عرض هذه الوحدة كجذر",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "fitToScreen": "ملاءمة الشاشة",
+    "actualSize": "الحجم الفعلي",
+    "panHint": "اسحب للتحريك · استخدم العجلة أو القرص للتكبير",
+    "layoutTree": "شجرة",
+    "layoutList": "قائمة",
+    "goToUnit": "الانتقال إلى وحدة…",
+    "backToRoot": "المنظمة بأكملها"
   }
 }

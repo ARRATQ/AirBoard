@@ -2086,6 +2086,18 @@
       "searchFailed": "Search failed.",
       "saveFailed": "Could not save.",
       "deleteFailed": "Could not delete."
-    }
+    },
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "focusUnit": "Show this unit as the root",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitToScreen": "Fit to screen",
+    "actualSize": "Actual size",
+    "panHint": "Drag to move · scroll or pinch to zoom",
+    "layoutTree": "Tree",
+    "layoutList": "List",
+    "goToUnit": "Go to a unit…",
+    "backToRoot": "Whole organization"
   }
 }
