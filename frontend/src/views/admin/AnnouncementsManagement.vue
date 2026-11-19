@@ -41,12 +41,7 @@
                 >
                   {{ $t(`announcements.type_${announcement.type}`) }}
                 </span>
-                <span
-                  :class="announcement.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                  class="px-2 py-1 rounded-md text-xs font-medium"
-                >
-                  {{ announcement.is_active ? $t('common.active') : $t('common.inactive') }}
-                </span>
+                <StatusBadge :tone="announcement.is_active ? 'ok' : 'neutral'">{{ announcement.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
                 <span v-if="announcement.priority > 0" class="text-xs text-gray-500 dark:text-gray-400">
                   {{ $t('announcements.priority') }}: {{ announcement.priority }}
                 </span>
@@ -277,6 +272,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { announcementsService } from '@/services/api'

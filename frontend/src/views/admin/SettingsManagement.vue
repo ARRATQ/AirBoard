@@ -1,12 +1,10 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('settings.title') }}</h1>
-          <p class="page-subtitle">{{ $t('settings.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('settings.title') }}</template>
+      <template #description>{{ $t('settings.subtitle') }}</template>
+      <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
             <Icon icon="mdi:key" class="h-4 w-4 mr-2" />
@@ -17,8 +15,8 @@
             {{ $t('settings.resetToDefault') }}
           </button>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Settings Form -->
     <div class="max-w-4xl">
@@ -979,6 +977,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

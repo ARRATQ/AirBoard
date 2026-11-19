@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('groupAdmin.eventsManagement.title') }}</h1>
-          <p class="page-subtitle">{{ $t('groupAdmin.eventsManagement.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('groupAdmin.eventsManagement.title') }}</template>
+      <template #description>{{ $t('groupAdmin.eventsManagement.subtitle') }}</template>
+      <template #actions>
         <router-link to="/group-admin/events/new" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('groupAdmin.eventsManagement.newEvent') }}
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Info Alert -->
     <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-600 rounded-lg">
@@ -296,6 +294,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'

@@ -1,14 +1,10 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t("email.title") }}</h1>
-          <p class="page-subtitle">{{ $t("email.subtitle") }}</p>
-        </div>
-      </div>
-    </div>
+    <PageHeader>
+      <template #title>{{ $t("email.title") }}</template>
+      <template #description>{{ $t("email.subtitle") }}</template>
+    </PageHeader>
 
     <!-- Tabs Navigation -->
     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
@@ -658,6 +654,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted } from "vue";
 import { Icon } from "@iconify/vue";
 import EmailOAuthConfig from "@/components/admin/EmailOAuthConfig.vue";

@@ -161,9 +161,7 @@
                 <p style="color: var(--text-muted)">{{ p.phone }}</p>
               </td>
               <td>
-                <span class="badge" :class="p.is_active ? 'badge-success' : 'badge-secondary'">
-                  {{ p.is_active ? $t('common.active') : $t('common.inactive') }}
-                </span>
+                <StatusBadge :tone="p.is_active ? 'ok' : 'neutral'">{{ p.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
               </td>
               <td class="text-end whitespace-nowrap">
                 <button type="button" class="dir-icon-btn" :title="$t('common.edit')" @click="openPerson(p)">
@@ -254,6 +252,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

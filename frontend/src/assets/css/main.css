@@ -265,19 +265,6 @@ html {
   @apply hidden;
 }
 
-/* Page headers */
-.page-header {
-  @apply mb-8;
-}
-
-.page-title {
-  @apply text-2xl font-semibold text-gray-900 dark:text-white mb-2;
-}
-
-.page-subtitle {
-  @apply text-gray-600 dark:text-gray-400 text-sm;
-}
-
 /* Cards */
 .card {
   @apply border rounded-lg p-6;

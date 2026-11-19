@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ isEditMode ? 'Edit Article' : 'New Article' }}</h1>
-          <p class="page-subtitle">{{ isEditMode ? 'Update your news article' : 'Create a new news article' }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ isEditMode ? 'Edit Article' : 'New Article' }}</template>
+      <template #description>{{ isEditMode ? 'Update your news article' : 'Create a new news article' }}</template>
+      <template #actions>
         <router-link to="/admin/news" class="btn btn-secondary">
           <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
           Back to List
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Form -->
     <form @submit.prevent="saveNews" class="space-y-6">
@@ -370,6 +368,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'

@@ -1,20 +1,18 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('profile.title') }}</h1>
-          <p class="page-subtitle">{{ $t('profile.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('profile.title') }}</template>
+      <template #description>{{ $t('profile.subtitle') }}</template>
+      <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
             <Icon icon="mdi:key" class="h-4 w-4 mr-2" />
             {{ $t('profile.changePassword') }}
           </button>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="max-w-4xl">
       <!-- Avatar Section -->
@@ -405,6 +403,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'

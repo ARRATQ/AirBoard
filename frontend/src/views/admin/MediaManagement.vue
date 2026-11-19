@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('media.title') }}</h1>
-          <p class="page-subtitle">{{ $t('media.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('media.title') }}</template>
+      <template #description>{{ $t('media.subtitle') }}</template>
+      <template #actions>
         <button @click="openUploadModal" class="btn btn-primary">
           <Icon icon="mdi:upload" class="h-4 w-4 mr-2" />
           {{ $t('media.upload') }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="filters-container">
@@ -381,6 +379,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'

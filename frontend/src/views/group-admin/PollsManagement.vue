@@ -112,12 +112,7 @@
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <span
-                  :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                  class="px-2 py-1 rounded-md text-xs font-medium"
-                >
-                  {{ poll.is_active ? t('common.active') : t('polls.status.closed') }}
-                </span>
+                <StatusBadge :tone="poll.is_active ? 'ok' : 'neutral'">{{ poll.is_active ? t('common.active') : t('polls.status.closed') }}</StatusBadge>
                 <span class="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                   {{ poll.poll_type === 'single' ? t('polls.filters.type_single') : t('polls.filters.type_multiple') }}
                 </span>
@@ -220,6 +215,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

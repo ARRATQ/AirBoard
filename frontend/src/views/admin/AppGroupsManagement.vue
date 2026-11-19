@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('common.appGroups') }}</h1>
-          <p class="page-subtitle">{{ $t('appGroups.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('common.appGroups') }}</template>
+      <template #description>{{ $t('appGroups.subtitle') }}</template>
+      <template #actions>
         <button @click="openCreateModal" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('appGroups.new') }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="filters-container">
@@ -70,9 +68,7 @@
           <p v-if="group.description" class="text-sm mb-4">{{ group.description }}</p>
 
           <div class="flex items-center justify-between text-sm mb-3">
-            <span :class="group.is_active ? 'badge badge-success' : 'badge badge-secondary'">
-              {{ group.is_active ? 'Active' : 'Inactive' }}
-            </span>
+            <StatusBadge :tone="group.is_active ? 'ok' : 'neutral'">{{ group.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
             <span class="text-gray-500">Order: {{ group.order || 0 }}</span>
           </div>
 
@@ -158,6 +154,8 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'

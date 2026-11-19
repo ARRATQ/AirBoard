@@ -36,9 +36,7 @@
           <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
             {{ suggestion.category_ref?.name || suggestion.category || t('suggestions.noCategory') }}
           </span>
-          <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-            {{ t(`suggestions.statuses.${suggestion.status}`) }}
-          </span>
+          <StatusBadge :tone="suggestionStatusTone(suggestion.status)">{{ t(`suggestions.statuses.${suggestion.status}`) }}</StatusBadge>
           <span class="text-gray-500 dark:text-gray-400">
             {{ formatAuthor(suggestion) }} · {{ formatDate(suggestion.created_at) }}
           </span>
@@ -89,6 +87,8 @@
 </template>
 
 <script setup>
+import { suggestionStatusTone } from '@/config/status'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

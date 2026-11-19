@@ -36,12 +36,7 @@
           >
             {{ $t(`events.priority.${event.priority}`) }}
           </span>
-          <span 
-            :class="getStatusClass(event.status)"
-            class="px-2 py-1 text-xs font-medium rounded-full"
-          >
-            {{ $t(`events.status.${event.status}`) }}
-          </span>
+          <StatusBadge :tone="eventStatusTone(event.status)">{{ $t(`events.status.${event.status}`) }}</StatusBadge>
         </div>
       </div>
 
@@ -181,6 +176,8 @@
 </template>
 
 <script setup>
+import { eventStatusTone } from '@/config/status'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
@@ -280,15 +277,6 @@ const getPriorityClass = (priority) => {
     'low': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
   }
   return classes[priority] || classes.normal
-}
-
-const getStatusClass = (status) => {
-  const classes = {
-    'confirmed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    'tentative': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    'cancelled': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-  }
-  return classes[status] || classes.confirmed
 }
 
 const editEvent = () => {

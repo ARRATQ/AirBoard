@@ -174,9 +174,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="user.is_active ? 'badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-                    {{ user.is_active ? $t('common.active') : $t('common.inactive') }}
-                  </span>
+                  <StatusBadge :tone="user.is_active ? 'ok' : 'bad'">{{ user.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <!-- Actions pour utilisateurs actifs -->
@@ -296,6 +294,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'

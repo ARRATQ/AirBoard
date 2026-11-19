@@ -1,12 +1,10 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('events.admin.title') }}</h1>
-          <p class="page-subtitle">{{ $t('events.admin.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('events.admin.title') }}</template>
+      <template #description>{{ $t('events.admin.subtitle') }}</template>
+      <template #actions>
         <div class="flex items-center gap-3">
           <button v-if="isAdminMode" @click="showImportHolidaysModal = true" class="btn btn-secondary">
             <Icon icon="mdi:calendar-star" class="h-4 w-4 mr-2" />
@@ -17,8 +15,8 @@
             {{ $t('events.admin.newEvent') }}
           </router-link>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="card mb-6">
@@ -270,6 +268,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'

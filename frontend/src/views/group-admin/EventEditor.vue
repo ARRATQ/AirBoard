@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ isEditMode ? $t('groupAdmin.eventEditor.title.edit') : $t('groupAdmin.eventEditor.title.new') }}</h1>
-          <p class="page-subtitle">{{ isEditMode ? $t('groupAdmin.eventEditor.subtitle.edit') : $t('groupAdmin.eventEditor.subtitle.new') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ isEditMode ? $t('groupAdmin.eventEditor.title.edit') : $t('groupAdmin.eventEditor.title.new') }}</template>
+      <template #description>{{ isEditMode ? $t('groupAdmin.eventEditor.subtitle.edit') : $t('groupAdmin.eventEditor.subtitle.new') }}</template>
+      <template #actions>
         <router-link to="/group-admin/events" class="btn btn-secondary">
           <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
           {{ $t('groupAdmin.eventEditor.backToList') }}
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Form -->
     <form @submit.prevent="saveEvent" class="space-y-6">
@@ -431,6 +429,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted, getCurrentInstance } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
