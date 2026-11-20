@@ -898,6 +898,12 @@ html {
 
 /* RTL + mobile: inversion des translations */
 @media (max-width: 1024px) {
+  /* Comme en LTR : pas de marge réservée à la sidebar sur mobile */
+  [dir='rtl'] .main-content,
+  [dir='rtl'] .main-content.sidebar-collapsed {
+    margin-right: 0;
+  }
+
   [dir='rtl'] .sidebar {
     @apply left-auto right-0;
   }
