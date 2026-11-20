@@ -147,6 +147,66 @@ hexadécimales dans 64 fichiers. Des surcharges globales (`main.css:878-893`) se
 
 > Avant de coder : choisir une direction visuelle précise et la valider avec des maquettes.
 
+### Direction A+ (validée le 2026-11-19)
+
+Maquette de référence : [`plans/maquettes/airboard-a-plus.html`](maquettes/airboard-a-plus.html)
+(les tokens CSS sont sur `.tok`).
+
+Sobre, inspirée des panneaux de départs d'aéroport, avec retenue : le panneau d'annonces et les tableaux
+de liste ont l'allure d'un tableau d'affichage sombre ; les chiffres clés défilent comme des palettes.
+Aucun gadget qui invente des données.
+
+**Règles**
+- La couleur signale les exceptions. L'état normal est en encre ; seuls l'alerte, le retard,
+  l'annulation, le « à confirmer » et le férié sont colorés.
+- Un vocabulaire de statuts commun à tous les modules (`StatusBadge`) : petites capitales mono, bordure
+  1 px `currentColor`, rayon 3 px. Clignotement réservé à l'urgence, coupé sous `prefers-reduced-motion`.
+- Partir de l'existant : aucun champ ni aucune fonction absents du modèle. Les « applications » sont des
+  liens vers des ressources (applis en ligne, documents et sites Office 365, liens web), pas des services
+  surveillés.
+- Aucun module visible par un utilisateur ne disparaît. Clair et sombre ; fr, en, es, ar (RTL : propriétés
+  CSS logiques).
+
+**Typographie** : IBM Plex Sans (+ IBM Plex Sans Arabic pour `ar`) ; IBM Plex Mono pour chiffres, dates,
+heures et étiquettes en capitales. Remplace Inter et Tajawal (`display=swap`, graisses 400/500/600).
+Corps 13,5 px ; titre de page 22 px/600 ; surtitre mono 11 px en capitales, interlettrage 0,1 em.
+
+**Forme** : rayons 3 px (badges, petits boutons), 4 px (boutons, champs, tuiles), 6 px (cartes,
+panneaux) ; `rounded-full` seulement pour avatars et pastilles. Pas d'ombre sur les cartes (bordure 1 px),
+une seule ombre pour les éléments flottants. Lignes de tableau de 40 px. Lien de menu actif : bordure de
+début de 3 px couleur `fill`.
+
+**Tokens** (variables CSS générées par `stores/app.js` pour chaque palette, palette personnalisée
+comprise) : `--acc` (couleur de la palette), `--acc-ink` (variante foncée, contraste ≥ 4,5:1 avec le
+blanc), `--fill` (= `acc-ink` en clair, `acc` en sombre).
+
+| Token | Clair | Sombre |
+|---|---|---|
+| chrome (menu latéral seul) | #f3f4f6 | #0b0c0e |
+| bg (page de contenu) | #fff | #141619 |
+| surface (cartes, barre du haut) | #fff | #141619 |
+| sunken (en-têtes de tableau, champs) | #f5f6f7 | #101215 |
+| line | #e2e4e8 | #25292e |
+| text / muted | #121518 / #596068 | #e6e9ec / #959da5 |
+| on-fill | #fff | #141210 |
+| ok / warn / bad / info | #15803d / #b45309 / #b91c1c / #1d4ed8 | #4ade80 / #fbbf24 / #f87171 / #93c5fd |
+| board / board-2 (annonces, chiffres clés seulement) | #1b1e22 / #24282d | #1d2125 / #252a2f |
+| board-text / board-dim | #f4f1e8 / #959ba2 | #f4f1e8 / #80868d |
+| board-hi / board-ok / board-bad | #ffc857 / #5ee08f / #ff7b72 | idem |
+
+Fonds « menu gris, contenu blanc » (choix du 2026-11-20) : aucune teinte d'accent dans les fonds,
+séparation par bordures. Tableaux et résultat des jours ouvrés en clair (surface, line, en-tête sunken,
+chiffre principal en acc-ink) ; le noir board ne reste que sur le panneau d'annonces et le bandeau
+des chiffres clés.
+
+**Lots d'exécution** (un commit chacun) : 0 figer la direction ; 1 tokens, polices et Tailwind ;
+2 composants `components/ui/` + Vitest ; 3 `alert()`/`confirm()` → toasts et `ConfirmDialog` ;
+4 harmonisation (`PageHeader`, `StatusBadge`) ; 5 `SettingsManagement.vue` en mode clair ; 6 code mort.
+
+**Reporté hors chantier 3** : tour de contrôle admin (chantier 4) ; type de ressource déduit de l'URL,
+« Nouveau » pendant 14 jours, note admin datée, calendrier restylé et vue Liste en tableau d'affichage
+(chantier 5).
+
 ## Chantier 4 — Navigation et organisation
 
 1. **Menu admin** : environ 37 liens pour un admin, parce que tout le bloc « Administration de groupe »

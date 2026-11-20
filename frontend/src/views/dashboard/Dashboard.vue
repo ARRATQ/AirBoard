@@ -1,15 +1,10 @@
 <template>
   <div class="content-area">
     <!-- Header avec paramètres dynamiques -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ appSettings.dashboard_title || 'Dashboard' }}</h1>
-          <p class="page-subtitle">
-            {{ appSettings.welcome_message || 'Welcome to your application portal' }}
-          </p>
-        </div>
-
+    <PageHeader>
+      <template #title>{{ appSettings.dashboard_title || 'Dashboard' }}</template>
+      <template #description>{{ appSettings.welcome_message || 'Welcome to your application portal' }}</template>
+      <template #actions>
         <!-- Controls -->
         <div class="flex items-center gap-3">
           <!-- View Mode Selector (hidden on mobile) -->
@@ -41,13 +36,8 @@
             <Icon icon="mdi:menu" class="h-5 w-5" />
           </button>
         </div>
-      </div>
-
-      <!-- View Mode Selector Mobile (below header) -->
-      <div class="md:hidden mt-4">
-        <ViewModeSelector v-model="viewMode" />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Statistiques (Admin seulement) -->
     <div v-if="authStore.isAdmin && dashboard?.stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -194,7 +184,7 @@
                 @click="goToAnnouncement(index)"
                 class="transition-all duration-200"
                 :class="index === currentAnnouncementIndex
-                  ? 'w-6 h-2 rounded-full bg-blue-600 dark:bg-blue-400'
+                  ? 'w-6 h-2 rounded-full bg-primary-600 dark:bg-primary-400'
                   : 'w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'"
                 :title="`Announcement ${index + 1}`"
               ></button>
@@ -332,6 +322,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'

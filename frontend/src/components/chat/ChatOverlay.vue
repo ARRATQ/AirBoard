@@ -105,7 +105,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher..."
-                class="w-full pl-8 pr-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-400/30"
+                class="w-full pl-8 pr-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400/30"
               >
               <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <Icon icon="mdi:close-circle" class="text-xs" />
@@ -118,12 +118,12 @@
 
             <!-- Non-lus -->
             <template v-if="hasUnreadUsers">
-              <p class="text-[10px] font-bold text-blue-500 uppercase tracking-wide px-1.5 pt-1 pb-0.5">Non lus</p>
+              <p class="text-[10px] font-bold text-primary-500 uppercase tracking-wide px-1.5 pt-1 pb-0.5">Non lus</p>
               <div
                 v-for="user in unreadUsers" :key="'u_'+user.id"
                 class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
-                  ? 'bg-blue-50 dark:bg-blue-900/20'
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
@@ -135,7 +135,7 @@
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
                   <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
                 </div>
-                <span class="bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center flex-shrink-0">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
+                <span class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center flex-shrink-0">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
               </div>
             </template>
 
@@ -146,7 +146,7 @@
                 v-for="group in filteredGroups" :key="group.id"
                 class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === group.id && chatStore.activeConversation?.type === 'group'
-                  ? 'bg-blue-50 dark:bg-blue-900/20'
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('group', group)"
               >
@@ -157,7 +157,7 @@
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ group.name }}</div>
                   <div class="text-[10px] text-gray-400">Groupe</div>
                 </div>
-                <span v-if="chatStore.unreadCounts['group_'+group.id]" class="bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['group_'+group.id] }}</span>
+                <span v-if="chatStore.unreadCounts['group_'+group.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['group_'+group.id] }}</span>
               </div>
             </template>
 
@@ -168,7 +168,7 @@
                 v-for="user in groupData.users" :key="user.id"
                 class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
-                  ? 'bg-blue-50 dark:bg-blue-900/20'
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
@@ -180,7 +180,7 @@
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
                   <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
                 </div>
-                <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
+                <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
               </div>
             </template>
 
@@ -191,7 +191,7 @@
                 v-for="user in otherUsers" :key="'o_'+user.id"
                 class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
-                  ? 'bg-blue-50 dark:bg-blue-900/20'
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
@@ -203,7 +203,7 @@
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
                   <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
                 </div>
-                <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-blue-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
+                <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
               </div>
             </template>
 
@@ -349,7 +349,7 @@
               <button
                 @click="showEmojiPicker = !showEmojiPicker"
                 class="flex-shrink-0 p-1.5 rounded-lg transition-colors"
-                :class="showEmojiPicker ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-400 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                :class="showEmojiPicker ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-400 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-800'"
                 title="Emoji"
               >
                 <Icon icon="mdi:emoticon-outline" class="h-5 w-5" />
@@ -361,7 +361,7 @@
                 @focus="showEmojiPicker = false"
                 type="text"
                 placeholder="Écrire un message..."
-                class="flex-1 min-w-0 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
+                class="flex-1 min-w-0 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
               >
 
               <button
@@ -384,7 +384,7 @@
           :style="{ background: 'var(--bg-page)' }"
         >
           <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style="background:linear-gradient(135deg,#dbeafe,#e0e7ff)">
-            <Icon icon="mdi:chat-outline" class="text-3xl text-blue-400" />
+            <Icon icon="mdi:chat-outline" class="text-3xl text-primary-400" />
           </div>
           <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sélectionnez une conversation</p>
           <p class="text-xs mt-1 text-gray-400">Choisissez un contact à gauche</p>
@@ -398,6 +398,8 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useChatStore } from '@/stores/chat';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/composables/useConfirm';
 import { storeToRefs } from 'pinia';
 import { Icon } from '@iconify/vue';
 import DOMPurify from 'dompurify';
@@ -409,6 +411,8 @@ const props = defineProps({
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
+const { t } = useI18n();
+const { confirm: askConfirm } = useConfirm();
 const { activeConversation, messages } = storeToRefs(chatStore);
 
 const newMessage = ref('');
@@ -513,13 +517,13 @@ const sendMessage = () => {
 
 const formatTime = (dateStr) => new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-const deleteMessage = (msgId) => {
-  if (confirm('Supprimer ce message ?')) chatStore.deleteMessage(msgId);
+const deleteMessage = async (msgId) => {
+  if (await askConfirm({ message: t('chat.confirmDeleteMessage'), tone: 'danger' })) chatStore.deleteMessage(msgId);
 };
 
-const confirmClearHistory = () => {
+const confirmClearHistory = async () => {
   showMenu.value = false;
-  if (confirm("Voulez-vous vraiment effacer tout l'historique de cette conversation ?")) chatStore.clearHistory();
+  if (await askConfirm({ message: t('chat.confirmClearHistory'), tone: 'danger', confirmLabel: t('chat.clearHistory') })) chatStore.clearHistory();
 };
 
 const faceMode = ref('user');

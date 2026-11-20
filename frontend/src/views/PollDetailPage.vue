@@ -107,6 +107,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -118,6 +119,7 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const poll = ref(null)
 const groups = ref([])
@@ -191,7 +193,7 @@ const handleEditSuccess = () => {
 
 // Confirmer la suppression
 const confirmDelete = async () => {
-  if (!confirm(t('polls.actions.confirmDelete'))) {
+  if (!(await askConfirm({ message: t('polls.actions.confirmDelete'), tone: 'danger' }))) {
     return
   }
 
@@ -221,7 +223,7 @@ const confirmDelete = async () => {
 
 // Confirmer la fermeture
 const confirmClose = async () => {
-  if (!confirm(t('polls.actions.confirmClose'))) {
+  if (!(await askConfirm({ message: t('polls.actions.confirmClose'), tone: 'danger', confirmLabel: t('polls.actions.close') }))) {
     return
   }
 

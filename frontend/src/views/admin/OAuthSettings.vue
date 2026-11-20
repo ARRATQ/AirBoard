@@ -1,14 +1,10 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('oauth.title') }}</h1>
-          <p class="page-subtitle">{{ $t('oauth.subtitle') }}</p>
-        </div>
-      </div>
-    </div>
+    <PageHeader>
+      <template #title>{{ $t('oauth.title') }}</template>
+      <template #description>{{ $t('oauth.subtitle') }}</template>
+    </PageHeader>
 
     <!-- OAuth Providers List -->
     <div class="max-w-4xl space-y-6">
@@ -56,7 +52,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon :icon="selectedProvider.icon" class="h-6 w-6 text-blue-500" />
+                <Icon :icon="selectedProvider.icon" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
                 <h3 class="modal-title">{{ $t('oauth.configure') }} {{ selectedProvider.display_name }}</h3>
@@ -247,6 +243,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'

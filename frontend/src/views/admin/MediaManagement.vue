@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('media.title') }}</h1>
-          <p class="page-subtitle">{{ $t('media.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('media.title') }}</template>
+      <template #description>{{ $t('media.subtitle') }}</template>
+      <template #actions>
         <button @click="openUploadModal" class="btn btn-primary">
           <Icon icon="mdi:upload" class="h-4 w-4 mr-2" />
           {{ $t('media.upload') }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="filters-container">
@@ -195,7 +193,7 @@
               @dragover.prevent="isDragging = true"
               @dragleave.prevent="isDragging = false"
               @drop.prevent="handleDrop"
-              :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-gray-600']"
+              :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', isDragging ? 'border-primary-500 bg-primary-500/10' : 'border-gray-600']"
             >
               <Icon icon="mdi:cloud-upload" class="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <p class="text-gray-300 mb-2">{{ $t('media.drag_drop') }}</p>
@@ -215,7 +213,7 @@
             <div v-if="selectedFile" class="mt-4 p-4 bg-gray-800 rounded-lg">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <Icon :icon="getFileIcon(selectedFile.type)" class="h-8 w-8 text-blue-500" />
+                  <Icon :icon="getFileIcon(selectedFile.type)" class="h-8 w-8 text-primary-500" />
                   <div>
                     <p class="text-sm font-medium">{{ selectedFile.name }}</p>
                     <p class="text-xs text-gray-400">{{ formatSize(selectedFile.size) }}</p>
@@ -230,7 +228,7 @@
             <div v-if="uploadProgress > 0 && uploadProgress < 100" class="mt-4">
               <div class="w-full bg-gray-700 rounded-full h-2">
                 <div
-                  class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  class="bg-primary-500 h-2 rounded-full transition-all duration-300"
                   :style="{ width: uploadProgress + '%' }"
                 ></div>
               </div>
@@ -327,7 +325,7 @@
               <p><strong>{{ $t('media.uploaded_by') }}:</strong> {{ viewingMedia?.uploader?.username || 'N/A' }}</p>
               <p><strong>{{ $t('media.uploaded_at') }}:</strong> {{ formatDate(viewingMedia?.created_at) }}</p>
               <p><strong>{{ $t('media.url') }}:</strong>
-                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" class="text-blue-400 hover:text-blue-300">
+                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" class="text-primary-400 hover:text-primary-300">
                   {{ getMediaUrl(viewingMedia?.url) }}
                 </a>
               </p>
@@ -381,12 +379,15 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
+import { useAppStore } from '@/stores/app'
 import { getAdminMediaList, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
 
 const { t } = useI18n()
+const appStore = useAppStore()
 
 // State
 const mediaList = ref([])
@@ -523,7 +524,7 @@ const uploadFile = async () => {
     closeUploadModal()
   } catch (error) {
     console.error('Failed to upload file:', error)
-    alert(t('media.upload_error'))
+    appStore.showError(t('media.upload_error'))
   } finally {
     uploading.value = false
   }
@@ -556,7 +557,7 @@ const updateMedia = async () => {
     closeEditModal()
   } catch (error) {
     console.error('Failed to update media:', error)
-    alert(t('media.update_error'))
+    appStore.showError(t('media.update_error'))
   } finally {
     updating.value = false
   }
@@ -575,7 +576,7 @@ const closeViewModal = () => {
 const copyUrl = (media) => {
   const url = getMediaUrl(media.url)
   navigator.clipboard.writeText(url)
-  alert(t('media.url_copied'))
+  appStore.showSuccess(t('media.url_copied'))
 }
 
 const downloadMedia = (media) => {
@@ -606,7 +607,7 @@ const deleteMedia = async () => {
     closeDeleteModal()
   } catch (error) {
     console.error('Failed to delete media:', error)
-    alert(t('media.delete_error'))
+    appStore.showError(t('media.delete_error'))
   } finally {
     deleting.value = false
   }

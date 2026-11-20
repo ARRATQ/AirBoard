@@ -3,9 +3,9 @@
     <div class="w-full">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('users.title') }}</h1>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="min-w-0 flex-[1_1_16rem]">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ $t('users.title') }}</h1>
             <p class="mt-1 text-gray-600 dark:text-gray-400">{{ $t('users.subtitle') }}</p>
           </div>
           <button @click="openCreateModal" class="btn btn-primary">
@@ -174,9 +174,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span :class="user.is_active ? 'badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-                    {{ user.is_active ? $t('common.active') : $t('common.inactive') }}
-                  </span>
+                  <StatusBadge :tone="user.is_active ? 'ok' : 'bad'">{{ user.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <!-- Actions pour utilisateurs actifs -->
@@ -296,12 +294,17 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
+import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
 
+const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 // State
@@ -561,7 +564,13 @@ const restoreUser = async (user) => {
 }
 
 const confirmPermanentDelete = async (user) => {
-  if (confirm(`⚠️ ATTENTION: Supprimer DÉFINITIVEMENT l'utilisateur "${user.username}" ?\n\nCette action est IRRÉVERSIBLE et supprimera toutes les données associées.`)) {
+  if (
+    await askConfirm({
+      title: t('users.permanentDeleteTitle'),
+      message: t('users.permanentDeleteMessage', { username: user.username }),
+      tone: 'danger'
+    })
+  ) {
     try {
       await adminService.permanentlyDeleteUser(user.id)
       appStore.showSuccess('Utilisateur supprimé définitivement')

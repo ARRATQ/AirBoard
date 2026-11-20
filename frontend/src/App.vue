@@ -10,18 +10,22 @@
       class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
     />
 
-    <!-- Bouton hamburger mobile - visible seulement sur mobile/tablette quand sidebar fermée -->
-    <button
-      v-if="isAuthenticated && !isAuthPage && !appStore.sidebarOpen"
-      @click="appStore.setSidebarOpen(true)"
-      class="fixed top-4 left-4 z-50 p-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg shadow-lg transition-all duration-200 lg:hidden"
-      :title="$t('common.expandSidebar')"
-    >
-      <Icon icon="mdi:menu" class="h-6 w-6" />
-    </button>
-
     <!-- Main content -->
     <div :class="mainContentClasses">
+      <!-- Barre mobile : le bouton menu occupe sa propre bande au lieu de flotter sur les titres -->
+      <div v-if="isAuthenticated && !isAuthPage" class="mobile-bar lg:hidden">
+        <button
+          type="button"
+          @click="appStore.setSidebarOpen(true)"
+          class="mobile-bar__btn"
+          :title="$t('common.expandSidebar')"
+          :aria-label="$t('common.expandSidebar')"
+          :aria-expanded="appStore.sidebarOpen"
+        >
+          <Icon icon="mdi:menu" class="h-6 w-6" />
+        </button>
+      </div>
+
       <!-- Zoom wrapper (contenu zoomé) -->
       <div v-if="isAuthenticated && !isAuthPage" class="zoom-wrapper" :style="zoomWrapperStyle">
         <!-- Loading global -->
@@ -52,6 +56,9 @@
     <!-- Notifications -->
     <NotificationContainer />
 
+    <!-- Confirmation (await confirm(…) via composables/useConfirm) -->
+    <ConfirmDialog />
+
     <!-- Speed Dial FAB (chat + chatbots fusionnés en un seul bouton flottant) -->
     <FloatingSpeedDial v-if="isAuthenticated && !isAuthPage" />
   </div>
@@ -68,6 +75,7 @@ import { useAppStore } from '@/stores/app'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import LoadingOverlay from '@/components/ui/LoadingOverlay.vue'
 import NotificationContainer from '@/components/ui/NotificationContainer.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import FloatingSpeedDial from '@/components/layout/FloatingSpeedDial.vue'
 
 // Stores
@@ -197,6 +205,39 @@ onMounted(async () => {
 </script>
 
 <style>
+/* Barre mobile (< lg) : bouton menu dans le flux, collant en haut */
+.mobile-bar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  padding-block: 8px;
+  padding-inline: 12px;
+  background: var(--chrome);
+  border-block-end: 1px solid var(--line);
+}
+
+.mobile-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 8px;
+  color: var(--text);
+  transition: background-color 150ms ease;
+}
+
+.mobile-bar__btn:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.mobile-bar__btn:focus-visible {
+  outline: 2px solid rgb(var(--primary-500));
+  outline-offset: 2px;
+}
+
 /* Zoom wrapper */
 .zoom-wrapper {
   /* Avec la propriété zoom CSS, pas besoin de compensation de taille */

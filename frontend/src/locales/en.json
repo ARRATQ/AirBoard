@@ -252,9 +252,13 @@
     "activate": "Activate",
     "deactivate": "Deactivate",
     "last_connection": "Last Connection",
-    "never_connected": "Never connected"
+    "never_connected": "Never connected",
+    "permanentDeleteTitle": "Permanent deletion",
+    "permanentDeleteMessage": "Permanently delete the user \"{username}\"?\n\nThis action cannot be undone and will delete all associated data."
   },
   "settings": {
+    "general": "General",
+    "homePageCustomization": "Home page customization",
     "title": "App Settings",
     "subtitle": "Customize your application appearance and branding",
     "changePassword": "Change Password",
@@ -324,7 +328,11 @@
     "typeLoadError": "Error loading types",
     "typeSaveError": "Error saving type",
     "typeDeleteError": "Error deleting type",
-    "noType": "No types"
+    "noType": "No types",
+    "tagSaveError": "Error saving tag",
+    "resetDatabaseSuccess": "Database reset successfully. {message} You will be logged out.",
+    "resetDatabaseError": "Error resetting the database: {error}",
+    "confirmDeleteHeroMessage": "Are you sure you want to delete this message?"
   },
   "appGroups": {
     "subtitle": "Organize your resources into groups",
@@ -382,7 +390,8 @@
     "peakUsage": "Peak usage",
     "noData": "No data available",
     "noAnalytics": "No Analytics Data",
-    "noAnalyticsText": "Start using resources to see analytics data here."
+    "noAnalyticsText": "Start using resources to see analytics data here.",
+    "exportStarted": "CSV data export started..."
   },
   "reports": {
     "title": "Reports",
@@ -532,6 +541,9 @@
       "mostReacted": "Most reactions",
       "titleAZ": "Title (A-Z)",
       "titleZA": "Title (Z-A)"
+    },
+    "editor": {
+      "invalidVideoUrl": "Unrecognized URL. Use a YouTube or Vimeo URL."
     }
   },
   "dashboard": {
@@ -1408,7 +1420,11 @@
       "minutes_ago": "{count} min",
       "hours_ago": "{count} h",
       "days_ago": "{count} d"
-    }
+    },
+    "confirmDelete": "Are you sure you want to delete this comment?",
+    "createError": "Error creating the comment",
+    "updateError": "Error updating the comment",
+    "deleteError": "Error deleting the comment"
   },
   "feedback": {
     "helpful": "Was this helpful?",
@@ -1438,7 +1454,10 @@
     "require_moderation_desc": "Comments require approval before being published",
     "max_length": "Maximum comment length",
     "max_length_desc": "Maximum number of characters allowed per comment",
-    "save_settings": "Save settings"
+    "save_settings": "Save settings",
+    "moderateError": "Error moderating the comment",
+    "settingsSaved": "Settings updated successfully",
+    "settingsSaveError": "Error updating the settings"
   },
   "notifications": {
     "title": "Notifications",
@@ -1775,7 +1794,8 @@
     "badges": "Badges",
     "points": "Points",
     "threshold": "Threshold",
-    "badgeReward": "XP reward"
+    "badgeReward": "XP reward",
+    "confirmDeleteBadge": "Delete the badge \"{name}\"?"
   },
   "help": {
     "title": "Help",
@@ -2111,5 +2131,36 @@
     "layoutList": "List",
     "goToUnit": "Go to a unit…",
     "backToRoot": "Whole organization"
+  },
+  "ui": {
+    "close": "Close",
+    "confirm": {
+      "title": "Confirm",
+      "ok": "Confirm",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "table": {
+      "search": "Search…",
+      "empty": "No results.",
+      "prev": "Previous page",
+      "next": "Next page",
+      "range": "{from}–{to} of {total}",
+      "sortAsc": "Sort ascending",
+      "sortDesc": "Sort descending"
+    },
+    "toast": {
+      "region": "Notifications",
+      "close": "Dismiss notification",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Information"
+    }
+  },
+  "chat": {
+    "confirmDeleteMessage": "Delete this message?",
+    "confirmClearHistory": "Do you really want to clear the entire history of this conversation?",
+    "clearHistory": "Clear history"
   }
 }

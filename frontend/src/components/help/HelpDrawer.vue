@@ -17,14 +17,14 @@
       >
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
           <!-- Header -->
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-blue-600 flex-shrink-0">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600 flex-shrink-0">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:help-circle" class="h-6 w-6 text-blue-600" />
+                <Icon icon="mdi:help-circle" class="h-6 w-6 text-primary-600" />
               </div>
               <div>
                 <h2 class="text-lg font-semibold text-white">{{ $t('help.title') }}</h2>
-                <p class="text-sm text-blue-100">{{ $t('help.subtitle') }}</p>
+                <p class="text-sm text-primary-100">{{ $t('help.subtitle') }}</p>
               </div>
             </div>
             <button
@@ -45,7 +45,7 @@
                 :class="[
                   'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
                   selectedGuide === guide.id
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                 ]"
               >
@@ -79,7 +79,7 @@
                           :class="[
                             'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors',
                             selectedPage?.id === item.id
-                              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-medium'
+                              ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium'
                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                           ]"
                         >
@@ -96,7 +96,7 @@
             <div class="flex-1 overflow-y-auto">
               <div v-if="loading" class="flex items-center justify-center h-full">
                 <div class="text-center">
-                  <Icon icon="mdi:loading" class="h-8 w-8 text-blue-500 animate-spin mx-auto mb-2" />
+                  <Icon icon="mdi:loading" class="h-8 w-8 text-primary-500 animate-spin mx-auto mb-2" />
                   <p class="text-gray-500 dark:text-gray-400">{{ $t('help.loading') }}</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@
 
                 <!-- Markdown Content -->
                 <div
-                  class="prose prose-blue dark:prose-invert max-w-none prose-headings:scroll-mt-4 prose-img:rounded-lg prose-img:shadow-lg prose-a:text-blue-600 dark:prose-a:text-blue-400"
+                  class="prose prose-blue dark:prose-invert max-w-none prose-headings:scroll-mt-4 prose-img:rounded-lg prose-img:shadow-lg prose-a:text-primary-600 dark:prose-a:text-primary-400"
                   v-html="renderedContent"
                 />
               </div>
@@ -576,6 +576,6 @@ onMounted(() => {
 }
 
 :deep(.prose blockquote) {
-  @apply border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 pl-4 py-2 italic;
+  @apply border-l-4 border-primary-500 bg-primary-50 dark:bg-primary-900/20 pl-4 py-2 italic;
 }
 </style>

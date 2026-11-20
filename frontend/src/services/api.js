@@ -619,12 +619,6 @@ export const newsService = {
     return response.data
   },
 
-  // User - Get unread count
-  async getUnreadCount() {
-    const response = await api.get('/news/unread/count')
-    return response.data
-  },
-
   // Editor - Create news
   async createNews(data) {
     const response = await api.post('/editor/news', data)

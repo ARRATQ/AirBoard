@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('groupAdmin.appGroupsManagement.title') }}</h1>
-          <p class="page-subtitle">{{ $t('groupAdmin.appGroupsManagement.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('groupAdmin.appGroupsManagement.title') }}</template>
+      <template #description>{{ $t('groupAdmin.appGroupsManagement.subtitle') }}</template>
+      <template #actions>
         <button @click="openCreateModal" class="btn btn-primary" :disabled="managedGroups.length === 0">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('groupAdmin.appGroupsManagement.newGroup') }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Info Alert -->
     <div v-if="managedGroups.length === 0" class="mb-6 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
@@ -83,9 +81,7 @@
           <p v-if="group.description" class="text-sm mb-4">{{ group.description }}</p>
 
           <div class="flex items-center justify-between text-sm mb-2">
-            <span :class="group.is_active ? 'badge badge-success' : 'badge badge-secondary'">
-              {{ group.is_active ? $t('groupAdmin.appGroupsManagement.statusBadge.active') : $t('groupAdmin.appGroupsManagement.statusBadge.inactive') }}
-            </span>
+            <StatusBadge :tone="group.is_active ? 'ok' : 'neutral'">{{ group.is_active ? $t('groupAdmin.appGroupsManagement.statusBadge.active') : $t('groupAdmin.appGroupsManagement.statusBadge.inactive') }}</StatusBadge>
             <span class="text-gray-500">{{ $t('groupAdmin.appGroupsManagement.order') }} {{ group.order || 0 }}</span>
           </div>
 
@@ -168,6 +164,8 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'

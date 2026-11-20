@@ -69,7 +69,7 @@
           <Icon
             v-if="item.status === 'uploading'"
             icon="mdi:loading"
-            class="animate-spin text-blue-500"
+            class="animate-spin text-primary-500"
           />
           <Icon
             v-else-if="item.status === 'success'"
@@ -248,11 +248,11 @@ export default {
 
 .upload-zone {
   @apply border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer transition-all;
-  @apply hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20;
+  @apply hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20;
 }
 
 .upload-zone.drag-over {
-  @apply border-blue-500 bg-blue-50 dark:bg-blue-900/30;
+  @apply border-primary-500 bg-primary-50 dark:bg-primary-900/30;
 }
 
 .upload-zone.uploading {
@@ -285,7 +285,7 @@ export default {
 }
 
 .progress-fill {
-  @apply h-full bg-blue-500 transition-all duration-300;
+  @apply h-full bg-primary-500 transition-all duration-300;
 }
 
 .error-message {

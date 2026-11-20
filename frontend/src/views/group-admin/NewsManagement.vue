@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('groupAdmin.newsManagement.title') }}</h1>
-          <p class="page-subtitle">{{ $t('groupAdmin.newsManagement.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('groupAdmin.newsManagement.title') }}</template>
+      <template #description>{{ $t('groupAdmin.newsManagement.subtitle') }}</template>
+      <template #actions>
         <router-link to="/group-admin/news/new" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('groupAdmin.newsManagement.newArticle') }}
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Info Alert -->
     <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-600 rounded-lg">
@@ -155,7 +153,7 @@
                       <span
                         v-for="group in news.target_groups.slice(0, 2)"
                         :key="group.id"
-                        class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900 rounded text-xs"
+                        class="px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900 rounded text-xs"
                       >
                         {{ group.name }}
                       </span>
@@ -285,14 +283,17 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { newsService, groupAdminService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
@@ -405,10 +406,10 @@ const deleteNews = async () => {
     console.log('[DEBUG] Reloading news list...')
     await loadNews()
     console.log('[DEBUG] News list after reload:', newsList.value.map(n => ({ id: n.id, title: n.title })))
-    appStore.showSuccess($t('groupAdmin.newsManagement.deleteSuccess'))
+    appStore.showSuccess(t('groupAdmin.newsManagement.deleteSuccess'))
   } catch (error) {
     console.error('[ERROR] Error deleting news:', error)
-    appStore.showError($t('groupAdmin.newsManagement.deleteError'))
+    appStore.showError(t('groupAdmin.newsManagement.deleteError'))
   } finally {
     deleteLoading.value = false
   }

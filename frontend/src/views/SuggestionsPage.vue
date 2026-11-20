@@ -113,9 +113,7 @@
               <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 {{ item.category_ref?.name || item.category || t('suggestions.noCategory') }}
               </span>
-              <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                {{ t(`suggestions.statuses.${item.status}`) }}
-              </span>
+              <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
               <span class="text-gray-500 dark:text-gray-400">
                 {{ formatAuthor(item) }} · {{ formatDate(item.created_at) }}
               </span>
@@ -168,9 +166,7 @@
           <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
             {{ item.category_ref?.name || item.category || t('suggestions.noCategory') }}
           </span>
-          <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-            {{ t(`suggestions.statuses.${item.status}`) }}
-          </span>
+          <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
         </div>
 
         <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line line-clamp-4 flex-1">{{ item.description }}</p>
@@ -288,6 +284,8 @@
 </template>
 
 <script setup>
+import { suggestionStatusTone } from '@/config/status'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

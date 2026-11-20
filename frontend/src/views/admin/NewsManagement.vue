@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">News Hub</h1>
-          <p class="page-subtitle">Manage your news articles and updates</p>
-        </div>
+    <PageHeader>
+      <template #title>News Hub</template>
+      <template #description>Manage your news articles and updates</template>
+      <template #actions>
         <router-link to="/admin/news/new" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           New Article
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters -->
     <div class="card mb-6">
@@ -250,6 +248,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
