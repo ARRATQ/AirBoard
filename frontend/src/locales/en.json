@@ -2208,7 +2208,8 @@
       "tagColor": "Tag color",
       "tagExists": "This tag already exists and has been added",
       "tagCreated": "Tag \"{name}\" created",
-      "removeItem": "Remove {name}"
+      "removeItem": "Remove {name}",
+      "lockedGroup": "Group targeted by another administrator: you cannot remove it"
     }
   },
   "nav": {

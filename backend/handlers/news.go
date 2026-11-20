@@ -584,27 +584,30 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 
 	// Mettre à jour les groupes cibles avec vérification pour les admins de groupe
 	if req.TargetGroupIDs != nil {
-		// Si admin de groupe (non-admin global), vérifier qu'il ne cible que ses groupes
-		if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
-			for _, targetGroupID := range req.TargetGroupIDs {
-				canManage := false
-				for _, managedID := range managedGroupIDs {
-					if targetGroupID == managedID {
-						canManage = true
-						break
-					}
-				}
-				if !canManage {
-					c.JSON(http.StatusForbidden, gin.H{
-						"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-					})
-					return
-				}
+		targetIDs := req.TargetGroupIDs
+		// Admin de groupe (non-admin global) : il ne gère que ses groupes, et les
+		// cibles posées par d'autres sur des groupes qu'il n'administre pas restent.
+		if userRole != "admin" && len(managedGroupIDs) > 0 {
+			var current models.News
+			h.db.Preload("TargetGroups").First(&current, news.ID)
+			existing := make([]uint, 0, len(current.TargetGroups))
+			for _, group := range current.TargetGroups {
+				existing = append(existing, group.ID)
 			}
+			merged, ok := mergeGroupAdminTargets(existing, req.TargetGroupIDs, managedGroupIDs)
+			if !ok {
+				c.JSON(http.StatusForbidden, gin.H{
+					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
+				})
+				return
+			}
+			targetIDs = merged
 		}
 
 		var groups []models.Group
-		h.db.Where("id IN ?", req.TargetGroupIDs).Find(&groups)
+		if len(targetIDs) > 0 {
+			h.db.Where("id IN ?", targetIDs).Find(&groups)
+		}
 		h.db.Model(&news).Association("TargetGroups").Replace(groups)
 	}
 
@@ -968,4 +971,41 @@ func (h *NewsHandler) GetAnalytics(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, stats)
+}
+
+// mergeGroupAdminTargets calcule les groupes cibles d'une actualité modifiée par un
+// admin de groupe. Il peut cibler ses groupes ; il peut aussi renvoyer une cible déjà
+// présente sur un groupe qu'il n'administre pas, mais pas en ajouter une. Les cibles
+// existantes hors de ses groupes sont toujours conservées. ok vaut false si la demande
+// ajoute un groupe qu'il n'administre pas.
+func mergeGroupAdminTargets(existing, requested, managed []uint) ([]uint, bool) {
+	isManaged := make(map[uint]bool, len(managed))
+	for _, id := range managed {
+		isManaged[id] = true
+	}
+	isExisting := make(map[uint]bool, len(existing))
+	for _, id := range existing {
+		isExisting[id] = true
+	}
+
+	result := make([]uint, 0, len(requested)+len(existing))
+	seen := make(map[uint]bool, len(requested)+len(existing))
+	add := func(id uint) {
+		if !seen[id] {
+			seen[id] = true
+			result = append(result, id)
+		}
+	}
+	for _, id := range requested {
+		if !isManaged[id] && !isExisting[id] {
+			return nil, false
+		}
+		add(id)
+	}
+	for _, id := range existing {
+		if !isManaged[id] {
+			add(id)
+		}
+	}
+	return result, true
 }

@@ -1868,7 +1868,8 @@
       "tagColor": "Color de la etiqueta",
       "tagExists": "Esta etiqueta ya existe y se ha añadido",
       "tagCreated": "Etiqueta «{name}» creada",
-      "removeItem": "Quitar {name}"
+      "removeItem": "Quitar {name}",
+      "lockedGroup": "Grupo seleccionado por otro administrador: no puede quitarlo"
     }
   },
   "nav": {

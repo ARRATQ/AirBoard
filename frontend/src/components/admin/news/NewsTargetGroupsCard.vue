@@ -22,7 +22,15 @@
         >
           <Icon icon="mdi:account-group" class="h-3 w-3" />
           {{ groupName(groupId) }}
+          <Icon
+            v-if="isLocked(groupId)"
+            icon="mdi:lock-outline"
+            class="h-3.5 w-3.5 opacity-70"
+            :title="$t('adminShared.news.lockedGroup')"
+            :aria-label="$t('adminShared.news.lockedGroup')"
+          />
           <button
+            v-else
             type="button"
             class="ml-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
             :aria-label="$t('adminShared.news.removeItem', { name: groupName(groupId) })"
@@ -61,7 +69,9 @@ const props = defineProps({
   // Identifiants des groupes ciblés
   modelValue: { type: Array, required: true },
   // Groupes que l'utilisateur administre
-  groups: { type: Array, required: true }
+  groups: { type: Array, required: true },
+  // Groupes déjà ciblés qu'il n'administre pas : affichés, mais non retirables
+  lockedGroups: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -70,7 +80,11 @@ const availableGroups = computed(() =>
   props.groups.filter((group) => !props.modelValue.includes(group.id))
 )
 
-const groupName = (groupId) => props.groups.find((g) => g.id === groupId)?.name || ''
+const findGroup = (groupId) =>
+  props.groups.find((g) => g.id === groupId) || props.lockedGroups.find((g) => g.id === groupId)
+
+const groupName = (groupId) => findGroup(groupId)?.name || `#${groupId}`
+const isLocked = (groupId) => !props.groups.some((g) => g.id === groupId)
 
 const addGroup = (event) => {
   const groupId = parseInt(event.target.value, 10)

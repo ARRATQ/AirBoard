@@ -2174,7 +2174,8 @@
       "tagColor": "Couleur du tag",
       "tagExists": "Ce tag existe déjà et a été ajouté",
       "tagCreated": "Tag « {name} » créé",
-      "removeItem": "Retirer {name}"
+      "removeItem": "Retirer {name}",
+      "lockedGroup": "Groupe ciblé par un autre administrateur : vous ne pouvez pas le retirer"
     }
   },
   "nav": {

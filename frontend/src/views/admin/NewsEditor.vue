@@ -136,6 +136,7 @@
             v-if="!isGlobal"
             v-model="form.target_group_ids"
             :groups="managedGroups"
+            :locked-groups="lockedGroups"
           />
 
           <!-- Classification -->
@@ -278,6 +279,11 @@ const isSaving = ref(false)
 const categories = ref([])
 const tags = ref([])
 const managedGroups = ref([])
+// Groupes ciblés par l'article que l'admin de groupe n'administre pas (lecture seule)
+const targetGroups = ref([])
+const lockedGroups = computed(() =>
+  targetGroups.value.filter((group) => !managedGroups.value.some((g) => g.id === group.id))
+)
 const showCategoryModal = ref(false)
 
 const form = ref({
@@ -386,6 +392,7 @@ const loadNews = async () => {
       tag_ids: news.tags ? news.tags.map((tag) => tag.id) : [],
       target_group_ids: news.target_groups ? news.target_groups.map((group) => group.id) : []
     }
+    targetGroups.value = news.target_groups || []
   } catch (error) {
     console.error('Erreur au chargement de l\'actualité :', error)
     appStore.showError(t('groupAdmin.newsEditor.messages.loadError'))

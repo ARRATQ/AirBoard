@@ -1868,7 +1868,8 @@
       "tagColor": "لون الوسم",
       "tagExists": "هذا الوسم موجود بالفعل وتمت إضافته",
       "tagCreated": "تم إنشاء الوسم «{name}»",
-      "removeItem": "إزالة {name}"
+      "removeItem": "إزالة {name}",
+      "lockedGroup": "مجموعة استهدفها مسؤول آخر: لا يمكنك إزالتها"
     }
   },
   "nav": {
