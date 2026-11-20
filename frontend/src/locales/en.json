@@ -1319,7 +1319,10 @@
       "latestResults": "Latest results",
       "closesIn": "Closes in",
       "votes": "{count} vote(s)",
-      "vote": "Vote now"
+      "vote": "Vote now",
+      "endsIn": "{count} d left | {count} d left | {count} d left",
+      "ended": "Closed",
+      "open": "Open"
     },
     "quickActions": {
       "title": "Quick actions",
@@ -1343,7 +1346,20 @@
       "beforeLevel": "before level {level}",
       "streak": "Streak",
       "badges": "Badges",
-      "rank": "Rank"
+      "rank": "Rank",
+      "levelShort": "Lvl"
+    },
+    "keyFigures": "Key figures",
+    "searchLabel": "Search the portal",
+    "announcements": {
+      "region": "Announcements",
+      "prev": "Previous announcement",
+      "next": "Next announcement",
+      "open": "Read the full announcement"
+    },
+    "rail": {
+      "portal": "Portal",
+      "agenda": "Calendar"
     }
   },
   "email": {

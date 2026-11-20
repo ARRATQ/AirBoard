@@ -1019,7 +1019,10 @@
       "latestResults": "Últimos resultados",
       "closesIn": "Cierra en",
       "votes": "{count} voto(s)",
-      "vote": "Votar ahora"
+      "vote": "Votar ahora",
+      "endsIn": "{count} d restante | {count} d restante | {count} d restantes",
+      "ended": "Cerrada",
+      "open": "Abierta"
     },
     "quickActions": {
       "title": "Acciones rápidas",
@@ -1044,7 +1047,8 @@
       "beforeLevel": "antes del nivel {level}",
       "streak": "Racha",
       "badges": "Insignias",
-      "rank": "Rango"
+      "rank": "Rango",
+      "levelShort": "Niv."
     },
     "hero": {
       "subtitle": "Descubre tu espacio de trabajo personalizado",
@@ -1071,6 +1075,18 @@
       },
       "pendingPolls": "{count} encuesta(s) pendiente(s)",
       "pendingApps": "{count} recurso(s) nuevo(s) esta semana"
+    },
+    "keyFigures": "Cifras clave",
+    "searchLabel": "Buscar en el portal",
+    "announcements": {
+      "region": "Anuncios",
+      "prev": "Anuncio anterior",
+      "next": "Anuncio siguiente",
+      "open": "Leer el anuncio completo"
+    },
+    "rail": {
+      "portal": "Portal",
+      "agenda": "Agenda"
     }
   },
   "email": {

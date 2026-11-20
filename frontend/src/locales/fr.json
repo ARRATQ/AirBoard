@@ -1285,7 +1285,10 @@
       "latestResults": "Derniers résultats",
       "closesIn": "Se ferme dans",
       "votes": "{count} vote(s)",
-      "vote": "Voter maintenant"
+      "vote": "Voter maintenant",
+      "endsIn": "{count} j restant | {count} j restant | {count} j restants",
+      "ended": "Terminé",
+      "open": "En cours"
     },
     "quickActions": {
       "title": "Actions rapides",
@@ -1309,7 +1312,20 @@
       "beforeLevel": "avant niveau {level}",
       "streak": "Série",
       "badges": "Badges",
-      "rank": "Rang"
+      "rank": "Rang",
+      "levelShort": "Niv."
+    },
+    "keyFigures": "Chiffres clés",
+    "searchLabel": "Rechercher dans le portail",
+    "announcements": {
+      "region": "Annonces",
+      "prev": "Annonce précédente",
+      "next": "Annonce suivante",
+      "open": "Lire l'annonce en entier"
+    },
+    "rail": {
+      "portal": "Portail",
+      "agenda": "Agenda"
     }
   },
   "email": {

@@ -1019,7 +1019,10 @@
       "latestResults": "آخر النتائج",
       "closesIn": "يغلق في",
       "votes": "{count} صوت",
-      "vote": "صوّت الآن"
+      "vote": "صوّت الآن",
+      "endsIn": "متبقٍ {count} يوم | متبقٍ {count} يوم | متبقية {count} أيام",
+      "ended": "مغلق",
+      "open": "مفتوح"
     },
     "quickActions": {
       "title": "إجراءات سريعة",
@@ -1044,7 +1047,8 @@
       "beforeLevel": "قبل المستوى {level}",
       "streak": "سلسلة",
       "badges": "الأوسمة",
-      "rank": "الترتيب"
+      "rank": "الترتيب",
+      "levelShort": "مستوى"
     },
     "hero": {
       "subtitle": "اكتشف مساحة عملك الشخصية",
@@ -1071,6 +1075,18 @@
       },
       "pendingPolls": "{count} استطلاع/استطلاعات بانتظار تصويتك",
       "pendingApps": "{count} مورد/موارد جديدة هذا الأسبوع"
+    },
+    "keyFigures": "أرقام رئيسية",
+    "searchLabel": "البحث في البوابة",
+    "announcements": {
+      "region": "الإعلانات",
+      "prev": "الإعلان السابق",
+      "next": "الإعلان التالي",
+      "open": "قراءة الإعلان كاملاً"
+    },
+    "rail": {
+      "portal": "البوابة",
+      "agenda": "المفكرة"
     }
   },
   "email": {

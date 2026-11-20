@@ -110,6 +110,15 @@ html.dark {
 /* Arabe : IBM Plex Sans Arabic en premier */
 [dir='rtl'] {
   --f-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Les chiffres restent en Plex Mono ; le texte arabe des étiquettes mono passe en Plex Sans Arabic. */
+  --f-num: 'IBM Plex Mono', 'IBM Plex Sans Arabic', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* L'écriture arabe est liée : aucun interlettrage (les surtitres en capitales en ont en latin). */
+[dir='rtl'] *,
+[dir='rtl'] *::before,
+[dir='rtl'] *::after {
+  letter-spacing: 0 !important;
 }
 
 /* Base styles */
