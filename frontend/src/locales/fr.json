@@ -270,6 +270,7 @@
     "welcomeMessagePlaceholder": "Bienvenue sur votre portail applicatif",
     "homePageMessage": "Message d'accueil (Page d'accueil)",
     "homePageMessagePlaceholder": "Découvrez votre espace de travail personnalisé",
+    "dynamicMessages": "Messages dynamiques",
     "reload": "Recharger",
     "save": "Enregistrer les paramètres",
     "changePasswordSubtitle": "Entrez votre mot de passe actuel et le nouveau",
