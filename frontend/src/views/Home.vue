@@ -527,8 +527,8 @@ const kpiCards = computed(() => {
     return [
       { value: stats.total_users ?? 0, label: 'Utilisateurs', icon: '👥', link: '/admin/users' },
       { value: stats.total_groups ?? 0, label: 'Groupes', icon: '🏷️', link: '/admin/groups' },
-      { value: stats.total_app_groups ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/app-groups' },
-      { value: stats.total_apps ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/applications' },
+      { value: stats.total_app_groups ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/resources/categories' },
+      { value: stats.total_apps ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/resources' },
       { value: stats.total_news ?? 0, label: 'Articles', icon: '📰', link: '/admin/news' },
       { value: stats.total_events ?? 0, label: 'Événements', icon: '📅', link: '/admin/events' },
       { value: stats.total_polls ?? 0, label: 'Sondages', icon: '📊', link: '/admin/polls', live: (stats.total_polls ?? 0) > 0 },
@@ -539,8 +539,8 @@ const kpiCards = computed(() => {
     return [
       { value: stats.managed_groups_count ?? 0, label: 'Groupes gérés', icon: '🏷️', link: '/group-admin' },
       { value: stats.total_members_count ?? 0, label: 'Membres', icon: '👥', link: '/group-admin' },
-      { value: stats.managed_app_groups_count ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/app-groups' },
-      { value: stats.managed_apps_count ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/applications' },
+      { value: stats.managed_app_groups_count ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/resources/categories' },
+      { value: stats.managed_apps_count ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/resources' },
       { value: stats.managed_news_count ?? 0, label: 'Articles', icon: '📰', link: '/admin/news' },
       { value: stats.managed_polls_count ?? 0, label: 'Sondages', icon: '📊', link: '/admin/polls', live: true },
       { value: stats.total_accessible_apps ?? 0, label: 'Ressources dispo.', icon: '✅', link: '/dashboard' },

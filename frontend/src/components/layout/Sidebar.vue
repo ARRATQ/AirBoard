@@ -45,155 +45,63 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="sidebar-nav">
-      <!-- ========================================== -->
-      <!-- ESPACE UTILISATEUR - Navigation principale -->
-      <!-- ========================================== -->
+    <nav class="sidebar-nav" :aria-label="$t('nav.mainLabel')">
+      <!-- Espace utilisateur : identique pour tous les rôles -->
       <div class="sidebar-section">
-        <SidebarLink to="/home" icon="mdi:home" :label="$t('common.home')" />
-
-        <SidebarLink to="/dashboard" icon="mdi:application" :label="$t('common.applications')" />
-
-        <SidebarLink to="/news" icon="mdi:newspaper" :label="$t('common.newsHub')" />
-
-        <SidebarLink to="/events" icon="mdi:calendar" :label="$t('common.events')" />
-
-        <SidebarLink to="/polls" icon="mdi:poll" :label="$t('common.polls')" />
-
-        <SidebarLink to="/suggestions" icon="mdi:lightbulb-on-outline" :label="$t('common.suggestions')" />
-
-        <SidebarLink to="/gamification" icon="mdi:medal" :label="$t('common.gamification')" />
-
-        <SidebarLink to="/directory" icon="mdi:account-group-outline" :label="$t('directory.title')" />
-
-        <SidebarLink to="/search" icon="mdi:magnify" :label="$t('search.title')" />
+        <SidebarLink
+          v-for="item in USER_NAV"
+          :key="item.to"
+          :to="item.to"
+          :icon="item.icon"
+          :label="$t(item.labelKey)"
+        />
       </div>
 
-      <!-- ========================================== -->
-      <!-- ADMINISTRATION DE GROUPE (Group Admin + Admin) -->
-      <!-- ========================================== -->
-      <div v-if="authStore.isGroupAdmin || authStore.isAdmin" class="sidebar-section">
+      <!-- Administration : construite d'après le rôle (config/navigation.js) -->
+      <div v-if="adminNav" class="sidebar-section">
         <div class="sidebar-section-title">
-          {{ $t('groupAdmin.title') }}
+          {{ $t(adminNav.titleKey) }}
         </div>
 
-        <SidebarLink to="/group-admin" icon="mdi:view-dashboard-outline" :label="$t('groupAdmin.dashboard')" exact />
+        <SidebarLink
+          v-if="adminNav.overview"
+          :to="adminNav.overview.to"
+          :icon="adminNav.overview.icon"
+          :label="$t(adminNav.overview.labelKey)"
+          exact
+        />
 
-        <SidebarLink to="/admin/app-groups" icon="mdi:folder-multiple" :label="$t('groupAdmin.myAppGroups')" />
+        <!-- Admin global : un groupe repliable par domaine -->
+        <template v-if="adminNav.grouped">
+          <CollapsibleMenu
+            v-for="section in adminNav.sections"
+            :key="section.id"
+            :title="$t(section.labelKey)"
+            :icon="section.icon"
+            :storage-key="`sidebar-admin-${section.id}`"
+            :compact="!appStore.sidebarOpen"
+            :default-open="isSectionActive(section)"
+          >
+            <SidebarLink
+              v-for="item in section.items"
+              :key="item.to"
+              :to="item.to"
+              :icon="item.icon"
+              :label="$t(item.labelKey)"
+            />
+          </CollapsibleMenu>
+        </template>
 
-        <SidebarLink to="/admin/applications" icon="mdi:apps" :label="$t('groupAdmin.myApplications')" />
-
-        <SidebarLink to="/admin/news" icon="mdi:newspaper-variant" :label="$t('groupAdmin.groupNews')" />
-
-        <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('groupAdmin.events')" />
-
-        <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('groupAdmin.myPolls')" />
-
-        <SidebarLink v-if="authStore.isAdmin" to="/group-admin/directory" icon="mdi:sitemap-outline" :label="$t('directory.manageTitle')" />
-      </div>
-
-      <!-- ========================================== -->
-      <!-- ADMINISTRATION GLOBALE (Admin only) -->
-      <!-- ========================================== -->
-      <div v-if="authStore.isAdmin" class="sidebar-section">
-        <div class="sidebar-section-title">
-          {{ $t('common.administration') }}
-        </div>
-
-        <!-- Contenu -->
-        <CollapsibleMenu
-          :title="$t('common.contentManagement')"
-          icon="mdi:file-document-multiple"
-          storage-key="sidebar-admin-content"
-          :compact="!appStore.sidebarOpen"
-          :default-open="isContentSectionActive"
-        >
-          <SidebarLink to="/admin/news" icon="mdi:newspaper" :label="$t('admin.newsArticles')" />
-
-          <SidebarLink to="/admin/news-categories" icon="mdi:tag-multiple-outline" :label="$t('admin.newsCategories')" />
-
-          <SidebarLink to="/admin/news-types" icon="mdi:shape-outline" :label="$t('admin.newsTypes')" />
-
-          <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('common.eventsManagement')" />
-
-          <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('common.pollsManagement')" />
-
-          <SidebarLink to="/admin/gamification" icon="mdi:medal-outline" :label="$t('gamificationAdmin.title')" />
-
-          <SidebarLink to="/admin/suggestions" icon="mdi:lightbulb-on-outline" :label="$t('suggestions.admin.title')" />
-
-          <SidebarLink to="/admin/suggestion-categories" icon="mdi:format-list-bulleted-square" :label="$t('suggestions.manageCategories')" />
-
-          <SidebarLink to="/admin/announcements" icon="mdi:bullhorn" :label="$t('common.announcements')" />
-
-          <SidebarLink to="/admin/media" icon="mdi:image-multiple" :label="$t('common.media')" />
-
-          <SidebarLink to="/admin/comments" icon="mdi:comment-text-outline" :label="$t('moderation.title')" />
-
-          <SidebarLink to="/admin/chatbots" icon="mdi:robot-outline" :label="$t('chatbots.sidebarTitle')" />
-        </CollapsibleMenu>
-
-        <!-- Utilisateurs & Accès -->
-        <CollapsibleMenu
-          :title="$t('common.usersAccess')"
-          icon="mdi:account-multiple"
-          storage-key="sidebar-admin-users"
-          :compact="!appStore.sidebarOpen"
-          :default-open="isUsersSectionActive"
-        >
-          <SidebarLink to="/admin/users" icon="mdi:account-multiple" :label="$t('common.users')" />
-
-          <SidebarLink to="/admin/groups" icon="mdi:account-group" :label="$t('common.groups')" />
-
-          <SidebarLink to="/admin/oauth" icon="mdi:shield-key" :label="$t('common.oauth')" />
-        </CollapsibleMenu>
-
-        <!-- Catalogue d'applications -->
-        <CollapsibleMenu
-          :title="$t('common.appCatalog')"
-          icon="mdi:apps-box"
-          storage-key="sidebar-admin-apps"
-          :compact="!appStore.sidebarOpen"
-          :default-open="isAppsSectionActive"
-        >
-          <SidebarLink to="/admin/app-groups" icon="mdi:folder-multiple" :label="$t('common.appGroups')" />
-
-          <SidebarLink to="/admin/applications" icon="mdi:apps" :label="$t('common.applications')" />
-        </CollapsibleMenu>
-
-        <!-- Système -->
-        <CollapsibleMenu
-          :title="$t('common.system')"
-          icon="mdi:cog"
-          storage-key="sidebar-admin-system"
-          :compact="!appStore.sidebarOpen"
-          :default-open="isSystemSectionActive"
-        >
-          <SidebarLink to="/admin/settings" icon="mdi:cog" :label="$t('common.settings')" />
-
-          <SidebarLink to="/admin/email" icon="mdi:email-outline" :label="$t('email.title')" />
-
-          <SidebarLink to="/admin/analytics" icon="mdi:chart-line" :label="$t('common.analytics')" />
-
-          <SidebarLink to="/admin/reports" icon="mdi:chart-timeline-variant" :label="$t('reports.title')" />
-        </CollapsibleMenu>
-      </div>
-
-      <!-- Editor section (Editor only, not admin) -->
-      <div v-else-if="authStore.user?.role === 'editor'" class="sidebar-section">
-        <CollapsibleMenu
-          :title="$t('common.contentManagement')"
-          icon="mdi:file-document-edit"
-          storage-key="sidebar-editor-content"
-          :compact="!appStore.sidebarOpen"
-          :default-open="isEditorContentActive"
-        >
-          <SidebarLink to="/admin/news" icon="mdi:newspaper" :label="$t('admin.newsArticles')" />
-
-          <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('common.eventsManagement')" />
-
-          <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('common.pollsManagement')" />
-        </CollapsibleMenu>
+        <!-- Admin de groupe, éditeur : la courte liste des pages permises -->
+        <template v-else>
+          <SidebarLink
+            v-for="item in adminNav.items"
+            :key="item.to"
+            :to="item.to"
+            :icon="item.icon"
+            :label="$t(item.labelKey)"
+          />
+        </template>
       </div>
     </nav>
 
@@ -480,6 +388,9 @@ import NotificationBell from '@/components/notifications/NotificationBell.vue'
 const HelpDrawer = defineAsyncComponent(() => import('@/components/help/HelpDrawer.vue'))
 import CollapsibleMenu from '@/components/layout/CollapsibleMenu.vue'
 import SidebarLink from '@/components/layout/SidebarLink.vue'
+import { USER_NAV, buildAdminNav } from '@/config/navigation'
+import { getRoles } from '@/config/access'
+import { isPathActive } from '@/utils/navigation'
 
 const authStore = useAuthStore()
 const appStore = useAppStore()
@@ -499,42 +410,9 @@ watch(showHelpDrawer, (open) => {
 const showUserMenu = ref(false)
 const userMenuRef = ref(null)
 
-// Computed properties to check if sections should be open based on current route
-const isContentSectionActive = computed(() => {
-  return route.path.startsWith('/admin/news') ||
-         route.path.startsWith('/admin/events') ||
-         route.path.startsWith('/admin/polls') ||
-         route.path.startsWith('/admin/gamification') ||
-         route.path.startsWith('/admin/suggestions') ||
-         route.path.startsWith('/admin/suggestion-categories') ||
-         route.path.startsWith('/admin/announcements') ||
-         route.path.startsWith('/admin/media') ||
-         route.path.startsWith('/admin/comments')
-})
-
-const isUsersSectionActive = computed(() => {
-  return route.path.startsWith('/admin/users') ||
-         route.path.startsWith('/admin/groups') ||
-         route.path.startsWith('/admin/oauth')
-})
-
-const isAppsSectionActive = computed(() => {
-  return route.path.startsWith('/admin/app-groups') ||
-         route.path.startsWith('/admin/applications')
-})
-
-const isSystemSectionActive = computed(() => {
-  return route.path.startsWith('/admin/settings') ||
-         route.path.startsWith('/admin/email') ||
-         route.path.startsWith('/admin/analytics') ||
-         route.path.startsWith('/admin/reports')
-})
-
-const isEditorContentActive = computed(() => {
-  return route.path.startsWith('/admin/news') ||
-         route.path.startsWith('/admin/events') ||
-         route.path.startsWith('/admin/polls')
-})
+// Menu d'administration du rôle courant ; un domaine s'ouvre s'il contient la page affichée
+const adminNav = computed(() => buildAdminNav(getRoles(authStore.user)))
+const isSectionActive = (section) => section.items.some((item) => isPathActive(route.path, item.to))
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value

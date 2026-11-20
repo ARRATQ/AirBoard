@@ -115,7 +115,7 @@
         }}
       </p>
       <div v-if="authStore.isAdmin" class="mt-6">
-        <router-link to="/admin/app-groups" class="btn btn-primary">
+        <router-link to="/admin/resources/categories" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           Create App Group
         </router-link>

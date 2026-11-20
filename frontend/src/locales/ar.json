@@ -1747,5 +1747,41 @@
       "tagCreated": "تم إنشاء الوسم «{name}»",
       "removeItem": "إزالة {name}"
     }
+  },
+  "nav": {
+    "admin": {
+      "title": "الإدارة",
+      "overview": "نظرة عامة",
+      "content": "المحتوى",
+      "community": "المجتمع",
+      "resources": "الموارد",
+      "users": "المستخدمون",
+      "system": "النظام",
+      "news": "الأخبار",
+      "events": "الأحداث",
+      "polls": "الاستطلاعات",
+      "announcements": "الإعلانات",
+      "media": "الوسائط",
+      "suggestions": "الاقتراحات",
+      "moderation": "الإشراف",
+      "gamification": "التحفيز",
+      "directory": "دليل الموظفين",
+      "groups": "المجموعات",
+      "oauth": "تسجيل الدخول OAuth",
+      "settings": "الإعدادات",
+      "email": "البريد الإلكتروني",
+      "analytics": "الإحصاءات",
+      "reports": "التقارير",
+      "chatbots": "روبوتات الدردشة"
+    },
+    "tabs": {
+      "label": "أقسام الصفحة",
+      "articles": "المقالات",
+      "categories": "الفئات",
+      "types": "الأنواع",
+      "suggestions": "الاقتراحات",
+      "resources": "الموارد"
+    },
+    "mainLabel": "التنقل الرئيسي"
   }
 }

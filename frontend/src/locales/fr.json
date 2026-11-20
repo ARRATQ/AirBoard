@@ -2169,5 +2169,41 @@
       "tagCreated": "Tag « {name} » créé",
       "removeItem": "Retirer {name}"
     }
+  },
+  "nav": {
+    "admin": {
+      "title": "Administration",
+      "overview": "Vue d'ensemble",
+      "content": "Contenu",
+      "community": "Communauté",
+      "resources": "Ressources",
+      "users": "Utilisateurs",
+      "system": "Système",
+      "news": "Actualités",
+      "events": "Événements",
+      "polls": "Sondages",
+      "announcements": "Annonces",
+      "media": "Médias",
+      "suggestions": "Suggestions",
+      "moderation": "Modération",
+      "gamification": "Gamification",
+      "directory": "Trombinoscope",
+      "groups": "Groupes",
+      "oauth": "Connexion OAuth",
+      "settings": "Réglages",
+      "email": "E-mail",
+      "analytics": "Statistiques",
+      "reports": "Rapports",
+      "chatbots": "Chatbots"
+    },
+    "tabs": {
+      "label": "Sections de la page",
+      "articles": "Articles",
+      "categories": "Catégories",
+      "types": "Types",
+      "suggestions": "Suggestions",
+      "resources": "Ressources"
+    },
+    "mainLabel": "Navigation principale"
   }
 }

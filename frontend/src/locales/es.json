@@ -1748,5 +1748,41 @@
       "tagCreated": "Etiqueta «{name}» creada",
       "removeItem": "Quitar {name}"
     }
+  },
+  "nav": {
+    "admin": {
+      "title": "Administración",
+      "overview": "Resumen",
+      "content": "Contenido",
+      "community": "Comunidad",
+      "resources": "Recursos",
+      "users": "Usuarios",
+      "system": "Sistema",
+      "news": "Noticias",
+      "events": "Eventos",
+      "polls": "Encuestas",
+      "announcements": "Anuncios",
+      "media": "Medios",
+      "suggestions": "Sugerencias",
+      "moderation": "Moderación",
+      "gamification": "Gamificación",
+      "directory": "Organigrama",
+      "groups": "Grupos",
+      "oauth": "Inicio de sesión OAuth",
+      "settings": "Ajustes",
+      "email": "Correo",
+      "analytics": "Estadísticas",
+      "reports": "Informes",
+      "chatbots": "Chatbots"
+    },
+    "tabs": {
+      "label": "Secciones de la página",
+      "articles": "Artículos",
+      "categories": "Categorías",
+      "types": "Tipos",
+      "suggestions": "Sugerencias",
+      "resources": "Recursos"
+    },
+    "mainLabel": "Navegación principal"
   }
 }

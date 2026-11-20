@@ -2194,5 +2194,41 @@
       "tagCreated": "Tag \"{name}\" created",
       "removeItem": "Remove {name}"
     }
+  },
+  "nav": {
+    "admin": {
+      "title": "Administration",
+      "overview": "Overview",
+      "content": "Content",
+      "community": "Community",
+      "resources": "Resources",
+      "users": "Users",
+      "system": "System",
+      "news": "News",
+      "events": "Events",
+      "polls": "Polls",
+      "announcements": "Announcements",
+      "media": "Media",
+      "suggestions": "Suggestions",
+      "moderation": "Moderation",
+      "gamification": "Gamification",
+      "directory": "Who's Who",
+      "groups": "Groups",
+      "oauth": "OAuth sign-in",
+      "settings": "Settings",
+      "email": "Email",
+      "analytics": "Analytics",
+      "reports": "Reports",
+      "chatbots": "Chatbots"
+    },
+    "tabs": {
+      "label": "Page sections",
+      "articles": "Articles",
+      "categories": "Categories",
+      "types": "Types",
+      "suggestions": "Suggestions",
+      "resources": "Resources"
+    },
+    "mainLabel": "Main navigation"
   }
 }

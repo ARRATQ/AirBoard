@@ -25,6 +25,9 @@ const MediaManagement = () => import('@/views/admin/MediaManagement.vue')
 const NewsCategoriesManagement = () => import('@/views/admin/NewsCategoriesManagement.vue')
 const NewsTypesManagement = () => import('@/views/admin/NewsTypesManagement.vue')
 
+// Page parente à onglets (module + taxonomies)
+const SectionTabs = () => import('@/components/layout/SectionTabs.vue')
+
 // Group Admin views
 const GroupAdminDashboard = () => import('@/views/group-admin/GroupAdminDashboard.vue')
 
@@ -52,7 +55,7 @@ const CommentModeration = () => import('@/views/admin/CommentModeration.vue')
 
 // Trombinoscope
 const DirectoryPage = () => import('@/views/DirectoryPage.vue')
-const DirectoryManagement = () => import('@/views/group-admin/DirectoryManagement.vue')
+const DirectoryManagement = () => import('@/views/admin/DirectoryManagement.vue')
 
 // Search
 const SearchPage = () => import('@/views/SearchPage.vue')
@@ -94,7 +97,7 @@ const routes = [
     }
   },
   {
-    path: '/group-admin/directory',
+    path: '/admin/directory',
     name: 'DirectoryManagement',
     component: DirectoryManagement,
     meta: {
@@ -239,28 +242,48 @@ const routes = [
   },
   {
     path: '/admin',
-    redirect: '/admin/settings'
+    // Vue d'ensemble : page dédiée au point suivant ; d'ici là, l'accueil de chaque rôle
+    redirect: () => (getRoles(useAuthStore().user).isAdmin ? '/admin/settings' : '/group-admin')
+  },
+  // Modules et leurs taxonomies, rangés en onglets (config/navigation.js : SECTION_TABS)
+  {
+    path: '/admin/news',
+    component: SectionTabs,
+    props: { section: 'news' },
+    meta: { requiresAuth: true, access: CONTENT },
+    children: [
+      { path: '', name: 'AdminNews', component: NewsManagement, meta: { title: 'Actualités' } },
+      { path: 'categories', name: 'AdminNewsCategories', component: NewsCategoriesManagement, meta: { access: ADMIN, title: 'Catégories d\'articles' } },
+      { path: 'types', name: 'AdminNewsTypes', component: NewsTypesManagement, meta: { access: ADMIN, title: 'Types d\'articles' } }
+    ]
   },
   {
-    path: '/admin/app-groups',
-    name: 'AdminAppGroups',
-    component: AppGroupsManagement,
-    meta: { 
-      requiresAuth: true,
-      access: GROUP_ADMIN,
-      title: 'Groupes de ressources'
-    }
+    path: '/admin/suggestions',
+    component: SectionTabs,
+    props: { section: 'suggestions' },
+    meta: { requiresAuth: true, access: ADMIN },
+    children: [
+      { path: '', name: 'AdminSuggestions', component: SuggestionsManagement, meta: { title: 'Gestion suggestions' } },
+      { path: 'categories', name: 'AdminSuggestionCategories', component: SuggestionCategoriesManagement, meta: { title: 'Catégories de suggestions' } }
+    ]
   },
   {
-    path: '/admin/applications',
-    name: 'AdminApplications',
-    component: ApplicationsManagement,
-    meta: { 
-      requiresAuth: true,
-      access: GROUP_ADMIN,
-      title: 'Ressources'
-    }
+    path: '/admin/resources',
+    component: SectionTabs,
+    props: { section: 'resources' },
+    meta: { requiresAuth: true, access: GROUP_ADMIN },
+    children: [
+      { path: '', name: 'AdminApplications', component: ApplicationsManagement, meta: { title: 'Ressources' } },
+      { path: 'categories', name: 'AdminAppGroups', component: AppGroupsManagement, meta: { title: 'Groupes de ressources' } }
+    ]
   },
+  // Anciennes adresses des taxonomies et des ressources
+  { path: '/admin/news-categories', redirect: '/admin/news/categories' },
+  { path: '/admin/news-types', redirect: '/admin/news/types' },
+  { path: '/admin/suggestion-categories', redirect: '/admin/suggestions/categories' },
+  { path: '/admin/app-groups', redirect: '/admin/resources/categories' },
+  { path: '/admin/applications', redirect: '/admin/resources' },
+  { path: '/group-admin/directory', redirect: '/admin/directory' },
   {
     path: '/admin/users',
     name: 'AdminUsers',
@@ -352,36 +375,6 @@ const routes = [
     }
   },
   {
-    path: '/admin/news',
-    name: 'AdminNews',
-    component: NewsManagement,
-    meta: {
-      requiresAuth: true,
-      access: CONTENT,
-      title: 'News Hub'
-    }
-  },
-  {
-    path: '/admin/news-categories',
-    name: 'AdminNewsCategories',
-    component: NewsCategoriesManagement,
-    meta: {
-      requiresAuth: true,
-      access: ADMIN,
-      title: 'Catégories d\'articles'
-    }
-  },
-  {
-    path: '/admin/news-types',
-    name: 'AdminNewsTypes',
-    component: NewsTypesManagement,
-    meta: {
-      requiresAuth: true,
-      access: ADMIN,
-      title: 'Types d\'articles'
-    }
-  },
-  {
     path: '/admin/polls',
     name: 'AdminPolls',
     component: PollsManagement,
@@ -399,26 +392,6 @@ const routes = [
       requiresAuth: true,
       access: ADMIN,
       title: 'Gamification'
-    }
-  },
-  {
-    path: '/admin/suggestions',
-    name: 'AdminSuggestions',
-    component: SuggestionsManagement,
-    meta: {
-      requiresAuth: true,
-      access: ADMIN,
-      title: 'Gestion suggestions'
-    }
-  },
-  {
-    path: '/admin/suggestion-categories',
-    name: 'AdminSuggestionCategories',
-    component: SuggestionCategoriesManagement,
-    meta: {
-      requiresAuth: true,
-      access: ADMIN,
-      title: 'Categories suggestions'
     }
   },
   {
@@ -504,8 +477,8 @@ const routes = [
   },
   // Anciennes adresses de l'administration de groupe : mêmes pages que l'admin,
   // limitées aux groupes administrés (voir useManagementScope)
-  { path: '/group-admin/app-groups', redirect: '/admin/app-groups' },
-  { path: '/group-admin/applications', redirect: '/admin/applications' },
+  { path: '/group-admin/app-groups', redirect: '/admin/resources/categories' },
+  { path: '/group-admin/applications', redirect: '/admin/resources' },
   { path: '/group-admin/news', redirect: '/admin/news' },
   { path: '/group-admin/news/new', redirect: '/admin/news/new' },
   { path: '/group-admin/news/:slug/edit', redirect: (to) => `/admin/news/${to.params.slug}/edit` },
