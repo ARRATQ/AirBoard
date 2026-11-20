@@ -209,9 +209,13 @@
     "emptyText": "Comience creando su primer usuario.",
     "create": "Crear usuario",
     "activate": "Activar",
-    "deactivate": "Desactivar"
+    "deactivate": "Desactivar",
+    "permanentDeleteTitle": "Eliminación definitiva",
+    "permanentDeleteMessage": "¿Eliminar definitivamente al usuario «{username}»?\n\nEsta acción es irreversible y eliminará todos los datos asociados."
   },
   "settings": {
+    "general": "General",
+    "homePageCustomization": "Personalización de la página de inicio",
     "title": "Ajustes de la aplicación",
     "subtitle": "Personaliza la apariencia y la marca",
     "changePassword": "Cambiar contraseña",
@@ -278,7 +282,11 @@
     "typeLoadError": "Error al cargar los tipos",
     "typeSaveError": "Error al guardar el tipo",
     "typeDeleteError": "Error al eliminar el tipo",
-    "noType": "Sin tipos"
+    "noType": "Sin tipos",
+    "tagSaveError": "Error al guardar la etiqueta",
+    "resetDatabaseSuccess": "Base de datos restablecida correctamente. {message} Se cerrará tu sesión.",
+    "resetDatabaseError": "Error al restablecer la base de datos: {error}",
+    "confirmDeleteHeroMessage": "¿Seguro que quieres eliminar este mensaje?"
   },
   "appGroups": {
     "subtitle": "Organiza tus recursos en grupos",
@@ -299,7 +307,8 @@
     "apps": "recursos",
     "noData": "No hay datos disponibles",
     "noAnalytics": "Sin datos de analíticas",
-    "noAnalyticsText": "Comienza a usar los recursos para ver las estadísticas aquí."
+    "noAnalyticsText": "Comienza a usar los recursos para ver las estadísticas aquí.",
+    "exportStarted": "Exportación de datos en CSV iniciada..."
   },
   "announcements": {
     "title": "Anuncios",
@@ -405,6 +414,9 @@
       "mostReacted": "Más reacciones",
       "titleAZ": "Título (A-Z)",
       "titleZA": "Título (Z-A)"
+    },
+    "editor": {
+      "invalidVideoUrl": "URL no reconocida. Usa una URL de YouTube o Vimeo."
     }
   },
   "dashboard": {
@@ -1070,7 +1082,11 @@
       "minutes_ago": "{count} min",
       "hours_ago": "{count} h",
       "days_ago": "{count} d"
-    }
+    },
+    "confirmDelete": "¿Seguro que quieres eliminar este comentario?",
+    "createError": "Error al crear el comentario",
+    "updateError": "Error al actualizar el comentario",
+    "deleteError": "Error al eliminar el comentario"
   },
   "feedback": {
     "helpful": "¿Te ha sido útil?",
@@ -1100,7 +1116,10 @@
     "require_moderation_desc": "Los comentarios requieren aprobación antes de publicarse",
     "max_length": "Longitud máxima de comentario",
     "max_length_desc": "Número máximo de caracteres permitidos por comentario",
-    "save_settings": "Guardar configuración"
+    "save_settings": "Guardar configuración",
+    "moderateError": "Error al moderar el comentario",
+    "settingsSaved": "Configuración actualizada correctamente",
+    "settingsSaveError": "Error al actualizar la configuración"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -1436,7 +1455,8 @@
     "badges": "Insignias",
     "points": "Puntos",
     "threshold": "Umbral",
-    "badgeReward": "Recompensa XP"
+    "badgeReward": "Recompensa XP",
+    "confirmDeleteBadge": "¿Eliminar la insignia «{name}»?"
   },
   "media": {
     "title": "Gestión de medios",
@@ -1653,5 +1673,36 @@
     "layoutList": "Lista",
     "goToUnit": "Ir a una unidad…",
     "backToRoot": "Toda la organización"
+  },
+  "ui": {
+    "close": "Cerrar",
+    "confirm": {
+      "title": "Confirmar",
+      "ok": "Confirmar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "table": {
+      "search": "Buscar…",
+      "empty": "Sin resultados.",
+      "prev": "Página anterior",
+      "next": "Página siguiente",
+      "range": "{from}–{to} de {total}",
+      "sortAsc": "Orden ascendente",
+      "sortDesc": "Orden descendente"
+    },
+    "toast": {
+      "region": "Notificaciones",
+      "close": "Cerrar la notificación",
+      "success": "Éxito",
+      "error": "Error",
+      "warning": "Atención",
+      "info": "Información"
+    }
+  },
+  "chat": {
+    "confirmDeleteMessage": "¿Eliminar este mensaje?",
+    "confirmClearHistory": "¿Seguro que quieres borrar todo el historial de esta conversación?",
+    "clearHistory": "Borrar historial"
   }
 }

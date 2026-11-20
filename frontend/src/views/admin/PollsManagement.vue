@@ -135,12 +135,7 @@
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <span
-                  :class="poll.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                  class="px-2 py-1 rounded-md text-xs font-medium"
-                >
-                  {{ poll.is_active ? $t('polls.adminPollsManagement.status.active') : $t('polls.adminPollsManagement.status.closed') }}
-                </span>
+                <StatusBadge :tone="poll.is_active ? 'ok' : 'neutral'">{{ poll.is_active ? $t('polls.adminPollsManagement.status.active') : $t('polls.adminPollsManagement.status.closed') }}</StatusBadge>
                 <span class="px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                   {{ poll.poll_type === 'single' ? $t('polls.adminPollsManagement.status.singleChoice') : $t('polls.adminPollsManagement.status.multipleChoices') }}
                 </span>
@@ -247,6 +242,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
@@ -254,8 +250,12 @@ import { pollsService, adminService } from '@/services/api'
 import PollEditor from '@/components/polls/PollEditor.vue'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 
 const router = useRouter()
+const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const polls = ref([])
 const groups = ref([])
@@ -296,7 +296,7 @@ const loadPolls = async () => {
     stats.value.closed = polls.value.filter(p => !p.is_active).length
     // TODO: Charger les stats de votes depuis l'API analytics
   } catch (error) {
-    console.error($t('polls.adminPollsManagement.messages.loadError'), error)
+    console.error(t('polls.adminPollsManagement.messages.loadError'), error)
   } finally {
     isLoading.value = false
   }
@@ -350,40 +350,40 @@ const viewResults = (poll) => {
 
 // Fermer un sondage
 const closePoll = async (poll) => {
-  if (!confirm($t('polls.adminPollsManagement.confirmation.closeMessage'))) {
+  if (!(await askConfirm({ message: t('polls.adminPollsManagement.confirmation.closeMessage'), tone: 'danger', confirmLabel: t('polls.actions.close') }))) {
     return
   }
 
   try {
     await pollsService.closePoll(poll.id)
     if (window.$toast) {
-      window.$toast.success($t('polls.adminPollsManagement.messages.closeSuccess'))
+      window.$toast.success(t('polls.adminPollsManagement.messages.closeSuccess'))
     }
     await loadPolls()
   } catch (error) {
     console.error('Erreur lors de la fermeture:', error)
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || $t('polls.adminPollsManagement.messages.closeError'))
+      window.$toast.error(error.response?.data?.error || t('polls.adminPollsManagement.messages.closeError'))
     }
   }
 }
 
 // Confirmer la suppression
 const confirmDelete = async (poll) => {
-  if (!confirm($t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }))) {
+  if (!(await askConfirm({ message: t('polls.adminPollsManagement.confirmation.deleteMessage', { title: poll.title }), tone: 'danger' }))) {
     return
   }
 
   try {
     await pollsService.deletePoll(poll.id)
     if (window.$toast) {
-      window.$toast.success($t('polls.adminPollsManagement.messages.deleteSuccess'))
+      window.$toast.success(t('polls.adminPollsManagement.messages.deleteSuccess'))
     }
     await loadPolls()
   } catch (error) {
     console.error('Erreur lors de la suppression:', error)
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || $t('polls.adminPollsManagement.messages.deleteError'))
+      window.$toast.error(error.response?.data?.error || t('polls.adminPollsManagement.messages.deleteError'))
     }
   }
 }

@@ -15,7 +15,7 @@
       <div class="form-group col-span-2">
         <label class="form-label form-label-required" for="pos-unit">{{ $t('directory.unit') }}</label>
         <select id="pos-unit" v-model="form.unit_id" class="form-select" required>
-          <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '  '.repeat(u.depth) }}{{ u.name }}</option>
+          <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '\u00a0\u00a0'.repeat(u.depth) }}{{ u.name }}</option>
         </select>
       </div>
       <div class="form-group">

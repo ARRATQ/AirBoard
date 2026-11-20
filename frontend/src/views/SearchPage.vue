@@ -173,12 +173,7 @@
               <h3 class="text-sm font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
                 {{ item.title }}
               </h3>
-              <span
-                :class="item.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
-                class="px-2 py-0.5 text-[10px] font-medium rounded-full"
-              >
-                {{ item.is_active ? $t('search.active') : $t('search.closed') }}
-              </span>
+              <StatusBadge :tone="item.is_active ? 'ok' : 'neutral'">{{ item.is_active ? $t('search.active') : $t('search.closed') }}</StatusBadge>
             </div>
             <p v-if="item.description" class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
               {{ item.description }}
@@ -249,6 +244,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

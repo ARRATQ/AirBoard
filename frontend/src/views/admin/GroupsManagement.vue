@@ -106,9 +106,7 @@
           </div>
           
           <div class="flex items-center justify-between text-sm">
-            <span :class="group.is_active ? 'badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'badge bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-              {{ group.is_active ? $t('common.active') : $t('common.inactive') }}
-            </span>
+            <StatusBadge :tone="group.is_active ? 'ok' : 'bad'">{{ group.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
             <span class="text-gray-500">{{ group.app_groups?.length || 0 }} {{ $t('groups.appsLabel') }}</span>
           </div>
         </div>
@@ -280,6 +278,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'

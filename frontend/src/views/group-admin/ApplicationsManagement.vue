@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('groupAdmin.applicationsManagement.title') }}</h1>
-          <p class="page-subtitle">{{ $t('groupAdmin.applicationsManagement.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('groupAdmin.applicationsManagement.title') }}</template>
+      <template #description>{{ $t('groupAdmin.applicationsManagement.subtitle') }}</template>
+      <template #actions>
         <button @click="openCreateModal" class="btn btn-primary" :disabled="appGroups.length === 0">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('groupAdmin.applicationsManagement.newApplication') }}
         </button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Info Alert -->
     <div v-if="appGroups.length === 0" class="mb-6 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
@@ -101,9 +99,7 @@
           </div>
 
           <div class="flex items-center justify-between text-sm">
-            <span :class="app.is_active ? 'badge badge-success' : 'badge badge-secondary'">
-              {{ app.is_active ? $t('groupAdmin.applicationsManagement.statusBadge.active') : $t('groupAdmin.applicationsManagement.statusBadge.inactive') }}
-            </span>
+            <StatusBadge :tone="app.is_active ? 'ok' : 'neutral'">{{ app.is_active ? $t('groupAdmin.applicationsManagement.statusBadge.active') : $t('groupAdmin.applicationsManagement.statusBadge.inactive') }}</StatusBadge>
             <span class="text-gray-500">{{ $t('groupAdmin.applicationsManagement.order') }} {{ app.order || 0 }}</span>
           </div>
         </div>
@@ -178,6 +174,8 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
@@ -317,7 +315,7 @@ const deleteApplication = async () => {
     await loadApplications()
   } catch (error) {
     console.error('Error deleting application:', error)
-    appStore.showError($t('groupAdmin.applicationsManagement.deleteError'))
+    appStore.showError(t('groupAdmin.applicationsManagement.deleteError'))
   } finally {
     deleteLoading.value = false
   }

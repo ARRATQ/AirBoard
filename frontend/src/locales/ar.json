@@ -209,9 +209,13 @@
     "emptyText": "ابدأ بإنشاء أول مستخدم.",
     "create": "إنشاء مستخدم",
     "activate": "تفعيل",
-    "deactivate": "تعطيل"
+    "deactivate": "تعطيل",
+    "permanentDeleteTitle": "حذف نهائي",
+    "permanentDeleteMessage": "هل تريد حذف المستخدم «{username}» نهائيًا؟\n\nهذا الإجراء لا رجعة فيه وسيحذف جميع البيانات المرتبطة به."
   },
   "settings": {
+    "general": "عام",
+    "homePageCustomization": "تخصيص الصفحة الرئيسية",
     "title": "إعدادات التطبيق",
     "subtitle": "خصص المظهر والعلامة التجارية",
     "changePassword": "تغيير كلمة المرور",
@@ -278,7 +282,11 @@
     "typeLoadError": "خطأ في تحميل الأنواع",
     "typeSaveError": "خطأ في حفظ النوع",
     "typeDeleteError": "خطأ في حذف النوع",
-    "noType": "لا توجد أنواع"
+    "noType": "لا توجد أنواع",
+    "tagSaveError": "خطأ في حفظ الوسم",
+    "resetDatabaseSuccess": "تمت إعادة تعيين قاعدة البيانات بنجاح. {message} سيتم تسجيل خروجك.",
+    "resetDatabaseError": "حدث خطأ أثناء إعادة تعيين قاعدة البيانات: {error}",
+    "confirmDeleteHeroMessage": "هل أنت متأكد من أنك تريد حذف هذه الرسالة؟"
   },
   "appGroups": {
     "subtitle": "نظم مواردك في مجموعات",
@@ -299,7 +307,8 @@
     "apps": "موارد",
     "noData": "لا توجد بيانات متاحة",
     "noAnalytics": "لا توجد بيانات تحليلية",
-    "noAnalyticsText": "ابدأ استخدام الموارد لرؤية الإحصائيات هنا."
+    "noAnalyticsText": "ابدأ استخدام الموارد لرؤية الإحصائيات هنا.",
+    "exportStarted": "بدأ تصدير البيانات بصيغة CSV..."
   },
   "announcements": {
     "title": "الإعلانات",
@@ -405,6 +414,9 @@
       "mostReacted": "الأكثر تفاعلاً",
       "titleAZ": "العنوان (أ-ي)",
       "titleZA": "العنوان (ي-أ)"
+    },
+    "editor": {
+      "invalidVideoUrl": "رابط غير معروف. استخدم رابطًا من YouTube أو Vimeo."
     }
   },
   "dashboard": {
@@ -1069,7 +1081,11 @@
       "minutes_ago": "{count} د",
       "hours_ago": "{count} س",
       "days_ago": "{count} ي"
-    }
+    },
+    "confirmDelete": "هل أنت متأكد من أنك تريد حذف هذا التعليق؟",
+    "createError": "حدث خطأ أثناء إنشاء التعليق",
+    "updateError": "حدث خطأ أثناء تحديث التعليق",
+    "deleteError": "حدث خطأ أثناء حذف التعليق"
   },
   "feedback": {
     "helpful": "هل كان هذا مفيداً؟",
@@ -1099,7 +1115,10 @@
     "require_moderation_desc": "تتطلب التعليقات الموافقة قبل نشرها",
     "max_length": "الحد الأقصى لطول التعليق",
     "max_length_desc": "الحد الأقصى لعدد الأحرف المسموح بها لكل تعليق",
-    "save_settings": "حفظ الإعدادات"
+    "save_settings": "حفظ الإعدادات",
+    "moderateError": "حدث خطأ أثناء الإشراف على التعليق",
+    "settingsSaved": "تم تحديث الإعدادات بنجاح",
+    "settingsSaveError": "حدث خطأ أثناء تحديث الإعدادات"
   },
   "notifications": {
     "title": "الإشعارات",
@@ -1435,7 +1454,8 @@
     "badges": "الشارات",
     "points": "النقاط",
     "threshold": "العتبة",
-    "badgeReward": "مكافاة XP"
+    "badgeReward": "مكافاة XP",
+    "confirmDeleteBadge": "هل تريد حذف الشارة «{name}»؟"
   },
   "media": {
     "title": "إدارة الوسائط",
@@ -1652,5 +1672,36 @@
     "layoutList": "قائمة",
     "goToUnit": "الانتقال إلى وحدة…",
     "backToRoot": "المنظمة بأكملها"
+  },
+  "ui": {
+    "close": "إغلاق",
+    "confirm": {
+      "title": "تأكيد",
+      "ok": "تأكيد",
+      "cancel": "إلغاء",
+      "delete": "حذف"
+    },
+    "table": {
+      "search": "بحث…",
+      "empty": "لا توجد نتائج.",
+      "prev": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "range": "{from}–{to} من {total}",
+      "sortAsc": "ترتيب تصاعدي",
+      "sortDesc": "ترتيب تنازلي"
+    },
+    "toast": {
+      "region": "الإشعارات",
+      "close": "إغلاق الإشعار",
+      "success": "تم بنجاح",
+      "error": "خطأ",
+      "warning": "تنبيه",
+      "info": "معلومة"
+    }
+  },
+  "chat": {
+    "confirmDeleteMessage": "هل تريد حذف هذه الرسالة؟",
+    "confirmClearHistory": "هل تريد حقًا مسح سجل هذه المحادثة بالكامل؟",
+    "clearHistory": "مسح السجل"
   }
 }

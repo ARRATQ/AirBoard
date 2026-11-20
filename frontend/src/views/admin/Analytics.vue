@@ -5,7 +5,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <div class="p-2 bg-blue-600 rounded-lg">
+            <div class="p-2 bg-primary-600 rounded-lg">
               <Icon icon="mdi:chart-box" class="h-6 w-6 text-white" />
             </div>
             {{ $t('analytics.title') }}
@@ -24,7 +24,7 @@
 
       <!-- Loading state -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-24">
-        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-blue-500" />
+        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-primary-500" />
         <p class="mt-4 text-gray-500 animate-pulse">Chargement des analyses...</p>
       </div>
 
@@ -105,10 +105,10 @@
           <div class="card p-6 lg:col-span-2">
             <div class="flex items-center justify-between mb-8">
               <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon icon="mdi:chart-line" class="text-blue-500" />
+                <Icon icon="mdi:chart-line" class="text-primary-500" />
                 {{ $t('analytics.dailyActivity') }}
               </h2>
-              <div class="bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-full text-xs font-medium text-blue-600 dark:text-blue-400">
+              <div class="bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full text-xs font-medium text-primary-600 dark:text-primary-400">
                 Action tracking
               </div>
             </div>
@@ -129,11 +129,11 @@
                 <path :d="chartAreaPath" fill="url(#areaGradient)" class="transition-all duration-1000" />
                 
                 <!-- Line -->
-                <path :d="chartPath" class="fill-none stroke-blue-500 dark:stroke-blue-400 stroke-2 transition-all duration-1000" stroke-linejoin="round" stroke-linecap="round" />
+                <path :d="chartPath" class="fill-none stroke-primary-500 dark:stroke-primary-400 stroke-2 transition-all duration-1000" stroke-linejoin="round" stroke-linecap="round" />
                 
                 <!-- Interactive Dots -->
                 <g v-for="(point, i) in chartPoints" :key="'p'+i" class="group">
-                  <circle :cx="point.x" :cy="point.y" r="4" class="fill-white stroke-blue-500 stroke-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <circle :cx="point.x" :cy="point.y" r="4" class="fill-white stroke-primary-500 stroke-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <rect :x="point.x - 15" y="0" width="30" height="200" fill="transparent" class="cursor-pointer">
                     <title>{{ formatDate(point.date) }}: {{ point.val }} clicks</title>
                   </rect>
@@ -211,7 +211,7 @@
                   </div>
                   <div class="w-24 flex-shrink-0">
                     <div class="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                      <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000" :style="{ width: (app.click_count / analytics.top_applications[0].click_count * 100) + '%' }"></div>
+                      <div class="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full transition-all duration-1000" :style="{ width: (app.click_count / analytics.top_applications[0].click_count * 100) + '%' }"></div>
                     </div>
                   </div>
                 </div>
@@ -329,9 +329,13 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { analyticsService, newsService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 
+const { t } = useI18n()
 const router = useRouter()
+const appStore = useAppStore()
 const analytics = ref(null)
 const newsStats = ref(null)
 const isLoading = ref(false)
@@ -477,7 +481,7 @@ const viewArticle = (slug) => {
 }
 
 const mockExport = () => {
-  alert('Export des données au format CSV initié...')
+  appStore.showInfo(t('analytics.exportStarted'))
 }
 
 onMounted(() => {

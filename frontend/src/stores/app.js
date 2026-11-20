@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { setLocale as setI18nLocale, resolveInitialLocale } from '@/i18n'
+import i18n, { setLocale as setI18nLocale, resolveInitialLocale } from '@/i18n'
 import { getPalette, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
+import { paletteCSS } from '@/config/tokens'
 
 export const useAppStore = defineStore('app', () => {
   // Déterminer si on est sur mobile pour l'état initial de la sidebar
@@ -31,10 +32,7 @@ export const useAppStore = defineStore('app', () => {
   const zoomScale = computed(() => parseInt(zoomLevel.value) / 100)
 
   const _injectPaletteCSS = (paletteObj) => {
-    const toKebab = (str) => str.replace(/([A-Z])/g, m => '-' + m.toLowerCase())
-    const makeCSSVars = (vars) =>
-      Object.entries(vars).map(([k, v]) => `  --${toKebab(k)}: ${v};`).join('\n')
-    const css = `:root {\n${makeCSSVars(paletteObj.light)}\n}\nhtml.dark {\n${makeCSSVars(paletteObj.dark)}\n}`
+    const css = paletteCSS(paletteObj)
     let el = document.getElementById('palette-vars')
     if (!el) {
       el = document.createElement('style')
@@ -127,8 +125,11 @@ export const useAppStore = defineStore('app', () => {
     isLoading.value = value
   }
 
+  let notificationSeq = 0
   const addNotification = (notification) => {
-    const id = Date.now().toString()
+    // Compteur : deux toasts créés dans la même milliseconde gardent des id distincts.
+    notificationSeq += 1
+    const id = `${Date.now()}-${notificationSeq}`
     const newNotification = {
       id,
       type: 'info', // info, success, warning, error
@@ -271,7 +272,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // Helpers pour les notifications toast
-  const showSuccess = (message, title = 'Succès') => {
+  const showSuccess = (message, title = i18n.global.t('ui.toast.success')) => {
     return addNotification({
       type: 'success',
       title,
@@ -279,7 +280,7 @@ export const useAppStore = defineStore('app', () => {
     })
   }
 
-  const showError = (message, title = 'Erreur') => {
+  const showError = (message, title = i18n.global.t('ui.toast.error')) => {
     return addNotification({
       type: 'error',
       title,
@@ -287,7 +288,7 @@ export const useAppStore = defineStore('app', () => {
     })
   }
 
-  const showWarning = (message, title = 'Attention') => {
+  const showWarning = (message, title = i18n.global.t('ui.toast.warning')) => {
     return addNotification({
       type: 'warning',
       title,
@@ -295,7 +296,7 @@ export const useAppStore = defineStore('app', () => {
     })
   }
 
-  const showInfo = (message, title = 'Information') => {
+  const showInfo = (message, title = i18n.global.t('ui.toast.info')) => {
     return addNotification({
       type: 'info',
       title,

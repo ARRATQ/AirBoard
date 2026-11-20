@@ -161,9 +161,7 @@
                 <p style="color: var(--text-muted)">{{ p.phone }}</p>
               </td>
               <td>
-                <span class="badge" :class="p.is_active ? 'badge-success' : 'badge-secondary'">
-                  {{ p.is_active ? $t('common.active') : $t('common.inactive') }}
-                </span>
+                <StatusBadge :tone="p.is_active ? 'ok' : 'neutral'">{{ p.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
               </td>
               <td class="text-end whitespace-nowrap">
                 <button type="button" class="dir-icon-btn" :title="$t('common.edit')" @click="openPerson(p)">
@@ -254,9 +252,11 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import PersonAvatar from '@/components/directory/PersonAvatar.vue'
 import UnitFormModal from '@/components/directory/UnitFormModal.vue'
@@ -268,6 +268,7 @@ import { directoryService } from '@/services/api'
 import { useDirectory, fullName, notify, apiError, FIELD_TYPE_ICONS } from '@/components/directory/useDirectory'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const route = useRoute()
 const router = useRouter()
 
@@ -319,7 +320,7 @@ const onSaved = async (messageKey) => {
 
 // ---- Suppressions ----
 const confirmAndRun = async (message, action, successKey) => {
-  if (!window.confirm(message)) return
+  if (!(await askConfirm({ message, tone: 'danger' }))) return
   try {
     await action()
     notify('success', t(successKey))

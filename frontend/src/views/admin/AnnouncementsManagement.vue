@@ -13,7 +13,7 @@
         </div>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
           <Icon icon="mdi:plus" class="h-5 w-5" />
           {{ $t('announcements.new') }}
@@ -22,7 +22,7 @@
 
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center items-center py-12">
-        <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-blue-600" />
+        <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-600" />
       </div>
 
       <!-- Announcements List -->
@@ -41,12 +41,7 @@
                 >
                   {{ $t(`announcements.type_${announcement.type}`) }}
                 </span>
-                <span
-                  :class="announcement.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                  class="px-2 py-1 rounded-md text-xs font-medium"
-                >
-                  {{ announcement.is_active ? $t('common.active') : $t('common.inactive') }}
-                </span>
+                <StatusBadge :tone="announcement.is_active ? 'ok' : 'neutral'">{{ announcement.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
                 <span v-if="announcement.priority > 0" class="text-xs text-gray-500 dark:text-gray-400">
                   {{ $t('announcements.priority') }}: {{ announcement.priority }}
                 </span>
@@ -72,7 +67,7 @@
             <div class="flex items-center gap-2 ml-4">
               <button
                 @click="openEditModal(announcement)"
-                class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                class="p-2 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                 :title="$t('common.edit')"
               >
                 <Icon icon="mdi:pencil" class="h-5 w-5" />
@@ -100,7 +95,7 @@
         </p>
         <button
           @click="openCreateModal"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
         >
           {{ $t('announcements.create') }}
         </button>
@@ -134,7 +129,7 @@
                 v-model="formData.title"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
@@ -145,7 +140,7 @@
               <textarea
                 v-model="formData.content"
                 rows="4"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
               ></textarea>
             </div>
 
@@ -157,7 +152,7 @@
                 <select
                   v-model="formData.type"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="info">{{ $t('announcements.type_info') }}</option>
                   <option value="warning">{{ $t('announcements.type_warning') }}</option>
@@ -174,7 +169,7 @@
                   v-model.number="formData.priority"
                   type="number"
                   min="0"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
@@ -187,7 +182,7 @@
                 <input
                   v-model="formData.start_date"
                   type="datetime-local"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 />
               </div>
 
@@ -198,7 +193,7 @@
                 <input
                   v-model="formData.end_date"
                   type="datetime-local"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
@@ -208,7 +203,7 @@
                 v-model="formData.is_active"
                 type="checkbox"
                 id="is_active"
-                class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                class="w-4 h-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
               />
               <label for="is_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ $t('announcements.isActive') }}
@@ -226,7 +221,7 @@
               <button
                 type="submit"
                 :disabled="isSaving"
-                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium transition-colors"
+                class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg font-medium transition-colors"
               >
                 {{ isSaving ? $t('announcements.saving') : $t('common.save') }}
               </button>
@@ -277,6 +272,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { announcementsService } from '@/services/api'

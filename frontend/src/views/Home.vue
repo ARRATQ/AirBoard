@@ -722,11 +722,6 @@ onMounted(() => { loadHomeData(); loadWeather() })
 onUnmounted(() => clearInterval(tickerTimer))
 </script>
 
-<style>
-/* Google Fonts — unscoped so they load globally */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Newsreader:ital,wght@1,400;1,600&display=swap');
-</style>
-
 <style scoped>
 /* ── Root ────────────────────────────────────────────────────────── */
 .pulse-home {
@@ -734,7 +729,7 @@ onUnmounted(() => clearInterval(tickerTimer))
   display: flex;
   flex-direction: column;
   background: var(--bg-page);
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: var(--f-body);
   overflow: hidden;
 }
 
@@ -1201,7 +1196,8 @@ onUnmounted(() => clearInterval(tickerTimer))
 }
 
 .greeting-title {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: var(--f-body);
+  font-weight: 600;
   font-size: 34px;
   color: #fff;
   line-height: 1.1;
@@ -1552,6 +1548,13 @@ onUnmounted(() => clearInterval(tickerTimer))
   display: flex;
   gap: 3px;
   margin-bottom: -1px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.news-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .news-tab {
@@ -1569,6 +1572,8 @@ onUnmounted(() => clearInterval(tickerTimer))
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
   position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .news-tab--active {

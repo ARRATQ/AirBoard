@@ -1,3 +1,7 @@
+import { darken, hexToHsl, hexToRgb, hslToHex, lighten } from './color'
+
+// accentInk (facultatif) : variante de l'accent lisible en texte, fixée à la main pour les palettes
+// validées dans la maquette A+ ; sinon calculée par config/tokens.js.
 export const PALETTES = [
   {
     slug: 'claude',
@@ -5,6 +9,7 @@ export const PALETTES = [
     preview: '#d97757',
     light: {
       accent:        '#d97757',
+      accentInk:     '#a8462f',
       accentLight:   '#e8907a',
       accentDark:    '#b5503a',
       accentRgb:     '217, 119, 87',
@@ -22,6 +27,7 @@ export const PALETTES = [
     },
     dark: {
       accent:        '#e0906d',
+      accentInk:     '#eeac8c',
       accentLight:   '#f0aa88',
       accentDark:    '#c86545',
       accentRgb:     '224, 144, 109',
@@ -83,6 +89,7 @@ export const PALETTES = [
     preview: '#5c6ef8',
     light: {
       accent:        '#5c6ef8',
+      accentInk:     '#3d4ed4',
       accentLight:   '#818cf8',
       accentDark:    '#3d4ed4',
       accentRgb:     '92, 110, 248',
@@ -100,6 +107,7 @@ export const PALETTES = [
     },
     dark: {
       accent:        '#818cf8',
+      accentInk:     '#a9b3fd',
       accentLight:   '#a5b0fc',
       accentDark:    '#5c6ef8',
       accentRgb:     '129, 140, 248',
@@ -122,6 +130,7 @@ export const PALETTES = [
     preview: '#10b981',
     light: {
       accent:        '#10b981',
+      accentInk:     '#047857',
       accentLight:   '#34d399',
       accentDark:    '#059669',
       accentRgb:     '16, 185, 129',
@@ -139,6 +148,7 @@ export const PALETTES = [
     },
     dark: {
       accent:        '#34d399',
+      accentInk:     '#6ee7b7',
       accentLight:   '#6ee7b7',
       accentDark:    '#10b981',
       accentRgb:     '52, 211, 153',
@@ -200,66 +210,9 @@ export function getPalette(slug) {
   return PALETTES.find(p => p.slug === slug) || PALETTES[0]
 }
 
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return { r, g, b }
-}
-
-function rgbToHex(r, g, b) {
-  return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('')
-}
-
-function lighten(hex, amount) {
-  const { r, g, b } = hexToRgb(hex)
-  return rgbToHex(r + amount, g + amount, b + amount)
-}
-
-function darken(hex, amount) {
-  const { r, g, b } = hexToRgb(hex)
-  return rgbToHex(r - amount, g - amount, b - amount)
-}
-
-function hexToHsl(hex) {
-  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return { h: 18, s: 67, l: 59 }
-  const r = parseInt(hex.slice(1, 3), 16) / 255
-  const g = parseInt(hex.slice(3, 5), 16) / 255
-  const b = parseInt(hex.slice(5, 7), 16) / 255
-  const max = Math.max(r, g, b), min = Math.min(r, g, b)
-  let h = 0, s = 0
-  const l = (max + min) / 2
-  if (max !== min) {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
-      case g: h = ((b - r) / d + 2) / 6; break
-      case b: h = ((r - g) / d + 4) / 6; break
-    }
-  }
-  return { h: h * 360, s: s * 100, l: l * 100 }
-}
-
-function hslToHex(h, s, l) {
-  h = ((h % 360) + 360) % 360
-  s = Math.max(0, Math.min(100, s)) / 100
-  l = Math.max(0, Math.min(100, l)) / 100
-  const c = (1 - Math.abs(2 * l - 1)) * s
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
-  const m = l - c / 2
-  let r = 0, g = 0, b = 0
-  if (h < 60)       { r = c; g = x; b = 0 }
-  else if (h < 120) { r = x; g = c; b = 0 }
-  else if (h < 180) { r = 0; g = c; b = x }
-  else if (h < 240) { r = 0; g = x; b = c }
-  else if (h < 300) { r = x; g = 0; b = c }
-  else              { r = c; g = 0; b = x }
-  return '#' + [r + m, g + m, b + m].map(v => Math.round(Math.max(0, Math.min(255, v * 255))).toString(16).padStart(2, '0')).join('')
-}
-
 // Génère une palette complète depuis une couleur d'accent et un fond.
-export function generatePaletteFromColors(accentHex, bgHex) {
+// customBg : le fond a été choisi par l'admin (sinon il est déduit de l'accent).
+export function generatePaletteFromColors(accentHex, bgHex, { customBg = true } = {}) {
   if (!/^#[0-9A-Fa-f]{6}$/.test(accentHex)) accentHex = '#d97757'
   if (!/^#[0-9A-Fa-f]{6}$/.test(bgHex)) bgHex = '#f5f0ea'
 
@@ -291,6 +244,7 @@ export function generatePaletteFromColors(accentHex, bgHex) {
   const accentLightRgb = hexToRgb(accentLight)
 
   return {
+    customBg,
     light: {
       accent: accentHex, accentLight, accentDark, accentRgb,
       bgPage: bgHex, bgCard, bgSurface,
@@ -315,5 +269,5 @@ export function generateCustomPalette(accentHex) {
   if (!/^#[0-9A-Fa-f]{6}$/.test(accentHex)) accentHex = '#d97757'
   const { h } = hexToHsl(accentHex)
   const bgHex = hslToHex(h, 40, 96)
-  return generatePaletteFromColors(accentHex, bgHex)
+  return generatePaletteFromColors(accentHex, bgHex, { customBg: false })
 }

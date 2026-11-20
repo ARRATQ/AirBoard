@@ -1,18 +1,16 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ isEditMode ? t('events.editor.editEvent') : t('events.editor.newEvent') }}</h1>
-          <p class="page-subtitle">{{ isEditMode ? t('events.editor.editSubtitle') : t('events.editor.newSubtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ isEditMode ? t('events.editor.editEvent') : t('events.editor.newEvent') }}</template>
+      <template #description>{{ isEditMode ? t('events.editor.editSubtitle') : t('events.editor.newSubtitle') }}</template>
+      <template #actions>
         <router-link :to="isGroupAdminMode ? '/group-admin/events' : '/admin/events'" class="btn btn-secondary">
           <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
           {{ t('common.backToList') }}
         </router-link>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Form -->
     <form @submit.prevent="saveEvent" class="space-y-6">
@@ -480,6 +478,7 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

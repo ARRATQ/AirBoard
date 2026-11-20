@@ -2,8 +2,8 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-        <Icon icon="mdi:calculator" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+      <div class="p-2 bg-primary-100 dark:bg-primary-900 rounded-lg">
+        <Icon icon="mdi:calculator" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
       </div>
       <div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">

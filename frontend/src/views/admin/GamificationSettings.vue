@@ -182,10 +182,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { gamificationService } from '@/services/api'
 
 const { t } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 
 const rules = ref([])
 const badges = ref([])
@@ -338,7 +340,7 @@ const saveBadge = async () => {
 }
 
 const removeBadge = async (badge) => {
-  if (!confirm(`Supprimer ${badge.name} ?`)) return
+  if (!(await askConfirm({ message: t('gamificationAdmin.confirmDeleteBadge', { name: badge.name }), tone: 'danger' }))) return
   try {
     await gamificationService.deleteAchievement(badge.id)
     await loadData()

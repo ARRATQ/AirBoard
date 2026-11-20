@@ -1,20 +1,18 @@
 <template>
   <div class="content-area">
     <!-- Header -->
-    <div class="page-header">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="page-title">{{ $t('profile.title') }}</h1>
-          <p class="page-subtitle">{{ $t('profile.subtitle') }}</p>
-        </div>
+    <PageHeader>
+      <template #title>{{ $t('profile.title') }}</template>
+      <template #description>{{ $t('profile.subtitle') }}</template>
+      <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
             <Icon icon="mdi:key" class="h-4 w-4 mr-2" />
             {{ $t('profile.changePassword') }}
           </button>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="max-w-4xl">
       <!-- Avatar Section -->
@@ -405,13 +403,16 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
 import { authService } from '@/services/api'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const appStore = useAppStore()
 const authStore = useAuthStore()
 
 // Form state
@@ -495,13 +496,13 @@ const handleAvatarChange = (event) => {
   // Validate file type
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    alert(t('profile.avatarTypeError'))
+    appStore.showWarning(t('profile.avatarTypeError'))
     return
   }
 
   // Validate file size (max 5MB)
   if (file.size > 5 * 1024 * 1024) {
-    alert(t('profile.avatarSizeError'))
+    appStore.showWarning(t('profile.avatarSizeError'))
     return
   }
 
@@ -536,7 +537,7 @@ const uploadAvatar = async () => {
     }
   } catch (error) {
     console.error('Error uploading avatar:', error)
-    alert(t('profile.avatarUploadError'))
+    appStore.showError(t('profile.avatarUploadError'))
   } finally {
     isUploading.value = false
   }
@@ -553,7 +554,7 @@ const deleteAvatar = async () => {
     showDeleteAvatarModal.value = false
   } catch (error) {
     console.error('Error deleting avatar:', error)
-    alert(t('profile.avatarDeleteError'))
+    appStore.showError(t('profile.avatarDeleteError'))
   } finally {
     isDeletingAvatar.value = false
   }
@@ -572,7 +573,7 @@ const handleSubmit = async () => {
     })
   } catch (error) {
     console.error('Error saving profile:', error)
-    alert(t('profile.saveError'))
+    appStore.showError(t('profile.saveError'))
   } finally {
     isSaving.value = false
   }
@@ -591,13 +592,13 @@ const handlePasswordChange = async () => {
     passwordForm.current_password = ''
     passwordForm.new_password = ''
     passwordForm.confirm_password = ''
-    alert(t('profile.passwordChanged'))
+    appStore.showSuccess(t('profile.passwordChanged'))
   } catch (error) {
     console.error('Error changing password:', error)
     if (error.response?.status === 401) {
-      alert(t('profile.currentPasswordIncorrect'))
+      appStore.showError(t('profile.currentPasswordIncorrect'))
     } else {
-      alert(t('profile.passwordChangeError'))
+      appStore.showError(t('profile.passwordChangeError'))
     }
   } finally {
     isChangingPassword.value = false
@@ -615,7 +616,7 @@ onMounted(() => {
 }
 
 .section-icon {
-  @apply h-5 w-5 text-blue-400;
+  @apply h-5 w-5 text-primary-400;
 }
 
 .section-title {

@@ -353,7 +353,7 @@
 
           <!-- Language selector - compact -->
           <select
-            class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
             :value="appStore.locale"
             @change="onChangeLocale($event.target.value)"
             :title="$t('common.language')"
@@ -400,7 +400,7 @@
 
         <!-- Language selector - icon only -->
         <select
-          class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 text-xs text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 w-12 text-center"
+          class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1.5 text-xs text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 w-12 text-center"
           :value="appStore.locale"
           @change="onChangeLocale($event.target.value)"
           :title="$t('common.language')"
@@ -496,15 +496,15 @@
       >
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
           <!-- Header -->
-          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500 to-blue-600">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                  <Icon icon="mdi:update" class="h-6 w-6 text-blue-600" />
+                  <Icon icon="mdi:update" class="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
                   <h3 class="text-lg font-semibold text-white">{{ $t('version.newVersionAvailable') }}</h3>
-                  <p class="text-sm text-blue-100">{{ $t('version.updateReady') }}</p>
+                  <p class="text-sm text-primary-100">{{ $t('version.updateReady') }}</p>
                 </div>
               </div>
               <button

@@ -4,7 +4,7 @@
     <div class="flex items-start justify-between mb-2">
       <div class="flex items-center gap-3">
         <div class="flex-shrink-0">
-          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600
+          <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-600
                       flex items-center justify-center text-white font-semibold">
             {{ getUserInitials(comment.user) }}
           </div>
@@ -26,7 +26,7 @@
       <div v-if="canManage" class="flex items-center gap-2">
         <button
           v-if="canEdit"
-          class="text-gray-500 hover:text-blue-600 transition-colors"
+          class="text-gray-500 hover:text-primary-600 transition-colors"
           :title="$t('comments.edit')"
           @click="$emit('edit', comment)"
         >

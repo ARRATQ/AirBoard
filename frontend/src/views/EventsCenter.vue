@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="mb-6">
       <div class="flex justify-between items-start flex-wrap gap-4">
-        <div class="flex-1 min-w-0">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <div class="min-w-0 flex-[1_1_16rem]">
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {{ $t('agenda.title') }}
           </h1>
           <p class="text-gray-600 dark:text-gray-400">

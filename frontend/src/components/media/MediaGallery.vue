@@ -201,7 +201,7 @@ export default {
 }
 
 .filter-button.active {
-  @apply bg-blue-500 text-white border-blue-500;
+  @apply bg-primary-500 text-white border-primary-500;
 }
 
 .loading {
@@ -218,11 +218,11 @@ export default {
 
 .media-item {
   @apply relative cursor-pointer rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden transition-all;
-  @apply hover:border-blue-500 hover:shadow-lg;
+  @apply hover:border-primary-500 hover:shadow-lg;
 }
 
 .media-item.selected {
-  @apply border-blue-500 shadow-lg;
+  @apply border-primary-500 shadow-lg;
 }
 
 .media-preview {
@@ -252,7 +252,7 @@ export default {
 }
 
 .selected-indicator {
-  @apply absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1;
+  @apply absolute top-2 right-2 bg-primary-500 text-white rounded-full p-1;
 }
 
 .pagination {
@@ -288,7 +288,7 @@ export default {
 }
 
 .button-primary {
-  @apply px-4 py-2 rounded-lg bg-blue-500 text-white;
-  @apply hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  @apply px-4 py-2 rounded-lg bg-primary-500 text-white;
+  @apply hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
 }
 </style>

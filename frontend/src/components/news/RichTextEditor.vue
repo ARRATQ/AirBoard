@@ -491,6 +491,8 @@ import Highlight from '@tiptap/extension-highlight'
 import Placeholder from '@tiptap/extension-placeholder'
 import { createLowlight } from 'lowlight'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
+import { useAppStore } from '@/stores/app'
 import MediaUploader from '@/components/media/MediaUploader.vue'
 import MediaGallery from '@/components/media/MediaGallery.vue'
 
@@ -514,6 +516,9 @@ lowlight.register('bash', bash)
 lowlight.register('json', json)
 lowlight.register('xml', xml)
 lowlight.register('css', css)
+
+const { t } = useI18n()
+const appStore = useAppStore()
 
 const props = defineProps({
   modelValue: {
@@ -641,7 +646,7 @@ const insertVideo = () => {
   if (!url) return
   const embedUrl = getEmbedUrl(url)
   if (!embedUrl) {
-    window.alert('URL non reconnue. Utilisez une URL YouTube ou Vimeo.')
+    appStore.showWarning(t('news.editor.invalidVideoUrl'))
     return
   }
   editor.value.chain().focus().insertContent({
@@ -685,7 +690,7 @@ const editor = useEditor({
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
-        class: 'text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300',
+        class: 'text-primary-600 dark:text-primary-400 underline hover:text-primary-800 dark:hover:text-primary-300',
       },
     }),
     ResizableImage.configure({
@@ -827,7 +832,7 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-button.is-active {
-  @apply bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400;
+  @apply bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400;
 }
 
 /* Color picker */
@@ -982,7 +987,7 @@ onBeforeUnmount(() => {
 
 /* Link styling */
 .editor-content :deep(.ProseMirror a) {
-  @apply text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300;
+  @apply text-primary-600 dark:text-primary-400 underline hover:text-primary-800 dark:hover:text-primary-300;
 }
 
 /* Table styling */
@@ -1121,7 +1126,7 @@ onBeforeUnmount(() => {
 }
 
 .tab-button.active {
-  @apply border-blue-500 text-blue-600 dark:text-blue-400 font-medium;
+  @apply border-primary-500 text-primary-600 dark:text-primary-400 font-medium;
 }
 
 .tab-content {

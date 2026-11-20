@@ -14,7 +14,7 @@
                 {{ roles[0].position.title }}
                 <span v-if="roles[0].assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
               </p>
-              <span v-if="!person.is_active" class="badge badge-secondary mt-2">{{ $t('common.inactive') }}</span>
+              <StatusBadge v-if="!person.is_active" class="mt-2">{{ $t('common.inactive') }}</StatusBadge>
             </div>
           </div>
 
@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'

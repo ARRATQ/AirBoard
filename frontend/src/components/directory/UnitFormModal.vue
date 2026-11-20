@@ -21,7 +21,7 @@
           <label class="form-label" for="unit-parent">{{ $t('directory.parentUnit') }}</label>
           <select id="unit-parent" v-model="form.parent_id" class="form-select">
             <option :value="null">{{ $t('directory.noParent') }}</option>
-            <option v-for="u in parentOptions" :key="u.id" :value="u.id">{{ '  '.repeat(u.depth) }}{{ u.name }}</option>
+            <option v-for="u in parentOptions" :key="u.id" :value="u.id">{{ '\u00a0\u00a0'.repeat(u.depth) }}{{ u.name }}</option>
           </select>
         </div>
       </div>
