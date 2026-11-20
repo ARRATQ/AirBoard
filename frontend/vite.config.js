@@ -108,6 +108,8 @@ export default defineConfig(({ command }) => ({
         find: /^@vue\/test-utils$/,
         replacement: resolve(__dirname, 'node_modules/@vue/test-utils/dist/vue-test-utils.esm-bundler.mjs'),
       },
+      // Sous Node, @tiptap/html choisit sa version serveur, qui refuse un DOM (jsdom) : prendre celle du navigateur.
+      { find: /^@tiptap\/html$/, replacement: resolve(__dirname, 'node_modules/@tiptap/html/dist/index.js') },
     ],
     // Ces bibliothèques passent par Vite pour utiliser la même instance de Vue que les SFC.
     server: { deps: { inline: [/@vue\/test-utils/, /@headlessui\/vue/, /vue-i18n/, /@intlify/, /@iconify\/vue/] } },

@@ -15,16 +15,15 @@ import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import TextAlign from '@tiptap/extension-text-align'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
-import { createLowlight, common } from 'lowlight'
 import DOMPurify from 'dompurify'
 
-// Create lowlight instance with common languages
-const lowlight = createLowlight(common)
+// Pas de lowlight ici : generateHTML ne lance pas les plugins ProseMirror, la coloration
+// n'apparaissait donc jamais en lecture. Le bloc de code de StarterKit produit le même HTML
+// (<pre><code class="language-…">) sans embarquer highlight.js (voir __tests__/TiptapRenderer.test.js).
 
 const props = defineProps({
   content: {
@@ -51,14 +50,13 @@ const renderedContent = computed(() => {
 
   // Generate HTML from Tiptap JSON
   return generateHTML(contentObj, [
-    StarterKit.configure({
-      codeBlock: false
-    }),
+    StarterKit,
     Link.configure({
       openOnClick: false
     }),
     ResizableImage.configure({
       inline: false,
+      HTMLAttributes: { loading: 'lazy' },
     }),
     CalloutExtension,
     VideoEmbed,
@@ -67,9 +65,6 @@ const renderedContent = computed(() => {
     TableRow,
     TableCell,
     TableHeader,
-    CodeBlockLowlight.configure({
-      lowlight
-    }),
     TextAlign.configure({
       types: ['heading', 'paragraph']
     }),

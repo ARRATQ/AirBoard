@@ -35,7 +35,7 @@
       >
         <!-- Image preview -->
         <div v-if="media.mime_type.startsWith('image/')" class="media-preview">
-          <img :src="media.url" :alt="media.filename" />
+          <img loading="lazy" :src="media.url" :alt="media.filename" />
         </div>
 
         <!-- File preview -->
