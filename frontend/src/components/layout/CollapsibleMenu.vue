@@ -2,19 +2,25 @@
   <div :class="['collapsible-menu', { 'nested': nested }]">
     <!-- Menu Header (clickable to toggle) -->
     <button
+      type="button"
       @click="toggle"
       :class="[
         'collapsible-menu-header',
-        { 'is-open': isOpen, 'has-active-child': hasActiveChild }
+        { 'is-open': isOpen, 'has-active-child': hasActiveChild, 'is-compact': compact }
       ]"
+      :aria-expanded="isOpen"
+      :title="compact ? title : undefined"
+      :aria-label="compact ? title : undefined"
     >
-      <div class="flex items-center gap-2 flex-1 min-w-0">
-        <Icon :icon="icon" class="h-4 w-4 flex-shrink-0" />
-        <span class="truncate">{{ title }}</span>
+      <div class="flex items-center gap-2 flex-1 min-w-0" :class="{ 'justify-center': compact }">
+        <Icon :icon="icon" class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+        <span v-if="!compact" class="truncate">{{ title }}</span>
       </div>
       <Icon
+        v-if="!compact"
         :icon="isOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'"
         class="h-4 w-4 flex-shrink-0 transition-transform duration-200"
+        aria-hidden="true"
       />
     </button>
 
@@ -35,8 +41,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, useSlots } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
@@ -59,10 +64,14 @@ const props = defineProps({
   nested: {
     type: Boolean,
     default: false
+  },
+  // Menu latéral replié : seule l'icône reste, le titre passe en infobulle
+  compact: {
+    type: Boolean,
+    default: false
   }
 })
 
-const route = useRoute()
 const isOpen = ref(false)
 
 // Check if any child route is active
@@ -120,6 +129,10 @@ const toggle = () => {
   @apply w-full flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors;
   @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700;
   @apply hover:text-gray-900 dark:hover:text-white;
+}
+
+.collapsible-menu-header.is-compact {
+  @apply justify-center px-2;
 }
 
 .collapsible-menu-header.is-open {

@@ -50,50 +50,23 @@
       <!-- ESPACE UTILISATEUR - Navigation principale -->
       <!-- ========================================== -->
       <div class="sidebar-section">
-        <router-link to="/home" :class="getLinkClasses('/home')">
-          <Icon icon="mdi:home" class="h-4 w-4" />
-          <span>{{ $t('common.home') }}</span>
-        </router-link>
+        <SidebarLink to="/home" icon="mdi:home" :label="$t('common.home')" />
 
-        <router-link to="/dashboard" :class="getLinkClasses('/dashboard')">
-          <Icon icon="mdi:application" class="h-4 w-4" />
-          <span>{{ $t('common.applications') }}</span>
-        </router-link>
+        <SidebarLink to="/dashboard" icon="mdi:application" :label="$t('common.applications')" />
 
-        <router-link to="/news" :class="getLinkClasses('/news')">
-          <Icon icon="mdi:newspaper" class="h-4 w-4" />
-          <span>{{ $t('common.newsHub') }}</span>
-        </router-link>
+        <SidebarLink to="/news" icon="mdi:newspaper" :label="$t('common.newsHub')" />
 
-        <router-link to="/events" :class="getLinkClasses('/events')">
-          <Icon icon="mdi:calendar" class="h-4 w-4" />
-          <span>{{ $t('common.events') }}</span>
-        </router-link>
+        <SidebarLink to="/events" icon="mdi:calendar" :label="$t('common.events')" />
 
-        <router-link to="/polls" :class="getLinkClasses('/polls')">
-          <Icon icon="mdi:poll" class="h-4 w-4" />
-          <span>{{ $t('common.polls') }}</span>
-        </router-link>
+        <SidebarLink to="/polls" icon="mdi:poll" :label="$t('common.polls')" />
 
-        <router-link to="/suggestions" :class="getLinkClasses('/suggestions')">
-          <Icon icon="mdi:lightbulb-on-outline" class="h-4 w-4" />
-          <span>{{ $t('common.suggestions') }}</span>
-        </router-link>
+        <SidebarLink to="/suggestions" icon="mdi:lightbulb-on-outline" :label="$t('common.suggestions')" />
 
-        <router-link to="/gamification" :class="getLinkClasses('/gamification')">
-          <Icon icon="mdi:medal" class="h-4 w-4" />
-          <span>{{ $t('common.gamification') }}</span>
-        </router-link>
+        <SidebarLink to="/gamification" icon="mdi:medal" :label="$t('common.gamification')" />
 
-        <router-link to="/directory" :class="getLinkClasses('/directory')">
-          <Icon icon="mdi:account-group-outline" class="h-4 w-4" />
-          <span>{{ $t('directory.title') }}</span>
-        </router-link>
+        <SidebarLink to="/directory" icon="mdi:account-group-outline" :label="$t('directory.title')" />
 
-        <router-link to="/search" :class="getLinkClasses('/search')">
-          <Icon icon="mdi:magnify" class="h-4 w-4" />
-          <span>{{ $t('search.title') }}</span>
-        </router-link>
+        <SidebarLink to="/search" icon="mdi:magnify" :label="$t('search.title')" />
       </div>
 
       <!-- ========================================== -->
@@ -104,40 +77,19 @@
           {{ $t('groupAdmin.title') }}
         </div>
 
-        <router-link to="/group-admin" :class="getLinkClasses('/group-admin', true)">
-          <Icon icon="mdi:view-dashboard-outline" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.dashboard') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin" icon="mdi:view-dashboard-outline" :label="$t('groupAdmin.dashboard')" exact />
 
-        <router-link to="/group-admin/app-groups" :class="getLinkClasses('/group-admin/app-groups')">
-          <Icon icon="mdi:folder-multiple" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.myAppGroups') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin/app-groups" icon="mdi:folder-multiple" :label="$t('groupAdmin.myAppGroups')" />
 
-        <router-link to="/group-admin/applications" :class="getLinkClasses('/group-admin/applications')">
-          <Icon icon="mdi:apps" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.myApplications') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin/applications" icon="mdi:apps" :label="$t('groupAdmin.myApplications')" />
 
-        <router-link to="/group-admin/news" :class="getLinkClasses('/group-admin/news')">
-          <Icon icon="mdi:newspaper-variant" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.groupNews') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin/news" icon="mdi:newspaper-variant" :label="$t('groupAdmin.groupNews')" />
 
-        <router-link to="/group-admin/events" :class="getLinkClasses('/group-admin/events')">
-          <Icon icon="mdi:calendar-edit" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.events') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin/events" icon="mdi:calendar-edit" :label="$t('groupAdmin.events')" />
 
-        <router-link to="/group-admin/polls" :class="getLinkClasses('/group-admin/polls')">
-          <Icon icon="mdi:poll" class="h-4 w-4" />
-          <span>{{ $t('groupAdmin.myPolls') }}</span>
-        </router-link>
+        <SidebarLink to="/group-admin/polls" icon="mdi:poll" :label="$t('groupAdmin.myPolls')" />
 
-        <router-link v-if="authStore.isAdmin" to="/group-admin/directory" :class="getLinkClasses('/group-admin/directory')">
-          <Icon icon="mdi:sitemap-outline" class="h-4 w-4" />
-          <span>{{ $t('directory.manageTitle') }}</span>
-        </router-link>
+        <SidebarLink v-if="authStore.isAdmin" to="/group-admin/directory" icon="mdi:sitemap-outline" :label="$t('directory.manageTitle')" />
       </div>
 
       <!-- ========================================== -->
@@ -153,67 +105,32 @@
           :title="$t('common.contentManagement')"
           icon="mdi:file-document-multiple"
           storage-key="sidebar-admin-content"
+          :compact="!appStore.sidebarOpen"
           :default-open="isContentSectionActive"
         >
-          <router-link to="/admin/news" :class="getLinkClasses('/admin/news')">
-            <Icon icon="mdi:newspaper" class="h-4 w-4" />
-            <span>{{ $t('admin.newsArticles') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/news" icon="mdi:newspaper" :label="$t('admin.newsArticles')" />
 
-          <router-link to="/admin/news-categories" :class="getLinkClasses('/admin/news-categories')">
-            <Icon icon="mdi:tag-multiple-outline" class="h-4 w-4" />
-            <span>{{ $t('admin.newsCategories') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/news-categories" icon="mdi:tag-multiple-outline" :label="$t('admin.newsCategories')" />
 
-          <router-link to="/admin/news-types" :class="getLinkClasses('/admin/news-types')">
-            <Icon icon="mdi:shape-outline" class="h-4 w-4" />
-            <span>{{ $t('admin.newsTypes') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/news-types" icon="mdi:shape-outline" :label="$t('admin.newsTypes')" />
 
-          <router-link to="/admin/events" :class="getLinkClasses('/admin/events')">
-            <Icon icon="mdi:calendar-edit" class="h-4 w-4" />
-            <span>{{ $t('common.eventsManagement') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('common.eventsManagement')" />
 
-          <router-link to="/admin/polls" :class="getLinkClasses('/admin/polls')">
-            <Icon icon="mdi:poll" class="h-4 w-4" />
-            <span>{{ $t('common.pollsManagement') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('common.pollsManagement')" />
 
-          <router-link to="/admin/gamification" :class="getLinkClasses('/admin/gamification')">
-            <Icon icon="mdi:medal-outline" class="h-4 w-4" />
-            <span>{{ $t('gamificationAdmin.title') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/gamification" icon="mdi:medal-outline" :label="$t('gamificationAdmin.title')" />
 
-          <router-link to="/admin/suggestions" :class="getLinkClasses('/admin/suggestions')">
-            <Icon icon="mdi:lightbulb-on-outline" class="h-4 w-4" />
-            <span>{{ $t('suggestions.admin.title') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/suggestions" icon="mdi:lightbulb-on-outline" :label="$t('suggestions.admin.title')" />
 
-          <router-link to="/admin/suggestion-categories" :class="getLinkClasses('/admin/suggestion-categories')">
-            <Icon icon="mdi:format-list-bulleted-square" class="h-4 w-4" />
-            <span>{{ $t('suggestions.manageCategories') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/suggestion-categories" icon="mdi:format-list-bulleted-square" :label="$t('suggestions.manageCategories')" />
 
-          <router-link to="/admin/announcements" :class="getLinkClasses('/admin/announcements')">
-            <Icon icon="mdi:bullhorn" class="h-4 w-4" />
-            <span>{{ $t('common.announcements') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/announcements" icon="mdi:bullhorn" :label="$t('common.announcements')" />
 
-          <router-link to="/admin/media" :class="getLinkClasses('/admin/media')">
-            <Icon icon="mdi:image-multiple" class="h-4 w-4" />
-            <span>{{ $t('common.media') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/media" icon="mdi:image-multiple" :label="$t('common.media')" />
 
-          <router-link to="/admin/comments" :class="getLinkClasses('/admin/comments')">
-            <Icon icon="mdi:comment-text-outline" class="h-4 w-4" />
-            <span>{{ $t('moderation.title') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/comments" icon="mdi:comment-text-outline" :label="$t('moderation.title')" />
 
-          <router-link to="/admin/chatbots" :class="getLinkClasses('/admin/chatbots')">
-            <Icon icon="mdi:robot-outline" class="h-4 w-4" />
-            <span>{{ $t('chatbots.sidebarTitle') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/chatbots" icon="mdi:robot-outline" :label="$t('chatbots.sidebarTitle')" />
         </CollapsibleMenu>
 
         <!-- Utilisateurs & Accès -->
@@ -221,22 +138,14 @@
           :title="$t('common.usersAccess')"
           icon="mdi:account-multiple"
           storage-key="sidebar-admin-users"
+          :compact="!appStore.sidebarOpen"
           :default-open="isUsersSectionActive"
         >
-          <router-link to="/admin/users" :class="getLinkClasses('/admin/users')">
-            <Icon icon="mdi:account-multiple" class="h-4 w-4" />
-            <span>{{ $t('common.users') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/users" icon="mdi:account-multiple" :label="$t('common.users')" />
 
-          <router-link to="/admin/groups" :class="getLinkClasses('/admin/groups')">
-            <Icon icon="mdi:account-group" class="h-4 w-4" />
-            <span>{{ $t('common.groups') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/groups" icon="mdi:account-group" :label="$t('common.groups')" />
 
-          <router-link to="/admin/oauth" :class="getLinkClasses('/admin/oauth')">
-            <Icon icon="mdi:shield-key" class="h-4 w-4" />
-            <span>{{ $t('common.oauth') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/oauth" icon="mdi:shield-key" :label="$t('common.oauth')" />
         </CollapsibleMenu>
 
         <!-- Catalogue d'applications -->
@@ -244,17 +153,12 @@
           :title="$t('common.appCatalog')"
           icon="mdi:apps-box"
           storage-key="sidebar-admin-apps"
+          :compact="!appStore.sidebarOpen"
           :default-open="isAppsSectionActive"
         >
-          <router-link to="/admin/app-groups" :class="getLinkClasses('/admin/app-groups')">
-            <Icon icon="mdi:folder-multiple" class="h-4 w-4" />
-            <span>{{ $t('common.appGroups') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/app-groups" icon="mdi:folder-multiple" :label="$t('common.appGroups')" />
 
-          <router-link to="/admin/applications" :class="getLinkClasses('/admin/applications')">
-            <Icon icon="mdi:apps" class="h-4 w-4" />
-            <span>{{ $t('common.applications') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/applications" icon="mdi:apps" :label="$t('common.applications')" />
         </CollapsibleMenu>
 
         <!-- Système -->
@@ -262,27 +166,16 @@
           :title="$t('common.system')"
           icon="mdi:cog"
           storage-key="sidebar-admin-system"
+          :compact="!appStore.sidebarOpen"
           :default-open="isSystemSectionActive"
         >
-          <router-link to="/admin/settings" :class="getLinkClasses('/admin/settings')">
-            <Icon icon="mdi:cog" class="h-4 w-4" />
-            <span>{{ $t('common.settings') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/settings" icon="mdi:cog" :label="$t('common.settings')" />
 
-          <router-link to="/admin/email" :class="getLinkClasses('/admin/email')">
-            <Icon icon="mdi:email-outline" class="h-4 w-4" />
-            <span>{{ $t('email.title') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/email" icon="mdi:email-outline" :label="$t('email.title')" />
 
-          <router-link to="/admin/analytics" :class="getLinkClasses('/admin/analytics')">
-            <Icon icon="mdi:chart-line" class="h-4 w-4" />
-            <span>{{ $t('common.analytics') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/analytics" icon="mdi:chart-line" :label="$t('common.analytics')" />
 
-          <router-link to="/admin/reports" :class="getLinkClasses('/admin/reports')">
-            <Icon icon="mdi:chart-timeline-variant" class="h-4 w-4" />
-            <span>{{ $t('reports.title') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/reports" icon="mdi:chart-timeline-variant" :label="$t('reports.title')" />
         </CollapsibleMenu>
       </div>
 
@@ -292,22 +185,14 @@
           :title="$t('common.contentManagement')"
           icon="mdi:file-document-edit"
           storage-key="sidebar-editor-content"
+          :compact="!appStore.sidebarOpen"
           :default-open="isEditorContentActive"
         >
-          <router-link to="/admin/news" :class="getLinkClasses('/admin/news')">
-            <Icon icon="mdi:newspaper" class="h-4 w-4" />
-            <span>{{ $t('admin.newsArticles') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/news" icon="mdi:newspaper" :label="$t('admin.newsArticles')" />
 
-          <router-link to="/admin/events" :class="getLinkClasses('/admin/events')">
-            <Icon icon="mdi:calendar-edit" class="h-4 w-4" />
-            <span>{{ $t('common.eventsManagement') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('common.eventsManagement')" />
 
-          <router-link to="/admin/polls" :class="getLinkClasses('/admin/polls')">
-            <Icon icon="mdi:poll" class="h-4 w-4" />
-            <span>{{ $t('common.pollsManagement') }}</span>
-          </router-link>
+          <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('common.pollsManagement')" />
         </CollapsibleMenu>
       </div>
     </nav>
@@ -594,6 +479,7 @@ import NotificationBell from '@/components/notifications/NotificationBell.vue'
 // Chargé à la première ouverture (embarque marked et les guides)
 const HelpDrawer = defineAsyncComponent(() => import('@/components/help/HelpDrawer.vue'))
 import CollapsibleMenu from '@/components/layout/CollapsibleMenu.vue'
+import SidebarLink from '@/components/layout/SidebarLink.vue'
 
 const authStore = useAuthStore()
 const appStore = useAppStore()
@@ -714,18 +600,6 @@ watch(() => appStore.settingsLastUpdated, async () => {
     }
   }
 })
-
-// Functions
-const getLinkClasses = (path, exact = false) => {
-  const isActive = exact
-    ? route.path === path
-    : route.path.startsWith(path)
-
-  return [
-    'nav-link',
-    isActive ? 'nav-link-active' : 'nav-link-inactive'
-  ]
-}
 
 const handleLogout = async () => {
   try {

@@ -28,13 +28,6 @@
             </span>
           </button>
 
-          <!-- Bouton menu mobile -->
-          <button
-            @click="appStore.toggleSidebar()"
-            class="lg:hidden btn btn-secondary"
-          >
-            <Icon icon="mdi:menu" class="h-5 w-5" />
-          </button>
         </div>
       </template>
     </PageHeader>
