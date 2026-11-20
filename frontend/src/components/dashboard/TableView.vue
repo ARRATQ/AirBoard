@@ -152,7 +152,7 @@
           <!-- Empty State -->
           <tr v-if="filteredApplications.length === 0">
             <td colspan="5" class="px-6 py-12 text-center">
-              <Icon icon="mdi:application-off" class="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <Icon icon="mdi:application-outline" class="h-12 w-12 mx-auto text-gray-400 mb-2" />
               <p class="text-gray-500 dark:text-gray-400">{{ $t('dashboard.noApplicationsFound') }}</p>
             </td>
           </tr>

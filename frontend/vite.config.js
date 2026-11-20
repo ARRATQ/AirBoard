@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import { cpSync, existsSync, mkdirSync } from 'fs'
+import iconsPlugin from './vite-plugins/iconsPlugin.js'
 
 // Plugin to copy docs to public folder
 function copyDocsPlugin() {
@@ -37,7 +38,7 @@ function copyDocsPlugin() {
 const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:8080'
 
 export default defineConfig(({ command }) => ({
-  plugins: [vue(), copyDocsPlugin()],
+  plugins: [vue(), copyDocsPlugin(), iconsPlugin()],
   // En prod, les console.log/debug sont retirés (console.warn/error restent)
   esbuild: command === 'build' ? { pure: ['console.log', 'console.debug'] } : {},
   resolve: {
@@ -79,9 +80,11 @@ export default defineConfig(({ command }) => ({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-          icons: ['@iconify/vue'],
+        manualChunks(id) {
+          if (/node_modules\/(vue|@vue|vue-router|pinia|vue-i18n|@intlify)\//.test(id)) return 'vendor'
+          // Les icônes changent rarement : chunk à part, mis en cache indépendamment du code.
+          if (id.includes('node_modules/@iconify/vue/')) return 'icons'
+          return undefined
         },
       },
     },
