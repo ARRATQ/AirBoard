@@ -552,7 +552,8 @@
     "viewModes": {
       "list": "List",
       "grid": "Grid",
-      "table": "Table"
+      "table": "Table",
+      "label": "Display"
     },
     "zoom": {
       "extraSmall": "Extra Small",
@@ -584,7 +585,31 @@
     "emptyAdmin": "Start by creating a resource category, then add resources to it.",
     "emptyUser": "Contact your administrator to get access to resources.",
     "createCategory": "Create a category",
-    "loadError": "Could not load resources"
+    "loadError": "Could not load resources",
+    "types": {
+      "app": "App",
+      "word": "Word document",
+      "excel": "Excel workbook",
+      "powerpoint": "Presentation",
+      "pdf": "PDF",
+      "folder": "Folder",
+      "site": "Intranet site",
+      "link": "Web link"
+    },
+    "typeFilter": {
+      "label": "Resource type",
+      "all": "All",
+      "apps": "Apps",
+      "docs": "Documents",
+      "sites": "Sites and links"
+    },
+    "newBadge": "New",
+    "privateBadge": "Private",
+    "opensInNewTab": "Opens in a new tab",
+    "type": "Type",
+    "addedOn": "Added on",
+    "count": "{count} resource | {count} resource | {count} resources",
+    "noneOfType": "No resource of this type."
   },
   "groupAdmin": {
     "title": "Group Administration",
@@ -1355,7 +1380,9 @@
       "region": "Announcements",
       "prev": "Previous announcement",
       "next": "Next announcement",
-      "open": "Read the full announcement"
+      "open": "Read the full announcement",
+      "pause": "Pause rotation",
+      "play": "Resume rotation"
     },
     "rail": {
       "portal": "Portal",

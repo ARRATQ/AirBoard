@@ -36,6 +36,16 @@
       <button type="button" class="ann__btn" :aria-label="$t('home.announcements.next')" @click="next">
         <Icon icon="mdi:chevron-right" class="ann__chev" aria-hidden="true" />
       </button>
+      <button
+        v-if="!motionReduced"
+        type="button"
+        class="ann__btn"
+        :aria-label="$t(userPaused ? 'home.announcements.play' : 'home.announcements.pause')"
+        :aria-pressed="userPaused"
+        @click="togglePause"
+      >
+        <Icon :icon="userPaused ? 'mdi:play' : 'mdi:pause'" class="ann__chev ann__chev--fixed" aria-hidden="true" />
+      </button>
     </span>
 
     <BaseModal :open="modalOpen" :title="current.title || $t('home.announcements.region')" @close="modalOpen = false">
@@ -76,7 +86,8 @@ const count = () => props.announcements.length
 const next = () => { index.value = (index.value + 1) % count() }
 const prev = () => { index.value = (index.value - 1 + count()) % count() }
 
-const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+const motionReduced = Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+const userPaused = ref(false)
 
 function stop() {
   clearInterval(timer)
@@ -85,7 +96,12 @@ function stop() {
 
 function start() {
   stop()
-  if (count() > 1 && !modalOpen.value && !reducedMotion()) timer = setInterval(next, ROTATE_MS)
+  if (count() > 1 && !modalOpen.value && !motionReduced && !userPaused.value) timer = setInterval(next, ROTATE_MS)
+}
+
+function togglePause() {
+  userPaused.value = !userPaused.value
+  if (userPaused.value) stop()
 }
 
 const pause = stop
@@ -196,7 +212,7 @@ onBeforeUnmount(stop)
 
 .ann__btn:hover { background: rgb(255 255 255 / 0.1); }
 .ann__chev { width: 16px; height: 16px; }
-[dir='rtl'] .ann__chev { transform: scaleX(-1); }
+[dir='rtl'] .ann__chev:not(.ann__chev--fixed) { transform: scaleX(-1); }
 
 .ann-fade-enter-active,
 .ann-fade-leave-active { transition: opacity 180ms ease, transform 180ms ease; }

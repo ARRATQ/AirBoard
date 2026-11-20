@@ -474,7 +474,8 @@
     "viewModes": {
       "list": "Lista",
       "grid": "Cuadrícula",
-      "table": "Tabla"
+      "table": "Tabla",
+      "label": "Vista"
     },
     "zoom": {
       "extraSmall": "Muy pequeño",
@@ -506,7 +507,31 @@
     "emptyAdmin": "Empiece creando una categoría de recursos y luego añada recursos.",
     "emptyUser": "Contacte con su administrador para obtener acceso a recursos.",
     "createCategory": "Crear una categoría",
-    "loadError": "No se pudieron cargar los recursos"
+    "loadError": "No se pudieron cargar los recursos",
+    "types": {
+      "app": "Aplicación",
+      "word": "Documento Word",
+      "excel": "Libro Excel",
+      "powerpoint": "Presentación",
+      "pdf": "PDF",
+      "folder": "Carpeta",
+      "site": "Sitio de intranet",
+      "link": "Enlace web"
+    },
+    "typeFilter": {
+      "label": "Tipo de recurso",
+      "all": "Todo",
+      "apps": "Aplicaciones",
+      "docs": "Documentos",
+      "sites": "Sitios y enlaces"
+    },
+    "newBadge": "Nuevo",
+    "privateBadge": "Privado",
+    "opensInNewTab": "Se abre en una pestaña nueva",
+    "type": "Tipo",
+    "addedOn": "Añadido el",
+    "count": "{count} recurso | {count} recurso | {count} recursos",
+    "noneOfType": "Ningún recurso de este tipo."
   },
   "groupAdmin": {
     "title": "Administración de Grupo",
@@ -1082,7 +1107,9 @@
       "region": "Anuncios",
       "prev": "Anuncio anterior",
       "next": "Anuncio siguiente",
-      "open": "Leer el anuncio completo"
+      "open": "Leer el anuncio completo",
+      "pause": "Pausar el desfile",
+      "play": "Reanudar el desfile"
     },
     "rail": {
       "portal": "Portal",

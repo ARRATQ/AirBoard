@@ -518,7 +518,8 @@
     "viewModes": {
       "list": "Liste",
       "grid": "Grille",
-      "table": "Tableau"
+      "table": "Tableau",
+      "label": "Affichage"
     },
     "zoom": {
       "extraSmall": "Très petit",
@@ -550,7 +551,31 @@
     "emptyAdmin": "Commencez par créer une catégorie de ressources, puis ajoutez-y des ressources.",
     "emptyUser": "Contactez votre administrateur pour obtenir l'accès à des ressources.",
     "createCategory": "Créer une catégorie",
-    "loadError": "Impossible de charger les ressources"
+    "loadError": "Impossible de charger les ressources",
+    "types": {
+      "app": "Appli",
+      "word": "Document Word",
+      "excel": "Classeur Excel",
+      "powerpoint": "Présentation",
+      "pdf": "PDF",
+      "folder": "Dossier",
+      "site": "Site intranet",
+      "link": "Lien web"
+    },
+    "typeFilter": {
+      "label": "Type de ressource",
+      "all": "Tout",
+      "apps": "Applis",
+      "docs": "Documents",
+      "sites": "Sites et liens"
+    },
+    "newBadge": "Nouveau",
+    "privateBadge": "Privé",
+    "opensInNewTab": "S'ouvre dans un nouvel onglet",
+    "type": "Type",
+    "addedOn": "Ajoutée le",
+    "count": "{count} ressource | {count} ressource | {count} ressources",
+    "noneOfType": "Aucune ressource de ce type."
   },
   "events": {
     "center": {
@@ -1321,7 +1346,9 @@
       "region": "Annonces",
       "prev": "Annonce précédente",
       "next": "Annonce suivante",
-      "open": "Lire l'annonce en entier"
+      "open": "Lire l'annonce en entier",
+      "pause": "Mettre le défilement en pause",
+      "play": "Reprendre le défilement"
     },
     "rail": {
       "portal": "Portail",

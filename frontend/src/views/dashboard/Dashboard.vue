@@ -1,485 +1,256 @@
 <template>
   <div class="content-area">
-    <!-- Header avec paramètres dynamiques -->
-    <PageHeader>
+    <PageHeader :eyebrow="$t('home.rail.portal')">
       <template #title>{{ pageTitle }}</template>
       <template #description>{{ pageDescription }}</template>
       <template #actions>
-        <!-- Controls -->
-        <div class="flex items-center gap-3">
-          <!-- View Mode Selector (hidden on mobile) -->
-          <div class="hidden md:block">
-            <ViewModeSelector v-model="viewMode" />
-          </div>
-
-          <!-- Collapse/Expand All Button -->
-          <button
-            v-if="dashboard?.app_groups?.length > 0"
-            @click="toggleAllGroups"
-            class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
-            :title="allGroupsCollapsed ? $t('dashboard.expandAll') : $t('dashboard.collapseAll')"
-          >
-            <Icon
-              :icon="allGroupsCollapsed ? 'mdi:unfold-more-horizontal' : 'mdi:unfold-less-horizontal'"
-              class="h-5 w-5"
-            />
-            <span class="hidden lg:inline">
-              {{ allGroupsCollapsed ? $t('dashboard.expandAll') : $t('dashboard.collapseAll') }}
-            </span>
-          </button>
-
-        </div>
+        <SegmentedControl v-model="viewMode" :options="viewModes" :label="$t('dashboard.viewModes.label')" icon-only-small />
+        <BaseButton
+          v-if="dashboard?.app_groups?.length && viewMode !== 'table'"
+          size="sm"
+          :icon="allGroupsCollapsed ? 'mdi:unfold-more-horizontal' : 'mdi:unfold-less-horizontal'"
+          @click="toggleAllGroups"
+        >
+          {{ allGroupsCollapsed ? $t('dashboard.expandAll') : $t('dashboard.collapseAll') }}
+        </BaseButton>
       </template>
     </PageHeader>
 
-    <!-- Loading state -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
+    <AnnouncementPanel v-if="activeAnnouncements.length" class="portal__announcements" :announcements="activeAnnouncements" />
+
+    <div v-if="isLoading" class="portal__state" role="status">
+      <Icon icon="mdi:loading" class="portal__spin" aria-hidden="true" />
+      <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
-    <!-- Empty state -->
-    <div v-else-if="!dashboard?.app_groups?.length" class="empty-state">
-      <Icon icon="mdi:application" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('dashboard.emptyTitle') }}</h3>
-      <p class="empty-state-description">
-        {{ authStore.isAdmin ? $t('dashboard.emptyAdmin') : $t('dashboard.emptyUser') }}
-      </p>
-      <div v-if="authStore.isAdmin" class="mt-6">
-        <router-link to="/admin/resources/categories" class="btn btn-primary">
-          <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
-          {{ $t('dashboard.createCategory') }}
-        </router-link>
-      </div>
-    </div>
+    <EmptyState
+      v-else-if="!dashboard?.app_groups?.length"
+      icon="mdi:application-outline"
+      :title="$t('dashboard.emptyTitle')"
+      :description="authStore.isAdmin ? $t('dashboard.emptyAdmin') : $t('dashboard.emptyUser')"
+    >
+      <BaseButton v-if="authStore.isAdmin" tag="router-link" to="/admin/resources/categories" variant="primary" icon="mdi:plus">
+        {{ $t('dashboard.createCategory') }}
+      </BaseButton>
+    </EmptyState>
 
-    <!-- Ressources, rangées par catégorie -->
-    <div v-else class="space-y-6">
-      <!-- Announcements Carousel -->
-      <div v-if="activeAnnouncements.length > 0" class="relative">
-        <div class="announcement-carousel">
-          <!-- Carousel Container -->
-          <div class="relative overflow-hidden" @mouseenter="pauseAutoRotation" @mouseleave="resumeAutoRotation">
-            <!-- Announcement Slide -->
-            <transition :name="slideDirection" mode="out-in">
-              <div
-                :key="currentAnnouncementIndex"
-                :class="getAnnouncementClass(currentAnnouncement.type)"
-                class="rounded-lg p-4 border-l-4"
-              >
-                <div class="flex items-start gap-3">
-                  <Icon :icon="getAnnouncementIcon(currentAnnouncement.type)" class="h-5 w-5 flex-shrink-0 mt-0.5" />
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-sm mb-1">{{ currentAnnouncement.title }}</h3>
-                    <p v-if="currentAnnouncement.content" class="text-sm whitespace-pre-wrap line-clamp-3">
-                      {{ currentAnnouncement.content }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </transition>
-
-            <!-- Navigation Buttons -->
-            <button
-              v-if="activeAnnouncements.length > 1"
-              @click="previousAnnouncement"
-              class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 shadow-md transition-all z-10"
-              :title="'Previous'"
-            >
-              <Icon icon="mdi:chevron-left" class="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
-            <button
-              v-if="activeAnnouncements.length > 1"
-              @click="nextAnnouncement"
-              class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/90 dark:bg-gray-700/90 hover:bg-white dark:hover:bg-gray-600 shadow-md transition-all z-10"
-              :title="'Next'"
-            >
-              <Icon icon="mdi:chevron-right" class="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            </button>
-          </div>
-
-          <!-- Controls Bar -->
-          <div v-if="activeAnnouncements.length > 1" class="flex items-center justify-between mt-3 px-2">
-            <!-- Pagination Dots -->
-            <div class="flex items-center gap-2">
-              <button
-                v-for="(announcement, index) in activeAnnouncements"
-                :key="index"
-                @click="goToAnnouncement(index)"
-                class="transition-all duration-200"
-                :class="index === currentAnnouncementIndex
-                  ? 'w-6 h-2 rounded-full bg-primary-600 dark:bg-primary-400'
-                  : 'w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'"
-                :title="`Announcement ${index + 1}`"
-              ></button>
-            </div>
-
-            <!-- Counter and Auto-play Control -->
-            <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {{ currentAnnouncementIndex + 1 }}/{{ activeAnnouncements.length }}
-              </span>
-              <button
-                @click="toggleAutoRotation"
-                class="p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                :title="isAutoRotating ? 'Pause' : 'Play'"
-              >
-                <Icon
-                  :icon="isAutoRotating ? 'mdi:pause' : 'mdi:play'"
-                  class="h-4 w-4 text-gray-600 dark:text-gray-400"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
+    <div v-else class="portal">
+      <div class="portal__toolbar">
+        <SegmentedControl v-model="typeFilter" :options="typeOptions" :label="$t('dashboard.typeFilter.label')" />
+        <p class="portal__count" aria-live="polite">{{ $t('dashboard.count', visibleCount) }}</p>
       </div>
 
-      <!-- Mes Favoris Section -->
-      <div v-if="favoriteApps.length > 0" class="app-group-container fade-in" style="margin-bottom: 1.5rem;">
-        <div 
-          class="app-group-header bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20"
-          @click="toggleGroup('favorites')"
-        >
-          <div class="flex items-center gap-2 flex-1">
-            <div
-              class="h-8 w-8 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0 bg-gradient-to-br from-yellow-400 to-orange-500"
-            >
-              <Icon icon="mdi:star" class="h-4 w-4 text-white" />
-            </div>
-            <div class="flex items-baseline gap-2 flex-1 min-w-0">
-              <h2 class="text-base font-semibold text-gray-900 dark:text-white truncate">
-                {{ $t('common.myFavorites') }}
-              </h2>
-              <span class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                - {{ favoriteApps.length }} {{ favoriteApps.length > 1 ? $t('common.applications').toLowerCase() : $t('common.applications').toLowerCase().slice(0, -1) }}
-              </span>
-            </div>
-          </div>
-          <Icon
-            :icon="isGroupCollapsed('favorites') ? 'mdi:chevron-down' : 'mdi:chevron-up'"
-            class="h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0"
-          />
-        </div>
-
-        <transition name="collapse">
-          <div v-show="!isGroupCollapsed('favorites')" class="app-group-content">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              <div
-                v-for="app in favoriteApps"
-                :key="app.id"
-                class="app-list-item"
-                @click="openApplication(app)"
-              >
-                <!-- App Icon -->
-                <Icon
-                  :icon="app.icon || 'mdi:application'"
-                  class="h-7 w-7 flex-shrink-0"
-                  :style="{ color: app.color || '#6366f1' }"
-                />
-
-                <!-- App Info -->
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-1">
-                    <h3 class="font-semibold text-xs text-gray-900 dark:text-white truncate">
-                      {{ app.name }}
-                    </h3>
-                    <Icon
-                      v-if="app.open_in_new_tab"
-                      icon="mdi:open-in-new"
-                      class="h-3 w-3 text-gray-400 dark:text-gray-500 flex-shrink-0"
-                    />
-                  </div>
-                  <p v-if="app.description" class="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">
-                    {{ app.description }}
-                  </p>
-                </div>
-
-                <!-- Favorite Button -->
-                <button
-                  @click.stop="toggleFavorite($event, app)"
-                  class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-                  :title="$t('common.removeFromFavorites')"
-                >
-                  <Icon icon="mdi:star" class="h-4 w-4 text-yellow-500" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </transition>
-      </div>
-
-      <!-- Grid View (formerly List) -->
-      <div v-if="viewMode === 'grid'">
-        <GridView
-          :app-groups="dashboard.app_groups"
-          :collapsed-groups="collapsedGroups"
-          @toggle-group="toggleGroup"
+      <ResourceGroup
+        v-if="favoriteApps.length && viewMode !== 'table'"
+        group-key="favorites"
+        :title="$t('common.myFavorites')"
+        icon="mdi:star"
+        color="#d99a00"
+        :count="favoriteApps.length"
+        :collapsed="collapsedGroups.has('favorites')"
+        @toggle="toggleGroup('favorites')"
+      >
+        <ResourceTile
+          v-for="app in favoriteApps"
+          :key="app.id"
+          :resource="app"
+          favorite
+          @toggle-favorite="toggleFavorite"
           @show-details="openAppDetails"
         />
-      </div>
+      </ResourceGroup>
 
-      <!-- Table View -->
-      <div v-else-if="viewMode === 'table'">
-        <TableView
-          :app-groups="dashboard.app_groups"
-        />
-      </div>
-
-      <!-- List View (formerly Grid) -->
-      <div v-else-if="viewMode === 'list'">
-        <ListView
-          :app-groups="dashboard.app_groups"
-          :collapsed-groups="collapsedGroups"
-          @toggle-group="toggleGroup"
-          @show-details="openAppDetails"
-        />
-      </div>
+      <EmptyState v-if="!visibleCount" compact icon="mdi:filter-off-outline" :title="$t('dashboard.noneOfType')" />
+      <ResourceTable v-else-if="viewMode === 'table'" :app-groups="visibleGroups" @show-details="openAppDetails" />
+      <ResourceGroupsView
+        v-else
+        :app-groups="visibleGroups"
+        :collapsed-groups="collapsedGroups"
+        :layout="viewMode === 'grid' ? 'columns' : 'wide'"
+        @toggle-group="toggleGroup"
+        @show-details="openAppDetails"
+      />
     </div>
 
-    <!-- Application Details Modal -->
-    <ApplicationDetailModal
-      v-if="showDetailsModal && selectedApp"
-      :app="selectedApp"
-      @close="showDetailsModal = false"
-    />
+    <ApplicationDetailModal v-if="showDetailsModal && selectedApp" :app="selectedApp" @close="showDetailsModal = false" />
   </div>
 </template>
 
 <script setup>
-import PageHeader from '@/components/ui/PageHeader.vue'
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+// Portail des ressources : liens vers des applis en ligne, documents et sites Office 365, liens web.
+// Le type de chaque ressource est déduit de son URL (utils/resourceType.js) ; le filtre par type est
+// gardé dans l'URL (?type=docs). Vues : grille, colonnes par catégorie, tableau.
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useFavoritesStore } from '@/stores/favorites'
-import { dashboardService, analyticsService, announcementsService } from '@/services/api'
-import ViewModeSelector from '@/components/dashboard/ViewModeSelector.vue'
-import TableView from '@/components/dashboard/TableView.vue'
-import ListView from '@/components/dashboard/ListView.vue'
-import GridView from '@/components/dashboard/GridView.vue'
+import { dashboardService, announcementsService } from '@/services/api'
+import { TYPE_FAMILIES, resourceTypeOf, typeFamilyOf } from '@/utils/resourceType'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
+import AnnouncementPanel from '@/components/ui/AnnouncementPanel.vue'
+import ResourceGroup from '@/components/dashboard/ResourceGroup.vue'
+import ResourceTile from '@/components/dashboard/ResourceTile.vue'
+import ResourceGroupsView from '@/components/dashboard/ResourceGroupsView.vue'
+import ResourceTable from '@/components/dashboard/ResourceTable.vue'
 import ApplicationDetailModal from '@/components/dashboard/ApplicationDetailModal.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const favoritesStore = useFavoritesStore()
 
-// État local
 const dashboard = ref(null)
 const appSettings = ref({})
 const isLoading = ref(false)
+const activeAnnouncements = ref([])
 
-// Valeurs livrées par défaut côté serveur (handlers/settings.go) : tant qu'un
-// admin ne les a pas personnalisées, la page garde le vocabulaire commun.
+// Valeurs livrées par défaut côté serveur (handlers/settings.go) : tant qu'un admin ne les a pas
+// personnalisées, la page garde le vocabulaire commun.
 const DEFAULT_TITLE = 'Dashboard'
 const DEFAULT_WELCOME = 'Welcome to your application portal'
 const customized = (value, fallback) => (value && value !== fallback ? value : null)
-const pageTitle = computed(() =>
-  customized(appSettings.value.dashboard_title, DEFAULT_TITLE) || t('common.applications'))
-const pageDescription = computed(() =>
-  customized(appSettings.value.welcome_message, DEFAULT_WELCOME) || t('dashboard.subtitle'))
-const collapsedGroups = ref(new Set())
-const activeAnnouncements = ref([])
+const pageTitle = computed(() => customized(appSettings.value.dashboard_title, DEFAULT_TITLE) || t('common.applications'))
+const pageDescription = computed(() => customized(appSettings.value.welcome_message, DEFAULT_WELCOME) || t('dashboard.subtitle'))
 
-// Application Details Modal
-const showDetailsModal = ref(false)
-const selectedApp = ref(null)
-
-const openAppDetails = (app) => {
-  selectedApp.value = app
-  showDetailsModal.value = true
-}
-
-// View mode state
-const viewMode = ref(localStorage.getItem('dashboard-view-mode') || 'grid')
-const allGroupsCollapsed = ref(false)
-
-// Carousel state
-const currentAnnouncementIndex = ref(0)
-const isAutoRotating = ref(true)
-const slideDirection = ref('slide-left')
-const autoRotationInterval = ref(null)
-
-// Computed property for current announcement
-const currentAnnouncement = computed(() => {
-  return activeAnnouncements.value[currentAnnouncementIndex.value] || {}
-})
-
-// Watch view mode changes and save to localStorage
-watch(viewMode, (newMode) => {
-  localStorage.setItem('dashboard-view-mode', newMode)
-})
-
-// Carousel navigation methods
-const previousAnnouncement = () => {
-  slideDirection.value = 'slide-right'
-  if (currentAnnouncementIndex.value === 0) {
-    currentAnnouncementIndex.value = activeAnnouncements.value.length - 1
-  } else {
-    currentAnnouncementIndex.value--
-  }
-}
-
-const nextAnnouncement = () => {
-  slideDirection.value = 'slide-left'
-  if (currentAnnouncementIndex.value === activeAnnouncements.value.length - 1) {
-    currentAnnouncementIndex.value = 0
-  } else {
-    currentAnnouncementIndex.value++
-  }
-}
-
-const goToAnnouncement = (index) => {
-  if (index === currentAnnouncementIndex.value) return
-  slideDirection.value = index > currentAnnouncementIndex.value ? 'slide-left' : 'slide-right'
-  currentAnnouncementIndex.value = index
-}
-
-// Auto-rotation methods
-const startAutoRotation = () => {
-  if (autoRotationInterval.value) {
-    clearInterval(autoRotationInterval.value)
-  }
-  if (activeAnnouncements.value.length > 1) {
-    autoRotationInterval.value = setInterval(() => {
-      nextAnnouncement()
-    }, 5000) // 5 seconds
-  }
-}
-
-const stopAutoRotation = () => {
-  if (autoRotationInterval.value) {
-    clearInterval(autoRotationInterval.value)
-    autoRotationInterval.value = null
-  }
-}
-
-const toggleAutoRotation = () => {
-  isAutoRotating.value = !isAutoRotating.value
-  if (isAutoRotating.value) {
-    startAutoRotation()
-  } else {
-    stopAutoRotation()
-  }
-}
-
-const pauseAutoRotation = () => {
-  if (isAutoRotating.value) {
-    stopAutoRotation()
-  }
-}
-
-const resumeAutoRotation = () => {
-  if (isAutoRotating.value) {
-    startAutoRotation()
-  }
-}
-
-// Watch for announcements changes to reset carousel
-watch(activeAnnouncements, (newVal) => {
-  if (newVal.length > 0) {
-    currentAnnouncementIndex.value = 0
-    if (isAutoRotating.value) {
-      startAutoRotation()
-    }
-  } else {
-    stopAutoRotation()
-  }
-}, { immediate: true })
-
-// Cleanup on unmount
-onUnmounted(() => {
-  stopAutoRotation()
-})
-
-// Charger les groupes effondrés depuis le localStorage
-const loadCollapsedGroups = () => {
+// ── Vues ─────────────────────────────────────────────────────────────
+// Valeurs conservées pour le choix déjà mémorisé (localStorage) : list = une catégorie par ligne,
+// grid = catégories en colonnes.
+const VIEW_KEY = 'dashboard-view-mode'
+const readView = () => {
   try {
-    const saved = localStorage.getItem('airboard_collapsed_groups')
-    if (saved) {
-      collapsedGroups.value = new Set(JSON.parse(saved))
-    }
+    return localStorage.getItem(VIEW_KEY) || 'list'
+  } catch {
+    return 'list'
+  }
+}
+const viewMode = ref(readView())
+watch(viewMode, (mode) => {
+  try {
+    localStorage.setItem(VIEW_KEY, mode)
+  } catch {
+    /* préférence non mémorisée */
+  }
+})
+const viewModes = computed(() => [
+  { value: 'list', label: t('dashboard.viewModes.grid'), icon: 'mdi:view-grid-outline' },
+  { value: 'grid', label: t('dashboard.viewModes.list'), icon: 'mdi:view-column-outline' },
+  { value: 'table', label: t('dashboard.viewModes.table'), icon: 'mdi:table' },
+])
+
+// ── Filtre par type (dans l'URL) ─────────────────────────────────────
+const typeFilter = computed({
+  get: () => (TYPE_FAMILIES.includes(route.query.type) ? route.query.type : 'all'),
+  set: (value) => router.replace({ query: { ...route.query, type: value === 'all' ? undefined : value } }),
+})
+
+const allApps = computed(() => (dashboard.value?.app_groups || []).flatMap((g) => g.applications || []))
+const familyOf = (app) => typeFamilyOf(resourceTypeOf(app.url))
+const matchesType = (app) => typeFilter.value === 'all' || familyOf(app) === typeFilter.value
+
+const typeOptions = computed(() => [
+  { value: 'all', label: t('dashboard.typeFilter.all'), count: allApps.value.length },
+  ...TYPE_FAMILIES.map((family) => ({
+    value: family,
+    label: t(`dashboard.typeFilter.${family}`),
+    count: allApps.value.filter((app) => familyOf(app) === family).length,
+  })),
+])
+
+const visibleGroups = computed(() => {
+  const groups = dashboard.value?.app_groups || []
+  if (typeFilter.value === 'all') return groups
+  return groups
+    .map((g) => ({ ...g, applications: (g.applications || []).filter(matchesType) }))
+    .filter((g) => g.applications.length)
+})
+const visibleCount = computed(() => visibleGroups.value.reduce((n, g) => n + (g.applications?.length || 0), 0))
+
+const favoriteApps = computed(() => allApps.value.filter((app) => favoritesStore.isFavorite(app.id) && matchesType(app)))
+
+// ── Catégories repliées (mémorisées) ─────────────────────────────────
+const COLLAPSED_KEY = 'airboard_collapsed_groups'
+const collapsedGroups = ref(new Set())
+
+function loadCollapsedGroups() {
+  try {
+    const saved = localStorage.getItem(COLLAPSED_KEY)
+    if (saved) collapsedGroups.value = new Set(JSON.parse(saved))
   } catch (error) {
     console.error('Error loading collapsed groups:', error)
   }
 }
 
-// Sauvegarder les groupes effondrés dans le localStorage
-const saveCollapsedGroups = () => {
+function saveCollapsedGroups(next) {
+  collapsedGroups.value = next
   try {
-    localStorage.setItem('airboard_collapsed_groups', JSON.stringify([...collapsedGroups.value]))
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]))
   } catch (error) {
     console.error('Error saving collapsed groups:', error)
   }
 }
 
-// Toggle un groupe
-const toggleGroup = (groupId) => {
-  if (collapsedGroups.value.has(groupId)) {
-    collapsedGroups.value.delete(groupId)
-  } else {
-    collapsedGroups.value.add(groupId)
-  }
-  saveCollapsedGroups()
+function toggleGroup(id) {
+  const next = new Set(collapsedGroups.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  saveCollapsedGroups(next)
 }
 
-// Vérifier si un groupe est effondré
-const isGroupCollapsed = (groupId) => {
-  return collapsedGroups.value.has(groupId)
+const allGroupsCollapsed = computed(() => {
+  const groups = dashboard.value?.app_groups || []
+  return groups.length > 0 && groups.every((g) => collapsedGroups.value.has(g.id))
+})
+
+function toggleAllGroups() {
+  if (allGroupsCollapsed.value) saveCollapsedGroups(new Set())
+  else saveCollapsedGroups(new Set([...(dashboard.value?.app_groups || []).map((g) => g.id), 'favorites']))
 }
 
-// Collapse all groups
-const collapseAll = () => {
-  if (!dashboard.value?.app_groups) return
+// ── Détails et favoris ───────────────────────────────────────────────
+const showDetailsModal = ref(false)
+const selectedApp = ref(null)
 
-  dashboard.value.app_groups.forEach(group => {
-    collapsedGroups.value.add(group.id)
-  })
-  allGroupsCollapsed.value = true
-  saveCollapsedGroups()
+function openAppDetails(app) {
+  selectedApp.value = app
+  showDetailsModal.value = true
 }
 
-// Expand all groups
-const expandAll = () => {
-  collapsedGroups.value.clear()
-  allGroupsCollapsed.value = false
-  saveCollapsedGroups()
-}
-
-// Toggle all groups
-const toggleAllGroups = () => {
-  if (allGroupsCollapsed.value) {
-    expandAll()
-  } else {
-    collapseAll()
+async function toggleFavorite(app) {
+  try {
+    await favoritesStore.toggleFavorite(app.id)
+  } catch (error) {
+    console.error('Error toggling favorite:', error)
+    appStore.showError(t('ui.toast.error'))
   }
 }
 
-// Fonctions
+// ── Chargement ───────────────────────────────────────────────────────
 const uniqueById = (items) => {
   if (!Array.isArray(items)) return []
   const seen = new Set()
-  const out = []
-  for (const item of items) {
+  return items.filter((item) => {
     const id = item?.id ?? JSON.stringify(item)
-    if (!seen.has(id)) {
-      seen.add(id)
-      out.push(item)
-    }
-  }
-  return out
+    if (seen.has(id)) return false
+    seen.add(id)
+    return true
+  })
 }
 
-const loadDashboard = async () => {
+async function loadDashboard() {
+  isLoading.value = true
   try {
-    isLoading.value = true
     const data = await dashboardService.getDashboard()
     // Déduplication côté client par sécurité
     if (data?.app_groups) {
-      data.app_groups = uniqueById(data.app_groups).map(g => ({
-        ...g,
-        applications: uniqueById(g.applications || [])
-      }))
+      data.app_groups = uniqueById(data.app_groups).map((g) => ({ ...g, applications: uniqueById(g.applications || []) }))
     }
     dashboard.value = data
   } catch (error) {
@@ -490,9 +261,8 @@ const loadDashboard = async () => {
   }
 }
 
-const loadAppSettings = async () => {
+async function loadAppSettings() {
   try {
-    // Utiliser le store si dispo
     if (appStore.appSettings) {
       appSettings.value = appStore.appSettings
       return
@@ -505,243 +275,68 @@ const loadAppSettings = async () => {
     appSettings.value = await appStore.ensureAppSettings()
   } catch (error) {
     console.error('Error loading app settings:', error)
-    // Réglages indisponibles : titre et message par défaut (voir pageTitle)
     appSettings.value = {}
   }
 }
 
-const openApplication = async (app) => {
-  // Track click for analytics (non-bloquant)
-  analyticsService.trackClick(app.id)
-
-  // Ouvrir l'application
-  if (app.open_in_new_tab) {
-    window.open(app.url, '_blank', 'noopener,noreferrer')
-  } else {
-    window.location.href = app.url
-  }
-
-  // Analytics ou logging (optionnel)
-  console.log(`Application opened: ${app.name} - ${app.url}`)
-}
-
-// Toggle favorite
-const toggleFavorite = async (event, app) => {
-  event.stopPropagation() // Empêcher l'ouverture de l'application
-  await favoritesStore.toggleFavorite(app.id)
-}
-
-// Get favorite applications
-const favoriteApps = computed(() => {
-  if (!dashboard.value?.app_groups) return []
-
-  const allApps = []
-  dashboard.value.app_groups.forEach(group => {
-    group.applications?.forEach(app => {
-      if (favoritesStore.isFavorite(app.id)) {
-        allApps.push(app)
-      }
-    })
-  })
-
-  return allApps
-})
-
-// Load active announcements
-const loadAnnouncements = async () => {
+async function loadAnnouncements() {
   try {
-    activeAnnouncements.value = await announcementsService.getActiveAnnouncements()
+    activeAnnouncements.value = (await announcementsService.getActiveAnnouncements()) || []
   } catch (error) {
     console.error('Error loading announcements:', error)
   }
 }
 
-// Get announcement styling
-const getAnnouncementClass = (type) => {
-  const classes = {
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-900 dark:text-blue-100',
-    warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500 text-yellow-900 dark:text-yellow-100',
-    success: 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-900 dark:text-green-100',
-    error: 'bg-red-50 dark:bg-red-900/20 border-red-500 text-red-900 dark:text-red-100'
-  }
-  return classes[type] || classes.info
-}
+watch(() => appStore.settingsLastUpdated, loadAppSettings)
 
-// Get announcement icon
-const getAnnouncementIcon = (type) => {
-  const icons = {
-    info: 'mdi:information',
-    warning: 'mdi:alert',
-    success: 'mdi:check-circle',
-    error: 'mdi:alert-circle'
-  }
-  return icons[type] || icons.info
-}
-
-// 🔧 FIX: Watcher pour les changements de settings
-watch(() => appStore.settingsLastUpdated, async () => {
-  console.log('Settings updated, reloading dashboard settings...')
-  await loadAppSettings()
-}, { immediate: false })
-
-// Lifecycle
 onMounted(async () => {
   loadCollapsedGroups()
-  await Promise.all([
-    loadDashboard(),
-    loadAppSettings(),
-    favoritesStore.loadFavorites(),
-    loadAnnouncements()
-  ])
+  await Promise.all([loadDashboard(), loadAppSettings(), favoritesStore.loadFavorites(), loadAnnouncements()])
 })
 </script>
 
 <style scoped>
-/* Conteneur de groupe d'applications */
-.app-group-container {
-  background-color: rgb(255 255 255);
-  border: 2px solid rgb(229 231 235);
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-
-.dark .app-group-container {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
-}
-
-/* En-tête de groupe (cliquable) */
-.app-group-header {
+.portal {
   display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.portal__announcements { margin-block-end: 18px; }
+
+.portal__toolbar {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: color 0.2s, background-color 0.2s;
-  border-bottom: 1px solid rgb(229 231 235);
+  gap: 8px 16px;
 }
 
-.app-group-header:hover {
-  background-color: rgb(249 250 251);
+.portal__count {
+  margin: 0;
+  font-family: var(--f-num);
+  font-size: 12px;
+  color: var(--muted);
 }
 
-.dark .app-group-header {
-  border-bottom-color: rgb(55 65 81);
-}
-
-.dark .app-group-header:hover {
-  background-color: rgb(55 65 81 / 0.5);
-}
-
-/* Contenu du groupe */
-.app-group-content {
-  padding: 1rem;
-}
-
-/* List Item - Compact Horizontal Design */
-.app-list-item {
+.portal__state {
   display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 0.625rem;
-  background-color: rgb(255 255 255);
-  border: 1px solid rgb(229 231 235);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  justify-content: center;
+  padding-block: 48px;
+  color: var(--muted);
 }
 
-.app-list-item:hover {
-  background-color: rgb(249 250 251);
-  border-color: rgb(209 213 219);
-  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.05);
-  transform: translateX(2px);
+.portal__spin {
+  width: 30px;
+  height: 30px;
+  animation: portal-spin 1s linear infinite;
 }
 
-.dark .app-list-item {
-  background-color: rgb(31 41 55);
-  border-color: rgb(55 65 81);
+@keyframes portal-spin {
+  to { transform: rotate(360deg); }
 }
 
-.dark .app-list-item:hover {
-  background-color: rgb(55 65 81);
-  border-color: rgb(75 85 99);
-}
-
-/* Transitions pour le collapse */
-.collapse-enter-active,
-.collapse-leave-active {
-  transition: all 0.3s ease;
-  max-height: 2000px;
-  overflow: hidden;
-}
-
-.collapse-enter-from,
-.collapse-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
-
-/* Animation d'apparition */
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Style pour les descriptions tronquées */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  line-clamp: 3;
-  overflow: hidden;
-}
-
-/* Carousel slide transitions */
-.slide-left-enter-active,
-.slide-left-leave-active,
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: all 0.4s ease-in-out;
-}
-
-.slide-left-enter-from {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.slide-left-leave-to {
-  opacity: 0;
-  transform: translateX(-100%);
-}
-
-.slide-right-enter-from {
-  opacity: 0;
-  transform: translateX(-100%);
-}
-
-.slide-right-leave-to {
-  opacity: 0;
-  transform: translateX(100%);
+@media (prefers-reduced-motion: reduce) {
+  .portal__spin { animation: none; }
 }
 </style>

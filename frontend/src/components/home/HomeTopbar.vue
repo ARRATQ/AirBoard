@@ -1,6 +1,6 @@
 <template>
   <header class="home-top">
-    <HomeAnnouncementPanel v-if="announcements.length" :announcements="announcements" />
+    <AnnouncementPanel v-if="announcements.length" :announcements="announcements" />
     <div v-else class="home-top__spacer" />
 
     <form class="home-top__search" role="search" @submit.prevent="goSearch">
@@ -35,7 +35,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
-import HomeAnnouncementPanel from './HomeAnnouncementPanel.vue'
+import AnnouncementPanel from '@/components/ui/AnnouncementPanel.vue'
 import { dateLocaleFor } from '@/utils/homeFormat'
 
 defineProps({
