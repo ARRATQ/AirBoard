@@ -22,7 +22,7 @@
               v-for="col in columns"
               :key="col.key"
               scope="col"
-              :class="`dt__cell--${col.align || 'start'}`"
+              :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]"
               :style="col.width ? { width: col.width } : null"
               :aria-sort="col.sortable ? ariaSort(col.key) : undefined"
             >
@@ -56,7 +56,7 @@
           </tr>
           <template v-else>
             <tr v-for="row in pageRows" :key="row[rowKey]" class="dt__row">
-              <td v-for="col in columns" :key="col.key" :class="`dt__cell--${col.align || 'start'}`">
+              <td v-for="col in columns" :key="col.key" :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]">
                 <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">{{ row[col.key] }}</slot>
               </td>
             </tr>
@@ -87,7 +87,8 @@ import { useI18n } from 'vue-i18n'
 import EmptyState from './EmptyState.vue'
 
 const props = defineProps({
-  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width? }]
+  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width?, hideSm? }]
+  // hideSm : colonne masquée sous 640 px (garder visibles le nom, le statut et les actions).
   columns: { type: Array, required: true },
   rows: { type: Array, default: () => [] },
   rowKey: { type: String, default: 'id' },
@@ -215,6 +216,10 @@ const sortIcon = (key) => {
 }
 
 .dt__scroll { overflow-x: auto; }
+
+@media (max-width: 640px) {
+  .dt__col--hide-sm { display: none; }
+}
 
 .dt__table {
   width: 100%;

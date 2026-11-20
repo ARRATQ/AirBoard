@@ -966,3 +966,27 @@ html {
 .dark .dir-interim {
   color: #fbbf24;
 }
+
+/* Select compact A+ des barres d'outils (DataTable, filtres d'admin). Chevron du plugin forms
+   placé côté fin de ligne, y compris en arabe. */
+.ui-select {
+  height: 34px;
+  max-width: 100%;
+  padding-block: 0;
+  padding-inline: 10px 32px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background-color: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.ui-select:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 1px;
+}
+
+[dir='rtl'] .ui-select {
+  padding-inline: 32px 10px;
+  background-position: left 0.5rem center;
+}

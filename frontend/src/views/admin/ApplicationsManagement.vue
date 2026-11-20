@@ -7,123 +7,88 @@
         {{ isGlobal ? $t('applications.subtitle') : $t('groupAdmin.applicationsManagement.subtitle') }}
       </template>
       <template #actions>
-        <button @click="openCreateModal" class="btn btn-primary" :disabled="hasNoAppGroups">
-          <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
+        <BaseButton variant="primary" icon="mdi:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
           {{ $t('applications.new') }}
-        </button>
+        </BaseButton>
       </template>
     </PageHeader>
 
     <!-- Aucun groupe de ressources : impossible d'ajouter une ressource -->
-    <div v-if="hasNoAppGroups" class="mb-6 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
-      <div class="flex items-start">
-        <Icon icon="mdi:information" class="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
-        <div>
-          <h3 class="text-yellow-500 font-medium">{{ $t('groupAdmin.applicationsManagement.noAppGroups') }}</h3>
-          <p class="text-sm text-yellow-200 mt-1">
-            {{ $t('groupAdmin.applicationsManagement.noAppGroupsHelp') }}
-          </p>
-        </div>
+    <div v-if="hasNoAppGroups" class="am-callout" role="note">
+      <Icon icon="mdi:information-outline" class="am-callout__icon" aria-hidden="true" />
+      <div>
+        <p class="am-callout__title">{{ $t('groupAdmin.applicationsManagement.noAppGroups') }}</p>
+        <p class="am-callout__text">{{ $t('groupAdmin.applicationsManagement.noAppGroupsHelp') }}</p>
       </div>
     </div>
 
-    <!-- Filtres -->
-    <div class="filters-container">
-      <div class="search-container flex-1">
-        <Icon icon="mdi:magnify" class="search-icon" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="$t('applications.searchPlaceholder')"
-          class="form-input search-input"
-        />
-      </div>
-      <select v-model="groupFilter" class="form-select w-full sm:w-auto">
-        <option value="">{{ $t('applications.filter_all_groups') }}</option>
-        <option v-for="group in appGroups" :key="group.id" :value="group.id">
-          {{ group.name }}
-        </option>
-      </select>
-      <select v-model="statusFilter" class="form-select w-full sm:w-auto">
-        <option value="">{{ $t('common.status_all') }}</option>
-        <option value="active">{{ $t('common.status_active') }}</option>
-        <option value="inactive">{{ $t('common.status_inactive') }}</option>
-      </select>
-    </div>
-
-    <!-- Contenu -->
-    <div v-if="appStore.loading" class="flex items-center justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
-    </div>
-
-    <div v-else-if="filteredApplications.length > 0" class="grid-container grid-cols-auto">
-      <div
-        v-for="app in filteredApplications"
-        :key="app.id"
-        class="card hover:border-gray-600 transition-all duration-200 fade-in"
-      >
-        <div class="card-header">
-          <div class="flex items-center gap-3">
-            <Icon
-              :icon="app.icon || 'mdi:application'"
-              class="h-8 w-8 flex-shrink-0"
-              :style="{ color: app.color || '#6366f1' }"
-            />
-            <div class="flex-1">
-              <h3 class="card-title">{{ app.name }}</h3>
-              <p class="text-sm text-gray-400">{{ getAppGroupName(app.app_group_id) }}</p>
-            </div>
-          </div>
-
-          <div class="flex gap-2">
-            <button @click="editApplication(app)" class="btn-ghost" :title="$t('common.edit')">
-              <Icon icon="mdi:pencil" class="h-4 w-4" />
-            </button>
-            <button @click="confirmDelete(app)" class="btn-ghost text-red-400 hover:text-red-300" :title="$t('common.delete')">
-              <Icon icon="mdi:delete" class="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        <div class="card-content">
-          <p v-if="app.description" class="text-sm mb-3">{{ app.description }}</p>
-
-          <div class="mb-3">
-            <a
-              :href="app.url"
-              :target="app.open_in_new_tab ? '_blank' : '_self'"
-              class="text-sm text-green-400 hover:text-green-300 flex items-center space-x-1 group"
-              :title="app.url"
-            >
-              <span class="truncate">{{ app.url }}</span>
-              <Icon v-if="app.open_in_new_tab" icon="mdi:open-in-new" class="h-3 w-3 flex-shrink-0" />
-            </a>
-          </div>
-
-          <div class="flex items-center justify-between text-sm">
-            <StatusBadge :tone="app.is_active ? 'ok' : 'neutral'">{{ app.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
-            <span class="text-gray-500">{{ $t('applications.order') }}: {{ app.order || 0 }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- États vides -->
-    <div v-else-if="applications.length === 0" class="empty-state">
-      <Icon icon="mdi:application" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('applications.emptyTitle') }}</h3>
-      <p class="empty-state-description">{{ $t('applications.emptyText') }}</p>
-      <button @click="openCreateModal" class="btn btn-primary" :disabled="hasNoAppGroups">
-        <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
+    <!-- Aucune ressource : invitation à en créer une -->
+    <EmptyState
+      v-if="!appStore.loading && applications.length === 0"
+      icon="mdi:application-outline"
+      :title="$t('applications.emptyTitle')"
+      :description="$t('applications.emptyText')"
+    >
+      <BaseButton variant="primary" size="sm" icon="mdi:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
         {{ $t('applications.add') }}
-      </button>
-    </div>
+      </BaseButton>
+    </EmptyState>
 
-    <div v-else class="empty-state">
-      <Icon icon="mdi:magnify" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('applications.noResultsTitle') }}</h3>
-      <p class="empty-state-description">{{ $t('applications.noResultsText') }}</p>
-    </div>
+    <DataTable
+      v-else
+      :columns="columns"
+      :rows="rows"
+      :loading="appStore.loading"
+      :search-keys="['name', 'description', 'url', 'groupName']"
+      :search-placeholder="$t('applications.searchPlaceholder')"
+      :empty-title="$t('applications.noResultsTitle')"
+      :page-size="25"
+    >
+      <template #toolbar>
+        <label>
+          <span class="sr-only">{{ $t('ui.table.columns.category') }}</span>
+          <select v-model="groupFilter" class="ui-select">
+            <option value="">{{ $t('applications.filter_all_groups') }}</option>
+            <option v-for="group in appGroups" :key="group.id" :value="String(group.id)">{{ group.name }}</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">{{ $t('ui.table.columns.status') }}</span>
+          <select v-model="statusFilter" class="ui-select">
+            <option value="">{{ $t('common.status_all') }}</option>
+            <option value="active">{{ $t('common.status_active') }}</option>
+            <option value="inactive">{{ $t('common.status_inactive') }}</option>
+          </select>
+        </label>
+      </template>
+
+      <template #cell-name="{ row }">
+        <span class="am-name">
+          <Icon :icon="row.raw.icon || 'mdi:application-outline'" class="am-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
+          <span class="am-name__text">
+            <span class="am-name__title">{{ row.name }}</span>
+            <a :href="row.url" target="_blank" rel="noopener noreferrer" class="am-name__url" dir="ltr">{{ row.url }}</a>
+            <span v-if="row.note" class="am-name__note">{{ row.note }}</span>
+          </span>
+        </span>
+      </template>
+
+      <template #cell-typeLabel="{ row }">
+        <span class="am-mono">{{ row.typeLabel }}</span>
+      </template>
+
+      <template #cell-status="{ row }">
+        <StatusBadge :tone="row.raw.is_active ? 'ok' : 'neutral'">{{ row.status }}</StatusBadge>
+      </template>
+
+      <template #cell-order="{ row }">
+        <span class="am-mono">{{ row.order }}</span>
+      </template>
+
+      <template #cell-actions="{ row }">
+        <RowActions :label="row.name" @edit="editApplication(row.raw)" @delete="confirmDelete(row.raw)" />
+      </template>
+    </DataTable>
 
     <!-- Modale ressource -->
     <ApplicationModal
@@ -136,46 +101,18 @@
       @submit="handleSubmit"
     />
 
-    <!-- Confirmation de suppression -->
-    <div v-if="showDeleteModal" class="modal-overlay">
-      <div class="modal-container">
-        <div class="modal-panel sm:max-w-lg sm:w-full">
-          <div class="modal-header">
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0">
-                <Icon icon="mdi:alert" class="h-6 w-6 text-red-500" />
-              </div>
-              <div>
-                <h3 class="modal-title">{{ $t('applications.confirmDeleteTitle') }}</h3>
-                <p class="modal-subtitle">
-                  {{ $t('applications.confirmDeleteText', { name: applicationToDelete?.name }) }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button @click="closeDeleteModal" class="btn btn-secondary w-full sm:w-auto">
-              {{ $t('common.cancel') }}
-            </button>
-            <button
-              @click="deleteApplication"
-              :disabled="deleteLoading"
-              class="btn btn-danger w-full sm:w-auto"
-            >
-              <Icon v-if="deleteLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              {{ $t('common.delete') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import RowActions from '@/components/ui/RowActions.vue'
+import { useConfirm } from '@/composables/useConfirm'
+import { activeAdminNote, resourceTypeOf } from '@/utils/resourceType'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
@@ -187,6 +124,7 @@ import ApplicationModal from '@/components/admin/ApplicationModal.vue'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const { confirm: askConfirm } = useConfirm()
 
 // Admin global : toutes les ressources (API admin).
 // Admin de groupe : ressources des groupes de ressources privés de ses groupes (API group-admin).
@@ -200,10 +138,6 @@ const appGroupsLoaded = ref(false)
 const users = ref([])
 const showModal = ref(false)
 const selectedApplication = ref(null)
-const showDeleteModal = ref(false)
-const applicationToDelete = ref(null)
-const deleteLoading = ref(false)
-const searchQuery = ref('')
 const groupFilter = ref('')
 const statusFilter = ref('')
 
@@ -213,23 +147,38 @@ const toArray = (data) => (Array.isArray(data) ? data : (data?.data || []))
 // Calculs
 const hasNoAppGroups = computed(() => appGroupsLoaded.value && appGroups.value.length === 0)
 
-const filteredApplications = computed(() => {
-  const query = searchQuery.value.toLowerCase()
-  const groupId = groupFilter.value ? parseInt(groupFilter.value) : null
+const columns = computed(() => [
+  { key: 'name', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'groupName', label: t('ui.table.columns.category'), sortable: true, hideSm: true },
+  { key: 'typeLabel', label: t('ui.table.columns.type'), sortable: true, hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status'), sortable: true },
+  { key: 'order', label: t('ui.table.columns.order'), sortable: true, align: 'end', width: '80px', hideSm: true },
+  { key: 'actions', label: '', align: 'end', width: '80px' },
+])
 
-  return applications.value
-    .filter(app => !query ||
-      app.name.toLowerCase().includes(query) ||
-      app.description?.toLowerCase().includes(query) ||
-      app.url.toLowerCase().includes(query))
-    .filter(app => groupId === null || app.app_group_id === groupId)
+// Lignes du tableau : filtres catégorie et statut ; la recherche et le tri sont dans DataTable.
+const rows = computed(() =>
+  applications.value
+    .filter(app => !groupFilter.value || String(app.app_group_id) === groupFilter.value)
     .filter(app => {
       if (statusFilter.value === 'active') return app.is_active
       if (statusFilter.value === 'inactive') return !app.is_active
       return true
     })
     .sort((a, b) => (a.order || 0) - (b.order || 0))
-})
+    .map(app => ({
+      id: app.id,
+      name: app.name,
+      description: app.description || '',
+      url: app.url,
+      groupName: getAppGroupName(app.app_group_id),
+      typeLabel: t(`dashboard.types.${resourceTypeOf(app.url)}`),
+      status: app.is_active ? t('common.active') : t('common.inactive'),
+      order: app.order || 0,
+      note: activeAdminNote(app),
+      raw: app,
+    })),
+)
 
 // Chargements
 const loadApplications = async () => {
@@ -292,16 +241,6 @@ const closeModal = () => {
   selectedApplication.value = null
 }
 
-const confirmDelete = (application) => {
-  applicationToDelete.value = application
-  showDeleteModal.value = true
-}
-
-const closeDeleteModal = () => {
-  showDeleteModal.value = false
-  applicationToDelete.value = null
-}
-
 const handleSubmit = async (formData) => {
   try {
     appStore.setLoading(true)
@@ -324,20 +263,22 @@ const handleSubmit = async (formData) => {
   }
 }
 
-const deleteApplication = async () => {
-  if (!applicationToDelete.value?.id) return
+const confirmDelete = async (application) => {
+  const confirmed = await askConfirm({
+    title: t('applications.confirmDeleteTitle'),
+    message: t('applications.confirmDeleteText', { name: application.name }),
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed) return
 
   try {
-    deleteLoading.value = true
-    await service.value.deleteApplication(applicationToDelete.value.id)
+    await service.value.deleteApplication(application.id)
     appStore.showSuccess(t('adminShared.applications.deleted'))
-    closeDeleteModal()
     await loadApplications()
   } catch (error) {
     console.error('Error deleting application:', error)
     appStore.showError(t('groupAdmin.applicationsManagement.deleteError'))
-  } finally {
-    deleteLoading.value = false
   }
 }
 
@@ -349,3 +290,56 @@ onMounted(async () => {
   ])
 })
 </script>
+
+<style scoped>
+.am-callout {
+  display: flex;
+  gap: 10px;
+  margin-block-end: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--warn);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.am-callout__icon { flex: none; width: 18px; height: 18px; margin-block-start: 1px; color: var(--warn); }
+.am-callout__title { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--text); }
+.am-callout__text { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.am-name { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.am-name__icon { flex: none; width: 20px; height: 20px; margin-block-start: 1px; color: var(--muted); }
+.am-name__text { display: flex; flex-direction: column; min-width: 0; }
+.am-name__title { font-weight: 600; color: var(--text); }
+
+.am-name__url {
+  max-width: 42ch;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .am-name__url { max-width: 22ch; }
+}
+
+.am-name__url:hover { color: var(--acc-ink); text-decoration: underline; }
+
+.am-name__note {
+  margin-block-start: 4px;
+  padding-inline-start: 7px;
+  border-inline-start: 2px solid var(--fill);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.am-mono {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+</style>
