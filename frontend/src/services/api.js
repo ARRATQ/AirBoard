@@ -297,10 +297,11 @@ export const adminService = {
     return response.data
   },
 
-  // Users
-  async getUsers() {
-    const response = await api.get('/admin/users')
-    return response.data.data || response.data
+  // Users : réponse paginée { data, total, page, page_size, total_pages }
+  // params : page, page_size (max 500), search, role, status, sort, order
+  async getUsers(params = {}) {
+    const response = await api.get('/admin/users', { params })
+    return response.data
   },
 
   async createUser(data) {

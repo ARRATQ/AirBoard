@@ -12,6 +12,7 @@ package handlers
 // AIRBOARD_TEST_USER (défaut : premier utilisateur actif de rôle "user").
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -185,6 +186,48 @@ func TestVisibilityQueries(t *testing.T) {
 		for _, who := range []identity{user, admin} {
 			if code := runHandlerAt(tc.h, who, nil, tc.target); code != http.StatusOK {
 				t.Errorf("%s (%s): statut %d", tc.name, who.role, code)
+			}
+		}
+	}
+}
+
+// GetUsers : pagination, filtres et tri exécutés contre une vraie base.
+func TestUsersPagination(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, _ := openCountingDB(t)
+	admin := loadIdentity(t, db, "admin", "")
+	h := NewAdminHandler(db, &config.Config{}, nil)
+
+	var all int64
+	db.Model(&models.User{}).Count(&all)
+
+	for _, target := range []string{
+		"/?page=1&page_size=1",
+		"/?search=adm&role=admin&status=active&sort=last_login&order=desc",
+		"/?search=%25_&sort=email",
+	} {
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, target, nil)
+		c.Set("user_id", admin.id)
+		c.Set("role", admin.role)
+		h.GetUsers(c)
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s: statut %d", target, w.Code)
+		}
+		var body struct {
+			Data  []models.User `json:"data"`
+			Total int64         `json:"total"`
+		}
+		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+			t.Fatalf("%s: %v", target, err)
+		}
+		if target == "/?page=1&page_size=1" && (len(body.Data) != 1 || body.Total != all) {
+			t.Errorf("page 1 : %d lignes, total %d (attendu 1 / %d)", len(body.Data), body.Total, all)
+		}
+		for _, u := range body.Data {
+			if u.Password != "" {
+				t.Errorf("%s: mot de passe renvoyé", target)
 			}
 		}
 	}
