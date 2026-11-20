@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
-import i18n from '@/i18n'
+import i18n, { initI18n } from '@/i18n'
 import { setupIcons } from '@/plugins/icons'
 
 // Styles CSS
@@ -44,5 +44,5 @@ setupInterceptors(router, () => {
   authStore.logout()
 })
 
-// Montage de l'application
-app.mount('#app')
+// Montage de l'application, une fois la langue initiale chargée
+initI18n().finally(() => app.mount('#app'))
