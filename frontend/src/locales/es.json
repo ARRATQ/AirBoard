@@ -36,7 +36,7 @@
     "dashboard": "Panel",
     "administration": "Administración",
     "overview": "Visión general",
-    "appGroups": "Grupos de recursos",
+    "appGroups": "Categorías de recursos",
     "applications": "Recursos",
     "today": "Hoy",
     "yesterday": "Ayer",
@@ -79,7 +79,7 @@
     "newsHub": "Centro de Noticias",
     "events": "Eventos",
     "save": "Guardar",
-    "noGroup": "Sin grupo",
+    "noGroup": "Sin categoría",
     "close": "Cerrar",
     "applicationsManagement": "Gestión de recursos",
     "contentManagement": "Gestión de contenido",
@@ -157,8 +157,8 @@
     "status_active": "Solo activos",
     "status_inactive": "Solo inactivos",
     "users": "usuarios",
-    "appsLabel": "grupos de recursos",
-    "appsAccess": "Acceso a grupos de recursos:",
+    "appsLabel": "categorías de recursos",
+    "appsAccess": "Acceso a categorías de recursos:",
     "usersLabel": "Usuarios:",
     "noResultsTitle": "Sin resultados",
     "noResultsText": "Ningún grupo coincide con tus criterios de búsqueda.",
@@ -183,7 +183,7 @@
     "new": "Nuevo recurso",
     "add": "Añadir recurso",
     "searchPlaceholder": "Buscar recursos...",
-    "filter_all_groups": "Todos los grupos",
+    "filter_all_groups": "Todas las categorías",
     "noResultsTitle": "Sin resultados",
     "noResultsText": "Ningún recurso coincide con tus criterios.",
     "emptyTitle": "Sin recursos",
@@ -291,8 +291,8 @@
     "confirmDeleteHeroMessage": "¿Seguro que quieres eliminar este mensaje?"
   },
   "appGroups": {
-    "subtitle": "Organiza tus recursos en grupos",
-    "new": "Nuevo grupo"
+    "subtitle": "Ordene sus recursos por categoría",
+    "new": "Nueva categoría"
   },
   "analytics": {
     "title": "Analíticas",
@@ -453,53 +453,59 @@
       "minutesAgo": "hace {count} minuto(s)",
       "hoursAgo": "hace {count} hora(s)",
       "daysAgo": "hace {count} día(s)"
-    }
+    },
+    "subtitle": "Las herramientas y enlaces a su disposición, ordenados por categoría.",
+    "emptyTitle": "No hay recursos disponibles",
+    "emptyAdmin": "Empiece creando una categoría de recursos y luego añada recursos.",
+    "emptyUser": "Contacte con su administrador para obtener acceso a recursos.",
+    "createCategory": "Crear una categoría",
+    "loadError": "No se pudieron cargar los recursos"
   },
   "groupAdmin": {
     "title": "Administración de Grupo",
     "subtitle": "Gestiona los recursos de los grupos que administras",
     "managedGroups": "Grupos Administrados",
-    "appGroups": "Grupos de Recursos",
+    "appGroups": "Categorías de recursos",
     "applications": "Recursos",
     "news": "Noticias de Grupo",
     "yourGroups": "Tus Grupos",
     "yourGroupsSubtitle": "Grupos que administras",
     "noManagedGroups": "No hay grupos administrados",
     "noManagedGroupsHelp": "Contacta a un administrador para obtener derechos de administración de grupo",
-    "manageAppGroups": "Gestionar Grupos de Recursos",
-    "manageAppGroupsDesc": "Crear y organizar tus grupos de recursos",
+    "manageAppGroups": "Gestionar categorías de recursos",
+    "manageAppGroupsDesc": "Crear y organizar tus categorías de recursos",
     "manageApplications": "Gestionar Recursos",
     "manageApplicationsDesc": "Añadir y configurar recursos",
     "manageNews": "Gestionar Noticias",
     "manageNewsDesc": "Publicar noticias para tus grupos",
     "dashboard": "Panel",
-    "myAppGroups": "Mis Grupos de Recursos",
+    "myAppGroups": "Mis categorías de recursos",
     "myApplications": "Mis Recursos",
     "myPolls": "Mis Encuestas",
     "events": "Eventos",
     "groupNews": "Noticias de Grupo",
     "appGroupModal": {
       "title": {
-        "new": "Nuevo Grupo",
-        "edit": "Editar Grupo"
+        "new": "Nueva categoría",
+        "edit": "Editar categoría"
       },
       "subtitle": {
-        "new": "Crear un nuevo grupo para organizar recursos",
-        "edit": "Modificar la configuración del grupo de recursos"
+        "new": "Crear una categoría para ordenar los recursos",
+        "edit": "Modificar la configuración de la categoría de recursos"
       },
       "ownerGroup": "Grupo Propietario",
       "group": "Grupo",
       "selectGroup": "Seleccionar un grupo",
-      "ownerGroupHelp": "Este grupo de recursos será privado y accesible solo por los miembros de este grupo.",
+      "ownerGroupHelp": "Esta categoría de recursos será privada y accesible solo por los miembros de este grupo.",
       "ownerGroupEditHelp": "El grupo propietario no puede ser modificado.",
       "basicInfo": "Información Básica",
-      "groupName": "Nombre del Grupo",
+      "groupName": "Nombre de la categoría",
       "displayOrder": "Orden de Visualización",
       "description": "Descripción",
-      "descriptionPlaceholder": "Describe este grupo de recursos...",
+      "descriptionPlaceholder": "Describe esta categoría de recursos...",
       "appearance": "Apariencia",
       "preview": "Vista Previa",
-      "previewName": "Nombre del Grupo",
+      "previewName": "Nombre de la categoría",
       "previewDescription": "Descripción...",
       "color": "Color",
       "icon": "Icono",
@@ -524,8 +530,8 @@
       },
       "basicInfo": "Información Básica",
       "applicationName": "Nombre del Recurso",
-      "appGroup": "Grupo de Recursos",
-      "selectGroup": "Seleccionar un grupo",
+      "appGroup": "Categoría de recursos",
+      "selectGroup": "Seleccionar una categoría",
       "applicationUrl": "URL del Recurso",
       "urlPlaceholder": "https://gitlab.example.com",
       "urlHelp": "URL completa hacia el recurso (con https://)",
@@ -544,21 +550,21 @@
       "cancel": "Cancelar",
       "update": "Actualizar",
       "create": "Crear",
-      "noPrivateGroups": "No hay grupos de recursos privados disponibles. Crea primero un grupo de recursos privado.",
+      "noPrivateGroups": "No hay categorías de recursos privadas disponibles. Crea primero una categoría de recursos privada.",
       "errors": {
         "nameRequired": "El nombre es requerido",
         "urlRequired": "La URL es requerida",
         "invalidUrl": "Formato de URL inválido",
-        "appGroupRequired": "El grupo de recursos es requerido"
+        "appGroupRequired": "La categoría de recursos es obligatoria"
       }
     },
     "appGroupsManagement": {
-      "title": "Grupos de Recursos",
-      "subtitle": "Gestionar grupos de recursos de tus grupos administrados",
+      "title": "Categorías de recursos",
+      "subtitle": "Gestionar categorías de recursos de tus grupos administrados",
       "newGroup": "Nuevo Grupo",
       "noManagedGroups": "No hay grupos administrados",
-      "noManagedGroupsHelp": "Debes ser administrador de al menos un grupo para crear grupos de recursos. Contacta a un administrador del sistema para obtener derechos de administración de grupo.",
-      "searchPlaceholder": "Buscar grupos...",
+      "noManagedGroupsHelp": "Debes ser administrador de al menos un grupo para crear categorías de recursos. Contacta a un administrador del sistema para obtener derechos de administración de grupo.",
+      "searchPlaceholder": "Buscar una categoría...",
       "status": {
         "all": "Todos los estados",
         "active": "Solo activos",
@@ -576,26 +582,26 @@
       "order": "Orden:",
       "ownerGroup": "Grupo:",
       "empty": {
-        "title": "No hay grupos de recursos",
-        "description": "Crea tu primer grupo de recursos para empezar.",
-        "createButton": "Crear grupo"
+        "title": "No hay categorías de recursos",
+        "description": "Crea tu primera categoría de recursos para empezar.",
+        "createButton": "Crear una categoría"
       },
       "noResults": {
         "title": "Sin resultados",
-        "description": "Ningún grupo coincide con tus criterios de búsqueda."
+        "description": "Ninguna categoría coincide con sus criterios de búsqueda."
       },
       "deleteConfirm": {
-        "title": "Eliminar grupo",
+        "title": "Eliminar categoría",
         "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible."
       },
-      "deleteError": "Error al eliminar el grupo"
+      "deleteError": "Error al eliminar la categoría"
     },
     "applicationsManagement": {
       "title": "Recursos",
       "subtitle": "Gestionar recursos de tus grupos",
       "newApplication": "Nuevo Recurso",
-      "noAppGroups": "No hay grupos de recursos",
-      "noAppGroupsHelp": "Debes crear primero un grupo de recursos antes de poder añadir recursos.",
+      "noAppGroups": "No hay categorías de recursos",
+      "noAppGroupsHelp": "Debes crear primero una categoría de recursos antes de poder añadir recursos.",
       "searchPlaceholder": "Buscar recursos...",
       "groupFilter": {
         "all": "Todos los grupos"
@@ -924,14 +930,14 @@
       "title": "Estadísticas",
       "users": "Usuarios",
       "groups": "Grupos",
-      "appGroups": "Grupos de recursos",
+      "appGroups": "Categorías de recursos",
       "apps": "Recursos",
       "news": "Artículos",
       "events": "Eventos",
       "polls": "Encuestas",
       "managedGroups": "Grupos gestionados",
       "totalMembers": "Miembros totales",
-      "managedAppGroups": "Grupos de recursos gestionados",
+      "managedAppGroups": "Categorías de recursos gestionadas",
       "managedApps": "Mis recursos",
       "managedNews": "Artículos gestionados",
       "managedPolls": "Encuestas gestionadas",
@@ -1721,14 +1727,14 @@
     "appGroups": {
       "private": "Privado",
       "public": "Público",
-      "privateToggle": "Grupo de recursos privado",
+      "privateToggle": "Categoría de recursos privada",
       "privateToggleHelp": "Solo los administradores de su grupo propietario pueden gestionarlo",
-      "ownerGroupManageHelp": "Los administradores de este grupo gestionarán este grupo de recursos",
-      "created": "Grupo de recursos creado",
-      "updated": "Grupo de recursos actualizado",
-      "deleted": "Grupo de recursos eliminado",
-      "saveError": "No se pudo guardar el grupo de recursos",
-      "loadError": "No se pudieron cargar los grupos de recursos"
+      "ownerGroupManageHelp": "Los administradores de este grupo gestionarán esta categoría de recursos",
+      "created": "Categoría de recursos creada",
+      "updated": "Categoría de recursos actualizada",
+      "deleted": "Categoría de recursos eliminada",
+      "saveError": "No se pudo guardar la categoría de recursos",
+      "loadError": "No se pudieron cargar las categorías de recursos"
     },
     "news": {
       "subtitle": "Gestiona los artículos de noticias de toda la organización",

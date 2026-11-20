@@ -16,9 +16,9 @@
       </p>
       
       <div class="space-y-4">
-        <router-link to="/dashboard" class="btn-primary btn-md w-full">
+        <router-link to="/home" class="btn-primary btn-md w-full">
           <Icon icon="mdi:home" class="h-5 w-5 mr-2" />
-          Retour au tableau de bord
+          Retour à l'accueil
         </router-link>
         
         <button @click="$router.back()" class="btn-secondary btn-md w-full">

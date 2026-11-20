@@ -36,7 +36,7 @@
     "dashboard": "لوحة التحكم",
     "administration": "الإدارة",
     "overview": "نظرة عامة",
-    "appGroups": "مجموعات الموارد",
+    "appGroups": "فئات الموارد",
     "applications": "الموارد",
     "today": "اليوم",
     "yesterday": "أمس",
@@ -79,7 +79,7 @@
     "newsHub": "مركز الأخبار",
     "events": "الأحداث",
     "save": "حفظ",
-    "noGroup": "لا توجد مجموعة",
+    "noGroup": "بدون فئة",
     "close": "إغلاق",
     "applicationsManagement": "إدارة الموارد",
     "contentManagement": "إدارة المحتوى",
@@ -157,8 +157,8 @@
     "status_active": "النشطة فقط",
     "status_inactive": "غير النشطة فقط",
     "users": "مستخدمين",
-    "appsLabel": "مجموعات الموارد",
-    "appsAccess": "الوصول إلى مجموعات الموارد:",
+    "appsLabel": "فئات الموارد",
+    "appsAccess": "الوصول إلى فئات الموارد:",
     "usersLabel": "المستخدمون:",
     "noResultsTitle": "لا توجد نتائج",
     "noResultsText": "لا توجد مجموعة تطابق معايير البحث.",
@@ -183,7 +183,7 @@
     "new": "مورد جديد",
     "add": "إضافة مورد",
     "searchPlaceholder": "ابحث عن موارد...",
-    "filter_all_groups": "كل المجموعات",
+    "filter_all_groups": "كل الفئات",
     "noResultsTitle": "لا توجد نتائج",
     "noResultsText": "لا يوجد مورد يطابق معايير البحث.",
     "emptyTitle": "لا توجد موارد",
@@ -291,8 +291,8 @@
     "confirmDeleteHeroMessage": "هل أنت متأكد من أنك تريد حذف هذه الرسالة؟"
   },
   "appGroups": {
-    "subtitle": "نظم مواردك في مجموعات",
-    "new": "مجموعة جديدة"
+    "subtitle": "رتّب مواردك حسب الفئة",
+    "new": "فئة جديدة"
   },
   "analytics": {
     "title": "التحليلات",
@@ -453,52 +453,58 @@
       "minutesAgo": "منذ {count} دقيقة",
       "hoursAgo": "منذ {count} ساعة",
       "daysAgo": "منذ {count} يوم"
-    }
+    },
+    "subtitle": "الأدوات والروابط المتاحة لك، مرتبة حسب الفئة.",
+    "emptyTitle": "لا توجد موارد متاحة",
+    "emptyAdmin": "ابدأ بإنشاء فئة موارد، ثم أضف إليها الموارد.",
+    "emptyUser": "تواصل مع المسؤول للحصول على إمكانية الوصول إلى الموارد.",
+    "createCategory": "إنشاء فئة",
+    "loadError": "تعذر تحميل الموارد"
   },
   "groupAdmin": {
     "title": "إدارة المجموعة",
     "subtitle": "إدارة موارد المجموعات التي تديرها",
     "managedGroups": "المجموعات المُدارة",
-    "appGroups": "مجموعات الموارد",
+    "appGroups": "فئات الموارد",
     "applications": "الموارد",
     "news": "أخبار المجموعة",
     "yourGroups": "مجموعاتك",
     "yourGroupsSubtitle": "المجموعات التي تديرها",
     "noManagedGroups": "لا توجد مجموعات مُدارة",
     "noManagedGroupsHelp": "اتصل بمدير للحصول على حقوق إدارة المجموعة",
-    "manageAppGroups": "إدارة مجموعات الموارد",
-    "manageAppGroupsDesc": "إنشاء وتنظيم مجموعات الموارد الخاصة بك",
+    "manageAppGroups": "إدارة فئات الموارد",
+    "manageAppGroupsDesc": "إنشاء وتنظيم فئات الموارد الخاصة بك",
     "manageApplications": "إدارة الموارد",
     "manageApplicationsDesc": "إضافة وتكوين الموارد",
     "manageNews": "إدارة الأخبار",
     "dashboard": "لوحة التحكم",
-    "myAppGroups": "مجموعات الموارد الخاصة بي",
+    "myAppGroups": "فئات الموارد الخاصة بي",
     "myApplications": "مواردي",
     "myPolls": "استطلاعاتي",
     "events": "الأحداث",
     "manageNewsDesc": "نشر أخبار لمجموعاتك",
     "appGroupModal": {
       "title": {
-        "new": "مجموعة جديدة",
-        "edit": "تعديل المجموعة"
+        "new": "فئة جديدة",
+        "edit": "تعديل الفئة"
       },
       "subtitle": {
-        "new": "إنشاء مجموعة جديدة لتنظيم الموارد",
-        "edit": "تعديل إعدادات مجموعة الموارد"
+        "new": "إنشاء فئة لترتيب الموارد",
+        "edit": "تعديل إعدادات فئة الموارد"
       },
       "ownerGroup": "المجموعة المالكة",
       "group": "المجموعة",
       "selectGroup": "اختر مجموعة",
-      "ownerGroupHelp": "ستكون مجموعة الموارد هذه خاصة ويمكن الوصول إليها فقط لأعضاء هذه المجموعة.",
+      "ownerGroupHelp": "ستكون فئة الموارد هذه خاصة ويمكن الوصول إليها فقط لأعضاء هذه المجموعة.",
       "ownerGroupEditHelp": "لا يمكن تعديل المجموعة المالكة.",
       "basicInfo": "المعلومات الأساسية",
-      "groupName": "اسم المجموعة",
+      "groupName": "اسم الفئة",
       "displayOrder": "ترتيب العرض",
       "description": "الوصف",
-      "descriptionPlaceholder": "وصف مجموعة الموارد هذه...",
+      "descriptionPlaceholder": "وصف فئة الموارد هذه...",
       "appearance": "المظهر",
       "preview": "معاينة",
-      "previewName": "اسم المجموعة",
+      "previewName": "اسم الفئة",
       "previewDescription": "الوصف...",
       "color": "اللون",
       "icon": "الأيقونة",
@@ -523,8 +529,8 @@
       },
       "basicInfo": "المعلومات الأساسية",
       "applicationName": "اسم المورد",
-      "appGroup": "مجموعة الموارد",
-      "selectGroup": "اختر مجموعة",
+      "appGroup": "فئة الموارد",
+      "selectGroup": "اختر فئة",
       "applicationUrl": "رابط المورد",
       "urlPlaceholder": "https://gitlab.example.com",
       "urlHelp": "الرابط الكامل للمورد (مع https://)",
@@ -543,21 +549,21 @@
       "cancel": "إلغاء",
       "update": "تحديث",
       "create": "إنشاء",
-      "noPrivateGroups": "لا توجد مجموعات موارد خاصة متاحة. أنشئ مجموعة موارد خاصة أولاً.",
+      "noPrivateGroups": "لا توجد فئات موارد خاصة متاحة. أنشئ فئة موارد خاصة أولاً.",
       "errors": {
         "nameRequired": "الاسم مطلوب",
         "urlRequired": "الرابط مطلوب",
         "invalidUrl": "تنسيق رابط غير صحيح",
-        "appGroupRequired": "مجموعة الموارد مطلوبة"
+        "appGroupRequired": "فئة الموارد مطلوبة"
       }
     },
     "appGroupsManagement": {
-      "title": "مجموعات الموارد",
-      "subtitle": "إدارة مجموعات الموارد لمجموعاتك المُدارة",
+      "title": "فئات الموارد",
+      "subtitle": "إدارة فئات الموارد لمجموعاتك المُدارة",
       "newGroup": "مجموعة جديدة",
       "noManagedGroups": "لا توجد مجموعات مُدارة",
-      "noManagedGroupsHelp": "يجب أن تكون مديراً لمجموعة واحدة على الأقل لإنشاء مجموعات الموارد. اتصل بمدير النظام للحصول على حقوق إدارة المجموعة.",
-      "searchPlaceholder": "البحث عن مجموعات...",
+      "noManagedGroupsHelp": "يجب أن تكون مديراً لمجموعة واحدة على الأقل لإنشاء فئات الموارد. اتصل بمدير النظام للحصول على حقوق إدارة المجموعة.",
+      "searchPlaceholder": "البحث عن فئة...",
       "status": {
         "all": "جميع الحالات",
         "active": "النشطة فقط",
@@ -575,26 +581,26 @@
       "order": "الترتيب:",
       "ownerGroup": "المجموعة:",
       "empty": {
-        "title": "لا توجد مجموعات موارد",
-        "description": "أنشئ أول مجموعة موارد للبدء.",
-        "createButton": "إنشاء مجموعة"
+        "title": "لا توجد فئات موارد",
+        "description": "أنشئ أول فئة موارد للبدء.",
+        "createButton": "إنشاء فئة"
       },
       "noResults": {
         "title": "لا توجد نتائج",
-        "description": "لا توجد مجموعة تطابق معايير البحث."
+        "description": "لا توجد فئة تطابق معايير البحث."
       },
       "deleteConfirm": {
-        "title": "حذف المجموعة",
+        "title": "حذف الفئة",
         "message": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
       },
-      "deleteError": "خطأ أثناء حذف المجموعة"
+      "deleteError": "خطأ أثناء حذف الفئة"
     },
     "applicationsManagement": {
       "title": "الموارد",
       "subtitle": "إدارة موارد مجموعاتك",
       "newApplication": "مورد جديد",
-      "noAppGroups": "لا توجد مجموعات موارد",
-      "noAppGroupsHelp": "يجب أولاً إنشاء مجموعة موارد قبل إضافة الموارد.",
+      "noAppGroups": "لا توجد فئات موارد",
+      "noAppGroupsHelp": "يجب أولاً إنشاء فئة موارد قبل إضافة الموارد.",
       "searchPlaceholder": "البحث عن الموارد...",
       "groupFilter": {
         "all": "جميع المجموعات"
@@ -923,14 +929,14 @@
       "title": "الإحصائيات",
       "users": "المستخدمون",
       "groups": "المجموعات",
-      "appGroups": "مجموعات الموارد",
+      "appGroups": "فئات الموارد",
       "apps": "الموارد",
       "news": "المقالات",
       "events": "الأحداث",
       "polls": "الاستطلاعات",
       "managedGroups": "المجموعات المدارة",
       "totalMembers": "إجمالي الأعضاء",
-      "managedAppGroups": "مجموعات الموارد المدارة",
+      "managedAppGroups": "فئات الموارد المدارة",
       "managedApps": "مواردي",
       "managedNews": "المقالات المدارة",
       "managedPolls": "الاستطلاعات المدارة",
@@ -1720,14 +1726,14 @@
     "appGroups": {
       "private": "خاص",
       "public": "عام",
-      "privateToggle": "مجموعة موارد خاصة",
+      "privateToggle": "فئة موارد خاصة",
       "privateToggleHelp": "لا يمكن إدارتها إلا من قبل مسؤولي المجموعة المالكة",
-      "ownerGroupManageHelp": "سيتولى مسؤولو هذه المجموعة إدارة مجموعة الموارد هذه",
-      "created": "تم إنشاء مجموعة الموارد",
-      "updated": "تم تحديث مجموعة الموارد",
-      "deleted": "تم حذف مجموعة الموارد",
-      "saveError": "تعذر حفظ مجموعة الموارد",
-      "loadError": "تعذر تحميل مجموعات الموارد"
+      "ownerGroupManageHelp": "سيتولى مسؤولو هذه المجموعة إدارة فئة الموارد هذه",
+      "created": "تم إنشاء فئة الموارد",
+      "updated": "تم تحديث فئة الموارد",
+      "deleted": "تم حذف فئة الموارد",
+      "saveError": "تعذر حفظ فئة الموارد",
+      "loadError": "تعذر تحميل فئات الموارد"
     },
     "news": {
       "subtitle": "إدارة المقالات الإخبارية للمؤسسة بأكملها",

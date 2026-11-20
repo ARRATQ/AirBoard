@@ -10,7 +10,7 @@ import { ADMIN, GROUP_ADMIN, CONTENT, canAccess } from './access'
 /** Espace utilisateur : visible par tous, jamais filtré */
 export const USER_NAV = [
   { to: '/home', icon: 'mdi:home', labelKey: 'common.home' },
-  { to: '/dashboard', icon: 'mdi:application', labelKey: 'common.applications' },
+  { to: '/resources', icon: 'mdi:application', labelKey: 'common.applications' },
   { to: '/news', icon: 'mdi:newspaper', labelKey: 'common.newsHub' },
   { to: '/events', icon: 'mdi:calendar', labelKey: 'common.events' },
   { to: '/polls', icon: 'mdi:poll', labelKey: 'common.polls' },

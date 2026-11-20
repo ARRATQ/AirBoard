@@ -79,14 +79,15 @@ const routes = [
     }
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
+    path: '/resources',
+    name: 'Resources',
     component: Dashboard,
     meta: {
       requiresAuth: true,
       title: 'Ressources'
     }
   },
+  { path: '/dashboard', redirect: '/resources' },
   {
     path: '/directory',
     name: 'Directory',
@@ -280,7 +281,7 @@ const routes = [
     meta: { requiresAuth: true, access: GROUP_ADMIN },
     children: [
       { path: '', name: 'AdminApplications', component: ApplicationsManagement, meta: { title: 'Ressources' } },
-      { path: 'categories', name: 'AdminAppGroups', component: AppGroupsManagement, meta: { title: 'Groupes de ressources' } }
+      { path: 'categories', name: 'AdminAppGroups', component: AppGroupsManagement, meta: { title: 'Catégories de ressources' } }
     ]
   },
   // Anciennes adresses des taxonomies et des ressources
@@ -561,8 +562,9 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Rediriger les utilisateurs connectés loin des pages d'auth
+  // Déjà connecté : même page d'arrivée qu'après la connexion (Login.vue)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'Dashboard' })
+    next({ name: 'Home' })
     return
   }
 

@@ -2,8 +2,8 @@
   <div class="content-area">
     <!-- Header avec paramètres dynamiques -->
     <PageHeader>
-      <template #title>{{ appSettings.dashboard_title || 'Dashboard' }}</template>
-      <template #description>{{ appSettings.welcome_message || 'Welcome to your application portal' }}</template>
+      <template #title>{{ pageTitle }}</template>
+      <template #description>{{ pageDescription }}</template>
       <template #actions>
         <!-- Controls -->
         <div class="flex items-center gap-3">
@@ -32,73 +32,6 @@
       </template>
     </PageHeader>
 
-    <!-- Statistiques (Admin seulement) -->
-    <div v-if="authStore.isAdmin && dashboard?.stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <div class="card hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="h-10 w-10 bg-green-500 dark:bg-green-900 rounded-lg flex items-center justify-center">
-              <Icon icon="mdi:folder-multiple" class="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Resource Groups</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ dashboard.stats.total_app_groups }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="h-10 w-10 bg-blue-500 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-              <Icon icon="mdi:application" class="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Resources</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ dashboard.stats.total_applications }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="h-10 w-10 bg-purple-500 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-              <Icon icon="mdi:account-multiple" class="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Users</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ dashboard.stats.total_users }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <div class="h-10 w-10 bg-yellow-500 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
-              <Icon icon="mdi:account-group" class="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Groups</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">
-              {{ dashboard.stats.total_groups }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Loading state -->
     <div v-if="isLoading" class="flex justify-center py-12">
       <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
@@ -107,22 +40,19 @@
     <!-- Empty state -->
     <div v-else-if="!dashboard?.app_groups?.length" class="empty-state">
       <Icon icon="mdi:application" class="empty-state-icon" />
-      <h3 class="empty-state-title">No Resources Available</h3>
+      <h3 class="empty-state-title">{{ $t('dashboard.emptyTitle') }}</h3>
       <p class="empty-state-description">
-        {{ authStore.isAdmin 
-          ? 'Start by creating resource groups and resources.' 
-          : 'Contact your administrator to get access to resources.' 
-        }}
+        {{ authStore.isAdmin ? $t('dashboard.emptyAdmin') : $t('dashboard.emptyUser') }}
       </p>
       <div v-if="authStore.isAdmin" class="mt-6">
         <router-link to="/admin/resources/categories" class="btn btn-primary">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
-          Create App Group
+          {{ $t('dashboard.createCategory') }}
         </router-link>
       </div>
     </div>
 
-    <!-- Groupes d'applications -->
+    <!-- Ressources, rangées par catégorie -->
     <div v-else class="space-y-6">
       <!-- Announcements Carousel -->
       <div v-if="activeAnnouncements.length > 0" class="relative">
@@ -318,6 +248,7 @@
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { useFavoritesStore } from '@/stores/favorites'
@@ -328,6 +259,7 @@ import ListView from '@/components/dashboard/ListView.vue'
 import GridView from '@/components/dashboard/GridView.vue'
 import ApplicationDetailModal from '@/components/dashboard/ApplicationDetailModal.vue'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 const favoritesStore = useFavoritesStore()
@@ -336,6 +268,16 @@ const favoritesStore = useFavoritesStore()
 const dashboard = ref(null)
 const appSettings = ref({})
 const isLoading = ref(false)
+
+// Valeurs livrées par défaut côté serveur (handlers/settings.go) : tant qu'un
+// admin ne les a pas personnalisées, la page garde le vocabulaire commun.
+const DEFAULT_TITLE = 'Dashboard'
+const DEFAULT_WELCOME = 'Welcome to your application portal'
+const customized = (value, fallback) => (value && value !== fallback ? value : null)
+const pageTitle = computed(() =>
+  customized(appSettings.value.dashboard_title, DEFAULT_TITLE) || t('common.applications'))
+const pageDescription = computed(() =>
+  customized(appSettings.value.welcome_message, DEFAULT_WELCOME) || t('dashboard.subtitle'))
 const collapsedGroups = ref(new Set())
 const activeAnnouncements = ref([])
 
@@ -542,7 +484,7 @@ const loadDashboard = async () => {
     dashboard.value = data
   } catch (error) {
     console.error('Error loading dashboard:', error)
-    appStore.showError('Failed to load dashboard')
+    appStore.showError(t('dashboard.loadError'))
   } finally {
     isLoading.value = false
   }
@@ -557,20 +499,14 @@ const loadAppSettings = async () => {
     }
     // Ne pas appeler l'API si l'utilisateur n'est pas admin (évite 403)
     if (!authStore.isAdmin) {
-      appSettings.value = {
-        dashboard_title: 'Dashboard',
-        welcome_message: 'Welcome to your application portal'
-      }
+      appSettings.value = {}
       return
     }
     appSettings.value = await appStore.ensureAppSettings()
   } catch (error) {
     console.error('Error loading app settings:', error)
-    // Use defaults if settings can't be loaded
-    appSettings.value = {
-      dashboard_title: 'Dashboard',
-      welcome_message: 'Welcome to your application portal'
-    }
+    // Réglages indisponibles : titre et message par défaut (voir pageTitle)
+    appSettings.value = {}
   }
 }
 
