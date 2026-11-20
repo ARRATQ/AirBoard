@@ -2221,7 +2221,11 @@
       "deleted": "Resource deleted successfully",
       "creator": "Creator",
       "creatorNone": "— Unassigned —",
-      "creatorHelp": "Sets the creator for activity reports."
+      "creatorHelp": "Sets the creator for activity reports.",
+      "note": "Note on the tile",
+      "notePlaceholder": "E.g. Maintenance Thursday 6–8 pm",
+      "noteHelp": "Shown on the portal tile. {count} / 140 characters.",
+      "noteUntil": "Show until"
     },
     "appGroups": {
       "private": "Private",

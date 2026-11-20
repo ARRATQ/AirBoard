@@ -86,3 +86,19 @@ export function activeAdminNote(resource, now = new Date()) {
   if (resource.admin_note_until && new Date(resource.admin_note_until) < now) return ''
   return note
 }
+
+/** Date de fin de la note (ISO) vers la valeur d'un champ date (AAAA-MM-JJ, heure locale). */
+export function noteUntilToInput(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** Champ date (AAAA-MM-JJ) vers ISO : la note reste affichée jusqu'à la fin de ce jour. */
+export function noteUntilFromInput(value) {
+  if (!value) return null
+  const d = new Date(`${value}T23:59:59`)
+  return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}

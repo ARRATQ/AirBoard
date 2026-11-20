@@ -11,6 +11,7 @@ import (
 	"airboard/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -407,6 +408,17 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 		return
 	}
 
+	note, noteUntil, err := models.NormalizeAdminNote(application.AdminNote, application.AdminNoteUntil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+	application.AdminNote, application.AdminNoteUntil = note, noteUntil
+
 	// Auto-renseigner le créateur si non fourni
 	if application.CreatedByID == nil {
 		if userIDVal, exists := c.Get("user_id"); exists {
@@ -506,7 +518,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	}
 
 	var updateData models.Application
-	if err := c.ShouldBindJSON(&updateData); err != nil {
+	if err := c.ShouldBindBodyWith(&updateData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -515,6 +527,27 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
+	// Updates() ignore les valeurs vides : la note est écrite à part, seulement si la clé
+	// admin_note est présente, pour pouvoir l'effacer sans toucher aux clients qui l'omettent.
+	var notePresence struct {
+		AdminNote *string `json:"admin_note"`
+	}
+	_ = c.ShouldBindBodyWith(&notePresence, binding.JSON)
+	var noteFields map[string]interface{}
+	if notePresence.AdminNote != nil {
+		note, noteUntil, err := models.NormalizeAdminNote(*notePresence.AdminNote, updateData.AdminNoteUntil)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Error:   "Bad Request",
+				Message: err.Error(),
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
+		noteFields = map[string]interface{}{"admin_note": note, "admin_note_until": noteUntil}
+	}
+	updateData.AdminNote, updateData.AdminNoteUntil = "", nil
+
 	if err := h.db.Model(&application).Updates(updateData).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
@@ -522,6 +555,17 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 			Code:    http.StatusInternalServerError,
 		})
 		return
+	}
+
+	if noteFields != nil {
+		if err := h.db.Model(&application).Updates(noteFields).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+				Error:   "Internal Server Error",
+				Message: "Erreur lors de la modification",
+				Code:    http.StatusInternalServerError,
+			})
+			return
+		}
 	}
 
 	// Mettre à jour CreatedByID séparément (Updates() ignore les pointeurs nil)

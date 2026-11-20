@@ -2187,7 +2187,11 @@
       "deleted": "Ressource supprimée avec succès",
       "creator": "Créateur",
       "creatorNone": "— Non attribué —",
-      "creatorHelp": "Définit le créateur pour les rapports d'activité."
+      "creatorHelp": "Définit le créateur pour les rapports d'activité.",
+      "note": "Note sur la tuile",
+      "notePlaceholder": "Ex. Maintenance jeudi de 18 h à 20 h",
+      "noteHelp": "Affichée sur la tuile du portail. {count} / 140 caractères.",
+      "noteUntil": "Afficher jusqu’au"
     },
     "appGroups": {
       "private": "Privé",

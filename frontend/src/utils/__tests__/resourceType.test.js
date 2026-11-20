@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resourceTypeOf, typeFamilyOf, isNewResource, activeAdminNote, NEW_RESOURCE_DAYS } from '../resourceType'
+import { resourceTypeOf, typeFamilyOf, isNewResource, activeAdminNote, noteUntilToInput, noteUntilFromInput, NEW_RESOURCE_DAYS } from '../resourceType'
 
 const SP = 'https://contoso.sharepoint.com'
 
@@ -72,5 +72,21 @@ describe('activeAdminNote', () => {
   it('hides an expired or empty note', () => {
     expect(activeAdminNote({ admin_note: 'Passée', admin_note_until: '2026-11-19T00:00:00Z' }, now)).toBe('')
     expect(activeAdminNote({ admin_note: '   ' }, now)).toBe('')
+  })
+})
+
+describe('note end date conversions', () => {
+  it('keeps the note until the end of the chosen local day', () => {
+    const iso = noteUntilFromInput('2026-12-01')
+    const d = new Date(iso)
+    expect([d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes()]).toEqual([2026, 11, 1, 23, 59])
+    expect(noteUntilToInput(iso)).toBe('2026-12-01')
+  })
+
+  it('maps empty or invalid values to no date', () => {
+    expect(noteUntilFromInput('')).toBeNull()
+    expect(noteUntilFromInput('pas une date')).toBeNull()
+    expect(noteUntilToInput(null)).toBe('')
+    expect(noteUntilToInput('n/a')).toBe('')
   })
 })

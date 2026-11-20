@@ -1881,7 +1881,11 @@
       "deleted": "Recurso eliminado correctamente",
       "creator": "Creador",
       "creatorNone": "— Sin asignar —",
-      "creatorHelp": "Define el creador para los informes de actividad."
+      "creatorHelp": "Define el creador para los informes de actividad.",
+      "note": "Nota en el mosaico",
+      "notePlaceholder": "Ej.: Mantenimiento el jueves de 18 a 20 h",
+      "noteHelp": "Se muestra en el mosaico del portal. {count} / 140 caracteres.",
+      "noteUntil": "Mostrar hasta"
     },
     "appGroups": {
       "private": "Privado",
