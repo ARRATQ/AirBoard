@@ -6,8 +6,8 @@
     </div>
 
     <!-- Simple calendar placeholder -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
-      <div class="flex items-center justify-between mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div class="flex flex-col">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ $t('calendar.title') }}
@@ -16,9 +16,9 @@
             {{ currentPeriodDisplay }}
           </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <!-- View Mode Selector -->
-          <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 mr-4">
+          <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 sm:me-2">
             <button
               @click="setViewMode('month')"
               :class="[
@@ -60,7 +60,7 @@
             class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md"
             :title="$t('calendar.previous')"
           >
-            <Icon icon="mdi:chevron-left" class="h-4 w-4" />
+            <Icon icon="mdi:chevron-left" class="h-4 w-4 rtl:-scale-x-100" />
           </button>
           <button 
             @click="goToToday"
@@ -73,7 +73,7 @@
             class="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-md"
             :title="$t('calendar.next')"
           >
-            <Icon icon="mdi:chevron-right" class="h-4 w-4" />
+            <Icon icon="mdi:chevron-right" class="h-4 w-4 rtl:-scale-x-100" />
           </button>
         </div>
       </div>
@@ -83,9 +83,11 @@
         <div 
           v-for="(day, index) in daysOfWeek" 
           :key="`${day}-${index}`"
-          class="text-center text-sm font-semibold text-gray-700 dark:text-gray-200 py-3 bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600"
+          class="min-w-0 truncate text-center text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 py-3 bg-gray-50 dark:bg-gray-700 border-b-2 border-gray-200 dark:border-gray-600"
+          :title="day"
         >
-          {{ day }}
+          <span class="hidden sm:inline">{{ day }}</span>
+          <span class="sm:hidden" aria-hidden="true">{{ daysOfWeekNarrow[index] }}</span>
         </div>
       </div>
 
@@ -294,6 +296,13 @@ const selectedEvent = ref(null)
 const currentDate = ref(new Date())
 const currentViewMode = ref('month') // 'month', 'week', 'day'
 const daysOfWeek = ref(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
+
+// Initiales des jours (lundi → dimanche) pour les écrans étroits
+const daysOfWeekNarrow = computed(() => {
+  const fmt = new Intl.DateTimeFormat(i18n.global.locale.value, { weekday: 'narrow' })
+  // 2024-01-01 est un lundi
+  return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2024, 0, 1 + i)))
+})
 
 // Computed
 const isLoading = computed(() => eventsStore.isLoadingCalendar)
