@@ -36,7 +36,7 @@
           :class="activeTab === 'hero' ? 'border-green-500 text-green-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
           <Icon icon="mdi:format-quote-close" class="inline-block mr-2 h-4 w-4" />
-          Dynamic Messages
+          {{ $t('settings.dynamicMessages') }}
         </button>
         <button 
           @click="activeTab = 'auth'"
