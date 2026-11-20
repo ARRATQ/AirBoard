@@ -73,7 +73,8 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   min-width: 0.74em;
   padding: 1px;
   border-radius: 2px;
-  background: #0a0b0d;
+  background: var(--flap-cell, #0a0b0d);
+  box-shadow: var(--flap-ring, none);
   color: var(--board-text);
   font-style: normal;
   text-align: center;
@@ -85,7 +86,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
   inset-inline: 0;
   top: 50%;
   height: 1px;
-  background: rgb(255 255 255 / 0.14);
+  background: var(--flap-rule, rgb(255 255 255 / 0.14));
 }
 
 .flaps__cell--space {

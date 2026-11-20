@@ -34,13 +34,27 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tok[data-acc="indigo"]{--acc:#5c6ef8;--acc-ink:#3d4ed4}.tok[data-acc="indigo"][data-mode="dark"]{--acc:#818cf8;--acc-ink:#a9b3fd}
 .tok[data-acc="emeraude"]{--acc:#10b981;--acc-ink:#047857}.tok[data-acc="emeraude"][data-mode="dark"]{--acc:#34d399;--acc-ink:#6ee7b7}
 
+/* Variantes de fonds : neutres, sans teinte d'accent, 2 niveaux + bordures */
+.tok[data-surf="chrome"]{--chrome:#f3f4f6;--bg:#fff;--surface:#fff;--sunken:#f5f6f7;--line:#e2e4e8;--board:#1b1e22;--board-2:#24282d}
+.tok[data-surf="chrome"][data-mode="dark"]{--chrome:#0b0c0e;--bg:#141619;--surface:#141619;--sunken:#101215;--line:#25292e;--board:#1d2125;--board-2:#252a2f}
+.tok[data-surf="blanc"]{--chrome:#fff;--bg:#fff;--surface:#fff;--sunken:#f6f7f8;--line:#e4e6e9;--board:#1b1e22;--board-2:#24282d}
+.tok[data-surf="blanc"][data-mode="dark"]{--chrome:#121417;--bg:#121417;--surface:#121417;--sunken:#0d0f11;--line:#262a2f;--board:#1d2125;--board-2:#252a2f}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) :is(.board,.res){--board:var(--surface);--board-2:var(--sunken);--board-text:var(--text);--board-dim:var(--muted);--board-hi:var(--text);--board-ok:var(--ok);--board-bad:var(--bad)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .board{border:1px solid var(--line)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .board :is(th,td){border-color:var(--line)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .board th{background:var(--sunken)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .board tbody tr:hover{background:var(--sunken)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .board .warn{color:var(--warn)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) .res .main b{color:var(--acc-ink)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) :is(.board,.res) .flaps .fl{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
+.tok:is([data-surf="chrome"],[data-surf="blanc"]) :is(.board,.res) .flaps .fl::after{background:var(--line)}
 .mock{container:mock/inline-size;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--pg-line);box-shadow:0 30px 60px -30px rgb(0 0 0/.35)}
 .app{display:grid;grid-template-columns:228px minmax(0,1fr);background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:13.5px;line-height:1.45;min-height:760px}
 .app *{box-sizing:border-box}.app a{color:inherit}
 .app :is(a,button,input):focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .i{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.i.sm{width:14px;height:14px}
 .mono{font-family:var(--f-num)}
-.side{display:flex;flex-direction:column;gap:14px;padding:18px 12px;border-inline-end:1px solid var(--line);background:var(--surface)}
+.side{display:flex;flex-direction:column;gap:14px;padding:18px 12px;border-inline-end:1px solid var(--line);background:var(--chrome,var(--surface))}
 .logo{display:flex;align-items:center;gap:10px;padding:4px 8px;font-family:var(--f-num);letter-spacing:.16em;text-transform:uppercase;font-size:13px;font-weight:600}
 .logo .mark{width:28px;height:28px;display:grid;place-items:center;background:var(--fill);color:var(--on-fill);border-radius:var(--r-m)}
 .nav{display:flex;flex-direction:column;gap:1px}
@@ -277,6 +291,7 @@ kbd{font-family:var(--f-num);font-size:10.5px;padding:1px 5px;border:1px solid v
   <div class="controls" id="controls">
     <div class="ctl"><span>Écran</span><div class="sw" data-key="screen"><button data-v="portal">Portail de ressources</button><button data-v="events">Événements</button><button data-v="tower">Tour de contrôle (admin)</button></div></div>
     <div class="ctl"><span>Mode</span><div class="sw" data-key="mode"><button data-v="light">Clair</button><button data-v="dark">Sombre</button></div></div>
+    <div class="ctl"><span>Fonds</span><div class="sw" data-key="surf"><button data-v="cur">Actuel</button><button data-v="chrome">Menu gris, contenu blanc</button><button data-v="blanc">Tout blanc</button></div></div>
     <div class="ctl"><span>Palette</span><div class="sw" data-key="acc"><button data-v="claude"><i class="dot" style="background:#d97757"></i>Claude</button><button data-v="indigo"><i class="dot" style="background:#5c6ef8"></i>Indigo</button><button data-v="emeraude"><i class="dot" style="background:#10b981"></i>Émeraude</button></div></div>
   </div>
   <div class="mock tok" id="mock"></div>
@@ -286,7 +301,7 @@ kbd{font-family:var(--f-num);font-size:10.5px;padding:1px 5px;border:1px solid v
 <script>
 (function(){
 let dark=false;try{const th=document.documentElement.getAttribute('data-theme');dark=th?th==='dark':matchMedia('(prefers-color-scheme: dark)').matches}catch(e){}
-const S={screen:'portal',mode:dark?'dark':'light',acc:'claude',pk:0,ev:0,view:'cal',day:'2026-11-19',cats:{dir:1,form:1,vie:1,it:1,rh:1},holOnly:false,calc:{from:'2026-11-19',to:'2026-12-31',we:[0,6],ex:true},pins:{mail:1,leave:1,exp:1,help:1}};
+const S={screen:'portal',surf:'chrome',mode:dark?'dark':'light',acc:'claude',pk:0,ev:0,view:'cal',day:'2026-11-19',cats:{dir:1,form:1,vie:1,it:1,rh:1},holOnly:false,calc:{from:'2026-11-19',to:'2026-12-31',we:[0,6],ex:true},pins:{mail:1,leave:1,exp:1,help:1}};
 const ic=(n,c='')=>`<svg class="i ${c}" aria-hidden="true" focusable="false"><use href="#i-${n}"></use></svg>`;
 const reduce=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
 const PANEL=[
@@ -428,6 +443,7 @@ function tower(){
    <section><div class="sec"><h2>Journal de bord</h2></div><div class="card"><ul class="log">${log.map(([h,t])=>`<li><time>${h}</time><span>${t}</span></li>`).join('')}</ul></div></section>
   </div></div></div>`;
 }
+const SURF={cur:['Fonds : actuel','Fond de page teinté par l’accent, menu et barre blancs, cartes blanches, tableaux noirs : jusqu’à cinq fonds sur un écran.'],chrome:['Fonds : menu gris, contenu blanc','Comme Linear ou Notion : le menu forme le cadre, tout le contenu est sur blanc. Les cartes se distinguent par une bordure, pas par un fond. Le noir est réservé au panneau d’annonces et aux chiffres clés.'],blanc:['Fonds : tout blanc','Comme Stripe ou Vercel : un seul fond, des lignes pour séparer. Le gris clair ne sert qu’aux en-têtes de tableau, aux champs et aux week-ends.']};
 const NOTES={
  portal:[['Pilier : accès aux ressources','Applis en ligne, documents Office 365, sites intranet et liens web, rangés par thème, avec favoris et groupes privés.'],['Type déduit du lien','Word, Excel, PDF, site SharePoint ou lien web : reconnu depuis l’URL, sans saisie. On sait ce qu’on ouvre avant de cliquer.'],['Deux signaux seulement','« Nouveau » pendant 14 jours après l’ajout, et une note facultative de l’admin avec une date de fin. Pas de statut de service.']],
  events:[['Le calendrier d’abord','Vue Mois, Semaine, Jour comme aujourd’hui. La vue Liste reprend le tableau d’affichage. Week-ends grisés, jours fériés hachurés, aujourd’hui marqué.'],['Seulement les champs qui existent','Catégorie (couleur), heure ou journée entière, lieu, récurrence ↻, statut. Seuls « À confirmer » et « Annulé » sont signalés : confirmé est la norme.'],['Jours ouvrés d’une période','Le calculateur reste, dans la colonne de droite : jours non travaillés réglables, fériés exclus, résultat recalculé à chaque changement. Cliquez un jour du calendrier pour voir son détail.']],
@@ -443,9 +459,9 @@ function flapText(el){if(reduce())return;const target=el.textContent;const L='AB
   let tail='';for(let j=0;j<Math.min(6,target.length-n);j++)tail+=L[Math.floor(Math.random()*L.length)];el.textContent=target.slice(0,n)+tail;
   if(n<target.length)requestAnimationFrame(step);else el.textContent=target};requestAnimationFrame(step)}
 function render(opts={}){
- mock.dataset.mode=S.mode;mock.dataset.acc=S.acc;mock.setAttribute('lang','fr');mock.setAttribute('dir','ltr');
+ mock.dataset.mode=S.mode;mock.dataset.acc=S.acc;mock.dataset.surf=S.surf;mock.setAttribute('lang','fr');mock.setAttribute('dir','ltr');
  mock.innerHTML=`<div class="app">${side()}<div class="content">${top()}${S.screen==='portal'?portal():S.screen==='events'?events():tower()}</div></div>`;
- document.getElementById('notes').innerHTML=NOTES[S.screen].map(([b,s])=>`<div class="note"><b>${b}</b><span>${s}</span></div>`).join('');
+ document.getElementById('notes').innerHTML=[SURF[S.surf],...NOTES[S.screen]].map(([b,s])=>`<div class="note"><b>${b}</b><span>${s}</span></div>`).join('');
  document.querySelectorAll('.sw').forEach(g=>g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(S[g.dataset.key]===b.dataset.v))));
  const key=S.screen;if(key!==lastKey){mock.querySelectorAll('[data-flap]').forEach(flapDigits);lastKey=key}
  if(opts.only)mock.querySelectorAll(opts.only).forEach(flapDigits);

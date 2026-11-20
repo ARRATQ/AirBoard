@@ -43,9 +43,23 @@ defineProps({
 </script>
 
 <style scoped>
+/* Tableau clair (direction « menu gris, contenu blanc ») : les tokens board sont remappés
+   sur la surface, ce qui rend aussi claires les cases FlapDigits placées dedans. */
 .board {
+  --board: var(--surface);
+  --board-2: var(--sunken);
+  --board-text: var(--text);
+  --board-dim: var(--muted);
+  --board-hi: var(--text);
+  --board-ok: var(--ok);
+  --board-bad: var(--bad);
+  --flap-cell: var(--surface);
+  --flap-ring: inset 0 0 0 1px var(--line);
+  --flap-rule: var(--line);
+
   background: var(--board);
   color: var(--board-text);
+  border: 1px solid var(--line);
   border-radius: var(--r-l);
   font-family: var(--f-num);
   font-size: 12.5px;
@@ -66,19 +80,20 @@ defineProps({
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--board-dim);
-  border-block-end: 1px solid rgb(255 255 255 / 0.08);
+  background: var(--sunken);
+  border-block-end: 1px solid var(--line);
   white-space: nowrap;
 }
 
 .board__table td {
   padding: 10px 12px;
-  border-block-end: 1px solid rgb(255 255 255 / 0.06);
+  border-block-end: 1px solid var(--line);
   vertical-align: middle;
   white-space: nowrap;
 }
 
 .board__table tbody tr:last-child td { border-block-end: 0; }
-.board__table tbody tr:hover { background: rgb(255 255 255 / 0.03); }
+.board__table tbody tr:hover { background: var(--sunken); }
 
 .board__cell--start { text-align: start; }
 .board__cell--end { text-align: end; }
@@ -102,6 +117,6 @@ defineProps({
 
 /* Statuts dans le tableau : classes utilisables dans les slots. */
 .board :deep(.board-ok) { color: var(--board-ok); }
-.board :deep(.board-warn) { color: var(--board-hi); }
+.board :deep(.board-warn) { color: var(--warn); }
 .board :deep(.board-bad) { color: var(--board-bad); }
 </style>

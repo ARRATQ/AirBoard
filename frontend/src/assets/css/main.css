@@ -14,10 +14,12 @@
   --fill:     var(--acc-ink);
   --on-fill:  #ffffff;
 
-  --bg:       color-mix(in oklab, var(--acc) 3%, #eceef0);
+  /* Fonds « menu gris, contenu blanc » : neutres, sans teinte d'accent, séparés par des bordures. */
+  --chrome:   #f3f4f6;
+  --bg:       #ffffff;
   --surface:  #ffffff;
-  --sunken:   color-mix(in oklab, var(--acc) 2%, #f4f5f6);
-  --line:     color-mix(in oklab, var(--acc) 6%, #d6dade);
+  --sunken:   #f5f6f7;
+  --line:     #e2e4e8;
   --text:     #121518;
   --muted:    #596068;
 
@@ -26,8 +28,9 @@
   --bad:      #b91c1c;
   --info:     #1d4ed8;
 
-  --board:      #15181b;
-  --board-2:    #1d2125;
+  /* Board : seulement le panneau d'annonces et le bandeau des chiffres clés. */
+  --board:      #1b1e22;
+  --board-2:    #24282d;
   --board-text: #f4f1e8;
   --board-dim:  #959ba2;
   --board-hi:   #ffc857;
@@ -81,10 +84,11 @@ html.dark {
   --fill:     var(--acc);
   --on-fill:  #141210;
 
-  --bg:       #0e1012;
-  --surface:  #15181b;
-  --sunken:   #111316;
-  --line:     #272c31;
+  --chrome:   #0b0c0e;
+  --bg:       #141619;
+  --surface:  #141619;
+  --sunken:   #101215;
+  --line:     #25292e;
   --text:     #e6e9ec;
   --muted:    #959da5;
 
@@ -93,8 +97,9 @@ html.dark {
   --bad:      #f87171;
   --info:     #93c5fd;
 
-  --board:     #050607;
-  --board-2:   #0d0f11;
+  /* Plus clair que la page : le board ne fait jamais « trou ». */
+  --board:     #1d2125;
+  --board-2:   #252a2f;
   --board-dim: #80868d;
 
   --shadow-float: 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.4);
@@ -141,7 +146,7 @@ html {
 
 .sidebar {
   @apply w-64 border-r flex flex-col h-screen fixed left-0 top-0 z-30 transition-all duration-300;
-  background-color: var(--bg-card);
+  background-color: var(--chrome);
   border-color: var(--border);
 }
 

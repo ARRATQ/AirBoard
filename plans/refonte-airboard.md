@@ -182,16 +182,22 @@ blanc), `--fill` (= `acc-ink` en clair, `acc` en sombre).
 
 | Token | Clair | Sombre |
 |---|---|---|
-| bg | color-mix(oklab, acc 3 %, #eceef0) | #0e1012 |
-| surface | #fff | #15181b |
-| sunken | color-mix(oklab, acc 2 %, #f4f5f6) | #111316 |
-| line | color-mix(oklab, acc 6 %, #d6dade) | #272c31 |
+| chrome (menu latéral seul) | #f3f4f6 | #0b0c0e |
+| bg (page de contenu) | #fff | #141619 |
+| surface (cartes, barre du haut) | #fff | #141619 |
+| sunken (en-têtes de tableau, champs) | #f5f6f7 | #101215 |
+| line | #e2e4e8 | #25292e |
 | text / muted | #121518 / #596068 | #e6e9ec / #959da5 |
 | on-fill | #fff | #141210 |
 | ok / warn / bad / info | #15803d / #b45309 / #b91c1c / #1d4ed8 | #4ade80 / #fbbf24 / #f87171 / #93c5fd |
-| board / board-2 | #15181b / #1d2125 | #050607 / #0d0f11 |
+| board / board-2 (annonces, chiffres clés seulement) | #1b1e22 / #24282d | #1d2125 / #252a2f |
 | board-text / board-dim | #f4f1e8 / #959ba2 | #f4f1e8 / #80868d |
 | board-hi / board-ok / board-bad | #ffc857 / #5ee08f / #ff7b72 | idem |
+
+Fonds « menu gris, contenu blanc » (choix du 2026-11-20) : aucune teinte d'accent dans les fonds,
+séparation par bordures. Tableaux et résultat des jours ouvrés en clair (surface, line, en-tête sunken,
+chiffre principal en acc-ink) ; le noir board ne reste que sur le panneau d'annonces et le bandeau
+des chiffres clés.
 
 **Lots d'exécution** (un commit chacun) : 0 figer la direction ; 1 tokens, polices et Tailwind ;
 2 composants `components/ui/` + Vitest ; 3 `alert()`/`confirm()` → toasts et `ConfirmDialog` ;
