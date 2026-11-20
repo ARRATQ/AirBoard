@@ -166,7 +166,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			if len(allGroupIDs) > 0 {
 				query = query.Where(`
 					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-						(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0 OR
+						NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id) OR
 						EXISTS (
 							SELECT 1 FROM event_target_groups
 							WHERE event_target_groups.event_id = events.id
@@ -177,7 +177,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			} else {
 				query = query.Where(`
 					is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
-					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				`, true, time.Now())
 			}
 		}
@@ -190,7 +190,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			query = query.Where(`
 				author_id = ? OR
 				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 					OR EXISTS (
 						SELECT 1 FROM event_target_groups
 						WHERE event_target_groups.event_id = events.id
@@ -202,7 +202,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			query = query.Where(`
 				author_id = ? OR
 				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
-					(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				)
 			`, userID, true, time.Now())
 		}
@@ -216,7 +216,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 
 		if len(userGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id
@@ -225,7 +225,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			`, userGroupIDs)
 		} else {
 			// Si pas de groupes, voir seulement les événements globaux
-			query = query.Where("(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
 		}
 	}
 
@@ -324,7 +324,7 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 
 		if len(allGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id
@@ -332,7 +332,7 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 				)
 			`, allGroupIDs)
 		} else {
-			query = query.Where("(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
 		}
 	} else {
 		// User régulier : événements publics + ses groupes
@@ -341,7 +341,7 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 
 		if len(userGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id
@@ -349,7 +349,7 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 				)
 			`, userGroupIDs)
 		} else {
-			query = query.Where("(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
 		}
 	}
 

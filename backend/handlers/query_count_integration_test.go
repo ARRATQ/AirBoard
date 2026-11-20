@@ -19,6 +19,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"airboard/config"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -80,9 +81,13 @@ func loadIdentity(t *testing.T, db *gorm.DB, username, role string) identity {
 }
 
 func runHandler(h gin.HandlerFunc, who identity, params gin.Params) int {
+	return runHandlerAt(h, who, params, "/")
+}
+
+func runHandlerAt(h gin.HandlerFunc, who identity, params gin.Params, target string) int {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, target, nil)
 	c.Params = params
 	c.Set("user_id", who.id)
 	c.Set("role", who.role)
@@ -140,5 +145,47 @@ func TestQueryCounts(t *testing.T) {
 			t.Errorf("%s: statut %d", tc.name, code)
 		}
 		t.Logf("%-20s %4d requêtes", tc.name, n.Load())
+	}
+}
+
+// Exécute les listes filtrées par groupes cibles (NOT EXISTS sur *_target_groups),
+// pour un utilisateur et un admin : une erreur SQL donnerait un statut 500.
+//
+//	go test -tags integration -run TestVisibilityQueries -v ./handlers/
+func TestVisibilityQueries(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, _ := openCountingDB(t)
+
+	adminName := os.Getenv("AIRBOARD_TEST_ADMIN")
+	if adminName == "" {
+		adminName = "admin"
+	}
+	admin := loadIdentity(t, db, adminName, "")
+	user := loadIdentity(t, db, os.Getenv("AIRBOARD_TEST_USER"), "user")
+
+	news := NewNewsHandler(db, &config.Config{}, nil)
+	events := NewEventsHandler(db, nil)
+	polls := NewPollsHandler(db, nil)
+	search := NewSearchHandler(db)
+	home := NewHomeHandler(db)
+
+	cases := []struct {
+		name   string
+		h      gin.HandlerFunc
+		target string
+	}{
+		{"news", news.GetNews, "/"},
+		{"events", events.GetEvents, "/"},
+		{"events/calendar", events.GetCalendarView, "/?start_date=2020-01-01&end_date=2030-12-31"},
+		{"polls", polls.GetPolls, "/"},
+		{"search", search.GlobalSearch, "/?q=te"},
+		{"home", home.GetHomeData, "/"},
+	}
+	for _, tc := range cases {
+		for _, who := range []identity{user, admin} {
+			if code := runHandlerAt(tc.h, who, nil, tc.target); code != http.StatusOK {
+				t.Errorf("%s (%s): statut %d", tc.name, who.role, code)
+			}
+		}
 	}
 }
