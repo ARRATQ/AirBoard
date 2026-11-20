@@ -184,7 +184,15 @@
       "weekendCount": "Weekend days",
       "holidaysCount": "Holidays",
       "days": "day(s)",
-      "holidaysInPeriod": "Holidays in period"
+      "holidaysInPeriod": "Holidays in period",
+      "invalidRange": "Choose a start date and a later end date."
+    },
+    "viewLabel": "Display",
+    "columns": {
+      "when": "Date",
+      "event": "Event",
+      "place": "Place",
+      "status": "Status"
     }
   },
   "groups": {

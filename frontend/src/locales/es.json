@@ -181,7 +181,15 @@
       "weekendCount": "Días de fin de semana",
       "holidaysCount": "Días festivos",
       "days": "día(s)",
-      "holidaysInPeriod": "Días festivos en el período"
+      "holidaysInPeriod": "Días festivos en el período",
+      "invalidRange": "Elija una fecha de inicio y una fecha de fin posterior."
+    },
+    "viewLabel": "Vista",
+    "columns": {
+      "when": "Fecha",
+      "event": "Evento",
+      "place": "Lugar",
+      "status": "Estado"
     }
   },
   "groups": {

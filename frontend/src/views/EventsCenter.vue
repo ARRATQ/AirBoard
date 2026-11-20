@@ -1,472 +1,343 @@
 <template>
-  <div class="w-full p-6">
-    <!-- Header -->
-    <div class="mb-6">
-      <div class="flex justify-between items-start flex-wrap gap-4">
-        <div class="min-w-0 flex-[1_1_16rem]">
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {{ $t('agenda.title') }}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{ $t('agenda.subtitle') }}
-          </p>
-        </div>
-        <div class="flex gap-2 items-center flex-shrink-0">
-          <!-- View Toggle Buttons -->
-          <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-            <button
-              @click="switchView('calendar')"
-              :class="[
-                'px-3 py-2 rounded-md font-medium transition-colors flex items-center gap-2 min-w-[100px] justify-center',
-                currentView === 'calendar'
-                  ? 'bg-white dark:bg-gray-800 text-primary-600 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              ]"
-            >
-              <Icon icon="mdi:calendar-month" class="h-4 w-4" />
-              <span class="hidden xs:inline text-sm">{{ $t('agenda.calendar') }}</span>
-            </button>
-            <button
-              @click="switchView('list')"
-              :class="[
-                'px-3 py-2 rounded-md font-medium transition-colors flex items-center gap-2 min-w-[80px] justify-center',
-                currentView === 'list'
-                  ? 'bg-white dark:bg-gray-800 text-primary-600 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              ]"
-            >
-              <Icon icon="mdi:format-list-bulleted" class="h-4 w-4" />
-              <span class="hidden xs:inline text-sm">{{ $t('agenda.list') }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
+  <div class="content-area agenda">
+    <PageHeader :eyebrow="$t('home.rail.agenda')" :title="$t('agenda.title')" :description="$t('agenda.subtitle')">
+      <template #actions>
+        <SegmentedControl v-model="currentView" :options="views" :label="$t('agenda.viewLabel')" />
+      </template>
+    </PageHeader>
+
+    <!-- Filtres : catégories et jours fériés -->
+    <div class="agenda__filters" role="group" :aria-label="$t('agenda.filterByCategory')">
+      <button type="button" class="chip" :aria-pressed="isAllSelected" @click="selectAll">
+        {{ $t('agenda.allCategories') }}<span class="chip__count">{{ sourceEvents.length }}</span>
+      </button>
+      <button
+        v-for="category in categories"
+        :key="category.id"
+        type="button"
+        class="chip"
+        :aria-pressed="selectedCategoryId === category.id"
+        @click="selectCategory(category.id)"
+      >
+        <span class="chip__dot" :style="{ background: category.color || 'var(--muted)' }" aria-hidden="true"></span>
+        {{ category.name }}<span class="chip__count">{{ countFor((e) => e.category_id === category.id) }}</span>
+      </button>
+      <button type="button" class="chip" :aria-pressed="showOnlyHolidays" @click="toggleHolidaysFilter">
+        <span class="chip__hatch" aria-hidden="true"></span>
+        {{ $t('agenda.holidays') }}<span class="chip__count">{{ countFor((e) => e.is_holiday === true) }}</span>
+      </button>
+      <span v-if="!categories.length && !isLoading" class="agenda__nocat">{{ $t('agenda.noCategories') }}</span>
     </div>
 
-    <!-- Category Filter (Moved to Top) -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {{ $t('agenda.filterByCategory') }}
-      </h3>
-
-      <div v-if="categories.length > 0" class="flex flex-wrap gap-3">
-        <!-- All categories button -->
-        <button
-          @click="selectedCategoryId = null"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
-            selectedCategoryId === null
-              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
-          ]"
-        >
-          <Icon icon="mdi:calendar-multiple" class="h-5 w-5" />
-          <span>{{ $t('agenda.allCategories') }}</span>
-          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
-            {{ getTotalEventsCount() }}
-          </span>
-        </button>
-
-        <!-- Category buttons -->
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          @click="selectedCategoryId = category.id"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
-            selectedCategoryId === category.id
-              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
-          ]"
-        >
-          <Icon :icon="category.icon || 'mdi:calendar'" class="h-5 w-5" :style="{ color: category.color }" />
-          <span>{{ category.name }}</span>
-          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
-            {{ getCategoryEventsCount(category.id) }}
-          </span>
-        </button>
-
-        <!-- Holidays filter button -->
-        <button
-          @click="toggleHolidaysFilter"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all font-medium',
-            showOnlyHolidays
-              ? 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300'
-          ]"
-        >
-          <Icon icon="mdi:calendar-star" class="h-5 w-5 text-red-500" />
-          <span>{{ $t('agenda.holidays') }}</span>
-          <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
-            {{ getHolidaysCount() }}
-          </span>
-        </button>
-      </div>
-
-      <div v-else class="text-center py-4">
-        <p class="text-gray-600 dark:text-gray-400">{{ $t('agenda.noCategories') }}</p>
-      </div>
-    </div>
-
-    <!-- Calendar View -->
-    <div v-if="currentView === 'calendar'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-      <EventCalendar 
-        ref="calendarComponent" 
-        :events="getDisplayEvents()"
-      />
-    </div>
-
-    <!-- List View -->
-    <div v-else-if="currentView === 'list'" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {{ $t('events.center.title') }} ({{ events.length }})
-      </h3>
-      
-      <div v-if="isLoading" class="text-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">{{ $t('agenda.loading') }}</p>
-      </div>
-
-      <div v-else-if="getDisplayEvents().length > 0" class="space-y-4">
-        <div 
-          v-for="event in getDisplayEvents()" 
-          :key="event.id"
-          class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-          @click="viewEvent(event)"
-        >
-          <div class="flex justify-between items-start">
-            <div class="flex-1">
-              <h4 class="font-medium text-gray-900 dark:text-white">{{ event.title }}</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {{ formatEventDate(event.start_date) }}
-              </p>
-              <p v-if="event.location" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                <Icon icon="mdi:map-marker" class="h-4 w-4 inline mr-1" />
-                {{ event.location }}
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span 
-                v-if="event.category"
-                class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full"
-              >
-                {{ event.category.name }}
-              </span>
-              <span 
-                :class="[
-                  'inline-block px-2 py-1 text-xs rounded-full',
-                  event.is_published
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                ]"
-              >
-                {{ event.is_published ? $t('agenda.published') : $t('agenda.draft') }}
-              </span>
-            </div>
-          </div>
-          <p v-if="event.description" class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-            {{ extractTextFromTiptap(event.description) }}
-          </p>
-        </div>
-      </div>
-
-      <div v-else class="text-center py-8">
-        <Icon icon="mdi:calendar-outline" class="h-12 w-12 mx-auto text-gray-400 mb-2" />
-        <p class="text-gray-600 dark:text-gray-400">{{ $t('agenda.noEventsFound') }}</p>
-        <button 
-          @click="loadData" 
-          class="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-        >
-          {{ $t('agenda.reload') }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Working Days Calculator -->
-    <WorkingDaysCalculator class="mt-6" />
-
-    <!-- Event Detail Modal -->
-    <EventDetailModal
-      v-if="selectedEvent"
-      :event="selectedEvent"
-      @close="selectedEvent = null"
-      @updated="handleEventUpdated"
+    <EventCalendar
+      v-if="currentView === 'calendar'"
+      ref="calendarComponent"
+      :events="displayEvents"
+      :holidays="holidays"
+      :loading="isLoading"
     />
+
+    <section v-else class="agenda__list" aria-labelledby="agenda-list-title">
+      <h2 id="agenda-list-title" class="agenda__list-title">
+        {{ $t('events.center.title') }} <span class="agenda__list-count">{{ displayEvents.length }}</span>
+      </h2>
+
+      <div v-if="isLoading" class="agenda__state" role="status">
+        <Icon icon="mdi:loading" class="agenda__spin" aria-hidden="true" />
+        <span class="sr-only">{{ $t('agenda.loading') }}</span>
+      </div>
+
+      <EmptyState v-else-if="!listRows.length" icon="mdi:calendar-outline" :title="$t('agenda.noEventsFound')">
+        <BaseButton size="sm" icon="mdi:refresh" @click="loadData">{{ $t('agenda.reload') }}</BaseButton>
+      </EmptyState>
+
+      <BoardTable v-else :columns="listColumns" :rows="listRows" :caption="$t('events.center.title')" min-width="760px">
+        <template #cell-when="{ row }">
+          <time :datetime="row.event.start_date" class="agenda__when">{{ row.when }}</time>
+        </template>
+        <template #cell-title="{ row }">
+          <button type="button" class="agenda__title" :class="{ 'is-cancelled': row.event.status === 'cancelled' }" @click="viewEvent(row.event)">
+            {{ row.event.title }}
+          </button>
+          <span v-if="row.excerpt" class="agenda__excerpt">{{ row.excerpt }}</span>
+        </template>
+        <template #cell-category="{ row }">
+          <span v-if="row.event.is_holiday" class="agenda__cat"><span class="chip__hatch" aria-hidden="true"></span>{{ $t('agenda.holidays') }}</span>
+          <span v-else-if="row.event.category" class="agenda__cat">
+            <span class="chip__dot" :style="{ background: row.event.category.color || 'var(--muted)' }" aria-hidden="true"></span>{{ row.event.category.name }}
+          </span>
+        </template>
+        <template #cell-status="{ row }">
+          <StatusBadge v-if="row.tone" :tone="row.tone">{{ $t(`events.status.${row.event.status}`) }}</StatusBadge>
+          <StatusBadge v-else-if="row.event.is_published === false" tone="neutral">{{ $t('agenda.draft') }}</StatusBadge>
+        </template>
+      </BoardTable>
+    </section>
+
+    <WorkingDaysCalculator class="agenda__calc" :holidays="holidays" />
+
+    <EventDetailModal v-if="selectedEvent" :event="selectedEvent" @close="selectedEvent = null" @updated="handleEventUpdated" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+// Agenda : calendrier (mois, semaine, jour) ou liste, filtres par catégorie et jours fériés,
+// calculateur de jours ouvrés. Les fériés sont calculés sur tous les événements, filtre ou non.
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
+import { Icon } from '@iconify/vue'
 import { useEventsStore } from '@/stores/events'
-import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
+import { eventStatusTone, holidayMap } from '@/utils/agenda'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
+import BoardTable from '@/components/ui/BoardTable.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import EventCalendar from '@/components/events/EventCalendar.vue'
 import EventDetailModal from '@/components/events/EventDetailModal.vue'
 import WorkingDaysCalculator from '@/components/events/WorkingDaysCalculator.vue'
 
 const router = useRouter()
 const eventsStore = useEventsStore()
-const authStore = useAuthStore()
-const { locale } = useI18n()
+const appStore = useAppStore()
+const { t, locale } = useI18n()
 
-// Refs
 const isLoading = ref(false)
 const currentView = ref('calendar')
 const calendarComponent = ref(null)
-const selectedEvent = ref(null) // Pour le modal de détail d'événement
-const selectedCategoryId = ref(null) // Filtre par catégorie
-const showOnlyHolidays = ref(false) // Filtre jours fériés
+const selectedEvent = ref(null)
+const selectedCategoryId = ref(null)
+const showOnlyHolidays = ref(false)
 
-// Computed
-const events = computed(() => eventsStore.events)
-const categories = computed(() => eventsStore.categories)
+const views = computed(() => [
+  { value: 'calendar', label: t('agenda.calendar'), icon: 'mdi:calendar-month-outline' },
+  { value: 'list', label: t('agenda.list'), icon: 'mdi:format-list-bulleted' },
+])
 
-// Methods
-const loadData = async () => {
+const categories = computed(() => eventsStore.categories || [])
+
+// Événements de la liste ; à défaut, ceux du calendrier de l'année.
+const sourceEvents = computed(() => {
+  const regular = eventsStore.events || []
+  const list = regular.length ? regular : eventsStore.calendarEvents || []
+  return list.filter((e) => e?.start_date && !Number.isNaN(new Date(e.start_date).getTime()))
+})
+
+const holidays = computed(() => holidayMap(sourceEvents.value))
+
+const displayEvents = computed(() =>
+  sourceEvents.value.filter((e) => {
+    if (selectedCategoryId.value !== null && e.category_id !== selectedCategoryId.value) return false
+    if (showOnlyHolidays.value && e.is_holiday !== true) return false
+    return true
+  }),
+)
+
+const countFor = (predicate) => sourceEvents.value.filter(predicate).length
+const isAllSelected = computed(() => selectedCategoryId.value === null && !showOnlyHolidays.value)
+
+function selectAll() {
+  selectedCategoryId.value = null
+  showOnlyHolidays.value = false
+}
+
+function selectCategory(id) {
+  selectedCategoryId.value = id
+  showOnlyHolidays.value = false
+}
+
+function toggleHolidaysFilter() {
+  showOnlyHolidays.value = !showOnlyHolidays.value
+  if (showOnlyHolidays.value) selectedCategoryId.value = null
+}
+
+// ── Liste ────────────────────────────────────────────────────────────
+const listColumns = computed(() => [
+  { key: 'when', label: t('agenda.columns.when') },
+  { key: 'title', label: t('agenda.columns.event') },
+  { key: 'category', label: t('agenda.categories') },
+  { key: 'location', label: t('agenda.columns.place'), tone: 'dim' },
+  { key: 'status', label: t('agenda.columns.status'), align: 'end' },
+])
+
+const formatWhen = (event) => {
+  const date = new Date(event.start_date)
+  const loc = dateLocaleFor(locale.value)
+  const day = date.toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+  if (event.is_all_day || event.is_holiday) return day
+  return `${day} · ${date.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' })}`
+}
+
+const listRows = computed(() =>
+  [...displayEvents.value]
+    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+    .map((event) => ({
+      id: event.id,
+      event,
+      when: formatWhen(event),
+      location: event.location || '—',
+      excerpt: extractTextFromTiptap(event.description).slice(0, 140),
+      tone: eventStatusTone(event.status),
+    })),
+)
+
+// Texte brut d'un contenu Tiptap (JSON ou chaîne)
+function extractTextFromTiptap(content) {
+  if (!content) return ''
+  let node = content
+  if (typeof content === 'string') {
+    try {
+      node = JSON.parse(content)
+    } catch {
+      return content
+    }
+  }
+  const walk = (n) => {
+    if (!n) return ''
+    const own = n.type === 'text' && n.text ? n.text : ''
+    return own + (Array.isArray(n.content) ? n.content.map(walk).join(' ') : '')
+  }
+  return walk(node).replace(/\s+/g, ' ').trim()
+}
+
+// ── Navigation et détail ─────────────────────────────────────────────
+function viewEvent(event) {
+  if (event.slug && event.slug.trim()) {
+    router.push(`/events/${event.slug}`)
+    return
+  }
+  // Sans slug : détail dans la modale
+  selectedEvent.value = {
+    ...event,
+    title: event.title || '',
+    description: event.description || '',
+    location: event.location || '',
+    category: event.category || null,
+    color: event.color || '#3B82F6',
+    priority: event.priority || 'normal',
+    status: event.status || 'confirmed',
+    is_published: event.is_published !== false,
+  }
+}
+
+function handleEventUpdated() {
+  selectedEvent.value = null
+  loadData()
+}
+
+// ── Chargement ───────────────────────────────────────────────────────
+async function loadData() {
+  isLoading.value = true
   try {
-    isLoading.value = true
-
-    // Load both regular events and calendar events for consistency
-    const currentDate = new Date()
-    const currentYear = currentDate.getFullYear()
-    const startDate = `${currentYear}-01-01`
-    const endDate = `${currentYear}-12-31`
-
+    const year = new Date().getFullYear()
     await Promise.all([
       eventsStore.fetchEvents(),
       eventsStore.fetchCategories(),
-      eventsStore.fetchCalendarEvents(startDate, endDate)
+      eventsStore.fetchCalendarEvents(`${year}-01-01`, `${year}-12-31`),
     ])
   } catch (error) {
     console.error('Error loading data:', error)
+    appStore.showError(t('ui.toast.error'))
   } finally {
     isLoading.value = false
   }
 }
 
-const switchView = (view) => {
-  currentView.value = view
-  if (view === 'calendar' && calendarComponent.value) {
-    // Refresh calendar when switching to it
-    calendarComponent.value.refreshCalendar()
-  } else if (view === 'list') {
-    // Ensure we have events data for list view
-    if (events.value.length === 0) {
-      const currentDate = new Date()
-      const currentYear = currentDate.getFullYear()
-      eventsStore.fetchCalendarEvents(`${currentYear}-01-01`, `${currentYear}-12-31`)
-    }
-  }
-}
-
-const refreshCalendar = () => {
-  if (calendarComponent.value) {
-    calendarComponent.value.refreshCalendar()
-  }
-}
-
-const getDisplayEvents = () => {
-  // Use regular events first, fallback to calendar events if needed
-  const regularEvents = events.value || []
-  const calendarEvents = eventsStore.calendarEvents || []
-
-  let eventsList = []
-  if (regularEvents.length > 0) {
-    eventsList = regularEvents
-  } else if (calendarEvents.length > 0) {
-    eventsList = calendarEvents
-  }
-
-  // Filter out filtered events AND invalid events
-  eventsList = eventsList.filter(event => {
-    // Basic validity check
-    if (!event || !event.start_date) return false
-    const date = new Date(event.start_date)
-    if (isNaN(date.getTime())) return false
-
-    // Apply category filter
-    if (selectedCategoryId.value !== null && event.category_id !== selectedCategoryId.value) {
-      return false
-    }
-
-    // Apply holidays filter
-    if (showOnlyHolidays.value && event.is_holiday !== true) {
-      return false
-    }
-
-    return true
-  })
-
-  return eventsList
-}
-
-// Category filter methods
-const getTotalEventsCount = () => {
-  const regularEvents = events.value || []
-  const calendarEvents = eventsStore.calendarEvents || []
-  return regularEvents.length > 0 ? regularEvents.length : calendarEvents.length
-}
-
-const getCategoryEventsCount = (categoryId) => {
-  const regularEvents = events.value || []
-  const calendarEvents = eventsStore.calendarEvents || []
-  const eventsList = regularEvents.length > 0 ? regularEvents : calendarEvents
-  return eventsList.filter(event => event.category_id === categoryId).length
-}
-
-const getHolidaysCount = () => {
-  const regularEvents = events.value || []
-  const calendarEvents = eventsStore.calendarEvents || []
-  const eventsList = regularEvents.length > 0 ? regularEvents : calendarEvents
-  return eventsList.filter(event => event.is_holiday === true).length
-}
-
-const toggleHolidaysFilter = () => {
-  showOnlyHolidays.value = !showOnlyHolidays.value
-  if (showOnlyHolidays.value) {
-    selectedCategoryId.value = null // Reset category filter when showing holidays
-  }
-}
-
-const viewEvent = (event) => {
-  // Vérifier que l'événement a un slug valide
-  if (!event.slug) {
-    console.error('Événement sans slug:', event)
-    // Afficher une notification ou utiliser un modal comme fallback
-    showEventModal(event)
-    return
-  }
-  
-  // Vérifier que le slug n'est pas vide
-  if (event.slug.trim() === '') {
-    console.error('Événement avec slug vide:', event)
-    showEventModal(event)
-    return
-  }
-
-  router.push(`/events/${event.slug}`)
-}
-
-const showEventModal = (event) => {
-  // Créer un objet événement avec les propriétés nécessaires pour le modal
-  const eventForModal = {
-    ...event,
-    // S'assurer que toutes les propriétés nécessaires sont présentes
-    id: event.id || Math.random(),
-    title: event.title || 'Événement sans titre',
-    description: event.description || '',
-    start_date: event.start_date,
-    end_date: event.end_date,
-    is_all_day: event.is_all_day || false,
-    location: event.location || '',
-    category: event.category || null,
-    author: event.author || { first_name: 'Inconnu', last_name: '' },
-    color: event.color || '#3B82F6',
-    priority: event.priority || 'normal',
-    status: event.status || 'confirmed',
-    created_at: event.created_at || new Date().toISOString(),
-    external_links: event.external_links || null,
-    is_recurring: event.is_recurring || false,
-    recurrence_rule: event.recurrence_rule || null,
-    is_published: event.is_published !== false // Par défaut publié sauf indication contraire
-  }
-  
-  selectedEvent.value = eventForModal
-}
-
-const handleEventUpdated = (updatedEvent) => {
-  // Recharger les événements quand un événement est mis à jour via le modal
-  loadData()
-  selectedEvent.value = null
-}
-
-// Utility function to extract text from Tiptap JSON format
-const extractTextFromTiptap = (content) => {
-  if (!content) return ''
-  
-  let contentObj = content
-  
-  // If content is a string, try to parse it as JSON
-  if (typeof content === 'string') {
-    try {
-      contentObj = JSON.parse(content)
-    } catch (e) {
-      // If parsing fails, return the content as is
-      return content
-    }
-  }
-  
-  // Extract text from Tiptap JSON structure
-  const extractText = (node) => {
-    if (!node) return ''
-    
-    let text = ''
-    
-    if (node.type === 'text' && node.text) {
-      text += node.text
-    }
-    
-    if (node.content && Array.isArray(node.content)) {
-      for (const child of node.content) {
-        text += extractText(child)
-      }
-    }
-    
-    return text
-  }
-  
-  return extractText(contentObj)
-}
-
-const formatEventDate = (dateString) => {
-  if (!dateString) return ''
-  
-  try {
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return 'Date invalide'
-    
-    const locale = getCurrentLocale()
-    
-    return date.toLocaleDateString(locale, { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit'
-    })
-  } catch (e) {
-    console.error('Error formatting date:', e)
-    return 'Date invalide'
-  }
-}
-
-const getCurrentLocale = () => {
-  // Map locale codes to locale strings for date formatting
-  const localeMap = {
-    'fr': 'fr-FR',
-    'en': 'en-US',
-    'ar': 'ar-SA',
-    'es': 'es-ES'
-  }
-  
-  return localeMap[locale.value] || 'fr-FR'
-}
-
-// Lifecycle
-onMounted(() => {
-  loadData()
-})
-
-// Add cleanup to prevent lifecycle warnings
-onUnmounted(() => {
-  // Clear any pending operations or timers here if needed
-})
+loadData()
 </script>
 
 <style scoped>
-/* Pas de styles spéciaux pour l'instant */
+.agenda { display: flex; flex-direction: column; gap: 16px; }
+
+.agenda__filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding-inline: 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed='true'] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); font-weight: 600; }
+.chip:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.chip__count { font-family: var(--f-num); font-size: 11px; font-weight: 400; color: var(--muted); }
+.chip__dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.chip__hatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px, var(--muted) 3px 4px);
+}
+
+.agenda__nocat { font-size: 12.5px; color: var(--muted); }
+
+.agenda__list-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.agenda__list-count { font-family: var(--f-num); font-size: 12px; font-weight: 400; color: var(--muted); }
+
+.agenda__when { white-space: nowrap; color: var(--muted); }
+
+.agenda__title {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.agenda__title:hover { color: var(--acc-ink); text-decoration: underline; }
+.agenda__title:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 2px; }
+.agenda__title.is-cancelled { color: var(--muted); text-decoration: line-through; }
+
+.agenda__excerpt {
+  display: block;
+  max-width: 44ch;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.agenda__cat { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-body); }
+
+.agenda__state { display: flex; justify-content: center; padding-block: 40px; color: var(--muted); }
+.agenda__spin { width: 28px; height: 28px; animation: agenda-spin 1s linear infinite; }
+@keyframes agenda-spin { to { transform: rotate(360deg); } }
+
+.agenda__calc { margin-block-start: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .agenda__spin { animation: none; }
+}
 </style>

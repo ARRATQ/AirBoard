@@ -181,7 +181,15 @@
       "weekendCount": "Jours de week-end",
       "holidaysCount": "Jours fériés",
       "days": "jour(s)",
-      "holidaysInPeriod": "Jours fériés dans la période"
+      "holidaysInPeriod": "Jours fériés dans la période",
+      "invalidRange": "Choisissez une date de début et une date de fin postérieure."
+    },
+    "viewLabel": "Affichage",
+    "columns": {
+      "when": "Date",
+      "event": "Événement",
+      "place": "Lieu",
+      "status": "Statut"
     }
   },
   "groups": {

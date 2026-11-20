@@ -181,7 +181,15 @@
       "weekendCount": "أيام نهاية الأسبوع",
       "holidaysCount": "العطل الرسمية",
       "days": "يوم/أيام",
-      "holidaysInPeriod": "العطل الرسمية خلال الفترة"
+      "holidaysInPeriod": "العطل الرسمية خلال الفترة",
+      "invalidRange": "اختر تاريخ بداية وتاريخ نهاية لاحقًا له."
+    },
+    "viewLabel": "طريقة العرض",
+    "columns": {
+      "when": "التاريخ",
+      "event": "الحدث",
+      "place": "المكان",
+      "status": "الحالة"
     }
   },
   "groups": {
