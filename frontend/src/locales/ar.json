@@ -214,6 +214,8 @@
     "permanentDeleteMessage": "هل تريد حذف المستخدم «{username}» نهائيًا؟\n\nهذا الإجراء لا رجعة فيه وسيحذف جميع البيانات المرتبطة به."
   },
   "settings": {
+    "general": "عام",
+    "homePageCustomization": "تخصيص الصفحة الرئيسية",
     "title": "إعدادات التطبيق",
     "subtitle": "خصص المظهر والعلامة التجارية",
     "changePassword": "تغيير كلمة المرور",

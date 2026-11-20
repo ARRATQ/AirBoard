@@ -254,6 +254,8 @@
     "permanentDeleteMessage": "Permanently delete the user \"{username}\"?\n\nThis action cannot be undone and will delete all associated data."
   },
   "settings": {
+    "general": "General",
+    "homePageCustomization": "Home page customization",
     "title": "App Settings",
     "subtitle": "Customize your application appearance and branding",
     "changePassword": "Change Password",

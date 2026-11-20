@@ -214,6 +214,8 @@
     "permanentDeleteMessage": "¿Eliminar definitivamente al usuario «{username}»?\n\nEsta acción es irreversible y eliminará todos los datos asociados."
   },
   "settings": {
+    "general": "General",
+    "homePageCustomization": "Personalización de la página de inicio",
     "title": "Ajustes de la aplicación",
     "subtitle": "Personaliza la apariencia y la marca",
     "changePassword": "Cambiar contraseña",
