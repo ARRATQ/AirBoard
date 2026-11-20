@@ -1100,9 +1100,10 @@ export const emailService = {
 }
 
 // Comments Service
-export const getComments = async (entityType, entityId) => {
+// Réponse paginée : { comments, total, page, page_size, total_pages }
+export const getComments = async (entityType, entityId, params = {}) => {
   const response = await api.get('/comments', {
-    params: { entity_type: entityType, entity_id: entityId }
+    params: { entity_type: entityType, entity_id: entityId, ...params }
   })
   return response.data
 }
@@ -1127,8 +1128,8 @@ export const getCommentSettings = async () => {
   return response.data
 }
 
-export const getPendingComments = async () => {
-  const response = await api.get('/admin/comments/pending')
+export const getPendingComments = async (params = {}) => {
+  const response = await api.get('/admin/comments/pending', { params })
   return response.data
 }
 
@@ -1419,8 +1420,9 @@ export const commentsService = {
   },
 
   // Admin
-  async getPendingComments() {
-    const response = await api.get('/admin/comments/pending')
+  // params : page, page_size (max 100) ; réponse { comments, total, page, page_size, total_pages }
+  async getPendingComments(params = {}) {
+    const response = await api.get('/admin/comments/pending', { params })
     return response.data
   },
 

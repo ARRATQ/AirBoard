@@ -232,3 +232,56 @@ func TestUsersPagination(t *testing.T) {
 		}
 	}
 }
+
+// GetComments / GetPendingComments : pages bornées et total exact.
+func TestCommentsPagination(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, _ := openCountingDB(t)
+	admin := loadIdentity(t, db, "admin", "")
+	h := NewCommentHandler(db, nil)
+
+	var entity struct {
+		EntityType string
+		EntityID   uint
+		N          int64
+	}
+	db.Model(&models.Comment{}).Select("entity_type, entity_id, COUNT(*) AS n").
+		Group("entity_type, entity_id").Order("n DESC").Limit(1).Scan(&entity)
+	if entity.N == 0 {
+		t.Skip("aucun commentaire en base")
+	}
+
+	call := func(handler gin.HandlerFunc, target string) (int, map[string]interface{}) {
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest(http.MethodGet, target, nil)
+		c.Set("user_id", admin.id)
+		c.Set("role", admin.role)
+		handler(c)
+		var body map[string]interface{}
+		_ = json.Unmarshal(w.Body.Bytes(), &body)
+		return w.Code, body
+	}
+
+	target := "/?page_size=1&entity_type=" + entity.EntityType + "&entity_id=" + strconv.FormatUint(uint64(entity.EntityID), 10)
+	code, body := call(h.GetComments, target)
+	if code != http.StatusOK {
+		t.Fatalf("GetComments: statut %d", code)
+	}
+	if got := len(body["comments"].([]interface{})); got != 1 {
+		t.Errorf("GetComments: %d commentaires sur la page, attendu 1", got)
+	}
+	if body["total_pages"] == nil || body["page"].(float64) != 1 {
+		t.Errorf("GetComments: pagination absente %v", body)
+	}
+
+	code, body = call(h.GetPendingComments, "/?page=1&page_size=5")
+	if code != http.StatusOK {
+		t.Fatalf("GetPendingComments: statut %d", code)
+	}
+	var pending int64
+	db.Model(&models.Comment{}).Where("is_approved = ?", false).Count(&pending)
+	if int64(body["total"].(float64)) != pending {
+		t.Errorf("GetPendingComments: total %v, attendu %d", body["total"], pending)
+	}
+}
