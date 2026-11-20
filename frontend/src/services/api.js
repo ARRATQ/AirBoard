@@ -715,7 +715,8 @@ export const newsService = {
 export const groupAdminService = {
   // AppGroups (scoped to managed groups)
   async getAppGroups(params = {}) {
-    const response = await api.get('/group-admin/app-groups', { params })
+    // Liste paginée côté serveur ; les vues l'affichent en entier, d'où la page maximale par défaut.
+    const response = await api.get('/group-admin/app-groups', { params: { page_size: 1000, ...params } })
     return response.data.data || response.data
   },
 
@@ -736,7 +737,8 @@ export const groupAdminService = {
 
   // Applications (scoped to managed groups)
   async getApplications(params = {}) {
-    const response = await api.get('/group-admin/applications', { params })
+    // Liste paginée côté serveur ; les vues l'affichent en entier, d'où la page maximale par défaut.
+    const response = await api.get('/group-admin/applications', { params: { page_size: 1000, ...params } })
     return response.data.data || response.data
   },
 

@@ -285,3 +285,42 @@ func TestCommentsPagination(t *testing.T) {
 		t.Errorf("GetPendingComments: total %v, attendu %d", body["total"], pending)
 	}
 }
+
+// Listes de l'admin de groupe : paginées pour l'admin global et pour un admin de groupe.
+func TestGroupAdminListsPagination(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, _ := openCountingDB(t)
+	admin := loadIdentity(t, db, "admin", "")
+	h := NewGroupAdminHandler(db)
+
+	who := []identity{admin}
+	var groupAdminID uint
+	db.Table("group_admins").Joins("JOIN users ON users.id = group_admins.user_id").
+		Where("users.role <> ? AND users.deleted_at IS NULL", "admin").
+		Limit(1).Pluck("group_admins.user_id", &groupAdminID)
+	if groupAdminID != 0 {
+		var u models.User
+		db.First(&u, groupAdminID)
+		who = append(who, loadIdentity(t, db, u.Username, ""))
+	}
+
+	for _, id := range who {
+		for name, handler := range map[string]gin.HandlerFunc{"app-groups": h.GetAppGroups, "applications": h.GetApplications} {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest(http.MethodGet, "/?page=1&limit=1", nil)
+			c.Set("user_id", id.id)
+			c.Set("role", id.role)
+			c.Set("managed_group_ids", id.managed)
+			handler(c)
+			var body models.PaginatedResponse
+			if w.Code != http.StatusOK || json.Unmarshal(w.Body.Bytes(), &body) != nil {
+				t.Fatalf("%s (%s): statut %d", name, id.role, w.Code)
+			}
+			if body.PageSize != 1 || len(body.Data.([]interface{})) > 1 {
+				t.Errorf("%s (%s): page non bornée %+v", name, id.role, body)
+			}
+			t.Logf("%s (%s, %d groupes gérés): total %d", name, id.role, len(id.managed), body.Total)
+		}
+	}
+}
