@@ -2283,6 +2283,36 @@
     "all": "الكل",
     "unlocked": "المفتوحة",
     "streak": "السلسلة",
-    "xpReward": "المكافأة: {xp} نقطة خبرة"
+    "xpReward": "المكافأة: {xp} نقطة خبرة",
+    "figPlayers": "المشاركون",
+    "figBadges": "الشارات المفتوحة",
+    "figRank": "ترتيبك",
+    "xpToNext": "{xp} نقطة خبرة للوصول إلى المستوى {level}",
+    "levelShort": "م {level}",
+    "badges": "الشارات",
+    "latestBadges": "آخر الشارات",
+    "noActivity": "لا يوجد نشاط حديث",
+    "noBadges": "لا توجد شارات في هذه الفئة",
+    "badgeFilter": "تصفية الشارات",
+    "loadError": "تعذّر تحميل تقدمك.",
+    "you": "أنت",
+    "activity": {
+      "daily_login": "تسجيل الدخول",
+      "app_click": "مورد",
+      "news_read": "مقال مقروء",
+      "news_publish": "نشر",
+      "event_publish": "حدث",
+      "poll_vote": "تصويت في استطلاع",
+      "poll_create": "إنشاء استطلاع",
+      "comment_create": "تعليق",
+      "suggestion_create": "اقتراح",
+      "suggestion_vote": "تصويت على فكرة",
+      "suggestion_comment": "نقاش",
+      "achievement_unlock": "فتح شارة",
+      "chat_message": "رسالة",
+      "chatbot_use": "المساعد الذكي",
+      "other": "نشاط"
+    },
+    "lockedPlural": "المقفلة"
   }
 }

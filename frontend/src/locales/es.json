@@ -2283,6 +2283,36 @@
     "all": "Todas",
     "unlocked": "Desbloqueadas",
     "streak": "Racha",
-    "xpReward": "Recompensa: {xp} XP"
+    "xpReward": "Recompensa: {xp} XP",
+    "figPlayers": "Jugadores",
+    "figBadges": "Insignias desbloqueadas",
+    "figRank": "Su posición",
+    "xpToNext": "{xp} XP para el nivel {level}",
+    "levelShort": "Niv. {level}",
+    "badges": "Insignias",
+    "latestBadges": "Últimas insignias",
+    "noActivity": "Sin actividad reciente",
+    "noBadges": "Ninguna insignia en esta categoría",
+    "badgeFilter": "Filtrar insignias",
+    "loadError": "No se pudo cargar su progreso.",
+    "you": "usted",
+    "activity": {
+      "daily_login": "Conexión",
+      "app_click": "Recurso",
+      "news_read": "Artículo leído",
+      "news_publish": "Publicación",
+      "event_publish": "Evento",
+      "poll_vote": "Voto en encuesta",
+      "poll_create": "Encuesta creada",
+      "comment_create": "Comentario",
+      "suggestion_create": "Sugerencia",
+      "suggestion_vote": "Voto a una idea",
+      "suggestion_comment": "Debate",
+      "achievement_unlock": "Insignia desbloqueada",
+      "chat_message": "Mensaje",
+      "chatbot_use": "Asistente IA",
+      "other": "Actividad"
+    },
+    "lockedPlural": "Bloqueadas"
   }
 }
