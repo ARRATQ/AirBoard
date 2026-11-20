@@ -425,6 +425,7 @@ import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { homeService } from '@/services/api'
+import { useWeather } from '@/composables/useWeather'
 const router = useRouter()
 const { t, locale } = useI18n()
 const authStore = useAuthStore()
@@ -652,41 +653,8 @@ const loadHomeData = async () => {
   }
 }
 
-// ── Weather ──────────────────────────────────────────────────────────
-const weather = ref({ temp: null, icon: 'mdi:weather-cloudy', city: '' })
-
-// WMO weather code → mdi icon
-const wmoIcon = (code) => {
-  if (code === 0) return 'mdi:weather-sunny'
-  if (code <= 2) return 'mdi:weather-partly-cloudy'
-  if (code <= 3) return 'mdi:weather-cloudy'
-  if (code <= 49) return 'mdi:weather-fog'
-  if (code <= 59) return 'mdi:weather-rainy'
-  if (code <= 69) return 'mdi:weather-snowy-rainy'
-  if (code <= 79) return 'mdi:weather-snowy'
-  if (code <= 82) return 'mdi:weather-pouring'
-  if (code <= 84) return 'mdi:weather-hail'
-  if (code <= 99) return 'mdi:weather-lightning-rainy'
-  return 'mdi:weather-cloudy'
-}
-
-const loadWeather = () => {
-  if (!navigator.geolocation) return
-  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-    try {
-      const { latitude: lat, longitude: lon } = coords
-      const [meteo, geo] = await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius`).then(r => r.json()),
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`).then(r => r.json()),
-      ])
-      weather.value = {
-        temp: Math.round(meteo.current_weather.temperature),
-        icon: wmoIcon(meteo.current_weather.weathercode),
-        city: geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || '',
-      }
-    } catch { /* silently ignore */ }
-  }, () => { /* permission denied — keep no weather */ })
-}
+// ── Weather (mise en cache, voir composables/useWeather.js) ─────────
+const { weather, loadWeather } = useWeather()
 
 // ── Announcements Ticker ─────────────────────────────────────────────
 const tickerIndex = ref(0)
