@@ -220,8 +220,8 @@ l'éditeur Actualités et Événements ; terme retenu « Ressources » + « Cat�
 
 Reste côté backend, vu pendant la fusion : `CreateAppGroup` impose le premier groupe administré et
 ignore le choix ; `Updates(struct)` GORM n'enregistre pas `false` (décocher actif/privé) ; filtres de
-statut des événements ignorés ; recherche d'un caractère → 400. Côté front : `events.*` manque en es
-et ar ; un article ciblant un groupe non administré affiche un badge sans nom chez l'admin de groupe.
+statut des événements ignorés ; recherche d'un caractère → 400. Côté front : un article ciblant un
+groupe non administré affiche un badge sans nom chez l'admin de groupe.
 
 Constat de départ :
 
