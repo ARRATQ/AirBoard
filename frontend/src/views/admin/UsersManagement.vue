@@ -3,9 +3,9 @@
     <div class="w-full">
       <!-- Header -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $t('users.title') }}</h1>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="min-w-0 flex-[1_1_16rem]">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ $t('users.title') }}</h1>
             <p class="mt-1 text-gray-600 dark:text-gray-400">{{ $t('users.subtitle') }}</p>
           </div>
           <button @click="openCreateModal" class="btn btn-primary">
