@@ -327,7 +327,7 @@ const sortIcon = (key) => {
   height: 16px;
 }
 
-:global([dir='rtl']) .dt__chev { transform: scaleX(-1); }
+[dir='rtl'] .dt__chev { transform: scaleX(-1); }
 
 @keyframes dt-spin {
   to { transform: rotate(360deg); }

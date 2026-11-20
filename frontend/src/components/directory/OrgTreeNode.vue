@@ -182,9 +182,9 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
   border-left: 2px solid var(--line);
 }
 /* Racine sans trait au-dessus */
-:global(.ot-root) > .ot-node::before,
-:global(.ot-root) > .ot-node::after { display: none; }
-:global(.ot-root) > .ot-node { padding-top: 0; }
+.ot-root > .ot-node::before,
+.ot-root > .ot-node::after { display: none; }
+.ot-root > .ot-node { padding-top: 0; }
 
 /* ---- Carte d'unité ---- */
 .ot-card {

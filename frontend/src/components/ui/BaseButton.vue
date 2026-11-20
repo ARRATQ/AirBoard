@@ -100,7 +100,7 @@ defineProps({
   color: #fff;
 }
 
-:global(html.dark) .base-btn--danger { color: #141210; }
+html.dark .base-btn--danger { color: #141210; }
 
 .base-btn--danger:not(:disabled):hover { filter: brightness(1.08); }
 

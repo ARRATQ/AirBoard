@@ -82,10 +82,10 @@ const config = computed(() => types.find(t => t.value === props.node.attrs.type)
 }
 
 /* Dark mode */
-:global(.dark) .callout-block[data-callout-type="info"]    { background: #1E3A5F; }
-:global(.dark) .callout-block[data-callout-type="warning"] { background: #3D2C00; }
-:global(.dark) .callout-block[data-callout-type="success"] { background: #052E16; }
-:global(.dark) .callout-block[data-callout-type="danger"]  { background: #3B0A0A; }
+.dark .callout-block[data-callout-type="info"]    { background: #1E3A5F; }
+.dark .callout-block[data-callout-type="warning"] { background: #3D2C00; }
+.dark .callout-block[data-callout-type="success"] { background: #052E16; }
+.dark .callout-block[data-callout-type="danger"]  { background: #3B0A0A; }
 
 .callout-header {
   display: flex;
