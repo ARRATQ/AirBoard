@@ -112,7 +112,15 @@
     "gamification": "Mi XP",
     "oauth": "OAuth",
     "clear": "Borrar",
-    "optional": "opcional"
+    "optional": "opcional",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "status": "Estado",
+    "description": "Descripción",
+    "name": "Nombre",
+    "color": "Color",
+    "icon": "Icono",
+    "order": "Orden"
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -259,7 +267,12 @@
     "permanentDeleteTitle": "Eliminación definitiva",
     "permanentDeleteMessage": "¿Eliminar definitivamente al usuario «{username}»?\n\nEsta acción es irreversible y eliminará todos los datos asociados.",
     "last_connection": "Última conexión",
-    "never_connected": "Nunca conectado"
+    "never_connected": "Nunca conectado",
+    "viewActive": "Usuarios activos",
+    "viewTrash": "Papelera",
+    "viewLabel": "Mostrar",
+    "deleteTitle": "Eliminar usuario",
+    "deleteMessage": "El usuario «{name}» se moverá a la papelera. Podrá restaurarlo."
   },
   "settings": {
     "general": "General",
@@ -1889,7 +1902,10 @@
         "visibility": "Visibilidad",
         "period": "Periodo",
         "votes": "Votos",
-        "content": "Contenido"
+        "content": "Contenido",
+        "reason": "Motivo",
+        "key": "Clave",
+        "slug": "Slug"
       }
     },
     "toast": {

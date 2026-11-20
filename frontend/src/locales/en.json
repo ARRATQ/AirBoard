@@ -115,7 +115,15 @@
     "optional": "optional",
     "details": "Details",
     "and": " and ",
-    "requiredFieldsHint": "* Required fields"
+    "requiredFieldsHint": "* Required fields",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "status": "Status",
+    "description": "Description",
+    "name": "Name",
+    "color": "Colour",
+    "icon": "Icon",
+    "order": "Order"
   },
   "calendar": {
     "title": "Event Calendar",
@@ -262,7 +270,12 @@
     "last_connection": "Last Connection",
     "never_connected": "Never connected",
     "permanentDeleteTitle": "Permanent deletion",
-    "permanentDeleteMessage": "Permanently delete the user \"{username}\"?\n\nThis action cannot be undone and will delete all associated data."
+    "permanentDeleteMessage": "Permanently delete the user \"{username}\"?\n\nThis action cannot be undone and will delete all associated data.",
+    "viewActive": "Active users",
+    "viewTrash": "Trash",
+    "viewLabel": "Show",
+    "deleteTitle": "Delete user",
+    "deleteMessage": "User \"{name}\" will be moved to the trash. You can restore them later."
   },
   "settings": {
     "general": "General",
@@ -2259,7 +2272,10 @@
         "visibility": "Visibility",
         "period": "Period",
         "votes": "Votes",
-        "content": "Content"
+        "content": "Content",
+        "reason": "Reason",
+        "key": "Key",
+        "slug": "Slug"
       }
     },
     "toast": {

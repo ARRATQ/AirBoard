@@ -65,7 +65,7 @@
       </table>
     </div>
 
-    <nav v-if="!loading && total > 0" class="dt__pager" :aria-label="t('ui.table.range', { from, to, total })">
+    <nav v-if="footer && !loading && total > 0" class="dt__pager" :aria-label="t('ui.table.range', { from, to, total })">
       <span class="dt__range">{{ t('ui.table.range', { from, to, total }) }}</span>
       <template v-if="pageCount > 1">
         <button type="button" class="dt__page-btn" :disabled="page === 1" :aria-label="t('ui.table.prev')" @click="page -= 1">
@@ -99,6 +99,8 @@ const props = defineProps({
   pageSize: { type: Number, default: 20 },
   loading: { type: Boolean, default: false },
   emptyTitle: { type: String, default: '' },
+  // false quand la page garde sa pagination serveur : évite un second compteur.
+  footer: { type: Boolean, default: true },
 })
 
 const { t } = useI18n()

@@ -112,7 +112,15 @@
     "gamification": "نقاطي",
     "oauth": "OAuth",
     "clear": "مسح",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل",
+    "status": "الحالة",
+    "description": "الوصف",
+    "name": "الاسم",
+    "color": "اللون",
+    "icon": "الأيقونة",
+    "order": "الترتيب"
   },
   "calendar": {
     "title": "تقويم الأحداث",
@@ -259,7 +267,12 @@
     "permanentDeleteTitle": "حذف نهائي",
     "permanentDeleteMessage": "هل تريد حذف المستخدم «{username}» نهائيًا؟\n\nهذا الإجراء لا رجعة فيه وسيحذف جميع البيانات المرتبطة به.",
     "last_connection": "آخر اتصال",
-    "never_connected": "لم يتصل أبداً"
+    "never_connected": "لم يتصل أبداً",
+    "viewActive": "المستخدمون النشطون",
+    "viewTrash": "سلة المحذوفات",
+    "viewLabel": "عرض",
+    "deleteTitle": "حذف المستخدم",
+    "deleteMessage": "سيُنقل المستخدم «{name}» إلى سلة المحذوفات، ويمكنك استعادته."
   },
   "settings": {
     "general": "عام",
@@ -1889,7 +1902,10 @@
         "visibility": "الظهور",
         "period": "الفترة",
         "votes": "الأصوات",
-        "content": "المحتوى"
+        "content": "المحتوى",
+        "reason": "السبب",
+        "key": "المفتاح",
+        "slug": "المعرّف"
       }
     },
     "toast": {

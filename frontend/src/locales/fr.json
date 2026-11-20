@@ -112,7 +112,15 @@
     "optional": "optionnel",
     "details": "Détails",
     "and": " et ",
-    "requiredFieldsHint": "* Champs obligatoires"
+    "requiredFieldsHint": "* Champs obligatoires",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "status": "Statut",
+    "description": "Description",
+    "name": "Nom",
+    "color": "Couleur",
+    "icon": "Icône",
+    "order": "Ordre"
   },
   "calendar": {
     "title": "Calendrier des Événements",
@@ -259,7 +267,12 @@
     "last_connection": "Dernière connexion",
     "never_connected": "Jamais connecté",
     "permanentDeleteTitle": "Suppression définitive",
-    "permanentDeleteMessage": "Supprimer définitivement l'utilisateur « {username} » ?\n\nCette action est irréversible et supprimera toutes les données associées."
+    "permanentDeleteMessage": "Supprimer définitivement l'utilisateur « {username} » ?\n\nCette action est irréversible et supprimera toutes les données associées.",
+    "viewActive": "Utilisateurs actifs",
+    "viewTrash": "Corbeille",
+    "viewLabel": "Afficher",
+    "deleteTitle": "Supprimer l'utilisateur",
+    "deleteMessage": "L'utilisateur « {name} » sera placé dans la corbeille. Vous pourrez le restaurer."
   },
   "settings": {
     "general": "Général",
@@ -2225,7 +2238,10 @@
         "visibility": "Visibilité",
         "period": "Période",
         "votes": "Votes",
-        "content": "Contenu"
+        "content": "Contenu",
+        "reason": "Raison",
+        "key": "Clé",
+        "slug": "Slug"
       }
     },
     "toast": {
