@@ -1783,5 +1783,18 @@
       "resources": "الموارد"
     },
     "mainLabel": "التنقل الرئيسي"
+  },
+  "adminHome": {
+    "title": "نظرة عامة",
+    "subtitleAdmin": "الأرقام الرئيسية، وما يتطلب إجراءً، والوصول إلى كل مجال.",
+    "subtitleGroup": "مجموعاتك ومواردها والصفحات التي يمكنك إدارتها.",
+    "keyFigures": "الأرقام الرئيسية",
+    "todo": "بانتظار المعالجة",
+    "nothingPending": "لا شيء معلّق",
+    "pendingComments": "تعليقات بانتظار الإشراف",
+    "newSuggestions": "اقتراحات جديدة",
+    "managedGroups": "المجموعات المُدارة",
+    "resourceCategories": "فئات الموارد",
+    "manage": "إدارة"
   }
 }

@@ -1784,5 +1784,18 @@
       "resources": "Recursos"
     },
     "mainLabel": "Navegación principal"
+  },
+  "adminHome": {
+    "title": "Resumen",
+    "subtitleAdmin": "Las cifras clave, lo que requiere una acción y el acceso a cada área.",
+    "subtitleGroup": "Sus grupos, sus recursos y las páginas que puede gestionar.",
+    "keyFigures": "Cifras clave",
+    "todo": "Pendiente",
+    "nothingPending": "nada pendiente",
+    "pendingComments": "Comentarios pendientes de moderación",
+    "newSuggestions": "Sugerencias nuevas",
+    "managedGroups": "Grupos administrados",
+    "resourceCategories": "Categorías de recursos",
+    "manage": "Gestionar"
   }
 }

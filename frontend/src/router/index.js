@@ -29,7 +29,7 @@ const NewsTypesManagement = () => import('@/views/admin/NewsTypesManagement.vue'
 const SectionTabs = () => import('@/components/layout/SectionTabs.vue')
 
 // Group Admin views
-const GroupAdminDashboard = () => import('@/views/group-admin/GroupAdminDashboard.vue')
+const AdminOverview = () => import('@/views/admin/AdminOverview.vue')
 
 // News views (public)
 const NewsCenter = () => import('@/views/NewsCenter.vue')
@@ -241,9 +241,15 @@ const routes = [
     }
   },
   {
+    // Vue d'ensemble, commune à l'admin et à l'admin de groupe
     path: '/admin',
-    // Vue d'ensemble : page dédiée au point suivant ; d'ici là, l'accueil de chaque rôle
-    redirect: () => (getRoles(useAuthStore().user).isAdmin ? '/admin/settings' : '/group-admin')
+    name: 'AdminOverview',
+    component: AdminOverview,
+    meta: {
+      requiresAuth: true,
+      access: GROUP_ADMIN,
+      title: "Vue d'ensemble"
+    }
   },
   // Modules et leurs taxonomies, rangés en onglets (config/navigation.js : SECTION_TABS)
   {
@@ -464,19 +470,9 @@ const routes = [
       title: 'Modération des Commentaires'
     }
   },
-  // Routes Group Admin
-  {
-    path: '/group-admin',
-    name: 'GroupAdminDashboard',
-    component: GroupAdminDashboard,
-    meta: {
-      requiresAuth: true,
-      access: GROUP_ADMIN,
-      title: 'Administration de Groupe'
-    }
-  },
   // Anciennes adresses de l'administration de groupe : mêmes pages que l'admin,
   // limitées aux groupes administrés (voir useManagementScope)
+  { path: '/group-admin', redirect: '/admin' },
   { path: '/group-admin/app-groups', redirect: '/admin/resources/categories' },
   { path: '/group-admin/applications', redirect: '/admin/resources' },
   { path: '/group-admin/news', redirect: '/admin/news' },

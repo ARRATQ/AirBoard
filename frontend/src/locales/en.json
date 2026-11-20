@@ -2230,5 +2230,18 @@
       "resources": "Resources"
     },
     "mainLabel": "Main navigation"
+  },
+  "adminHome": {
+    "title": "Overview",
+    "subtitleAdmin": "Key figures, what needs action, and a way into each area.",
+    "subtitleGroup": "Your groups, their resources and the pages you can manage.",
+    "keyFigures": "Key figures",
+    "todo": "To do",
+    "nothingPending": "nothing pending",
+    "pendingComments": "Comments awaiting moderation",
+    "newSuggestions": "New suggestions",
+    "managedGroups": "Managed groups",
+    "resourceCategories": "Resource categories",
+    "manage": "Manage"
   }
 }

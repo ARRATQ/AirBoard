@@ -537,8 +537,8 @@ const kpiCards = computed(() => {
 
   if (homeData.value.managed_group_ids?.length) {
     return [
-      { value: stats.managed_groups_count ?? 0, label: 'Groupes gérés', icon: '🏷️', link: '/group-admin' },
-      { value: stats.total_members_count ?? 0, label: 'Membres', icon: '👥', link: '/group-admin' },
+      { value: stats.managed_groups_count ?? 0, label: 'Groupes gérés', icon: '🏷️', link: '/admin' },
+      { value: stats.total_members_count ?? 0, label: 'Membres', icon: '👥', link: '/admin' },
       { value: stats.managed_app_groups_count ?? 0, label: 'Groupes de ressources', icon: '📦', link: '/admin/resources/categories' },
       { value: stats.managed_apps_count ?? 0, label: 'Ressources', icon: '🔲', link: '/admin/resources' },
       { value: stats.managed_news_count ?? 0, label: 'Articles', icon: '📰', link: '/admin/news' },

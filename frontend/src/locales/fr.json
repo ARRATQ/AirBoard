@@ -2205,5 +2205,18 @@
       "resources": "Ressources"
     },
     "mainLabel": "Navigation principale"
+  },
+  "adminHome": {
+    "title": "Vue d'ensemble",
+    "subtitleAdmin": "Les chiffres clés, ce qui attend une action, et l'accès à chaque domaine.",
+    "subtitleGroup": "Vos groupes, leurs ressources et les pages que vous pouvez gérer.",
+    "keyFigures": "Chiffres clés",
+    "todo": "À traiter",
+    "nothingPending": "rien en attente",
+    "pendingComments": "Commentaires en attente de modération",
+    "newSuggestions": "Nouvelles suggestions",
+    "managedGroups": "Groupes administrés",
+    "resourceCategories": "Catégories de ressources",
+    "manage": "Gérer"
   }
 }
