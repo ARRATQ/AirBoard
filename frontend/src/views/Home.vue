@@ -1548,6 +1548,13 @@ onUnmounted(() => clearInterval(tickerTimer))
   display: flex;
   gap: 3px;
   margin-bottom: -1px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.news-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .news-tab {
@@ -1565,6 +1572,8 @@ onUnmounted(() => clearInterval(tickerTimer))
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
   position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .news-tab--active {
