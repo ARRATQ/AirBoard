@@ -80,5 +80,6 @@ const go = (target) => {
   height: 16px;
 }
 
-:global([dir='rtl']) .dt__chev { transform: scaleX(-1); }
+/* Pas de :global() ici : Vue ne garderait que [dir='rtl'] et retournerait toute la page. */
+[dir='rtl'] .dt__chev { transform: scaleX(-1); }
 </style>
