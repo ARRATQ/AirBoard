@@ -1,17 +1,16 @@
 <template>
-  <div class="dir-admin">
-    <header class="flex flex-wrap items-end justify-between gap-4 mb-6">
-      <div>
-        <p class="dir-admin__eyebrow">{{ $t('directory.title') }}</p>
-        <h1 class="text-3xl font-bold" style="color: var(--text-primary)">{{ $t('directory.manageTitle') }}</h1>
-        <p class="mt-1" style="color: var(--text-muted)">
-          {{ canAdmin ? $t('directory.manageHelpAdmin') : $t('directory.manageHelpGroupAdmin') }}
-        </p>
-      </div>
-      <router-link to="/directory" class="btn btn-secondary">
-        <Icon icon="mdi:eye-outline" class="h-4 w-4 mr-1" /> {{ $t('directory.viewPublic') }}
-      </router-link>
-    </header>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ $t('directory.manageTitle') }}</template>
+      <template #description>
+        {{ canAdmin ? $t('directory.manageHelpAdmin') : $t('directory.manageHelpGroupAdmin') }}
+      </template>
+      <template #actions>
+        <BaseButton :tag="RouterLink" to="/directory" variant="secondary" icon="mdi:eye-outline">
+          {{ $t('directory.viewPublic') }}
+        </BaseButton>
+      </template>
+    </PageHeader>
 
     <nav class="dir-admin__tabs" role="tablist">
       <button
@@ -30,26 +29,27 @@
       </button>
     </nav>
 
-    <div v-if="loading" class="py-16 flex justify-center" style="color: var(--text-muted)">
-      <Icon icon="mdi:loading" class="animate-spin h-8 w-8" />
+    <div v-if="loading" class="dir-admin__state">
+      <Icon icon="mdi:loading" class="dir-admin__spin" aria-hidden="true" />
+      <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
-    <div v-else-if="error" class="py-16 text-center space-y-3" style="color: var(--text-muted)">
+    <div v-else-if="error" class="dir-admin__state dir-admin__state--col">
       <p>{{ error }}</p>
-      <button type="button" class="btn btn-secondary" @click="load">{{ $t('common.retry') }}</button>
+      <BaseButton variant="secondary" size="sm" @click="load">{{ $t('common.retry') }}</BaseButton>
     </div>
 
     <!-- ====== STRUCTURE ====== -->
     <section v-else-if="activeTab === 'structure'">
-      <div class="flex justify-between items-center gap-3 mb-4 flex-wrap">
-        <p class="text-sm" style="color: var(--text-muted)">{{ $t('directory.structureHelp') }}</p>
-        <button v-if="canAdmin" type="button" class="btn btn-primary" @click="openUnit(null, null)">
-          <Icon icon="mdi:plus" class="h-4 w-4 mr-1" /> {{ $t('directory.newUnit') }}
-        </button>
+      <div class="dir-admin__bar">
+        <p class="dir-admin__help">{{ $t('directory.structureHelp') }}</p>
+        <BaseButton v-if="canAdmin" variant="primary" icon="mdi:plus" @click="openUnit(null, null)">
+          {{ $t('directory.newUnit') }}
+        </BaseButton>
       </div>
 
-      <p v-if="!flatUnits.length" class="dir-admin__empty">{{ $t('directory.noUnits') }}</p>
+      <EmptyState v-if="!flatUnits.length" icon="mdi:sitemap-outline" :title="$t('directory.noUnits')" />
 
-      <ul class="space-y-3">
+      <ul class="dir-tree">
         <li
           v-for="unit in flatUnits"
           :key="unit.id"
@@ -58,36 +58,36 @@
         >
           <div class="dir-unit__head">
             <span class="dir-unit__dot" />
-            <span class="font-semibold" style="color: var(--text-primary)">{{ unit.name }}</span>
-            <span v-if="unit.code" class="text-xs font-mono" style="color: var(--text-muted)">{{ unit.code }}</span>
+            <span class="dir-unit__name">{{ unit.name }}</span>
+            <span v-if="unit.code" class="dir-mono">{{ unit.code }}</span>
             <div v-if="canAdmin" class="dir-unit__actions">
-              <button type="button" class="dir-icon-btn" :title="$t('directory.newPosition')" @click="openPosition(null, unit.id)">
+              <button type="button" class="dir-icon-btn" :title="$t('directory.newPosition')" :aria-label="$t('directory.newPosition')" @click="openPosition(null, unit.id)">
                 <Icon icon="mdi:briefcase-plus-outline" />
               </button>
-              <button type="button" class="dir-icon-btn" :title="$t('directory.newSubUnit')" @click="openUnit(null, unit.id)">
+              <button type="button" class="dir-icon-btn" :title="$t('directory.newSubUnit')" :aria-label="$t('directory.newSubUnit')" @click="openUnit(null, unit.id)">
                 <Icon icon="mdi:file-tree-outline" />
               </button>
-              <button type="button" class="dir-icon-btn" :title="$t('common.edit')" @click="openUnit(unit)">
+              <button type="button" class="dir-icon-btn" :title="$t('common.edit')" :aria-label="$t('common.edit')" @click="openUnit(unit)">
                 <Icon icon="mdi:pencil-outline" />
               </button>
-              <button type="button" class="dir-icon-btn dir-icon-btn--danger" :title="$t('common.delete')" @click="removeUnit(unit)">
+              <button type="button" class="dir-icon-btn dir-icon-btn--danger" :title="$t('common.delete')" :aria-label="$t('common.delete')" @click="removeUnit(unit)">
                 <Icon icon="mdi:trash-can-outline" />
               </button>
             </div>
           </div>
 
-          <p v-if="!(unit.positions || []).length" class="px-4 pb-3 text-xs italic" style="color: var(--text-muted)">
+          <p v-if="!(unit.positions || []).length" class="dir-muted dir-unit__none">
             {{ $t('directory.noPositions') }}
           </p>
           <div v-for="position in sortedPositions(unit)" :key="position.id" class="dir-pos">
             <div class="dir-pos__title">
-              <Icon v-if="position.is_head" icon="mdi:star-four-points" class="h-3.5 w-3.5 text-amber-500" :title="$t('directory.head')" />
+              <Icon v-if="position.is_head" icon="mdi:star-four-points" class="dir-head" :title="$t('directory.head')" />
               <span>{{ position.title }}</span>
               <template v-if="canAdmin">
-                <button type="button" class="dir-icon-btn dir-icon-btn--sm" :title="$t('common.edit')" @click="openPosition(position)">
+                <button type="button" class="dir-icon-btn dir-icon-btn--sm" :title="$t('common.edit')" :aria-label="$t('common.edit')" @click="openPosition(position)">
                   <Icon icon="mdi:pencil-outline" />
                 </button>
-                <button type="button" class="dir-icon-btn dir-icon-btn--sm dir-icon-btn--danger" :title="$t('common.delete')" @click="removePosition(position)">
+                <button type="button" class="dir-icon-btn dir-icon-btn--sm dir-icon-btn--danger" :title="$t('common.delete')" :aria-label="$t('common.delete')" @click="removePosition(position)">
                   <Icon icon="mdi:trash-can-outline" />
                 </button>
               </template>
@@ -103,7 +103,7 @@
                   <Icon icon="mdi:close" class="h-3.5 w-3.5" />
                 </button>
               </span>
-              <span v-if="!(position.assignments || []).length" class="text-xs italic" style="color: var(--text-muted)">{{ $t('directory.vacant') }}</span>
+              <span v-if="!(position.assignments || []).length" class="dir-muted">{{ $t('directory.vacant') }}</span>
               <button type="button" class="dir-chip dir-chip--add" @click="openAssignment(position)">
                 <Icon icon="mdi:account-plus-outline" class="h-4 w-4" /> {{ $t('directory.assign') }}
               </button>
@@ -115,97 +115,95 @@
 
     <!-- ====== PERSONNES ====== -->
     <section v-else-if="activeTab === 'people'">
-      <div class="flex justify-between items-center gap-3 mb-4 flex-wrap">
-        <label class="dir-admin__search">
-          <Icon icon="mdi:magnify" class="h-4 w-4" />
-          <input v-model="peopleSearch" type="search" :placeholder="$t('directory.searchPlaceholder')" />
-        </label>
-        <button type="button" class="btn btn-primary" @click="openPerson(null)">
-          <Icon icon="mdi:account-plus" class="h-4 w-4 mr-1" /> {{ $t('directory.newPerson') }}
-        </button>
-      </div>
+      <EmptyState v-if="!people.length" icon="mdi:account-multiple-outline" :title="$t('directory.noPeople')">
+        <BaseButton variant="primary" size="sm" icon="mdi:account-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
+      </EmptyState>
 
-      <p v-if="!people.length" class="dir-admin__empty">{{ $t('directory.noPeople') }}</p>
-      <div v-else class="card p-0 overflow-x-auto">
-        <table class="table w-full">
-          <thead>
-            <tr>
-              <th>{{ $t('directory.person') }}</th>
-              <th>{{ $t('directory.positions') }}</th>
-              <th>{{ $t('directory.contact') }}</th>
-              <th>{{ $t('directory.status') }}</th>
-              <th class="text-end">{{ $t('directory.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="p in filteredPeople" :key="p.id">
-              <td>
-                <div class="flex items-center gap-3">
-                  <PersonAvatar :person="p" size="sm" />
-                  <div>
-                    <p class="font-medium">{{ fullName(p) }}</p>
-                    <p v-if="p.user_id" class="text-xs flex items-center gap-1" style="color: var(--text-muted)">
-                      <Icon icon="mdi:link-variant" class="h-3 w-3" /> {{ $t('directory.linked') }}
-                    </p>
-                  </div>
-                </div>
-              </td>
-              <td class="text-sm">
-                <p v-for="r in rolesByPerson.get(p.id) || []" :key="r.assignment.id">
-                  {{ r.position.title }} <span style="color: var(--text-muted)">· {{ r.unit.name }}</span>
-                </p>
-                <span v-if="!(rolesByPerson.get(p.id) || []).length" class="italic" style="color: var(--text-muted)">—</span>
-              </td>
-              <td class="text-sm">
-                <p>{{ p.email }}</p>
-                <p style="color: var(--text-muted)">{{ p.phone }}</p>
-              </td>
-              <td>
-                <StatusBadge :tone="p.is_active ? 'ok' : 'neutral'">{{ p.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
-              </td>
-              <td class="text-end whitespace-nowrap">
-                <button type="button" class="dir-icon-btn" :title="$t('common.edit')" @click="openPerson(p)">
-                  <Icon icon="mdi:pencil-outline" />
-                </button>
-                <button type="button" class="dir-icon-btn dir-icon-btn--danger" :title="$t('common.delete')" @click="removePerson(p)">
-                  <Icon icon="mdi:trash-can-outline" />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        v-else
+        :columns="peopleColumns"
+        :rows="peopleRows"
+        :search-keys="['name', 'email', 'phone', 'rolesText']"
+        :search-placeholder="$t('directory.searchPlaceholder')"
+        :page-size="25"
+      >
+        <template #toolbar>
+          <BaseButton variant="primary" icon="mdi:account-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
+        </template>
+
+        <template #cell-name="{ row }">
+          <div class="dir-person">
+            <PersonAvatar :person="row.raw" size="sm" />
+            <div>
+              <p class="dir-person__name">{{ row.name }}</p>
+              <p v-if="row.raw.user_id" class="dir-muted dir-person__link">
+                <Icon icon="mdi:link-variant" class="h-3 w-3" aria-hidden="true" /> {{ $t('directory.linked') }}
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <template #cell-rolesText="{ row }">
+          <p v-for="r in rolesByPerson.get(row.id) || []" :key="r.assignment.id" class="dir-role">
+            {{ r.position.title }} <span class="dir-muted">· {{ r.unit.name }}</span>
+          </p>
+          <span v-if="!(rolesByPerson.get(row.id) || []).length" class="dir-muted">—</span>
+        </template>
+
+        <template #cell-email="{ row }">
+          <p class="dir-role">{{ row.email }}</p>
+          <p class="dir-mono" dir="ltr">{{ row.phone }}</p>
+        </template>
+
+        <template #cell-status="{ row }">
+          <StatusBadge :tone="row.raw.is_active ? 'ok' : 'neutral'">{{ row.status }}</StatusBadge>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <RowActions :label="row.name" @edit="openPerson(row.raw)" @delete="removePerson(row.raw)" />
+        </template>
+      </DataTable>
     </section>
 
     <!-- ====== CHAMPS DYNAMIQUES (admin) ====== -->
     <section v-else-if="activeTab === 'fields' && canAdmin">
-      <div class="flex justify-between items-center gap-3 mb-4 flex-wrap">
-        <p class="text-sm max-w-2xl" style="color: var(--text-muted)">{{ $t('directory.fieldsHelp') }}</p>
-        <button type="button" class="btn btn-primary" @click="openField(null)">
-          <Icon icon="mdi:plus" class="h-4 w-4 mr-1" /> {{ $t('directory.newField') }}
-        </button>
+      <div class="dir-admin__bar">
+        <p class="dir-admin__help">{{ $t('directory.fieldsHelp') }}</p>
+        <BaseButton variant="primary" icon="mdi:plus" @click="openField(null)">{{ $t('directory.newField') }}</BaseButton>
       </div>
-      <p v-if="!fields.length" class="dir-admin__empty">{{ $t('directory.noCustomFields') }}</p>
-      <ul class="grid gap-3 md:grid-cols-2">
-        <li v-for="f in fields" :key="f.id" class="dir-field">
-          <span class="dir-field__icon"><Icon :icon="FIELD_TYPE_ICONS[f.type]" class="h-5 w-5" /></span>
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold truncate" style="color: var(--text-primary)">{{ f.label }}</p>
-            <p class="text-xs font-mono" style="color: var(--text-muted)">{{ f.key }} · {{ $t(`directory.fieldTypes.${f.type}`) }}</p>
-            <div class="flex flex-wrap gap-1 mt-2">
-              <span v-if="f.required" class="badge badge-secondary">{{ $t('directory.fieldRequired') }}</span>
-              <span v-if="f.visibility === 'managers'" class="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-                <Icon icon="mdi:lock-outline" class="h-3 w-3 mr-1" />{{ $t('directory.visibility.managers') }}
-              </span>
-              <span v-if="f.show_on_card" class="badge badge-secondary">{{ $t('directory.onCard') }}</span>
-            </div>
-          </div>
-          <div class="flex flex-col gap-1">
-            <button type="button" class="dir-icon-btn" :title="$t('common.edit')" @click="openField(f)"><Icon icon="mdi:pencil-outline" /></button>
-            <button type="button" class="dir-icon-btn dir-icon-btn--danger" :title="$t('common.delete')" @click="removeField(f)"><Icon icon="mdi:trash-can-outline" /></button>
-          </div>
-        </li>
-      </ul>
+
+      <EmptyState v-if="!fields.length" icon="mdi:form-select" :title="$t('directory.noCustomFields')" />
+
+      <DataTable
+        v-else
+        :columns="fieldColumns"
+        :rows="fieldRows"
+        :search-keys="['label', 'key', 'typeLabel']"
+        :page-size="25"
+      >
+        <template #cell-label="{ row }">
+          <span class="dir-field">
+            <Icon :icon="FIELD_TYPE_ICONS[row.raw.type]" class="dir-field__icon" aria-hidden="true" />
+            <span class="dir-unit__name">{{ row.label }}</span>
+          </span>
+        </template>
+
+        <template #cell-key="{ row }">
+          <span class="dir-mono">{{ row.key }}</span>
+        </template>
+
+        <template #cell-flags="{ row }">
+          <span class="dir-flags">
+            <StatusBadge v-if="row.raw.required" tone="neutral">{{ $t('directory.fieldRequired') }}</StatusBadge>
+            <StatusBadge v-if="row.raw.visibility === 'managers'" tone="warn">{{ $t('directory.visibility.managers') }}</StatusBadge>
+            <StatusBadge v-if="row.raw.show_on_card" tone="info">{{ $t('directory.onCard') }}</StatusBadge>
+          </span>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <RowActions :label="row.label" @edit="openField(row.raw)" @delete="removeField(row.raw)" />
+        </template>
+      </DataTable>
     </section>
 
     <!-- ====== MODALS ====== -->
@@ -253,8 +251,13 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import RowActions from '@/components/ui/RowActions.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
@@ -290,13 +293,43 @@ const setTab = (id) => {
   router.replace({ query: { ...route.query, tab: id, person: undefined } })
 }
 
-const peopleSearch = ref('')
-const normalize = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-const filteredPeople = computed(() => {
-  const q = normalize(peopleSearch.value)
-  if (!q) return people.value
-  return people.value.filter((p) => normalize(`${fullName(p)} ${p.email} ${p.phone}`).includes(q))
-})
+const peopleColumns = computed(() => [
+  { key: 'name', label: t('directory.person'), sortable: true },
+  { key: 'rolesText', label: t('directory.positions'), hideSm: true },
+  { key: 'email', label: t('directory.contact'), hideSm: true },
+  { key: 'status', label: t('directory.status'), sortable: true },
+  { key: 'actions', label: '', align: 'end', width: '80px' },
+])
+
+const peopleRows = computed(() =>
+  people.value.map((p) => ({
+    id: p.id,
+    name: fullName(p),
+    email: p.email || '',
+    phone: p.phone || '',
+    rolesText: (rolesByPerson.value.get(p.id) || []).map((r) => `${r.position.title} ${r.unit.name}`).join(' '),
+    status: p.is_active ? t('common.active') : t('common.inactive'),
+    raw: p,
+  })),
+)
+
+const fieldColumns = computed(() => [
+  { key: 'label', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'key', label: t('ui.table.columns.key'), sortable: true, hideSm: true },
+  { key: 'typeLabel', label: t('ui.table.columns.type'), sortable: true, hideSm: true },
+  { key: 'flags', label: t('ui.table.columns.visibility'), hideSm: true },
+  { key: 'actions', label: '', align: 'end', width: '80px' },
+])
+
+const fieldRows = computed(() =>
+  fields.value.map((f) => ({
+    id: f.id,
+    label: f.label,
+    key: f.key,
+    typeLabel: t(`directory.fieldTypes.${f.type}`),
+    raw: f,
+  })),
+)
 
 const sortedPositions = (unit) =>
   [...(unit.positions || [])].sort((a, b) => Number(b.is_head) - Number(a.is_head) || a.order - b.order)
@@ -320,7 +353,8 @@ const onSaved = async (messageKey) => {
 
 // ---- Suppressions ----
 const confirmAndRun = async (message, action, successKey) => {
-  if (!(await askConfirm({ message, tone: 'danger' }))) return
+  const confirmed = await askConfirm({ message, confirmLabel: t('common.delete'), tone: 'danger' })
+  if (!confirmed) return
   try {
     await action()
     notify('success', t(successKey))
@@ -353,56 +387,118 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.dir-admin { padding: clamp(1rem, 2.5vw, 2rem); max-width: 80rem; margin: 0 auto; }
-.dir-admin__eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
-.dir-admin__tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.dir-admin__tabs { display: flex; gap: 4px; margin-block-end: 16px; border-block-end: 1px solid var(--line); overflow-x: auto; }
+
 .dir-admin__tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.7rem 1rem;
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
-  font-size: 0.9rem;
+  gap: 7px;
+  margin-block-end: -1px;
+  padding: 10px 14px;
+  border: 0;
+  border-block-end: 2px solid transparent;
+  background: none;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--muted);
   white-space: nowrap;
+  cursor: pointer;
 }
-.dir-admin__tab:hover { color: var(--text-primary); }
-.dir-admin__tab--active { color: var(--accent); border-bottom-color: var(--accent); }
-.dir-admin__tab-count { font-size: 0.7rem; padding: 0.05rem 0.45rem; border-radius: 9999px; background: var(--bg-surface); }
-.dir-admin__empty { padding: 3rem 1rem; text-align: center; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 0.85rem; }
-.dir-admin__search {
-  display: flex; align-items: center; gap: 0.5rem; padding: 0 0.75rem; height: 2.5rem; min-width: min(100%, 20rem);
-  border: 1px solid var(--border); border-radius: 0.65rem; background: var(--bg-card); color: var(--text-muted);
-}
-.dir-admin__search:focus-within { border-color: var(--accent); }
-.dir-admin__search input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text-primary); }
 
-.dir-unit { border: 1px solid var(--border); border-inline-start: 4px solid var(--unit-color); border-radius: 0.85rem; background: var(--bg-card); }
-.dir-unit__head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; }
-.dir-unit__dot { width: 0.6rem; height: 0.6rem; border-radius: 9999px; background: var(--unit-color); }
-.dir-unit__actions { margin-inline-start: auto; display: flex; gap: 0.15rem; }
-.dir-pos { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; padding: 0.55rem 1rem; border-top: 1px solid var(--border); }
-.dir-pos__title { display: flex; align-items: center; gap: 0.3rem; min-width: 12rem; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
-.dir-pos__holders { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
-.dir-chip {
-  display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.15rem 0.35rem 0.15rem 0.15rem;
-  border-radius: 9999px; border: 1px solid var(--border); background: var(--bg-surface); font-size: 0.8rem; color: var(--text-primary);
+.dir-admin__tab:hover { color: var(--text); }
+.dir-admin__tab--active { color: var(--text); border-block-end-color: var(--acc); }
+.dir-admin__tab:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+
+.dir-admin__tab-count {
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  color: var(--muted);
 }
+
+.dir-admin__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-block-end: 14px; }
+.dir-admin__help { max-width: 640px; margin: 0; font-size: 13px; color: var(--muted); }
+
+.dir-admin__state { display: flex; justify-content: center; padding-block: 56px; color: var(--muted); }
+.dir-admin__state--col { flex-direction: column; align-items: center; gap: 12px; }
+.dir-admin__spin { width: 28px; height: 28px; animation: dir-rot 1s linear infinite; }
+@keyframes dir-rot { to { transform: rotate(360deg); } }
+
+.dir-muted { font-size: 12px; color: var(--muted); }
+.dir-mono { font-family: var(--f-num); font-size: 11.5px; letter-spacing: 0.04em; color: var(--muted); }
+
+.dir-person { display: flex; align-items: center; gap: 10px; }
+.dir-person__name { margin: 0; font-weight: 600; color: var(--text); }
+.dir-person__link { display: flex; align-items: center; gap: 4px; margin: 0; }
+.dir-role { margin: 0; font-size: 13px; color: var(--text); }
+
+.dir-field { display: inline-flex; align-items: center; gap: 8px; }
+.dir-field__icon { flex: none; width: 18px; height: 18px; color: var(--muted); }
+.dir-flags { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+
+.dir-tree { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.dir-unit {
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--unit-color);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.dir-unit__head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+.dir-unit__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--unit-color); }
+.dir-unit__name { font-weight: 600; color: var(--text); }
+.dir-unit__none { margin: 0; padding: 0 14px 10px; font-style: italic; }
+.dir-unit__actions { margin-inline-start: auto; display: flex; gap: 2px; }
+.dir-head { width: 14px; height: 14px; color: var(--warn); }
+
+.dir-pos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 8px 14px; border-block-start: 1px solid var(--line); }
+.dir-pos__title { display: flex; align-items: center; gap: 4px; min-width: 12rem; font-size: 13px; font-weight: 600; color: var(--text); }
+.dir-pos__holders { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+
+.dir-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px 2px 2px;
+  padding-inline: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--sunken);
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.dir-chip__name { background: none; border: 0; color: inherit; cursor: pointer; }
 .dir-chip__name:hover { text-decoration: underline; }
-.dir-chip__remove { display: inline-flex; padding: 0.15rem; border-radius: 9999px; color: var(--text-muted); }
-.dir-chip__remove:hover { color: var(--danger, #dc2626); background: var(--hover); }
-.dir-chip--add { padding: 0.25rem 0.65rem; border-style: dashed; color: var(--accent); background: transparent; }
-.dir-chip--add:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.dir-icon-btn { display: inline-flex; padding: 0.4rem; border-radius: 0.45rem; color: var(--text-muted); font-size: 1.05rem; transition: background-color 150ms ease, color 150ms ease; }
-.dir-icon-btn:hover { background: var(--hover); color: var(--text-primary); }
-.dir-icon-btn:focus-visible { outline: 2px solid var(--accent); }
-.dir-icon-btn--sm { padding: 0.2rem; font-size: 0.9rem; }
-.dir-icon-btn--danger:hover { color: var(--danger, #dc2626); }
-.dir-field { display: flex; gap: 0.85rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.85rem; background: var(--bg-card); }
-.dir-field__icon {
-  display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; flex-shrink: 0;
-  border-radius: 0.65rem; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+.dir-interim { font-family: var(--f-num); font-size: 10.5px; color: var(--warn); text-transform: uppercase; }
+.dir-chip__remove { display: inline-flex; padding: 2px; border: 0; border-radius: 3px; background: none; color: var(--muted); cursor: pointer; }
+.dir-chip__remove:hover { color: var(--bad); background: var(--surface); }
+.dir-chip--add { padding: 3px 9px; border-style: dashed; background: transparent; color: var(--acc-ink); cursor: pointer; }
+.dir-chip--add:hover { border-color: var(--acc); }
+.dir-chip:focus-visible, .dir-chip__remove:focus-visible, .dir-chip__name:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.dir-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--muted);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.dir-icon-btn:hover { background: var(--sunken); color: var(--text); }
+.dir-icon-btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.dir-icon-btn--sm { width: 24px; height: 24px; font-size: 14px; }
+.dir-icon-btn--danger:hover { color: var(--bad); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dir-admin__spin { animation: none; }
 }
 </style>

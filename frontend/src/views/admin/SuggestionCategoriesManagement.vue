@@ -1,101 +1,106 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-    <div class="max-w-5xl mx-auto space-y-6">
-      <div class="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('suggestions.manageCategories') }}</h1>
-          <p class="text-gray-600 dark:text-gray-400 mt-1">{{ t('suggestions.manageCategoriesHelp') }}</p>
-        </div>
-        <button class="cat-btn cat-btn-primary" @click="openCreate">{{ t('common.create') }}</button>
-      </div>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ t('suggestions.manageCategories') }}</template>
+      <template #description>{{ t('suggestions.manageCategoriesHelp') }}</template>
+      <template #actions>
+        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+      </template>
+    </PageHeader>
 
-      <div class="card p-5 border border-gray-200 dark:border-gray-700">
-        <div v-if="loading" class="loading-state py-8">
-          <Icon icon="mdi:loading" class="animate-spin text-2xl text-amber-500" />
-        </div>
+    <EmptyState
+      v-if="!loading && categories.length === 0"
+      icon="mdi:format-list-bulleted-square"
+      :title="t('suggestions.noCategory')"
+    >
+      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+    </EmptyState>
 
-        <div v-else-if="categories.length === 0" class="empty-state py-8">
-          <Icon icon="mdi:format-list-bulleted-square" class="text-4xl text-gray-400" />
-          <p>{{ t('suggestions.noCategory') }}</p>
-        </div>
+    <DataTable
+      v-else
+      :columns="columns"
+      :rows="rows"
+      :loading="loading"
+      :search-keys="['name', 'slug']"
+      :page-size="25"
+    >
+      <template #cell-name="{ row }">
+        <span class="sc-name">{{ row.name }}</span>
+      </template>
 
-        <div v-else class="space-y-3">
-          <div
-            v-for="category in categories"
-            :key="category.id"
-            class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3"
-          >
+      <template #cell-slug="{ row }">
+        <span class="sc-mono" dir="ltr">{{ row.slug }}</span>
+      </template>
+
+      <template #cell-order="{ row }">
+        <span class="sc-mono">{{ row.order }}</span>
+      </template>
+
+      <template #cell-status="{ row }">
+        <label class="sc-active">
+          <input type="checkbox" :checked="row.raw.is_active" @change="toggleActive(row.raw, $event.target.checked)" />
+          <span>{{ t('common.active') }}</span>
+        </label>
+      </template>
+
+      <template #cell-actions="{ row }">
+        <RowActions :label="row.name" @edit="openEdit(row.raw)" @delete="removeCategory(row.raw)" />
+      </template>
+    </DataTable>
+
+    <Teleport to="body">
+      <div v-if="showModal" class="sc-overlay" @click.self="closeForm">
+        <div class="sc-modal" role="dialog" aria-modal="true" :aria-label="editingId ? t('common.edit') : t('common.create')">
+          <div class="sc-modal__head">
+            <h2 class="sc-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h2>
+            <button type="button" class="row-actions__btn" :aria-label="t('common.cancel')" @click="closeForm">
+              <Icon icon="mdi:close" aria-hidden="true" />
+            </button>
+          </div>
+
+          <form class="sc-form" @submit.prevent="saveCategory">
             <div>
-              <p class="font-semibold text-gray-900 dark:text-white">{{ category.name }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">slug: {{ category.slug }} · order: {{ category.order }}</p>
+              <label class="form-label form-label-required">{{ t('suggestions.form.category') }}</label>
+              <input v-model="form.name" class="form-input" required />
             </div>
-            <div class="flex items-center gap-2">
-              <label class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2 mr-2">
-                <input type="checkbox" :checked="category.is_active" @change="toggleActive(category, $event.target.checked)" />
-                {{ t('common.active') }}
-              </label>
-              <button class="cat-btn cat-btn-secondary cat-btn-sm" @click="openEdit(category)">{{ t('common.edit') }}</button>
-              <button class="cat-btn cat-btn-danger cat-btn-sm" @click="removeCategory(category)">{{ t('common.delete') }}</button>
+
+            <div>
+              <label class="form-label form-label-required">{{ $t('ui.table.columns.slug') }}</label>
+              <input v-model="form.slug" class="form-input" required />
             </div>
-          </div>
+
+            <div>
+              <label class="form-label">{{ t('ui.table.columns.order') }}</label>
+              <input v-model.number="form.order" type="number" class="form-input" />
+            </div>
+
+            <div class="sc-form__check">
+              <input id="is_active" v-model="form.is_active" type="checkbox" />
+              <label for="is_active">{{ t('common.active') }}</label>
+            </div>
+
+            <div class="sc-form__actions">
+              <BaseButton variant="secondary" @click="closeForm">{{ t('common.cancel') }}</BaseButton>
+              <BaseButton variant="primary" type="submit">{{ t('common.save') }}</BaseButton>
+            </div>
+          </form>
         </div>
       </div>
-
-      <Teleport to="body">
-        <div
-          v-if="showModal"
-          class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-          @click.self="closeForm"
-        >
-          <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ editingId ? t('common.edit') : t('common.create') }}
-              </h2>
-              <button class="cat-btn cat-btn-secondary cat-btn-sm" type="button" @click="closeForm">
-                <Icon icon="mdi:close" class="h-4 w-4" />
-              </button>
-            </div>
-
-            <form class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="saveCategory">
-              <div>
-                <label class="form-label form-label-required">{{ t('suggestions.form.category') }}</label>
-                <input v-model="form.name" class="form-input" required />
-              </div>
-
-              <div>
-                <label class="form-label form-label-required">Slug</label>
-                <input v-model="form.slug" class="form-input" required />
-              </div>
-
-              <div>
-                <label class="form-label">Order</label>
-                <input v-model.number="form.order" type="number" class="form-input" />
-              </div>
-
-              <div class="flex items-center gap-2 mt-7">
-                <input v-model="form.is_active" type="checkbox" id="is_active" />
-                <label for="is_active">{{ t('common.active') }}</label>
-              </div>
-
-              <div class="md:col-span-2 flex justify-end gap-2">
-                <button type="button" class="cat-btn cat-btn-secondary" @click="closeForm">{{ t('common.cancel') }}</button>
-                <button type="submit" class="cat-btn cat-btn-primary">{{ t('common.save') }}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </Teleport>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { suggestionsService } from '@/services/api'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import RowActions from '@/components/ui/RowActions.vue'
 
 const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
@@ -110,6 +115,26 @@ const form = ref({
   order: 0,
   is_active: true
 })
+
+const columns = computed(() => [
+  { key: 'name', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'slug', label: t('ui.table.columns.slug'), sortable: true, hideSm: true },
+  { key: 'order', label: t('ui.table.columns.order'), sortable: true, align: 'end', width: '80px', hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status') },
+  { key: 'actions', label: '', align: 'end', width: '80px' },
+])
+
+const rows = computed(() =>
+  [...categories.value]
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map(category => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      order: category.order ?? 0,
+      raw: category,
+    })),
+)
 
 const loadCategories = async () => {
   try {
@@ -175,7 +200,13 @@ const saveCategory = async () => {
 }
 
 const removeCategory = async (category) => {
-  if (!(await askConfirm({ message: `${t('common.delete')} "${category.name}" ?`, tone: 'danger' }))) return
+  const confirmed = await askConfirm({
+    title: t('common.delete'),
+    message: `${t('common.delete')} "${category.name}" ?`,
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed) return
 
   try {
     await suggestionsService.deleteCategory(category.id)
@@ -210,37 +241,55 @@ onMounted(loadCategories)
 </script>
 
 <style scoped>
-.cat-btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-200;
-  @apply px-4 py-2 text-sm;
+.sc-name { font-weight: 600; color: var(--text); }
+
+.sc-mono {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
-.cat-btn-sm {
-  @apply px-3 py-1.5 text-xs;
+.sc-active { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text); cursor: pointer; }
+
+.sc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.5);
 }
 
-.cat-btn-primary {
-  @apply text-white bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm;
-  @apply hover:from-amber-600 hover:to-orange-600 hover:shadow-md;
-  @apply focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
-  @apply dark:focus:ring-offset-gray-900;
+.sc-modal {
+  width: 100%;
+  max-width: 640px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
 }
 
-.cat-btn-secondary {
-  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-}
-.cat-btn-secondary:hover {
-  background-color: var(--hover);
+.sc-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-block-end: 1px solid var(--line);
 }
 
-.cat-btn-danger {
-  @apply border border-red-300 bg-red-50 text-red-700;
-  @apply hover:bg-red-100 hover:border-red-400;
-  @apply dark:border-red-700 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/35;
-  @apply focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2;
-  @apply dark:focus:ring-offset-gray-900;
+.sc-modal__title { margin: 0; font-size: 16px; font-weight: 600; }
+
+.sc-form { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 16px; }
+
+.sc-form__check { display: flex; align-items: center; gap: 8px; }
+.sc-form__actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+@media (min-width: 768px) {
+  .sc-form { grid-template-columns: 1fr 1fr; }
+  .sc-form__actions { grid-column: 1 / -1; }
 }
 </style>

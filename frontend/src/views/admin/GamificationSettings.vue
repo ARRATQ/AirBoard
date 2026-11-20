@@ -1,125 +1,148 @@
 <template>
-  <div class="w-full p-6 space-y-8">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ t('gamificationAdmin.title') }}</h1>
-      <p class="text-gray-600 dark:text-gray-400">{{ t('gamificationAdmin.subtitle') }}</p>
-    </div>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ t('gamificationAdmin.title') }}</template>
+      <template #description>{{ t('gamificationAdmin.subtitle') }}</template>
+    </PageHeader>
 
-    <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('gamificationAdmin.rules') }}</h2>
-      </div>
+    <!-- Règles de points -->
+    <section class="gm-section">
+      <h2 class="gm-section__title">{{ t('gamificationAdmin.rules') }}</h2>
 
-      <div class="overflow-x-auto">
-        <table class="w-full min-w-[720px]">
-          <thead>
-            <tr class="text-left border-b border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
-              <th class="py-2 pr-4">Reason</th>
-              <th class="py-2 pr-4">{{ t('gamificationAdmin.points') }}</th>
-              <th class="py-2 pr-4">{{ t('common.active') }}</th>
-              <th class="py-2">{{ t('common.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="rule in rules" :key="rule.id" class="border-b border-gray-100 dark:border-gray-700/60">
-              <td class="py-3 pr-4 font-mono text-sm text-gray-800 dark:text-gray-200">{{ rule.reason }}</td>
-              <td class="py-3 pr-4 w-40">
-                <input v-model.number="rule.points" type="number" min="0" class="form-input" />
-              </td>
-              <td class="py-3 pr-4">
-                <input v-model="rule.enabled" type="checkbox" class="form-checkbox" />
-              </td>
-              <td class="py-3">
-                <button class="gm-btn gm-btn-secondary gm-btn-sm" @click="saveRule(rule)">{{ t('common.save') }}</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        :columns="ruleColumns"
+        :rows="ruleRows"
+        :search-keys="['reason']"
+        :page-size="25"
+      >
+        <template #cell-reason="{ row }">
+          <span class="gm-mono">{{ row.reason }}</span>
+        </template>
+
+        <template #cell-points="{ row }">
+          <label>
+            <span class="sr-only">{{ t('gamificationAdmin.points') }} : {{ row.reason }}</span>
+            <input v-model.number="row.raw.points" type="number" min="0" class="form-input gm-points" />
+          </label>
+        </template>
+
+        <template #cell-enabled="{ row }">
+          <label class="gm-check">
+            <input v-model="row.raw.enabled" type="checkbox" class="form-checkbox" />
+            <span class="sr-only">{{ t('common.active') }} : {{ row.reason }}</span>
+          </label>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <BaseButton variant="secondary" size="sm" icon="mdi:content-save-outline" @click="saveRule(row.raw)">
+            {{ t('common.save') }}
+          </BaseButton>
+        </template>
+      </DataTable>
     </section>
 
-    <section class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('gamificationAdmin.badges') }}</h2>
-        <button class="gm-btn gm-btn-primary" @click="openCreate">{{ t('common.create') }}</button>
+    <!-- Badges -->
+    <section class="gm-section">
+      <div class="gm-section__head">
+        <h2 class="gm-section__title">{{ t('gamificationAdmin.badges') }}</h2>
+        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </div>
 
-      <div class="space-y-3">
-        <article
-          v-for="badge in badges"
-          :key="badge.id"
-          class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex items-start justify-between gap-4"
-        >
-          <div class="min-w-0">
-            <p class="font-semibold text-gray-900 dark:text-white">{{ badge.name }} <span class="text-xs text-gray-500">({{ badge.code }})</span></p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">{{ badge.description }}</p>
-            <p class="text-xs text-gray-500 mt-1">{{ badge.trigger_reason || '-' }} · {{ badge.metric || '-' }} · {{ badge.threshold || 0 }}</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="gm-btn gm-btn-secondary gm-btn-sm" @click="openEdit(badge)">{{ t('common.edit') }}</button>
-            <button class="gm-btn gm-btn-danger gm-btn-sm" @click="removeBadge(badge)">{{ t('common.delete') }}</button>
-          </div>
-        </article>
-      </div>
+      <EmptyState v-if="badges.length === 0" icon="mdi:medal-outline" :title="t('gamificationAdmin.badges')">
+        <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+      </EmptyState>
+
+      <DataTable
+        v-else
+        :columns="badgeColumns"
+        :rows="badgeRows"
+        :search-keys="['name', 'code', 'description', 'trigger']"
+        :page-size="25"
+      >
+        <template #cell-name="{ row }">
+          <span class="gm-badge">
+            <span class="gm-badge__icon" :style="{ backgroundColor: row.raw.color || undefined }">
+              <Icon :icon="row.raw.icon || 'mdi:medal'" aria-hidden="true" />
+            </span>
+            <span class="gm-badge__text">
+              <span class="gm-badge__name">{{ row.name }}</span>
+              <span class="gm-mono">{{ row.code }}</span>
+              <span v-if="row.description" class="gm-badge__desc">{{ row.description }}</span>
+            </span>
+          </span>
+        </template>
+
+        <template #cell-trigger="{ row }">
+          <span class="gm-mono">{{ row.trigger }} · {{ row.metric }} · {{ row.threshold }}</span>
+        </template>
+
+        <template #cell-status="{ row }">
+          <StatusBadge :tone="row.raw.is_active ? 'ok' : 'neutral'">{{ row.status }}</StatusBadge>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <RowActions :label="row.name" @edit="openEdit(row.raw)" @delete="removeBadge(row.raw)" />
+        </template>
+      </DataTable>
     </section>
 
-    <Teleport to="body">
-      <div v-if="showModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModal">
-        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ editingId ? t('common.edit') : t('common.create') }}</h3>
-          <form class="grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="saveBadge">
+        <Teleport to="body">
+      <div v-if="showModal" class="gm-overlay" @click.self="closeModal">
+        <div class="gm-modal" role="dialog" aria-modal="true">
+          <h3 class="gm-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h3>
+          <form class="gm-form" @submit.prevent="saveBadge">
             <div>
               <label class="form-label">Code technique</label>
               <input v-model="form.code" class="form-input" placeholder="ex: suggestion_master" required />
-              <p class="text-xs text-gray-500 mt-1">Identifiant unique interne (non visible par l'utilisateur).</p>
+              <p class="gm-hint">Identifiant unique interne (non visible par l'utilisateur).</p>
             </div>
 
             <div>
               <label class="form-label">Nom du badge</label>
               <input v-model="form.name" class="form-input" :placeholder="t('common.name')" required />
-              <p class="text-xs text-gray-500 mt-1">Texte affiché aux utilisateurs.</p>
+              <p class="gm-hint">Texte affiché aux utilisateurs.</p>
             </div>
 
             <div>
               <label class="form-label">Icône</label>
               <input v-model="form.icon" class="form-input" placeholder="mdi:medal" />
-              <p class="text-xs text-gray-500 mt-1">Format Iconify, ex: <code>mdi:medal</code>.</p>
+              <p class="gm-hint">Format Iconify, ex: <code>mdi:medal</code>.</p>
             </div>
 
             <div>
               <label class="form-label">Couleur</label>
-              <div class="flex items-center gap-2">
+              <div class="gm-colorrow">
                 <input v-model="form.color" class="form-input" placeholder="#FBBF24" />
                 <input
                   v-model="form.color"
                   type="color"
-                  class="h-10 w-12 p-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
+                  class="gm-color"
                   aria-label="Choisir une couleur"
                 />
               </div>
-              <div class="flex items-center gap-2 mt-2">
+              <div class="gm-presets">
                 <button
                   v-for="preset in colorPresets"
                   :key="preset"
                   type="button"
-                  class="h-6 w-6 rounded-full border border-white shadow-sm ring-1 ring-gray-300 dark:ring-gray-600"
+                  class="gm-preset"
                   :style="{ backgroundColor: preset }"
                   :title="preset"
                   @click="form.color = preset"
                 ></button>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Couleur hexadécimale du badge.</p>
+              <p class="gm-hint">Couleur hexadécimale du badge.</p>
             </div>
 
-            <div class="md:col-span-2">
+            <div class="gm-form__wide">
               <label class="form-label">Aperçu du badge</label>
-              <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4 flex items-center gap-3">
-                <div class="h-11 w-11 rounded-full flex items-center justify-center text-white shadow-sm" :style="badgePreviewStyle">
-                  <Icon :icon="safePreviewIcon" class="h-6 w-6" />
+              <div class="gm-preview">
+                <div class="gm-preview__badge" :style="badgePreviewStyle">
+                  <Icon :icon="safePreviewIcon" class="gm-preview__icon" />
                 </div>
                 <div>
-                  <p class="font-semibold text-gray-900 dark:text-white">{{ form.name || 'Nom du badge' }}</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ form.icon || 'mdi:medal' }} · {{ form.color || '#FBBF24' }}</p>
+                  <p class="gm-preview__name">{{ form.name || 'Nom du badge' }}</p>
+                  <p class="gm-hint">{{ form.icon || 'mdi:medal' }} · {{ form.color || '#FBBF24' }}</p>
                 </div>
               </div>
             </div>
@@ -127,7 +150,7 @@
             <div>
               <label class="form-label">Bonus XP du badge</label>
               <input v-model.number="form.xp_reward" type="number" class="form-input" :placeholder="t('gamificationAdmin.badgeReward')" />
-              <p class="text-xs text-gray-500 mt-1">XP accordé une seule fois au déblocage du badge.</p>
+              <p class="gm-hint">XP accordé une seule fois au déblocage du badge.</p>
             </div>
 
             <div>
@@ -136,7 +159,7 @@
                 <option value="user">user</option>
                 <option value="contributor">contributor</option>
               </select>
-              <p class="text-xs text-gray-500 mt-1"><code>contributor</code> est réservé aux profils contributeurs.</p>
+              <p class="gm-hint"><code>contributor</code> est réservé aux profils contributeurs.</p>
             </div>
 
             <div>
@@ -145,7 +168,7 @@
                 <option value="">Sélectionner un trigger</option>
                 <option v-for="reason in reasonOptions" :key="reason" :value="reason">{{ reason }}</option>
               </select>
-              <p class="text-xs text-gray-500 mt-1">{{ selectedReasonHelp }}</p>
+              <p class="gm-hint">{{ selectedReasonHelp }}</p>
             </div>
 
             <div>
@@ -154,23 +177,23 @@
                 <option value="">Sélectionner une métrique</option>
                 <option v-for="metric in metricOptions" :key="metric" :value="metric">{{ metric }}</option>
               </select>
-              <p class="text-xs text-gray-500 mt-1">{{ selectedMetricHelp }}</p>
+              <p class="gm-hint">{{ selectedMetricHelp }}</p>
             </div>
 
             <div>
               <label class="form-label">Seuil de déblocage</label>
               <input v-model.number="form.threshold" type="number" min="0" class="form-input" :placeholder="t('gamificationAdmin.threshold')" />
-              <p class="text-xs text-gray-500 mt-1">Nombre d'actions nécessaires pour obtenir le badge.</p>
+              <p class="gm-hint">Nombre d'actions nécessaires pour obtenir le badge.</p>
             </div>
 
-            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mt-7"><input v-model="form.is_active" type="checkbox" class="form-checkbox" />Badge actif</label>
-            <div class="md:col-span-2">
+            <label class="gm-check"><input v-model="form.is_active" type="checkbox" class="form-checkbox" />Badge actif</label>
+            <div class="gm-form__wide">
               <label class="form-label">Description</label>
               <textarea v-model="form.description" rows="3" class="form-textarea" :placeholder="t('common.description')"></textarea>
             </div>
-            <div class="md:col-span-2 flex justify-end gap-2">
-              <button type="button" class="gm-btn gm-btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
-              <button type="submit" class="gm-btn gm-btn-primary">{{ t('common.save') }}</button>
+            <div class="gm-form__wide gm-form__actions">
+              <BaseButton variant="secondary" @click="closeModal">{{ t('common.cancel') }}</BaseButton>
+              <BaseButton variant="primary" type="submit">{{ t('common.save') }}</BaseButton>
             </div>
           </form>
         </div>
@@ -185,6 +208,12 @@ import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
 import { gamificationService } from '@/services/api'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import RowActions from '@/components/ui/RowActions.vue'
 
 const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
@@ -280,6 +309,37 @@ const form = ref({
   is_secret: false
 })
 
+const ruleColumns = computed(() => [
+  { key: 'reason', label: t('ui.table.columns.reason'), sortable: true },
+  { key: 'points', label: t('gamificationAdmin.points'), width: '140px' },
+  { key: 'enabled', label: t('common.active'), width: '90px' },
+  { key: 'actions', label: '', align: 'end', width: '120px' },
+])
+
+// Les champs points / actif s'éditent directement sur l'objet de la règle (raw).
+const ruleRows = computed(() => rules.value.map(rule => ({ id: rule.id, reason: rule.reason, raw: rule })))
+
+const badgeColumns = computed(() => [
+  { key: 'name', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'trigger', label: t('ui.table.columns.type'), hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status'), sortable: true },
+  { key: 'actions', label: '', align: 'end', width: '80px' },
+])
+
+const badgeRows = computed(() =>
+  badges.value.map(badge => ({
+    id: badge.id,
+    name: badge.name,
+    code: badge.code,
+    description: badge.description || '',
+    trigger: badge.trigger_reason || '-',
+    metric: badge.metric || '-',
+    threshold: badge.threshold || 0,
+    status: badge.is_active ? t('common.active') : t('common.inactive'),
+    raw: badge,
+  })),
+)
+
 const loadData = async () => {
   const [rulesData, badgesData] = await Promise.all([
     gamificationService.getRules(),
@@ -340,7 +400,12 @@ const saveBadge = async () => {
 }
 
 const removeBadge = async (badge) => {
-  if (!(await askConfirm({ message: t('gamificationAdmin.confirmDeleteBadge', { name: badge.name }), tone: 'danger' }))) return
+  const confirmed = await askConfirm({
+    message: t('gamificationAdmin.confirmDeleteBadge', { name: badge.name }),
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed) return
   try {
     await gamificationService.deleteAchievement(badge.id)
     await loadData()
@@ -354,37 +419,93 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.gm-btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-200;
-  @apply px-4 py-2 text-sm;
+.gm-section { margin-block-end: 28px; }
+.gm-section__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-block-end: 10px; }
+.gm-section__title { margin: 0 0 10px; font-size: 15px; font-weight: 600; color: var(--text); }
+.gm-section__head .gm-section__title { margin: 0; }
+
+.gm-mono { font-family: var(--f-num); font-size: 11.5px; letter-spacing: 0.04em; color: var(--muted); }
+.gm-points { max-width: 110px; }
+.gm-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
+
+.gm-badge { display: flex; align-items: flex-start; gap: 10px; }
+
+.gm-badge__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  background: var(--acc);
+  color: var(--acc-ink);
+  font-size: 18px;
 }
 
-.gm-btn-sm {
-  @apply px-3 py-1.5 text-xs;
+.gm-badge__text { display: flex; flex-direction: column; min-width: 0; }
+.gm-badge__name { font-weight: 600; color: var(--text); }
+.gm-badge__desc { margin-block-start: 2px; font-size: 12px; color: var(--muted); }
+
+.gm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.5);
 }
 
-.gm-btn-primary {
-  @apply text-white bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm;
-  @apply hover:from-amber-600 hover:to-orange-600 hover:shadow-md;
-  @apply focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
-  @apply dark:focus:ring-offset-gray-800;
+.gm-modal {
+  width: 100%;
+  max-width: 672px;
+  max-height: 92vh;
+  padding: 18px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
 }
 
-.gm-btn-secondary {
-  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-}
-.gm-btn-secondary:hover {
-  background-color: var(--hover);
+.gm-modal__title { margin: 0 0 14px; font-size: 16px; font-weight: 600; }
+.gm-form { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.gm-form__actions { display: flex; justify-content: flex-end; gap: 8px; }
+.gm-hint { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+
+.gm-colorrow, .gm-presets { display: flex; align-items: center; gap: 8px; }
+.gm-presets { margin-block-start: 8px; }
+
+.gm-color {
+  width: 48px;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  cursor: pointer;
 }
 
-.gm-btn-danger {
-  @apply border border-red-300 bg-red-50 text-red-700;
-  @apply hover:bg-red-100 hover:border-red-400;
-  @apply dark:border-red-700 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/35;
-  @apply focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2;
-  @apply dark:focus:ring-offset-gray-800;
+.gm-preset { width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; }
+.gm-preset:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+.gm-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--sunken);
+}
+
+.gm-preview__badge { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 4px; color: #fff; }
+.gm-preview__icon { width: 24px; height: 24px; }
+.gm-preview__name { margin: 0; font-weight: 600; color: var(--text); }
+
+@media (min-width: 768px) {
+  .gm-form { grid-template-columns: 1fr 1fr; }
+  .gm-form__wide { grid-column: 1 / -1; }
 }
 </style>
