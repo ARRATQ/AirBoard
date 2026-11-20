@@ -192,8 +192,8 @@ onUnmounted(() => {
 /* ── Conteneur principal ────────────────────────────────── */
 .speed-dial-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  inset-block-end: 20px;
+  inset-inline-end: 20px;
   z-index: 10001;
   display: flex;
   flex-direction: column;
@@ -285,8 +285,8 @@ onUnmounted(() => {
 /* ── Badge non-lus sur bouton secondaire ────────────────── */
 .speed-dial-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  inset-block-start: -4px;
+  inset-inline-end: -4px;
   background: #ef4444;
   color: white;
   font-size: 10px;
@@ -397,8 +397,8 @@ onUnmounted(() => {
 /* ── Badge non-lus sur FAB ──────────────────────────────── */
 .speed-dial-fab-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  inset-block-start: -2px;
+  inset-inline-end: -2px;
   background: #ef4444;
   color: white;
   font-size: 10px;
@@ -422,8 +422,8 @@ onUnmounted(() => {
 /* ── Mobile (≤ 600px) ───────────────────────────────────── */
 @media (max-width: 600px) {
   .speed-dial-container {
-    bottom: 16px;
-    right: 16px;
+    inset-block-end: 16px;
+    inset-inline-end: 16px;
   }
 
   .speed-dial-label {
