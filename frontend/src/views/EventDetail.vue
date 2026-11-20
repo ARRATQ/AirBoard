@@ -375,13 +375,9 @@ const fetchEvent = async () => {
   }
 }
 
+// Même éditeur pour tous les rôles : il choisit l'API selon le périmètre (useManagementScope)
 const editEvent = () => {
-  const user = authStore.user
-  if (user?.role === 'admin' || user?.role === 'editor') {
-    router.push({ name: 'AdminEventEdit', params: { slug: event.value.slug } })
-  } else if (user?.admin_of_groups && user.admin_of_groups.length > 0) {
-    router.push({ name: 'GroupAdminEventEdit', params: { slug: event.value.slug } })
-  }
+  router.push({ name: 'AdminEventEdit', params: { slug: event.value.slug } })
 }
 
 const formatDateRange = (startDate, endDate) => {
