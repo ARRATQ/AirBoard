@@ -2127,5 +2127,47 @@
     "confirmDeleteMessage": "Supprimer ce message ?",
     "confirmClearHistory": "Voulez-vous vraiment effacer tout l'historique de cette conversation ?",
     "clearHistory": "Vider l'historique"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "Impossible de charger les ressources",
+      "saveError": "Impossible d'enregistrer la ressource",
+      "created": "Ressource créée avec succès",
+      "updated": "Ressource mise à jour avec succès",
+      "deleted": "Ressource supprimée avec succès",
+      "creator": "Créateur",
+      "creatorNone": "— Non attribué —",
+      "creatorHelp": "Définit le créateur pour les rapports d'activité."
+    },
+    "appGroups": {
+      "private": "Privé",
+      "public": "Public",
+      "privateToggle": "Groupe de ressources privé",
+      "privateToggleHelp": "Seuls les admins de son groupe propriétaire peuvent le gérer",
+      "ownerGroupManageHelp": "Les admins de ce groupe géreront ce groupe de ressources",
+      "created": "Groupe de ressources créé",
+      "updated": "Groupe de ressources mis à jour",
+      "deleted": "Groupe de ressources supprimé",
+      "saveError": "Échec de l'enregistrement du groupe de ressources",
+      "loadError": "Impossible de charger les groupes de ressources"
+    },
+    "news": {
+      "subtitle": "Gérez les articles d'actualité de toute l'organisation",
+      "createFirst": "Créez votre premier article.",
+      "loadError": "Échec du chargement des articles",
+      "deleteSuccess": "Article supprimé",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "pinned": "Article épinglé",
+      "unpinned": "Article désépinglé",
+      "pinError": "Échec de la mise à jour de l'épinglage",
+      "editorSubtitleNew": "Créez un nouvel article d'actualité",
+      "editorSubtitleEdit": "Mettez à jour votre article",
+      "newTagPlaceholder": "Nom du nouveau tag...",
+      "tagColor": "Couleur du tag",
+      "tagExists": "Ce tag existe déjà et a été ajouté",
+      "tagCreated": "Tag « {name} » créé",
+      "removeItem": "Retirer {name}"
+    }
   }
 }

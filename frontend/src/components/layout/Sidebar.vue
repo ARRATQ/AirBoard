@@ -79,15 +79,15 @@
 
         <SidebarLink to="/group-admin" icon="mdi:view-dashboard-outline" :label="$t('groupAdmin.dashboard')" exact />
 
-        <SidebarLink to="/group-admin/app-groups" icon="mdi:folder-multiple" :label="$t('groupAdmin.myAppGroups')" />
+        <SidebarLink to="/admin/app-groups" icon="mdi:folder-multiple" :label="$t('groupAdmin.myAppGroups')" />
 
-        <SidebarLink to="/group-admin/applications" icon="mdi:apps" :label="$t('groupAdmin.myApplications')" />
+        <SidebarLink to="/admin/applications" icon="mdi:apps" :label="$t('groupAdmin.myApplications')" />
 
-        <SidebarLink to="/group-admin/news" icon="mdi:newspaper-variant" :label="$t('groupAdmin.groupNews')" />
+        <SidebarLink to="/admin/news" icon="mdi:newspaper-variant" :label="$t('groupAdmin.groupNews')" />
 
-        <SidebarLink to="/group-admin/events" icon="mdi:calendar-edit" :label="$t('groupAdmin.events')" />
+        <SidebarLink to="/admin/events" icon="mdi:calendar-edit" :label="$t('groupAdmin.events')" />
 
-        <SidebarLink to="/group-admin/polls" icon="mdi:poll" :label="$t('groupAdmin.myPolls')" />
+        <SidebarLink to="/admin/polls" icon="mdi:poll" :label="$t('groupAdmin.myPolls')" />
 
         <SidebarLink v-if="authStore.isAdmin" to="/group-admin/directory" icon="mdi:sitemap-outline" :label="$t('directory.manageTitle')" />
       </div>

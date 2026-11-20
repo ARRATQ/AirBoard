@@ -1,92 +1,90 @@
 <template>
   <div class="content-area">
-    <!-- Header -->
     <PageHeader>
-      <template #title>{{ isEditMode ? 'Edit Article' : 'New Article' }}</template>
-      <template #description>{{ isEditMode ? 'Update your news article' : 'Create a new news article' }}</template>
+      <template #title>{{ pageTitle }}</template>
+      <template #description>{{ pageSubtitle }}</template>
       <template #actions>
-        <router-link to="/admin/news" class="btn btn-secondary">
+        <router-link :to="LIST_ROUTE" class="btn btn-secondary">
           <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
-          Back to List
+          {{ $t('groupAdmin.newsEditor.backToList') }}
         </router-link>
       </template>
     </PageHeader>
 
-    <!-- Form -->
-    <form @submit.prevent="saveNews" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="saveNews">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main content -->
+        <!-- Contenu principal -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Title -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              <label for="news-title" class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
                 <Icon icon="mdi:format-title" class="h-5 w-5 text-primary-500" />
-                Title *
+                {{ $t('groupAdmin.newsEditor.titleLabel') }} *
               </label>
               <input
+                id="news-title"
                 v-model="form.title"
                 type="text"
                 required
-                placeholder="Enter a compelling title for your article..."
+                :placeholder="$t('groupAdmin.newsEditor.titlePlaceholder')"
                 class="w-full px-4 py-3 text-lg font-medium border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
               />
             </div>
           </div>
 
-          <!-- Summary -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+              <label for="news-summary" class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
                 <Icon icon="mdi:text-short" class="h-5 w-5 text-primary-500" />
-                Summary
+                {{ $t('groupAdmin.newsEditor.summaryLabel') }}
               </label>
               <textarea
+                id="news-summary"
                 v-model="form.summary"
                 rows="3"
-                maxlength="300"
-                placeholder="Write a brief summary that will appear in listings and previews..."
+                :maxlength="SUMMARY_MAX"
+                :placeholder="$t('groupAdmin.newsEditor.summaryPlaceholder')"
                 class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white resize-none transition-colors"
               ></textarea>
               <div class="flex justify-between items-center mt-2">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  Brief description for previews and search
+                  {{ $t('groupAdmin.newsEditor.summaryHelp') }}
                 </p>
-                <p class="text-xs font-medium" :class="form.summary.length >= 300 ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'">
-                  {{ form.summary.length }}/300
+                <p class="text-xs font-medium" :class="form.summary.length >= SUMMARY_MAX ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'">
+                  {{ form.summary.length }}/{{ SUMMARY_MAX }}
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- Content -->
           <div class="card">
             <div class="mb-3">
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+              <p class="flex text-sm font-semibold text-gray-900 dark:text-white mb-3 items-center gap-2">
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
-                Article Content *
-              </label>
+                {{ $t('groupAdmin.newsEditor.contentLabel') }} *
+              </p>
               <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg">
+                <!-- L'admin de groupe téléverse ses médias via l'API group-admin -->
                 <RichTextEditor
                   v-model="form.content"
-                  placeholder="Write your article content here. Use the toolbar to format your text, add links, code blocks, and more..."
+                  :placeholder="$t('groupAdmin.newsEditor.contentPlaceholder')"
+                  :as-group-admin="!isGlobal"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar -->
+        <!-- Colonne latérale -->
         <div class="space-y-6">
-          <!-- Publish settings -->
+          <!-- Publication -->
           <div class="card bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Icon icon="mdi:publish" class="h-5 w-5 text-primary-500" />
-              Publication
+              {{ $t('groupAdmin.newsEditor.publishSection') }}
             </h3>
 
             <div class="space-y-4">
-              <!-- Status -->
               <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border-2 border-gray-200 dark:border-gray-700">
                 <label class="flex items-center cursor-pointer">
                   <input
@@ -95,176 +93,140 @@
                     class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
                   <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                    Publish immediately
+                    {{ $t('groupAdmin.newsEditor.publishImmediately') }}
                   </span>
                 </label>
               </div>
 
-              <!-- Publish date -->
               <div v-if="form.is_published">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                <label for="news-published-at" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:calendar-clock" class="h-4 w-4" />
-                  Publish Date
+                  {{ $t('groupAdmin.newsEditor.publishDate') }}
                 </label>
                 <input
+                  id="news-published-at"
                   v-model="form.published_at"
                   type="datetime-local"
                   class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
               </div>
 
-              <!-- Expiry date -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                <label for="news-expires-at" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:calendar-remove" class="h-4 w-4" />
-                  Expiry Date
-                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(Optional)</span>
+                  {{ $t('groupAdmin.newsEditor.expiryDate') }}
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">{{ $t('groupAdmin.newsEditor.expiryDateOptional') }}</span>
                 </label>
                 <input
+                  id="news-expires-at"
                   v-model="form.expires_at"
                   type="datetime-local"
                   class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
                   <Icon icon="mdi:information-outline" class="h-3 w-3" />
-                  Auto-archive after this date
+                  {{ $t('groupAdmin.newsEditor.expiryDateHelp') }}
                 </p>
               </div>
             </div>
           </div>
 
-          <!-- Category & Priority -->
+          <!-- Groupes cibles : admin de groupe uniquement -->
+          <NewsTargetGroupsCard
+            v-if="!isGlobal"
+            v-model="form.target_group_ids"
+            :groups="managedGroups"
+          />
+
+          <!-- Classification -->
           <div class="card">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Icon icon="mdi:tag-multiple" class="h-5 w-5 text-primary-500" />
-              Classification
+              {{ $t('groupAdmin.newsEditor.classification') }}
             </h3>
 
             <div class="space-y-4">
-              <!-- Category -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                <label for="news-category" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:folder" class="h-4 w-4" />
-                  Category
+                  {{ $t('groupAdmin.newsEditor.categoryLabel') }}
                 </label>
                 <div class="flex gap-2">
-                  <select v-model="form.category_id" class="flex-1 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
-                    <option :value="null">No category</option>
+                  <select
+                    id="news-category"
+                    v-model="form.category_id"
+                    class="flex-1 min-w-0 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  >
+                    <option :value="null">{{ $t('groupAdmin.newsEditor.noCategory') }}</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                       {{ cat.name }}
                     </option>
                   </select>
+                  <!-- Création de catégorie : endpoint réservé à l'admin global -->
                   <button
+                    v-if="isAdmin"
                     type="button"
-                    @click="showAddCategoryDialog = true"
                     class="flex-shrink-0 px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1"
-                    title="Add new category"
+                    :title="$t('events.editor.addCategory')"
+                    :aria-label="$t('events.editor.addCategory')"
+                    @click="showCategoryModal = true"
                   >
                     <Icon icon="mdi:plus" class="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              <!-- Type -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:shape" class="h-4 w-4" />
-                  Type
-                </label>
+                  {{ $t('groupAdmin.newsEditor.typeLabel') }}
+                </p>
                 <TypeSelect v-model="form.type" :types="typesStore.types" />
               </div>
 
-              <!-- Priority -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+                <label for="news-priority" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:flag" class="h-4 w-4" />
-                  Priority
+                  {{ $t('groupAdmin.newsEditor.priorityLabel') }}
                 </label>
-                <select v-model="form.priority" class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
-                  <option value="normal">⚪ Normal</option>
-                  <option value="important">🟠 Important</option>
-                  <option value="urgent">🔴 Urgent</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tags -->
-          <div class="card">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Icon icon="mdi:tag-multiple" class="h-5 w-5 text-primary-500" />
-              Tags
-            </h3>
-
-            <div class="space-y-3">
-              <!-- Selected tags -->
-              <div v-if="form.tag_ids.length > 0" class="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                <span
-                  v-for="tagId in form.tag_ids"
-                  :key="tagId"
-                  class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-sm font-medium"
-                >
-                  <Icon icon="mdi:tag" class="h-3 w-3" />
-                  {{ getTagName(tagId) }}
-                  <button
-                    type="button"
-                    @click="removeTag(tagId)"
-                    class="ml-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    <Icon icon="mdi:close-circle" class="h-4 w-4" />
-                  </button>
-                </span>
-              </div>
-              <div v-else class="text-sm text-gray-500 dark:text-gray-400 italic p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                No tags selected
-              </div>
-
-              <!-- Add tag -->
-              <div class="flex gap-2">
                 <select
-                  @change="addTag"
-                  class="flex-1 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  id="news-priority"
+                  v-model="form.priority"
+                  class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 >
-                  <option value="">+ Add tag</option>
-                  <option
-                    v-for="tag in availableTags"
-                    :key="tag.id"
-                    :value="tag.id"
-                  >
-                    {{ tag.name }}
+                  <option v-for="priority in PRIORITIES" :key="priority" :value="priority">
+                    {{ $t(`groupAdmin.newsEditor.priorities.${priority}`) }}
                   </option>
                 </select>
-                <button
-                  type="button"
-                  @click="showAddTagDialog = true"
-                  class="flex-shrink-0 px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1"
-                  title="Add new tag"
-                >
-                  <Icon icon="mdi:plus" class="h-4 w-4" />
-                </button>
               </div>
             </div>
           </div>
+
+          <NewsTagsCard v-model="form.tag_ids" :tags="tags" :create-tag="createTag" />
 
           <!-- Actions -->
           <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
             <div class="space-y-3">
               <button
                 type="submit"
-                :disabled="isSaving"
+                :disabled="isSaving || missingTargetGroup"
                 class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 <Icon v-if="isSaving" icon="mdi:loading" class="h-5 w-5 animate-spin" />
                 <Icon v-else icon="mdi:content-save" class="h-5 w-5" />
-                <span>{{ isSaving ? 'Saving...' : (isEditMode ? 'Update Article' : 'Create Article') }}</span>
+                <span>{{ submitLabel }}</span>
               </button>
 
+              <p v-if="missingTargetGroup" class="text-xs text-center text-red-500 dark:text-red-400">
+                {{ $t('groupAdmin.newsEditor.validation.selectGroupRequired') }}
+              </p>
+
               <router-link
-                to="/admin/news"
+                :to="LIST_ROUTE"
                 class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 <Icon icon="mdi:close" class="h-5 w-5" />
-                <span>Cancel</span>
+                <span>{{ $t('groupAdmin.newsEditor.actions.cancel') }}</span>
               </router-link>
             </div>
           </div>
@@ -272,98 +234,12 @@
       </div>
     </form>
 
-    <!-- Add Category Dialog -->
-    <div v-if="showAddCategoryDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Category</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-            <input
-              v-model="newCategory.name"
-              type="text"
-              class="input"
-              placeholder="Category name"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon (Iconify)</label>
-            <input
-              v-model="newCategory.icon"
-              type="text"
-              class="input"
-              placeholder="mdi:folder"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-            <input
-              v-model="newCategory.color"
-              type="color"
-              class="input h-10"
-            />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button
-            type="button"
-            @click="showAddCategoryDialog = false"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="createCategory"
-            class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-          >
-            Create
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add Tag Dialog -->
-    <div v-if="showAddTagDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add New Tag</h3>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-            <input
-              v-model="newTag.name"
-              type="text"
-              class="input"
-              placeholder="Tag name"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-            <input
-              v-model="newTag.color"
-              type="color"
-              class="input h-10"
-            />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button
-            type="button"
-            @click="showAddTagDialog = false"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="createTag"
-            class="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-          >
-            Create
-          </button>
-        </div>
-      </div>
-    </div>
+    <NewsCategoryModal
+      v-if="isAdmin"
+      :open="showCategoryModal"
+      @close="showCategoryModal = false"
+      @created="onCategoryCreated"
+    />
   </div>
 </template>
 
@@ -375,9 +251,18 @@ import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useNewsTypesStore } from '@/stores/newsTypes'
-import { newsService } from '@/services/api'
+import { newsService, groupAdminService } from '@/services/api'
+import { CONTENT } from '@/config/access'
+import { useManagementScope } from '@/composables/useManagementScope'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
 import TypeSelect from '@/components/news/TypeSelect.vue'
+import NewsTargetGroupsCard from '@/components/admin/news/NewsTargetGroupsCard.vue'
+import NewsTagsCard from '@/components/admin/news/NewsTagsCard.vue'
+import NewsCategoryModal from '@/components/admin/news/NewsCategoryModal.vue'
+
+const LIST_ROUTE = '/admin/news'
+const SUMMARY_MAX = 300
+const PRIORITIES = ['normal', 'important', 'urgent']
 
 const route = useRoute()
 const router = useRouter()
@@ -385,26 +270,15 @@ const { t } = useI18n()
 const appStore = useAppStore()
 const typesStore = useNewsTypesStore()
 
-const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
+// Admin et éditeur : API éditeur ; admin de groupe seul : API group-admin + ciblage obligatoire
+const { isGlobal, isAdmin } = useManagementScope(CONTENT)
+
+const isEditMode = computed(() => Boolean(route.params.slug && route.params.slug !== 'new'))
 const isSaving = ref(false)
 const categories = ref([])
 const tags = ref([])
-
-// Dialogs
-const showAddCategoryDialog = ref(false)
-const showAddTagDialog = ref(false)
-
-// New category/tag forms
-const newCategory = ref({
-  name: '',
-  icon: 'mdi:folder',
-  color: '#6366f1'
-})
-
-const newTag = ref({
-  name: '',
-  color: '#6366f1'
-})
+const managedGroups = ref([])
+const showCategoryModal = ref(false)
 
 const form = ref({
   title: '',
@@ -416,155 +290,165 @@ const form = ref({
   published_at: null,
   expires_at: null,
   category_id: null,
-  tag_ids: []
+  tag_ids: [],
+  target_group_ids: []
 })
 
-// Available tags (excluding already selected)
-const availableTags = computed(() => {
-  return tags.value.filter(tag => !form.value.tag_ids.includes(tag.id))
+const missingTargetGroup = computed(() => !isGlobal.value && form.value.target_group_ids.length === 0)
+
+const pageTitle = computed(() => {
+  if (isEditMode.value) return t('groupAdmin.newsEditor.title.edit')
+  return isGlobal.value ? t('groupAdmin.newsManagement.newArticle') : t('groupAdmin.newsEditor.title.new')
 })
 
-// Get tag name by ID
-const getTagName = (tagId) => {
-  const tag = tags.value.find(t => t.id === tagId)
-  return tag ? tag.name : ''
-}
-
-// Add tag
-const addTag = (event) => {
-  const tagId = parseInt(event.target.value)
-  if (tagId && !form.value.tag_ids.includes(tagId)) {
-    form.value.tag_ids.push(tagId)
+const pageSubtitle = computed(() => {
+  if (isGlobal.value) {
+    return isEditMode.value ? t('adminShared.news.editorSubtitleEdit') : t('adminShared.news.editorSubtitleNew')
   }
-  event.target.value = ''
-}
+  return isEditMode.value ? t('groupAdmin.newsEditor.subtitle.edit') : t('groupAdmin.newsEditor.subtitle.new')
+})
 
-// Remove tag
-const removeTag = (tagId) => {
-  form.value.tag_ids = form.value.tag_ids.filter(id => id !== tagId)
-}
+const submitLabel = computed(() => {
+  if (isSaving.value) return t('groupAdmin.newsEditor.actions.saving')
+  return isEditMode.value ? t('groupAdmin.newsEditor.actions.update') : t('groupAdmin.newsEditor.actions.create')
+})
 
-// Create new category
-const createCategory = async () => {
+// datetime-local attend « AAAA-MM-JJTHH:mm »
+const toInputDate = (value) => (value ? new Date(value).toISOString().slice(0, 16) : null)
+const toApiDate = (value) => (value ? new Date(value).toISOString() : null)
+
+// Le contenu Tiptap est stocké en JSON sérialisé
+const parseContent = (raw) => {
+  const content = raw || ''
+  if (typeof content !== 'string' || !content.trim().startsWith('{')) return content
   try {
-    const category = await newsService.createCategory(newCategory.value)
-    categories.value.push(category)
-    form.value.category_id = category.id
-    showAddCategoryDialog.value = false
-    // Reset form
-    newCategory.value = {
-      name: '',
-      icon: 'mdi:folder',
-      color: '#6366f1'
-    }
-  } catch (error) {
-    console.error('Error creating category:', error)
-    appStore.showError(t('admin.categorySaveError'))
+    return JSON.parse(content)
+  } catch {
+    return content
   }
 }
 
-// Create new tag
-const createTag = async () => {
+const onCategoryCreated = (category) => {
+  categories.value = [...categories.value, category]
+  form.value = { ...form.value, category_id: category.id }
+}
+
+// Création d'un tag : réutilise un tag existant du même nom, sinon le crée via l'API du périmètre
+const createTag = async ({ name, color }) => {
+  const existing = tags.value.find((tag) => tag.name.toLowerCase() === name.toLowerCase())
+  if (existing) {
+    if (!form.value.tag_ids.includes(existing.id)) {
+      form.value = { ...form.value, tag_ids: [...form.value.tag_ids, existing.id] }
+    }
+    appStore.showInfo(t('adminShared.news.tagExists'))
+    return true
+  }
+
   try {
-    const tag = await newsService.createTag(newTag.value)
-    tags.value.push(tag)
-    form.value.tag_ids.push(tag.id)
-    showAddTagDialog.value = false
-    // Reset form
-    newTag.value = {
-      name: '',
-      color: '#6366f1'
-    }
+    const payload = { name, color }
+    const tag = isGlobal.value ? await newsService.createTag(payload) : await groupAdminService.createTag(payload)
+    tags.value = [...tags.value, tag]
+    form.value = { ...form.value, tag_ids: [...form.value.tag_ids, tag.id] }
+    appStore.showSuccess(t('adminShared.news.tagCreated', { name }))
+    return true
   } catch (error) {
-    console.error('Error creating tag:', error)
-    appStore.showError(t('admin.tagSaveError'))
+    console.error('Erreur à la création du tag :', error)
+    appStore.showError(error.response?.data?.error || t('admin.tagSaveError'))
+    return false
   }
 }
 
-// Load news for editing
+const loadManagedGroups = async () => {
+  try {
+    const data = await groupAdminService.getManagedGroups()
+    managedGroups.value = Array.isArray(data) ? data : (data?.groups || data?.data || [])
+  } catch (error) {
+    console.error('Erreur au chargement des groupes administrés :', error)
+    managedGroups.value = []
+  }
+}
+
 const loadNews = async () => {
   if (!isEditMode.value) return
 
   try {
     const news = await newsService.getNewsBySlug(route.params.slug)
-
-    // Parse content if it's a JSON string
-    let content = news.content || ''
-    if (typeof content === 'string' && content.trim().startsWith('{')) {
-      try {
-        content = JSON.parse(content)
-      } catch (e) {
-        console.warn('Failed to parse content as JSON, using as-is')
-      }
-    }
-
     form.value = {
       title: news.title,
       summary: news.summary || '',
-      content: content,
+      content: parseContent(news.content),
       type: news.type,
       priority: news.priority,
       is_published: news.is_published,
-      published_at: news.published_at ? new Date(news.published_at).toISOString().slice(0, 16) : null,
-      expires_at: news.expires_at ? new Date(news.expires_at).toISOString().slice(0, 16) : null,
+      published_at: toInputDate(news.published_at),
+      expires_at: toInputDate(news.expires_at),
       category_id: news.category_id,
-      tag_ids: news.tags ? news.tags.map(t => t.id) : []
+      tag_ids: news.tags ? news.tags.map((tag) => tag.id) : [],
+      target_group_ids: news.target_groups ? news.target_groups.map((group) => group.id) : []
     }
   } catch (error) {
-    console.error('Error loading news:', error)
-    appStore.showError('Failed to load news')
-    router.push('/admin/news')
+    console.error('Erreur au chargement de l\'actualité :', error)
+    appStore.showError(t('groupAdmin.newsEditor.messages.loadError'))
+    router.push(LIST_ROUTE)
   }
 }
 
-// Load categories and tags
 const loadMetadata = async () => {
   try {
-    [categories.value, tags.value] = await Promise.all([
+    const [categoryList, tagList] = await Promise.all([
       newsService.getCategories(),
       newsService.getTags()
     ])
+    categories.value = categoryList || []
+    tags.value = tagList || []
   } catch (error) {
-    console.error('Error loading metadata:', error)
+    console.error('Erreur au chargement des catégories et tags :', error)
   }
 }
 
-// Save news
+// Charge utile envoyée à l'API. Les groupes cibles ne sont transmis que par l'admin de groupe :
+// sans le champ, le backend conserve le ciblage existant (aucun écrasement côté admin/éditeur).
+const buildPayload = () => {
+  const { target_group_ids: targetGroupIds, ...rest } = form.value
+  const payload = {
+    ...rest,
+    content: typeof rest.content === 'object' ? JSON.stringify(rest.content) : rest.content,
+    published_at: toApiDate(rest.published_at),
+    expires_at: toApiDate(rest.expires_at)
+  }
+  return isGlobal.value ? payload : { ...payload, target_group_ids: targetGroupIds }
+}
+
 const saveNews = async () => {
+  if (missingTargetGroup.value) {
+    appStore.showError(t('groupAdmin.newsEditor.messages.selectGroupError'))
+    return
+  }
+
+  isSaving.value = true
   try {
-    isSaving.value = true
-
-    const data = {
-      ...form.value,
-      // Convert Tiptap JSON content to string
-      content: typeof form.value.content === 'object'
-        ? JSON.stringify(form.value.content)
-        : form.value.content,
-      published_at: form.value.published_at ? new Date(form.value.published_at).toISOString() : null,
-      expires_at: form.value.expires_at ? new Date(form.value.expires_at).toISOString() : null
-    }
-
+    const data = buildPayload()
+    const service = isGlobal.value ? newsService : groupAdminService
     if (isEditMode.value) {
-      await newsService.updateNews(route.params.slug, data)
-      appStore.showSuccess('Article updated successfully')
+      await service.updateNews(route.params.slug, data)
+      appStore.showSuccess(t('groupAdmin.newsEditor.messages.updateSuccess'))
     } else {
-      await newsService.createNews(data)
-      appStore.showSuccess('Article created successfully')
+      await service.createNews(data)
+      appStore.showSuccess(t('groupAdmin.newsEditor.messages.createSuccess'))
     }
-
-    router.push('/admin/news')
+    router.push(LIST_ROUTE)
   } catch (error) {
-    console.error('Error saving news:', error)
-    appStore.showError('Failed to save article')
+    console.error('Erreur à l\'enregistrement de l\'actualité :', error)
+    appStore.showError(t('groupAdmin.newsEditor.messages.saveError'))
   } finally {
     isSaving.value = false
   }
 }
 
-// Lifecycle
-onMounted(async () => {
-  await typesStore.fetchTypes()
+onMounted(() => {
+  typesStore.fetchTypes()
   loadMetadata()
+  if (!isGlobal.value) loadManagedGroups()
   loadNews()
 })
 </script>

@@ -104,7 +104,9 @@
     "of": "من",
     "details": "تفاصيل",
     "and": " و ",
-    "requiredFieldsHint": "* حقول إلزامية"
+    "requiredFieldsHint": "* حقول إلزامية",
+    "backToList": "العودة إلى القائمة",
+    "saving": "جارٍ الحفظ..."
   },
   "calendar": {
     "title": "تقويم الأحداث",
@@ -1703,5 +1705,47 @@
     "confirmDeleteMessage": "هل تريد حذف هذه الرسالة؟",
     "confirmClearHistory": "هل تريد حقًا مسح سجل هذه المحادثة بالكامل؟",
     "clearHistory": "مسح السجل"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "تعذّر تحميل الموارد",
+      "saveError": "تعذّر حفظ المورد",
+      "created": "تم إنشاء المورد بنجاح",
+      "updated": "تم تحديث المورد بنجاح",
+      "deleted": "تم حذف المورد بنجاح",
+      "creator": "المُنشئ",
+      "creatorNone": "— غير مُسند —",
+      "creatorHelp": "يحدّد المُنشئ في تقارير النشاط."
+    },
+    "appGroups": {
+      "private": "خاص",
+      "public": "عام",
+      "privateToggle": "مجموعة موارد خاصة",
+      "privateToggleHelp": "لا يمكن إدارتها إلا من قبل مسؤولي المجموعة المالكة",
+      "ownerGroupManageHelp": "سيتولى مسؤولو هذه المجموعة إدارة مجموعة الموارد هذه",
+      "created": "تم إنشاء مجموعة الموارد",
+      "updated": "تم تحديث مجموعة الموارد",
+      "deleted": "تم حذف مجموعة الموارد",
+      "saveError": "تعذر حفظ مجموعة الموارد",
+      "loadError": "تعذر تحميل مجموعات الموارد"
+    },
+    "news": {
+      "subtitle": "إدارة المقالات الإخبارية للمؤسسة بأكملها",
+      "createFirst": "أنشئ مقالك الأول.",
+      "loadError": "فشل تحميل المقالات",
+      "deleteSuccess": "تم حذف المقال",
+      "pin": "تثبيت",
+      "unpin": "إلغاء التثبيت",
+      "pinned": "تم تثبيت المقال",
+      "unpinned": "تم إلغاء تثبيت المقال",
+      "pinError": "فشل تحديث التثبيت",
+      "editorSubtitleNew": "أنشئ مقالًا إخباريًا جديدًا",
+      "editorSubtitleEdit": "حدّث مقالك",
+      "newTagPlaceholder": "اسم الوسم الجديد...",
+      "tagColor": "لون الوسم",
+      "tagExists": "هذا الوسم موجود بالفعل وتمت إضافته",
+      "tagCreated": "تم إنشاء الوسم «{name}»",
+      "removeItem": "إزالة {name}"
+    }
   }
 }

@@ -104,7 +104,9 @@
     "of": "de",
     "details": "Detalles",
     "and": " y ",
-    "requiredFieldsHint": "* Campos obligatorios"
+    "requiredFieldsHint": "* Campos obligatorios",
+    "backToList": "Volver a la lista",
+    "saving": "Guardando..."
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -1704,5 +1706,47 @@
     "confirmDeleteMessage": "¿Eliminar este mensaje?",
     "confirmClearHistory": "¿Seguro que quieres borrar todo el historial de esta conversación?",
     "clearHistory": "Borrar historial"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "No se pudieron cargar los recursos",
+      "saveError": "No se pudo guardar el recurso",
+      "created": "Recurso creado correctamente",
+      "updated": "Recurso actualizado correctamente",
+      "deleted": "Recurso eliminado correctamente",
+      "creator": "Creador",
+      "creatorNone": "— Sin asignar —",
+      "creatorHelp": "Define el creador para los informes de actividad."
+    },
+    "appGroups": {
+      "private": "Privado",
+      "public": "Público",
+      "privateToggle": "Grupo de recursos privado",
+      "privateToggleHelp": "Solo los administradores de su grupo propietario pueden gestionarlo",
+      "ownerGroupManageHelp": "Los administradores de este grupo gestionarán este grupo de recursos",
+      "created": "Grupo de recursos creado",
+      "updated": "Grupo de recursos actualizado",
+      "deleted": "Grupo de recursos eliminado",
+      "saveError": "No se pudo guardar el grupo de recursos",
+      "loadError": "No se pudieron cargar los grupos de recursos"
+    },
+    "news": {
+      "subtitle": "Gestiona los artículos de noticias de toda la organización",
+      "createFirst": "Crea tu primer artículo.",
+      "loadError": "Error al cargar los artículos",
+      "deleteSuccess": "Artículo eliminado",
+      "pin": "Fijar",
+      "unpin": "Desfijar",
+      "pinned": "Artículo fijado",
+      "unpinned": "Artículo desfijado",
+      "pinError": "Error al actualizar el fijado",
+      "editorSubtitleNew": "Crea un nuevo artículo de noticias",
+      "editorSubtitleEdit": "Actualiza tu artículo",
+      "newTagPlaceholder": "Nombre de la nueva etiqueta...",
+      "tagColor": "Color de la etiqueta",
+      "tagExists": "Esta etiqueta ya existe y se ha añadido",
+      "tagCreated": "Etiqueta «{name}» creada",
+      "removeItem": "Quitar {name}"
+    }
   }
 }

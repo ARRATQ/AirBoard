@@ -112,7 +112,9 @@
     "optional": "optional",
     "details": "Details",
     "and": " and ",
-    "requiredFieldsHint": "* Required fields"
+    "requiredFieldsHint": "* Required fields",
+    "backToList": "Back to list",
+    "saving": "Saving..."
   },
   "calendar": {
     "title": "Event Calendar",
@@ -2150,5 +2152,47 @@
     "confirmDeleteMessage": "Delete this message?",
     "confirmClearHistory": "Do you really want to clear the entire history of this conversation?",
     "clearHistory": "Clear history"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "Failed to load resources",
+      "saveError": "Failed to save resource",
+      "created": "Resource created successfully",
+      "updated": "Resource updated successfully",
+      "deleted": "Resource deleted successfully",
+      "creator": "Creator",
+      "creatorNone": "— Unassigned —",
+      "creatorHelp": "Sets the creator for activity reports."
+    },
+    "appGroups": {
+      "private": "Private",
+      "public": "Public",
+      "privateToggle": "Private resource group",
+      "privateToggleHelp": "Only the admins of its owner group can manage it",
+      "ownerGroupManageHelp": "The admins of this group will manage this resource group",
+      "created": "Resource group created",
+      "updated": "Resource group updated",
+      "deleted": "Resource group deleted",
+      "saveError": "Failed to save resource group",
+      "loadError": "Failed to load resource groups"
+    },
+    "news": {
+      "subtitle": "Manage news articles across the organization",
+      "createFirst": "Create your first article.",
+      "loadError": "Failed to load articles",
+      "deleteSuccess": "Article deleted",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "pinned": "Article pinned",
+      "unpinned": "Article unpinned",
+      "pinError": "Failed to update pin",
+      "editorSubtitleNew": "Create a new news article",
+      "editorSubtitleEdit": "Update your article",
+      "newTagPlaceholder": "New tag name...",
+      "tagColor": "Tag color",
+      "tagExists": "This tag already exists and has been added",
+      "tagCreated": "Tag \"{name}\" created",
+      "removeItem": "Remove {name}"
+    }
   }
 }
