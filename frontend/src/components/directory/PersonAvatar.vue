@@ -47,7 +47,7 @@ const color = computed(() => avatarColor(props.person))
   color: #fff;
   font-weight: 600;
   letter-spacing: 0.02em;
-  box-shadow: 0 0 0 2px var(--bg-card);
+  box-shadow: 0 0 0 2px var(--surface);
 }
 .person-avatar img {
   width: 100%;
@@ -56,8 +56,8 @@ const color = computed(() => avatarColor(props.person))
 }
 .person-avatar--vacant {
   background: transparent;
-  color: var(--text-muted);
-  border: 2px dashed var(--border);
+  color: var(--muted);
+  border: 1px dashed var(--muted);
   box-shadow: none;
 }
 .person-avatar--xs { width: 1.75rem; height: 1.75rem; font-size: 0.65rem; }

@@ -1,5 +1,5 @@
 <template>
-  <li class="org-node" :style="{ '--unit-color': unit.color || 'var(--accent)' }">
+  <li class="org-node" :style="{ '--unit-color': unit.color || 'var(--acc)' }">
     <div class="org-node__card">
       <button
         type="button"
@@ -24,7 +24,7 @@
       <div v-show="open" v-if="positions.length" class="org-node__positions">
         <div v-for="position in positions" :key="position.id" class="org-pos" :class="{ 'org-pos--head': position.is_head }">
           <p class="org-pos__title">
-            <Icon v-if="position.is_head" icon="mdi:star-four-points" class="h-3.5 w-3.5 text-amber-500" />
+            <Icon v-if="position.is_head" icon="mdi:star-four-points" class="org-pos__star h-3.5 w-3.5" aria-hidden="true" />
             {{ position.title }}
           </p>
           <div class="org-pos__holders">
@@ -103,118 +103,130 @@ const holders = (position) =>
 <style scoped>
 .org-node { position: relative; list-style: none; }
 .org-node__card {
-  border: 1px solid var(--border);
-  border-inline-start: 4px solid var(--unit-color);
-  border-radius: 0.85rem;
-  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--unit-color);
+  border-radius: 4px;
+  background: var(--surface);
   overflow: hidden;
-  box-shadow: 0 1px 0 rgba(var(--shadow-rgb, 15, 23, 42), 0.04);
 }
 .org-node__header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
   text-align: start;
-  color: var(--text-primary);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--unit-color) 9%, transparent), transparent 70%);
+  color: var(--text);
+  cursor: pointer;
 }
-.org-node__header:hover { background-color: var(--hover); }
-.org-node__header:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.org-node__chevron { color: var(--text-muted); transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+.org-node__header:hover { background: var(--sunken); }
+.org-node__header:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+.org-node__chevron { color: var(--muted); transition: transform 150ms ease; }
 .org-node__chevron--open { transform: rotate(90deg); }
 [dir='rtl'] .org-node__chevron:not(.org-node__chevron--open) { transform: rotate(180deg); }
-.org-node__name { font-weight: 700; font-size: 1rem; }
+.org-node__name { font-weight: 600; font-size: 15px; }
 .org-node__code {
-  font-size: 0.68rem;
-  font-weight: 700;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--f-num);
+  font-size: 10.5px;
   letter-spacing: 0.06em;
-  padding: 0.1rem 0.45rem;
-  border-radius: 0.35rem;
-  color: var(--unit-color);
-  background: color-mix(in srgb, var(--unit-color) 14%, transparent);
+  color: var(--muted);
 }
 .org-node__count {
   margin-inline-start: auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  gap: 4px;
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  color: var(--muted);
 }
 .org-node__positions {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 0.5rem;
-  padding: 0.25rem 1rem 1rem;
+  gap: 8px;
+  padding: 2px 14px 14px;
 }
 .org-pos {
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.6rem;
-  background: var(--bg-surface);
-  border: 1px solid transparent;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--sunken);
 }
 .org-pos--head {
   grid-column: 1 / -1;
-  border-color: color-mix(in srgb, var(--unit-color) 35%, transparent);
-  background: color-mix(in srgb, var(--unit-color) 6%, var(--bg-surface));
+  border-inline-start: 2px solid var(--unit-color);
+  background: var(--surface);
 }
 .org-pos__title {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  gap: 5px;
+  margin: 0 0 6px;
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 0.4rem;
+  color: var(--muted);
 }
-.org-pos__holders { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.org-pos__star { color: var(--warn); }
+.org-pos__holders { display: flex; flex-wrap: wrap; gap: 6px; }
 .org-holder {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.2rem 0.65rem 0.2rem 0.2rem;
+  gap: 8px;
+  padding-block: 3px;
+  padding-inline: 3px 10px;
+  border: 0;
   border-radius: 9999px;
-  color: var(--text-primary);
+  background: none;
+  font: inherit;
+  color: var(--text);
   transition: background-color 150ms ease;
 }
-[dir='rtl'] .org-holder { padding: 0.2rem 0.2rem 0.2rem 0.65rem; }
-button.org-holder:hover { background: var(--hover); }
-button.org-holder:focus-visible { outline: 2px solid var(--accent); }
-.org-holder__name { font-size: 0.875rem; font-weight: 500; }
-.org-holder--vacant { color: var(--text-muted); font-style: italic; }
+button.org-holder { cursor: pointer; }
+button.org-holder:hover { background: var(--line); }
+button.org-holder:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.org-holder__name { font-size: 13.5px; font-weight: 500; }
+.org-holder--vacant { color: var(--muted); font-style: italic; }
 
 .org-node__children {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-  padding-inline-start: 2rem;
+  gap: 12px;
+  margin-top: 12px;
+  padding-inline-start: 32px;
 }
 /* Connecteurs de l'arbre */
 .org-node__children::before {
   content: '';
   position: absolute;
-  inset-inline-start: 0.9rem;
-  top: -0.75rem;
-  bottom: 1.4rem;
-  border-inline-start: 2px solid var(--border);
+  inset-inline-start: 14px;
+  top: -12px;
+  bottom: 22px;
+  border-inline-start: 1px solid var(--line);
 }
 .org-node__children > .org-node::before {
   content: '';
   position: absolute;
-  inset-inline-start: -1.1rem;
-  top: 1.4rem;
-  width: 1.1rem;
-  border-top: 2px solid var(--border);
+  inset-inline-start: -18px;
+  top: 22px;
+  width: 18px;
+  border-top: 1px solid var(--line);
 }
 @media (max-width: 640px) {
-  .org-node__children { padding-inline-start: 1rem; }
-  .org-node__children::before { inset-inline-start: 0.35rem; }
-  .org-node__children > .org-node::before { inset-inline-start: -0.65rem; width: 0.65rem; }
+  .org-node__children { padding-inline-start: 16px; }
+  .org-node__children::before { inset-inline-start: 6px; }
+  .org-node__children > .org-node::before { inset-inline-start: -10px; width: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .org-node__chevron, .org-holder { transition: none; }
 }
 </style>
