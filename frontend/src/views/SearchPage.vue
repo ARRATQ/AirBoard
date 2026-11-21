@@ -1,14 +1,7 @@
 <template>
   <div class="w-full p-6">
     <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-        {{ $t('search.title') }}
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        {{ $t('search.subtitle') }}
-      </p>
-    </div>
+    <PageHeader :title="$t('search.title')" :description="$t('search.subtitle')" />
 
     <!-- Search Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
@@ -19,7 +12,7 @@
           v-model="searchQuery"
           type="text"
           :placeholder="$t('search.placeholder')"
-          class="w-full ps-10 pe-10 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          class="w-full ps-10 pe-10 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           @input="debouncedSearch"
         />
         <button
@@ -245,6 +238,7 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

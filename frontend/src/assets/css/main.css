@@ -46,6 +46,14 @@
   --f-body: var(--f-sans);
   --f-num:  'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Échelle de texte commune au menu et au contenu : le menu parle à la taille du texte
+     courant, les titres de page restent à 22 px. */
+  --fs-eyebrow: 11px;
+  --fs-small:   12.5px;
+  --fs-nav:     13px;
+  --fs-body:    13.5px;
+  --fs-page:    22px;
+
   /* Échelle primary par défaut (claude), en canaux RGB pour Tailwind <alpha-value> */
   --primary-50:  252 244 242;
   --primary-100: 249 233 228;
@@ -165,10 +173,17 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--f-body);
-  font-size: 13.5px;
+  font-size: var(--fs-body);
   line-height: 1.45;
   overflow-x: hidden;
   max-width: 100vw;
+}
+
+/* Champs de saisie du contenu : même taille que le texte qui les entoure (le plugin forms
+   et d'anciennes pages imposaient 16 à 18 px). :where garde une spécificité faible, les
+   composants qui fixent leur propre taille restent prioritaires. */
+.main-content :where(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea) {
+  font-size: inherit;
 }
 
 html {
@@ -232,7 +247,7 @@ html {
 }
 
 .sidebar-brand {
-  @apply text-xl font-bold text-gray-900 dark:text-white transition-all duration-300;
+  @apply text-lg font-bold text-gray-900 dark:text-white transition-all duration-300;
 }
 
 .sidebar-collapsed .sidebar-brand {
@@ -256,7 +271,9 @@ html {
 }
 
 .sidebar-section-title {
-  @apply px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-200 transition-all duration-300;
+  @apply px-3 mb-2 font-semibold uppercase text-gray-700 dark:text-gray-200 transition-all duration-300;
+  font-size: var(--fs-eyebrow);
+  letter-spacing: 0.08em;
 }
 
 .sidebar-collapsed .sidebar-section-title {
@@ -264,7 +281,7 @@ html {
 }
 
 .sidebar-subsection-title {
-  @apply px-3 mt-4 mb-2 text-xs font-medium text-gray-600 dark:text-gray-400 transition-all duration-300;
+  @apply px-3 mt-4 mb-2 text-[12px] font-medium text-gray-600 dark:text-gray-400 transition-all duration-300;
 }
 
 .sidebar-collapsed .sidebar-subsection-title {
@@ -272,7 +289,8 @@ html {
 }
 
 .nav-link {
-  @apply flex items-center gap-3 px-3 py-2 ms-3 rounded-lg text-xs font-medium transition-all duration-300;
+  @apply flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-all duration-300;
+  font-size: var(--fs-nav);
 }
 
 .sidebar-collapsed .nav-link {

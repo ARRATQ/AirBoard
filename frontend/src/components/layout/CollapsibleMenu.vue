@@ -12,7 +12,7 @@
       :title="compact ? title : undefined"
       :aria-label="compact ? title : undefined"
     >
-      <div class="flex items-center gap-2 flex-1 min-w-0" :class="{ 'justify-center': compact }">
+      <div class="flex items-center gap-3 flex-1 min-w-0" :class="{ 'justify-center': compact }">
         <Icon :icon="icon" class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
         <span v-if="!compact" class="truncate">{{ title }}</span>
       </div>
@@ -126,7 +126,8 @@ const toggle = () => {
 }
 
 .collapsible-menu-header {
-  @apply w-full flex items-center justify-between gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+  @apply w-full flex items-center justify-between gap-2 px-3 py-2 font-semibold rounded-lg transition-colors;
+  font-size: var(--fs-nav);
   @apply text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700;
   @apply hover:text-gray-900 dark:hover:text-white;
 }
@@ -144,7 +145,8 @@ const toggle = () => {
 }
 
 .collapsible-menu.nested .collapsible-menu-header {
-  @apply text-xs py-1.5 ps-2;
+  @apply py-1.5 ps-2;
+  font-size: var(--fs-small);
 }
 
 .collapsible-menu-content {
@@ -157,9 +159,11 @@ const toggle = () => {
 
 .collapsible-menu-content :deep(.nav-link) {
   @apply ps-3 ms-3;
+  font-size: var(--fs-small);
 }
 
 .collapsible-menu.nested .collapsible-menu-content :deep(.nav-link) {
-  @apply ps-4 text-xs py-1.5;
+  @apply ps-4 py-1.5;
+  font-size: var(--fs-small);
 }
 </style>

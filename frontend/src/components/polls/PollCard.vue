@@ -454,8 +454,11 @@ const getWaitingMessage = () => {
   position: relative;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   isolation: isolate;
+  /* Les longs textes (question, options, liens) passent à la ligne au lieu d'élargir la carte. */
+  overflow-wrap: anywhere;
   /* Prevent content from bleeding outside */
   contain: layout;
   /* Ensure proper stacking context */
@@ -559,10 +562,16 @@ const getWaitingMessage = () => {
   color: var(--text-primary);
   margin: 0;
   line-height: 1.4;
-  word-wrap: break-word;
+  /* Question lisible : deux lignes carte fermée, en entier une fois ouverte. */
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.poll-card.is-expanded .poll-title {
+  display: block;
+  overflow: visible;
 }
 
 /* Indicateur de vote dans le titre */
@@ -799,7 +808,7 @@ const getWaitingMessage = () => {
 
 .option-text {
   flex: 1;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--text-primary);
 }
 
@@ -831,7 +840,7 @@ const getWaitingMessage = () => {
 
 .waiting-message {
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: var(--fs-body);
   margin-bottom: 1rem;
 }
 
