@@ -35,6 +35,18 @@ pour un utilisateur comme pour un administrateur.
 | `9a29669` | Chantier 2, back : vue et XP comptées une seule fois en concurrence (`ON CONFLICT DO NOTHING`, point 7) |
 | `4a73cfb` | Chantier 2, back : N+1 supprimés sur `/home` (108 → 55 requêtes SQL), `/dashboard`, rapports par groupe et par utilisateur (nombre de requêtes constant). Comptage par `go test -tags integration -run TestQueryCounts ./handlers/` |
 | `7b4e0f5` | Chantier 2 : gzip des réponses API dans nginx aussi derrière un proxy (`gzip_proxied any`) |
+| `d71444d` | Chantier 2, front : icônes Iconify embarquées (plugin Vite `vite-plugins/iconsPlugin.js`) : chaque module reçoit les icônes qu'il cite ; celles stockées en base (applications, catégories) viennent de 640 petits paquets locaux chargés à la demande (mdi, lucide, heroicons) ; api.iconify.design retiré de la CSP |
+| `286a734` | Chantier 2, front : langues chargées à la demande (anglais de secours en arrière-plan) ; IBM Plex Sans Arabic chargée seulement en `ar` |
+| `982979b` | Chantier 2, front : `loading="lazy"` sur les images sous la ligne de flottaison et celles des articles ; lowlight retiré de TiptapRenderer, où il ne colorait rien (`generateHTML` ne lance pas les plugins ProseMirror) : 36 → 1,2 kB compressés |
+| `076bc49` | Chantier 2, front : météo de l'accueil en cache 30 min (`composables/useWeather.js`), ville gardée par zone d'environ 1 km |
+| `192507f` | Chantier 2, front : date-fns seule, dayjs retiré |
+| `956194f` | Chantier 2, back : `NOT EXISTS` au lieu de `(SELECT COUNT(*) …) = 0` (26 occurrences restantes : events, home, news, polls, search), vérifié par `TestVisibilityQueries` |
+| `7077ab0` | Chantier 2 : `GET /admin/users` paginé côté SQL (page, `page_size` ≤ 500, recherche, rôle, statut, tri en liste blanche) ; page Utilisateurs et sélecteur d'admins de groupe adaptés ; `PaginationBar` partagé |
+| `2ccc83f` | Chantier 2 : commentaires et file de modération paginés (20 par page, ≤ 100), clé `comments` conservée ; section commentaires et page de modération avec `PaginationBar` |
+| `2457a4c` | Chantier 2 : listes app-groups et applications de l'admin de groupe paginées (100 par défaut, ≤ 1000) ; le front demande 1000 lignes en attendant une vraie pagination |
+| `41d7491` | Correctif : en arabe, la barre de pagination retournait toute la page (`:global([dir='rtl']) .x` compilé en `[dir='rtl']`), défaut déjà présent dans DataTable sur main |
+| (suivi) | Correctifs : les sélecteurs de groupes d'applications de l'admin voient tous les groupes (et non 10) ; les liens des articles s'ouvrent toujours dans un nouvel onglet (`DOMPurify.addHook`) |
+| (suivi) | Après fusion du chantier 4 : graisse 700 chargée ; `/group-admin/managed-groups` renvoie `user_count` au lieu des utilisateurs (adresses e-mail comprises) ; icône `mdi:poll-check` remplacée ; écrans du chantier 4 adaptés aux listes paginées |
 | `728934c` | Chantier 4 : lien actif exact (`utils/navigation.js`), libellés et `aria-label` du menu replié, un seul hamburger |
 | `ff5e747` | Chantier 4 : une page par module pour l'admin et l'admin de groupe (actualités, événements, sondages, ressources, catégories) ; rôles et périmètre dans `config/access.js` et `useManagementScope` ; anciennes URL `/group-admin/…` redirigées |
 | `c0ba933` | Chantier 4 : menu admin décrit dans `config/navigation.js`, rangé par domaine ; taxonomies en onglets (`SectionTabs`) ; annuaire sous `/admin/directory` |
@@ -44,6 +56,22 @@ pour un utilisateur comme pour un administrateur.
 Mesures du chantier 2 (local) : JS+CSS au premier chargement 240 → 205 kB compressés ; appels API au
 chargement de `/home` 9 → 8 (utilisateur) et 11 → 9 (admin), puis 7 / 8 quand la vérification de mise à
 jour a moins de 4 h.
+
+Mesures de la seconde partie (build de prod servi en local, admin, `/home` en français, gzip niveau 9) :
+
+| | main (`c4918a7`) | branche |
+|---|---|---|
+| JS+CSS du point d'entrée (avant toute route) | 222,2 kB | 161,0 kB |
+| JS+CSS bloquants pour afficher l'accueil (entrée + route + langue) | 232,7 kB | 193,7 kB |
+| Chargés ensuite en arrière-plan | — | anglais de secours 16,6 kB ; table et 7 paquets d'icônes 38,9 kB |
+| Requêtes au chargement de `/home` | 32 | 29 (30 en `ar`) |
+| dont api.iconify.design | 7 | 0 |
+| dont polices (Google Fonts) | 10 | 4 (5 en `ar`) |
+| dont API | 8 | 8 |
+
+Le total chargé par l'accueil est un peu plus élevé (249 kB contre 233 kB plus les réponses JSON
+d'Iconify), mais le chemin bloquant est plus court de 39 kB et aucun domaine tiers n'est plus sollicité
+pour les icônes. Les paquets d'icônes ont un nom haché : le navigateur les garde en cache.
 
 À vérifier après déploiement : une connexion Microsoft réelle, le chat (WebSocket : `FRONTEND_URL` doit être
 l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactivation du compte démo `user`.
@@ -73,13 +101,19 @@ l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactiv
      (`models.go:251`) ;
    - la liste noire de la recherche bloque les apostrophes (« l'équipe » échoue, `search.go:96`).
 
-## Chantier 2 — Performance (gains rapides) — en partie fait
+## Chantier 2 — Performance (gains rapides) — fait
 
-Fait : front 1, 4, 5, 6 et le chunk `ui` / `console.log` du point 8 ; back 1, 3, 4, 7 et 8 (cache du
-middleware, chantier 1). Gzip (back 2) traité dans nginx, par où passe toute l'API en prod.
-Reste : front 2 (icônes locales), 3 (langues à la demande), 7 (polices, `loading="lazy"`), le reste du 8 ;
-back 5 (`NOT EXISTS` : seules les requêtes de `home.go` touchées ici sont converties), 6 (pagination),
-et les rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1).
+Fait : front 1 à 8 ; back 1 à 8. Gzip (back 2) traité dans nginx, par où passe toute l'API en prod.
+Polices (front 7) : la police arabe n'est plus chargée que pour `ar` ; la graisse 700 d'IBM Plex est
+chargée (le code utilisait le gras, dessiné jusque-là avec la 600 ; IBM Plex s'arrête à 700, donc 800
+et `font-black` s'affichent en 700).
+
+Reste, ou à suivre :
+- écrans de ressources et de catégories (admin et admin de groupe) : ils demandent une page de 1000
+  lignes ; leur donner une vraie pagination si les volumes l'exigent ;
+- rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1) ;
+- une icône d'une autre collection que mdi, lucide ou heroicons saisie en base ne s'affiche plus
+  (auparavant récupérée sur api.iconify.design).
 
 **Frontend** (premier chargement : environ 235 kB de JS compressé avant la moindre route)
 1. Retirer la transition de page `out-in` de 0,3 s (`App.vue:31-41`), qui ajoute environ 600 ms à chaque

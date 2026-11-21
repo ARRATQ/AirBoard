@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        {{ $t('comments.title') }} ({{ comments.length }})
+        {{ $t('comments.title') }} ({{ total }})
       </h3>
     </div>
 
@@ -52,6 +52,7 @@
         @edit="editComment"
         @delete="deleteCommentData"
       />
+      <PaginationBar v-model:page="page" :page-size="PAGE_SIZE" :total="total" />
     </div>
 
     <!-- Message si aucun commentaire -->
@@ -72,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -81,6 +82,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { getComments, createComment, updateComment, deleteComment, getCommentSettings } from '@/services/api'
 import CommentItem from './CommentItem.vue'
 import CommentEditModal from './CommentEditModal.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 
 const props = defineProps({
   entityType: {
@@ -98,7 +100,11 @@ const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+// L'API renvoie les commentaires par pages, du plus récent au plus ancien.
+const PAGE_SIZE = 20
 const comments = ref([])
+const total = ref(0)
+const page = ref(1)
 const newComment = ref('')
 const isSubmitting = ref(false)
 const editingComment = ref(null)
@@ -117,8 +123,13 @@ const sortedComments = computed(() => {
 
 const loadComments = async () => {
   try {
-    const response = await getComments(props.entityType, props.entityId)
+    const response = await getComments(props.entityType, props.entityId, { page: page.value, page_size: PAGE_SIZE })
     comments.value = response.comments || []
+    total.value = response.total ?? comments.value.length
+    // Dernier commentaire d'une page supprimé : revenir à la page précédente.
+    if (comments.value.length === 0 && page.value > 1) {
+      page.value -= 1
+    }
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires:', error)
   }
@@ -154,7 +165,8 @@ const submitComment = async () => {
       entity_id: props.entityId
     })
     newComment.value = ''
-    await loadComments()
+    if (page.value === 1) await loadComments()
+    else page.value = 1
   } catch (error) {
     console.error('Erreur lors de la création du commentaire:', error)
     appStore.showError(t('comments.createError'))
@@ -193,6 +205,8 @@ const deleteCommentData = async (commentId) => {
     appStore.showError(t('comments.deleteError'))
   }
 }
+
+watch(page, loadComments)
 
 onMounted(() => {
   loadSettings()

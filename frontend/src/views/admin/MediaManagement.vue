@@ -95,7 +95,7 @@
       >
         <!-- Preview -->
         <div class="relative h-48 bg-gray-800 rounded-t-lg overflow-hidden">
-          <img
+          <img loading="lazy"
             v-if="isImage(media.mime_type)"
             :src="getMediaUrl(media.url)"
             :alt="media.filename"

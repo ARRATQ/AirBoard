@@ -38,7 +38,7 @@
         <div class="card p-4">
           <div class="flex items-center gap-3">
             <div class="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <Icon icon="mdi:poll-check" class="h-6 w-6 text-green-600" />
+              <Icon icon="mdi:checkbox-marked-circle-outline" class="h-6 w-6 text-green-600" />
             </div>
             <div>
               <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('polls.adminPollsManagement.stats.active') }}</p>

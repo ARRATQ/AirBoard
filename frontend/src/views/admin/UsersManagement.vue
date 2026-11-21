@@ -222,13 +222,15 @@
         </div>
 
         <!-- Empty state -->
-        <div v-if="filteredUsers.length === 0 && users.length > 0" class="text-center py-12">
+        <PaginationBar v-if="!showDeleted" v-model:page="page" :page-size="pageSize" :total="total" />
+
+        <div v-if="!showDeleted && users.length === 0 && hasFilters" class="text-center py-12">
           <Icon icon="mdi:magnify" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('users.noResultsTitle') }}</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('users.noResultsText') }}</p>
         </div>
 
-        <div v-else-if="users.length === 0" class="text-center py-12">
+        <div v-else-if="!showDeleted && users.length === 0 && !loadingUsers" class="text-center py-12">
           <Icon icon="mdi:account-multiple" class="mx-auto h-12 w-12 text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('users.emptyTitle') }}</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('users.emptyText') }}</p>
@@ -295,13 +297,14 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 
 const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
@@ -322,63 +325,17 @@ const statusFilter = ref('')
 const sortBy = ref('username')
 const sortOrder = ref('asc')
 
+// Pagination, recherche, filtres et tri sont faits par le serveur (GET /admin/users).
+const page = ref(1)
+const pageSize = 25
+const total = ref(0)
+const loadingUsers = ref(false)
+const SEARCH_DEBOUNCE_MS = 300
+
+const hasFilters = computed(() => Boolean(searchQuery.value.trim() || roleFilter.value || statusFilter.value))
+
 // Computed
-const filteredUsers = computed(() => {
-  let filtered = users.value
-
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user =>
-      user.username.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.first_name?.toLowerCase().includes(query) ||
-      user.last_name?.toLowerCase().includes(query)
-    )
-  }
-
-  // Filter by role
-  if (roleFilter.value) {
-    filtered = filtered.filter(user => user.role === roleFilter.value)
-  }
-
-  // Filter by status
-  if (statusFilter.value === 'active') {
-    filtered = filtered.filter(user => user.is_active)
-  } else if (statusFilter.value === 'inactive') {
-    filtered = filtered.filter(user => !user.is_active)
-  }
-
-  // Sort based on current sort column and order
-  if (Array.isArray(filtered)) {
-    filtered.sort((a, b) => {
-      let aValue = a[sortBy.value]
-      let bValue = b[sortBy.value]
-
-      // Handle null values
-      if (aValue === null || aValue === undefined) aValue = ''
-      if (bValue === null || bValue === undefined) bValue = ''
-
-      // Compare values based on type
-      let comparison = 0
-      if (typeof aValue === 'string') {
-        comparison = aValue.toLowerCase().localeCompare(bValue.toString().toLowerCase())
-      } else if (typeof aValue === 'boolean') {
-        comparison = aValue === bValue ? 0 : aValue ? 1 : -1
-      } else if (aValue instanceof Date || bValue instanceof Date) {
-        const aDate = new Date(aValue)
-        const bDate = new Date(bValue)
-        comparison = aDate - bDate
-      } else {
-        comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0
-      }
-
-      return sortOrder.value === 'asc' ? comparison : -comparison
-    })
-  }
-
-  return filtered
-})
+const filteredUsers = computed(() => users.value)
 
 // Computed pour afficher soit les utilisateurs actifs, soit les supprimés
 const displayedUsers = computed(() => {
@@ -438,19 +395,52 @@ const formatLastConnection = (lastLogin) => {
   }
 }
 
+let usersRequest = 0
+
 const loadUsers = async () => {
+  const request = ++usersRequest
+  loadingUsers.value = true
   try {
-    appStore.setLoading(true)
-    const data = await adminService.getUsers()
-    users.value = Array.isArray(data) ? data : []
+    const data = await adminService.getUsers({
+      page: page.value,
+      page_size: pageSize,
+      search: searchQuery.value.trim() || undefined,
+      role: roleFilter.value || undefined,
+      status: statusFilter.value || undefined,
+      sort: sortBy.value,
+      order: sortOrder.value,
+    })
+    if (request !== usersRequest) return // une recherche plus récente a déjà répondu
+    users.value = data.data || []
+    total.value = data.total || 0
+    // Page devenue vide (dernier utilisateur supprimé) : revenir à la dernière page existante
+    if (users.value.length === 0 && total.value > 0 && page.value > 1) {
+      page.value = Math.ceil(total.value / pageSize)
+    }
   } catch (error) {
+    if (request !== usersRequest) return
     console.error('Erreur lors du chargement des utilisateurs:', error)
     users.value = []
+    total.value = 0
     appStore.showError('Erreur lors du chargement des utilisateurs')
   } finally {
-    appStore.setLoading(false)
+    if (request === usersRequest) loadingUsers.value = false
   }
 }
+
+// Revenir en page 1 quand les critères changent ; la recherche attend la fin de la frappe.
+const reloadFromFirstPage = () => {
+  if (page.value !== 1) page.value = 1 // le watcher de page recharge
+  else loadUsers()
+}
+let searchTimer = null
+watch(searchQuery, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(reloadFromFirstPage, SEARCH_DEBOUNCE_MS)
+})
+watch([roleFilter, statusFilter, sortBy, sortOrder], reloadFromFirstPage)
+watch(page, loadUsers)
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 const loadDeletedUsers = async () => {
   try {

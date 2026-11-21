@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"airboard/middleware"
@@ -18,110 +19,155 @@ func NewGroupAdminHandler(db *gorm.DB) *GroupAdminHandler {
 	return &GroupAdminHandler{db: db}
 }
 
-// GetAppGroups retourne les AppGroups accessibles par les groupes administrés
-func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
-	role := c.GetString("role")
+// groupAdminPageLimits : les écrans de l'admin de groupe filtrent côté client et demandent une
+// grande page ; le plafond borne quand même la requête.
+var groupAdminPageLimits = pageLimits{Default: 100, Max: 1000}
 
-	if role == "admin" {
-		// Admin global voit tous les AppGroups
-		var appGroups []models.AppGroup
-		h.db.Order("\"order\" ASC, name ASC").
-			Preload("Applications").
-			Preload("OwnerGroup").
-			Find(&appGroups)
-		c.JSON(http.StatusOK, appGroups)
-		return
-	}
-
-	// Group admin voit uniquement les AppGroups privés (is_private = true) liés à ses groupes administrés
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if len(managedGroupIDs) == 0 {
-		c.JSON(http.StatusOK, []models.AppGroup{})
-		return
-	}
-
-	// Récupérer les AppGroups privés via la relation many-to-many avec les groupes administrés
-	var appGroups []models.AppGroup
-	h.db.Distinct().
-		Joins("JOIN group_app_groups ON group_app_groups.app_group_id = app_groups.id").
-		Where("group_app_groups.group_id IN ? AND app_groups.is_private = ?", managedGroupIDs, true).
-		Order("\"order\" ASC, name ASC").
-		Preload("Applications").
-		Preload("OwnerGroup").
-		Find(&appGroups)
-
-	c.JSON(http.StatusOK, appGroups)
+// privateAppGroupIDs : sous-requête des AppGroups privés liés aux groupes administrés.
+func (h *GroupAdminHandler) privateAppGroupIDs(managedGroupIDs []uint) *gorm.DB {
+	return h.db.Table("group_app_groups").
+		Select("group_app_groups.app_group_id").
+		Joins("JOIN app_groups ON app_groups.id = group_app_groups.app_group_id").
+		Where("group_app_groups.group_id IN ? AND app_groups.is_private = ? AND app_groups.deleted_at IS NULL", managedGroupIDs, true)
 }
 
-// GetManagedGroups retourne les groupes administrés par l'utilisateur
-func (h *GroupAdminHandler) GetManagedGroups(c *gin.Context) {
-	role := c.GetString("role")
+// respondGroupAdminListError journalise l'erreur SQL et renvoie un message sans détail technique.
+func respondGroupAdminListError(c *gin.Context, what string, err error) {
+	log.Printf("group-admin: lecture des %s impossible : %v", what, err)
+	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+		Error:   "Internal Server Error",
+		Message: "Erreur lors de la récupération des " + what,
+		Code:    http.StatusInternalServerError,
+	})
+}
 
-	if role == "admin" {
-		// Admin global voit tous les groupes
-		var groups []models.Group
-		h.db.Where("is_active = ?", true).Preload("Users").Preload("AppGroups").Find(&groups)
-		c.JSON(http.StatusOK, groups)
+// GetAppGroups retourne une page des AppGroups accessibles : tous pour l'admin global,
+// les AppGroups privés liés aux groupes administrés pour un admin de groupe.
+func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
+	page := parsePageParams(c, groupAdminPageLimits)
+	query := h.db.Model(&models.AppGroup{})
+
+	if c.GetString("role") != "admin" {
+		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		if len(managedGroupIDs) == 0 {
+			c.JSON(http.StatusOK, page.Response([]models.AppGroup{}, 0))
+			return
+		}
+		query = query.Where("app_groups.id IN (?)", h.privateAppGroupIDs(managedGroupIDs))
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		respondGroupAdminListError(c, "groupes d'applications", err)
+		return
+	}
+	var appGroups []models.AppGroup
+	if err := query.Order("\"order\" ASC, name ASC, id ASC").
+		Preload("Applications").
+		Preload("OwnerGroup").
+		Limit(page.Size).Offset(page.Offset()).
+		Find(&appGroups).Error; err != nil {
+		respondGroupAdminListError(c, "groupes d'applications", err)
 		return
 	}
 
-	// Group admin voit uniquement ses groupes
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if len(managedGroupIDs) == 0 {
-		c.JSON(http.StatusOK, []models.Group{})
-		return
+	c.JSON(http.StatusOK, page.Response(appGroups, total))
+}
+
+// managedGroup est un groupe accompagné de son nombre de membres : la liste des utilisateurs
+// (adresses e-mail comprises) n'est pas envoyée.
+type managedGroup struct {
+	models.Group
+	UserCount int64 `json:"user_count"`
+}
+
+// GetManagedGroups retourne les groupes actifs administrés par l'utilisateur (tous pour l'admin
+// global), avec leur nombre de membres.
+func (h *GroupAdminHandler) GetManagedGroups(c *gin.Context) {
+	query := h.db.Where("is_active = ?", true)
+	if c.GetString("role") != "admin" {
+		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		if len(managedGroupIDs) == 0 {
+			c.JSON(http.StatusOK, []managedGroup{})
+			return
+		}
+		query = query.Where("id IN ?", managedGroupIDs)
 	}
 
 	var groups []models.Group
-	h.db.Where("id IN ? AND is_active = ?", managedGroupIDs, true).
-		Preload("Users").
-		Preload("AppGroups").
-		Find(&groups)
+	if err := query.Order("name ASC").Find(&groups).Error; err != nil {
+		respondGroupAdminListError(c, "groupes gérés", err)
+		return
+	}
 
-	c.JSON(http.StatusOK, groups)
+	counts, err := h.groupUserCounts(groups)
+	if err != nil {
+		respondGroupAdminListError(c, "groupes gérés", err)
+		return
+	}
+	result := make([]managedGroup, len(groups))
+	for i, g := range groups {
+		result[i] = managedGroup{Group: g, UserCount: counts[g.ID]}
+	}
+	c.JSON(http.StatusOK, result)
 }
 
-// GetApplications retourne les applications des AppGroups privés gérés
+// groupUserCounts compte les membres (comptes non supprimés) de chaque groupe en une requête.
+func (h *GroupAdminHandler) groupUserCounts(groups []models.Group) (map[uint]int64, error) {
+	counts := make(map[uint]int64, len(groups))
+	if len(groups) == 0 {
+		return counts, nil
+	}
+	ids := make([]uint, len(groups))
+	for i, g := range groups {
+		ids[i] = g.ID
+	}
+	var rows []struct {
+		GroupID uint
+		Total   int64
+	}
+	err := h.db.Table("user_groups").
+		Select("user_groups.group_id, COUNT(*) AS total").
+		Joins("JOIN users ON users.id = user_groups.user_id AND users.deleted_at IS NULL").
+		Where("user_groups.group_id IN ?", ids).
+		Group("user_groups.group_id").
+		Scan(&rows).Error
+	for _, r := range rows {
+		counts[r.GroupID] = r.Total
+	}
+	return counts, err
+}
+
+// GetApplications retourne une page des applications : toutes pour l'admin global, celles des
+// AppGroups privés liés aux groupes administrés pour un admin de groupe.
 func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
-	role := c.GetString("role")
+	page := parsePageParams(c, groupAdminPageLimits)
+	query := h.db.Model(&models.Application{})
 
-	if role == "admin" {
-		// Admin global voit toutes les applications
-		var applications []models.Application
-		h.db.Order("\"order\" ASC, name ASC").
-			Preload("AppGroup").
-			Find(&applications)
-		c.JSON(http.StatusOK, applications)
-		return
+	if c.GetString("role") != "admin" {
+		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		if len(managedGroupIDs) == 0 {
+			c.JSON(http.StatusOK, page.Response([]models.Application{}, 0))
+			return
+		}
+		query = query.Where("app_group_id IN (?)", h.privateAppGroupIDs(managedGroupIDs))
 	}
 
-	// Group admin voit uniquement les applications des AppGroups privés liés à ses groupes
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if len(managedGroupIDs) == 0 {
-		c.JSON(http.StatusOK, []models.Application{})
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		respondGroupAdminListError(c, "applications", err)
 		return
 	}
-
-	// Récupérer les IDs des AppGroups privés accessibles
-	var appGroupIDs []uint
-	h.db.Model(&models.AppGroup{}).
-		Distinct("app_groups.id").
-		Joins("JOIN group_app_groups ON group_app_groups.app_group_id = app_groups.id").
-		Where("group_app_groups.group_id IN ? AND app_groups.is_private = ?", managedGroupIDs, true).
-		Pluck("app_groups.id", &appGroupIDs)
-
-	if len(appGroupIDs) == 0 {
-		c.JSON(http.StatusOK, []models.Application{})
-		return
-	}
-
 	var applications []models.Application
-	h.db.Where("app_group_id IN ?", appGroupIDs).
-		Order("\"order\" ASC, name ASC").
+	if err := query.Order("\"order\" ASC, name ASC, id ASC").
 		Preload("AppGroup").
-		Find(&applications)
+		Limit(page.Size).Offset(page.Offset()).
+		Find(&applications).Error; err != nil {
+		respondGroupAdminListError(c, "applications", err)
+		return
+	}
 
-	c.JSON(http.StatusOK, applications)
+	c.JSON(http.StatusOK, page.Response(applications, total))
 }
 
 // CreateApplication crée une nouvelle application dans un AppGroup privé géré

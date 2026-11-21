@@ -5,7 +5,7 @@
   >
     <!-- Event Image -->
     <div v-if="event.cover_image" class="aspect-video overflow-hidden">
-      <img
+      <img loading="lazy"
         :src="event.cover_image"
         :alt="event.title"
         class="w-full h-full object-cover"

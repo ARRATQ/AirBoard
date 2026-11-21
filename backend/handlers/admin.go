@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"airboard/config"
 	"airboard/middleware"
@@ -677,20 +678,35 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 // ============ GESTION DES UTILISATEURS ============
 
 // @Summary Lister les utilisateurs
-// @Description Récupère tous les utilisateurs (admin uniquement)
+// @Description Liste paginée des utilisateurs, avec recherche, filtres et tri (admin uniquement)
 // @Tags Admin
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {array} models.User
+// @Param page query int false "Numéro de page" default(1)
+// @Param page_size query int false "Taille de page (max 500)" default(25)
+// @Param search query string false "Nom d'utilisateur, e-mail, prénom ou nom"
+// @Param role query string false "admin, editor ou user"
+// @Param status query string false "active ou inactive"
+// @Param sort query string false "username, email, role, last_login, is_active ou created_at"
+// @Param order query string false "asc ou desc"
+// @Success 200 {object} models.PaginatedResponse
 // @Router /admin/users [get]
 func (h *AdminHandler) GetUsers(c *gin.Context) {
+	page := parsePageParams(c, userPageLimits)
+	query := filterUsers(h.db.Model(&models.User{}), c.Query("search"), c.Query("role"), c.Query("status"))
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		respondUsersError(c)
+		return
+	}
+
 	var users []models.User
-	if err := h.db.Preload("Groups").Preload("AdminOfGroups").Find(&users).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des utilisateurs",
-			Code:    http.StatusInternalServerError,
-		})
+	if err := query.Preload("Groups").Preload("AdminOfGroups").
+		Order(userSortClause(c.Query("sort"), c.Query("order"))).
+		Limit(page.Size).Offset(page.Offset()).
+		Find(&users).Error; err != nil {
+		respondUsersError(c)
 		return
 	}
 
@@ -699,7 +715,66 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 		users[i].Password = ""
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, page.Response(users, total))
+}
+
+var userPageLimits = pageLimits{Default: 25, Max: 500}
+
+// Colonnes triables de la liste des utilisateurs (liste blanche : la valeur part dans ORDER BY).
+var userSortColumns = map[string]string{
+	"username":   "username",
+	"email":      "email",
+	"role":       "role",
+	"last_login": "last_login",
+	"is_active":  "is_active",
+	"created_at": "created_at",
+}
+
+// userSortClause construit un ORDER BY sûr ; l'id départage pour une pagination stable.
+func userSortClause(sort, order string) string {
+	column, ok := userSortColumns[sort]
+	if !ok {
+		column = "username"
+	}
+	direction := "ASC"
+	if strings.EqualFold(order, "desc") {
+		direction = "DESC"
+	}
+	nulls := ""
+	if column == "last_login" {
+		nulls = " NULLS LAST"
+	}
+	return column + " " + direction + nulls + ", id ASC"
+}
+
+// filterUsers applique la recherche texte, le rôle et le statut.
+func filterUsers(query *gorm.DB, search, role, status string) *gorm.DB {
+	if term := strings.TrimSpace(search); term != "" {
+		like := "%" + escapeLikePattern(strings.ToLower(term)) + "%"
+		query = query.Where(
+			"LOWER(username) LIKE ? OR LOWER(email) LIKE ? OR LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ?",
+			like, like, like, like,
+		)
+	}
+	switch role {
+	case "admin", "editor", "user":
+		query = query.Where("role = ?", role)
+	}
+	switch status {
+	case "active":
+		query = query.Where("is_active = ?", true)
+	case "inactive":
+		query = query.Where("is_active = ?", false)
+	}
+	return query
+}
+
+func respondUsersError(c *gin.Context) {
+	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+		Error:   "Internal Server Error",
+		Message: "Erreur lors de la récupération des utilisateurs",
+		Code:    http.StatusInternalServerError,
+	})
 }
 
 // @Summary Créer un utilisateur

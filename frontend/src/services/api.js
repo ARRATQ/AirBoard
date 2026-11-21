@@ -256,8 +256,9 @@ export const homeService = {
 // Admin Services
 export const adminService = {
   // App Groups
+  // Paginé côté serveur (10 par défaut) : les écrans admin affichent toute la liste.
   async getAppGroups(params = {}) {
-    const response = await api.get('/admin/app-groups', { params })
+    const response = await api.get('/admin/app-groups', { params: { limit: 1000, ...params } })
     return response.data.data || response.data
   },
 
@@ -297,10 +298,11 @@ export const adminService = {
     return response.data
   },
 
-  // Users
-  async getUsers() {
-    const response = await api.get('/admin/users')
-    return response.data.data || response.data
+  // Users : réponse paginée { data, total, page, page_size, total_pages }
+  // params : page, page_size (max 500), search, role, status, sort, order
+  async getUsers(params = {}) {
+    const response = await api.get('/admin/users', { params })
+    return response.data
   },
 
   async createUser(data) {
@@ -714,7 +716,8 @@ export const newsService = {
 export const groupAdminService = {
   // AppGroups (scoped to managed groups)
   async getAppGroups(params = {}) {
-    const response = await api.get('/group-admin/app-groups', { params })
+    // Liste paginée côté serveur ; les vues l'affichent en entier, d'où la page maximale par défaut.
+    const response = await api.get('/group-admin/app-groups', { params: { page_size: 1000, ...params } })
     return response.data.data || response.data
   },
 
@@ -735,7 +738,8 @@ export const groupAdminService = {
 
   // Applications (scoped to managed groups)
   async getApplications(params = {}) {
-    const response = await api.get('/group-admin/applications', { params })
+    // Liste paginée côté serveur ; les vues l'affichent en entier, d'où la page maximale par défaut.
+    const response = await api.get('/group-admin/applications', { params: { page_size: 1000, ...params } })
     return response.data.data || response.data
   },
 
@@ -1099,9 +1103,10 @@ export const emailService = {
 }
 
 // Comments Service
-export const getComments = async (entityType, entityId) => {
+// Réponse paginée : { comments, total, page, page_size, total_pages }
+export const getComments = async (entityType, entityId, params = {}) => {
   const response = await api.get('/comments', {
-    params: { entity_type: entityType, entity_id: entityId }
+    params: { entity_type: entityType, entity_id: entityId, ...params }
   })
   return response.data
 }
@@ -1126,8 +1131,8 @@ export const getCommentSettings = async () => {
   return response.data
 }
 
-export const getPendingComments = async () => {
-  const response = await api.get('/admin/comments/pending')
+export const getPendingComments = async (params = {}) => {
+  const response = await api.get('/admin/comments/pending', { params })
   return response.data
 }
 
@@ -1418,8 +1423,9 @@ export const commentsService = {
   },
 
   // Admin
-  async getPendingComments() {
-    const response = await api.get('/admin/comments/pending')
+  // params : page, page_size (max 100) ; réponse { comments, total, page, page_size, total_pages }
+  async getPendingComments(params = {}) {
+    const response = await api.get('/admin/comments/pending', { params })
     return response.data
   },
 

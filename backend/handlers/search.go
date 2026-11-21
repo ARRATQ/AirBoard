@@ -217,7 +217,7 @@ func (h *SearchHandler) searchNews(userID uint, userRole string, combinedGroupID
 		// Filtre de visibilité par groupes
 		if len(combinedGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0
+				NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
 				OR EXISTS (
 					SELECT 1 FROM news_target_groups
 					WHERE news_target_groups.news_id = news.id
@@ -226,7 +226,7 @@ func (h *SearchHandler) searchNews(userID uint, userRole string, combinedGroupID
 			`, combinedGroupIDs)
 		} else {
 			// Pas de groupes : uniquement les news globales (sans target groups)
-			query = query.Where("(SELECT COUNT(*) FROM news_target_groups WHERE news_target_groups.news_id = news.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)")
 		}
 	}
 
@@ -271,7 +271,7 @@ func (h *SearchHandler) searchEvents(userID uint, userRole string, combinedGroup
 		// Filtre de visibilité par groupes
 		if len(combinedGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id
@@ -279,7 +279,7 @@ func (h *SearchHandler) searchEvents(userID uint, userRole string, combinedGroup
 				)
 			`, combinedGroupIDs)
 		} else {
-			query = query.Where("(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
 		}
 	}
 
@@ -303,7 +303,7 @@ func (h *SearchHandler) searchPolls(userID uint, userRole string, combinedGroupI
 		// Filtre de visibilité par groupes
 		if len(combinedGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
+				NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
 				OR EXISTS (
 					SELECT 1 FROM poll_target_groups
 					WHERE poll_target_groups.poll_id = polls.id
@@ -311,7 +311,7 @@ func (h *SearchHandler) searchPolls(userID uint, userRole string, combinedGroupI
 				)
 			`, combinedGroupIDs)
 		} else {
-			query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
 		}
 	}
 

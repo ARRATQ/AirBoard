@@ -118,6 +118,7 @@
             </button>
           </div>
         </div>
+        <PaginationBar v-model:page="page" :page-size="PAGE_SIZE" :total="pendingTotal" />
       </div>
     </div>
 
@@ -302,9 +303,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { commentsService } from '@/services/api'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
@@ -315,7 +317,10 @@ const appStore = useAppStore()
 
 const activeTab = ref('pending')
 const loading = ref(false)
+const PAGE_SIZE = 20
 const pendingComments = ref([])
+const pendingTotal = ref(0)
+const page = ref(1)
 const settings = ref({
   comments_enabled: true,
   news_comments_enabled: true,
@@ -325,7 +330,7 @@ const settings = ref({
   max_comment_length: 1000
 })
 
-const pendingCount = computed(() => pendingComments.value.length)
+const pendingCount = computed(() => pendingTotal.value)
 
 const getUserName = (user) => {
   if (!user) return t('comments.anonymous')
@@ -347,8 +352,14 @@ const formatDate = (dateString) => {
 const loadPendingComments = async () => {
   loading.value = true
   try {
-    const response = await commentsService.getPendingComments()
+    const response = await commentsService.getPendingComments({ page: page.value, page_size: PAGE_SIZE })
     pendingComments.value = response.comments || []
+    pendingTotal.value = response.total ?? pendingComments.value.length
+    // Dernière page vidée par une modération : revenir à la précédente.
+    if (pendingComments.value.length === 0 && page.value > 1) {
+      page.value -= 1
+      return
+    }
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires en attente:', error)
   } finally {
@@ -400,6 +411,8 @@ const saveSettings = async () => {
     appStore.showError(t('moderation.settingsSaveError'))
   }
 }
+
+watch(page, loadPendingComments)
 
 onMounted(() => {
   loadPendingComments()

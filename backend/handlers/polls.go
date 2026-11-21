@@ -173,7 +173,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 			// Interface publique : sondages globaux + ceux de ses groupes (appartenance + administration)
 			if len(combinedGroupIDs) > 0 {
 				query = query.Where(`
-					(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
+					NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
 					OR EXISTS (
 						SELECT 1 FROM poll_target_groups
 						WHERE poll_target_groups.poll_id = polls.id
@@ -182,7 +182,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 				`, combinedGroupIDs)
 			} else {
 				// Si pas de groupes, voir seulement les sondages globaux
-				query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
+				query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
 			}
 		}
 	} else if !isEntityFilter {
@@ -193,7 +193,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 
 		if len(userGroupIDs) > 0 {
 			query = query.Where(`
-				(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0
+				NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
 				OR EXISTS (
 					SELECT 1 FROM poll_target_groups
 					WHERE poll_target_groups.poll_id = polls.id
@@ -202,7 +202,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 			`, userGroupIDs)
 		} else {
 			// Si pas de groupes, voir seulement les sondages globaux
-			query = query.Where("(SELECT COUNT(*) FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id) = 0")
+			query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
 		}
 	}
 	// Si isEntityFilter est true, on ne filtre PAS par groupes, on retourne seulement

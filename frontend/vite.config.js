@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 import { cpSync, existsSync, mkdirSync } from 'fs'
+import iconsPlugin from './vite-plugins/iconsPlugin.js'
 
 // Plugin to copy docs to public folder
 function copyDocsPlugin() {
@@ -37,7 +38,7 @@ function copyDocsPlugin() {
 const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:8080'
 
 export default defineConfig(({ command }) => ({
-  plugins: [vue(), copyDocsPlugin()],
+  plugins: [vue(), copyDocsPlugin(), iconsPlugin()],
   // En prod, les console.log/debug sont retirés (console.warn/error restent)
   esbuild: command === 'build' ? { pure: ['console.log', 'console.debug'] } : {},
   resolve: {
@@ -79,9 +80,11 @@ export default defineConfig(({ command }) => ({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'pinia', 'vue-i18n'],
-          icons: ['@iconify/vue'],
+        manualChunks(id) {
+          if (/node_modules\/(vue|@vue|vue-router|pinia|vue-i18n|@intlify)\//.test(id)) return 'vendor'
+          // Les icônes changent rarement : chunk à part, mis en cache indépendamment du code.
+          if (id.includes('node_modules/@iconify/vue/')) return 'icons'
+          return undefined
         },
       },
     },
@@ -105,6 +108,8 @@ export default defineConfig(({ command }) => ({
         find: /^@vue\/test-utils$/,
         replacement: resolve(__dirname, 'node_modules/@vue/test-utils/dist/vue-test-utils.esm-bundler.mjs'),
       },
+      // Sous Node, @tiptap/html choisit sa version serveur, qui refuse un DOM (jsdom) : prendre celle du navigateur.
+      { find: /^@tiptap\/html$/, replacement: resolve(__dirname, 'node_modules/@tiptap/html/dist/index.js') },
     ],
     // Ces bibliothèques passent par Vite pour utiliser la même instance de Vue que les SFC.
     server: { deps: { inline: [/@vue\/test-utils/, /@headlessui\/vue/, /vue-i18n/, /@intlify/, /@iconify\/vue/] } },

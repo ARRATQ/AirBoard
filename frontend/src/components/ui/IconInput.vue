@@ -99,7 +99,7 @@ const emit = defineEmits(['update:modelValue'])
 const isValidIcon = ref(true)
 
 const helpText = computed(() => {
-  return `Utilisez le format "collection:nom" (ex: mdi:home, lucide:user, heroicons:cog). Recherchez sur iconify.design`
+  return `Utilisez le format "collection:nom" avec mdi, lucide ou heroicons (ex: mdi:home, lucide:user, heroicons:cog). Recherchez sur iconify.design`
 })
 
 const suggestions = computed(() => {

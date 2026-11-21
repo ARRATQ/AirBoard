@@ -258,14 +258,10 @@ import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { gamificationService } from '@/services/api'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import 'dayjs/locale/fr'
+import { format, formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import AOS from 'aos'
 import 'aos/dist/aos.css'
-
-dayjs.extend(relativeTime)
-dayjs.locale('fr')
 
 const authStore = useAuthStore()
 
@@ -323,7 +319,7 @@ const isUnlocked = (code) =>
 
 const getUnlockedDate = (code) => {
   const ua = unlockedAchievements.value.find(ua => ua.achievement?.code === code)
-  return ua ? dayjs(ua.unlocked_at).format('DD/MM/YYYY') : ''
+  return ua ? format(new Date(ua.unlocked_at), 'dd/MM/yyyy') : ''
 }
 
 const getActivityIcon = (reason) => ({
@@ -360,7 +356,7 @@ const getActivityLabel = (reason) => ({
   chatbot_use: 'IA utilisée',
 })[reason] || reason
 
-const formatRelative = (date) => dayjs(date).fromNow()
+const formatRelative = (date) => formatDistanceToNow(new Date(date), { addSuffix: true, locale: fr })
 
 onMounted(() => {
   fetchData()

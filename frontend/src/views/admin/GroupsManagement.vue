@@ -186,6 +186,10 @@
                 <p v-if="filteredUsersForAdmins.length === 0" class="py-8 text-center text-sm text-gray-500">
                   Aucun utilisateur trouvé
                 </p>
+                <!-- La liste est une page de résultats : au-delà, affiner la recherche -->
+                <p v-if="userSearchTotal > userSearchResults.length" class="text-xs text-gray-500">
+                  {{ t('ui.table.range', { from: 1, to: userSearchResults.length, total: userSearchTotal }) }}
+                </p>
                 <label
                   v-for="user in filteredUsersForAdmins"
                   :key="user.id"
@@ -279,7 +283,7 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -302,7 +306,12 @@ const statusFilter = ref('')
 // Group Admins Modal
 const showGroupAdminsModal = ref(false)
 const selectedGroupForAdmins = ref(null)
-const allUsers = ref([])
+// Résultats de recherche (une page côté serveur) et admins actuels, toujours affichés.
+const userSearchResults = ref([])
+const userSearchTotal = ref(0)
+const currentGroupAdmins = ref([])
+const USER_SEARCH_PAGE_SIZE = 50
+const SEARCH_DEBOUNCE_MS = 300
 const selectedAdminIds = ref([])
 const loadingUsers = ref(false)
 const savingAdmins = ref(false)
@@ -331,21 +340,45 @@ const filteredGroups = computed(() => {
   return Array.isArray(filtered) ? filtered.sort((a, b) => a.name.localeCompare(b.name)) : []
 })
 
+const matchesAdminSearch = (user) => {
+  const query = adminSearchQuery.value.trim().toLowerCase()
+  if (!query) return true
+  return [user.username, user.email, user.first_name, user.last_name]
+    .some(value => value?.toLowerCase().includes(query))
+}
+
+// Admins actuels (filtrés localement) puis résultats du serveur, sans doublon.
 const filteredUsersForAdmins = computed(() => {
-  let filtered = allUsers.value
-
-  if (adminSearchQuery.value) {
-    const query = adminSearchQuery.value.toLowerCase()
-    filtered = filtered.filter(user =>
-      user.username.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.first_name?.toLowerCase().includes(query) ||
-      user.last_name?.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
+  const admins = currentGroupAdmins.value.filter(matchesAdminSearch)
+  const adminIds = new Set(admins.map(user => user.id))
+  return [...admins, ...userSearchResults.value.filter(user => !adminIds.has(user.id))]
 })
+
+let userSearchRequest = 0
+const searchUsersForAdmins = async () => {
+  const request = ++userSearchRequest
+  try {
+    const data = await adminService.getUsers({
+      search: adminSearchQuery.value.trim() || undefined,
+      page_size: USER_SEARCH_PAGE_SIZE,
+    })
+    if (request !== userSearchRequest) return
+    userSearchResults.value = data.data || []
+    userSearchTotal.value = data.total || 0
+  } catch (error) {
+    if (request !== userSearchRequest) return
+    console.error('Error searching users:', error)
+    appStore.showError('Erreur lors du chargement des données')
+  }
+}
+
+let adminSearchTimer = null
+watch(adminSearchQuery, () => {
+  if (!showGroupAdminsModal.value) return
+  clearTimeout(adminSearchTimer)
+  adminSearchTimer = setTimeout(searchUsersForAdmins, SEARCH_DEBOUNCE_MS)
+})
+onBeforeUnmount(() => clearTimeout(adminSearchTimer))
 
 // Methods
 const getUserInitials = (user) => {
@@ -453,13 +486,13 @@ const manageGroupAdmins = async (group) => {
   try {
     loadingUsers.value = true
 
-    // Load all users
-    const usersData = await adminService.getUsers()
-    allUsers.value = Array.isArray(usersData) ? usersData : (usersData.data || [])
-
-    // Load current group admins
-    const adminsData = await adminService.getGroupAdmins(group.id)
+    // Admins actuels et première page d'utilisateurs, en parallèle
+    const [adminsData] = await Promise.all([
+      adminService.getGroupAdmins(group.id),
+      searchUsersForAdmins(),
+    ])
     const currentAdmins = Array.isArray(adminsData) ? adminsData : (adminsData.data || [])
+    currentGroupAdmins.value = currentAdmins
     selectedAdminIds.value = currentAdmins.map(admin => admin.id)
   } catch (error) {
     console.error('Error loading group admins:', error)
@@ -472,7 +505,10 @@ const manageGroupAdmins = async (group) => {
 const closeGroupAdminsModal = () => {
   showGroupAdminsModal.value = false
   selectedGroupForAdmins.value = null
-  allUsers.value = []
+  clearTimeout(adminSearchTimer)
+  userSearchResults.value = []
+  userSearchTotal.value = 0
+  currentGroupAdmins.value = []
   selectedAdminIds.value = []
   adminSearchQuery.value = ''
 }
