@@ -4,6 +4,7 @@ import router from './router'
 import App from './App.vue'
 import i18n, { initI18n } from '@/i18n'
 import { setupIcons } from '@/plugins/icons'
+import { focusTrap } from '@/directives/focusTrap'
 
 // Styles CSS
 import './assets/css/main.css'
@@ -26,6 +27,9 @@ setupIcons()
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+
+// v-focus-trap : focus clavier gardé dans les modales maison
+app.directive('focus-trap', focusTrap)
 
 // Initialiser le store après l'installation de Pinia
 const authStore = useAuthStore()
