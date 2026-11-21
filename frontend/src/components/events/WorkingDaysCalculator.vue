@@ -1,8 +1,9 @@
 <template>
-  <section class="wdc" aria-labelledby="wdc-title">
+  <section class="wdc" :class="{ 'wdc--compact': compact }" :aria-labelledby="titleId">
     <header class="wdc__head">
-      <h2 id="wdc-title" class="wdc__title">{{ $t('agenda.calculator.title') }}</h2>
-      <p class="wdc__sub">{{ $t('agenda.calculator.subtitle') }}</p>
+      <h2 :id="titleId" class="wdc__title">{{ $t(compact ? 'home.workingDays.title' : 'agenda.calculator.title') }}</h2>
+      <p v-if="!compact" class="wdc__sub">{{ $t('agenda.calculator.subtitle') }}</p>
+      <slot name="action" />
     </header>
 
     <div class="wdc__body">
@@ -34,7 +35,7 @@
               {{ day.short }}
             </button>
           </div>
-          <p class="wdc__hint">{{ $t('agenda.calculator.weekendHint') }}</p>
+          <p v-if="!compact" class="wdc__hint">{{ $t('agenda.calculator.weekendHint') }}</p>
         </fieldset>
 
         <label class="wdc__check">
@@ -53,6 +54,7 @@
             <div v-if="excludeHolidays"><dt>{{ $t('agenda.calculator.holidaysCount') }}</dt><dd>{{ results.holidayDays }}</dd></div>
             <div><dt>{{ $t('agenda.calculator.nonWorkingDays') }}</dt><dd>{{ results.nonWorkingDays }}</dd></div>
           </dl>
+          <slot name="note" />
           <div v-if="excludeHolidays && results.holidays.length" class="wdc__holidays">
             <p class="wdc__label">{{ $t('agenda.calculator.holidaysInPeriod') }}</p>
             <ul>
@@ -72,14 +74,19 @@
 <script setup>
 // Calculateur de jours ouvrés : le résultat suit chaque changement (dates, jours de repos,
 // fériés), sans bouton. Les fériés viennent de l'agenda (prop holidays : Map clé → nom).
-import { computed, ref } from 'vue'
+// compact : version de l'accueil (titre court, sans aide) ; la mise en page suit la largeur
+// du bloc lui-même (requêtes de conteneur), pas celle de la fenêtre.
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DEFAULT_WEEKEND, countWorkingDays, dateKey, parseDateKey } from '@/utils/agenda'
 import { dateLocaleFor } from '@/utils/homeFormat'
 
 const props = defineProps({
   holidays: { type: Map, default: () => new Map() },
+  compact: { type: Boolean, default: false },
 })
+
+const titleId = `wdc-title-${useId()}`
 
 const { locale } = useI18n()
 
@@ -122,6 +129,7 @@ const formatDate = (key) =>
 
 <style scoped>
 .wdc {
+  container-type: inline-size;
   border: 1px solid var(--line);
   border-radius: 4px;
   background: var(--surface);
@@ -262,12 +270,39 @@ const formatDate = (key) =>
 
 .wdc__empty { margin: 0; font-size: 13px; color: var(--muted); }
 
-@media (max-width: 720px) {
+/* Version accueil : en-tête comme les autres cartes de l'accueil. */
+.wdc--compact .wdc__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 10px;
+}
+
+.wdc--compact .wdc__title {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.wdc--compact .wdc__form { gap: 12px; padding: 12px 16px 14px; }
+.wdc--compact .wdc__result { padding: 12px 16px 14px; }
+.wdc--compact .wdc__big { font-size: 36px; }
+
+@container (max-width: 640px) {
   .wdc__body { grid-template-columns: minmax(0, 1fr); }
   .wdc__result { border-inline-start: 0; border-block-start: 1px solid var(--line); }
 }
 
-@media (max-width: 400px) {
+/* Colonne étroite : les sept jours tiennent sur une ligne. */
+@container (max-width: 400px) {
+  .wdc__days { flex-wrap: nowrap; gap: 3px; }
+  .wdc__day { flex: 1 1 0; min-width: 0; padding-inline: 0; font-size: 12px; }
+  .wdc__input { padding-inline: 6px; font-size: 12.5px; }
+}
+
+@container (max-width: 260px) {
   .wdc__dates { grid-template-columns: minmax(0, 1fr); }
 }
 </style>

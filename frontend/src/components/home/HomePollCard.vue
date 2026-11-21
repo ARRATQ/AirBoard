@@ -24,7 +24,7 @@
     </ul>
 
     <BaseButton tag="router-link" :to="`/polls/${poll.id}`" variant="primary" size="sm" block>
-      {{ $t('home.polls.vote') }}
+      {{ $t(isEnded ? 'home.polls.seeResults' : 'home.polls.vote') }}
     </BaseButton>
   </section>
 </template>
@@ -45,10 +45,16 @@ const props = defineProps({
 const ENDING_SOON_DAYS = 2
 const { t } = useI18n()
 
+// Sondage arrivé à échéance : on propose les résultats plutôt qu'un vote.
+const isEnded = computed(() => {
+  const days = daysUntil(props.poll.end_date)
+  return days !== null && days <= 0
+})
+
 const status = computed(() => {
   const days = daysUntil(props.poll.end_date)
   if (days === null) return { tone: 'neutral', label: t('home.polls.open') }
-  if (days <= 0) return { tone: 'neutral', label: t('home.polls.ended') }
+  if (isEnded.value) return { tone: 'neutral', label: t('home.polls.ended') }
   return { tone: days <= ENDING_SOON_DAYS ? 'warn' : 'neutral', label: t('home.polls.endsIn', days) }
 })
 </script>

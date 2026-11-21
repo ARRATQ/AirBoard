@@ -1,9 +1,11 @@
 <template>
   <section class="figures" :aria-label="$t('home.keyFigures')">
-    <router-link v-for="fig in figures" :key="fig.key" :to="fig.to" class="figures__item">
-      <span class="figures__label">{{ $t(fig.labelKey) }}</span>
-      <span class="figures__value"><FlapDigits :value="fig.value" /></span>
-    </router-link>
+    <div class="figures__grid" :style="{ '--n': figures.length }">
+      <router-link v-for="fig in figures" :key="fig.key" :to="fig.to" class="figures__item">
+        <span class="figures__label">{{ $t(fig.labelKey) }}</span>
+        <span class="figures__value"><FlapDigits :value="fig.value" /></span>
+      </router-link>
+    </div>
   </section>
 </template>
 
@@ -18,12 +20,22 @@ defineProps({
 </script>
 
 <style scoped>
+/* Tous les chiffres sur une ligne quand la largeur le permet (≈ 100 px chacun), sinon en
+   grille ; la largeur est celle du bandeau lui-même, pas de la fenêtre. */
 .figures {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  container-type: inline-size;
   border-radius: 6px;
   background: var(--board);
   overflow: hidden;
+}
+
+.figures__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
+}
+
+@container (max-width: 640px) {
+  .figures__grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
 }
 
 .figures__item {
@@ -62,7 +74,7 @@ defineProps({
 }
 
 @media (max-width: 640px) {
-  .figures { grid-template-columns: repeat(2, 1fr); }
+  .figures__item { padding: 10px 12px 12px; gap: 8px; }
   .figures__value { font-size: 20px; }
 }
 </style>

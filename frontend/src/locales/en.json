@@ -1722,7 +1722,8 @@
       "vote": "Vote now",
       "endsIn": "{count} d left | {count} d left | {count} d left",
       "ended": "Closed",
-      "open": "Open"
+      "open": "Open",
+      "seeResults": "See results"
     },
     "quickActions": {
       "title": "Quick actions",
@@ -1761,7 +1762,12 @@
     },
     "rail": {
       "portal": "Portal",
-      "agenda": "Calendar"
+      "agenda": "Calendar",
+      "label": "Tools and reminders"
+    },
+    "workingDays": {
+      "title": "Working days",
+      "holidaysUnavailable": "Public holidays unavailable: they are not deducted."
     }
   },
   "email": {
