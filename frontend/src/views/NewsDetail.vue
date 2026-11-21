@@ -191,7 +191,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { newsService, pollsService } from '@/services/api'
-import { readingTime } from '@/utils/readingTime'
+import { readingMinutes } from '@/utils/readingTime'
 import { dateLocaleFor } from '@/utils/homeFormat'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -210,7 +210,10 @@ const loading = ref(false)
 const news = ref(null)
 const linkedPoll = ref(null)
 
-const articleReadingTime = computed(() => readingTime(news.value?.content))
+const articleReadingTime = computed(() => {
+  const n = readingMinutes(news.value?.content)
+  return n ? t('news.minutes', { n }) : null
+})
 
 // Computed
 const canEdit = computed(() => {

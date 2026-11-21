@@ -140,7 +140,7 @@ import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNewsTypesStore } from '@/stores/newsTypes'
 import { useI18n } from 'vue-i18n'
-import { readingTime } from '@/utils/readingTime'
+import { readingMinutes } from '@/utils/readingTime'
 import { dateLocaleFor } from '@/utils/homeFormat'
 
 const { t, locale } = useI18n()
@@ -155,7 +155,10 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
-const articleReadingTime = computed(() => readingTime(props.news.content))
+const articleReadingTime = computed(() => {
+  const n = readingMinutes(props.news.content)
+  return n ? t('news.minutes', { n }) : null
+})
 
 // Get type data from store
 const typeData = computed(() => {
