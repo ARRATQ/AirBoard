@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"airboard/config"
+	"airboard/database"
 	"airboard/services"
 	"airboard/services/chat"
 
@@ -19,7 +21,9 @@ func main() {
 	gin.SetMode(cfg.Server.Mode)
 
 	db := openDatabase(cfg)
-	migrateSchema(db)
+	if err := database.Migrate(context.Background(), db); err != nil {
+		log.Fatalf("Erreur lors des migrations: %v", err)
+	}
 
 	// Créer les données initiales
 	if err := createInitialData(db, cfg); err != nil {
