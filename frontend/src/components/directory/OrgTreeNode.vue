@@ -3,7 +3,7 @@
     <article
       class="ot-card"
       :class="{ 'ot-card--root': depth === 0 }"
-      :style="{ '--unit-color': unit.color || 'var(--accent)' }"
+      :style="{ '--unit-color': unit.color || 'var(--acc)' }"
       :dir="textDir"
       :data-unit-id="unit.id"
     >
@@ -139,14 +139,14 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
 </script>
 
 <style scoped>
-/* ---- Connecteurs en équerre (arbre de haut en bas) ---- */
+/* ---- Connecteurs en équerre (arbre de haut en bas), en propriétés logiques pour l'arabe ---- */
 .ot-node {
-  --line: color-mix(in srgb, var(--text-muted) 45%, transparent);
+  --ot-wire: var(--line);
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1.75rem 0.65rem 0;
+  padding: 28px 10px 0;
   list-style: none;
 }
 .ot-node::before,
@@ -155,147 +155,144 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
   position: absolute;
   top: 0;
   width: 50%;
-  height: 1.75rem;
-  border-top: 2px solid var(--line);
+  height: 28px;
+  border-top: 1px solid var(--ot-wire);
 }
-.ot-node::before { right: 50%; }
-.ot-node::after { left: 50%; border-left: 2px solid var(--line); }
+.ot-node::before { inset-inline-end: 50%; }
+.ot-node::after { inset-inline-start: 50%; border-inline-start: 1px solid var(--ot-wire); }
 .ot-node:only-child::before,
 .ot-node:only-child::after { display: none; }
 .ot-node:only-child { padding-top: 0; }
 .ot-node:first-child::before,
 .ot-node:last-child::after { border: 0 none; }
-.ot-node:last-child::before { border-right: 2px solid var(--line); border-top-right-radius: 0.75rem; }
-.ot-node:first-child::after { border-top-left-radius: 0.75rem; }
+.ot-node:last-child::before { border-inline-end: 1px solid var(--ot-wire); border-start-end-radius: 4px; }
+.ot-node:first-child::after { border-start-start-radius: 4px; }
 .ot-children {
   position: relative;
   display: flex;
   justify-content: center;
-  padding-top: 1.75rem;
+  padding-top: 28px;
 }
 .ot-children::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 50%;
-  height: 1.75rem;
-  border-left: 2px solid var(--line);
+  inset-inline-start: 50%;
+  height: 28px;
+  border-inline-start: 1px solid var(--ot-wire);
 }
 /* Racine sans trait au-dessus */
-:global(.ot-root) > .ot-node::before,
-:global(.ot-root) > .ot-node::after { display: none; }
-:global(.ot-root) > .ot-node { padding-top: 0; }
+.ot-root > .ot-node::before,
+.ot-root > .ot-node::after { display: none; }
+.ot-root > .ot-node { padding-top: 0; }
 
-/* ---- Carte d'unité ---- */
+/* ---- Carte d'unité : filet de la couleur de l'unité, pas d'ombre ---- */
 .ot-card {
   position: relative;
   width: 15.5rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-block-start: 3px solid var(--unit-color);
+  border-radius: 4px;
+  background: var(--surface);
   overflow: hidden;
-  box-shadow:
-    0 1px 0 rgba(var(--shadow-rgb, 15, 23, 42), 0.04),
-    0 14px 30px -18px rgba(var(--shadow-rgb, 15, 23, 42), 0.45);
-  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease, border-color 200ms ease;
+  transition: border-color 150ms ease;
 }
-.ot-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  background: var(--unit-color);
-}
-.ot-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--unit-color) 55%, var(--border));
-}
+.ot-card:hover { border-inline-color: var(--muted); border-block-end-color: var(--muted); }
 .ot-card--root { width: 18rem; }
 .ot-card__head {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.85rem 0.9rem 0.6rem;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--unit-color) 10%, transparent), transparent);
+  gap: 8px;
+  padding: 10px 12px 6px;
 }
 .ot-card__name {
   flex: 1;
   min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
   text-align: start;
-  font-weight: 700;
-  font-size: 0.92rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
   line-height: 1.25;
-  color: var(--text-primary);
+  color: var(--text);
+  cursor: pointer;
 }
-.ot-card--root .ot-card__name { font-size: 1.05rem; }
-.ot-card__name:hover { color: var(--unit-color); text-decoration: underline; text-underline-offset: 3px; }
+.ot-card--root .ot-card__name { font-size: 15.5px; }
+.ot-card__name:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ot-card__name:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 2px; }
 .ot-card__code {
   flex-shrink: 0;
-  font-size: 0.62rem;
-  font-weight: 800;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--f-num);
+  font-size: 10.5px;
   letter-spacing: 0.06em;
-  padding: 0.12rem 0.4rem;
-  border-radius: 0.35rem;
-  color: var(--unit-color);
-  background: color-mix(in srgb, var(--unit-color) 14%, transparent);
+  color: var(--muted);
 }
 .ot-card__head-person {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem 0.75rem;
+  gap: 8px;
+  padding: 2px 10px 10px;
 }
 .ot-lead {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 3px;
   min-width: 0;
-  padding: 0.35rem;
-  border-radius: 0.75rem;
+  padding: 6px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  font: inherit;
   text-align: center;
-  color: var(--text-primary);
+  color: var(--text);
 }
-button.ot-lead:hover { background: var(--hover); }
-button.ot-lead:focus-visible { outline: 2px solid var(--accent); }
-.ot-lead__name { margin-top: 0.25rem; font-weight: 600; font-size: 0.85rem; line-height: 1.2; }
+button.ot-lead { cursor: pointer; }
+button.ot-lead:hover { background: var(--sunken); }
+button.ot-lead:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.ot-lead__name { margin-top: 3px; font-weight: 600; font-size: 13px; line-height: 1.2; }
 .ot-lead__title {
   display: inline-flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.72rem;
-  color: var(--unit-color);
-  font-weight: 500;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted);
 }
-.ot-lead--vacant .ot-lead__name { color: var(--text-muted); font-style: italic; }
+.ot-lead--vacant .ot-lead__name { color: var(--muted); font-style: italic; font-weight: 500; }
 .ot-card__team {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.55rem 0.8rem;
-  border-top: 1px solid var(--border);
-  background: var(--bg-surface);
+  gap: 8px;
+  padding: 7px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--sunken);
 }
-.ot-stack { display: flex; align-items: center; padding-inline-start: 0.35rem; }
-.ot-stack__item { margin-inline-start: -0.45rem; border-radius: 9999px; transition: transform 150ms ease; }
-.ot-stack__item:hover { transform: translateY(-2px); z-index: 1; }
-.ot-stack__item:focus-visible { outline: 2px solid var(--accent); }
+.ot-stack { display: flex; align-items: center; padding-inline-start: 6px; }
+.ot-stack__item { margin-inline-start: -7px; border-radius: 9999px; box-shadow: 0 0 0 2px var(--sunken); }
+.ot-stack__item:hover { z-index: 1; }
+.ot-stack__item:focus-visible { z-index: 1; outline: 2px solid var(--acc); outline-offset: 1px; }
 .ot-stack__more {
-  margin-inline-start: 0.3rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  margin-inline-start: 5px;
+  font-family: var(--f-num);
+  font-size: 11px;
+  color: var(--muted);
 }
 .ot-card__count {
   margin-inline-start: auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  gap: 3px;
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  color: var(--muted);
   white-space: nowrap;
 }
 
@@ -305,23 +302,24 @@ button.ot-lead:focus-visible { outline: 2px solid var(--accent); }
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  margin-top: -0.7rem;
-  padding: 0.2rem 0.45rem;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: var(--bg-card);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  gap: 3px;
+  margin-top: -11px;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: var(--f-num);
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
   transition: color 150ms ease, border-color 150ms ease;
 }
-.ot-toggle:hover { color: var(--accent); border-color: var(--accent); }
-.ot-toggle:focus-visible { outline: 2px solid var(--accent); }
-.ot-toggle--closed { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
-.ot-node > .ot-toggle + .ot-children { margin-top: -0.7rem; }
+.ot-toggle:hover { color: var(--text); border-color: var(--muted); }
+.ot-toggle:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.ot-toggle--closed { color: var(--text); }
+.ot-node > .ot-toggle + .ot-children { margin-top: -11px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ot-card, .ot-stack__item { transition: none; }
+  .ot-card, .ot-toggle { transition: none; }
 }
 </style>

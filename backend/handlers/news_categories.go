@@ -5,6 +5,7 @@ import (
 
 	"airboard/models"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -47,7 +48,7 @@ func (h *NewsHandler) GetCategory(c *gin.Context) {
 // CreateCategory - Créer une catégorie (admin uniquement)
 func (h *NewsHandler) CreateCategory(c *gin.Context) {
 	var req models.CategoryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -61,7 +62,11 @@ func (h *NewsHandler) CreateCategory(c *gin.Context) {
 		IsActive:    req.IsActive,
 	}
 
-	if err := h.db.Create(&category).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A category with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create category"})
 		return
 	}
@@ -97,6 +102,10 @@ func (h *NewsHandler) UpdateCategory(c *gin.Context) {
 	category.IsActive = req.IsActive
 
 	if err := h.db.Save(&category).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A category with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category"})
 		return
 	}
@@ -180,6 +189,10 @@ func (h *NewsHandler) CreateTag(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&tag).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create tag"})
 		return
 	}
@@ -211,6 +224,10 @@ func (h *NewsHandler) UpdateTag(c *gin.Context) {
 	tag.Color = req.Color
 
 	if err := h.db.Save(&tag).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tag"})
 		return
 	}

@@ -1,8 +1,13 @@
 <template>
-  <button type="button" class="person-card" :class="{ 'person-card--inactive': !person.is_active }" @click="$emit('open', person)">
-    <span class="person-card__band" :style="{ backgroundColor: primaryRole?.unit.color || 'var(--accent)' }" />
+  <!-- Le nom porte l'action d'ouverture ; son ::after couvre toute la carte.
+       Les liens de contact restent hors du bouton (HTML valide) et passent au-dessus. -->
+  <article
+    class="person-card"
+    :class="{ 'person-card--inactive': !person.is_active }"
+    :style="{ '--unit-color': primaryRole?.unit.color || 'var(--line)' }"
+  >
     <PersonAvatar :person="person" size="lg" class="person-card__avatar" />
-    <span class="person-card__name">{{ name }}</span>
+    <button type="button" class="person-card__name" @click="$emit('open', person)">{{ name }}</button>
     <span v-if="primaryRole" class="person-card__role">
       {{ primaryRole.position.title }}
       <span v-if="primaryRole.assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
@@ -13,20 +18,20 @@
 
     <span v-if="cardFields.length" class="person-card__fields">
       <span v-for="f in cardFields" :key="f.key" class="person-card__field">
-        <Icon :icon="FIELD_TYPE_ICONS[f.type]" class="h-3.5 w-3.5 shrink-0" />
+        <Icon :icon="FIELD_TYPE_ICONS[f.type]" class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
         <span class="truncate">{{ formatFieldValue(f, person.custom_fields[f.key], locale) }}</span>
       </span>
     </span>
 
-    <span class="person-card__contacts">
-      <a v-if="person.email" :href="`mailto:${person.email}`" :title="person.email" @click.stop>
-        <Icon icon="mdi:email-outline" class="h-4 w-4" />
+    <span v-if="person.email || person.phone" class="person-card__contacts">
+      <a v-if="person.email" :href="`mailto:${person.email}`" :title="person.email" :aria-label="person.email">
+        <Icon icon="mdi:email-outline" class="h-4 w-4" aria-hidden="true" />
       </a>
-      <a v-if="person.phone" :href="`tel:${person.phone.replace(/\s+/g, '')}`" :title="person.phone" @click.stop>
-        <Icon icon="mdi:phone-outline" class="h-4 w-4" />
+      <a v-if="person.phone" :href="`tel:${person.phone.replace(/\s+/g, '')}`" :title="person.phone" :aria-label="person.phone">
+        <Icon icon="mdi:phone-outline" class="h-4 w-4" aria-hidden="true" />
       </a>
     </span>
-  </button>
+  </article>
 </template>
 
 <script setup>
@@ -57,56 +62,85 @@ const cardFields = computed(() =>
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 1.5rem 1rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: var(--bg-card);
-  color: var(--text-primary);
+  gap: 2px;
+  padding: 18px 14px 14px;
+  border: 1px solid var(--line);
+  border-block-start: 3px solid var(--unit-color);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
   text-align: center;
-  overflow: hidden;
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease, border-color 180ms ease;
+  cursor: pointer;
+  transition: border-color 150ms ease;
 }
-.person-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent);
-  box-shadow: 0 12px 28px -12px rgba(var(--shadow-rgb, 15, 23, 42), 0.35);
+.person-card:hover { border-inline-color: var(--muted); border-block-end-color: var(--muted); }
+.person-card__name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.25;
+  cursor: pointer;
 }
-.person-card:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.person-card--inactive { opacity: 0.55; }
-.person-card__band {
+/* Zone cliquable étendue à toute la carte */
+.person-card__name::after {
+  content: '';
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 3.25rem;
-  opacity: 0.14;
+  inset: -3px -1px -1px;
+  border-radius: 4px;
 }
-.person-card__avatar { position: relative; margin-bottom: 0.6rem; }
-.person-card__name { font-weight: 700; font-size: 1rem; line-height: 1.25; }
-.person-card__role { font-size: 0.85rem; font-weight: 500; color: var(--accent); display: inline-flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; justify-content: center; }
-.person-card__unit { font-size: 0.78rem; color: var(--text-muted); }
+.person-card__name:focus-visible { outline: none; }
+.person-card__name:focus-visible::after { outline: 2px solid var(--acc); outline-offset: 2px; }
+.person-card--inactive { opacity: 0.55; }
+.person-card__avatar { margin-bottom: 8px; }
+.person-card__role {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text);
+}
+.person-card__unit { font-size: 12px; color: var(--muted); }
 .person-card__unit--none { font-style: italic; }
-.person-card__more { font-size: 0.72rem; color: var(--text-muted); }
+.person-card__more { font-family: var(--f-num); font-size: 11px; color: var(--muted); }
 .person-card__fields {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 3px;
   width: 100%;
-  margin-top: 0.6rem;
-  padding-top: 0.6rem;
-  border-top: 1px dashed var(--border);
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
 }
-.person-card__field { display: flex; align-items: center; gap: 0.35rem; justify-content: center; font-size: 0.75rem; color: var(--text-muted); min-width: 0; }
-.person-card__contacts { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.person-card__field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.person-card__contacts { position: relative; z-index: 1; display: flex; gap: 6px; margin-top: 11px; }
 .person-card__contacts a {
-  display: inline-flex;
-  padding: 0.4rem;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--muted);
+  transition: color 150ms ease, border-color 150ms ease;
 }
-.person-card__contacts a:hover { color: var(--accent); border-color: var(--accent); background: var(--hover); }
+.person-card__contacts a:hover { color: var(--text); border-color: var(--muted); }
+.person-card__contacts a:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .person-card, .person-card__contacts a { transition: none; }
+}
 </style>

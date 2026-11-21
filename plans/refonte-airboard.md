@@ -163,7 +163,7 @@ Reste, ou à suivre :
    et attribuer l'XP seulement si `RowsAffected == 1`.
 8. `RequireAuth` lance une requête `group_admins` à chaque appel (`middleware/auth.go:79`). → Mettre en cache.
 
-## Chantier 3 — Fondations du design
+## Chantier 3 — Fondations du design ✅ fait (direction A+)
 
 Problème : deux systèmes de couleurs cohabitent. La palette runtime (`--accent`, `main.css:6-23`,
 `config/palettes.js`) ne s'applique qu'à une partie de l'interface. Le reste utilise le bleu Tailwind
@@ -279,9 +279,18 @@ Constat de départ :
    - icônes sans libellé quand le menu est replié ;
    - double hamburger sur Dashboard (`Dashboard.vue:36-41`).
 
-## Chantier 5 — Refonte page par page
+## Chantier 5 — Refonte page par page ✅ fait (branche `claude/chantier-5-pages-0bceae`)
 
-Commencer par `Home.vue` (1 975 lignes, dont environ 1 250 de CSS ; très dense : bandeau, recherche,
+Fait : accueil découpé en composants (`components/home/`) ; portail Ressources A+ (type déduit de
+l'URL, « Nouveau » 14 jours, note de l'admin datée) ; agenda Mois/Semaine/Jour et liste en tableau,
+jours ouvrés en direct ; sondage, trombinoscope (organigramme et fiches) et My XP (chargement, erreur,
+Réessayer) ; les pages d'admin sur `PageHeader` + `DataTable` + `RowActions` + `useConfirm`. Échap
+sur toutes les modales, toasts traduits, titres d'onglet. Côté serveur : `false` respecté à la
+création, modération appliquée, noms et slugs réutilisables après suppression (index uniques partiels
+posés en SQL : GORM 1.25 ajoutait une contrainte complète), filtres et statistiques des médias côté
+serveur. `DataTable` a un mode `remote` pour les listes paginées par le serveur (utilisateurs).
+
+Constat de départ : commencer par `Home.vue` (1 975 lignes, dont environ 1 250 de CSS ; très dense : bandeau, recherche,
 météo, XP, 7 KPI, actualités, colonne latérale). Le découper en composants et revoir la hiérarchie
 visuelle. Ensuite :
 - les pages utilisateur sans mise en page responsive : `EventsCenter`, `PollDetailPage`,

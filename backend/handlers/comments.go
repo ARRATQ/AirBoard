@@ -239,7 +239,19 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 		ParentID:   req.ParentID,
 	}
 
-	if err := h.DB.Create(&comment).Error; err != nil {
+	// IsApproved porte default:true : GORM omettrait le false à l'insertion et le
+	// commentaire serait publié malgré la modération. Le false est réécrit dans la
+	// même transaction.
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&comment).Error; err != nil {
+			return err
+		}
+		if settings.RequireModeration {
+			return tx.Model(&comment).Update("is_approved", false).Error
+		}
+		return nil
+	})
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "DATABASE_ERROR",
 			Message: "Erreur lors de la création du commentaire",
@@ -510,7 +522,9 @@ func (h *CommentHandler) GetPendingComments(c *gin.Context) {
 		respondCommentsError(c)
 		return
 	}
-	c.JSON(http.StatusOK, commentPageResponse(comments, total, page))
+	response := commentPageResponse(comments, total, page)
+	response["targets"] = loadCommentTargets(h.DB, comments)
+	c.JSON(http.StatusOK, response)
 }
 
 // GetCommentSettings récupère les paramètres de commentaires
@@ -591,6 +605,15 @@ func (h *CommentHandler) UpdateCommentSettings(c *gin.Context) {
 		settings.AllowAnonymous = *req.AllowAnonymous
 	}
 	if req.MaxCommentLength != nil {
+		// 0 ou une valeur trop basse rendrait tout commentaire impossible
+		if !validCommentLength(*req.MaxCommentLength) {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Error:   "VALIDATION_ERROR",
+				Message: fmt.Sprintf("La longueur maximale doit être comprise entre %d et %d caractères", minCommentLengthSetting, maxCommentLengthSetting),
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
 		settings.MaxCommentLength = *req.MaxCommentLength
 	}
 

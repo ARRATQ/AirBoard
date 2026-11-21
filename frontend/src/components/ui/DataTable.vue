@@ -22,7 +22,7 @@
               v-for="col in columns"
               :key="col.key"
               scope="col"
-              :class="`dt__cell--${col.align || 'start'}`"
+              :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]"
               :style="col.width ? { width: col.width } : null"
               :aria-sort="col.sortable ? ariaSort(col.key) : undefined"
             >
@@ -56,7 +56,7 @@
           </tr>
           <template v-else>
             <tr v-for="row in pageRows" :key="row[rowKey]" class="dt__row">
-              <td v-for="col in columns" :key="col.key" :class="`dt__cell--${col.align || 'start'}`">
+              <td v-for="col in columns" :key="col.key" :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]">
                 <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">{{ row[col.key] }}</slot>
               </td>
             </tr>
@@ -65,7 +65,7 @@
       </table>
     </div>
 
-    <PaginationBar v-if="!loading" v-model:page="page" :page-size="pageSize" :total="total" />
+    <PaginationBar v-if="footer && !remote && !loading" v-model:page="page" :page-size="pageSize" :total="total" />
   </div>
 </template>
 
@@ -77,7 +77,8 @@ import EmptyState from './EmptyState.vue'
 import PaginationBar from './PaginationBar.vue'
 
 const props = defineProps({
-  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width? }]
+  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width?, hideSm? }]
+  // hideSm : colonne masquée sous 640 px (garder visibles le nom, le statut et les actions).
   columns: { type: Array, required: true },
   rows: { type: Array, default: () => [] },
   rowKey: { type: String, default: 'id' },
@@ -88,13 +89,19 @@ const props = defineProps({
   pageSize: { type: Number, default: 20 },
   loading: { type: Boolean, default: false },
   emptyTitle: { type: String, default: '' },
+  // false quand la page garde sa pagination serveur : évite un second compteur.
+  footer: { type: Boolean, default: true },
+  // true quand le serveur cherche, trie et pagine : la recherche et le tri passent par
+  // v-model:query, v-model:sort-key et v-model:sort-dir, les lignes sont affichées telles quelles.
+  remote: { type: Boolean, default: false },
 })
 
 const { t } = useI18n()
 
-const query = ref('')
-const sortKey = ref('')
-const sortDir = ref('asc')
+// Modèles locaux tant que la page ne les lie pas (mode client).
+const query = defineModel('query', { type: String, default: '' })
+const sortKey = defineModel('sortKey', { type: String, default: '' })
+const sortDir = defineModel('sortDir', { type: String, default: 'asc' })
 const page = ref(1)
 
 // Insensible à la casse et aux accents.
@@ -103,7 +110,7 @@ const normalize = (value) =>
 
 const filtered = computed(() => {
   const q = normalize(query.value.trim())
-  if (!q) return props.rows
+  if (props.remote || !q) return props.rows
   const keys = props.searchKeys || props.columns.map(c => c.key)
   return props.rows.filter(row => keys.some(key => normalize(row[key]).includes(q)))
 })
@@ -117,7 +124,7 @@ const compare = (a, b) => {
 }
 
 const sorted = computed(() => {
-  if (!sortKey.value) return filtered.value
+  if (props.remote || !sortKey.value) return filtered.value
   const dir = sortDir.value === 'asc' ? 1 : -1
   return [...filtered.value].sort((x, y) => dir * compare(x[sortKey.value], y[sortKey.value]))
 })
@@ -125,7 +132,9 @@ const sorted = computed(() => {
 const total = computed(() => sorted.value.length)
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / props.pageSize)))
 const start = computed(() => (page.value - 1) * props.pageSize)
-const pageRows = computed(() => sorted.value.slice(start.value, start.value + props.pageSize))
+const pageRows = computed(() =>
+  props.remote ? sorted.value : sorted.value.slice(start.value, start.value + props.pageSize),
+)
 
 watch(query, () => { page.value = 1 })
 watch(pageCount, (count) => { if (page.value > count) page.value = count })
@@ -203,6 +212,10 @@ const sortIcon = (key) => {
 }
 
 .dt__scroll { overflow-x: auto; }
+
+@media (max-width: 640px) {
+  .dt__col--hide-sm { display: none; }
+}
 
 .dt__table {
   width: 100%;

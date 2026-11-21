@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AdminHandler struct {
@@ -248,13 +249,13 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		}
 	}
 
-	// Updates(struct) ignore false et 0 : les cases à cocher et l'ordre sont appliqués à part
+	// Updates(struct) ignore false, 0 et "" : cases à cocher, ordre et description sont appliqués à part
 	err = h.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&appGroup).Updates(updateData).Error; err != nil {
 			return err
 		}
-		if values := flagUpdates(flags, "is_active", "is_private", "order"); len(values) > 0 {
-			return tx.Model(&appGroup).Updates(values).Error
+		if values := flagUpdates(flags, "is_active", "is_private", "order", "description"); len(values) > 0 {
+			return tx.Model(&appGroup).Omit(clause.Associations).Updates(values).Error
 		}
 		return nil
 	})
@@ -448,6 +449,17 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
+	note, noteUntil, err := models.NormalizeAdminNote(application.AdminNote, application.AdminNoteUntil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+	application.AdminNote, application.AdminNoteUntil = note, noteUntil
+
 	// Auto-renseigner le créateur si non fourni
 	if application.CreatedByID == nil {
 		if userIDVal, exists := c.Get("user_id"); exists {
@@ -568,6 +580,27 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
+	// Updates() ignore les valeurs vides : la note est écrite à part, seulement si la clé
+	// admin_note est présente, pour pouvoir l'effacer sans toucher aux clients qui l'omettent.
+	var notePresence struct {
+		AdminNote *string `json:"admin_note"`
+	}
+	_ = c.ShouldBindBodyWith(&notePresence, binding.JSON)
+	var noteFields map[string]interface{}
+	if notePresence.AdminNote != nil {
+		note, noteUntil, err := models.NormalizeAdminNote(*notePresence.AdminNote, updateData.AdminNoteUntil)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Error:   "Bad Request",
+				Message: err.Error(),
+				Code:    http.StatusBadRequest,
+			})
+			return
+		}
+		noteFields = map[string]interface{}{"admin_note": note, "admin_note_until": noteUntil}
+	}
+	updateData.AdminNote, updateData.AdminNoteUntil = "", nil
+
 	// Déplacer l'application exige aussi le droit de gérer la catégorie d'arrivée
 	if updateData.AppGroupID != 0 && updateData.AppGroupID != application.AppGroupID &&
 		!middleware.CanManageAppGroupWithDB(c, updateData.AppGroupID, h.db) {
@@ -579,13 +612,20 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	// Updates(struct) ignore false et 0 : les cases à cocher et l'ordre sont appliqués à part
+	// Updates(struct) ignore false, 0 et "" : cases à cocher, ordre et note sont appliqués à part.
+	// Omit(clause.Associations) : sinon GORM réenregistre l'AppGroup préchargé et remet
+	// app_group_id sur l'ancienne catégorie, ce qui annule un déplacement.
 	err = h.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&application).Updates(updateData).Error; err != nil {
+		if err := tx.Model(&application).Omit(clause.Associations).Updates(updateData).Error; err != nil {
 			return err
 		}
-		if values := flagUpdates(flags, "is_active", "open_in_new_tab", "order"); len(values) > 0 {
-			return tx.Model(&application).Updates(values).Error
+		if values := flagUpdates(flags, "is_active", "open_in_new_tab", "order", "description"); len(values) > 0 {
+			if err := tx.Model(&application).Omit(clause.Associations).Updates(values).Error; err != nil {
+				return err
+			}
+		}
+		if noteFields != nil {
+			return tx.Model(&application).Omit(clause.Associations).Updates(noteFields).Error
 		}
 		return nil
 	})
@@ -798,7 +838,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		GroupIDs  []uint `json:"group_ids"`
 	}
 
-	if err := c.ShouldBindJSON(&createData); err != nil {
+	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -839,7 +879,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		IsActive:  createData.IsActive,
 	}
 
-	if err := h.db.Create(&user).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &user, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création de l'utilisateur",
@@ -1129,16 +1169,14 @@ func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 
 	// Supprimer définitivement dans une transaction
 	if err := h.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Supprimer les associations many-to-many
+		// 1. Supprimer les associations many-to-many directement dans les tables de jointure :
+		// Association(...).Clear() en mode Unscoped produit un SQL invalide sur user_favorites.
 		txUnscoped := tx.Unscoped()
-		if err := txUnscoped.Model(&user).Association("Groups").Clear(); err != nil {
-			return err
-		}
-		if err := txUnscoped.Model(&user).Association("Favorites").Clear(); err != nil {
-			return err
-		}
-		if err := txUnscoped.Model(&user).Association("AdminOfGroups").Clear(); err != nil {
-			return err
+		for _, joinTable := range []string{"user_groups", "user_favorites", "group_admins"} {
+			// joinTable vient de la liste constante ci-dessus, jamais d'une entrée utilisateur
+			if err := tx.Exec("DELETE FROM "+joinTable+" WHERE user_id = ?", user.ID).Error; err != nil {
+				return err
+			}
 		}
 
 		// 2. Supprimer les enregistrements liés à l'utilisateur
@@ -1201,6 +1239,7 @@ func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 
 		return nil
 	}); err != nil {
+		log.Printf("[PermanentlyDeleteUser] utilisateur %d : %v", user.ID, err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la suppression définitive",
@@ -1322,7 +1361,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		AppGroupIDs []uint `json:"app_group_ids"`
 	}
 
-	if err := c.ShouldBindJSON(&createData); err != nil {
+	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -1338,7 +1377,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		IsActive:    createData.IsActive,
 	}
 
-	if err := h.db.Create(&group).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &group, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création du groupe",

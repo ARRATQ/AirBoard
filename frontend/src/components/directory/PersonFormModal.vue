@@ -138,6 +138,7 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import DirModal from './DirModal.vue'
@@ -270,6 +271,9 @@ const submit = async () => {
     saving.value = false
   }
 }
+
+// Échap ferme la modale
+useEscapeClose(showGallery, () => { showGallery.value = false })
 </script>
 
 <style scoped>

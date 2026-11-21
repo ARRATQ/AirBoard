@@ -377,6 +377,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -503,4 +504,7 @@ const formatDate = (dateString) => {
     day: 'numeric'
   })
 }
+
+// Échap ferme la modale
+useEscapeClose(showUpdateModal, () => { showUpdateModal.value = false })
 </script>

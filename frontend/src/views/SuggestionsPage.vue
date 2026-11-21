@@ -111,7 +111,7 @@
 
             <div class="mt-2 flex items-center gap-2 flex-wrap text-xs">
               <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                {{ item.category_ref?.name || item.category || t('suggestions.noCategory') }}
+                {{ suggestionCategoryLabel(item, t, te) }}
               </span>
               <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
               <span class="text-gray-500 dark:text-gray-400">
@@ -164,7 +164,7 @@
 
         <div class="mt-2 flex items-center gap-2 flex-wrap text-xs">
           <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-            {{ item.category_ref?.name || item.category || t('suggestions.noCategory') }}
+            {{ suggestionCategoryLabel(item, t, te) }}
           </span>
           <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
         </div>
@@ -287,12 +287,14 @@
 import { suggestionStatusTone } from '@/config/status'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
+import { suggestionCategoryLabel } from '@/utils/suggestionCategory'
 import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { suggestionsService } from '@/services/api'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const route = useRoute()
 
 const statuses = ['new', 'reviewing', 'planned', 'in_progress', 'implemented', 'rejected']
@@ -428,7 +430,7 @@ const submitSuggestion = async () => {
   } catch (error) {
     console.error('Failed to create suggestion:', error)
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.form.error'))
+      window.$toast.error(t('suggestions.form.error'))
     }
   } finally {
     submitting.value = false
@@ -481,6 +483,9 @@ onMounted(async () => {
     showCreateModal.value = true
   }
 })
+
+// Échap ferme la modale
+useEscapeClose(showCreateModal, () => closeCreateModal())
 </script>
 
 <style scoped>

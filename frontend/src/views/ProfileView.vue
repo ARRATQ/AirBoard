@@ -405,6 +405,7 @@
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -608,6 +609,10 @@ const handlePasswordChange = async () => {
 onMounted(() => {
   loadProfile()
 })
+
+// Échap ferme la modale
+useEscapeClose(showPasswordModal, () => { showPasswordModal.value = false })
+useEscapeClose(showDeleteAvatarModal, () => { showDeleteAvatarModal.value = false })
 </script>
 
 <style scoped>

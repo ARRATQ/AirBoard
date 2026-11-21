@@ -64,6 +64,15 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 		query = query.Where("type = ?", newsType)
 	}
 
+	// Statut de publication (administration) : appliqué à toute la liste, pas à la page courante.
+	// Le filtrage par rôle plus bas reste appliqué en plus : il ne peut que restreindre.
+	switch c.Query("status") {
+	case "published":
+		query = query.Where("is_published = ?", true)
+	case "draft":
+		query = query.Where("is_published = ?", false)
+	}
+
 	// Filtre par tags (supporte plusieurs tags séparés par des virgules)
 	if tags := c.Query("tags"); tags != "" {
 		tagIDs := strings.Split(tags, ",")

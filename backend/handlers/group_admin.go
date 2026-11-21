@@ -3,11 +3,13 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"airboard/middleware"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -182,9 +184,11 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		OpenInNewTab bool   `json:"open_in_new_tab"`
 		IsActive     bool   `json:"is_active"`
 		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		AdminNote      string     `json:"admin_note"`
+		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Invalid request",
 			Message: err.Error(),
@@ -229,6 +233,16 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		createdByID = &uid
 	}
 
+	note, noteUntil, err := models.NormalizeAdminNote(req.AdminNote, req.AdminNoteUntil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Invalid request",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
 	application := models.Application{
 		Name:        req.Name,
 		Description: req.Description,
@@ -240,9 +254,11 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		IsActive:    req.IsActive,
 		AppGroupID:  req.AppGroupID,
 		CreatedByID: createdByID,
+		AdminNote:      note,
+		AdminNoteUntil: noteUntil,
 	}
 
-	if err := h.db.Create(&application).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &application, "is_active", "open_in_new_tab"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Database error",
 			Message: err.Error(),
@@ -269,6 +285,8 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 		OpenInNewTab bool   `json:"open_in_new_tab"`
 		IsActive     bool   `json:"is_active"`
 		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		AdminNote      string     `json:"admin_note"`
+		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -340,6 +358,16 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 		}
 	}
 
+	note, noteUntil, err := models.NormalizeAdminNote(req.AdminNote, req.AdminNoteUntil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Invalid request",
+			Message: err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
 	application.Name = req.Name
 	application.Description = req.Description
 	application.URL = req.URL
@@ -349,6 +377,8 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 	application.OpenInNewTab = req.OpenInNewTab
 	application.IsActive = req.IsActive
 	application.AppGroupID = req.AppGroupID
+	application.AdminNote = note
+	application.AdminNoteUntil = noteUntil
 
 	if err := h.db.Save(&application).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{

@@ -15,6 +15,8 @@ type resourceFlags struct {
 	IsPrivate    *bool `json:"is_private"`
 	OpenInNewTab *bool `json:"open_in_new_tab"`
 	Order        *int  `json:"order"`
+	// Description : une chaîne vide est ignorée par Updates(struct), la lire ici permet de la vider
+	Description *string `json:"description"`
 }
 
 // flagUpdates renvoie, pour les colonnes demandées, les valeurs présentes dans la requête.
@@ -37,6 +39,10 @@ func flagUpdates(f resourceFlags, columns ...string) map[string]interface{} {
 		case "order":
 			if f.Order != nil {
 				values[column] = *f.Order
+			}
+		case "description":
+			if f.Description != nil {
+				values[column] = *f.Description
 			}
 		}
 	}

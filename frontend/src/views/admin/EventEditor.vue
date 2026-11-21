@@ -385,6 +385,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { toDateTimeInput, fromDateTimeInput, isEndBeforeStart } from '@/utils/dateInput'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -476,7 +477,7 @@ const parseJson = (value, fallback) => {
   }
 }
 
-const toDateTimeInput = (value) => (value ? new Date(value).toISOString().slice(0, 16) : '')
+// Date seule (fin de récurrence) : écrite et relue en UTC, donc stable
 const toDateInput = (value) => (value ? new Date(value).toISOString().slice(0, 10) : '')
 
 const loadEvent = async () => {
@@ -556,7 +557,7 @@ const loadGroups = async () => {
   }
 }
 
-const toIsoDateTime = (value) => (value ? new Date(value).toISOString() : null)
+const toIsoDateTime = fromDateTimeInput
 const toIsoDate = (value) => (value ? new Date(value).toISOString().split('T')[0] : null)
 
 const buildPayload = () => ({
@@ -576,6 +577,10 @@ const buildPayload = () => ({
 })
 
 const saveEvent = async () => {
+  if (isEndBeforeStart(form.value.start_date, form.value.end_date)) {
+    appStore.showError(t('common.validation.endBeforeStart'))
+    return
+  }
   isSaving.value = true
   try {
     const service = getEventWriteService(isAdmin.value, isGlobal.value)

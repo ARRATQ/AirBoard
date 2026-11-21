@@ -275,6 +275,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { emailService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -422,4 +423,7 @@ const formatTokenExpiry = (dateString) => {
 onMounted(() => {
   loadOAuthConfig()
 })
+
+// Échap ferme la modale
+useEscapeClose(showTestModal, () => { showTestModal.value = false })
 </script>

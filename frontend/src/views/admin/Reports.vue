@@ -763,6 +763,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { reportsService } from '@/services/api'
@@ -1001,4 +1002,8 @@ function formatDate(dateStr) {
 onMounted(() => {
   selectPreset('30d')
 })
+
+// Échap ferme la modale
+useEscapeClose(groupDetail, () => { groupDetail.value = null })
+useEscapeClose(userDetail, () => { userDetail.value = null })
 </script>

@@ -65,8 +65,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { pageTitle } from '@/utils/pageTitle'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
@@ -83,6 +85,12 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 const route = useRoute()
 const router = useRouter()
+const { t, te } = useI18n()
+
+// Titre de l'onglet traduit, mis à jour à chaque navigation et changement de langue
+watchEffect(() => {
+  document.title = pageTitle(route, t, te)
+})
 
 // Computed
 const isAuthenticated = computed(() => authStore.isAuthenticated)

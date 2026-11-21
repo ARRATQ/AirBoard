@@ -112,7 +112,36 @@
     "gamification": "نقاطي",
     "oauth": "OAuth",
     "clear": "مسح",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "activate": "تفعيل",
+    "deactivate": "تعطيل",
+    "status": "الحالة",
+    "description": "الوصف",
+    "name": "الاسم",
+    "color": "اللون",
+    "icon": "الأيقونة",
+    "order": "الترتيب",
+    "open": "فتح",
+    "previous": "السابق",
+    "next": "التالي",
+    "enabled": "مفعّل",
+    "disabled": "معطّل",
+    "notConfigured": "غير مُهيّأ",
+    "validation": {
+      "endBeforeStart": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء.",
+      "contentRequired": "المحتوى مطلوب.",
+      "commentLengthRange": "يجب أن يكون الحد الأقصى للطول بين {min} و{max} حرفًا.",
+      "duplicateName": "هذا الاسم مستخدم بالفعل."
+    },
+    "feedback": {
+      "saved": "تم حفظ التغييرات.",
+      "created": "تم الإنشاء.",
+      "deleted": "تم الحذف.",
+      "statusChanged": "تم تحديث الحالة.",
+      "loadError": "تعذّر تحميل البيانات.",
+      "saveError": "تعذّر الحفظ. حاول مرة أخرى.",
+      "deleteError": "تعذّر الحذف. حاول مرة أخرى."
+    }
   },
   "calendar": {
     "title": "تقويم الأحداث",
@@ -181,7 +210,15 @@
       "weekendCount": "أيام نهاية الأسبوع",
       "holidaysCount": "العطل الرسمية",
       "days": "يوم/أيام",
-      "holidaysInPeriod": "العطل الرسمية خلال الفترة"
+      "holidaysInPeriod": "العطل الرسمية خلال الفترة",
+      "invalidRange": "اختر تاريخ بداية وتاريخ نهاية لاحقًا له."
+    },
+    "viewLabel": "طريقة العرض",
+    "columns": {
+      "when": "التاريخ",
+      "event": "الحدث",
+      "place": "المكان",
+      "status": "الحالة"
     }
   },
   "groups": {
@@ -211,7 +248,10 @@
     "updated": "تم تعديل المجموعة بنجاح",
     "loadError": "خطأ أثناء تحميل المجموعات",
     "saveError": "خطأ أثناء حفظ المجموعة",
-    "deleteError": "خطأ أثناء حذف المجموعة"
+    "deleteError": "خطأ أثناء حذف المجموعة",
+    "adminsSaved": "تم تحديث مشرفي المجموعة.",
+    "adminsLoadError": "تعذّر تحميل مستخدمي المجموعة.",
+    "membersCount": "{count} مستخدم | {count} مستخدم | {count} مستخدم"
   },
   "applications": {
     "title": "الموارد",
@@ -226,7 +266,8 @@
     "emptyText": "ابدأ بإضافة أول مورد.",
     "order": "الترتيب",
     "confirmDeleteTitle": "حذف المورد",
-    "confirmDeleteText": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
+    "confirmDeleteText": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+    "noDescription": "لا يوجد وصف."
   },
   "users": {
     "title": "المستخدمون",
@@ -251,7 +292,115 @@
     "permanentDeleteTitle": "حذف نهائي",
     "permanentDeleteMessage": "هل تريد حذف المستخدم «{username}» نهائيًا؟\n\nهذا الإجراء لا رجعة فيه وسيحذف جميع البيانات المرتبطة به.",
     "last_connection": "آخر اتصال",
-    "never_connected": "لم يتصل أبداً"
+    "never_connected": "لم يتصل أبداً",
+    "viewActive": "المستخدمون النشطون",
+    "viewTrash": "سلة المحذوفات",
+    "viewLabel": "عرض",
+    "deleteTitle": "حذف المستخدم",
+    "deleteMessage": "سيُنقل المستخدم «{name}» إلى سلة المحذوفات، ويمكنك استعادته.",
+    "toast": {
+      "loadError": "تعذّر تحميل المستخدمين.",
+      "created": "تم إنشاء المستخدم.",
+      "updated": "تم تعديل المستخدم.",
+      "saveError": "تعذّر حفظ المستخدم.",
+      "deleted": "تم نقل المستخدم إلى سلة المحذوفات.",
+      "deleteError": "تعذّر حذف المستخدم.",
+      "activated": "تم تفعيل المستخدم.",
+      "deactivated": "تم تعطيل المستخدم.",
+      "statusError": "تعذّر تغيير الحالة.",
+      "restored": "تمت استعادة {name}.",
+      "restoreError": "تعذّرت استعادة المستخدم.",
+      "permanentlyDeleted": "تم حذف المستخدم نهائيًا.",
+      "permanentDeleteError": "تعذّر الحذف النهائي."
+    },
+    "lastConnection": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ دقيقة واحدة | منذ {count} دقيقة",
+      "hoursAgo": "منذ ساعة واحدة | منذ {count} ساعة",
+      "daysAgo": "منذ يوم واحد | منذ {count} يوم"
+    },
+    "trashActions": {
+      "restore": "استعادة المستخدم",
+      "restoreFor": "استعادة المستخدم: {name}",
+      "purge": "حذف نهائي (لا يمكن التراجع عنه)",
+      "purgeFor": "حذف نهائي: {name}"
+    }
+  },
+  "userModal": {
+    "titleEdit": "تعديل المستخدم",
+    "subtitleEdit": "عدّل معلومات الحساب",
+    "subtitleCreate": "أنشئ حساب مستخدم جديدًا",
+    "tabAccount": "الحساب",
+    "tabAccess": "الدور والمجموعات",
+    "tabError": "خطأ",
+    "username": "اسم المستخدم",
+    "usernameLocked": "لا يمكن تعديل اسم المستخدم",
+    "email": "البريد الإلكتروني",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "password": "كلمة المرور",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "passwordHint": "{min} أحرف على الأقل",
+    "activeAccount": "حساب نشط",
+    "activeAccountDesc": "يُسمح للمستخدم بتسجيل الدخول",
+    "role": "الدور",
+    "roleUserDesc": "الوصول إلى موارد مجموعاته",
+    "roleEditorDesc": "يدير أخبار News Hub",
+    "roleAdminDesc": "الوصول إلى جميع الميزات",
+    "groupAdminHint": "لتفويض إدارة مجموعة، عيّن المستخدم مسؤولًا عنها من صفحة إدارة المجموعات.",
+    "groups": "مجموعات المستخدمين",
+    "groupsHint": "تحدد المجموعات الموارد المتاحة",
+    "noGroups": "لا توجد مجموعات متاحة",
+    "submitCreate": "إنشاء المستخدم",
+    "errors": {
+      "usernameRequired": "اسم المستخدم مطلوب",
+      "usernameTooShort": "يجب أن يحتوي اسم المستخدم على {min} أحرف على الأقل",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "البريد الإلكتروني غير صالح",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordTooShort": "يجب أن تحتوي كلمة المرور على {min} أحرف على الأقل",
+      "roleRequired": "الدور مطلوب"
+    }
+  },
+  "groupModal": {
+    "titleEdit": "تعديل المجموعة",
+    "titleCreate": "مجموعة مستخدمين جديدة",
+    "subtitleEdit": "عدّل معلومات المجموعة",
+    "subtitleCreate": "أنشئ مجموعة لتنظيم الصلاحيات",
+    "tabGeneral": "عام",
+    "tabAccess": "الوصول",
+    "tabMembers": "الأعضاء",
+    "tabError": "خطأ",
+    "name": "اسم المجموعة",
+    "namePlaceholder": "مثال: المطورون",
+    "color": "لون التعريف",
+    "colorSwatch": "اللون {color}",
+    "descriptionPlaceholder": "وصف مجموعة المستخدمين...",
+    "activeGroup": "مجموعة نشطة",
+    "activeGroupDesc": "تُطبَّق صلاحيات المجموعة على أعضائها",
+    "searchAppGroups": "ابحث عن مجموعة موارد...",
+    "selectAll": "تحديد الكل",
+    "selectNone": "لا شيء",
+    "noAppGroups": "لا توجد مجموعات موارد متاحة",
+    "noAppGroupsHint": "أنشئ مجموعات موارد أولًا",
+    "resourcesCount": "{count} مورد | {count} مورد | {count} موارد",
+    "noResults": "لا توجد نتائج لـ «{query}»",
+    "noMembers": "لا يوجد أعضاء في هذه المجموعة",
+    "noMembersHint": "أضف أعضاء من صفحة إدارة المستخدمين",
+    "selectedCount": "لم يتم تحديد أي مجموعة موارد | {count} مجموعة موارد محددة | {count} مجموعة موارد محددة",
+    "submitCreate": "إنشاء المجموعة",
+    "errors": {
+      "nameRequired": "الاسم مطلوب"
+    }
+  },
+  "groupAdminsModal": {
+    "manage": "إدارة المسؤولين",
+    "manageFor": "إدارة المسؤولين: {name}",
+    "title": "مسؤولو المجموعة",
+    "intro": "اختر المستخدمين الذين سيتمكنون من إدارة هذه المجموعة ومواردها.",
+    "noUsers": "لم يتم العثور على أي مستخدم",
+    "selectedCount": "لم يتم تحديد أي مسؤول | {count} مسؤول محدد | {count} مسؤول محدد"
   },
   "settings": {
     "general": "عام",
@@ -423,6 +572,7 @@
     "showAvatarIntroHelp": "عند فتح المحادثة، تظهر صورة رمزية متحركة في الزاوية وتطفو بلطف طالما النافذة مفتوحة. تظهر فقاعة ترحيب ثم تُغلق تلقائياً بعد بضع ثوانٍ."
   },
   "news": {
+    "selectTypePlaceholder": "اختر نوعًا…",
     "widget": {
       "title": "أبرز الأخبار",
       "viewAll": "عرض الكل",
@@ -474,7 +624,8 @@
     "viewModes": {
       "list": "قائمة",
       "grid": "شبكة",
-      "table": "جدول"
+      "table": "جدول",
+      "label": "طريقة العرض"
     },
     "zoom": {
       "extraSmall": "صغير جدا",
@@ -506,7 +657,31 @@
     "emptyAdmin": "ابدأ بإنشاء فئة موارد، ثم أضف إليها الموارد.",
     "emptyUser": "تواصل مع المسؤول للحصول على إمكانية الوصول إلى الموارد.",
     "createCategory": "إنشاء فئة",
-    "loadError": "تعذر تحميل الموارد"
+    "loadError": "تعذر تحميل الموارد",
+    "types": {
+      "app": "تطبيق",
+      "word": "مستند Word",
+      "excel": "مصنف Excel",
+      "powerpoint": "عرض تقديمي",
+      "pdf": "PDF",
+      "folder": "مجلد",
+      "site": "موقع الإنترانت",
+      "link": "رابط ويب"
+    },
+    "typeFilter": {
+      "label": "نوع المورد",
+      "all": "الكل",
+      "apps": "التطبيقات",
+      "docs": "المستندات",
+      "sites": "المواقع والروابط"
+    },
+    "newBadge": "جديد",
+    "privateBadge": "خاص",
+    "opensInNewTab": "يفتح في علامة تبويب جديدة",
+    "type": "النوع",
+    "addedOn": "أُضيف في",
+    "count": "{count} مورد | {count} مورد | {count} موارد",
+    "noneOfType": "لا يوجد مورد من هذا النوع."
   },
   "groupAdmin": {
     "title": "إدارة المجموعة",
@@ -638,7 +813,8 @@
       },
       "deleteConfirm": {
         "title": "حذف الفئة",
-        "message": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
+        "message": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+        "messageWithResources": "سيؤدي حذف «{name}» أيضًا إلى الحذف النهائي للموارد التي يحتويها (العدد: {count}). لا يمكن التراجع عن هذا الإجراء. | سيؤدي حذف «{name}» أيضًا إلى الحذف النهائي للموارد التي يحتويها (العدد: {count}). لا يمكن التراجع عن هذا الإجراء."
       },
       "deleteError": "خطأ أثناء حذف الفئة"
     },
@@ -1019,7 +1195,10 @@
       "latestResults": "آخر النتائج",
       "closesIn": "يغلق في",
       "votes": "{count} صوت",
-      "vote": "صوّت الآن"
+      "vote": "صوّت الآن",
+      "endsIn": "متبقٍ {count} يوم | متبقٍ {count} يوم | متبقية {count} أيام",
+      "ended": "مغلق",
+      "open": "مفتوح"
     },
     "quickActions": {
       "title": "إجراءات سريعة",
@@ -1044,7 +1223,8 @@
       "beforeLevel": "قبل المستوى {level}",
       "streak": "سلسلة",
       "badges": "الأوسمة",
-      "rank": "الترتيب"
+      "rank": "الترتيب",
+      "levelShort": "مستوى"
     },
     "hero": {
       "subtitle": "اكتشف مساحة عملك الشخصية",
@@ -1071,6 +1251,20 @@
       },
       "pendingPolls": "{count} استطلاع/استطلاعات بانتظار تصويتك",
       "pendingApps": "{count} مورد/موارد جديدة هذا الأسبوع"
+    },
+    "keyFigures": "أرقام رئيسية",
+    "searchLabel": "البحث في البوابة",
+    "announcements": {
+      "region": "الإعلانات",
+      "prev": "الإعلان السابق",
+      "next": "الإعلان التالي",
+      "open": "قراءة الإعلان كاملاً",
+      "pause": "إيقاف التمرير مؤقتاً",
+      "play": "استئناف التمرير"
+    },
+    "rail": {
+      "portal": "البوابة",
+      "agenda": "المفكرة"
     }
   },
   "email": {
@@ -1190,7 +1384,16 @@
     "save_settings": "حفظ الإعدادات",
     "moderateError": "حدث خطأ أثناء الإشراف على التعليق",
     "settingsSaved": "تم تحديث الإعدادات بنجاح",
-    "settingsSaveError": "حدث خطأ أثناء تحديث الإعدادات"
+    "settingsSaveError": "حدث خطأ أثناء تحديث الإعدادات",
+    "approved": "تمت الموافقة على التعليق.",
+    "flaggedDone": "تم الإبلاغ عن التعليق.",
+    "targetColumn": "العنصر المعلَّق عليه",
+    "targetMissing": "العنصر غير موجود",
+    "entityTypes": {
+      "news": "مقال",
+      "event": "فعالية",
+      "application": "مورد"
+    }
   },
   "notifications": {
     "title": "الإشعارات",
@@ -1480,6 +1683,7 @@
     "categoryLoadError": "تعذر تحميل الفئات",
     "categorySaveError": "تعذر حفظ الفئة",
     "categoryDeleteError": "تعذر حذف الفئة",
+    "categoryInUse": "هذه الفئة مستخدمة في اقتراحات: عطّلها بدلاً من ذلك.",
     "linkedPoll": "مرتبط باستطلاع",
     "statusUpdated": "تم تحديث الحالة",
     "statusUpdateError": "تعذر تحديث الحالة",
@@ -1523,6 +1727,32 @@
     }
   },
   "gamificationAdmin": {
+    "reasonLabels": {
+      "daily_login": "تسجيل الدخول اليومي",
+      "app_click": "فتح مورد",
+      "news_read": "قراءة مقال",
+      "news_publish": "نشر مقال",
+      "event_publish": "إنشاء فعالية",
+      "poll_vote": "التصويت في استطلاع",
+      "poll_create": "إنشاء استطلاع",
+      "comment_create": "نشر تعليق",
+      "suggestion_create": "إرسال اقتراح",
+      "suggestion_vote": "التصويت على اقتراح",
+      "suggestion_comment": "تعليق على اقتراح"
+    },
+    "metricLabels": {
+      "reason_count": "عدد المرات",
+      "app_click_distinct": "موارد مختلفة تم فتحها",
+      "news_read_count": "المقالات المقروءة",
+      "news_publish_count": "المقالات المنشورة",
+      "event_publish_count": "الفعاليات المنشورة",
+      "poll_vote_count": "الأصوات في الاستطلاعات",
+      "poll_create_count": "الاستطلاعات المنشأة",
+      "comment_count": "التعليقات",
+      "suggestion_create_count": "الاقتراحات المنشأة",
+      "suggestion_vote_count": "الأصوات على الاقتراحات",
+      "suggestion_comment_count": "التعليقات على الاقتراحات"
+    },
     "title": "التحفيز",
     "subtitle": "عدل النقاط واضبط الشارات مع شروط الحصول عليها.",
     "rules": "قواعد النقاط",
@@ -1530,7 +1760,58 @@
     "points": "النقاط",
     "threshold": "العتبة",
     "badgeReward": "مكافاة XP",
-    "confirmDeleteBadge": "هل تريد حذف الشارة «{name}»؟"
+    "confirmDeleteBadge": "هل تريد حذف الشارة «{name}»؟",
+    "form": {
+      "code": "الرمز التقني",
+      "codeHint": "معرّف داخلي فريد لا يظهر للمستخدم.",
+      "name": "اسم الشارة",
+      "nameHint": "النص الذي يراه المستخدمون.",
+      "icon": "الأيقونة",
+      "iconHint": "بصيغة Iconify، مثل {example}.",
+      "color": "اللون",
+      "pickColor": "اختر لونًا",
+      "colorHint": "لون الشارة بالنظام الست عشري.",
+      "preview": "معاينة الشارة",
+      "xpReward": "مكافأة XP للشارة",
+      "xpRewardHint": "نقاط XP تُمنح مرة واحدة عند فتح الشارة.",
+      "category": "الفئة",
+      "categoryHint": "الفئة {code} مخصّصة لملفات المساهمين.",
+      "trigger": "الحدث المُطلِق",
+      "triggerPlaceholder": "اختر حدثًا",
+      "triggerHelp": "اختر الحدث الذي يُقدّم هذه الشارة.",
+      "metric": "مقياس التقدّم",
+      "metricPlaceholder": "اختر مقياسًا",
+      "metricHelp": "اختر طريقة قياس التقدّم نحو الشارة.",
+      "threshold": "حدّ الفتح",
+      "thresholdHint": "عدد الإجراءات اللازمة للحصول على الشارة.",
+      "active": "الشارة مفعّلة"
+    },
+    "reasons": {
+      "daily_login": "عند كل تسجيل دخول يومي مُكافأ.",
+      "app_click": "عند كل فتح لمورد.",
+      "news_read": "عند كل قراءة لمقال.",
+      "news_publish": "عند كل نشر لمقال.",
+      "event_publish": "عند كل إنشاء لحدث.",
+      "poll_vote": "عند كل تصويت في استطلاع.",
+      "poll_create": "عند كل إنشاء لاستطلاع.",
+      "comment_create": "عند كل تعليق يُنشر.",
+      "suggestion_create": "عند كل اقتراح يُرسل.",
+      "suggestion_vote": "عند كل تصويت على اقتراح.",
+      "suggestion_comment": "عند كل تعليق على اقتراح."
+    },
+    "metrics": {
+      "reason_count": "عدد مرات وقوع الحدث.",
+      "app_click_distinct": "عدد الموارد المختلفة التي فُتحت.",
+      "news_read_count": "إجمالي المقالات المقروءة.",
+      "news_publish_count": "إجمالي المقالات المنشورة.",
+      "event_publish_count": "إجمالي الأحداث المنشورة.",
+      "poll_vote_count": "إجمالي الأصوات في الاستطلاعات.",
+      "poll_create_count": "إجمالي الاستطلاعات المُنشأة.",
+      "comment_count": "إجمالي التعليقات.",
+      "suggestion_create_count": "إجمالي الاقتراحات المُنشأة.",
+      "suggestion_vote_count": "إجمالي الأصوات على الاقتراحات.",
+      "suggestion_comment_count": "إجمالي التعليقات على الاقتراحات."
+    }
   },
   "media": {
     "title": "إدارة الوسائط",
@@ -1572,7 +1853,13 @@
     "url_copied": "تم نسخ الرابط إلى الحافظة!",
     "upload_error": "خطأ في رفع الملف",
     "update_error": "خطأ في تحديث الوسائط",
-    "delete_error": "خطأ في حذف الوسائط"
+    "delete_error": "خطأ في حذف الوسائط",
+    "loading": "جارٍ تحميل الوسائط…",
+    "noMedia": "لا توجد وسائط.",
+    "insert": "إدراج",
+    "dropFiles": "أفلت ملفاتك هنا",
+    "orClickToSelect": "أو انقر لاختيارها",
+    "uploadQueue": "قائمة الرفع"
   },
   "help": {
     "sections": {
@@ -1772,6 +2059,7 @@
       "field": "حذف الحقل «{name}»؟ لن تُعرض القيم المدخلة بعد الآن."
     },
     "errors": {
+      "hasSubUnits": "احذف الوحدات الفرعية لهذه الوحدة أو انقلها أولًا.",
       "nameRequired": "الاسم إلزامي.",
       "positionRequired": "المسمى والوحدة إلزاميان.",
       "personRequired": "اختر شخصًا.",
@@ -1813,7 +2101,36 @@
       "next": "الصفحة التالية",
       "range": "{from}–{to} من {total}",
       "sortAsc": "ترتيب تصاعدي",
-      "sortDesc": "ترتيب تنازلي"
+      "sortDesc": "ترتيب تنازلي",
+      "columns": {
+        "name": "الاسم",
+        "title": "العنوان",
+        "status": "الحالة",
+        "actions": "الإجراءات",
+        "order": "الترتيب",
+        "category": "الفئة",
+        "type": "النوع",
+        "group": "المجموعة",
+        "groups": "المجموعات",
+        "owner": "المالك",
+        "author": "الكاتب",
+        "date": "التاريخ",
+        "createdAt": "تاريخ الإنشاء",
+        "updatedAt": "تاريخ التعديل",
+        "members": "الأعضاء",
+        "count": "العدد",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "url": "العنوان الإلكتروني",
+        "description": "الوصف",
+        "visibility": "الظهور",
+        "period": "الفترة",
+        "votes": "الأصوات",
+        "content": "المحتوى",
+        "reason": "السبب",
+        "key": "المفتاح",
+        "slug": "المعرّف"
+      }
     },
     "toast": {
       "region": "الإشعارات",
@@ -1838,7 +2155,11 @@
       "deleted": "تم حذف المورد بنجاح",
       "creator": "المُنشئ",
       "creatorNone": "— غير مُسند —",
-      "creatorHelp": "يحدّد المُنشئ في تقارير النشاط."
+      "creatorHelp": "يحدّد المُنشئ في تقارير النشاط.",
+      "note": "ملاحظة على البطاقة",
+      "notePlaceholder": "مثال: صيانة يوم الخميس من 18 إلى 20",
+      "noteHelp": "تظهر على بطاقة البوابة. {count} / 140 حرفًا.",
+      "noteUntil": "إظهارها حتى"
     },
     "appGroups": {
       "private": "خاص",
@@ -2159,6 +2480,9 @@
       "loadCountriesError": "خطأ أثناء تحميل البلدان",
       "previewError": "خطأ أثناء المعاينة",
       "importError": "خطأ أثناء استيراد العطل الرسمية"
+    },
+    "actions": {
+      "view": "عرض الحدث"
     }
   },
   "profile": {
@@ -2228,6 +2552,117 @@
     "all": "الكل",
     "unlocked": "المفتوحة",
     "streak": "السلسلة",
-    "xpReward": "المكافأة: {xp} نقطة خبرة"
+    "xpReward": "المكافأة: {xp} نقطة خبرة",
+    "figPlayers": "المشاركون",
+    "figBadges": "الشارات المفتوحة",
+    "figRank": "ترتيبك",
+    "xpToNext": "{xp} نقطة خبرة للوصول إلى المستوى {level}",
+    "levelShort": "م {level}",
+    "badges": "الشارات",
+    "latestBadges": "آخر الشارات",
+    "noActivity": "لا يوجد نشاط حديث",
+    "noBadges": "لا توجد شارات في هذه الفئة",
+    "badgeFilter": "تصفية الشارات",
+    "loadError": "تعذّر تحميل تقدمك.",
+    "you": "أنت",
+    "activity": {
+      "daily_login": "تسجيل الدخول",
+      "app_click": "مورد",
+      "news_read": "مقال مقروء",
+      "news_publish": "نشر",
+      "event_publish": "حدث",
+      "poll_vote": "تصويت في استطلاع",
+      "poll_create": "إنشاء استطلاع",
+      "comment_create": "تعليق",
+      "suggestion_create": "اقتراح",
+      "suggestion_vote": "تصويت على فكرة",
+      "suggestion_comment": "نقاش",
+      "achievement_unlock": "فتح شارة",
+      "chat_message": "رسالة",
+      "chatbot_use": "المساعد الذكي",
+      "other": "نشاط"
+    },
+    "lockedPlural": "المقفلة"
+  },
+  "oauth": {
+    "title": "المصادقة عبر OAuth",
+    "subtitle": "هيّئ مزوّدي المصادقة الخارجيين (Google وMicrosoft)",
+    "configure": "تهيئة",
+    "configureSubtitle": "أدخل بيانات اعتماد OAuth لهذا المزوّد",
+    "enableProvider": "تفعيل مزوّد OAuth هذا",
+    "enableProviderHelp": "سيرى المستخدمون زر دخول لهذا المزوّد في صفحة تسجيل الدخول",
+    "clientId": "معرّف العميل",
+    "clientIdHelp": "احصل عليه من وحدة تحكم المطوّرين لدى المزوّد",
+    "clientSecret": "السر الخاص بالعميل",
+    "clientSecretPlaceholder": "اتركه فارغًا للإبقاء على السر الحالي",
+    "clientSecretHelp": "احفظ هذا السر بأمان ولا تشاركه أبدًا",
+    "redirectUri": "عنوان إعادة التوجيه",
+    "redirectUriHelp": "انسخ هذا العنوان وأضفه إلى عناوين إعادة التوجيه المسموح بها لدى المزوّد",
+    "advancedSettings": "إعدادات متقدّمة",
+    "authUrl": "عنوان التفويض",
+    "tokenUrl": "عنوان الرمز المميّز",
+    "userInfoUrl": "عنوان معلومات المستخدم",
+    "scopes": "نطاقات OAuth",
+    "setupInstructions": "تعليمات الإعداد",
+    "googleSetup1": "لتهيئة Google OAuth:",
+    "googleSetup2": "افتح Google Cloud Console > APIs & Services > Credentials",
+    "googleSetup3": "أنشئ معرّف عميل OAuth 2.0 (تطبيق ويب)",
+    "googleSetup4": "أضف عنوان إعادة التوجيه إلى العناوين المصرّح بها",
+    "googleSetup5": "انسخ معرّف العميل والسر هنا",
+    "microsoftSetup1": "لتهيئة Microsoft OAuth:",
+    "microsoftSetup2": "افتح Azure Portal > App registrations > New registration",
+    "microsoftSetup3": "حدّد عنوان إعادة التوجيه في إعدادات Authentication",
+    "microsoftSetup4": "أنشئ سرًّا جديدًا للعميل في Certificates & secrets",
+    "microsoftSetup5": "انسخ معرّف التطبيق (العميل) والسر هنا"
+  },
+  "pageTitles": {
+    "default": "بوابة التطبيقات",
+    "Home": "الرئيسية",
+    "Resources": "الموارد",
+    "Directory": "دليل الموظفين",
+    "DirectoryManagement": "إدارة الدليل",
+    "Search": "البحث",
+    "NewsCenter": "الأخبار",
+    "NewsDetail": "مقال",
+    "Polls": "الاستطلاعات",
+    "PollDetail": "استطلاع",
+    "Suggestions": "صندوق الاقتراحات",
+    "SuggestionDetail": "اقتراح",
+    "EventsCenter": "الأجندة",
+    "Profile": "الملف الشخصي",
+    "GamificationHub": "مركز التحفيز",
+    "Notifications": "الإشعارات",
+    "EventDetail": "فعالية",
+    "Login": "تسجيل الدخول",
+    "Register": "إنشاء حساب",
+    "OAuthCallback": "مصادقة OAuth",
+    "AdminOverview": "نظرة عامة",
+    "AdminNews": "الأخبار",
+    "AdminNewsCategories": "فئات المقالات",
+    "AdminNewsTypes": "أنواع المقالات",
+    "AdminSuggestions": "إدارة الاقتراحات",
+    "AdminSuggestionCategories": "فئات الاقتراحات",
+    "AdminApplications": "الموارد",
+    "AdminAppGroups": "فئات الموارد",
+    "AdminUsers": "المستخدمون",
+    "AdminGroups": "المجموعات",
+    "AdminSettings": "الإعدادات",
+    "AdminOAuth": "إعداد OAuth",
+    "AdminEmail": "إشعارات البريد الإلكتروني",
+    "AdminAnalytics": "الإحصاءات",
+    "AdminReports": "التقارير",
+    "AdminAnnouncements": "الإعلانات",
+    "AdminChatbots": "روبوتات المحادثة",
+    "AdminPolls": "الاستطلاعات",
+    "AdminGamification": "التحفيز",
+    "AdminMedia": "الوسائط",
+    "AdminNewsEdit": "تعديل المقال",
+    "AdminNewsNew": "مقال جديد",
+    "AdminEvents": "إدارة الفعاليات",
+    "AdminEventEdit": "تعديل الفعالية",
+    "AdminEventNew": "فعالية جديدة",
+    "CommentModeration": "إشراف التعليقات",
+    "Unauthorized": "وصول غير مصرح به",
+    "NotFound": "الصفحة غير موجودة"
   }
 }

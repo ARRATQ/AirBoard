@@ -246,6 +246,8 @@
 
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
+import { toDateTimeInput, fromDateTimeInput } from '@/utils/dateInput'
+import { isRichTextEmpty } from '@/utils/richText'
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
@@ -319,9 +321,9 @@ const submitLabel = computed(() => {
   return isEditMode.value ? t('groupAdmin.newsEditor.actions.update') : t('groupAdmin.newsEditor.actions.create')
 })
 
-// datetime-local attend « AAAA-MM-JJTHH:mm »
-const toInputDate = (value) => (value ? new Date(value).toISOString().slice(0, 16) : null)
-const toApiDate = (value) => (value ? new Date(value).toISOString() : null)
+// datetime-local attend une heure locale « AAAA-MM-JJTHH:mm »
+const toInputDate = (value) => toDateTimeInput(value, null)
+const toApiDate = fromDateTimeInput
 
 // Le contenu Tiptap est stocké en JSON sérialisé
 const parseContent = (raw) => {
@@ -429,6 +431,10 @@ const buildPayload = () => {
 const saveNews = async () => {
   if (missingTargetGroup.value) {
     appStore.showError(t('groupAdmin.newsEditor.messages.selectGroupError'))
+    return
+  }
+  if (isRichTextEmpty(form.value.content)) {
+    appStore.showError(t('common.validation.contentRequired'))
     return
   }
 

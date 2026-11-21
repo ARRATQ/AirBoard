@@ -1,295 +1,273 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-    <!-- Header -->
-    <div class="flex items-center gap-3 mb-6">
-      <div class="p-2 bg-primary-100 dark:bg-primary-900 rounded-lg">
-        <Icon icon="mdi:calculator" class="h-6 w-6 text-primary-600 dark:text-primary-400" />
-      </div>
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ $t('agenda.calculator.title') }}
-        </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ $t('agenda.calculator.subtitle') }}
-        </p>
-      </div>
-    </div>
+  <section class="wdc" aria-labelledby="wdc-title">
+    <header class="wdc__head">
+      <h2 id="wdc-title" class="wdc__title">{{ $t('agenda.calculator.title') }}</h2>
+      <p class="wdc__sub">{{ $t('agenda.calculator.subtitle') }}</p>
+    </header>
 
-    <!-- Weekend Configuration -->
-    <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-        {{ $t('agenda.calculator.weekendDays') }}
-      </label>
-      <div class="flex flex-wrap gap-2">
-        <button
-          v-for="(day, index) in weekDays"
-          :key="index"
-          @click="toggleWeekendDay(index)"
-          :class="[
-            'px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
-            weekendDays.includes(index)
-              ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-500 text-orange-700 dark:text-orange-300'
-              : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300'
-          ]"
-        >
-          {{ day }}
-        </button>
-      </div>
-      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-        {{ $t('agenda.calculator.weekendHint') }}
-      </p>
-    </div>
-
-    <!-- Date Range -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('agenda.calculator.startDate') }}
-        </label>
-        <input
-          v-model="startDate"
-          type="date"
-          class="input w-full"
-        />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {{ $t('agenda.calculator.endDate') }}
-        </label>
-        <input
-          v-model="endDate"
-          type="date"
-          class="input w-full"
-        />
-      </div>
-    </div>
-
-    <!-- Include Holidays Toggle -->
-    <div class="mb-6">
-      <label class="flex items-center gap-3 cursor-pointer">
-        <input
-          v-model="excludeHolidays"
-          type="checkbox"
-          class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-        />
-        <span class="text-sm text-gray-700 dark:text-gray-300">
-          {{ $t('agenda.calculator.excludeHolidays') }}
-        </span>
-      </label>
-    </div>
-
-    <!-- Calculate Button -->
-    <button
-      @click="calculate"
-      :disabled="!startDate || !endDate"
-      class="btn btn-primary w-full mb-6"
-    >
-      <Icon icon="mdi:calculator-variant" class="h-5 w-5 mr-2" />
-      {{ $t('agenda.calculator.calculate') }}
-    </button>
-
-    <!-- Results -->
-    <div v-if="results" class="space-y-4">
-      <!-- Total Days -->
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <div class="text-center">
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-            {{ $t('agenda.calculator.totalDays') }}
-          </p>
-          <p class="text-3xl font-bold text-gray-900 dark:text-white">
-            {{ results.totalDays }}
-          </p>
+    <div class="wdc__body">
+      <div class="wdc__form">
+        <div class="wdc__dates">
+          <label class="wdc__field">
+            <span class="wdc__label">{{ $t('agenda.calculator.startDate') }}</span>
+            <input v-model="startDate" type="date" class="wdc__input" />
+          </label>
+          <label class="wdc__field">
+            <span class="wdc__label">{{ $t('agenda.calculator.endDate') }}</span>
+            <input v-model="endDate" type="date" class="wdc__input" :min="startDate || undefined" />
+          </label>
         </div>
-      </div>
 
-      <!-- Working vs Non-Working -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 text-center">
-          <Icon icon="mdi:briefcase-check" class="h-8 w-8 mx-auto mb-2 text-green-600 dark:text-green-400" />
-          <p class="text-sm text-green-600 dark:text-green-400 mb-1">
-            {{ $t('agenda.calculator.workingDays') }}
-          </p>
-          <p class="text-2xl font-bold text-green-700 dark:text-green-300">
-            {{ results.workingDays }}
-          </p>
-        </div>
-        <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 text-center">
-          <Icon icon="mdi:beach" class="h-8 w-8 mx-auto mb-2 text-orange-600 dark:text-orange-400" />
-          <p class="text-sm text-orange-600 dark:text-orange-400 mb-1">
-            {{ $t('agenda.calculator.nonWorkingDays') }}
-          </p>
-          <p class="text-2xl font-bold text-orange-700 dark:text-orange-300">
-            {{ results.nonWorkingDays }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Breakdown -->
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          {{ $t('agenda.calculator.breakdown') }}
-        </h4>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">
-              {{ $t('agenda.calculator.weekendCount') }}
-            </span>
-            <span class="font-medium text-gray-900 dark:text-white">
-              {{ results.weekendDays }} {{ $t('agenda.calculator.days') }}
-            </span>
+        <fieldset class="wdc__weekend">
+          <legend class="wdc__label">{{ $t('agenda.calculator.weekendDays') }}</legend>
+          <div class="wdc__days">
+            <button
+              v-for="day in weekOrder"
+              :key="day.index"
+              type="button"
+              class="wdc__day"
+              :class="{ 'wdc__day--on': weekendDays.includes(day.index) }"
+              :aria-pressed="weekendDays.includes(day.index)"
+              :title="day.long"
+              @click="toggleWeekendDay(day.index)"
+            >
+              {{ day.short }}
+            </button>
           </div>
-          <div v-if="excludeHolidays" class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">
-              {{ $t('agenda.calculator.holidaysCount') }}
-            </span>
-            <span class="font-medium text-gray-900 dark:text-white">
-              {{ results.holidayDays }} {{ $t('agenda.calculator.days') }}
-            </span>
-          </div>
-        </div>
+          <p class="wdc__hint">{{ $t('agenda.calculator.weekendHint') }}</p>
+        </fieldset>
+
+        <label class="wdc__check">
+          <input v-model="excludeHolidays" type="checkbox" />
+          <span>{{ $t('agenda.calculator.excludeHolidays') }}</span>
+        </label>
       </div>
 
-      <!-- Holiday List (if any) -->
-      <div v-if="excludeHolidays && results.holidays.length > 0" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <h4 class="text-sm font-medium text-red-700 dark:text-red-300 mb-3 flex items-center gap-2">
-          <Icon icon="mdi:calendar-star" class="h-4 w-4" />
-          {{ $t('agenda.calculator.holidaysInPeriod') }}
-        </h4>
-        <ul class="space-y-1 text-sm">
-          <li
-            v-for="holiday in results.holidays"
-            :key="holiday.date"
-            class="flex justify-between text-red-600 dark:text-red-400"
-          >
-            <span>{{ holiday.title }}</span>
-            <span class="text-red-500 dark:text-red-500">{{ formatDate(holiday.date) }}</span>
-          </li>
-        </ul>
+      <div class="wdc__result" aria-live="polite">
+        <template v-if="results">
+          <p class="wdc__label">{{ $t('agenda.calculator.workingDays') }}</p>
+          <p class="wdc__big">{{ results.workingDays }}</p>
+          <dl class="wdc__breakdown">
+            <div><dt>{{ $t('agenda.calculator.totalDays') }}</dt><dd>{{ results.totalDays }}</dd></div>
+            <div><dt>{{ $t('agenda.calculator.weekendCount') }}</dt><dd>{{ results.weekendDays }}</dd></div>
+            <div v-if="excludeHolidays"><dt>{{ $t('agenda.calculator.holidaysCount') }}</dt><dd>{{ results.holidayDays }}</dd></div>
+            <div><dt>{{ $t('agenda.calculator.nonWorkingDays') }}</dt><dd>{{ results.nonWorkingDays }}</dd></div>
+          </dl>
+          <div v-if="excludeHolidays && results.holidays.length" class="wdc__holidays">
+            <p class="wdc__label">{{ $t('agenda.calculator.holidaysInPeriod') }}</p>
+            <ul>
+              <li v-for="holiday in results.holidays" :key="holiday.date">
+                <span>{{ holiday.title }}</span>
+                <time :datetime="holiday.date">{{ formatDate(holiday.date) }}</time>
+              </li>
+            </ul>
+          </div>
+        </template>
+        <p v-else class="wdc__empty">{{ $t('agenda.calculator.invalidRange') }}</p>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Icon } from '@iconify/vue'
+// Calculateur de jours ouvrés : le résultat suit chaque changement (dates, jours de repos,
+// fériés), sans bouton. Les fériés viennent de l'agenda (prop holidays : Map clé → nom).
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useEventsStore } from '@/stores/events'
+import { DEFAULT_WEEKEND, countWorkingDays, dateKey, parseDateKey } from '@/utils/agenda'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
-const { t, locale } = useI18n()
-const eventsStore = useEventsStore()
-
-// Week days (0 = Sunday, 1 = Monday, etc.)
-const weekDays = computed(() => {
-  const days = t('agenda.calculator.daysOfWeek')
-  // Parse if it's a string (fallback)
-  if (typeof days === 'string') {
-    return ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
-  }
-  return days
+const props = defineProps({
+  holidays: { type: Map, default: () => new Map() },
 })
 
-// State
-const startDate = ref('')
-const endDate = ref('')
-const weekendDays = ref([0, 6]) // Default: Sunday (0) and Saturday (6)
+const { locale } = useI18n()
+
+const today = new Date()
+const startDate = ref(dateKey(today))
+const endDate = ref(dateKey(new Date(today.getFullYear(), today.getMonth() + 1, 0)))
+const weekendDays = ref([...DEFAULT_WEEKEND])
 const excludeHolidays = ref(true)
-const results = ref(null)
 
-// Methods
-const toggleWeekendDay = (dayIndex) => {
-  const index = weekendDays.value.indexOf(dayIndex)
-  if (index > -1) {
-    weekendDays.value.splice(index, 1)
-  } else {
-    weekendDays.value.push(dayIndex)
-  }
-}
-
-const calculate = () => {
-  if (!startDate.value || !endDate.value) return
-
-  const start = new Date(startDate.value)
-  const end = new Date(endDate.value)
-
-  // Ensure start <= end
-  if (start > end) {
-    results.value = null
-    return
-  }
-
-  // Get holidays in the period
-  const holidaysInPeriod = getHolidaysInPeriod(start, end)
-
-  let totalDays = 0
-  let workingDays = 0
-  let weekendDaysCount = 0
-  let holidayDays = 0
-
-  const currentDate = new Date(start)
-  while (currentDate <= end) {
-    totalDays++
-
-    const dayOfWeek = currentDate.getDay()
-    const isWeekend = weekendDays.value.includes(dayOfWeek)
-    const dateStr = currentDate.toISOString().split('T')[0]
-    const isHoliday = excludeHolidays.value && holidaysInPeriod.some(h => h.date === dateStr)
-
-    if (isWeekend) {
-      weekendDaysCount++
-    } else if (isHoliday) {
-      holidayDays++
-    } else {
-      workingDays++
-    }
-
-    // Move to next day
-    currentDate.setDate(currentDate.getDate() + 1)
-  }
-
-  results.value = {
-    totalDays,
-    workingDays,
-    nonWorkingDays: totalDays - workingDays,
-    weekendDays: weekendDaysCount,
-    holidayDays,
-    holidays: holidaysInPeriod.filter(h => {
-      // Only include holidays that fall on working days
-      const date = new Date(h.date)
-      return !weekendDays.value.includes(date.getDay())
-    })
-  }
-}
-
-const getHolidaysInPeriod = (start, end) => {
-  const events = eventsStore.events || []
-  const calendarEvents = eventsStore.calendarEvents || []
-  const allEvents = events.length > 0 ? events : calendarEvents
-
-  return allEvents
-    .filter(event => {
-      if (!event.is_holiday) return false
-      const eventDate = new Date(event.start_date)
-      return eventDate >= start && eventDate <= end
-    })
-    .map(event => ({
-      date: event.start_date.split('T')[0],
-      title: event.title
-    }))
-}
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString)
-  const localeMap = {
-    'fr': 'fr-FR',
-    'en': 'en-US',
-    'es': 'es-ES',
-    'ar': 'ar-SA'
-  }
-  return date.toLocaleDateString(localeMap[locale.value] || 'fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short'
+// Lundi → dimanche ; index = Date.getDay(). 2024-01-01 est un lundi.
+const weekOrder = computed(() => {
+  const loc = dateLocaleFor(locale.value)
+  const short = new Intl.DateTimeFormat(loc, { weekday: 'short' })
+  const long = new Intl.DateTimeFormat(loc, { weekday: 'long' })
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(2024, 0, 1 + i)
+    return { index: d.getDay(), short: short.format(d), long: long.format(d) }
   })
+})
+
+function toggleWeekendDay(index) {
+  weekendDays.value = weekendDays.value.includes(index)
+    ? weekendDays.value.filter((d) => d !== index)
+    : [...weekendDays.value, index]
 }
+
+const results = computed(() =>
+  countWorkingDays({
+    start: startDate.value,
+    end: endDate.value,
+    weekendDays: weekendDays.value,
+    holidays: props.holidays,
+    excludeHolidays: excludeHolidays.value,
+  }),
+)
+
+const formatDate = (key) =>
+  parseDateKey(key)?.toLocaleDateString(dateLocaleFor(locale.value), { weekday: 'short', day: 'numeric', month: 'short' }) || key
 </script>
+
+<style scoped>
+.wdc {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.wdc__head {
+  padding: 14px 16px 12px;
+  border-block-end: 1px solid var(--line);
+}
+
+.wdc__title { margin: 0; font-size: 15px; font-weight: 600; color: var(--text); }
+.wdc__sub { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.wdc__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+.wdc__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.wdc__dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wdc__field { display: flex; flex-direction: column; gap: 4px; }
+
+.wdc__label {
+  margin: 0;
+  padding: 0;
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.wdc__input {
+  height: 36px;
+  padding-inline: 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--f-num);
+  font-size: 13px;
+}
+
+.wdc__input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.wdc__weekend { margin: 0; padding: 0; border: 0; min-width: 0; }
+
+.wdc__days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-block-start: 6px;
+}
+
+.wdc__day {
+  min-width: 44px;
+  height: 32px;
+  padding-inline: 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.wdc__day:hover { border-color: var(--muted); }
+.wdc__day--on { background: var(--sunken); color: var(--muted); text-decoration: line-through; }
+.wdc__day:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.wdc__hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+
+.wdc__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.wdc__check input { width: 16px; height: 16px; accent-color: var(--fill); }
+
+.wdc__result {
+  padding: 16px;
+  border-inline-start: 1px solid var(--line);
+  background: var(--sunken);
+}
+
+.wdc__big {
+  margin: 2px 0 10px;
+  font-family: var(--f-num);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.wdc__breakdown { margin: 0; display: grid; gap: 4px; }
+
+.wdc__breakdown div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 4px;
+  border-block-end: 1px dashed var(--line);
+  font-size: 12.5px;
+}
+
+.wdc__breakdown dt { color: var(--muted); }
+.wdc__breakdown dd { margin: 0; font-family: var(--f-num); color: var(--text); }
+
+.wdc__holidays { margin-block-start: 14px; }
+
+.wdc__holidays ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+
+.wdc__holidays li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.wdc__holidays time { font-family: var(--f-num); color: var(--muted); white-space: nowrap; }
+
+.wdc__empty { margin: 0; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 720px) {
+  .wdc__body { grid-template-columns: minmax(0, 1fr); }
+  .wdc__result { border-inline-start: 0; border-block-start: 1px solid var(--line); }
+}
+
+@media (max-width: 400px) {
+  .wdc__dates { grid-template-columns: minmax(0, 1fr); }
+}
+</style>

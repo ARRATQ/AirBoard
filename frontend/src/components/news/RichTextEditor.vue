@@ -472,6 +472,7 @@
 
 <script setup>
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
@@ -684,8 +685,11 @@ const editor = useEditor({
   content: props.modelValue,
   editable: props.editable,
   extensions: [
+    // Tiptap 3 : StarterKit inclut Link et Underline, configurés séparément ci-dessous
     StarterKit.configure({
       codeBlock: false,
+      link: false,
+      underline: false,
     }),
     Link.configure({
       openOnClick: false,
@@ -795,6 +799,10 @@ onBeforeUnmount(() => {
     editor.value.destroy()
   }
 })
+
+// Échap ferme la modale
+useEscapeClose(showMediaModal, () => { showMediaModal.value = false })
+useEscapeClose(showFileModal, () => { showFileModal.value = false })
 </script>
 
 <style scoped>

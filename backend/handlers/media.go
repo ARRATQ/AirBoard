@@ -9,6 +9,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -70,8 +71,14 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 		return
 	}
 
+	// Nom affiché et téléchargé : celui d'origine ; le stockage utilise le nom assaini
+	displayName := utils.DisplayFilename(fileHeader.Filename)
+
 	// Sanitize filename
 	safeFilename := h.fileValidator.SanitizeFilename(fileHeader.Filename)
+	if displayName == "" {
+		displayName = safeFilename
+	}
 
 	// Update fileHeader with safe filename
 	fileHeader.Filename = safeFilename
@@ -102,7 +109,7 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 
 	// Create media record in database
 	media := models.Media{
-		Filename:    safeFilename,
+		Filename:    displayName,
 		StoragePath: storagePath,
 		URL:         url,
 		MimeType:    validationResult.SafeMIME,
@@ -124,6 +131,8 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 		return
 	}
 
+	h.loadUploader(&media)
+
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "File uploaded successfully",
 		"media":   media,
@@ -135,6 +144,7 @@ func (h *MediaHandler) GetMediaList(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	mediaType := c.Query("type") // filter by type: image, video, document, pdf, etc.
+	search := strings.TrimSpace(c.Query("search"))
 
 	if page < 1 {
 		page = 1
@@ -161,6 +171,11 @@ func (h *MediaHandler) GetMediaList(c *gin.Context) {
 		case "presentation":
 			query = query.Where("mime_type LIKE ? OR mime_type LIKE ?", "%presentation%", "%powerpoint%")
 		}
+	}
+
+	// Recherche sur le nom, sur toute la médiathèque (pas seulement la page affichée)
+	if search != "" {
+		query = query.Where("filename ILIKE ?", "%"+escapeLikePattern(search)+"%")
 	}
 
 	// Count total
@@ -270,8 +285,8 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 	}
 
 	// Update only filename (metadata)
-	if input.Filename != "" {
-		media.Filename = input.Filename
+	if name := utils.DisplayFilename(input.Filename); name != "" {
+		media.Filename = name
 	}
 
 	if err := h.db.Save(&media).Error; err != nil {
@@ -282,6 +297,8 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 		})
 		return
 	}
+
+	h.loadUploader(&media)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Media updated successfully",
@@ -354,3 +371,41 @@ func (h *MediaHandler) DeleteMedia(c *gin.Context) {
 }
 
 // validateFileSize function removed - validation now handled by SecureFileValidator
+
+// loadUploader charge l'auteur de l'envoi, pour que la réponse s'affiche sans rechargement.
+func (h *MediaHandler) loadUploader(media *models.Media) {
+	if media.UploadedBy == 0 {
+		return
+	}
+	if err := h.db.First(&media.Uploader, media.UploadedBy).Error; err != nil {
+		log.Printf("[media] auteur %d du média %d : %v", media.UploadedBy, media.ID, err)
+	}
+}
+
+// mediaStats résume toute la médiathèque, indépendamment des filtres et de la pagination.
+type mediaStats struct {
+	TotalFiles     int64 `json:"total_files"`
+	TotalImages    int64 `json:"total_images"`
+	TotalDocuments int64 `json:"total_documents"`
+	TotalSize      int64 `json:"total_size"`
+}
+
+// GetMediaStats renvoie les totaux de la médiathèque (une seule requête d'agrégat).
+func (h *MediaHandler) GetMediaStats(c *gin.Context) {
+	var stats mediaStats
+	err := h.db.Model(&models.Media{}).Select(`
+		COUNT(*) AS total_files,
+		COUNT(*) FILTER (WHERE mime_type LIKE 'image/%') AS total_images,
+		COUNT(*) FILTER (WHERE mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%') AS total_documents,
+		COALESCE(SUM(file_size), 0) AS total_size`).Scan(&stats).Error
+	if err != nil {
+		log.Printf("[media] statistiques : %v", err)
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "database_error",
+			Message: "Failed to compute media stats",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, stats)
+}

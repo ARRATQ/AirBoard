@@ -93,4 +93,22 @@ describe('DataTable', () => {
     expect(wrapper.findAll('tbody tr')).toHaveLength(1)
     expect(wrapper.find('.dt__pager').exists()).toBe(false)
   })
+
+  it('in remote mode, emits search and sort instead of applying them', async () => {
+    const wrapper = mountTable({ remote: true, pageSize: 2 })
+    expect(names(wrapper)).toEqual(['Émile Durand', 'Alice Martin', 'Chloé Bernard'])
+
+    await wrapper.find('input[type="search"]').setValue('emile')
+    expect(wrapper.emitted('update:query')?.at(-1)).toEqual(['emile'])
+    expect(names(wrapper)).toHaveLength(3)
+
+    await wrapper.findAll('th')[0].find('button').trigger('click')
+    expect(wrapper.emitted('update:sortKey')?.at(-1)).toEqual(['name'])
+    expect(names(wrapper)[0]).toBe('Émile Durand')
+
+    await wrapper.findAll('th')[0].find('button').trigger('click')
+    expect(wrapper.emitted('update:sortDir')?.at(-1)).toEqual(['desc'])
+    expect(names(wrapper)[0]).toBe('Émile Durand')
+    expect(wrapper.find('.dt__pager').exists()).toBe(false)
+  })
 })

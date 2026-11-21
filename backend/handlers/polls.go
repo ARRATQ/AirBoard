@@ -14,7 +14,9 @@ import (
 	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PollsHandler struct {
@@ -328,8 +330,13 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 // CreatePoll - Créer un sondage (admin/group_admin/editor)
 func (h *PollsHandler) CreatePoll(c *gin.Context) {
 	var req models.PollRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if endBeforeStart(req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
 		return
 	}
 
@@ -389,7 +396,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 	}
 
 	// Créer le sondage
-	if err := h.db.Create(&poll).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &poll, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create poll"})
 		return
 	}
@@ -522,6 +529,11 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		return
 	}
 
+	if endBeforeStart(req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		return
+	}
+
 	otherOptionsCount := 0
 	for _, optReq := range req.Options {
 		if optReq.IsOther {
@@ -568,24 +580,40 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		poll.IsActive = req.IsActive
 	}
 
-	// Sauvegarder
-	if err := h.db.Save(&poll).Error; err != nil {
+	// Sauvegarder le sondage et ses options dans une transaction. Les options gardées
+	// sont mises à jour sur place (leurs votes restent) au lieu d'être recréées ;
+	// les votes d'une option retirée sont supprimés, ce qui permet de revoter.
+	plan := planPollOptions(poll.ID, poll.Options, req.Options)
+	err := h.db.Transaction(func(tx *gorm.DB) error {
+		// Omit : Save réenregistrerait sinon les options et groupes préchargés
+		if err := tx.Omit(clause.Associations).Save(&poll).Error; err != nil {
+			return fmt.Errorf("sondage : %w", err)
+		}
+		for _, opt := range plan.Update {
+			if err := tx.Model(&models.PollOption{}).Where("id = ? AND poll_id = ?", opt.ID, poll.ID).
+				Updates(map[string]interface{}{"text": opt.Text, "is_other": opt.IsOther, "order": opt.Order}).Error; err != nil {
+				return fmt.Errorf("option %d : %w", opt.ID, err)
+			}
+		}
+		for i := range plan.Create {
+			if err := tx.Create(&plan.Create[i]).Error; err != nil {
+				return fmt.Errorf("nouvelle option : %w", err)
+			}
+		}
+		if len(plan.DeleteIDs) > 0 {
+			if err := tx.Where("poll_option_id IN ?", plan.DeleteIDs).Delete(&models.PollVote{}).Error; err != nil {
+				return fmt.Errorf("votes des options retirées : %w", err)
+			}
+			if err := tx.Where("id IN ? AND poll_id = ?", plan.DeleteIDs, poll.ID).Delete(&models.PollOption{}).Error; err != nil {
+				return fmt.Errorf("options retirées : %w", err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("[UpdatePoll] sondage %d : %v", poll.ID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update poll"})
 		return
-	}
-
-	// Mettre à jour les options (supprimer les anciennes, créer les nouvelles)
-	// Note : cette approche simple supprime et recrée les options
-	// Pour une approche plus sophistiquée, on comparerait les IDs
-	h.db.Where("poll_id = ?", poll.ID).Delete(&models.PollOption{})
-	for i, optReq := range req.Options {
-		option := models.PollOption{
-			PollID:  poll.ID,
-			Text:    optReq.Text,
-			IsOther: optReq.IsOther,
-			Order:   i,
-		}
-		h.db.Create(&option)
 	}
 
 	// Mettre à jour les groupes cibles

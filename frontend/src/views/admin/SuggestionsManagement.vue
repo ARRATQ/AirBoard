@@ -1,162 +1,128 @@
 <template>
-  <div class="w-full p-6">
-    <div class="mb-8">
-      <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ t('suggestions.admin.title') }}</h1>
-          <p class="text-gray-600 dark:text-gray-400">{{ t('suggestions.admin.subtitle') }}</p>
-        </div>
-      </div>
-    </div>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ t('suggestions.admin.title') }}</template>
+      <template #description>{{ t('suggestions.admin.subtitle') }}</template>
+    </PageHeader>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div class="md:col-span-2">
-          <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              v-model="filters.search"
-              type="text"
-              :placeholder="t('suggestions.filters.search')"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              @input="debounceLoad"
-            />
-          </div>
-        </div>
+    <DataTable
+      :columns="columns"
+      :rows="rows"
+      :loading="loading"
+      :searchable="false"
+      :footer="false"
+      :page-size="1000"
+      :empty-title="t('suggestions.emptyTitle')"
+    >
+      <template #toolbar>
+        <label class="sm-search">
+          <Icon icon="mdi:magnify" class="sm-search__icon" aria-hidden="true" />
+          <input
+            v-model="filters.search"
+            type="search"
+            class="sm-search__input"
+            :placeholder="t('suggestions.filters.search')"
+            :aria-label="t('suggestions.filters.search')"
+            @input="debounceLoad"
+          />
+        </label>
+        <label>
+          <span class="sr-only">{{ t('ui.table.columns.category') }}</span>
+          <select v-model="filters.category_id" class="ui-select" @change="applyFilters">
+            <option value="">{{ t('suggestions.filters.allCategories') }}</option>
+            <option v-for="category in categories" :key="category.id" :value="String(category.id)">{{ category.name }}</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">{{ t('ui.table.columns.status') }}</span>
+          <select v-model="filters.status" class="ui-select" @change="applyFilters">
+            <option value="">{{ t('suggestions.filters.allStatuses') }}</option>
+            <option v-for="status in statuses" :key="status" :value="status">{{ t(`suggestions.statuses.${status}`) }}</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">{{ t('suggestions.admin.archivedAll') }}</span>
+          <select v-model="filters.archived" class="ui-select" @change="applyFilters">
+            <option value="">{{ t('suggestions.admin.archivedAll') }}</option>
+            <option value="0">{{ t('suggestions.admin.archivedNo') }}</option>
+            <option value="1">{{ t('suggestions.admin.archivedYes') }}</option>
+          </select>
+        </label>
+      </template>
 
-        <select
-          v-model="filters.category_id"
-          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          @change="loadSuggestions"
-        >
-          <option value="">{{ t('suggestions.filters.allCategories') }}</option>
-          <option v-for="category in categories" :key="category.id" :value="String(category.id)">
-            {{ category.name }}
-          </option>
-        </select>
+      <template #cell-title="{ row }">
+        <RouterLink :to="`/suggestions/${row.id}`" class="sm-title">{{ row.title }}</RouterLink>
+      </template>
 
-        <select
-          v-model="filters.status"
-          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          @change="loadSuggestions"
-        >
-          <option value="">{{ t('suggestions.filters.allStatuses') }}</option>
-          <option v-for="status in statuses" :key="status" :value="status">
-            {{ t(`suggestions.statuses.${status}`) }}
-          </option>
-        </select>
+      <template #cell-createdAt="{ row }">
+        <span class="sm-mono">{{ row.createdAt }}</span>
+      </template>
 
-        <select
-          v-model="filters.archived"
-          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          @change="loadSuggestions"
-        >
-          <option value="">{{ t('suggestions.admin.archivedAll') }}</option>
-          <option value="0">{{ t('suggestions.admin.archivedNo') }}</option>
-          <option value="1">{{ t('suggestions.admin.archivedYes') }}</option>
-        </select>
-      </div>
-    </div>
+      <template #cell-archived="{ row }">
+        <StatusBadge :tone="row.raw.is_archived ? 'neutral' : 'ok'">
+          {{ row.raw.is_archived ? t('suggestions.admin.archivedBadge') : t('suggestions.admin.activeBadge') }}
+        </StatusBadge>
+      </template>
 
-    <div v-if="loading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
-    </div>
+      <template #cell-status="{ row }">
+        <label>
+          <span class="sr-only">{{ t('ui.table.columns.status') }} : {{ row.title }}</span>
+          <select class="ui-select" :value="row.raw.status" @change="updateStatus(row.raw, $event.target.value)">
+            <option v-for="status in statuses" :key="status" :value="status">{{ t(`suggestions.statuses.${status}`) }}</option>
+          </select>
+        </label>
+      </template>
 
-    <div v-else-if="suggestions.length === 0" class="text-center py-12">
-      <Icon icon="mdi:lightbulb-off-outline" class="h-16 w-16 mx-auto text-gray-400 mb-4" />
-      <p class="text-gray-600 dark:text-gray-400 text-lg">{{ t('suggestions.emptyTitle') }}</p>
-    </div>
+      <template #cell-actions="{ row }">
+        <RowActions :label="row.title" :editable="false" :deletable="false">
+          <button
+            type="button"
+            class="row-actions__btn"
+            :aria-label="`${row.raw.is_archived ? t('suggestions.admin.activate') : t('suggestions.admin.archive')} : ${row.title}`"
+            :title="row.raw.is_archived ? t('suggestions.admin.activate') : t('suggestions.admin.archive')"
+            @click="toggleArchive(row.raw)"
+          >
+            <Icon :icon="row.raw.is_archived ? 'mdi:archive-arrow-up-outline' : 'mdi:archive-arrow-down-outline'" aria-hidden="true" />
+          </button>
+        </RowActions>
+      </template>
+    </DataTable>
 
-    <div v-else class="space-y-4">
-      <article
-        v-for="item in suggestions"
-        :key="item.id"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700"
+    <nav v-if="pagination.total_pages > 1" class="sm-pager" :aria-label="t('ui.table.range', { from: 1, to: pagination.page_size, total: pagination.total })">
+      <button type="button" class="sm-pager__btn" :disabled="pagination.page === 1" :aria-label="t('ui.table.prev')" @click="changePage(pagination.page - 1)">
+        <Icon icon="mdi:chevron-left" aria-hidden="true" />
+      </button>
+      <button
+        v-for="page in visiblePages"
+        :key="page"
+        type="button"
+        class="sm-pager__btn"
+        :class="{ 'sm-pager__btn--on': page === pagination.page }"
+        :aria-current="page === pagination.page ? 'page' : undefined"
+        @click="changePage(page)"
       >
-        <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div class="min-w-0 flex-1">
-            <RouterLink :to="`/suggestions/${item.id}`" class="font-semibold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
-              {{ item.title }}
-            </RouterLink>
-            <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 flex-wrap">
-              <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                {{ item.category_ref?.name || item.category || t('suggestions.noCategory') }}
-              </span>
-              <span class="px-2 py-1 rounded-full" :class="item.is_archived ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'">
-                {{ item.is_archived ? t('suggestions.admin.archivedBadge') : t('suggestions.admin.activeBadge') }}
-              </span>
-              <span>{{ formatAuthor(item) }} · {{ formatDate(item.created_at) }}</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2 flex-wrap">
-            <select
-              class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white"
-              :value="item.status"
-              @change="updateStatus(item, $event.target.value)"
-            >
-              <option v-for="status in statuses" :key="status" :value="status">
-                {{ t(`suggestions.statuses.${status}`) }}
-              </option>
-            </select>
-
-            <button
-              class="px-3 py-2 rounded-lg text-sm font-semibold border transition-colors"
-              :class="item.is_archived
-                ? 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-300 dark:bg-emerald-900/20'
-                : 'border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:bg-amber-900/20'"
-              @click="toggleArchive(item)"
-            >
-              {{ item.is_archived ? t('suggestions.admin.activate') : t('suggestions.admin.archive') }}
-            </button>
-          </div>
-        </div>
-      </article>
-    </div>
-
-    <div v-if="pagination.total_pages > 1" class="mt-8 flex justify-center">
-      <nav class="flex items-center gap-2">
-        <button
-          @click="changePage(pagination.page - 1)"
-          :disabled="pagination.page === 1"
-          class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Icon icon="mdi:chevron-left" class="h-5 w-5" />
-        </button>
-
-        <button
-          v-for="page in visiblePages"
-          :key="page"
-          @click="changePage(page)"
-          :class="[
-            'px-4 py-2 rounded-lg border',
-            page === pagination.page
-              ? 'bg-primary-500 text-white border-primary-500'
-              : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-          ]"
-        >
-          {{ page }}
-        </button>
-
-        <button
-          @click="changePage(pagination.page + 1)"
-          :disabled="pagination.page === pagination.total_pages"
-          class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
-        >
-          <Icon icon="mdi:chevron-right" class="h-5 w-5" />
-        </button>
-      </nav>
-    </div>
+        {{ page }}
+      </button>
+      <button type="button" class="sm-pager__btn" :disabled="pagination.page === pagination.total_pages" :aria-label="t('ui.table.next')" @click="changePage(pagination.page + 1)">
+        <Icon icon="mdi:chevron-right" aria-hidden="true" />
+      </button>
+    </nav>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { suggestionCategoryLabel } from '@/utils/suggestionCategory'
 import { Icon } from '@iconify/vue'
 import { suggestionsService } from '@/services/api'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import RowActions from '@/components/ui/RowActions.vue'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 
 const loading = ref(false)
 const suggestions = ref([])
@@ -187,6 +153,28 @@ const visiblePages = computed(() => {
   return pages
 })
 
+const columns = computed(() => [
+  { key: 'title', label: t('ui.table.columns.title') },
+  { key: 'category', label: t('ui.table.columns.category'), hideSm: true },
+  { key: 'author', label: t('ui.table.columns.author'), hideSm: true },
+  { key: 'createdAt', label: t('ui.table.columns.date'), hideSm: true },
+  { key: 'archived', label: '', hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status') },
+  { key: 'actions', label: '', align: 'end', width: '60px' },
+])
+
+// Le filtrage et la pagination se font côté serveur ; le tableau n'affiche que la page reçue.
+const rows = computed(() =>
+  suggestions.value.map(item => ({
+    id: item.id,
+    title: item.title,
+    category: suggestionCategoryLabel(item, t, te),
+    author: formatAuthor(item),
+    createdAt: formatDate(item.created_at),
+    raw: item,
+  })),
+)
+
 const loadCategories = async () => {
   const response = await suggestionsService.getAdminCategories({ include_inactive: 1 })
   categories.value = response.categories || []
@@ -213,7 +201,7 @@ const loadSuggestions = async () => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.loadError'))
+      window.$toast.error(t('suggestions.loadError'))
     }
   } finally {
     loading.value = false
@@ -229,7 +217,7 @@ const updateStatus = async (item, status) => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.statusUpdateError'))
+      window.$toast.error(t('suggestions.statusUpdateError'))
     }
   }
 }
@@ -243,7 +231,7 @@ const toggleArchive = async (item) => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.statusUpdateError'))
+      window.$toast.error(t('suggestions.statusUpdateError'))
     }
   }
 }
@@ -256,6 +244,11 @@ const debounceLoad = () => {
   }, 300)
 }
 
+const applyFilters = () => {
+  pagination.value.page = 1
+  loadSuggestions()
+}
+
 const changePage = (page) => {
   if (page < 1 || page > pagination.value.total_pages) return
   pagination.value.page = page
@@ -264,7 +257,7 @@ const changePage = (page) => {
 
 const formatDate = (date) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString(locale.value)
+  return new Date(date).toLocaleDateString(dateLocaleFor(locale.value), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 const formatAuthor = (item) => {
@@ -280,3 +273,66 @@ onMounted(async () => {
   await loadSuggestions()
 })
 </script>
+
+<style scoped>
+.sm-title { font-weight: 600; color: var(--text); }
+.sm-title:hover { color: var(--acc-ink); text-decoration: underline; }
+
+.sm-mono {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.sm-search { position: relative; flex: 1 1 200px; min-width: 160px; }
+
+.sm-search__icon {
+  position: absolute;
+  inset-inline-start: 9px;
+  inset-block-start: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.sm-search__input {
+  width: 100%;
+  padding-block: 7px;
+  padding-inline: 30px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.sm-search__input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.sm-pager { display: flex; justify-content: center; gap: 4px; margin-block-start: 14px; }
+
+.sm-pager__btn {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  padding-inline: 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--f-num);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sm-pager__btn:hover:not(:disabled) { background: var(--sunken); }
+.sm-pager__btn--on { border-color: var(--acc); color: var(--acc-ink); font-weight: 600; }
+.sm-pager__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.sm-pager__btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+[dir='rtl'] .sm-pager__btn .iconify { transform: scaleX(-1); }
+</style>

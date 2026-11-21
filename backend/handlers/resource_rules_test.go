@@ -6,9 +6,10 @@ import (
 	"testing"
 )
 
-func boolPtr(v bool) *bool { return &v }
-func intPtr(v int) *int    { return &v }
-func uintPtr(v uint) *uint { return &v }
+func boolPtr(v bool) *bool    { return &v }
+func intPtr(v int) *int       { return &v }
+func uintPtr(v uint) *uint    { return &v }
+func strPtr(v string) *string { return &v }
 
 func TestFlagUpdates(t *testing.T) {
 	tests := []struct {
@@ -24,6 +25,9 @@ func TestFlagUpdates(t *testing.T) {
 		{"ignore les colonnes non demandées", resourceFlags{IsPrivate: boolPtr(false), OpenInNewTab: boolPtr(false)}, []string{"open_in_new_tab"},
 			map[string]interface{}{"open_in_new_tab": false}},
 		{"requête vide", resourceFlags{}, []string{"is_active"}, map[string]interface{}{}},
+		{"description vidée", resourceFlags{Description: strPtr("")}, []string{"description"},
+			map[string]interface{}{"description": ""}},
+		{"description absente", resourceFlags{IsActive: boolPtr(true)}, []string{"description"}, map[string]interface{}{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

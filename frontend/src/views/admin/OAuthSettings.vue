@@ -245,6 +245,7 @@
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -353,4 +354,7 @@ const getClientIdPlaceholder = (providerName) => {
 onMounted(() => {
   loadProviders()
 })
+
+// Échap ferme la modale
+useEscapeClose(() => showEditModal.value && selectedProvider.value, () => closeEditModal())
 </script>
