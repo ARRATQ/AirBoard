@@ -413,6 +413,10 @@ func (h *EventsHandler) CreateCategory(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Une catégorie porte déjà ce nom"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la catégorie"})
 		return
 	}
@@ -444,6 +448,10 @@ func (h *EventsHandler) UpdateCategory(c *gin.Context) {
 	category.IsActive = req.IsActive
 
 	if err := h.db.Save(&category).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Une catégorie porte déjà ce nom"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour"})
 		return
 	}

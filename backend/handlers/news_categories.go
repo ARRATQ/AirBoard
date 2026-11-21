@@ -189,6 +189,10 @@ func (h *NewsHandler) CreateTag(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&tag).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create tag"})
 		return
 	}
@@ -220,6 +224,10 @@ func (h *NewsHandler) UpdateTag(c *gin.Context) {
 	tag.Color = req.Color
 
 	if err := h.db.Save(&tag).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tag"})
 		return
 	}

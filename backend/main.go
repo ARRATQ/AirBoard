@@ -169,14 +169,17 @@ func main() {
 		log.Println("✓ Index unique partiel créé/vérifié pour event_categories.slug")
 	}
 
-	// Noms et slugs de catégories et de types réutilisables après suppression douce :
-	// les anciens index uniques complets (noms par défaut de GORM) bloquaient la
-	// recréation d'un élément supprimé. Leurs remplaçants partiels sont posés ci-dessous.
+	// Noms et slugs réutilisables après suppression douce : les anciens index uniques
+	// complets (noms par défaut de GORM) bloquaient la recréation d'un élément supprimé.
+	// Leurs remplaçants partiels sont posés ci-dessus et ci-dessous.
 	// Selon la version de GORM qui les a créés, ce sont des contraintes ou de simples index.
 	for _, legacy := range []struct{ table, name string }{
 		{"news_categories", "idx_news_categories_name"}, {"news_categories", "idx_news_categories_slug"},
 		{"news_types", "idx_news_types_name"}, {"news_types", "idx_news_types_slug"},
 		{"suggestion_categories", "idx_suggestion_categories_name"}, {"suggestion_categories", "idx_suggestion_categories_slug"},
+		{"events", "idx_events_slug"},
+		{"event_categories", "idx_event_categories_name"}, {"event_categories", "idx_event_categories_slug"},
+		{"tags", "idx_tags_name"}, {"tags", "idx_tags_slug"},
 	} {
 		if err := db.Exec(fmt.Sprintf("ALTER TABLE %s DROP CONSTRAINT IF EXISTS %s", legacy.table, legacy.name)).Error; err != nil {
 			log.Printf("Avertissement: Impossible de supprimer l'ancienne contrainte %s: %v", legacy.name, err)

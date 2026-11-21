@@ -11,9 +11,10 @@ import (
 )
 
 // News représente un article du News Hub
+// Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
 type News struct {
 	ID          uint       `json:"id" gorm:"primaryKey"`
-	Slug        string     `json:"slug" gorm:"not null;uniqueIndex:idx_news_slug,where:deleted_at IS NULL"`
+	Slug        string     `json:"slug" gorm:"not null"`
 	Title       string     `json:"title" gorm:"not null"`
 	Summary     string     `json:"summary" gorm:"type:varchar(300)"` // Résumé court (max 300 chars)
 	Content     string     `json:"content" gorm:"type:text"`         // Contenu riche (JSON Tiptap)
@@ -86,10 +87,11 @@ type NewsType struct {
 }
 
 // Tag représente un tag/étiquette
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
 type Tag struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
-	Name      string         `json:"name" gorm:"not null;uniqueIndex:idx_tag_name,where:deleted_at IS NULL"`
-	Slug      string         `json:"slug" gorm:"not null;uniqueIndex:idx_tag_slug,where:deleted_at IS NULL"`
+	Name      string         `json:"name" gorm:"not null"`
+	Slug      string         `json:"slug" gorm:"not null"`
 	Color     string         `json:"color" gorm:"default:'#6B7280'"` // Couleur hex
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
