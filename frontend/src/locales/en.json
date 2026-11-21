@@ -533,7 +533,7 @@
       "minLength": "At least 6 characters",
       "currentRequired": "The current password is required",
       "newRequired": "The new password is required",
-      "tooShort": "The password must be at least 6 characters long",
+      "tooShort": "Password must be at least {min} characters",
       "confirmRequired": "Please confirm your password",
       "mismatch": "Passwords do not match",
       "incorrect": "Incorrect current password",
@@ -902,7 +902,8 @@
     },
     "viewModes": {
       "compact": "Compact"
-    }
+    },
+    "minutes": "{n} min"
   },
   "dashboard": {
     "collapseAll": "Collapse All",
@@ -3029,7 +3030,13 @@
       "emailInvalid": "Invalid email format",
       "passwordRequired": "Password is required",
       "passwordMin": "Password must be at least {min} characters",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooLong": "Password must not exceed {max} characters",
+      "passwordUpper": "Password must contain an uppercase letter",
+      "passwordLower": "Password must contain a lowercase letter",
+      "passwordDigit": "Password must contain a digit",
+      "passwordSpecial": "Password must contain a special character (for example ! ? - _ #)",
+      "passwordCommon": "Password contains a word that is too common (password, admin, 123456…)"
     },
     "login": {
       "title": "Welcome back",
@@ -3048,7 +3055,7 @@
     "register": {
       "title": "Create an account",
       "subtitle": "Join Airboard",
-      "passwordHint": "At least 6 characters",
+      "passwordHint": "At least 8 characters, with an uppercase letter, a lowercase letter, a digit and a special character",
       "terms": "I agree to the {terms} and the {privacy}",
       "termsLink": "Terms of Service",
       "privacyLink": "Privacy Policy",

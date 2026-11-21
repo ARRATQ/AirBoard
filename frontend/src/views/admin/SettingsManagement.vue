@@ -772,7 +772,7 @@
                   required
                   class="form-input"
                   :placeholder="$t('settings.newPasswordPlaceholder')"
-                  minlength="6"
+                  minlength="8"
                 />
                 <p v-if="passwordErrors.newPassword" class="form-error">{{ passwordErrors.newPassword }}</p>
                 <p class="form-help">{{ $t('settings.password.minLength') }}</p>
@@ -787,7 +787,7 @@
                   required
                   class="form-input"
                   :placeholder="$t('settings.confirmNewPasswordPlaceholder')"
-                  minlength="6"
+                  minlength="8"
                 />
                 <p v-if="passwordErrors.confirmPassword" class="form-error">{{ passwordErrors.confirmPassword }}</p>
               </div>
@@ -1366,8 +1366,8 @@ const validatePasswordForm = () => {
   
   if (!passwordForm.newPassword.trim()) {
     passwordErrors.value.newPassword = t('settings.password.newRequired')
-  } else if (passwordForm.newPassword.length < 6) {
-    passwordErrors.value.newPassword = t('settings.password.tooShort')
+  } else if (passwordForm.newPassword.length < 8) {
+    passwordErrors.value.newPassword = t('settings.password.tooShort', { min: 8 })
   }
   
   if (!passwordForm.confirmPassword.trim()) {

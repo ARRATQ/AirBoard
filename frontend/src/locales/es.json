@@ -533,7 +533,7 @@
       "minLength": "Mínimo 6 caracteres",
       "currentRequired": "La contraseña actual es obligatoria",
       "newRequired": "La nueva contraseña es obligatoria",
-      "tooShort": "La contraseña debe tener al menos 6 caracteres",
+      "tooShort": "La contraseña debe tener al menos {min} caracteres",
       "confirmRequired": "Confirme su contraseña",
       "mismatch": "Las contraseñas no coinciden",
       "incorrect": "Contraseña actual incorrecta",
@@ -816,7 +816,8 @@
     },
     "viewModes": {
       "compact": "Compacto"
-    }
+    },
+    "minutes": "{n} min"
   },
   "dashboard": {
     "collapseAll": "Contraer Todo",
@@ -3029,7 +3030,13 @@
       "emailInvalid": "Formato de correo electrónico no válido",
       "passwordRequired": "La contraseña es obligatoria",
       "passwordMin": "La contraseña debe tener al menos {min} caracteres",
-      "passwordMismatch": "Las contraseñas no coinciden"
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordTooLong": "La contraseña no debe superar los {max} caracteres",
+      "passwordUpper": "La contraseña debe contener una mayúscula",
+      "passwordLower": "La contraseña debe contener una minúscula",
+      "passwordDigit": "La contraseña debe contener un número",
+      "passwordSpecial": "La contraseña debe contener un carácter especial (por ejemplo ! ? - _ #)",
+      "passwordCommon": "La contraseña contiene una palabra demasiado común (password, admin, 123456…)"
     },
     "login": {
       "title": "Bienvenido de nuevo",
@@ -3048,7 +3055,7 @@
     "register": {
       "title": "Crear una cuenta",
       "subtitle": "Únete a Airboard",
-      "passwordHint": "Al menos 6 caracteres",
+      "passwordHint": "Al menos 8 caracteres, con una mayúscula, una minúscula, un número y un carácter especial",
       "terms": "Acepto los {terms} y la {privacy}",
       "termsLink": "términos de uso",
       "privacyLink": "política de privacidad",

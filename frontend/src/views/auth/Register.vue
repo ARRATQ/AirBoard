@@ -94,7 +94,7 @@
                 :placeholder="t('auth.fields.passwordPlaceholder')"
                 autocomplete="new-password"
                 :disabled="loading"
-                minlength="6"
+                minlength="8"
               />
               <button
                 type="button"
@@ -191,6 +191,8 @@ import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { authService } from '@/services/api'
+import { apiErrorMessage } from '@/services/apiError'
+import { passwordProblem, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from '@/utils/passwordPolicy'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -242,8 +244,9 @@ const validateForm = () => {
   
   if (!form.password.trim()) {
     errors.value.password = t('auth.validation.passwordRequired')
-  } else if (form.password.length < 6) {
-    errors.value.password = t('auth.validation.passwordMin', { min: 6 })
+  } else {
+    const problem = passwordProblem(form.password)
+    if (problem) errors.value.password = passwordMessage(problem)
   }
   
   if (form.password !== form.password_confirmation) {
@@ -252,6 +255,17 @@ const validateForm = () => {
   
   return Object.keys(errors.value).length === 0
 }
+
+const PASSWORD_MESSAGES = {
+  tooShort: () => t('auth.validation.passwordMin', { min: PASSWORD_MIN_LENGTH }),
+  tooLong: () => t('auth.validation.passwordTooLong', { max: PASSWORD_MAX_LENGTH }),
+  upper: () => t('auth.validation.passwordUpper'),
+  lower: () => t('auth.validation.passwordLower'),
+  digit: () => t('auth.validation.passwordDigit'),
+  special: () => t('auth.validation.passwordSpecial'),
+  common: () => t('auth.validation.passwordCommon')
+}
+const passwordMessage = (problem) => PASSWORD_MESSAGES[problem]()
 
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -277,6 +291,9 @@ const handleSubmit = async () => {
       } else {
         appStore.showError(t('auth.invalidInput'))
       }
+    } else if (error.response?.data?.code === 'weak_password') {
+      // Règle du backend plus stricte que la vérification locale : afficher son motif
+      errors.value = { password: apiErrorMessage(error, t('auth.register.failed')) }
     } else if (error.response?.status === 409) {
       appStore.showError(t('auth.register.alreadyExists'))
     } else {

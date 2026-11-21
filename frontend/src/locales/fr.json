@@ -533,7 +533,7 @@
       "minLength": "6 caractères minimum",
       "currentRequired": "Le mot de passe actuel est obligatoire",
       "newRequired": "Le nouveau mot de passe est obligatoire",
-      "tooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "tooShort": "Le mot de passe doit contenir au moins {min} caractères",
       "confirmRequired": "Veuillez confirmer votre mot de passe",
       "mismatch": "Les mots de passe ne correspondent pas",
       "incorrect": "Mot de passe actuel incorrect",
@@ -864,7 +864,8 @@
     },
     "viewModes": {
       "compact": "Compact"
-    }
+    },
+    "minutes": "{n} min"
   },
   "dashboard": {
     "collapseAll": "Réduire tout",
@@ -3029,7 +3030,13 @@
       "emailInvalid": "Format d'e-mail invalide",
       "passwordRequired": "Le mot de passe est obligatoire",
       "passwordMin": "Le mot de passe doit contenir au moins {min} caractères",
-      "passwordMismatch": "Les mots de passe ne correspondent pas"
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordTooLong": "Le mot de passe ne doit pas dépasser {max} caractères",
+      "passwordUpper": "Le mot de passe doit contenir une majuscule",
+      "passwordLower": "Le mot de passe doit contenir une minuscule",
+      "passwordDigit": "Le mot de passe doit contenir un chiffre",
+      "passwordSpecial": "Le mot de passe doit contenir un caractère spécial (par exemple ! ? - _ #)",
+      "passwordCommon": "Le mot de passe contient un mot trop courant (password, admin, 123456…)"
     },
     "login": {
       "title": "Bon retour",
@@ -3048,7 +3055,7 @@
     "register": {
       "title": "Créer un compte",
       "subtitle": "Rejoignez Airboard",
-      "passwordHint": "Au moins 6 caractères",
+      "passwordHint": "8 caractères minimum, avec une majuscule, une minuscule, un chiffre et un caractère spécial",
       "terms": "J'accepte les {terms} et la {privacy}",
       "termsLink": "conditions d'utilisation",
       "privacyLink": "politique de confidentialité",

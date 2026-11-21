@@ -100,7 +100,7 @@
                       v-model="form.password"
                       :type="showPassword ? 'text' : 'password'"
                       required
-                      class="form-input !pr-10"
+                      class="form-input !pe-10"
                       placeholder="••••••••"
                       minlength="6"
                       autocomplete="new-password"
