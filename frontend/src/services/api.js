@@ -256,8 +256,9 @@ export const homeService = {
 // Admin Services
 export const adminService = {
   // App Groups
+  // Paginé côté serveur (10 par défaut) : les écrans admin affichent toute la liste.
   async getAppGroups(params = {}) {
-    const response = await api.get('/admin/app-groups', { params })
+    const response = await api.get('/admin/app-groups', { params: { limit: 1000, ...params } })
     return response.data.data || response.data
   },
 
