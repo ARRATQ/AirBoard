@@ -76,9 +76,19 @@ const renderedContent = computed(() => {
   ])
 })
 
+// Liens ouverts dans un nouvel onglet, sans accès à la page d'origine (noopener noreferrer).
+function openLinksInNewTab(node) {
+  if (node.tagName !== 'A') return
+  node.setAttribute('target', '_blank')
+  const rel = new Set((node.getAttribute('rel') || '').split(/\s+/).filter(Boolean))
+  rel.add('noopener')
+  rel.add('noreferrer')
+  node.setAttribute('rel', [...rel].join(' '))
+}
+
 // Sanitize HTML content to prevent XSS attacks
 const sanitizedContent = computed(() => {
-  return DOMPurify.sanitize(renderedContent.value, {
+  const config = {
     ALLOWED_TAGS: [
       'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'strong', 'em', 'u', 's', 'del',
@@ -94,14 +104,14 @@ const sanitizedContent = computed(() => {
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
     ALLOW_DATA_ATTR: true,
     ADD_ATTR: ['target'],
-    // Force target="_blank" and rel="noopener noreferrer" on all links
-    HOOK_AFTER_SANITIZE_ATTRIBUTES: (node) => {
-      if (node.tagName === 'A') {
-        node.setAttribute('target', '_blank')
-        node.setAttribute('rel', 'noopener noreferrer')
-      }
-    }
-  })
+  }
+  // DOMPurify n'accepte pas de hook dans ses options : il s'enregistre à part, le temps de cet appel.
+  DOMPurify.addHook('afterSanitizeAttributes', openLinksInNewTab)
+  try {
+    return DOMPurify.sanitize(renderedContent.value, config)
+  } finally {
+    DOMPurify.removeHook('afterSanitizeAttributes', openLinksInNewTab)
+  }
 })
 </script>
 

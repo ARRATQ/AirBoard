@@ -35,4 +35,18 @@ describe('TiptapRenderer', () => {
     expect(img.attributes('src')).toBe('/uploads/a.png')
     expect(img.attributes('loading')).toBe('lazy')
   })
+  it('ouvre tous les liens dans un nouvel onglet, sans accès à la page d’origine', () => {
+    // Un lien enregistré sans target (target: null) sortait tel quel de generateHTML.
+    const withLink = {
+      type: 'doc',
+      content: [{
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'site', marks: [{ type: 'link', attrs: { href: 'https://example.com', target: null, rel: null } }] }],
+      }],
+    }
+    const link = mount(TiptapRenderer, { props: { content: withLink } }).find('a')
+    expect(link.attributes('href')).toBe('https://example.com')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel').split(' ')).toEqual(expect.arrayContaining(['noopener', 'noreferrer']))
+  })
 })
