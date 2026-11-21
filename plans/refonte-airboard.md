@@ -45,6 +45,7 @@ pour un utilisateur comme pour un administrateur.
 | `2ccc83f` | Chantier 2 : commentaires et file de modération paginés (20 par page, ≤ 100), clé `comments` conservée ; section commentaires et page de modération avec `PaginationBar` |
 | `2457a4c` | Chantier 2 : listes app-groups et applications de l'admin de groupe paginées (100 par défaut, ≤ 1000) ; le front demande 1000 lignes en attendant une vraie pagination |
 | `41d7491` | Correctif : en arabe, la barre de pagination retournait toute la page (`:global([dir='rtl']) .x` compilé en `[dir='rtl']`), défaut déjà présent dans DataTable sur main |
+| (suivi) | Correctifs : les sélecteurs de groupes d'applications de l'admin voient tous les groupes (et non 10) ; les liens des articles s'ouvrent toujours dans un nouvel onglet (`DOMPurify.addHook`) |
 
 Mesures du chantier 2 (local) : JS+CSS au premier chargement 240 → 205 kB compressés ; appels API au
 chargement de `/home` 9 → 8 (utilisateur) et 11 → 9 (admin), puis 7 / 8 quand la vérification de mise à
@@ -104,12 +105,7 @@ Reste, ou à suivre :
 - rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1) ;
 - vues de l'admin de groupe : elles demandent une page de 1000 lignes ; leur donner une vraie
   pagination une fois la PR du chantier 4 (qui les modifie) fusionnée ;
-- `GET /admin/app-groups` renvoie 10 groupes par défaut et `adminService.getAppGroups()` ne passe pas de
-  limite : GroupModal, AppGroupsManagement et ApplicationsManagement (admin) n'en voient que 10
-  (défaut antérieur à ce chantier) ;
 - `GetManagedGroups` précharge les utilisateurs seulement pour les compter ;
-- TiptapRenderer : `HOOK_AFTER_SANITIZE_ATTRIBUTES` n'est pas une option de DOMPurify, les liens ne sont
-  donc pas forcés en `_blank` (défaut antérieur) ;
 - `mdi:poll-check` n'existe pas (PollsManagement, laissé à la PR du chantier 4) : le build l'indique ;
 - le code utilise les graisses 700 et 800, rendues avec la 600 chargée : choisir entre ajouter ces
   graisses ou ramener le code à 600 ;
