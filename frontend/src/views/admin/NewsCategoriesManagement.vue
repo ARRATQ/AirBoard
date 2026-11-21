@@ -223,7 +223,7 @@ const saveCategory = async () => {
     await loadCategories()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('admin.categorySaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('admin.categorySaveError'))
     }
   }
 }
@@ -258,7 +258,7 @@ const toggleActive = async (category, isActive) => {
     await loadCategories()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('admin.categorySaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('admin.categorySaveError'))
     }
   }
 }

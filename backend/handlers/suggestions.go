@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -360,7 +361,7 @@ func (h *SuggestionsHandler) GetAdminSuggestionCategories(c *gin.Context) {
 
 func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 	var req models.SuggestionCategoryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -384,7 +385,7 @@ func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 		IsActive: isActive,
 	}
 
-	if err := h.db.Create(&category).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category (name/slug may already exist)"})
 		return
 	}

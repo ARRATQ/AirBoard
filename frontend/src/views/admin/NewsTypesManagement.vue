@@ -214,7 +214,7 @@ const saveType = async () => {
     await loadTypes()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('admin.typeSaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('admin.typeSaveError'))
     }
   }
 }
@@ -248,7 +248,7 @@ const toggleActive = async (type, isActive) => {
     await loadTypes()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('admin.typeSaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('admin.typeSaveError'))
     }
   }
 }

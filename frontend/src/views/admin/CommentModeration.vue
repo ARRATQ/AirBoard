@@ -263,7 +263,16 @@ const deleteComment = async (commentId) => {
   }
 }
 
+// Mêmes bornes que le serveur (handlers/request_validation.go)
+const COMMENT_LENGTH_MIN = 100
+const COMMENT_LENGTH_MAX = 5000
+
 const saveSettings = async () => {
+  const maxLength = Number(settings.value.max_comment_length)
+  if (!Number.isInteger(maxLength) || maxLength < COMMENT_LENGTH_MIN || maxLength > COMMENT_LENGTH_MAX) {
+    appStore.showError(t('common.validation.commentLengthRange', { min: COMMENT_LENGTH_MIN, max: COMMENT_LENGTH_MAX }))
+    return
+  }
   try {
     await commentsService.updateSettings(settings.value)
     appStore.showSuccess(t('moderation.settingsSaved'))

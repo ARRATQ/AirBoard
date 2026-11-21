@@ -8,6 +8,7 @@ import (
 	"airboard/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -64,7 +65,7 @@ func (h *ChatbotHandler) GetChatbots(c *gin.Context) {
 // CreateChatbot crée un nouveau chatbot (admin)
 func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 	var req models.ChatbotRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides : " + err.Error(),
@@ -113,7 +114,7 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 		InitialMessages: initialMessages,
 	}
 
-	if err := h.db.Create(&chatbot).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &chatbot, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création du chatbot",

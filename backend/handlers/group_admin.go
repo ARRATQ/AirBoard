@@ -8,6 +8,7 @@ import (
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -141,7 +142,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Invalid request",
 			Message: err.Error(),
@@ -211,7 +212,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		AdminNoteUntil: noteUntil,
 	}
 
-	if err := h.db.Create(&application).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &application, "is_active", "open_in_new_tab"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Database error",
 			Message: err.Error(),

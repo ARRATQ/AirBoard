@@ -11,6 +11,7 @@ import (
 	"airboard/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -90,10 +91,19 @@ func (h *AnnouncementHandler) GetAnnouncement(c *gin.Context) {
 func (h *AnnouncementHandler) CreateAnnouncement(c *gin.Context) {
 	var req models.AnnouncementRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides: " + err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	if endBeforeStart(req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: msgEndBeforeStart,
 			Code:    http.StatusBadRequest,
 		})
 		return
@@ -109,7 +119,7 @@ func (h *AnnouncementHandler) CreateAnnouncement(c *gin.Context) {
 		EndDate:   req.EndDate,
 	}
 
-	if err := h.db.Create(&announcement).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &announcement, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création de l'annonce",
@@ -159,6 +169,15 @@ func (h *AnnouncementHandler) UpdateAnnouncement(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides: " + err.Error(),
+			Code:    http.StatusBadRequest,
+		})
+		return
+	}
+
+	if endBeforeStart(req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Bad Request",
+			Message: msgEndBeforeStart,
 			Code:    http.StatusBadRequest,
 		})
 		return
