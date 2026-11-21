@@ -48,7 +48,7 @@
           <li v-for="group in managedGroups" :key="group.id" class="overview-row">
             <span>{{ group.name }}</span>
             <span class="overview-row__meta">
-              {{ group.users?.length || 0 }} {{ $t('common.users') }}
+              {{ group.user_count ?? 0 }} {{ $t('common.users') }}
             </span>
           </li>
         </ul>

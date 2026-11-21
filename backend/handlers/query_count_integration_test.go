@@ -324,3 +324,39 @@ func TestGroupAdminListsPagination(t *testing.T) {
 		}
 	}
 }
+
+// Groupes gérés : un nombre de membres calculé en SQL, sans renvoyer les utilisateurs eux-mêmes.
+func TestManagedGroupsUserCount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	db, _ := openCountingDB(t)
+	admin := loadIdentity(t, db, "admin", "")
+	h := NewGroupAdminHandler(db)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	c.Set("user_id", admin.id)
+	c.Set("role", admin.role)
+	h.GetManagedGroups(c)
+
+	var groups []map[string]interface{}
+	if w.Code != http.StatusOK || json.Unmarshal(w.Body.Bytes(), &groups) != nil {
+		t.Fatalf("statut %d : %s", w.Code, w.Body.String())
+	}
+	for _, g := range groups {
+		if _, leaked := g["users"]; leaked {
+			t.Fatalf("groupe %v : la liste des utilisateurs est renvoyée", g["name"])
+		}
+		count, ok := g["user_count"].(float64)
+		if !ok {
+			t.Fatalf("groupe %v : user_count absent", g["name"])
+		}
+		var want int64
+		db.Table("user_groups").Joins("JOIN users ON users.id = user_groups.user_id AND users.deleted_at IS NULL").
+			Where("user_groups.group_id = ?", g["id"]).Count(&want)
+		if int64(count) != want {
+			t.Errorf("groupe %v : user_count %v, attendu %d", g["name"], count, want)
+		}
+	}
+	t.Logf("%d groupes", len(groups))
+}

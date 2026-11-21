@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"airboard/middleware"
@@ -30,7 +31,9 @@ func (h *GroupAdminHandler) privateAppGroupIDs(managedGroupIDs []uint) *gorm.DB 
 		Where("group_app_groups.group_id IN ? AND app_groups.is_private = ? AND app_groups.deleted_at IS NULL", managedGroupIDs, true)
 }
 
-func respondGroupAdminListError(c *gin.Context, what string) {
+// respondGroupAdminListError journalise l'erreur SQL et renvoie un message sans détail technique.
+func respondGroupAdminListError(c *gin.Context, what string, err error) {
+	log.Printf("group-admin: lecture des %s impossible : %v", what, err)
 	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 		Error:   "Internal Server Error",
 		Message: "Erreur lors de la récupération des " + what,
@@ -55,7 +58,7 @@ func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
-		respondGroupAdminListError(c, "groupes d'applications")
+		respondGroupAdminListError(c, "groupes d'applications", err)
 		return
 	}
 	var appGroups []models.AppGroup
@@ -64,39 +67,75 @@ func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
 		Preload("OwnerGroup").
 		Limit(page.Size).Offset(page.Offset()).
 		Find(&appGroups).Error; err != nil {
-		respondGroupAdminListError(c, "groupes d'applications")
+		respondGroupAdminListError(c, "groupes d'applications", err)
 		return
 	}
 
 	c.JSON(http.StatusOK, page.Response(appGroups, total))
 }
 
-// GetManagedGroups retourne les groupes administrés par l'utilisateur
+// managedGroup est un groupe accompagné de son nombre de membres : la liste des utilisateurs
+// (adresses e-mail comprises) n'est pas envoyée.
+type managedGroup struct {
+	models.Group
+	UserCount int64 `json:"user_count"`
+}
+
+// GetManagedGroups retourne les groupes actifs administrés par l'utilisateur (tous pour l'admin
+// global), avec leur nombre de membres.
 func (h *GroupAdminHandler) GetManagedGroups(c *gin.Context) {
-	role := c.GetString("role")
-
-	if role == "admin" {
-		// Admin global voit tous les groupes
-		var groups []models.Group
-		h.db.Where("is_active = ?", true).Preload("Users").Preload("AppGroups").Find(&groups)
-		c.JSON(http.StatusOK, groups)
-		return
-	}
-
-	// Group admin voit uniquement ses groupes
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if len(managedGroupIDs) == 0 {
-		c.JSON(http.StatusOK, []models.Group{})
-		return
+	query := h.db.Where("is_active = ?", true)
+	if c.GetString("role") != "admin" {
+		managedGroupIDs := middleware.GetManagedGroupIDs(c)
+		if len(managedGroupIDs) == 0 {
+			c.JSON(http.StatusOK, []managedGroup{})
+			return
+		}
+		query = query.Where("id IN ?", managedGroupIDs)
 	}
 
 	var groups []models.Group
-	h.db.Where("id IN ? AND is_active = ?", managedGroupIDs, true).
-		Preload("Users").
-		Preload("AppGroups").
-		Find(&groups)
+	if err := query.Order("name ASC").Find(&groups).Error; err != nil {
+		respondGroupAdminListError(c, "groupes gérés", err)
+		return
+	}
 
-	c.JSON(http.StatusOK, groups)
+	counts, err := h.groupUserCounts(groups)
+	if err != nil {
+		respondGroupAdminListError(c, "groupes gérés", err)
+		return
+	}
+	result := make([]managedGroup, len(groups))
+	for i, g := range groups {
+		result[i] = managedGroup{Group: g, UserCount: counts[g.ID]}
+	}
+	c.JSON(http.StatusOK, result)
+}
+
+// groupUserCounts compte les membres (comptes non supprimés) de chaque groupe en une requête.
+func (h *GroupAdminHandler) groupUserCounts(groups []models.Group) (map[uint]int64, error) {
+	counts := make(map[uint]int64, len(groups))
+	if len(groups) == 0 {
+		return counts, nil
+	}
+	ids := make([]uint, len(groups))
+	for i, g := range groups {
+		ids[i] = g.ID
+	}
+	var rows []struct {
+		GroupID uint
+		Total   int64
+	}
+	err := h.db.Table("user_groups").
+		Select("user_groups.group_id, COUNT(*) AS total").
+		Joins("JOIN users ON users.id = user_groups.user_id AND users.deleted_at IS NULL").
+		Where("user_groups.group_id IN ?", ids).
+		Group("user_groups.group_id").
+		Scan(&rows).Error
+	for _, r := range rows {
+		counts[r.GroupID] = r.Total
+	}
+	return counts, err
 }
 
 // GetApplications retourne une page des applications : toutes pour l'admin global, celles des
@@ -116,7 +155,7 @@ func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
-		respondGroupAdminListError(c, "applications")
+		respondGroupAdminListError(c, "applications", err)
 		return
 	}
 	var applications []models.Application
@@ -124,7 +163,7 @@ func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 		Preload("AppGroup").
 		Limit(page.Size).Offset(page.Offset()).
 		Find(&applications).Error; err != nil {
-		respondGroupAdminListError(c, "applications")
+		respondGroupAdminListError(c, "applications", err)
 		return
 	}
 
