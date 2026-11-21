@@ -302,7 +302,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { dateLocaleFor } from '@/utils/homeFormat'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
@@ -388,6 +388,12 @@ const calculateStats = () => {
   stats.value.totalDocuments = mediaList.value.filter(m => !m.mime_type.startsWith('image/') && !m.mime_type.startsWith('video/')).length
   stats.value.totalSize = mediaList.value.reduce((sum, m) => sum + m.file_size, 0)
 }
+
+// Le filtre de type est appliqué côté serveur : recharger depuis la première page
+watch(typeFilter, () => {
+  currentPage.value = 1
+  fetchMedia()
+})
 
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {

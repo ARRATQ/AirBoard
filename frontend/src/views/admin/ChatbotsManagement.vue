@@ -151,14 +151,8 @@ const onSaved = () => {
 const toggleActive = async (chatbot) => {
   togglingId.value = chatbot.id
   try {
-    await chatbotsAdminService.updateChatbot(chatbot.id, {
-      name: chatbot.name,
-      description: chatbot.description,
-      webhook_url: chatbot.webhook_url,
-      icon: chatbot.icon,
-      is_active: !chatbot.is_active,
-      initial_messages: chatbot.initial_messages
-    })
+    // Renvoyer toute la fiche : le backend réécrit welcome_title/subtitle même absents
+    await chatbotsAdminService.updateChatbot(chatbot.id, { ...chatbot, is_active: !chatbot.is_active })
     chatbot.is_active = !chatbot.is_active
   } catch (error) {
     console.error('Error toggling chatbot:', error)
