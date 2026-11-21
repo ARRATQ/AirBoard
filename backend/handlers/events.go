@@ -57,6 +57,13 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 		query = query.Where("status = ?", status)
 	}
 
+	// Filtres publié / brouillon, récurrent et journée entière de la liste d'administration
+	for _, column := range []string{"is_published", "is_recurring", "is_all_day"} {
+		if value, ok := parseBoolFilter(c.Query(column)); ok {
+			query = query.Where(column+" = ?", value)
+		}
+	}
+
 	// Filtre par tags (supporte plusieurs tags séparés par des virgules)
 	if tags := c.Query("tags"); tags != "" {
 		tagIDs := strings.Split(tags, ",")
@@ -93,12 +100,8 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 
 	// Recherche sécurisée avec validation et assainissement
 	if search := c.Query("search"); search != "" {
-		// Valider l'input de recherche
-		if len(search) < 2 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche doit contenir au moins 2 caractères"})
-			return
-		}
-		if len(search) > 100 {
+		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
+		if listSearchTooLong(search) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
 			return
 		}
