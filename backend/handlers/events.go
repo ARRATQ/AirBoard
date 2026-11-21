@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -106,18 +105,9 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			return
 		}
 
-		// Vérifier les caractères interdits pour prévenir SQL injection et XSS
-		forbiddenChars := []string{"<", ">", "&", "\"", "'", "(", ")", "=", "+", ";", "--", "/*", "*/", "union", "select", "insert", "update", "delete", "drop", "create"}
-		lowerSearch := strings.ToLower(search)
-		for _, char := range forbiddenChars {
-			if strings.Contains(lowerSearch, char) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Caractère ou terme interdit dans la recherche: %s", char)})
-				return
-			}
-		}
-
-		// Assainir l'input pour les requêtes LIKE
-		sanitizedSearch := strings.ReplaceAll(search, "%", "\\%")
+		// Requête paramétrée : seuls les jokers de LIKE (\, % et _) sont échappés
+		sanitizedSearch := strings.ReplaceAll(search, "\\", "\\\\")
+		sanitizedSearch = strings.ReplaceAll(sanitizedSearch, "%", "\\%")
 		sanitizedSearch = strings.ReplaceAll(sanitizedSearch, "_", "\\_")
 
 		query = query.Where("title ILIKE ? OR description ILIKE ? OR location ILIKE ?",

@@ -221,8 +221,8 @@ l'éditeur Actualités et Événements ; terme retenu « Ressources » + « Cat�
 Corrigé ensuite côté backend (même PR) : `CreateAppGroup` garde le groupe propriétaire choisi ;
 `false` et `0` (actif, privé, nouvel onglet, ordre) sont enregistrés à la création et à la modification ;
 filtres publié/brouillon, récurrent et journée entière de la liste des événements ; recherche d'un
-caractère acceptée (longueur comptée en caractères). Reste : la recherche refuse toujours l'apostrophe
-et des mots comme « update » ou « create » (liste de termes interdits inutile avec des requêtes paramétrées).
+caractère acceptée (longueur comptée en caractères) ; liste de termes interdits retirée (l'apostrophe,
+« update » ou « create » sont acceptés), seuls les jokers de LIKE sont échappés.
 
 Constat de départ :
 
