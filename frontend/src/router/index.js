@@ -418,7 +418,7 @@ const routes = [
     meta: {
       requiresAuth: true,
       access: CONTENT,
-      title: 'Edit Article'
+      title: 'Modifier l\'article'
     }
   },
   {
@@ -539,12 +539,7 @@ router.beforeEach(async (to, from, next) => {
     authStore.loadFromStorage()
   }
 
-  // Définir le titre de la page
-  if (to.meta.title) {
-    document.title = `${to.meta.title} - Airboard`
-  } else {
-    document.title = 'Airboard - Portail Applicatif'
-  }
+  // Le titre de l'onglet (traduit) est posé par App.vue
 
   // Vérifier l'authentification
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {

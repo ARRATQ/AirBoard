@@ -159,6 +159,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -488,6 +489,9 @@ onMounted(() => {
     initializeGuide()
   }
 })
+
+// Échap ferme la modale
+useEscapeClose(() => props.modelValue, () => close())
 </script>
 
 <style scoped>

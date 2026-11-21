@@ -364,8 +364,14 @@ const confirmAndRun = async (message, action, successKey) => {
   }
 }
 
-const removeUnit = (unit) =>
-  confirmAndRun(t('directory.confirm.unit', { name: unit.name }), () => directoryService.deleteUnit(unit.id), 'directory.deleted.unit')
+// Une unité qui a des sous-unités n'est pas supprimable (l'API répond 409) : le dire avant de demander confirmation
+const removeUnit = (unit) => {
+  if (flatUnits.value.some((u) => u.parent_id === unit.id)) {
+    notify('error', t('directory.errors.hasSubUnits'))
+    return
+  }
+  return confirmAndRun(t('directory.confirm.unit', { name: unit.name }), () => directoryService.deleteUnit(unit.id), 'directory.deleted.unit')
+}
 const removePosition = (position) =>
   confirmAndRun(t('directory.confirm.position', { name: position.title }), () => directoryService.deletePosition(position.id), 'directory.deleted.position')
 const removeAssignment = (a) =>

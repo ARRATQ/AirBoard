@@ -128,6 +128,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import DataTable from '@/components/ui/DataTable.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -216,7 +217,7 @@ const saveCategory = async () => {
     }
 
     if (window.$toast) {
-      window.$toast.success(t('common.save'))
+      window.$toast.success(t('common.feedback.saved'))
     }
 
     showModal.value = false
@@ -234,7 +235,7 @@ const removeCategory = async (category) => {
   try {
     await newsService.deleteCategory(category.id)
     if (window.$toast) {
-      window.$toast.success(t('common.delete'))
+      window.$toast.success(t('common.feedback.deleted'))
     }
     await loadCategories()
   } catch (error) {
@@ -284,6 +285,9 @@ const rows = computed(() =>
 )
 
 onMounted(loadCategories)
+
+// Échap ferme la modale
+useEscapeClose(showModal, () => closeForm())
 </script>
 
 <style scoped>

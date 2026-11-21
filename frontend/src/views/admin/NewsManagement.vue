@@ -210,13 +210,13 @@ const removeNews = (id) => (isGlobal.value ? newsService.deleteNews(id) : groupA
 const loadNews = async () => {
   try {
     isLoading.value = true
-    // Le filtre de statut n'a pas d'équivalent côté API : il n'est pas transmis
     const params = {
       page: pagination.value.page,
       page_size: PAGE_SIZE,
       search: filters.value.search || undefined,
       category_id: filters.value.category || undefined,
-      priority: filters.value.priority || undefined
+      priority: filters.value.priority || undefined,
+      status: filters.value.status || undefined
     }
     const response = await listNews(params)
     newsList.value = response.news || []
@@ -307,14 +307,9 @@ const columns = computed(() => [
   { key: 'actions', label: '', align: 'end', width: '120px' },
 ])
 
-// Le statut n'est pas filtré par l'API : il l'est ici, sur la page courante.
+// Le statut est filtré par l'API, sur toute la liste.
 const rows = computed(() =>
   newsList.value
-    .filter(news => {
-      if (filters.value.status === 'published') return news.is_published
-      if (filters.value.status === 'draft') return !news.is_published
-      return true
-    })
     .map(news => ({
       id: news.id,
       title: news.title,

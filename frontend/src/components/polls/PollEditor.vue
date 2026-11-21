@@ -351,6 +351,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { isEndBeforeStart } from '@/utils/dateInput'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -665,6 +666,9 @@ const closeModal = () => {
   showAdvanced.value = false
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>
 
 <style scoped>

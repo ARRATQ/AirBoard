@@ -179,6 +179,7 @@
 import { eventStatusTone } from '@/config/status'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -288,6 +289,9 @@ const editEvent = () => {
 
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.event, () => emit('close'))
 </script>
 
 <style scoped>

@@ -216,6 +216,7 @@ import RowActions from '@/components/ui/RowActions.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { dateLocaleFor } from '@/utils/homeFormat'
 import { ref, computed, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { announcementsService } from '@/services/api'
@@ -253,6 +254,7 @@ const loadAnnouncements = async () => {
     announcements.value = await announcementsService.getAllAnnouncements()
   } catch (error) {
     console.error('Error loading announcements:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     isLoading.value = false
   }
@@ -311,10 +313,12 @@ const saveAnnouncement = async () => {
       await announcementsService.createAnnouncement(data)
     }
 
+    appStore.showSuccess(t(isEditMode.value ? 'common.feedback.saved' : 'common.feedback.created'))
     closeModal()
     await loadAnnouncements()
   } catch (error) {
     console.error('Error saving announcement:', error)
+    appStore.showError(t('common.feedback.saveError'))
   } finally {
     isSaving.value = false
   }
@@ -331,9 +335,11 @@ const confirmDelete = async (announcement) => {
 
   try {
     await announcementsService.deleteAnnouncement(announcement.id)
+    appStore.showSuccess(t('common.feedback.deleted'))
     await loadAnnouncements()
   } catch (error) {
     console.error('Error deleting announcement:', error)
+    appStore.showError(t('common.feedback.deleteError'))
   }
 }
 
@@ -391,6 +397,9 @@ const rows = computed(() =>
 onMounted(() => {
   loadAnnouncements()
 })
+
+// Échap ferme la modale
+useEscapeClose(showModal, () => closeModal())
 </script>
 
 <style scoped>

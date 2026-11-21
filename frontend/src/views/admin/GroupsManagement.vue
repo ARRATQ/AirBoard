@@ -55,7 +55,7 @@
       </template>
 
       <template #cell-members="{ row }">
-        <span class="gm-mono">{{ row.members }} {{ $t('groups.users') }}</span>
+        <span class="gm-mono">{{ $t('groups.membersCount', row.members) }}</span>
       </template>
 
       <template #cell-appGroups="{ row }">
@@ -82,8 +82,8 @@
           <button
             type="button"
             class="row-actions__btn"
-            :aria-label="`Gérer les administrateurs : ${row.name}`"
-            title="Gérer les administrateurs"
+            :aria-label="$t('groupAdminsModal.manageFor', { name: row.name })"
+            :title="$t('groupAdminsModal.manage')"
             @click="manageGroupAdmins(row.raw)"
           >
             <Icon icon="mdi:shield-account-outline" aria-hidden="true" />
@@ -115,11 +115,11 @@
                     <Icon icon="mdi:shield-account" class="h-5 w-5" />
                   </div>
                   <div class="min-w-0">
-                    <h3 class="modal-title truncate">Administrateurs du groupe</h3>
+                    <h3 class="modal-title truncate">{{ $t('groupAdminsModal.title') }}</h3>
                     <p class="modal-subtitle truncate">{{ selectedGroupForAdmins?.name }}</p>
                   </div>
                 </div>
-                <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeGroupAdminsModal">
+                <button type="button" class="btn btn-ghost p-2" :aria-label="$t('common.close')" @click="closeGroupAdminsModal">
                   <Icon icon="mdi:close" class="h-5 w-5" />
                 </button>
               </div>
@@ -127,7 +127,7 @@
 
             <div class="modal-content modal-body-tabbed flex flex-col gap-3">
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                Sélectionnez les utilisateurs qui pourront administrer ce groupe et ses ressources.
+                {{ $t('groupAdminsModal.intro') }}
               </p>
 
               <div class="search-container">
@@ -135,7 +135,7 @@
                 <input
                   v-model="adminSearchQuery"
                   type="search"
-                  placeholder="Rechercher un utilisateur..."
+                  :placeholder="$t('users.searchPlaceholder')"
                   class="form-input search-input"
                 />
               </div>
@@ -146,7 +146,7 @@
 
               <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
                 <p v-if="filteredUsersForAdmins.length === 0" class="py-8 text-center text-sm text-gray-500">
-                  Aucun utilisateur trouvé
+                  {{ $t('groupAdminsModal.noUsers') }}
                 </p>
                 <label
                   v-for="user in filteredUsersForAdmins"
@@ -180,13 +180,13 @@
             </div>
 
             <div class="modal-footer-bar">
-              <span class="modal-footer-hint">{{ selectedAdminIds.length }} administrateur(s) sélectionné(s)</span>
+              <span class="modal-footer-hint">{{ $t('groupAdminsModal.selectedCount', selectedAdminIds.length) }}</span>
               <div class="modal-footer-actions">
-                <button type="button" class="btn btn-secondary" @click="closeGroupAdminsModal">Annuler</button>
+                <button type="button" class="btn btn-secondary" @click="closeGroupAdminsModal">{{ $t('common.cancel') }}</button>
                 <button type="button" :disabled="savingAdmins" class="btn btn-primary" @click="saveGroupAdmins">
                   <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
                   <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
-                  Enregistrer
+                  {{ $t('common.save') }}
                 </button>
               </div>
             </div>
@@ -207,6 +207,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { ref, computed, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -418,6 +419,9 @@ const saveGroupAdmins = async () => {
 onMounted(() => {
   loadGroups()
 })
+
+// Échap ferme la modale
+useEscapeClose(showGroupAdminsModal, () => closeGroupAdminsModal())
 </script>
 <style scoped>
 .gm-name { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }

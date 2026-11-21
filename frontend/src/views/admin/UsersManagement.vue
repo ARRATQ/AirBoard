@@ -102,8 +102,8 @@
           <button
             type="button"
             class="row-actions__btn"
-            :aria-label="`Restaurer l'utilisateur : ${row.username}`"
-            title="Restaurer l'utilisateur"
+            :aria-label="$t('users.trashActions.restoreFor', { name: row.username })"
+            :title="$t('users.trashActions.restore')"
             @click="restoreUser(row.raw)"
           >
             <Icon icon="mdi:restore" aria-hidden="true" />
@@ -111,8 +111,8 @@
           <button
             type="button"
             class="row-actions__btn row-actions__btn--danger"
-            :aria-label="`Supprimer définitivement : ${row.username}`"
-            title="Supprimer définitivement (irréversible)"
+            :aria-label="$t('users.trashActions.purgeFor', { name: row.username })"
+            :title="$t('users.trashActions.purge')"
             @click="confirmPermanentDelete(row.raw)"
           >
             <Icon icon="mdi:delete-forever-outline" aria-hidden="true" />
@@ -155,11 +155,12 @@ import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
+import { dateLocaleFor } from '@/utils/homeFormat'
 import { useAppStore } from '@/stores/app'
 import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
@@ -250,15 +251,15 @@ const formatLastConnection = (lastLogin) => {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   
   if (diffMins < 1) {
-    return "À l'instant"
+    return t('users.lastConnection.justNow')
   } else if (diffMins < 60) {
-    return `il y a ${diffMins} minute${diffMins > 1 ? 's' : ''}`
+    return t('users.lastConnection.minutesAgo', { count: diffMins }, diffMins)
   } else if (diffHours < 24) {
-    return `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`
+    return t('users.lastConnection.hoursAgo', { count: diffHours }, diffHours)
   } else if (diffDays < 7) {
-    return `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+    return t('users.lastConnection.daysAgo', { count: diffDays }, diffDays)
   } else {
-    return loginDate.toLocaleDateString('fr-FR', {
+    return loginDate.toLocaleDateString(dateLocaleFor(locale.value), {
       day: 'numeric',
       month: 'short',
       year: loginDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined

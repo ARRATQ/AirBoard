@@ -113,6 +113,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { suggestionCategoryLabel } from '@/utils/suggestionCategory'
 import { Icon } from '@iconify/vue'
 import { suggestionsService } from '@/services/api'
 import { dateLocaleFor } from '@/utils/homeFormat'
@@ -121,7 +122,7 @@ import DataTable from '@/components/ui/DataTable.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 
 const loading = ref(false)
 const suggestions = ref([])
@@ -167,7 +168,7 @@ const rows = computed(() =>
   suggestions.value.map(item => ({
     id: item.id,
     title: item.title,
-    category: item.category_ref?.name || item.category || t('suggestions.noCategory'),
+    category: suggestionCategoryLabel(item, t, te),
     author: formatAuthor(item),
     createdAt: formatDate(item.created_at),
     raw: item,
@@ -200,7 +201,7 @@ const loadSuggestions = async () => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.loadError'))
+      window.$toast.error(t('suggestions.loadError'))
     }
   } finally {
     loading.value = false
@@ -216,7 +217,7 @@ const updateStatus = async (item, status) => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.statusUpdateError'))
+      window.$toast.error(t('suggestions.statusUpdateError'))
     }
   }
 }
@@ -230,7 +231,7 @@ const toggleArchive = async (item) => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.statusUpdateError'))
+      window.$toast.error(t('suggestions.statusUpdateError'))
     }
   }
 }

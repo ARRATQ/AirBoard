@@ -302,11 +302,12 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { dateLocaleFor } from '@/utils/homeFormat'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
-import { getAdminMediaList, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
+import { getAdminMediaList, getAdminMediaStats, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
 
 const { t, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
@@ -347,18 +348,8 @@ const showViewModal = ref(false)
 const viewingMedia = ref(null)
 
 // Computed
-const filteredMedia = computed(() => {
-  let filtered = [...mediaList.value]
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(media =>
-      media.filename.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
-})
+// La recherche est faite côté serveur, sur toute la médiathèque
+const filteredMedia = computed(() => mediaList.value)
 
 // Methods
 const fetchMedia = async () => {
@@ -371,22 +362,34 @@ const fetchMedia = async () => {
     if (typeFilter.value) {
       params.type = typeFilter.value
     }
+    const search = searchQuery.value.trim()
+    if (search) {
+      params.search = search
+    }
     const response = await getAdminMediaList(params)
     mediaList.value = response.data.data || []
     totalPages.value = response.data.total_pages || 1
-    calculateStats()
   } catch (error) {
     console.error('Failed to fetch media:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     loading.value = false
   }
 }
 
-const calculateStats = () => {
-  stats.value.totalFiles = mediaList.value.length
-  stats.value.totalImages = mediaList.value.filter(m => m.mime_type.startsWith('image/')).length
-  stats.value.totalDocuments = mediaList.value.filter(m => !m.mime_type.startsWith('image/') && !m.mime_type.startsWith('video/')).length
-  stats.value.totalSize = mediaList.value.reduce((sum, m) => sum + m.file_size, 0)
+// Totaux de toute la médiathèque (et non de la page affichée)
+const fetchStats = async () => {
+  try {
+    const { data } = await getAdminMediaStats()
+    stats.value = {
+      totalFiles: data.total_files || 0,
+      totalImages: data.total_images || 0,
+      totalDocuments: data.total_documents || 0,
+      totalSize: data.total_size || 0
+    }
+  } catch (error) {
+    console.error('Failed to fetch media stats:', error)
+  }
 }
 
 // Le filtre de type est appliqué côté serveur : recharger depuis la première page
@@ -394,6 +397,18 @@ watch(typeFilter, () => {
   currentPage.value = 1
   fetchMedia()
 })
+
+// Recherche côté serveur, déclenchée après une courte pause de frappe
+const SEARCH_DEBOUNCE_MS = 300
+let searchTimer = null
+watch(searchQuery, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    currentPage.value = 1
+    fetchMedia()
+  }, SEARCH_DEBOUNCE_MS)
+})
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -443,9 +458,10 @@ const uploadFile = async () => {
 
     if (response.data.media) {
       mediaList.value.unshift(response.data.media)
-      calculateStats()
     }
+    fetchStats()
     closeUploadModal()
+    appStore.showSuccess(t('common.feedback.created'))
   } catch (error) {
     console.error('Failed to upload file:', error)
     appStore.showError(t('media.upload_error'))
@@ -479,6 +495,7 @@ const updateMedia = async () => {
       }
     }
     closeEditModal()
+    appStore.showSuccess(t('common.feedback.saved'))
   } catch (error) {
     console.error('Failed to update media:', error)
     appStore.showError(t('media.update_error'))
@@ -521,8 +538,9 @@ const confirmDelete = async (media) => {
 
   try {
     await deleteAdminMedia(media.id)
+    appStore.showSuccess(t('common.feedback.deleted'))
     mediaList.value = mediaList.value.filter(m => m.id !== media.id)
-    calculateStats()
+    fetchStats()
   } catch (error) {
     console.error('Failed to delete media:', error)
     appStore.showError(t('media.delete_error'))
@@ -576,7 +594,13 @@ const markBroken = (id) => {
 // Lifecycle
 onMounted(() => {
   fetchMedia()
+  fetchStats()
 })
+
+// Échap ferme la modale
+useEscapeClose(showUploadModal, () => closeUploadModal())
+useEscapeClose(showEditModal, () => closeEditModal())
+useEscapeClose(showViewModal, () => closeViewModal())
 </script>
 
 <style scoped>

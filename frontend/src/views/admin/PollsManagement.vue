@@ -148,6 +148,16 @@
       @close="closeModal"
       @success="handleSuccess"
     />
+
+    <!-- Résultats consultables depuis l'admin : l'API les donne toujours à l'admin et à l'auteur -->
+    <BaseModal
+      :open="Boolean(resultsPoll)"
+      :title="resultsPoll ? `${$t('polls.adminPollsManagement.actions.viewResults')} : ${resultsPoll.title}` : ''"
+      size="lg"
+      @close="resultsPoll = null"
+    >
+      <PollResults v-if="resultsPoll" :poll="resultsPoll" @view-details="openPollPage(resultsPoll)" />
+    </BaseModal>
   </div>
 </template>
 
@@ -164,6 +174,8 @@ import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { pollsService, adminService, groupAdminService } from '@/services/api'
 import PollEditor from '@/components/polls/PollEditor.vue'
+import PollResults from '@/components/polls/PollResults.vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { useAuthStore } from '@/stores/auth'
@@ -309,8 +321,13 @@ const handleSuccess = () => {
   loadPolls()
 }
 
-// Voir les résultats
+// Voir les résultats : dans une fenêtre, sans quitter l'admin ni passer par la page de vote
+const resultsPoll = ref(null)
 const viewResults = (poll) => {
+  resultsPoll.value = poll
+}
+const openPollPage = (poll) => {
+  resultsPoll.value = null
   router.push(`/polls/${poll.id}`)
 }
 

@@ -12,16 +12,19 @@
       <DataTable
         :columns="ruleColumns"
         :rows="ruleRows"
-        :search-keys="['reason']"
+        :search-keys="['label', 'reason']"
         :page-size="25"
       >
         <template #cell-reason="{ row }">
-          <span class="gm-mono">{{ row.reason }}</span>
+          <span class="gm-rule">
+            <span>{{ row.label }}</span>
+            <span class="gm-mono">{{ row.reason }}</span>
+          </span>
         </template>
 
         <template #cell-points="{ row }">
           <label>
-            <span class="sr-only">{{ t('gamificationAdmin.points') }} : {{ row.reason }}</span>
+            <span class="sr-only">{{ t('gamificationAdmin.points') }} : {{ row.label }}</span>
             <input v-model.number="row.raw.points" type="number" min="0" class="form-input gm-points" />
           </label>
         </template>
@@ -29,7 +32,7 @@
         <template #cell-enabled="{ row }">
           <label class="gm-check">
             <input v-model="row.raw.enabled" type="checkbox" class="form-checkbox" />
-            <span class="sr-only">{{ t('common.active') }} : {{ row.reason }}</span>
+            <span class="sr-only">{{ t('common.active') }} : {{ row.label }}</span>
           </label>
         </template>
 
@@ -73,7 +76,7 @@
         </template>
 
         <template #cell-trigger="{ row }">
-          <span class="gm-mono">{{ row.trigger }} · {{ row.metric }} · {{ row.threshold }}</span>
+          <span>{{ row.trigger }} · {{ row.metric }} · {{ row.threshold }}</span>
         </template>
 
         <template #cell-status="{ row }">
@@ -167,7 +170,7 @@
               <label for="gm-trigger" class="form-label">{{ t('gamificationAdmin.form.trigger') }}</label>
               <select id="gm-trigger" v-model="form.trigger_reason" class="form-select">
                 <option value="">{{ t('gamificationAdmin.form.triggerPlaceholder') }}</option>
-                <option v-for="reason in reasonOptions" :key="reason" :value="reason">{{ reason }}</option>
+                <option v-for="reason in reasonOptions" :key="reason" :value="reason">{{ labelFor('reasonLabels', reason) }}</option>
               </select>
               <p class="gm-hint">{{ selectedReasonHelp }}</p>
             </div>
@@ -176,7 +179,7 @@
               <label for="gm-metric" class="form-label">{{ t('gamificationAdmin.form.metric') }}</label>
               <select id="gm-metric" v-model="form.metric" class="form-select">
                 <option value="">{{ t('gamificationAdmin.form.metricPlaceholder') }}</option>
-                <option v-for="metric in metricOptions" :key="metric" :value="metric">{{ metric }}</option>
+                <option v-for="metric in metricOptions" :key="metric" :value="metric">{{ labelFor('metricLabels', metric) }}</option>
               </select>
               <p class="gm-hint">{{ selectedMetricHelp }}</p>
             </div>
@@ -205,6 +208,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
@@ -259,6 +263,12 @@ const helpFor = (group, key, fallback) => {
   return key && te(path) ? t(path) : t(fallback)
 }
 
+// Libellé lisible d'un déclencheur ou d'une métrique ; le code brut si aucune traduction.
+const labelFor = (group, code) => {
+  const path = `gamificationAdmin.${group}.${code}`
+  return code && te(path) ? t(path) : code
+}
+
 const selectedReasonHelp = computed(() => helpFor('reasons', form.value.trigger_reason, 'gamificationAdmin.form.triggerHelp'))
 const selectedMetricHelp = computed(() => helpFor('metrics', form.value.metric, 'gamificationAdmin.form.metricHelp'))
 
@@ -291,7 +301,7 @@ const ruleColumns = computed(() => [
 ])
 
 // Les champs points / actif s'éditent directement sur l'objet de la règle (raw).
-const ruleRows = computed(() => rules.value.map(rule => ({ id: rule.id, reason: rule.reason, raw: rule })))
+const ruleRows = computed(() => rules.value.map(rule => ({ id: rule.id, reason: rule.reason, label: labelFor('reasonLabels', rule.reason), raw: rule })))
 
 const badgeColumns = computed(() => [
   { key: 'name', label: t('ui.table.columns.name'), sortable: true },
@@ -306,8 +316,8 @@ const badgeRows = computed(() =>
     name: badge.name,
     code: badge.code,
     description: badge.description || '',
-    trigger: badge.trigger_reason || '-',
-    metric: badge.metric || '-',
+    trigger: badge.trigger_reason ? labelFor('reasonLabels', badge.trigger_reason) : '-',
+    metric: badge.metric ? labelFor('metricLabels', badge.metric) : '-',
     threshold: badge.threshold || 0,
     status: badge.is_active ? t('common.active') : t('common.inactive'),
     raw: badge,
@@ -327,9 +337,9 @@ const loadData = async () => {
 const saveRule = async (rule) => {
   try {
     await gamificationService.upsertRule({ reason: rule.reason, points: Number(rule.points) || 0, enabled: !!rule.enabled })
-    window.$toast?.success(t('common.save'))
+    window.$toast?.success(t('common.feedback.saved'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
+    window.$toast?.error(t('common.feedback.saveError'))
   }
 }
 
@@ -367,9 +377,9 @@ const saveBadge = async () => {
     }
     closeModal()
     await loadData()
-    window.$toast?.success(t('common.save'))
+    window.$toast?.success(t('common.feedback.saved'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
+    window.$toast?.error(t('common.feedback.saveError'))
   }
 }
 
@@ -383,13 +393,16 @@ const removeBadge = async (badge) => {
   try {
     await gamificationService.deleteAchievement(badge.id)
     await loadData()
-    window.$toast?.success(t('common.delete'))
+    window.$toast?.success(t('common.feedback.deleted'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
+    window.$toast?.error(t('common.feedback.deleteError'))
   }
 }
 
 onMounted(loadData)
+
+// Échap ferme la modale
+useEscapeClose(showModal, () => closeModal())
 </script>
 
 <style scoped>
@@ -399,6 +412,7 @@ onMounted(loadData)
 .gm-section__head .gm-section__title { margin: 0; }
 
 .gm-mono { font-family: var(--f-num); font-size: 11.5px; letter-spacing: 0.04em; color: var(--muted); }
+.gm-rule { display: flex; flex-direction: column; gap: 2px; }
 .gm-points { max-width: 110px; }
 .gm-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); }
 

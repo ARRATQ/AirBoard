@@ -218,6 +218,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { noteUntilFromInput, noteUntilToInput } from '@/utils/resourceType'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
@@ -346,4 +347,7 @@ const closeModal = () => {
   resetForm()
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>

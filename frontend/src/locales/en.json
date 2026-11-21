@@ -132,6 +132,15 @@
       "contentRequired": "Content is required.",
       "commentLengthRange": "The maximum length must be between {min} and {max} characters.",
       "duplicateName": "This name is already in use."
+    },
+    "feedback": {
+      "saved": "Changes saved.",
+      "created": "Item created.",
+      "deleted": "Item deleted.",
+      "statusChanged": "Status updated.",
+      "loadError": "Could not load the data.",
+      "saveError": "Saving failed. Please try again.",
+      "deleteError": "Deleting failed. Please try again."
     }
   },
   "calendar": {
@@ -241,7 +250,8 @@
     "saveError": "Error while saving group",
     "deleteError": "Error while deleting group",
     "adminsSaved": "Group admins updated.",
-    "adminsLoadError": "Could not load the group users."
+    "adminsLoadError": "Could not load the group users.",
+    "membersCount": "{count} users | {count} user | {count} users"
   },
   "applications": {
     "title": "Resources",
@@ -302,7 +312,95 @@
       "restoreError": "Could not restore the user.",
       "permanentlyDeleted": "User permanently deleted.",
       "permanentDeleteError": "Could not delete permanently."
+    },
+    "lastConnection": {
+      "justNow": "Just now",
+      "minutesAgo": "{count} minute ago | {count} minutes ago",
+      "hoursAgo": "{count} hour ago | {count} hours ago",
+      "daysAgo": "{count} day ago | {count} days ago"
+    },
+    "trashActions": {
+      "restore": "Restore user",
+      "restoreFor": "Restore user: {name}",
+      "purge": "Delete permanently (cannot be undone)",
+      "purgeFor": "Delete permanently: {name}"
     }
+  },
+  "userModal": {
+    "titleEdit": "Edit user",
+    "subtitleEdit": "Update the account details",
+    "subtitleCreate": "Create a new user account",
+    "tabAccount": "Account",
+    "tabAccess": "Role & groups",
+    "tabError": "Error",
+    "username": "Username",
+    "usernameLocked": "The username cannot be changed",
+    "email": "Email address",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHint": "At least {min} characters",
+    "activeAccount": "Active account",
+    "activeAccountDesc": "The user is allowed to sign in",
+    "role": "Role",
+    "roleUserDesc": "Access to their groups' resources",
+    "roleEditorDesc": "Manages News Hub articles",
+    "roleAdminDesc": "Access to all features",
+    "groupAdminHint": "To delegate a group's administration, make the user an administrator of that group from group management.",
+    "groups": "User groups",
+    "groupsHint": "Groups determine which resources are accessible",
+    "noGroups": "No groups available",
+    "submitCreate": "Create user",
+    "errors": {
+      "usernameRequired": "Username is required",
+      "usernameTooShort": "Username must be at least {min} characters long",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Email is not valid",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least {min} characters long",
+      "roleRequired": "Role is required"
+    }
+  },
+  "groupModal": {
+    "titleEdit": "Edit group",
+    "titleCreate": "New user group",
+    "subtitleEdit": "Update the group details",
+    "subtitleCreate": "Create a group to organize permissions",
+    "tabGeneral": "General",
+    "tabAccess": "Access",
+    "tabMembers": "Members",
+    "tabError": "Error",
+    "name": "Group name",
+    "namePlaceholder": "e.g. Developers",
+    "color": "Identification color",
+    "colorSwatch": "Color {color}",
+    "descriptionPlaceholder": "Description of the user group...",
+    "activeGroup": "Active group",
+    "activeGroupDesc": "The group's permissions apply to its members",
+    "searchAppGroups": "Search a resource group...",
+    "selectAll": "Select all",
+    "selectNone": "None",
+    "noAppGroups": "No resource groups available",
+    "noAppGroupsHint": "Create resource groups first",
+    "resourcesCount": "0 resources | 1 resource | {count} resources",
+    "noResults": "No results for “{query}”",
+    "noMembers": "No members in this group",
+    "noMembersHint": "Add members from user management",
+    "selectedCount": "no resource groups selected | 1 resource group selected | {count} resource groups selected",
+    "submitCreate": "Create group",
+    "errors": {
+      "nameRequired": "Name is required"
+    }
+  },
+  "groupAdminsModal": {
+    "manage": "Manage administrators",
+    "manageFor": "Manage administrators: {name}",
+    "title": "Group administrators",
+    "intro": "Select the users who will be able to manage this group and its resources.",
+    "noUsers": "No users found",
+    "selectedCount": "no administrators selected | 1 administrator selected | {count} administrators selected"
   },
   "settings": {
     "general": "General",
@@ -549,6 +647,7 @@
     "showAvatarIntroHelp": "When the chat opens, an animated avatar appears in the corner and gently floats while the window is open. A welcome bubble pops up then closes automatically after a few seconds."
   },
   "news": {
+    "selectTypePlaceholder": "Select a type…",
     "widget": {
       "title": "Featured",
       "viewAll": "View all",
@@ -1558,7 +1657,16 @@
     "save_settings": "Save settings",
     "moderateError": "Error moderating the comment",
     "settingsSaved": "Settings updated successfully",
-    "settingsSaveError": "Error updating the settings"
+    "settingsSaveError": "Error updating the settings",
+    "approved": "Comment approved.",
+    "flaggedDone": "Comment flagged.",
+    "targetColumn": "Commented item",
+    "targetMissing": "Item not found",
+    "entityTypes": {
+      "news": "Article",
+      "event": "Event",
+      "application": "Resource"
+    }
   },
   "notifications": {
     "title": "Notifications",
@@ -1846,6 +1954,7 @@
     "categoryLoadError": "Failed to load categories",
     "categorySaveError": "Failed to save category",
     "categoryDeleteError": "Failed to delete category",
+    "categoryInUse": "This category is used by suggestions: deactivate it instead.",
     "linkedPoll": "Linked poll",
     "statusUpdated": "Status updated",
     "statusUpdateError": "Failed to update status",
@@ -1889,6 +1998,32 @@
     }
   },
   "gamificationAdmin": {
+    "reasonLabels": {
+      "daily_login": "Daily sign-in",
+      "app_click": "Resource opened",
+      "news_read": "Article read",
+      "news_publish": "Article published",
+      "event_publish": "Event created",
+      "poll_vote": "Poll vote",
+      "poll_create": "Poll created",
+      "comment_create": "Comment posted",
+      "suggestion_create": "Suggestion sent",
+      "suggestion_vote": "Suggestion vote",
+      "suggestion_comment": "Suggestion comment"
+    },
+    "metricLabels": {
+      "reason_count": "Occurrence count",
+      "app_click_distinct": "Distinct resources opened",
+      "news_read_count": "Articles read",
+      "news_publish_count": "Articles published",
+      "event_publish_count": "Events published",
+      "poll_vote_count": "Poll votes",
+      "poll_create_count": "Polls created",
+      "comment_count": "Comments",
+      "suggestion_create_count": "Suggestions created",
+      "suggestion_vote_count": "Suggestion votes",
+      "suggestion_comment_count": "Suggestion comments"
+    },
     "title": "Gamification",
     "subtitle": "Adjust points and configure badges with unlock conditions.",
     "rules": "Point rules",
@@ -2294,6 +2429,7 @@
       "field": "Delete field \"{name}\"? Entered values will no longer be shown."
     },
     "errors": {
+      "hasSubUnits": "Delete or move this unit's sub-units first.",
       "nameRequired": "Name is required.",
       "positionRequired": "Title and unit are required.",
       "personRequired": "Choose a person.",
@@ -2475,5 +2611,55 @@
     "managedGroups": "Managed groups",
     "resourceCategories": "Resource categories",
     "manage": "Manage"
+  },
+  "pageTitles": {
+    "default": "Application portal",
+    "Home": "Home",
+    "Resources": "Resources",
+    "Directory": "Directory",
+    "DirectoryManagement": "Directory management",
+    "Search": "Search",
+    "NewsCenter": "News",
+    "NewsDetail": "Article",
+    "Polls": "Polls",
+    "PollDetail": "Poll",
+    "Suggestions": "Suggestion box",
+    "SuggestionDetail": "Suggestion",
+    "EventsCenter": "Calendar",
+    "Profile": "Profile",
+    "GamificationHub": "Gamification hub",
+    "Notifications": "Notifications",
+    "EventDetail": "Event",
+    "Login": "Sign in",
+    "Register": "Sign up",
+    "OAuthCallback": "OAuth sign-in",
+    "AdminOverview": "Overview",
+    "AdminNews": "News",
+    "AdminNewsCategories": "Article categories",
+    "AdminNewsTypes": "Article types",
+    "AdminSuggestions": "Suggestion management",
+    "AdminSuggestionCategories": "Suggestion categories",
+    "AdminApplications": "Resources",
+    "AdminAppGroups": "Resource categories",
+    "AdminUsers": "Users",
+    "AdminGroups": "Groups",
+    "AdminSettings": "Settings",
+    "AdminOAuth": "OAuth configuration",
+    "AdminEmail": "Email notifications",
+    "AdminAnalytics": "Analytics",
+    "AdminReports": "Reports",
+    "AdminAnnouncements": "Announcements",
+    "AdminChatbots": "AI chatbots",
+    "AdminPolls": "Polls",
+    "AdminGamification": "Gamification",
+    "AdminMedia": "Media",
+    "AdminNewsEdit": "Edit article",
+    "AdminNewsNew": "New article",
+    "AdminEvents": "Event management",
+    "AdminEventEdit": "Edit event",
+    "AdminEventNew": "New event",
+    "CommentModeration": "Comment moderation",
+    "Unauthorized": "Access denied",
+    "NotFound": "Page not found"
   }
 }

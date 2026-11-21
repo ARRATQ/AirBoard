@@ -92,6 +92,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { Icon } from '@iconify/vue'
@@ -143,7 +144,7 @@ const loadCategories = async () => {
     categories.value = response.categories || []
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.categoryLoadError'))
+      window.$toast.error(t('suggestions.categoryLoadError'))
     }
   } finally {
     loading.value = false
@@ -187,14 +188,14 @@ const saveCategory = async () => {
     }
 
     if (window.$toast) {
-      window.$toast.success(t('common.save'))
+      window.$toast.success(t('common.feedback.saved'))
     }
 
     showModal.value = false
     await loadCategories()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.categorySaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('suggestions.categorySaveError'))
     }
   }
 }
@@ -211,12 +212,12 @@ const removeCategory = async (category) => {
   try {
     await suggestionsService.deleteCategory(category.id)
     if (window.$toast) {
-      window.$toast.success(t('common.delete'))
+      window.$toast.success(t('common.feedback.deleted'))
     }
     await loadCategories()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.categoryDeleteError'))
+      window.$toast.error(error.response?.status === 409 ? t('suggestions.categoryInUse') : t('suggestions.categoryDeleteError'))
     }
   }
 }
@@ -232,12 +233,15 @@ const toggleActive = async (category, isActive) => {
     await loadCategories()
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.categorySaveError'))
+      window.$toast.error(error.response?.status === 409 ? t('common.validation.duplicateName') : t('suggestions.categorySaveError'))
     }
   }
 }
 
 onMounted(loadCategories)
+
+// Échap ferme la modale
+useEscapeClose(showModal, () => closeForm())
 </script>
 
 <style scoped>

@@ -50,7 +50,11 @@
         </template>
 
         <template #cell-target="{ row }">
-          <span class="cm-mono">{{ row.target }}</span>
+          <span class="cm-target">
+            <span class="cm-mono">{{ row.targetType }}</span>
+            <RouterLink v-if="row.targetLink" :to="row.targetLink" class="cm-target__link">{{ row.targetTitle }}</RouterLink>
+            <span v-else>{{ row.targetTitle }}</span>
+          </span>
         </template>
 
         <template #cell-content="{ row }">
@@ -147,13 +151,15 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 const activeTab = ref('pending')
 const loading = ref(false)
 const pendingComments = ref([])
+// Titre (et slug) des éléments commentés, par « type:id »
+const pendingTargets = ref({})
 const settings = ref({
   comments_enabled: true,
   news_comments_enabled: true,
@@ -174,7 +180,7 @@ const toggles = [
 
 const columns = computed(() => [
   { key: 'author', label: t('ui.table.columns.author'), sortable: true },
-  { key: 'target', label: t('ui.table.columns.type'), sortable: true, hideSm: true },
+  { key: 'target', label: t('moderation.targetColumn'), sortable: true, hideSm: true },
   { key: 'content', label: t('ui.table.columns.content') },
   { key: 'createdAt', label: t('ui.table.columns.date'), sortable: true, hideSm: true },
   { key: 'status', label: t('ui.table.columns.status'), hideSm: true },
@@ -185,12 +191,25 @@ const rows = computed(() =>
   pendingComments.value.map(comment => ({
     id: comment.id,
     author: getUserName(comment.user),
-    target: `${comment.entity_type} #${comment.entity_id}`,
+    ...describeTarget(comment),
     content: comment.content,
     createdAt: formatDate(comment.created_at),
     raw: comment,
   })),
 )
+
+// Pages de détail des éléments commentés ; une ressource n'en a pas.
+const TARGET_ROUTES = { news: 'NewsDetail', event: 'EventDetail' }
+
+const describeTarget = (comment) => {
+  const typeKey = `moderation.entityTypes.${comment.entity_type}`
+  const targetType = te(typeKey) ? t(typeKey) : comment.entity_type
+  const found = pendingTargets.value[`${comment.entity_type}:${comment.entity_id}`]
+  const targetTitle = found?.title || t('moderation.targetMissing')
+  const routeName = TARGET_ROUTES[comment.entity_type]
+  const targetLink = found?.slug && routeName ? { name: routeName, params: { slug: found.slug } } : null
+  return { target: `${targetType} ${targetTitle}`, targetType, targetTitle, targetLink }
+}
 
 const pendingCount = computed(() => pendingComments.value.length)
 
@@ -215,9 +234,11 @@ const loadPendingComments = async () => {
   loading.value = true
   try {
     const response = await commentsService.getPendingComments()
+    pendingTargets.value = response.targets || {}
     pendingComments.value = response.comments || []
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires en attente:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     loading.value = false
   }
@@ -229,6 +250,7 @@ const loadSettings = async () => {
     settings.value = response
   } catch (error) {
     console.error('Erreur lors du chargement des paramètres:', error)
+    appStore.showError(t('common.feedback.loadError'))
   }
 }
 
@@ -239,6 +261,7 @@ const moderateComment = async (commentId, isApproved, isFlagged) => {
       is_approved: isApproved,
       is_flagged: isFlagged
     })
+    appStore.showSuccess(t(isApproved ? 'moderation.approved' : 'moderation.flaggedDone'))
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la modération du commentaire:', error)
@@ -256,6 +279,7 @@ const deleteComment = async (commentId) => {
 
   try {
     await commentsService.deleteComment(commentId)
+    appStore.showSuccess(t('common.feedback.deleted'))
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la suppression du commentaire:', error)
@@ -327,6 +351,29 @@ onMounted(() => {
   color: var(--text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.cm-target {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cm-target__link {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.cm-target__link:hover { text-decoration-color: currentColor; }
+
+.cm-target__link:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .cm-mono {

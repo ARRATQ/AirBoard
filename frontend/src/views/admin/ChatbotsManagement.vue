@@ -89,10 +89,12 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { chatbotsAdminService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 import ChatbotModal from '@/components/admin/ChatbotModal.vue'
 
 const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
+const appStore = useAppStore()
 
 const chatbots = ref([])
 const isLoading = ref(false)
@@ -126,6 +128,7 @@ const loadChatbots = async () => {
     chatbots.value = data.data || []
   } catch (error) {
     console.error('Error loading chatbots:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     isLoading.value = false
   }
@@ -145,6 +148,7 @@ const openEditModal = (chatbot) => {
 
 const onSaved = () => {
   showModal.value = false
+  appStore.showSuccess(t('common.feedback.saved'))
   loadChatbots()
 }
 
@@ -154,8 +158,10 @@ const toggleActive = async (chatbot) => {
     // Renvoyer toute la fiche : le backend réécrit welcome_title/subtitle même absents
     await chatbotsAdminService.updateChatbot(chatbot.id, { ...chatbot, is_active: !chatbot.is_active })
     chatbot.is_active = !chatbot.is_active
+    appStore.showSuccess(t('common.feedback.statusChanged'))
   } catch (error) {
     console.error('Error toggling chatbot:', error)
+    appStore.showError(t('common.feedback.saveError'))
   } finally {
     togglingId.value = null
   }
@@ -172,9 +178,11 @@ const confirmDelete = async (chatbot) => {
 
   try {
     await chatbotsAdminService.deleteChatbot(chatbot.id)
+    appStore.showSuccess(t('common.feedback.deleted'))
     await loadChatbots()
   } catch (error) {
     console.error('Error deleting chatbot:', error)
+    appStore.showError(t('common.feedback.deleteError'))
   }
 }
 

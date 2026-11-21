@@ -83,6 +83,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useFavoritesStore } from '@/stores/favorites'
 import CommentSection from '@/components/comments/CommentSection.vue'
@@ -105,4 +106,7 @@ const isFavorite = computed(() => {
 const toggleFavorite = async () => {
   await favoritesStore.toggleFavorite(props.app.id)
 }
+
+// Échap ferme la modale
+useEscapeClose(true, () => emit('close'))
 </script>
