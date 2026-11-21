@@ -3,6 +3,7 @@ package handlers
 import (
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 	"fmt"
 	"log"
 	"math"
@@ -143,11 +144,12 @@ func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 	}
 
 	if h.gamificationService != nil {
-		go func(userID uint, suggestionID uint) {
+		suggestionID := suggestion.ID
+		utils.SafeGo("xp-suggestion-create", func() {
 			if err := h.gamificationService.AwardXP(userID, 35, "suggestion_create", fmt.Sprintf("{\"suggestion_id\":%d}", suggestionID)); err != nil {
 				log.Printf("[Gamification] Failed to award XP for suggestion creation: %v", err)
 			}
-		}(userID, suggestion.ID)
+		})
 	}
 
 	if err := h.db.
@@ -320,11 +322,12 @@ func (h *SuggestionsHandler) VoteSuggestion(c *gin.Context) {
 			if rewardErr != nil {
 				log.Printf("[Gamification] Failed to check suggestion vote reward: %v", rewardErr)
 			} else if !hasReward {
-				go func(userID uint, suggestionID uint) {
+				suggestionID := uint(id)
+				utils.SafeGo("xp-suggestion-vote", func() {
 					if err := h.gamificationService.AwardXP(userID, 8, "suggestion_vote", fmt.Sprintf("{\"suggestion_id\":%d}", suggestionID)); err != nil {
 						log.Printf("[Gamification] Failed to award XP for suggestion vote: %v", err)
 					}
-				}(userID, uint(id))
+				})
 			}
 		}
 	}

@@ -91,7 +91,7 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 
 	// Envoyer une notification email si l'événement est publié
 	if event.IsPublished {
-		go func() {
+		utils.SafeGo("email-event", func() {
 			emailService := services.NewEmailService(h.db, config.LoadConfig())
 			var targetGroupIDs []uint
 			for _, g := range event.TargetGroups {
@@ -100,7 +100,7 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 			if err := emailService.SendNotification("event", event.ID, targetGroupIDs); err != nil {
 				log.Printf("[Email] Échec de l'envoi de la notification événement: %v", err)
 			}
-		}()
+		})
 	}
 
 	// Award Contributor XP

@@ -8,6 +8,7 @@ import (
 	"airboard/models"
 	"airboard/services"
 	"airboard/services/chat"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -65,8 +66,8 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
-	go client.WritePump()
-	go client.ReadPump()
+	utils.SafeGo("chat-write-pump", client.WritePump)
+	utils.SafeGo("chat-read-pump", client.ReadPump)
 }
 
 // GetContacts returns list of users (DMs) and groups

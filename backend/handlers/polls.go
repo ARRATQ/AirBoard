@@ -434,7 +434,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 
 	// Envoyer des notifications
 	if poll.IsActive {
-		go func() {
+		utils.SafeGo("notify-poll-created", func() {
 			notifService := services.NewNotificationService(h.db)
 
 			// Récupérer les utilisateurs à notifier
@@ -463,14 +463,14 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 					log.Printf("[Notification] Échec de l'envoi de la notification de sondage: %v", err)
 				}
 			}
-		}()
+		})
 
 		// Accorder de l'XP pour la création du sondage (50 XP)
-		go func() {
+		utils.SafeGo("xp-poll-create", func() {
 			if err := h.gamificationService.AwardXP(userID, 50, "poll_create", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
 				log.Printf("[Gamification] Failed to award XP for poll creation: %v", err)
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, poll)
@@ -851,11 +851,11 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 		if rewardErr != nil {
 			log.Printf("[Gamification] Failed to check poll vote reward: %v", rewardErr)
 		} else if !hasReward {
-			go func() {
+			utils.SafeGo("xp-poll-vote", func() {
 				if err := h.gamificationService.AwardXP(userID, 10, "poll_vote", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
 					log.Printf("[Gamification] Failed to award XP for poll vote: %v", err)
 				}
-			}()
+			})
 		}
 	}
 }

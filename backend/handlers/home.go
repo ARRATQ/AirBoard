@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"airboard/models"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -121,7 +122,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 
 	// 1. Load Favorite Apps (user-specific, no cache)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-favorites", func() {
 		defer wg.Done()
 		apps, err := h.getFavoriteApps(userID.(uint))
 		if err != nil {
@@ -131,11 +132,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.FavoriteApps = apps
 		mu.Unlock()
-	}()
+	})
 
 	// 2. Load New Apps (filtered by user groups)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-new-apps", func() {
 		defer wg.Done()
 		apps, err := h.getNewApps(userID.(uint), role.(string))
 		if err != nil {
@@ -145,11 +146,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.NewApps = apps
 		mu.Unlock()
-	}()
+	})
 
 	// 3. Load Today's Events
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-today-events", func() {
 		defer wg.Done()
 		events, err := h.getTodayEvents(userID.(uint), role.(string))
 		if err != nil {
@@ -159,11 +160,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.TodayEvents = events
 		mu.Unlock()
-	}()
+	})
 
 	// 4. Load Upcoming Events
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-upcoming-events", func() {
 		defer wg.Done()
 		events, err := h.getUpcomingEvents(userID.(uint), role.(string))
 		if err != nil {
@@ -173,11 +174,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.UpcomingEvents = events
 		mu.Unlock()
-	}()
+	})
 
 	// 5. Load Recent News
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-recent-news", func() {
 		defer wg.Done()
 		news, err := h.getRecentNews(userID.(uint), role.(string))
 		if err != nil {
@@ -187,11 +188,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.RecentNews = news
 		mu.Unlock()
-	}()
+	})
 
 	// 6. Load Recent News By Type (grouped)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-news-by-type", func() {
 		defer wg.Done()
 		newsByType, err := h.getRecentNewsByType(userID.(uint), role.(string), newsPerTab)
 		if err != nil {
@@ -201,11 +202,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.RecentNewsByType = newsByType
 		mu.Unlock()
-	}()
+	})
 
 	// 7. Load Recent Polls
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-polls", func() {
 		defer wg.Done()
 		polls, err := h.getRecentPolls(userID.(uint), role.(string))
 		if err != nil {
@@ -215,11 +216,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.Polls = polls
 		mu.Unlock()
-	}()
+	})
 
 	// 8. Load Announcements (cached)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-announcements", func() {
 		defer wg.Done()
 		announcements, err := h.getAnnouncementsWithCache()
 		if err != nil {
@@ -229,11 +230,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.Announcements = announcements
 		mu.Unlock()
-	}()
+	})
 
 	// 9. Load Stats (for all users)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-stats", func() {
 		defer wg.Done()
 		userIDVal := userID.(uint)
 		roleVal := role.(string)
@@ -242,11 +243,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.Stats = stats
 		mu.Unlock()
-	}()
+	})
 
 	// 10. Load App Settings (cached)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-app-settings", func() {
 		defer wg.Done()
 		settings, err := h.getAppSettingsWithCache()
 		if err != nil {
@@ -256,11 +257,11 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.AppSettings = settings
 		mu.Unlock()
-	}()
+	})
 
 	// 11. Load Hero Messages (cached)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-hero-messages", func() {
 		defer wg.Done()
 		messages, err := h.getHeroMessagesWithCache()
 		if err != nil {
@@ -270,27 +271,27 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		mu.Lock()
 		response.HeroMessages = messages
 		mu.Unlock()
-	}()
+	})
 
 	// 12. Load Gamification Summary
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-gamification", func() {
 		defer wg.Done()
 		summary := h.getGamificationSummary(userID.(uint))
 		mu.Lock()
 		response.Gamification = summary
 		mu.Unlock()
-	}()
+	})
 
 	// 13. Load Pending Items (unread news, unanswered polls, new apps this week)
 	wg.Add(1)
-	go func() {
+	utils.SafeGo("home-pending", func() {
 		defer wg.Done()
 		pending := h.getPendingItems(userID.(uint), role.(string))
 		mu.Lock()
 		response.PendingItems = pending
 		mu.Unlock()
-	}()
+	})
 
 	wg.Wait()
 

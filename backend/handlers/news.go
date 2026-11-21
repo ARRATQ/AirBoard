@@ -419,7 +419,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 
 	// Envoyer une notification email si l'article est publié
 	if news.IsPublished {
-		go func() {
+		utils.SafeGo("email-news", func() {
 			log.Printf("[Email] Tentative d'envoi de notification pour news ID=%d, titre='%s'", news.ID, news.Title)
 			// Utiliser la configuration stockée pour éviter de régénérer le secret JWT
 			emailService := services.NewEmailService(h.db, h.config)
@@ -433,10 +433,10 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 			} else {
 				log.Printf("[Email] ✅ Notification envoyée avec succès pour news ID=%d", news.ID)
 			}
-		}()
+		})
 
 		// Créer des notifications pour les utilisateurs
-		go func() {
+		utils.SafeGo("notify-news-published", func() {
 			notifService := services.NewNotificationService(h.db)
 
 			// Récupérer les utilisateurs à notifier
@@ -466,7 +466,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 					log.Printf("[Notification] Échec de l'envoi de la notification: %v", err)
 				}
 			}
-		}()
+		})
 	}
 
 	// Award Contributor XP
@@ -709,7 +709,7 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 
 	// Si l'article est épinglé et publié, envoyer des notifications
 	if news.IsPinned && wasNotPinned && news.IsPublished {
-		go func() {
+		utils.SafeGo("notify-news-pinned", func() {
 			notifService := services.NewNotificationService(h.db)
 
 			// Récupérer les utilisateurs à notifier
@@ -737,7 +737,7 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 					log.Printf("[Notification] Échec de l'envoi de la notification d'épinglage: %v", err)
 				}
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusOK, news)

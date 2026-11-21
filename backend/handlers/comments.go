@@ -4,6 +4,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -273,7 +274,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	// Accorder des points XP pour la création d'un commentaire
 	if h.Gamification != nil {
 		// 10 XP pour un commentaire
-		go func() {
+		utils.SafeGo("xp-comment-create", func() {
 			err := h.Gamification.AwardXP(userID.(uint), 10, "comment_create", "{}")
 			if err != nil {
 				// Log error but don't fail request
@@ -286,7 +287,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 					log.Printf("[Gamification] Failed to award XP for suggestion comment: %v", err)
 				}
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, models.SuccessResponse{

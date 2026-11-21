@@ -10,6 +10,7 @@ import (
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -503,7 +504,7 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 
 	// Envoyer une notification email si l'application est active
 	if application.IsActive {
-		go func() {
+		utils.SafeGo("email-application", func() {
 			emailService := services.NewEmailService(h.db, config.LoadConfig())
 			// Récupérer les groupes liés à l'AppGroup
 			var targetGroupIDs []uint
@@ -511,7 +512,7 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 			if err := emailService.SendNotification("application", application.ID, targetGroupIDs); err != nil {
 				log.Printf("[Email] Échec de l'envoi de la notification application: %v", err)
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, application)
