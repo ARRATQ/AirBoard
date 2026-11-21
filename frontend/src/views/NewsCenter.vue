@@ -18,7 +18,7 @@
     </div>
 
     <!-- Filters Bar -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+    <div class="news-filters mb-6">
       <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <!-- Search -->
         <div class="md:col-span-2">
@@ -73,20 +73,29 @@
         </div>
       </div>
 
-      <!-- Tags Filter -->
-      <div v-if="tags.length > 0" class="mt-4 flex flex-wrap gap-2">
+      <!-- Tags Filter : puces compactes, noms longs tronqués, liste repliée au-delà de quelques étiquettes -->
+      <div v-if="tags.length > 0" class="ftags" role="group" :aria-label="$t('news.center.tagsLabel')">
         <button
-          v-for="tag in tags"
+          v-for="tag in shownFilterTags"
           :key="tag.id"
+          type="button"
+          class="ftag"
+          :class="{ 'ftag--on': selectedTags.includes(tag.id) }"
+          :aria-pressed="selectedTags.includes(tag.id)"
+          :title="tag.name"
+          :style="{ '--tg': tag.color || 'var(--muted)' }"
           @click="toggleTag(tag.id)"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
-            selectedTags.includes(tag.id)
-              ? 'bg-primary-500 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-          ]"
         >
-          {{ tag.name }}
+          <span class="ftag__name" dir="auto">{{ tag.name }}</span>
+        </button>
+        <button
+          v-if="tags.length > FILTER_TAGS_COLLAPSED"
+          type="button"
+          class="ftag ftag--toggle"
+          :aria-expanded="tagsExpanded"
+          @click="tagsExpanded = !tagsExpanded"
+        >
+          {{ tagsExpanded ? $t('news.center.fewerTags') : $t('news.center.allTags', { count: tags.length }) }}
         </button>
       </div>
     </div>
@@ -204,6 +213,7 @@ import { useNewsTypesStore } from '@/stores/newsTypes'
 import { newsService } from '@/services/api'
 import NewsCard from '@/components/news/NewsCard.vue'
 import NewsCardCompact from '@/components/news/NewsCardCompact.vue'
+import { filterTagsToShow } from '@/utils/tagChips'
 import ViewModeSelector from '@/components/news/ViewModeSelector.vue'
 import SortSelector from '@/components/news/SortSelector.vue'
 import TypeSelect from '@/components/news/TypeSelect.vue'
@@ -233,6 +243,12 @@ const newsList = ref([])
 const categories = ref([])
 const tags = ref([])
 const selectedTags = ref([])
+// Barre de filtres : nombre d'étiquettes visibles tant qu'on ne déplie pas la liste
+const FILTER_TAGS_COLLAPSED = 8
+const tagsExpanded = ref(false)
+const shownFilterTags = computed(() =>
+  filterTagsToShow(tags.value, selectedTags.value, FILTER_TAGS_COLLAPSED, tagsExpanded.value)
+)
 
 // Filters
 const filters = ref({
@@ -395,6 +411,82 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.news-filters {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-l);
+  background: var(--surface);
+}
+
+.ftags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.ftag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 16em;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.ftag:not(.ftag--toggle)::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tg);
+  content: '';
+}
+
+.ftag:hover { border-color: var(--muted); }
+
+.ftag:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 1px;
+}
+
+.ftag--on {
+  border-color: var(--fill);
+  background: var(--fill);
+  color: var(--on-fill);
+}
+
+.ftag--on::before { box-shadow: 0 0 0 1.5px var(--on-fill); }
+
+.ftag--on:hover { border-color: var(--fill); }
+
+.ftag__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ftag--toggle {
+  border-style: dashed;
+  background: none;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ftag { transition: none; }
+}
+
 /* Fade Scale Animation for Grid View */
 .fade-scale-enter-active,
 .fade-scale-leave-active {

@@ -761,7 +761,10 @@
       "searchPlaceholder": "Rechercher des articles...",
       "allCategories": "Toutes les catégories",
       "allTypes": "Tous les types",
-      "noNews": "Aucun article disponible"
+      "noNews": "Aucun article disponible",
+      "tagsLabel": "Étiquettes",
+      "allTags": "Toutes les étiquettes ({count})",
+      "fewerTags": "Moins d'étiquettes"
     },
     "detail": {
       "back": "Retour",
