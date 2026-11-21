@@ -61,13 +61,13 @@ async function toggleFavorite(app) {
 .rgv--wide {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 18px;
 }
 
 .rgv--columns {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   align-items: start;
-  gap: 22px 16px;
+  gap: 18px 16px;
 }
 </style>
