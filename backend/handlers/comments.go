@@ -501,6 +501,7 @@ func (h *CommentHandler) GetPendingComments(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"comments": comments,
 		"total":    len(comments),
+		"targets":  loadCommentTargets(h.DB, comments),
 	})
 }
 

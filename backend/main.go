@@ -169,6 +169,36 @@ func main() {
 		log.Println("✓ Index unique partiel créé/vérifié pour event_categories.slug")
 	}
 
+	// Noms et slugs de catégories et de types réutilisables après suppression douce :
+	// les anciens index uniques complets (noms par défaut de GORM) bloquaient la
+	// recréation d'un élément supprimé. Leurs remplaçants partiels sont posés ci-dessous.
+	// Selon la version de GORM qui les a créés, ce sont des contraintes ou de simples index.
+	for _, legacy := range []struct{ table, name string }{
+		{"news_categories", "idx_news_categories_name"}, {"news_categories", "idx_news_categories_slug"},
+		{"news_types", "idx_news_types_name"}, {"news_types", "idx_news_types_slug"},
+		{"suggestion_categories", "idx_suggestion_categories_name"}, {"suggestion_categories", "idx_suggestion_categories_slug"},
+	} {
+		if err := db.Exec(fmt.Sprintf("ALTER TABLE %s DROP CONSTRAINT IF EXISTS %s", legacy.table, legacy.name)).Error; err != nil {
+			log.Printf("Avertissement: Impossible de supprimer l'ancienne contrainte %s: %v", legacy.name, err)
+		}
+		if err := db.Exec("DROP INDEX IF EXISTS " + legacy.name).Error; err != nil {
+			log.Printf("Avertissement: Impossible de supprimer l'ancien index %s: %v", legacy.name, err)
+		}
+	}
+	for _, idx := range []struct{ name, table, column string }{
+		{"idx_news_category_name", "news_categories", "name"},
+		{"idx_category_slug", "news_categories", "slug"},
+		{"idx_news_type_name", "news_types", "name"},
+		{"idx_news_type_slug", "news_types", "slug"},
+		{"idx_suggestion_category_name", "suggestion_categories", "name"},
+		{"idx_suggestion_category_slug", "suggestion_categories", "slug"},
+	} {
+		query := fmt.Sprintf("CREATE UNIQUE INDEX IF NOT EXISTS %s ON %s(%s) WHERE deleted_at IS NULL", idx.name, idx.table, idx.column)
+		if err := db.Exec(query).Error; err != nil {
+			log.Printf("Avertissement: Impossible de créer l'index unique partiel %s: %v", idx.name, err)
+		}
+	}
+
 	database.EnsurePerformanceIndexes(db)
 
 	// Créer les données initiales
@@ -678,6 +708,7 @@ func main() {
 
 			// Gestion des médias (admin uniquement)
 			admin.GET("/media", mediaHandler.GetMediaList)        // Liste des médias avec pagination et filtres
+			admin.GET("/media/stats", mediaHandler.GetMediaStats) // Totaux de toute la médiathèque
 			admin.GET("/media/:id", mediaHandler.GetMedia)        // Récupérer un média par ID
 			admin.POST("/media/upload", mediaHandler.UploadMedia) // Uploader un média
 			admin.PUT("/media/:id", mediaHandler.UpdateMedia)     // Mettre à jour les métadonnées d'un média

@@ -53,10 +53,12 @@ type News struct {
 }
 
 // NewsCategory représente une catégorie de news
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type NewsCategory struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
-	Name        string         `json:"name" gorm:"not null;uniqueIndex"`
-	Slug        string         `json:"slug" gorm:"not null;uniqueIndex:idx_category_slug,where:deleted_at IS NULL"`
+	Name        string         `json:"name" gorm:"not null"`
+	Slug        string         `json:"slug" gorm:"not null"`
 	Description string         `json:"description"`
 	Icon        string         `json:"icon" gorm:"default:'mdi:newspaper'"` // Icône Iconify
 	Color       string         `json:"color" gorm:"default:'#3B82F6'"`      // Couleur hex
@@ -68,10 +70,12 @@ type NewsCategory struct {
 }
 
 // NewsType représente un type d'article (article, tutorial, announcement, faq)
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type NewsType struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
-	Name      string         `json:"name" gorm:"not null;uniqueIndex"`
-	Slug      string         `json:"slug" gorm:"not null;uniqueIndex:idx_news_type_slug,where:deleted_at IS NULL"`
+	Name      string         `json:"name" gorm:"not null"`
+	Slug      string         `json:"slug" gorm:"not null"`
 	Icon      string         `json:"icon" gorm:"default:'mdi:newspaper'"`
 	Color     string         `json:"color" gorm:"default:'#3B82F6'"`
 	Order     int            `json:"order" gorm:"default:0"`

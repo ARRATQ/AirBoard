@@ -386,7 +386,11 @@ func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category (name/slug may already exist)"})
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category"})
 		return
 	}
 
@@ -427,7 +431,11 @@ func (h *SuggestionsHandler) UpdateSuggestionCategory(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&category).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update category (name/slug may already exist)"})
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update category"})
 		return
 	}
 
@@ -447,7 +455,7 @@ func (h *SuggestionsHandler) DeleteSuggestionCategory(c *gin.Context) {
 		return
 	}
 	if count > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Category is used by existing suggestions"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Category is used by existing suggestions"})
 		return
 	}
 

@@ -60,10 +60,12 @@ type SuggestionListResponse struct {
 	TotalPages  int          `json:"total_pages"`
 }
 
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type SuggestionCategory struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
-	Name      string         `json:"name" gorm:"not null;uniqueIndex"`
-	Slug      string         `json:"slug" gorm:"not null;uniqueIndex"`
+	Name      string         `json:"name" gorm:"not null"`
+	Slug      string         `json:"slug" gorm:"not null"`
 	Order     int            `json:"order" gorm:"default:0"`
 	IsActive  bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt time.Time      `json:"created_at"`
