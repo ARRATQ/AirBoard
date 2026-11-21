@@ -1,19 +1,7 @@
 <template>
   <div class="w-full p-6">
     <!-- Header -->
-    <div class="mb-6">
-      <div class="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            <Icon icon="mdi:poll" class="inline me-3 text-3xl" />
-            {{ t('polls.title') }}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{ t('polls.subtitle') }}
-          </p>
-        </div>
-      </div>
-    </div>
+    <PageHeader :title="t('polls.title')" :description="t('polls.subtitle')" />
 
     <!-- Filters Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
@@ -131,6 +119,7 @@ import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { pollsService } from '@/services/api'
 import PollCard from '@/components/polls/PollCard.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -238,38 +227,18 @@ onMounted(() => {
   min-height: 0;
 }
 
+/* Colonnes d'au moins 300 px selon la largeur réelle de la zone de contenu (barre latérale
+   ouverte ou repliée) ; minmax(0, …) empêche un long titre ou un mot sans espace d'élargir
+   sa colonne au-delà de la page. */
 .three-column-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 1.25rem;
   align-items: start;
-  /* Masonry-like behavior: allow variable heights */
   grid-auto-flow: dense;
-  grid-auto-rows: minmax(4rem, auto);
 }
 
-/* Mobile: 1 column, Tablet: 2 columns, Desktop: 3 columns */
-@media (max-width: 640px) {
-  .three-column-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 768px) {
-  .three-column-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
-  }
-}
-
-/* Desktop: exactly 3 columns with masonry layout */
-@media (min-width: 769px) {
-  .three-column-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-}
+.three-column-grid > * { min-width: 0; }
 
 /* Poll cards with masonry layout support */
 .three-column-grid .poll-card {

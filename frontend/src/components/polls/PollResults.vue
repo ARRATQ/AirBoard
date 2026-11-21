@@ -375,7 +375,7 @@ watch(() => props.poll.id, () => {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: #1f2937;
 }
@@ -397,8 +397,9 @@ watch(() => props.poll.id, () => {
 
 .voter-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.375rem 1rem;
   padding: 0.75rem 1rem;
   background: white;
   border-radius: 6px;
@@ -412,7 +413,8 @@ watch(() => props.poll.id, () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
+  flex: 1 1 9rem;
+  min-width: 0;
 }
 
 .voter-info svg {
@@ -421,6 +423,8 @@ watch(() => props.poll.id, () => {
 }
 
 .voter-name {
+  /* Nom coupé entre les mots ; la date passe à la ligne plutôt que de casser le nom. */
+  overflow-wrap: break-word;
   font-weight: 500;
   font-size: 0.875rem;
   color: #1f2937;

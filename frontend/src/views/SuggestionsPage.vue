@@ -1,15 +1,7 @@
 <template>
   <div class="w-full p-6">
-    <div class="mb-8">
-      <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          <Icon icon="mdi:lightbulb-on-outline" class="inline me-3 text-3xl text-amber-500" />
-          {{ t('suggestions.title') }}
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400">{{ t('suggestions.subtitle') }}</p>
-      </div>
-
+    <PageHeader :title="t('suggestions.title')" :description="t('suggestions.subtitle')">
+      <template #actions>
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1" role="group" :aria-label="t('dashboard.viewModes.label')">
             <button
@@ -41,8 +33,8 @@
             {{ t('suggestions.newSuggestion') }}
           </button>
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -299,6 +291,7 @@
 <script setup>
 import { suggestionStatusTone } from '@/config/status'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'

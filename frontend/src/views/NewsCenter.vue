@@ -1,21 +1,11 @@
 <template>
   <div class="w-full p-6">
     <!-- Header -->
-    <div class="mb-8">
-      <div class="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {{ $t('news.center.title') }}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{ $t('news.center.subtitle') }}
-          </p>
-        </div>
-
-        <!-- View Mode Selector -->
+    <PageHeader :title="$t('news.center.title')" :description="$t('news.center.subtitle')">
+      <template #actions>
         <ViewModeSelector v-model="viewMode" />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Filters Bar -->
     <div class="news-filters mb-6">
@@ -215,6 +205,7 @@ import NewsCard from '@/components/news/NewsCard.vue'
 import NewsCardCompact from '@/components/news/NewsCardCompact.vue'
 import { filterTagsToShow } from '@/utils/tagChips'
 import ViewModeSelector from '@/components/news/ViewModeSelector.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import SortSelector from '@/components/news/SortSelector.vue'
 import TypeSelect from '@/components/news/TypeSelect.vue'
 
