@@ -1,181 +1,134 @@
 <template>
   <div class="content-area">
-    <!-- Header -->
     <PageHeader>
       <template #title>{{ $t('media.title') }}</template>
       <template #description>{{ $t('media.subtitle') }}</template>
       <template #actions>
-        <button @click="openUploadModal" class="btn btn-primary">
-          <Icon icon="mdi:upload" class="h-4 w-4 mr-2" />
-          {{ $t('media.upload') }}
-        </button>
+        <BaseButton variant="primary" icon="mdi:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
       </template>
     </PageHeader>
 
-    <!-- Filters -->
-    <div class="filters-container">
-      <div class="search-container flex-1">
-        <Icon icon="mdi:magnify" class="search-icon" />
+    <!-- Chiffres clés -->
+    <dl class="mm-stats">
+      <div class="mm-stat">
+        <dt>{{ $t('media.total_files') }}</dt>
+        <dd>{{ stats.totalFiles }}</dd>
+      </div>
+      <div class="mm-stat">
+        <dt>{{ $t('media.total_images') }}</dt>
+        <dd>{{ stats.totalImages }}</dd>
+      </div>
+      <div class="mm-stat">
+        <dt>{{ $t('media.total_documents') }}</dt>
+        <dd>{{ stats.totalDocuments }}</dd>
+      </div>
+      <div class="mm-stat">
+        <dt>{{ $t('media.total_size') }}</dt>
+        <dd>{{ formatSize(stats.totalSize) }}</dd>
+      </div>
+    </dl>
+
+    <!-- Filtres -->
+    <div class="mm-filters">
+      <label class="mm-search">
+        <Icon icon="mdi:magnify" class="mm-search__icon" aria-hidden="true" />
         <input
           v-model="searchQuery"
-          type="text"
+          type="search"
           :placeholder="$t('media.searchPlaceholder')"
-          class="form-input search-input"
+          :aria-label="$t('media.searchPlaceholder')"
+          class="mm-search__input"
         />
-      </div>
-      <select v-model="typeFilter" class="form-select w-full sm:w-auto">
-        <option value="">{{ $t('media.filter_all_types') }}</option>
-        <option value="image">{{ $t('media.type_image') }}</option>
-        <option value="video">{{ $t('media.type_video') }}</option>
-        <option value="pdf">{{ $t('media.type_pdf') }}</option>
-        <option value="document">{{ $t('media.type_document') }}</option>
-        <option value="spreadsheet">{{ $t('media.type_spreadsheet') }}</option>
-        <option value="presentation">{{ $t('media.type_presentation') }}</option>
-      </select>
+      </label>
+      <label>
+        <span class="sr-only">{{ $t('ui.table.columns.type') }}</span>
+        <select v-model="typeFilter" class="ui-select">
+          <option value="">{{ $t('media.filter_all_types') }}</option>
+          <option value="image">{{ $t('media.type_image') }}</option>
+          <option value="video">{{ $t('media.type_video') }}</option>
+          <option value="pdf">{{ $t('media.type_pdf') }}</option>
+          <option value="document">{{ $t('media.type_document') }}</option>
+          <option value="spreadsheet">{{ $t('media.type_spreadsheet') }}</option>
+          <option value="presentation">{{ $t('media.type_presentation') }}</option>
+        </select>
+      </label>
     </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="card">
-        <div class="card-content">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">{{ $t('media.total_files') }}</p>
-              <p class="text-2xl font-bold text-white">{{ stats.totalFiles }}</p>
-            </div>
-            <Icon icon="mdi:file-multiple" class="h-8 w-8 text-blue-500" />
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-content">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">{{ $t('media.total_images') }}</p>
-              <p class="text-2xl font-bold text-white">{{ stats.totalImages }}</p>
-            </div>
-            <Icon icon="mdi:image" class="h-8 w-8 text-green-500" />
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-content">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">{{ $t('media.total_documents') }}</p>
-              <p class="text-2xl font-bold text-white">{{ stats.totalDocuments }}</p>
-            </div>
-            <Icon icon="mdi:file-document" class="h-8 w-8 text-purple-500" />
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-content">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-gray-400">{{ $t('media.total_size') }}</p>
-              <p class="text-2xl font-bold text-white">{{ formatSize(stats.totalSize) }}</p>
-            </div>
-            <Icon icon="mdi:database" class="h-8 w-8 text-yellow-500" />
-          </div>
-        </div>
-      </div>
+    <!-- Contenu -->
+    <div v-if="loading" class="mm-loading">
+      <Icon icon="mdi:loading" class="mm-spin" aria-hidden="true" />
+      <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
-    <!-- Content -->
-    <div v-if="loading" class="flex items-center justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
-    </div>
-
-    <div v-else-if="filteredMedia.length > 0" class="grid-container grid-cols-auto">
-      <div
-        v-for="media in filteredMedia"
-        :key="media.id"
-        class="card hover:border-gray-600 transition-all duration-200 fade-in relative group"
-      >
-        <!-- Preview -->
-        <div class="relative h-48 bg-gray-800 rounded-t-lg overflow-hidden">
+    <ul v-else-if="filteredMedia.length > 0" class="mm-grid">
+      <li v-for="media in filteredMedia" :key="media.id" class="mm-card">
+        <button type="button" class="mm-card__preview" :aria-label="`${$t('common.view')} : ${media.filename}`" @click="viewMedia(media)">
           <img
-            v-if="isImage(media.mime_type)"
+            v-if="isImage(media.mime_type) && !brokenImages.has(media.id)"
             :src="getMediaUrl(media.url)"
             :alt="media.filename"
-            class="w-full h-full object-cover"
-            @error="handleImageError"
+            loading="lazy"
+            @error="markBroken(media.id)"
           />
-          <div v-else class="flex items-center justify-center h-full">
-            <Icon :icon="getFileIcon(media.mime_type)" class="h-16 w-16 text-gray-500" />
-          </div>
+          <Icon v-else :icon="getFileIcon(media.mime_type)" class="mm-card__file-icon" aria-hidden="true" />
+        </button>
 
-          <!-- Actions overlay -->
-          <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
-            <button @click="viewMedia(media)" class="btn-ghost" :title="$t('common.view')">
-              <Icon icon="mdi:eye" class="h-5 w-5" />
-            </button>
-            <button @click="copyUrl(media)" class="btn-ghost" :title="$t('media.copy_url')">
-              <Icon icon="mdi:content-copy" class="h-5 w-5" />
-            </button>
-            <button @click="downloadMedia(media)" class="btn-ghost" :title="$t('common.download')">
-              <Icon icon="mdi:download" class="h-5 w-5" />
-            </button>
-            <button @click="editMedia(media)" class="btn-ghost" :title="$t('common.edit')">
-              <Icon icon="mdi:pencil" class="h-5 w-5" />
-            </button>
-            <button @click="confirmDelete(media)" class="btn-ghost text-red-400 hover:text-red-300" :title="$t('common.delete')">
-              <Icon icon="mdi:delete" class="h-5 w-5" />
-            </button>
-          </div>
+        <div class="mm-card__body">
+          <h3 class="mm-card__name" :title="media.filename">{{ media.filename }}</h3>
+          <p class="mm-card__meta">
+            <span>{{ formatSize(media.file_size) }}</span>
+            <span v-if="media.width && media.height">{{ media.width }} × {{ media.height }}</span>
+          </p>
+          <p class="mm-card__meta">{{ $t('media.uploaded_by') }} : {{ media.uploader?.username || 'N/A' }}</p>
+          <p class="mm-card__meta">{{ formatDate(media.created_at) }}</p>
         </div>
 
-        <!-- Info -->
-        <div class="card-content">
-          <h3 class="card-title truncate" :title="media.filename">{{ media.filename }}</h3>
-          <div class="mt-2 space-y-1 text-xs text-gray-400">
-            <p>{{ formatSize(media.file_size) }}</p>
-            <p v-if="media.width && media.height">{{ media.width }} × {{ media.height }}</p>
-            <p>{{ $t('media.uploaded_by') }}: {{ media.uploader?.username || 'N/A' }}</p>
-            <p>{{ formatDate(media.created_at) }}</p>
-          </div>
+        <div class="mm-card__actions">
+          <button type="button" class="row-actions__btn" :title="$t('common.view')" :aria-label="`${$t('common.view')} : ${media.filename}`" @click="viewMedia(media)">
+            <Icon icon="mdi:eye-outline" aria-hidden="true" />
+          </button>
+          <button type="button" class="row-actions__btn" :title="$t('media.copy_url')" :aria-label="`${$t('media.copy_url')} : ${media.filename}`" @click="copyUrl(media)">
+            <Icon icon="mdi:content-copy" aria-hidden="true" />
+          </button>
+          <button type="button" class="row-actions__btn" :title="$t('common.download')" :aria-label="`${$t('common.download')} : ${media.filename}`" @click="downloadMedia(media)">
+            <Icon icon="mdi:download-outline" aria-hidden="true" />
+          </button>
+          <button type="button" class="row-actions__btn" :title="$t('common.edit')" :aria-label="`${$t('common.edit')} : ${media.filename}`" @click="editMedia(media)">
+            <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+          </button>
+          <button type="button" class="row-actions__btn row-actions__btn--danger" :title="$t('common.delete')" :aria-label="`${$t('common.delete')} : ${media.filename}`" @click="confirmDelete(media)">
+            <Icon icon="mdi:trash-can-outline" aria-hidden="true" />
+          </button>
         </div>
-      </div>
-    </div>
+      </li>
+    </ul>
 
-    <!-- Empty State -->
-    <div v-else-if="mediaList.length === 0" class="empty-state">
-      <Icon icon="mdi:image-multiple" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('media.emptyTitle') }}</h3>
-      <p class="empty-state-description">{{ $t('media.emptyText') }}</p>
-      <button @click="openUploadModal" class="btn btn-primary">
-        <Icon icon="mdi:upload" class="h-4 w-4 mr-2" />
-        {{ $t('media.upload') }}
-      </button>
-    </div>
+    <EmptyState
+      v-else-if="mediaList.length === 0"
+      icon="mdi:image-multiple"
+      :title="$t('media.emptyTitle')"
+      :description="$t('media.emptyText')"
+    >
+      <BaseButton variant="primary" size="sm" icon="mdi:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
+    </EmptyState>
 
-    <div v-else class="empty-state">
-      <Icon icon="mdi:magnify" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('media.noResultsTitle') }}</h3>
-      <p class="empty-state-description">{{ $t('media.noResultsText') }}</p>
-    </div>
+    <EmptyState
+      v-else
+      icon="mdi:magnify"
+      :title="$t('media.noResultsTitle')"
+      :description="$t('media.noResultsText')"
+    />
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="pagination">
-      <button
-        @click="changePage(currentPage - 1)"
-        :disabled="currentPage === 1"
-        class="btn btn-secondary"
-      >
-        <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+    <nav v-if="totalPages > 1" class="mm-pager">
+      <button type="button" class="mm-pager__btn" :disabled="currentPage === 1" :aria-label="$t('ui.table.prev')" @click="changePage(currentPage - 1)">
+        <Icon icon="mdi:chevron-left" aria-hidden="true" />
       </button>
-      <span class="text-gray-400">
-        {{ $t('common.page') }} {{ currentPage }} {{ $t('common.of') }} {{ totalPages }}
-      </span>
-      <button
-        @click="changePage(currentPage + 1)"
-        :disabled="currentPage === totalPages"
-        class="btn btn-secondary"
-      >
-        <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+      <span class="mm-pager__page">{{ $t('common.page') }} {{ currentPage }} {{ $t('common.of') }} {{ totalPages }}</span>
+      <button type="button" class="mm-pager__btn" :disabled="currentPage === totalPages" :aria-label="$t('ui.table.next')" @click="changePage(currentPage + 1)">
+        <Icon icon="mdi:chevron-right" aria-hidden="true" />
       </button>
-    </div>
+    </nav>
 
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="modal-overlay" @click="closeUploadModal">
@@ -183,7 +136,7 @@
         <div class="modal-panel sm:max-w-lg sm:w-full">
           <div class="modal-header">
             <h3 class="modal-title">{{ $t('media.upload_title') }}</h3>
-            <button @click="closeUploadModal" class="btn-ghost">
+            <button @click="closeUploadModal" class="row-actions__btn">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -193,11 +146,11 @@
               @dragover.prevent="isDragging = true"
               @dragleave.prevent="isDragging = false"
               @drop.prevent="handleDrop"
-              :class="['border-2 border-dashed rounded-lg p-8 text-center transition-colors', isDragging ? 'border-primary-500 bg-primary-500/10' : 'border-gray-600']"
+              :class="['mm-drop', { 'mm-drop--on': isDragging }]"
             >
-              <Icon icon="mdi:cloud-upload" class="h-16 w-16 mx-auto text-gray-400 mb-4" />
-              <p class="text-gray-300 mb-2">{{ $t('media.drag_drop') }}</p>
-              <p class="text-sm text-gray-500 mb-4">{{ $t('media.or') }}</p>
+              <Icon icon="mdi:cloud-upload" class="mm-drop__icon" />
+              <p class="mm-drop__text">{{ $t('media.drag_drop') }}</p>
+              <p class="mm-drop__or">{{ $t('media.or') }}</p>
               <input
                 ref="fileInput"
                 type="file"
@@ -210,29 +163,29 @@
               </button>
             </div>
 
-            <div v-if="selectedFile" class="mt-4 p-4 bg-gray-800 rounded-lg">
+            <div v-if="selectedFile" class="mm-selected">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <Icon :icon="getFileIcon(selectedFile.type)" class="h-8 w-8 text-primary-500" />
+                  <Icon :icon="getFileIcon(selectedFile.type)" class="h-8 w-8 mm-icon" />
                   <div>
                     <p class="text-sm font-medium">{{ selectedFile.name }}</p>
-                    <p class="text-xs text-gray-400">{{ formatSize(selectedFile.size) }}</p>
+                    <p class="mm-dim">{{ formatSize(selectedFile.size) }}</p>
                   </div>
                 </div>
-                <button @click="selectedFile = null" class="btn-ghost text-red-400">
+                <button @click="selectedFile = null" class="row-actions__btn row-actions__btn--danger">
                   <Icon icon="mdi:close" class="h-5 w-5" />
                 </button>
               </div>
             </div>
 
             <div v-if="uploadProgress > 0 && uploadProgress < 100" class="mt-4">
-              <div class="w-full bg-gray-700 rounded-full h-2">
+              <div class="mm-bar">
                 <div
-                  class="bg-primary-500 h-2 rounded-full transition-all duration-300"
+                  class="mm-bar__fill"
                   :style="{ width: uploadProgress + '%' }"
                 ></div>
               </div>
-              <p class="text-sm text-gray-400 mt-2 text-center">{{ uploadProgress }}%</p>
+              <p class="mm-dim mm-center mt-2">{{ uploadProgress }}%</p>
             </div>
           </div>
 
@@ -259,7 +212,7 @@
         <div class="modal-panel sm:max-w-lg sm:w-full">
           <div class="modal-header">
             <h3 class="modal-title">{{ $t('media.edit_title') }}</h3>
-            <button @click="closeEditModal" class="btn-ghost">
+            <button @click="closeEditModal" class="row-actions__btn">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -299,7 +252,7 @@
         <div class="modal-panel sm:max-w-4xl sm:w-full">
           <div class="modal-header">
             <h3 class="modal-title">{{ viewingMedia?.filename }}</h3>
-            <button @click="closeViewModal" class="btn-ghost">
+            <button @click="closeViewModal" class="row-actions__btn">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -309,10 +262,10 @@
               v-if="isImage(viewingMedia?.mime_type)"
               :src="getMediaUrl(viewingMedia?.url)"
               :alt="viewingMedia?.filename"
-              class="w-full h-auto rounded-lg"
+              class="mm-view-img"
             />
             <div v-else class="flex items-center justify-center h-64">
-              <Icon :icon="getFileIcon(viewingMedia?.mime_type)" class="h-32 w-32 text-gray-500" />
+              <Icon :icon="getFileIcon(viewingMedia?.mime_type)" class="h-32 w-32 mm-icon-muted" />
             </div>
 
             <div class="mt-4 space-y-2 text-sm">
@@ -325,7 +278,7 @@
               <p><strong>{{ $t('media.uploaded_by') }}:</strong> {{ viewingMedia?.uploader?.username || 'N/A' }}</p>
               <p><strong>{{ $t('media.uploaded_at') }}:</strong> {{ formatDate(viewingMedia?.created_at) }}</p>
               <p><strong>{{ $t('media.url') }}:</strong>
-                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" class="text-primary-400 hover:text-primary-300">
+                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" class="mm-link">
                   {{ getMediaUrl(viewingMedia?.url) }}
                 </a>
               </p>
@@ -340,53 +293,24 @@
         </div>
       </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
-      <div class="modal-container" @click.stop>
-        <div class="modal-panel sm:max-w-lg sm:w-full">
-          <div class="modal-header">
-            <div class="flex items-start gap-3">
-              <div class="flex-shrink-0">
-                <Icon icon="mdi:alert" class="h-6 w-6 text-red-500" />
-              </div>
-              <div>
-                <h3 class="modal-title">{{ $t('media.confirmDeleteTitle') }}</h3>
-                <p class="modal-subtitle">
-                  {{ $t('media.confirmDeleteText', { name: mediaToDelete?.filename }) }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button @click="closeDeleteModal" class="btn btn-secondary w-full sm:w-auto">
-              {{ $t('common.cancel') }}
-            </button>
-            <button
-              @click="deleteMedia"
-              :disabled="deleting"
-              class="btn btn-danger w-full sm:w-auto"
-            >
-              <Icon v-if="deleting" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-              {{ deleting ? $t('common.deleting') : $t('common.delete') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
-import { ref, computed, onMounted } from 'vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import { useConfirm } from '@/composables/useConfirm'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
-import { getAdminMediaList, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
+import { getAdminMediaList, getAdminMediaStats, uploadAdminMedia, updateAdminMedia, deleteAdminMedia } from '@/services/api'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 // State
@@ -423,24 +347,9 @@ const updating = ref(false)
 const showViewModal = ref(false)
 const viewingMedia = ref(null)
 
-// Delete
-const showDeleteModal = ref(false)
-const mediaToDelete = ref(null)
-const deleting = ref(false)
-
 // Computed
-const filteredMedia = computed(() => {
-  let filtered = [...mediaList.value]
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(media =>
-      media.filename.toLowerCase().includes(query)
-    )
-  }
-
-  return filtered
-})
+// La recherche est faite côté serveur, sur toute la médiathèque
+const filteredMedia = computed(() => mediaList.value)
 
 // Methods
 const fetchMedia = async () => {
@@ -453,23 +362,53 @@ const fetchMedia = async () => {
     if (typeFilter.value) {
       params.type = typeFilter.value
     }
+    const search = searchQuery.value.trim()
+    if (search) {
+      params.search = search
+    }
     const response = await getAdminMediaList(params)
     mediaList.value = response.data.data || []
     totalPages.value = response.data.total_pages || 1
-    calculateStats()
   } catch (error) {
     console.error('Failed to fetch media:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     loading.value = false
   }
 }
 
-const calculateStats = () => {
-  stats.value.totalFiles = mediaList.value.length
-  stats.value.totalImages = mediaList.value.filter(m => m.mime_type.startsWith('image/')).length
-  stats.value.totalDocuments = mediaList.value.filter(m => !m.mime_type.startsWith('image/') && !m.mime_type.startsWith('video/')).length
-  stats.value.totalSize = mediaList.value.reduce((sum, m) => sum + m.file_size, 0)
+// Totaux de toute la médiathèque (et non de la page affichée)
+const fetchStats = async () => {
+  try {
+    const { data } = await getAdminMediaStats()
+    stats.value = {
+      totalFiles: data.total_files || 0,
+      totalImages: data.total_images || 0,
+      totalDocuments: data.total_documents || 0,
+      totalSize: data.total_size || 0
+    }
+  } catch (error) {
+    console.error('Failed to fetch media stats:', error)
+  }
 }
+
+// Le filtre de type est appliqué côté serveur : recharger depuis la première page
+watch(typeFilter, () => {
+  currentPage.value = 1
+  fetchMedia()
+})
+
+// Recherche côté serveur, déclenchée après une courte pause de frappe
+const SEARCH_DEBOUNCE_MS = 300
+let searchTimer = null
+watch(searchQuery, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    currentPage.value = 1
+    fetchMedia()
+  }, SEARCH_DEBOUNCE_MS)
+})
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -519,9 +458,10 @@ const uploadFile = async () => {
 
     if (response.data.media) {
       mediaList.value.unshift(response.data.media)
-      calculateStats()
     }
+    fetchStats()
     closeUploadModal()
+    appStore.showSuccess(t('common.feedback.created'))
   } catch (error) {
     console.error('Failed to upload file:', error)
     appStore.showError(t('media.upload_error'))
@@ -555,6 +495,7 @@ const updateMedia = async () => {
       }
     }
     closeEditModal()
+    appStore.showSuccess(t('common.feedback.saved'))
   } catch (error) {
     console.error('Failed to update media:', error)
     appStore.showError(t('media.update_error'))
@@ -586,30 +527,23 @@ const downloadMedia = (media) => {
   link.click()
 }
 
-const confirmDelete = (media) => {
-  mediaToDelete.value = media
-  showDeleteModal.value = true
-}
-
-const closeDeleteModal = () => {
-  showDeleteModal.value = false
-  mediaToDelete.value = null
-}
-
-const deleteMedia = async () => {
-  if (!mediaToDelete.value) return
+const confirmDelete = async (media) => {
+  const confirmed = await askConfirm({
+    title: t('media.confirmDeleteTitle'),
+    message: t('media.confirmDeleteText', { name: media.filename }),
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed) return
 
   try {
-    deleting.value = true
-    await deleteAdminMedia(mediaToDelete.value.id)
-    mediaList.value = mediaList.value.filter(m => m.id !== mediaToDelete.value.id)
-    calculateStats()
-    closeDeleteModal()
+    await deleteAdminMedia(media.id)
+    appStore.showSuccess(t('common.feedback.deleted'))
+    mediaList.value = mediaList.value.filter(m => m.id !== media.id)
+    fetchStats()
   } catch (error) {
     console.error('Failed to delete media:', error)
     appStore.showError(t('media.delete_error'))
-  } finally {
-    deleting.value = false
   }
 }
 
@@ -646,25 +580,180 @@ const formatSize = (bytes) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+  const lang = dateLocaleFor(locale.value)
+  return date.toLocaleDateString(lang) + ' ' + date.toLocaleTimeString(lang)
 }
 
-const handleImageError = (event) => {
-  event.target.src = '/placeholder.png'
+// Vignette introuvable : on affiche l'icône du type de fichier (l'ancien repli vers
+// /placeholder.png, absent du projet, relançait l'erreur en boucle).
+const brokenImages = ref(new Set())
+const markBroken = (id) => {
+  brokenImages.value = new Set(brokenImages.value).add(id)
 }
 
 // Lifecycle
 onMounted(() => {
   fetchMedia()
+  fetchStats()
 })
+
+// Échap ferme la modale
+useEscapeClose(showUploadModal, () => closeUploadModal())
+useEscapeClose(showEditModal, () => closeEditModal())
+useEscapeClose(showViewModal, () => closeViewModal())
 </script>
 
 <style scoped>
-.grid-cols-auto {
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+.mm-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 0 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
 }
 
-.pagination {
-  @apply flex items-center justify-center gap-4 mt-6;
+.mm-stat { padding: 12px 14px; background: var(--surface); }
+.mm-stat dt { font-size: 12px; color: var(--muted); }
+.mm-stat dd { margin: 2px 0 0; font-family: var(--f-num); font-size: 20px; font-weight: 600; color: var(--text); }
+
+.mm-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-block-end: 16px; }
+.mm-search { position: relative; flex: 1 1 220px; min-width: 160px; }
+
+.mm-search__icon {
+  position: absolute;
+  inset-inline-start: 9px;
+  inset-block-start: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.mm-search__input {
+  width: 100%;
+  padding-block: 7px;
+  padding-inline: 30px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.mm-search__input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.mm-loading { display: grid; place-items: center; padding-block: 48px; color: var(--muted); }
+.mm-spin { width: 28px; height: 28px; animation: mm-rot 1s linear infinite; }
+@keyframes mm-rot { to { transform: rotate(360deg); } }
+
+.mm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mm-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.mm-card:hover { border-color: var(--muted); }
+
+.mm-card__preview {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  padding: 0;
+  border: 0;
+  border-block-end: 1px solid var(--line);
+  background: var(--sunken);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.mm-card__preview:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+.mm-card__preview img { width: 100%; height: 100%; object-fit: cover; }
+.mm-card__file-icon { width: 48px; height: 48px; color: var(--muted); }
+
+.mm-card__body { flex: 1; padding: 10px 12px 6px; min-width: 0; }
+
+.mm-card__name {
+  margin: 0 0 4px;
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mm-card__meta {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--f-num);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.mm-card__actions { display: flex; justify-content: flex-end; gap: 2px; padding: 4px 6px 6px; }
+
+.mm-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-block-start: 18px; }
+.mm-pager__page { font-family: var(--f-num); font-size: 12px; color: var(--muted); }
+
+.mm-pager__btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mm-pager__btn:hover:not(:disabled) { background: var(--sunken); }
+.mm-pager__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.mm-pager__btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+[dir='rtl'] .mm-pager__btn .iconify { transform: scaleX(-1); }
+
+/* Modales : zone de dépôt et fichier choisi */
+.mm-drop {
+  padding: 32px;
+  border: 2px dashed var(--line);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.mm-drop--on { border-color: var(--acc); background: var(--sunken); }
+.mm-drop__icon { width: 56px; height: 56px; margin: 0 auto 12px; color: var(--muted); }
+.mm-drop__text { margin: 0 0 8px; color: var(--text); }
+.mm-drop__or { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.mm-selected { margin-block-start: 16px; padding: 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--sunken); }
+.mm-icon { color: var(--acc-ink); }
+.mm-icon-muted { color: var(--muted); }
+.mm-dim { font-size: 12px; color: var(--muted); }
+.mm-center { text-align: center; }
+.mm-bar { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }
+.mm-bar__fill { height: 100%; background: var(--acc); transition: width 0.3s; }
+.mm-view-img { width: 100%; height: auto; border-radius: 4px; }
+.mm-link { color: var(--acc-ink); text-decoration: underline; overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-spin { animation: none; }
+  .mm-bar__fill { transition: none; }
 }
 </style>

@@ -51,8 +51,11 @@ const renderedContent = computed(() => {
 
   // Generate HTML from Tiptap JSON
   return generateHTML(contentObj, [
+    // Tiptap 3 : StarterKit inclut Link et Underline, configurés séparément ci-dessous
     StarterKit.configure({
-      codeBlock: false
+      codeBlock: false,
+      link: false,
+      underline: false
     }),
     Link.configure({
       openOnClick: false

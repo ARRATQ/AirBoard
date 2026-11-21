@@ -112,7 +112,36 @@
     "gamification": "Mi XP",
     "oauth": "OAuth",
     "clear": "Borrar",
-    "optional": "opcional"
+    "optional": "opcional",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "status": "Estado",
+    "description": "Descripción",
+    "name": "Nombre",
+    "color": "Color",
+    "icon": "Icono",
+    "order": "Orden",
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "notConfigured": "No configurado",
+    "validation": {
+      "endBeforeStart": "La fecha de fin debe ser posterior a la fecha de inicio.",
+      "contentRequired": "El contenido es obligatorio.",
+      "commentLengthRange": "La longitud máxima debe estar entre {min} y {max} caracteres.",
+      "duplicateName": "Este nombre ya está en uso."
+    },
+    "feedback": {
+      "saved": "Cambios guardados.",
+      "created": "Elemento creado.",
+      "deleted": "Elemento eliminado.",
+      "statusChanged": "Estado actualizado.",
+      "loadError": "No se pudieron cargar los datos.",
+      "saveError": "No se pudo guardar. Inténtelo de nuevo.",
+      "deleteError": "No se pudo eliminar. Inténtelo de nuevo."
+    }
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -181,7 +210,15 @@
       "weekendCount": "Días de fin de semana",
       "holidaysCount": "Días festivos",
       "days": "día(s)",
-      "holidaysInPeriod": "Días festivos en el período"
+      "holidaysInPeriod": "Días festivos en el período",
+      "invalidRange": "Elija una fecha de inicio y una fecha de fin posterior."
+    },
+    "viewLabel": "Vista",
+    "columns": {
+      "when": "Fecha",
+      "event": "Evento",
+      "place": "Lugar",
+      "status": "Estado"
     }
   },
   "groups": {
@@ -211,7 +248,10 @@
     "updated": "Grupo actualizado correctamente",
     "loadError": "Error al cargar los grupos",
     "saveError": "Error al guardar el grupo",
-    "deleteError": "Error al eliminar el grupo"
+    "deleteError": "Error al eliminar el grupo",
+    "adminsSaved": "Administradores del grupo actualizados.",
+    "adminsLoadError": "No se pudieron cargar los usuarios del grupo.",
+    "membersCount": "{count} usuarios | {count} usuario | {count} usuarios"
   },
   "applications": {
     "title": "Recursos",
@@ -226,7 +266,8 @@
     "emptyText": "Añade tu primer recurso para empezar.",
     "order": "Orden",
     "confirmDeleteTitle": "Eliminar recurso",
-    "confirmDeleteText": "¿Seguro que desea eliminar \"{name}\"? Esta acción no se puede deshacer."
+    "confirmDeleteText": "¿Seguro que desea eliminar \"{name}\"? Esta acción no se puede deshacer.",
+    "noDescription": "Sin descripción."
   },
   "users": {
     "title": "Usuarios",
@@ -251,7 +292,115 @@
     "permanentDeleteTitle": "Eliminación definitiva",
     "permanentDeleteMessage": "¿Eliminar definitivamente al usuario «{username}»?\n\nEsta acción es irreversible y eliminará todos los datos asociados.",
     "last_connection": "Última conexión",
-    "never_connected": "Nunca conectado"
+    "never_connected": "Nunca conectado",
+    "viewActive": "Usuarios activos",
+    "viewTrash": "Papelera",
+    "viewLabel": "Mostrar",
+    "deleteTitle": "Eliminar usuario",
+    "deleteMessage": "El usuario «{name}» se moverá a la papelera. Podrá restaurarlo.",
+    "toast": {
+      "loadError": "No se pudieron cargar los usuarios.",
+      "created": "Usuario creado.",
+      "updated": "Usuario modificado.",
+      "saveError": "No se pudo guardar el usuario.",
+      "deleted": "Usuario movido a la papelera.",
+      "deleteError": "No se pudo eliminar el usuario.",
+      "activated": "Usuario activado.",
+      "deactivated": "Usuario desactivado.",
+      "statusError": "No se pudo cambiar el estado.",
+      "restored": "{name} ha sido restaurado.",
+      "restoreError": "No se pudo restaurar el usuario.",
+      "permanentlyDeleted": "Usuario eliminado definitivamente.",
+      "permanentDeleteError": "No se pudo eliminar definitivamente."
+    },
+    "lastConnection": {
+      "justNow": "Ahora mismo",
+      "minutesAgo": "hace {count} minuto | hace {count} minutos",
+      "hoursAgo": "hace {count} hora | hace {count} horas",
+      "daysAgo": "hace {count} día | hace {count} días"
+    },
+    "trashActions": {
+      "restore": "Restaurar el usuario",
+      "restoreFor": "Restaurar el usuario: {name}",
+      "purge": "Eliminar definitivamente (irreversible)",
+      "purgeFor": "Eliminar definitivamente: {name}"
+    }
+  },
+  "userModal": {
+    "titleEdit": "Editar usuario",
+    "subtitleEdit": "Modifique los datos de la cuenta",
+    "subtitleCreate": "Cree una nueva cuenta de usuario",
+    "tabAccount": "Cuenta",
+    "tabAccess": "Rol y grupos",
+    "tabError": "Error",
+    "username": "Nombre de usuario",
+    "usernameLocked": "El nombre de usuario no se puede modificar",
+    "email": "Correo electrónico",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "password": "Contraseña",
+    "showPassword": "Mostrar la contraseña",
+    "hidePassword": "Ocultar la contraseña",
+    "passwordHint": "Mínimo {min} caracteres",
+    "activeAccount": "Cuenta activa",
+    "activeAccountDesc": "El usuario puede iniciar sesión",
+    "role": "Rol",
+    "roleUserDesc": "Acceso a los recursos de sus grupos",
+    "roleEditorDesc": "Gestiona las noticias del News Hub",
+    "roleAdminDesc": "Acceso a todas las funcionalidades",
+    "groupAdminHint": "Para delegar la administración de un grupo, asigne al usuario como administrador desde la gestión de grupos.",
+    "groups": "Grupos de usuarios",
+    "groupsHint": "Los grupos determinan los recursos accesibles",
+    "noGroups": "No hay grupos disponibles",
+    "submitCreate": "Crear el usuario",
+    "errors": {
+      "usernameRequired": "El nombre de usuario es obligatorio",
+      "usernameTooShort": "El nombre de usuario debe tener al menos {min} caracteres",
+      "emailRequired": "El correo electrónico es obligatorio",
+      "emailInvalid": "El correo electrónico no es válido",
+      "passwordRequired": "La contraseña es obligatoria",
+      "passwordTooShort": "La contraseña debe tener al menos {min} caracteres",
+      "roleRequired": "El rol es obligatorio"
+    }
+  },
+  "groupModal": {
+    "titleEdit": "Editar grupo",
+    "titleCreate": "Nuevo grupo de usuarios",
+    "subtitleEdit": "Modifique los datos del grupo",
+    "subtitleCreate": "Cree un grupo para organizar los permisos",
+    "tabGeneral": "General",
+    "tabAccess": "Acceso",
+    "tabMembers": "Miembros",
+    "tabError": "Error",
+    "name": "Nombre del grupo",
+    "namePlaceholder": "Ej.: Desarrolladores",
+    "color": "Color de identificación",
+    "colorSwatch": "Color {color}",
+    "descriptionPlaceholder": "Descripción del grupo de usuarios...",
+    "activeGroup": "Grupo activo",
+    "activeGroupDesc": "Los permisos del grupo se aplican a sus miembros",
+    "searchAppGroups": "Buscar un grupo de recursos...",
+    "selectAll": "Seleccionar todo",
+    "selectNone": "Ninguno",
+    "noAppGroups": "No hay grupos de recursos disponibles",
+    "noAppGroupsHint": "Cree primero grupos de recursos",
+    "resourcesCount": "0 recursos | 1 recurso | {count} recursos",
+    "noResults": "Sin resultados para «{query}»",
+    "noMembers": "No hay miembros en este grupo",
+    "noMembersHint": "Añada miembros desde la gestión de usuarios",
+    "selectedCount": "ningún grupo de recursos seleccionado | 1 grupo de recursos seleccionado | {count} grupos de recursos seleccionados",
+    "submitCreate": "Crear el grupo",
+    "errors": {
+      "nameRequired": "El nombre es obligatorio"
+    }
+  },
+  "groupAdminsModal": {
+    "manage": "Gestionar los administradores",
+    "manageFor": "Gestionar los administradores: {name}",
+    "title": "Administradores del grupo",
+    "intro": "Seleccione los usuarios que podrán administrar este grupo y sus recursos.",
+    "noUsers": "No se encontró ningún usuario",
+    "selectedCount": "ningún administrador seleccionado | 1 administrador seleccionado | {count} administradores seleccionados"
   },
   "settings": {
     "general": "General",
@@ -423,6 +572,7 @@
     "showAvatarIntroHelp": "Al abrir el chat, un avatar animado aparece en la esquina y flota suavemente mientras la ventana está abierta. Aparece una burbuja de bienvenida que se cierra automáticamente tras unos segundos."
   },
   "news": {
+    "selectTypePlaceholder": "Elegir un tipo…",
     "widget": {
       "title": "Destacados",
       "viewAll": "Ver todo",
@@ -474,7 +624,8 @@
     "viewModes": {
       "list": "Lista",
       "grid": "Cuadrícula",
-      "table": "Tabla"
+      "table": "Tabla",
+      "label": "Vista"
     },
     "zoom": {
       "extraSmall": "Muy pequeño",
@@ -506,7 +657,31 @@
     "emptyAdmin": "Empiece creando una categoría de recursos y luego añada recursos.",
     "emptyUser": "Contacte con su administrador para obtener acceso a recursos.",
     "createCategory": "Crear una categoría",
-    "loadError": "No se pudieron cargar los recursos"
+    "loadError": "No se pudieron cargar los recursos",
+    "types": {
+      "app": "Aplicación",
+      "word": "Documento Word",
+      "excel": "Libro Excel",
+      "powerpoint": "Presentación",
+      "pdf": "PDF",
+      "folder": "Carpeta",
+      "site": "Sitio de intranet",
+      "link": "Enlace web"
+    },
+    "typeFilter": {
+      "label": "Tipo de recurso",
+      "all": "Todo",
+      "apps": "Aplicaciones",
+      "docs": "Documentos",
+      "sites": "Sitios y enlaces"
+    },
+    "newBadge": "Nuevo",
+    "privateBadge": "Privado",
+    "opensInNewTab": "Se abre en una pestaña nueva",
+    "type": "Tipo",
+    "addedOn": "Añadido el",
+    "count": "{count} recurso | {count} recurso | {count} recursos",
+    "noneOfType": "Ningún recurso de este tipo."
   },
   "groupAdmin": {
     "title": "Administración de Grupo",
@@ -639,7 +814,8 @@
       },
       "deleteConfirm": {
         "title": "Eliminar categoría",
-        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible."
+        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible.",
+        "messageWithResources": "Eliminar «{name}» también eliminará definitivamente su recurso. Esta acción es irreversible. | Eliminar «{name}» también eliminará definitivamente sus {count} recursos. Esta acción es irreversible."
       },
       "deleteError": "Error al eliminar la categoría"
     },
@@ -1019,7 +1195,10 @@
       "latestResults": "Últimos resultados",
       "closesIn": "Cierra en",
       "votes": "{count} voto(s)",
-      "vote": "Votar ahora"
+      "vote": "Votar ahora",
+      "endsIn": "{count} d restante | {count} d restante | {count} d restantes",
+      "ended": "Cerrada",
+      "open": "Abierta"
     },
     "quickActions": {
       "title": "Acciones rápidas",
@@ -1044,7 +1223,8 @@
       "beforeLevel": "antes del nivel {level}",
       "streak": "Racha",
       "badges": "Insignias",
-      "rank": "Rango"
+      "rank": "Rango",
+      "levelShort": "Niv."
     },
     "hero": {
       "subtitle": "Descubre tu espacio de trabajo personalizado",
@@ -1071,6 +1251,20 @@
       },
       "pendingPolls": "{count} encuesta(s) pendiente(s)",
       "pendingApps": "{count} recurso(s) nuevo(s) esta semana"
+    },
+    "keyFigures": "Cifras clave",
+    "searchLabel": "Buscar en el portal",
+    "announcements": {
+      "region": "Anuncios",
+      "prev": "Anuncio anterior",
+      "next": "Anuncio siguiente",
+      "open": "Leer el anuncio completo",
+      "pause": "Pausar el desfile",
+      "play": "Reanudar el desfile"
+    },
+    "rail": {
+      "portal": "Portal",
+      "agenda": "Agenda"
     }
   },
   "email": {
@@ -1190,7 +1384,16 @@
     "save_settings": "Guardar configuración",
     "moderateError": "Error al moderar el comentario",
     "settingsSaved": "Configuración actualizada correctamente",
-    "settingsSaveError": "Error al actualizar la configuración"
+    "settingsSaveError": "Error al actualizar la configuración",
+    "approved": "Comentario aprobado.",
+    "flaggedDone": "Comentario marcado.",
+    "targetColumn": "Elemento comentado",
+    "targetMissing": "Elemento no encontrado",
+    "entityTypes": {
+      "news": "Artículo",
+      "event": "Evento",
+      "application": "Recurso"
+    }
   },
   "notifications": {
     "title": "Notificaciones",
@@ -1480,6 +1683,7 @@
     "categoryLoadError": "Error al cargar categorias",
     "categorySaveError": "Error al guardar la categoria",
     "categoryDeleteError": "Error al eliminar la categoria",
+    "categoryInUse": "Esta categoría la usan sugerencias: desactívela en su lugar.",
     "linkedPoll": "Encuesta vinculada",
     "statusUpdated": "Estado actualizado",
     "statusUpdateError": "Error al actualizar el estado",
@@ -1523,6 +1727,32 @@
     }
   },
   "gamificationAdmin": {
+    "reasonLabels": {
+      "daily_login": "Inicio de sesión diario",
+      "app_click": "Apertura de un recurso",
+      "news_read": "Lectura de artículo",
+      "news_publish": "Publicación de artículo",
+      "event_publish": "Creación de evento",
+      "poll_vote": "Voto en encuesta",
+      "poll_create": "Creación de encuesta",
+      "comment_create": "Comentario publicado",
+      "suggestion_create": "Sugerencia enviada",
+      "suggestion_vote": "Voto en sugerencia",
+      "suggestion_comment": "Comentario en sugerencia"
+    },
+    "metricLabels": {
+      "reason_count": "Número de veces",
+      "app_click_distinct": "Recursos distintos abiertos",
+      "news_read_count": "Artículos leídos",
+      "news_publish_count": "Artículos publicados",
+      "event_publish_count": "Eventos publicados",
+      "poll_vote_count": "Votos en encuestas",
+      "poll_create_count": "Encuestas creadas",
+      "comment_count": "Comentarios",
+      "suggestion_create_count": "Sugerencias creadas",
+      "suggestion_vote_count": "Votos en sugerencias",
+      "suggestion_comment_count": "Comentarios en sugerencias"
+    },
     "title": "Gamificacion",
     "subtitle": "Ajusta puntos y configura insignias con condiciones de desbloqueo.",
     "rules": "Reglas de puntos",
@@ -1530,7 +1760,58 @@
     "points": "Puntos",
     "threshold": "Umbral",
     "badgeReward": "Recompensa XP",
-    "confirmDeleteBadge": "¿Eliminar la insignia «{name}»?"
+    "confirmDeleteBadge": "¿Eliminar la insignia «{name}»?",
+    "form": {
+      "code": "Código técnico",
+      "codeHint": "Identificador interno único, no visible para el usuario.",
+      "name": "Nombre de la insignia",
+      "nameHint": "Texto que ven los usuarios.",
+      "icon": "Icono",
+      "iconHint": "Formato Iconify, por ejemplo {example}.",
+      "color": "Color",
+      "pickColor": "Elegir un color",
+      "colorHint": "Color hexadecimal de la insignia.",
+      "preview": "Vista previa de la insignia",
+      "xpReward": "Bonificación de XP",
+      "xpRewardHint": "XP otorgados una sola vez, al desbloquear la insignia.",
+      "category": "Categoría",
+      "categoryHint": "La categoría {code} está reservada a los perfiles colaboradores.",
+      "trigger": "Evento desencadenante",
+      "triggerPlaceholder": "Elegir un evento",
+      "triggerHelp": "Elija el evento que hace avanzar esta insignia.",
+      "metric": "Métrica de progreso",
+      "metricPlaceholder": "Elegir una métrica",
+      "metricHelp": "Elija cómo se mide el progreso hacia la insignia.",
+      "threshold": "Umbral de desbloqueo",
+      "thresholdHint": "Número de acciones necesarias para obtener la insignia.",
+      "active": "Insignia activa"
+    },
+    "reasons": {
+      "daily_login": "En cada inicio de sesión diario recompensado.",
+      "app_click": "Cada vez que se abre un recurso.",
+      "news_read": "Cada vez que se lee un artículo.",
+      "news_publish": "Cada vez que se publica un artículo.",
+      "event_publish": "Cada vez que se crea un evento.",
+      "poll_vote": "Cada vez que se vota en una encuesta.",
+      "poll_create": "Cada vez que se crea una encuesta.",
+      "comment_create": "Cada vez que se publica un comentario.",
+      "suggestion_create": "Cada vez que se envía una sugerencia.",
+      "suggestion_vote": "Cada vez que se vota una sugerencia.",
+      "suggestion_comment": "Cada vez que se comenta una sugerencia."
+    },
+    "metrics": {
+      "reason_count": "Número de veces que ocurre el evento.",
+      "app_click_distinct": "Número de recursos distintos abiertos.",
+      "news_read_count": "Total de artículos leídos.",
+      "news_publish_count": "Total de artículos publicados.",
+      "event_publish_count": "Total de eventos publicados.",
+      "poll_vote_count": "Total de votos en encuestas.",
+      "poll_create_count": "Total de encuestas creadas.",
+      "comment_count": "Total de comentarios.",
+      "suggestion_create_count": "Total de sugerencias creadas.",
+      "suggestion_vote_count": "Total de votos en sugerencias.",
+      "suggestion_comment_count": "Total de comentarios en sugerencias."
+    }
   },
   "media": {
     "title": "Gestión de medios",
@@ -1572,7 +1853,13 @@
     "url_copied": "¡URL copiada al portapapeles!",
     "upload_error": "Error al subir el archivo",
     "update_error": "Error al actualizar el medio",
-    "delete_error": "Error al eliminar el medio"
+    "delete_error": "Error al eliminar el medio",
+    "loading": "Cargando medios…",
+    "noMedia": "Sin medios.",
+    "insert": "Insertar",
+    "dropFiles": "Suelte sus archivos aquí",
+    "orClickToSelect": "o haga clic para elegirlos",
+    "uploadQueue": "Cola de subida"
   },
   "help": {
     "sections": {
@@ -1772,6 +2059,7 @@
       "field": "¿Eliminar el campo «{name}»? Los valores introducidos dejarán de mostrarse."
     },
     "errors": {
+      "hasSubUnits": "Elimine o mueva primero las subunidades de esta unidad.",
       "nameRequired": "El nombre es obligatorio.",
       "positionRequired": "El título y la unidad son obligatorios.",
       "personRequired": "Elija una persona.",
@@ -1813,7 +2101,36 @@
       "next": "Página siguiente",
       "range": "{from}–{to} de {total}",
       "sortAsc": "Orden ascendente",
-      "sortDesc": "Orden descendente"
+      "sortDesc": "Orden descendente",
+      "columns": {
+        "name": "Nombre",
+        "title": "Título",
+        "status": "Estado",
+        "actions": "Acciones",
+        "order": "Orden",
+        "category": "Categoría",
+        "type": "Tipo",
+        "group": "Grupo",
+        "groups": "Grupos",
+        "owner": "Propietario",
+        "author": "Autor",
+        "date": "Fecha",
+        "createdAt": "Creado el",
+        "updatedAt": "Modificado el",
+        "members": "Miembros",
+        "count": "Cantidad",
+        "email": "Correo",
+        "role": "Rol",
+        "url": "Dirección",
+        "description": "Descripción",
+        "visibility": "Visibilidad",
+        "period": "Periodo",
+        "votes": "Votos",
+        "content": "Contenido",
+        "reason": "Motivo",
+        "key": "Clave",
+        "slug": "Slug"
+      }
     },
     "toast": {
       "region": "Notificaciones",
@@ -1838,7 +2155,11 @@
       "deleted": "Recurso eliminado correctamente",
       "creator": "Creador",
       "creatorNone": "— Sin asignar —",
-      "creatorHelp": "Define el creador para los informes de actividad."
+      "creatorHelp": "Define el creador para los informes de actividad.",
+      "note": "Nota en el mosaico",
+      "notePlaceholder": "Ej.: Mantenimiento el jueves de 18 a 20 h",
+      "noteHelp": "Se muestra en el mosaico del portal. {count} / 140 caracteres.",
+      "noteUntil": "Mostrar hasta"
     },
     "appGroups": {
       "private": "Privado",
@@ -2159,6 +2480,9 @@
       "loadCountriesError": "Error al cargar los países",
       "previewError": "Error al previsualizar",
       "importError": "Error al importar los días festivos"
+    },
+    "actions": {
+      "view": "Ver evento"
     }
   },
   "profile": {
@@ -2228,6 +2552,117 @@
     "all": "Todas",
     "unlocked": "Desbloqueadas",
     "streak": "Racha",
-    "xpReward": "Recompensa: {xp} XP"
+    "xpReward": "Recompensa: {xp} XP",
+    "figPlayers": "Jugadores",
+    "figBadges": "Insignias desbloqueadas",
+    "figRank": "Su posición",
+    "xpToNext": "{xp} XP para el nivel {level}",
+    "levelShort": "Niv. {level}",
+    "badges": "Insignias",
+    "latestBadges": "Últimas insignias",
+    "noActivity": "Sin actividad reciente",
+    "noBadges": "Ninguna insignia en esta categoría",
+    "badgeFilter": "Filtrar insignias",
+    "loadError": "No se pudo cargar su progreso.",
+    "you": "usted",
+    "activity": {
+      "daily_login": "Conexión",
+      "app_click": "Recurso",
+      "news_read": "Artículo leído",
+      "news_publish": "Publicación",
+      "event_publish": "Evento",
+      "poll_vote": "Voto en encuesta",
+      "poll_create": "Encuesta creada",
+      "comment_create": "Comentario",
+      "suggestion_create": "Sugerencia",
+      "suggestion_vote": "Voto a una idea",
+      "suggestion_comment": "Debate",
+      "achievement_unlock": "Insignia desbloqueada",
+      "chat_message": "Mensaje",
+      "chatbot_use": "Asistente IA",
+      "other": "Actividad"
+    },
+    "lockedPlural": "Bloqueadas"
+  },
+  "oauth": {
+    "title": "Autenticación OAuth",
+    "subtitle": "Configure los proveedores de autenticación externos (Google, Microsoft)",
+    "configure": "Configurar",
+    "configureSubtitle": "Configure las credenciales OAuth de este proveedor",
+    "enableProvider": "Activar este proveedor OAuth",
+    "enableProviderHelp": "Los usuarios verán un botón de inicio de sesión para este proveedor",
+    "clientId": "ID de cliente",
+    "clientIdHelp": "Obténgalo en la consola de desarrollador del proveedor",
+    "clientSecret": "Secreto de cliente",
+    "clientSecretPlaceholder": "Déjelo vacío para conservar el secreto actual",
+    "clientSecretHelp": "Guarde este secreto en un lugar seguro y no lo comparta nunca",
+    "redirectUri": "URI de redirección",
+    "redirectUriHelp": "Copie esta URL en las URI de redirección autorizadas del proveedor",
+    "advancedSettings": "Ajustes avanzados",
+    "authUrl": "URL de autorización",
+    "tokenUrl": "URL del token",
+    "userInfoUrl": "URL de información del usuario",
+    "scopes": "Ámbitos OAuth",
+    "setupInstructions": "Instrucciones de configuración",
+    "googleSetup1": "Para configurar Google OAuth:",
+    "googleSetup2": "Abra Google Cloud Console > APIs & Services > Credentials",
+    "googleSetup3": "Cree un ID de cliente OAuth 2.0 (aplicación web)",
+    "googleSetup4": "Añada la URI de redirección a las URI autorizadas",
+    "googleSetup5": "Copie aquí el ID y el secreto de cliente",
+    "microsoftSetup1": "Para configurar Microsoft OAuth:",
+    "microsoftSetup2": "Abra Azure Portal > App registrations > New registration",
+    "microsoftSetup3": "Indique la URI de redirección en los ajustes de Authentication",
+    "microsoftSetup4": "Cree un secreto de cliente en Certificates & secrets",
+    "microsoftSetup5": "Copie aquí el ID de aplicación (cliente) y el secreto"
+  },
+  "pageTitles": {
+    "default": "Portal de aplicaciones",
+    "Home": "Inicio",
+    "Resources": "Recursos",
+    "Directory": "Directorio",
+    "DirectoryManagement": "Gestión del directorio",
+    "Search": "Búsqueda",
+    "NewsCenter": "Noticias",
+    "NewsDetail": "Artículo",
+    "Polls": "Encuestas",
+    "PollDetail": "Encuesta",
+    "Suggestions": "Buzón de sugerencias",
+    "SuggestionDetail": "Sugerencia",
+    "EventsCenter": "Agenda",
+    "Profile": "Perfil",
+    "GamificationHub": "Centro de gamificación",
+    "Notifications": "Notificaciones",
+    "EventDetail": "Evento",
+    "Login": "Iniciar sesión",
+    "Register": "Registro",
+    "OAuthCallback": "Autenticación OAuth",
+    "AdminOverview": "Resumen",
+    "AdminNews": "Noticias",
+    "AdminNewsCategories": "Categorías de artículos",
+    "AdminNewsTypes": "Tipos de artículos",
+    "AdminSuggestions": "Gestión de sugerencias",
+    "AdminSuggestionCategories": "Categorías de sugerencias",
+    "AdminApplications": "Recursos",
+    "AdminAppGroups": "Categorías de recursos",
+    "AdminUsers": "Usuarios",
+    "AdminGroups": "Grupos",
+    "AdminSettings": "Ajustes",
+    "AdminOAuth": "Configuración OAuth",
+    "AdminEmail": "Notificaciones por correo",
+    "AdminAnalytics": "Estadísticas",
+    "AdminReports": "Informes",
+    "AdminAnnouncements": "Anuncios",
+    "AdminChatbots": "Chatbots de IA",
+    "AdminPolls": "Encuestas",
+    "AdminGamification": "Gamificación",
+    "AdminMedia": "Medios",
+    "AdminNewsEdit": "Editar artículo",
+    "AdminNewsNew": "Nuevo artículo",
+    "AdminEvents": "Gestión de eventos",
+    "AdminEventEdit": "Editar evento",
+    "AdminEventNew": "Nuevo evento",
+    "CommentModeration": "Moderación de comentarios",
+    "Unauthorized": "Acceso denegado",
+    "NotFound": "Página no encontrada"
   }
 }

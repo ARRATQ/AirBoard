@@ -1,0 +1,55 @@
+/* Cartes de l'accueil (direction A+) : surface blanche, bordure 1 px, rayon 6 px, pas d'ombre.
+   Classes préfixées home-card pour ne rien toucher ailleurs ; importé par views/Home.vue. */
+.home-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.home-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-block-end: 10px;
+}
+
+.home-card__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.home-card__more {
+  flex: none;
+  border-radius: 3px;
+  font-size: 12.5px;
+  color: var(--acc-ink);
+  white-space: nowrap;
+}
+
+.home-card__more:hover {
+  text-decoration: underline;
+}
+
+.home-card__more:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+/* Le texte « → » suit le sens de lecture. */
+[dir='rtl'] .home-card__arrow {
+  display: inline-block;
+  transform: scaleX(-1);
+}

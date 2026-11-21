@@ -37,8 +37,11 @@
       <!-- Bouton de toggle -->
       <button 
         @click.stop="toggleExpanded" 
+        type="button"
         class="toggle-btn"
         :class="{ 'expanded': isExpanded }"
+        :aria-expanded="isExpanded"
+        :aria-label="poll.title"
       >
         <Icon icon="mdi:chevron-down" class="chevron-icon" />
       </button>
@@ -181,8 +184,8 @@ import { Icon } from '@iconify/vue'
 import { pollsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import PollResults from './PollResults.vue'
-import { format, isAfter, isBefore, differenceInDays } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { isAfter, isBefore, differenceInDays } from 'date-fns'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
 const props = defineProps({
   poll: {
@@ -196,6 +199,11 @@ const props = defineProps({
   canManage: {
     type: Boolean,
     default: false
+  },
+  // Ouvert d'emblée (page de détail du sondage)
+  defaultExpanded: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -203,7 +211,7 @@ const emit = defineEmits(['vote-success', 'edit', 'delete', 'close', 'view-detai
 
 const authStore = useAuthStore()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const selectedOptions = ref([])
 const isVoting = ref(false)
@@ -213,7 +221,7 @@ const showResults = ref(false)
 const userVotes = ref([]) // Stocker les votes de l'utilisateur
 
 // État d'expansion isolé pour chaque bloc
-const isExpanded = ref(false)
+const isExpanded = ref(props.defaultExpanded)
 
 // Fonction pour toggle l'expansion
 const toggleExpanded = () => {
@@ -238,7 +246,7 @@ const toggleExpanded = () => {
 
 // Réinitialiser l'état d'expansion quand le sondage change
 watch(() => props.poll.id, () => {
-  isExpanded.value = false
+  isExpanded.value = props.defaultExpanded
 })
 
 // Vérifier si l'utilisateur peut voter
@@ -400,7 +408,8 @@ const removeVote = async () => {
 // Formater la date
 const formatDate = (date) => {
   if (!date) return ''
-  return format(new Date(date), 'dd MMM yyyy', { locale: fr })
+  const d = new Date(date)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(dateLocaleFor(locale.value), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 // Message d'attente
@@ -701,7 +710,8 @@ const getWaitingMessage = () => {
 /* Informations sur le sondage */
 .poll-meta {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);

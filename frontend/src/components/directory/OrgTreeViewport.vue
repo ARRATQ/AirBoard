@@ -192,16 +192,17 @@ defineExpose({ fit, centerOn, resetTop })
   position: relative;
   height: clamp(32rem, calc(100vh - 16rem), 60rem);
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   cursor: grab;
   touch-action: none;
   user-select: none;
-  background-color: var(--bg-surface);
-  background-image: radial-gradient(circle, color-mix(in srgb, var(--text-muted) 22%, transparent) 1px, transparent 1.2px);
+  background-color: var(--sunken);
+  background-image: radial-gradient(circle, var(--line) 1px, transparent 1.2px);
   background-size: 22px 22px;
 }
 .ot-viewport--dragging { cursor: grabbing; }
+/* Le canevas reste ancré à gauche : le pan et le zoom calculent en coordonnées physiques. */
 .ot-canvas {
   position: absolute;
   top: 0;
@@ -212,36 +213,38 @@ defineExpose({ fit, centerOn, resetTop })
 }
 .ot-controls {
   position: absolute;
-  right: 1rem;
-  bottom: 1rem;
+  inset-inline-end: 12px;
+  bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 25px -12px rgba(var(--shadow-rgb, 15, 23, 42), 0.35);
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
   cursor: default;
 }
 .ot-control {
-  display: inline-flex;
-  padding: 0.45rem;
-  border-radius: 0.55rem;
-  color: var(--text-primary);
-  transition: background-color 150ms ease;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
 }
-.ot-control:hover { background: var(--hover); }
-.ot-control:focus-visible { outline: 2px solid var(--accent); }
-.ot-zoom-level { min-width: 3rem; text-align: center; font-size: 0.75rem; font-variant-numeric: tabular-nums; color: var(--text-muted); }
-.ot-controls__sep { width: 1px; height: 1.25rem; margin: 0 0.25rem; background: var(--border); }
+.ot-control:hover { background: var(--sunken); }
+.ot-control:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+.ot-zoom-level { min-width: 3rem; text-align: center; font-family: var(--f-num); font-size: 11.5px; color: var(--muted); }
+.ot-controls__sep { width: 1px; height: 18px; margin: 0 4px; background: var(--line); }
 .ot-hint {
   position: absolute;
-  left: 1rem;
-  bottom: 1rem;
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  inset-inline-start: 12px;
+  bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {

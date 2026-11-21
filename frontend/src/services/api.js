@@ -1485,6 +1485,7 @@ export const mediaService = {
 
 // ===== Admin Media Service =====
 export const getAdminMediaList = (params = {}) => api.get('/admin/media', { params })
+export const getAdminMediaStats = () => api.get('/admin/media/stats')
 export const getAdminMedia = (id) => api.get(`/admin/media/${id}`)
 export const uploadAdminMedia = (formData, onUploadProgress) => {
   return api.post('/admin/media/upload', formData, {

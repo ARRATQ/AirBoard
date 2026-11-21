@@ -6,6 +6,7 @@ import (
 
 	"airboard/models"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -52,7 +53,7 @@ func (h *NewsHandler) GetNewsType(c *gin.Context) {
 // CreateNewsType - Créer un type d'article (admin uniquement)
 func (h *NewsHandler) CreateNewsType(c *gin.Context) {
 	var req models.NewsTypeRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -65,8 +66,8 @@ func (h *NewsHandler) CreateNewsType(c *gin.Context) {
 		IsActive: req.IsActive,
 	}
 
-	if err := h.db.Create(&newsType).Error; err != nil {
-		if err.Error() == "UNIQUE constraint failed: news_types.name" || err.Error() == "UNIQUE constraint failed: news_types.slug" {
+	if err := createKeepingFalse(h.db, c, &newsType, "is_active"); err != nil {
+		if isUniqueViolation(err) {
 			c.JSON(http.StatusConflict, gin.H{"error": "A type with this name already exists"})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create type"})
@@ -108,6 +109,10 @@ func (h *NewsHandler) UpdateNewsType(c *gin.Context) {
 	newsType.IsActive = req.IsActive
 
 	if err := h.db.Save(&newsType).Error; err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "A type with this name already exists"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update type"})
 		return
 	}

@@ -1,244 +1,137 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-    <div class="w-full">
-      <!-- Header -->
-      <div class="mb-8">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="min-w-0 flex-[1_1_16rem]">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{{ $t('users.title') }}</h1>
-            <p class="mt-1 text-gray-600 dark:text-gray-400">{{ $t('users.subtitle') }}</p>
-          </div>
-          <button @click="openCreateModal" class="btn btn-primary">
-            <Icon icon="mdi:plus" class="h-5 w-5 mr-2" />
-            {{ $t('users.new') }}
-          </button>
-        </div>
-      </div>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ $t('users.title') }}</template>
+      <template #description>{{ $t('users.subtitle') }}</template>
+      <template #actions>
+        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+          {{ $t('users.new') }}
+        </BaseButton>
+      </template>
+    </PageHeader>
 
-      <!-- View Toggle -->
-      <div class="mb-6 flex items-center justify-between">
-        <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-          <button
-            @click="showDeleted = false"
-            :class="[
-              'px-4 py-2 rounded-md transition-colors',
-              !showDeleted
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            ]"
-          >
-            <Icon icon="mdi:account-check" class="h-5 w-5 inline mr-2" />
-            Utilisateurs actifs
-          </button>
-          <button
-            @click="showDeleted = true"
-            :class="[
-              'px-4 py-2 rounded-md transition-colors',
-              showDeleted
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            ]"
-          >
-            <Icon icon="mdi:delete" class="h-5 w-5 inline mr-2" />
-            Corbeille
-            <span v-if="deletedUsers.length > 0" class="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-              {{ deletedUsers.length }}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Search and filters (only for active users) -->
-      <div v-if="!showDeleted" class="mb-6 flex flex-col sm:flex-row gap-4">
-        <div class="flex-1">
-          <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              :placeholder="$t('users.searchPlaceholder')"
-              class="form-input pl-10"
-            />
-          </div>
-        </div>
-        <select v-model="roleFilter" class="form-select w-full sm:w-auto">
-          <option value="">{{ $t('users.filter_all_roles') }}</option>
-          <option value="admin">{{ $t('users.filter_admins') }}</option>
-          <option value="editor">{{ $t('users.filter_editors') }}</option>
-          <option value="user">{{ $t('users.filter_users') }}</option>
-        </select>
-        <select v-model="statusFilter" class="form-select w-full sm:w-auto">
-          <option value="">{{ $t('common.status_all') }}</option>
-          <option value="active">{{ $t('common.status_active') }}</option>
-          <option value="inactive">{{ $t('common.status_inactive') }}</option>
-        </select>
-      </div>
-
-      <!-- Users Table -->
-      <div class="card overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th @click="setSortColumn('username')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
-                  <div class="flex items-center gap-2">
-                    Utilisateur
-                    <Icon v-if="sortBy === 'username'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
-                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
-                  </div>
-                </th>
-                <th @click="setSortColumn('email')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
-                  <div class="flex items-center gap-2">
-                    Email
-                    <Icon v-if="sortBy === 'email'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
-                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
-                  </div>
-                </th>
-                <th @click="setSortColumn('role')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
-                  <div class="flex items-center gap-2">
-                    Rôle
-                    <Icon v-if="sortBy === 'role'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
-                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
-                  </div>
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Groupes
-                </th>
-                <th @click="setSortColumn('last_login')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
-                  <div class="flex items-center gap-2">
-                    {{ $t('users.last_connection') }}
-                    <Icon v-if="sortBy === 'last_login'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
-                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
-                  </div>
-                </th>
-                <th @click="setSortColumn('is_active')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors select-none group">
-                  <div class="flex items-center gap-2">
-                    Statut
-                    <Icon v-if="sortBy === 'is_active'" :icon="sortOrder === 'asc' ? 'mdi:arrow-up' : 'mdi:arrow-down'" class="h-4 w-4 text-primary-500" />
-                    <Icon v-else icon="mdi:arrow-up-down" class="h-4 w-4 text-gray-300 dark:text-gray-600 group-hover:text-gray-400" />
-                  </div>
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-for="user in displayedUsers" :key="user.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="h-10 w-10 rounded-full bg-primary-500 flex items-center justify-center">
-                      <span class="text-sm font-medium text-white">{{ getUserInitials(user) }}</span>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900 dark:text-white">{{ getUserDisplayName(user) }}</div>
-                      <div class="text-sm text-gray-500">@{{ user.username }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {{ user.email }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="{
-                      'badge bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': user.role === 'admin',
-                      'badge bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': user.role === 'editor',
-                      'badge bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role === 'user'
-                    }"
-                  >
-                    {{ user.role === 'admin' ? $t('users.role_admin') : user.role === 'editor' ? $t('users.role_editor') : $t('users.role_user') }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-for="group in user.groups"
-                      :key="group.id"
-                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                      :style="{ backgroundColor: group.color + '20', color: group.color }"
-                    >
-                      {{ group.name }}
-                    </span>
-                    <span v-if="!user.groups || user.groups.length === 0" class="text-sm text-gray-500">
-                      {{ $t('users.no_group') }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  <span v-if="user.last_login" class="text-gray-600 dark:text-gray-400">
-                    {{ formatLastConnection(user.last_login) }}
-                  </span>
-                  <span v-else class="text-gray-400 italic">
-                    {{ $t('users.never_connected') }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge :tone="user.is_active ? 'ok' : 'bad'">{{ user.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <!-- Actions pour utilisateurs actifs -->
-                  <div v-if="!showDeleted" class="flex gap-2">
-                    <button @click="editUser(user)" class="btn-ghost btn-sm" :title="$t('common.edit')">
-                      <Icon icon="mdi:pencil" class="h-4 w-4" />
-                    </button>
-                    <button
-                      @click="toggleUserStatus(user)"
-                      class="btn-ghost btn-sm"
-                      :class="user.is_active ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'"
-                      :title="user.is_active ? $t('users.deactivate') : $t('users.activate')"
-                    >
-                      <Icon :icon="user.is_active ? 'mdi:account-off' : 'mdi:account-check'" class="h-4 w-4" />
-                    </button>
-                    <button
-                      @click="confirmDelete(user)"
-                      class="btn-ghost btn-sm text-red-600 hover:text-red-700"
-                      :title="$t('common.delete')"
-                    >
-                      <Icon icon="mdi:delete" class="h-4 w-4" />
-                    </button>
-                  </div>
-                  <!-- Actions pour utilisateurs supprimés -->
-                  <div v-else class="flex gap-2 justify-end">
-                    <button
-                      @click="restoreUser(user)"
-                      class="inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition-colors"
-                      title="Restaurer l'utilisateur"
-                    >
-                      <Icon icon="mdi:restore" class="h-4 w-4" />
-                    </button>
-                    <button
-                      @click="confirmPermanentDelete(user)"
-                      class="inline-flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors"
-                      title="Supprimer définitivement (irréversible)"
-                    >
-                      <Icon icon="mdi:delete-forever" class="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Empty state -->
-        <div v-if="filteredUsers.length === 0 && users.length > 0" class="text-center py-12">
-          <Icon icon="mdi:magnify" class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('users.noResultsTitle') }}</h3>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('users.noResultsText') }}</p>
-        </div>
-
-        <div v-else-if="users.length === 0" class="text-center py-12">
-          <Icon icon="mdi:account-multiple" class="mx-auto h-12 w-12 text-gray-400" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ $t('users.emptyTitle') }}</h3>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $t('users.emptyText') }}</p>
-          <button @click="openCreateModal" class="btn btn-primary mt-4">
-            <Icon icon="mdi:plus" class="h-5 w-5 mr-2" />
-            {{ $t('users.create') }}
-          </button>
-        </div>
-      </div>
+    <!-- Onglets : utilisateurs actifs / corbeille -->
+    <div class="um-tabs">
+      <SegmentedControl v-model="viewMode" :options="viewOptions" :label="$t('users.viewLabel')" />
     </div>
+
+    <EmptyState
+      v-if="!showDeleted && !appStore.loading && users.length === 0"
+      icon="mdi:account-multiple-outline"
+      :title="$t('users.emptyTitle')"
+      :description="$t('users.emptyText')"
+    >
+      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+        {{ $t('users.create') }}
+      </BaseButton>
+    </EmptyState>
+
+    <DataTable
+      v-else
+      :key="viewMode"
+      :columns="columns"
+      :rows="rows"
+      :loading="!showDeleted && appStore.loading"
+      :search-keys="['fullName', 'username', 'email']"
+      :search-placeholder="$t('users.searchPlaceholder')"
+      :empty-title="$t('users.noResultsTitle')"
+      :page-size="25"
+    >
+      <template v-if="!showDeleted" #toolbar>
+        <label>
+          <span class="sr-only">{{ $t('ui.table.columns.role') }}</span>
+          <select v-model="roleFilter" class="ui-select">
+            <option value="">{{ $t('users.filter_all_roles') }}</option>
+            <option value="admin">{{ $t('users.filter_admins') }}</option>
+            <option value="editor">{{ $t('users.filter_editors') }}</option>
+            <option value="user">{{ $t('users.filter_users') }}</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">{{ $t('ui.table.columns.status') }}</span>
+          <select v-model="statusFilter" class="ui-select">
+            <option value="">{{ $t('common.status_all') }}</option>
+            <option value="active">{{ $t('common.status_active') }}</option>
+            <option value="inactive">{{ $t('common.status_inactive') }}</option>
+          </select>
+        </label>
+      </template>
+
+      <template #cell-fullName="{ row }">
+        <span class="um-user">
+          <span class="um-user__avatar" aria-hidden="true">{{ row.initials }}</span>
+          <span class="um-user__text">
+            <span class="um-user__name">{{ row.fullName }}</span>
+            <span class="um-user__handle" dir="ltr">@{{ row.username }}</span>
+          </span>
+        </span>
+      </template>
+
+      <template #cell-email="{ row }">
+        <span class="um-email" dir="ltr">{{ row.email }}</span>
+      </template>
+
+      <template #cell-role="{ row }">
+        <StatusBadge :tone="roleTone(row.raw.role)">{{ row.role }}</StatusBadge>
+      </template>
+
+      <template #cell-groups="{ row }">
+        <span v-if="row.raw.groups && row.raw.groups.length > 0" class="um-chips">
+          <span
+            v-for="group in row.raw.groups"
+            :key="group.id"
+            class="um-chip"
+            :style="group.color ? { borderColor: group.color, color: group.color } : undefined"
+          >{{ group.name }}</span>
+        </span>
+        <span v-else class="um-mono">{{ $t('users.no_group') }}</span>
+      </template>
+
+      <template #cell-lastLogin="{ row }">
+        <span v-if="row.raw.last_login" class="um-mono">{{ formatLastConnection(row.raw.last_login) }}</span>
+        <span v-else class="um-mono um-mono--dim">{{ $t('users.never_connected') }}</span>
+      </template>
+
+      <template #cell-status="{ row }">
+        <StatusBadge :tone="row.raw.is_active ? 'ok' : 'bad'">{{ row.status }}</StatusBadge>
+      </template>
+
+      <template #cell-actions="{ row }">
+        <!-- Utilisateurs supprimés : restaurer ou supprimer définitivement -->
+        <div v-if="showDeleted" class="row-actions">
+          <button
+            type="button"
+            class="row-actions__btn"
+            :aria-label="$t('users.trashActions.restoreFor', { name: row.username })"
+            :title="$t('users.trashActions.restore')"
+            @click="restoreUser(row.raw)"
+          >
+            <Icon icon="mdi:restore" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="row-actions__btn row-actions__btn--danger"
+            :aria-label="$t('users.trashActions.purgeFor', { name: row.username })"
+            :title="$t('users.trashActions.purge')"
+            @click="confirmPermanentDelete(row.raw)"
+          >
+            <Icon icon="mdi:delete-forever-outline" aria-hidden="true" />
+          </button>
+        </div>
+        <!-- Utilisateurs actifs -->
+        <RowActions v-else :label="row.username" @edit="editUser(row.raw)" @delete="confirmDelete(row.raw)">
+          <button
+            type="button"
+            class="row-actions__btn"
+            :aria-label="`${row.raw.is_active ? $t('users.deactivate') : $t('users.activate')} : ${row.username}`"
+            :title="row.raw.is_active ? $t('users.deactivate') : $t('users.activate')"
+            @click="toggleUserStatus(row.raw)"
+          >
+            <Icon :icon="row.raw.is_active ? 'mdi:account-off-outline' : 'mdi:account-check-outline'" aria-hidden="true" />
+          </button>
+        </RowActions>
+      </template>
+    </DataTable>
 
     <!-- User Modal -->
     <UserModal
@@ -247,156 +140,92 @@
       @close="closeModal"
       @submit="handleSubmit"
     />
-
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="closeDeleteModal"></div>
-        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <Icon icon="mdi:alert" class="h-6 w-6 text-red-600" />
-              </div>
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                  Supprimer l'utilisateur
-                </h3>
-                <div class="mt-2">
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Êtes-vous sûr de vouloir supprimer l'utilisateur "<strong>{{ userToDelete?.username }}</strong>" ?
-                    Cette action est irréversible.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              @click="deleteUser"
-              :disabled="deleteLoading"
-              class="btn btn-danger w-full sm:w-auto sm:ml-3"
-            >
-              <Icon v-if="deleteLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              Supprimer
-            </button>
-            <button
-              @click="closeDeleteModal"
-              class="btn btn-secondary w-full sm:w-auto mt-3 sm:mt-0 sm:ml-3"
-            >
-              Annuler
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import RowActions from '@/components/ui/RowActions.vue'
+import SegmentedControl from '@/components/ui/SegmentedControl.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
+import { dateLocaleFor } from '@/utils/homeFormat'
 import { useAppStore } from '@/stores/app'
 import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 // State
 const users = ref([])
 const deletedUsers = ref([])
-const showDeleted = ref(false)
+const viewMode = ref('active')
+const showDeleted = computed(() => viewMode.value === 'deleted')
 const showModal = ref(false)
 const selectedUser = ref(null)
-const showDeleteModal = ref(false)
-const userToDelete = ref(null)
-const deleteLoading = ref(false)
-const searchQuery = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
-const sortBy = ref('username')
-const sortOrder = ref('asc')
 
 // Computed
-const filteredUsers = computed(() => {
-  let filtered = users.value
+const viewOptions = computed(() => [
+  { value: 'active', label: t('users.viewActive'), icon: 'mdi:account-check-outline' },
+  {
+    value: 'deleted',
+    label: t('users.viewTrash'),
+    icon: 'mdi:trash-can-outline',
+    count: deletedUsers.value.length > 0 ? deletedUsers.value.length : undefined,
+  },
+])
 
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user =>
-      user.username.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.first_name?.toLowerCase().includes(query) ||
-      user.last_name?.toLowerCase().includes(query)
-    )
-  }
+const columns = computed(() => [
+  { key: 'fullName', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'email', label: t('ui.table.columns.email'), sortable: true, hideSm: true },
+  { key: 'role', label: t('ui.table.columns.role'), sortable: true, hideSm: true },
+  { key: 'groups', label: t('ui.table.columns.groups'), hideSm: true },
+  { key: 'lastLogin', label: t('users.last_connection'), sortable: true, hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status'), sortable: true },
+  { key: 'actions', label: '', align: 'end', width: showDeleted.value ? '90px' : '120px' },
+])
 
-  // Filter by role
-  if (roleFilter.value) {
-    filtered = filtered.filter(user => user.role === roleFilter.value)
-  }
+const roleLabel = (role) =>
+  role === 'admin' ? t('users.role_admin') : role === 'editor' ? t('users.role_editor') : t('users.role_user')
 
-  // Filter by status
-  if (statusFilter.value === 'active') {
-    filtered = filtered.filter(user => user.is_active)
-  } else if (statusFilter.value === 'inactive') {
-    filtered = filtered.filter(user => !user.is_active)
-  }
+const roleTone = (role) => (role === 'admin' ? 'info' : role === 'editor' ? 'warn' : 'neutral')
 
-  // Sort based on current sort column and order
-  if (Array.isArray(filtered)) {
-    filtered.sort((a, b) => {
-      let aValue = a[sortBy.value]
-      let bValue = b[sortBy.value]
-
-      // Handle null values
-      if (aValue === null || aValue === undefined) aValue = ''
-      if (bValue === null || bValue === undefined) bValue = ''
-
-      // Compare values based on type
-      let comparison = 0
-      if (typeof aValue === 'string') {
-        comparison = aValue.toLowerCase().localeCompare(bValue.toString().toLowerCase())
-      } else if (typeof aValue === 'boolean') {
-        comparison = aValue === bValue ? 0 : aValue ? 1 : -1
-      } else if (aValue instanceof Date || bValue instanceof Date) {
-        const aDate = new Date(aValue)
-        const bDate = new Date(bValue)
-        comparison = aDate - bDate
-      } else {
-        comparison = aValue > bValue ? 1 : aValue < bValue ? -1 : 0
-      }
-
-      return sortOrder.value === 'asc' ? comparison : -comparison
-    })
-  }
-
-  return filtered
+const toRow = (user) => ({
+  id: user.id,
+  fullName: getUserDisplayName(user),
+  initials: getUserInitials(user),
+  username: user.username,
+  email: user.email || '',
+  role: roleLabel(user.role),
+  lastLogin: user.last_login ? new Date(user.last_login).getTime() : 0,
+  status: user.is_active ? t('common.active') : t('common.inactive'),
+  raw: user,
 })
 
-// Computed pour afficher soit les utilisateurs actifs, soit les supprimés
-const displayedUsers = computed(() => {
-  return showDeleted.value ? deletedUsers.value : filteredUsers.value
+// Lignes du tableau : filtres rôle et statut (actifs seulement) ; la recherche et le tri sont dans DataTable.
+const rows = computed(() => {
+  if (showDeleted.value) return deletedUsers.value.map(toRow)
+  return users.value
+    .filter(user => !roleFilter.value || user.role === roleFilter.value)
+    .filter(user => {
+      if (statusFilter.value === 'active') return user.is_active
+      if (statusFilter.value === 'inactive') return !user.is_active
+      return true
+    })
+    .map(toRow)
 })
 
 // Methods
-const setSortColumn = (column) => {
-  if (sortBy.value === column) {
-    // Toggle sort order if clicking the same column
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    // Change to new column with ascending order
-    sortBy.value = column
-    sortOrder.value = 'asc'
-  }
-}
-
 const getUserInitials = (user) => {
   if (user.first_name && user.last_name) {
     return `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`.toUpperCase()
@@ -422,15 +251,15 @@ const formatLastConnection = (lastLogin) => {
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   
   if (diffMins < 1) {
-    return "À l'instant"
+    return t('users.lastConnection.justNow')
   } else if (diffMins < 60) {
-    return `il y a ${diffMins} minute${diffMins > 1 ? 's' : ''}`
+    return t('users.lastConnection.minutesAgo', { count: diffMins }, diffMins)
   } else if (diffHours < 24) {
-    return `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`
+    return t('users.lastConnection.hoursAgo', { count: diffHours }, diffHours)
   } else if (diffDays < 7) {
-    return `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`
+    return t('users.lastConnection.daysAgo', { count: diffDays }, diffDays)
   } else {
-    return loginDate.toLocaleDateString('fr-FR', {
+    return loginDate.toLocaleDateString(dateLocaleFor(locale.value), {
       day: 'numeric',
       month: 'short',
       year: loginDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
@@ -446,7 +275,7 @@ const loadUsers = async () => {
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error)
     users.value = []
-    appStore.showError('Erreur lors du chargement des utilisateurs')
+    appStore.showError(t('users.toast.loadError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -477,14 +306,24 @@ const closeModal = () => {
   selectedUser.value = null
 }
 
-const confirmDelete = (user) => {
-  userToDelete.value = user
-  showDeleteModal.value = true
-}
+const confirmDelete = async (user) => {
+  const confirmed = await askConfirm({
+    title: t('users.deleteTitle'),
+    message: t('users.deleteMessage', { name: user.username }),
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed || !user?.id) return
 
-const closeDeleteModal = () => {
-  showDeleteModal.value = false
-  userToDelete.value = null
+  try {
+    await adminService.deleteUser(user.id)
+    appStore.showSuccess(t('users.toast.deleted'))
+    await loadUsers()
+    await loadDeletedUsers()
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+    appStore.showError(t('users.toast.deleteError'))
+  }
 }
 
 const handleSubmit = async (formData) => {
@@ -495,19 +334,19 @@ const handleSubmit = async (formData) => {
       // Update existing user - only send relevant fields
       const { id, ...updateData } = formData
       await adminService.updateUser(id, updateData)
-      appStore.showSuccess('Utilisateur modifié avec succès')
+      appStore.showSuccess(t('users.toast.updated'))
     } else {
       // Create new user - only send relevant fields  
       const { id, ...createData } = formData
       await adminService.createUser(createData)
-      appStore.showSuccess('Utilisateur créé avec succès')
+      appStore.showSuccess(t('users.toast.created'))
     }
     
     closeModal()
     await loadUsers()
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
-    appStore.showError('Erreur lors de la sauvegarde de l\'utilisateur')
+    appStore.showError(t('users.toast.saveError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -521,45 +360,23 @@ const toggleUserStatus = async (user) => {
     }
     
     await adminService.updateUser(user.id, updatedData)
-    appStore.showSuccess(`Utilisateur ${!user.is_active ? 'activé' : 'désactivé'} avec succès`)
+    appStore.showSuccess(t(!user.is_active ? 'users.toast.activated' : 'users.toast.deactivated'))
     await loadUsers()
   } catch (error) {
     console.error('Erreur lors de la modification du statut:', error)
-    appStore.showError('Erreur lors de la modification du statut')
-  }
-}
-
-const deleteUser = async () => {
-  if (!userToDelete.value || !userToDelete.value.id) {
-    console.error('Aucun utilisateur sélectionné pour suppression')
-    return
-  }
-
-  try {
-    deleteLoading.value = true
-    console.log('Suppression de l\'utilisateur:', userToDelete.value.id)
-    await adminService.deleteUser(userToDelete.value.id)
-    appStore.showSuccess('Utilisateur supprimé avec succès')
-    closeDeleteModal()
-    await loadUsers()
-    await loadDeletedUsers()
-  } catch (error) {
-    console.error('Erreur lors de la suppression:', error)
-    appStore.showError('Erreur lors de la suppression de l\'utilisateur')
-  } finally {
-    deleteLoading.value = false
+    appStore.showError(t('users.toast.statusError'))
   }
 }
 
 const restoreUser = async (user) => {
   try {
     await adminService.restoreUser(user.id)
-    appStore.showSuccess(`Utilisateur ${user.username} restauré avec succès`)
+    appStore.showSuccess(t('users.toast.restored', { name: user.username }))
     await loadUsers()
     await loadDeletedUsers()
   } catch (error) {
     console.error('Erreur lors de la restauration:', error)
-    appStore.showError('Erreur lors de la restauration de l\'utilisateur')
+    appStore.showError(t('users.toast.restoreError'))
   }
 }
 
@@ -573,11 +390,11 @@ const confirmPermanentDelete = async (user) => {
   ) {
     try {
       await adminService.permanentlyDeleteUser(user.id)
-      appStore.showSuccess('Utilisateur supprimé définitivement')
+      appStore.showSuccess(t('users.toast.permanentlyDeleted'))
       await loadDeletedUsers()
     } catch (error) {
       console.error('Erreur lors de la suppression définitive:', error)
-      appStore.showError('Erreur lors de la suppression définitive')
+      appStore.showError(t('users.toast.permanentDeleteError'))
     }
   }
 }
@@ -588,3 +405,49 @@ onMounted(() => {
   loadDeletedUsers()
 })
 </script>
+<style scoped>
+.um-tabs { margin-block-end: 14px; }
+
+.um-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.um-user__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--sunken);
+  font-family: var(--f-num);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--acc-ink);
+}
+
+.um-user__text { display: flex; flex-direction: column; min-width: 0; }
+.um-user__name { font-weight: 600; color: var(--text); }
+.um-user__handle { font-size: 12px; color: var(--muted); }
+
+.um-email { font-size: 12.5px; color: var(--text); }
+
+.um-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.um-chip {
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.um-mono {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.um-mono--dim { font-style: italic; opacity: 0.8; }
+</style>

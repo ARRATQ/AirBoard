@@ -5,120 +5,141 @@
       <template #title>{{ isGlobal ? $t('events.admin.title') : $t('groupAdmin.eventsManagement.title') }}</template>
       <template #description>{{ isGlobal ? $t('events.admin.subtitle') : $t('groupAdmin.eventsManagement.subtitle') }}</template>
       <template #actions>
-        <div class="flex items-center gap-3">
-          <!-- Import des jours fériés : routes /admin/events/holidays/* réservées à l'admin global -->
-          <button v-if="isAdmin" class="btn btn-secondary" @click="showImportHolidaysModal = true">
-            <Icon icon="mdi:calendar-star" class="h-4 w-4 mr-2" />
-            {{ $t('events.holidays.importButton') }}
-          </button>
-          <router-link to="/admin/events/new" class="btn btn-primary">
-            <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
-            {{ $t('events.admin.newEvent') }}
-          </router-link>
-        </div>
+        <!-- Import des jours fériés : routes /admin/events/holidays/* réservées à l'admin global -->
+        <BaseButton v-if="isAdmin" variant="secondary" icon="mdi:calendar-star" @click="showImportHolidaysModal = true">
+          {{ $t('events.holidays.importButton') }}
+        </BaseButton>
+        <BaseButton tag="router-link" to="/admin/events/new" variant="primary" icon="mdi:plus">
+          {{ $t('events.admin.newEvent') }}
+        </BaseButton>
       </template>
     </PageHeader>
 
     <!-- Rappel du périmètre pour l'admin de groupe -->
-    <div
-      v-if="!isGlobal"
-      class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-600 rounded-lg"
+    <div v-if="!isGlobal" class="ev-callout" role="note">
+      <Icon icon="mdi:information-outline" class="ev-callout__icon" aria-hidden="true" />
+      <div>
+        <p class="ev-callout__title">{{ $t('groupAdmin.eventsManagement.infoTitle') }}</p>
+        <p class="ev-callout__text">{{ $t('groupAdmin.eventsManagement.infoDescription') }}</p>
+      </div>
+    </div>
+
+    <!-- Aucun événement et aucun filtre : invitation à en créer un -->
+    <EmptyState
+      v-if="!isLoading && eventsList.length === 0 && !hasActiveFilters"
+      icon="mdi:calendar"
+      :title="$t('events.admin.noEvents')"
+      :description="emptyDescription"
     >
-      <div class="flex items-start">
-        <Icon icon="mdi:information" class="h-5 w-5 text-blue-600 dark:text-blue-500 mr-3 mt-0.5" />
-        <div>
-          <h3 class="text-blue-800 dark:text-blue-500 font-medium">{{ $t('groupAdmin.eventsManagement.infoTitle') }}</h3>
-          <p class="text-sm text-blue-700 dark:text-blue-200 mt-1">
-            {{ $t('groupAdmin.eventsManagement.infoDescription') }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filtres -->
-    <div class="card mb-6">
-      <div class="flex flex-col sm:flex-row gap-4">
-        <div class="flex-1 min-w-[200px]">
-          <input
-            v-model="filters.search"
-            type="text"
-            :placeholder="$t('events.admin.searchPlaceholder')"
-            class="input"
-          />
-        </div>
-
-        <select v-model="filters.category_id" class="input w-full sm:w-48">
-          <option value="">{{ $t('events.admin.allCategories') }}</option>
-          <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-            {{ cat.name }}
-          </option>
-        </select>
-
-        <select v-model="filters.status" class="input w-full sm:w-40">
-          <option value="">{{ $t('events.admin.allStatus') }}</option>
-          <option value="published">{{ $t('events.admin.published') }}</option>
-          <option value="draft">{{ $t('events.admin.draft') }}</option>
-        </select>
-
-        <select v-model="filters.event_type" class="input w-full sm:w-40">
-          <option value="">{{ $t('events.admin.allTypes') }}</option>
-          <option value="recurring">{{ $t('events.admin.recurring') }}</option>
-          <option value="all_day">{{ $t('events.admin.allDay') }}</option>
-          <option value="upcoming">{{ $t('events.admin.upcoming') }}</option>
-          <option value="past">{{ $t('events.admin.past') }}</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Chargement -->
-    <div v-if="isLoading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
-    </div>
-
-    <!-- Liste -->
-    <div v-else-if="eventsList.length > 0" class="space-y-4">
-      <EventListItem
-        v-for="event in eventsList"
-        :key="event.id"
-        :event="event"
-        @toggle-publish="togglePublish"
-        @delete="confirmDelete"
-      />
-
-      <!-- Pagination -->
-      <div v-if="pagination.pages > 1" class="flex justify-center gap-2 mt-6">
-        <button
-          :disabled="pagination.page === 1"
-          class="btn btn-secondary btn-sm"
-          @click="changePage(pagination.page - 1)"
-        >
-          <Icon icon="mdi:chevron-left" class="h-4 w-4" />
-        </button>
-
-        <span class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
-          {{ $t('events.admin.pageInfo', { page: pagination.page, pages: pagination.pages }) }}
-        </span>
-
-        <button
-          :disabled="pagination.page === pagination.pages"
-          class="btn btn-secondary btn-sm"
-          @click="changePage(pagination.page + 1)"
-        >
-          <Icon icon="mdi:chevron-right" class="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-
-    <!-- État vide -->
-    <div v-else class="empty-state">
-      <Icon icon="mdi:calendar" class="empty-state-icon" />
-      <h3 class="empty-state-title">{{ $t('events.admin.noEvents') }}</h3>
-      <p class="empty-state-description">{{ emptyDescription }}</p>
-      <router-link v-if="!hasActiveFilters" to="/admin/events/new" class="btn btn-primary mt-4">
-        <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
+      <BaseButton tag="router-link" to="/admin/events/new" variant="primary" size="sm" icon="mdi:plus">
         {{ $t('events.admin.createEvent') }}
-      </router-link>
-    </div>
+      </BaseButton>
+    </EmptyState>
+
+    <template v-else>
+      <!-- Recherche, filtres et pagination sont gérés côté serveur : seule la page courante est passée au tableau -->
+      <DataTable
+        :columns="columns"
+        :rows="rows"
+        :loading="isLoading"
+        :searchable="false"
+      :footer="false"
+        :page-size="100"
+        :empty-title="$t('events.admin.noEvents')"
+      >
+        <template #toolbar>
+          <label class="ev-search">
+            <Icon icon="mdi:magnify" class="ev-search__icon" aria-hidden="true" />
+            <input
+              v-model="filters.search"
+              type="search"
+              class="ev-search__input"
+              :placeholder="$t('events.admin.searchPlaceholder')"
+              :aria-label="$t('events.admin.searchPlaceholder')"
+            />
+          </label>
+          <label>
+            <span class="sr-only">{{ $t('ui.table.columns.category') }}</span>
+            <select v-model="filters.category_id" class="ui-select">
+              <option value="">{{ $t('events.admin.allCategories') }}</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+          </label>
+          <label>
+            <span class="sr-only">{{ $t('ui.table.columns.status') }}</span>
+            <select v-model="filters.status" class="ui-select">
+              <option value="">{{ $t('events.admin.allStatus') }}</option>
+              <option value="published">{{ $t('events.admin.published') }}</option>
+              <option value="draft">{{ $t('events.admin.draft') }}</option>
+            </select>
+          </label>
+          <label>
+            <span class="sr-only">{{ $t('ui.table.columns.type') }}</span>
+            <select v-model="filters.event_type" class="ui-select">
+              <option value="">{{ $t('events.admin.allTypes') }}</option>
+              <option value="recurring">{{ $t('events.admin.recurring') }}</option>
+              <option value="all_day">{{ $t('events.admin.allDay') }}</option>
+              <option value="upcoming">{{ $t('events.admin.upcoming') }}</option>
+              <option value="past">{{ $t('events.admin.past') }}</option>
+            </select>
+          </label>
+        </template>
+
+        <template #cell-title="{ row }">
+          <span class="ev-title">
+            <span class="ev-title__line">
+              <Icon v-if="row.raw.is_recurring" icon="mdi:repeat" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.recurring')" />
+              <Icon v-if="row.raw.is_all_day" icon="mdi:weather-sunny" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.allDay')" />
+              <router-link
+                v-if="row.raw.slug"
+                :to="{ name: 'EventDetail', params: { slug: row.raw.slug } }"
+                class="ev-title__link"
+              >{{ row.title }}</router-link>
+              <span v-else class="ev-title__text">{{ row.title }}</span>
+              <StatusBadge v-if="row.priorityLabel" :tone="row.raw.priority === 'urgent' ? 'bad' : 'warn'">{{ row.priorityLabel }}</StatusBadge>
+            </span>
+            <span v-if="row.raw.location" class="ev-title__sub">{{ row.raw.location }}</span>
+          </span>
+        </template>
+
+        <template #cell-date="{ row }">
+          <span class="ev-mono">{{ row.dateLabel }}</span>
+        </template>
+
+        <template #cell-status="{ row }">
+          <StatusBadge :tone="row.raw.is_published ? 'ok' : 'neutral'">{{ row.status }}</StatusBadge>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <RowActions :label="row.title" :editable="false" @delete="confirmDelete(row.raw)">
+            <router-link
+              :to="`/admin/events/${row.raw.slug}/edit`"
+              class="row-actions__btn"
+              :title="$t('events.admin.edit')"
+              :aria-label="`${$t('events.admin.edit')} : ${row.title}`"
+            >
+              <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+            </router-link>
+            <button
+              type="button"
+              class="row-actions__btn"
+              :title="row.raw.is_published ? $t('events.admin.unpublish') : $t('events.admin.publish')"
+              :aria-label="`${row.raw.is_published ? $t('events.admin.unpublish') : $t('events.admin.publish')} : ${row.title}`"
+              @click="togglePublish(row.raw)"
+            >
+              <Icon :icon="row.raw.is_published ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" aria-hidden="true" />
+            </button>
+          </RowActions>
+        </template>
+      </DataTable>
+
+      <!-- Pagination serveur -->
+      <nav v-if="pagination.pages > 1" class="ev-pager" :aria-label="$t('events.admin.pageInfo', { page: pagination.page, pages: pagination.pages })">
+        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-left" :disabled="pagination.page === 1" :aria-label="$t('ui.table.prev')" @click="changePage(pagination.page - 1)" />
+        <span class="ev-mono">{{ $t('events.admin.pageInfo', { page: pagination.page, pages: pagination.pages }) }}</span>
+        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-right" :disabled="pagination.page === pagination.pages" :aria-label="$t('ui.table.next')" @click="changePage(pagination.page + 1)" />
+      </nav>
+    </template>
 
     <!-- Import des jours fériés (admin global) -->
     <ImportHolidaysModal
@@ -135,8 +156,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import RowActions from '@/components/ui/RowActions.vue'
+import { dateLocaleFor } from '@/utils/homeFormat'
 import ImportHolidaysModal from '@/components/admin/ImportHolidaysModal.vue'
-import EventListItem from '@/components/admin/events/EventListItem.vue'
 import { getEventListFetcher, getEventWriteService } from '@/components/admin/events/eventServices'
 import { eventsService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
@@ -148,7 +174,7 @@ import { CONTENT } from '@/config/access'
 const ADMIN_PAGE_SIZE = 10
 const SCOPED_PAGE_SIZE = 20
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 // Admin et éditeur : tous les événements ; admin de groupe : ceux de ses groupes
@@ -293,8 +319,91 @@ watch(
   }
 )
 
+const columns = computed(() => [
+  { key: 'title', label: t('ui.table.columns.title'), sortable: true },
+  { key: 'categoryName', label: t('ui.table.columns.category'), sortable: true, hideSm: true },
+  { key: 'date', label: t('ui.table.columns.date'), sortable: true, hideSm: true },
+  { key: 'author', label: t('ui.table.columns.author'), sortable: true, hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status'), sortable: true },
+  { key: 'actions', label: '', align: 'end', width: '120px' },
+])
+
+const DATE_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' }
+
+const formatDateRange = (startDate, endDate) => {
+  if (!startDate) return '—'
+  const lang = dateLocaleFor(locale.value)
+  const start = new Date(startDate)
+  const end = endDate ? new Date(endDate) : null
+  if (end && start.toDateString() !== end.toDateString()) {
+    return `${start.toLocaleDateString(lang, DATE_OPTIONS)} – ${end.toLocaleDateString(lang, DATE_OPTIONS)}`
+  }
+  return start.toLocaleDateString(lang, DATE_OPTIONS)
+}
+
+const authorName = (author) => {
+  const first = author?.first_name || author?.username || t('groupAdmin.eventsManagement.author.unknown')
+  return `${first} ${author?.last_name || ''}`.trim()
+}
+
+const rows = computed(() =>
+  eventsList.value.map(event => ({
+    id: event.id,
+    title: event.title,
+    categoryName: event.category?.name || '',
+    date: event.start_date || '',
+    dateLabel: formatDateRange(event.start_date, event.end_date),
+    author: authorName(event.author),
+    status: event.is_published ? t('events.admin.published') : t('events.admin.draft'),
+    priorityLabel: event.priority && event.priority !== 'normal' ? t(`events.priority.${event.priority}`) : '',
+    raw: event,
+  })),
+)
+
 onMounted(() => {
   loadCategories()
   loadEvents()
 })
 </script>
+
+<style scoped>
+.ev-callout {
+  display: flex;
+  gap: 10px;
+  margin-block-end: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--acc);
+  border-radius: 4px;
+  background: var(--surface);
+}
+.ev-callout__icon { flex: none; width: 18px; height: 18px; margin-block-start: 1px; color: var(--acc-ink); }
+.ev-callout__title { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--text); }
+.ev-callout__text { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.ev-search { position: relative; display: flex; align-items: center; flex: 1 1 220px; max-width: 340px; }
+.ev-search__icon { position: absolute; inset-inline-start: 9px; width: 16px; height: 16px; color: var(--muted); pointer-events: none; }
+.ev-search__input {
+  width: 100%;
+  height: 32px;
+  padding-inline: 30px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+}
+.ev-search__input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+
+.ev-title { display: flex; flex-direction: column; min-width: 0; }
+.ev-title__line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ev-title__flag { flex: none; width: 15px; height: 15px; color: var(--muted); }
+.ev-title__link, .ev-title__text { font-weight: 600; color: var(--text); }
+.ev-title__link:hover { color: var(--acc-ink); text-decoration: underline; }
+.ev-title__sub { font-size: 12px; color: var(--muted); }
+
+.ev-mono { font-family: var(--f-num); font-size: 11.5px; letter-spacing: 0.04em; color: var(--muted); white-space: nowrap; }
+
+.ev-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-block-start: 12px; }
+</style>

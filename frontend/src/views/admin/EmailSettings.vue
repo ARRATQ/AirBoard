@@ -656,6 +656,7 @@
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, onMounted } from "vue";
+import { useEscapeClose } from '@/composables/useEscapeClose';
 import { Icon } from "@iconify/vue";
 import EmailOAuthConfig from "@/components/admin/EmailOAuthConfig.vue";
 import { useI18n } from "vue-i18n";
@@ -914,6 +915,10 @@ onMounted(async () => {
     loadLogs(),
   ]);
 });
+
+// Échap ferme la modale
+useEscapeClose(showTestModal, () => { showTestModal.value = false });
+useEscapeClose(showPreviewModal, () => { showPreviewModal.value = false });
 </script>
 
 <style scoped>

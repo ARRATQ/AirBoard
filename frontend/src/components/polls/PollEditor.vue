@@ -351,6 +351,8 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
+import { isEndBeforeStart } from '@/utils/dateInput'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { pollsService, newsService, announcementsService } from '@/services/api'
@@ -569,6 +571,13 @@ const handleSubmit = async () => {
     return
   }
 
+  if (isEndBeforeStart(form.value.start_date, form.value.end_date)) {
+    if (window.$toast) {
+      window.$toast.error(t('common.validation.endBeforeStart'))
+    }
+    return
+  }
+
   try {
     loading.value = true
 
@@ -584,7 +593,9 @@ const handleSubmit = async () => {
       news_id: form.value.news_id || null,
       announcement_id: form.value.announcement_id || null,
       target_group_ids: form.value.target_group_ids,
+      // L'id d'une option existante la fait modifier sur place : ses votes sont conservés
       options: validOptions.map((opt, index) => ({
+        ...(opt.id ? { id: opt.id } : {}),
         text: opt.text.trim(),
         is_other: !!opt.is_other,
         order: index
@@ -655,6 +666,9 @@ const closeModal = () => {
   showAdvanced.value = false
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>
 
 <style scoped>

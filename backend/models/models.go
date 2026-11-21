@@ -86,6 +86,10 @@ type Application struct {
 	Order        int            `json:"order" gorm:"default:0"`
 	IsActive     bool           `json:"is_active" gorm:"default:true"`
 	OpenInNewTab bool           `json:"open_in_new_tab" gorm:"default:true"`
+	// Note courte de l'admin affichée sur la tuile (ex. « Maintenance jeudi 18 h »),
+	// jusqu'à AdminNoteUntil si renseignée. Voir NormalizeAdminNote.
+	AdminNote      string     `json:"admin_note" gorm:"size:140"`
+	AdminNoteUntil *time.Time `json:"admin_note_until"`
 	AppGroupID  uint  `json:"app_group_id"`
 	CreatedByID *uint `json:"created_by_id"`
 	CreatedAt   time.Time      `json:"created_at"`

@@ -8,6 +8,7 @@ import (
 	"airboard/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -299,7 +300,7 @@ func (h *GamificationHandler) GetAdminAchievements(c *gin.Context) {
 
 func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
 	var req AchievementRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -331,7 +332,7 @@ func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
 		achievement.Color = "#FBBF24"
 	}
 
-	if err := h.db.Create(&achievement).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &achievement, "is_active"); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur lors de la création du badge (code peut déjà exister)"})
 		return
 	}

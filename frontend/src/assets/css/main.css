@@ -110,6 +110,15 @@ html.dark {
 /* Arabe : IBM Plex Sans Arabic en premier */
 [dir='rtl'] {
   --f-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Les chiffres restent en Plex Mono ; le texte arabe des étiquettes mono passe en Plex Sans Arabic. */
+  --f-num: 'IBM Plex Mono', 'IBM Plex Sans Arabic', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* L'écriture arabe est liée : aucun interlettrage (les surtitres en capitales en ont en latin). */
+[dir='rtl'] *,
+[dir='rtl'] *::before,
+[dir='rtl'] *::after {
+  letter-spacing: 0 !important;
 }
 
 /* Base styles */
@@ -889,6 +898,12 @@ html {
 
 /* RTL + mobile: inversion des translations */
 @media (max-width: 1024px) {
+  /* Comme en LTR : pas de marge réservée à la sidebar sur mobile */
+  [dir='rtl'] .main-content,
+  [dir='rtl'] .main-content.sidebar-collapsed {
+    margin-right: 0;
+  }
+
   [dir='rtl'] .sidebar {
     @apply left-auto right-0;
   }
@@ -950,4 +965,36 @@ html {
 }
 .dark .dir-interim {
   color: #fbbf24;
+}
+
+/* Select compact A+ des barres d'outils (DataTable, filtres d'admin). Chevron du plugin forms
+   placé côté fin de ligne, y compris en arabe. */
+.ui-select {
+  height: 34px;
+  max-width: 100%;
+  padding-block: 0;
+  padding-inline: 10px 32px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background-color: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.ui-select:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 1px;
+}
+
+[dir='rtl'] .ui-select {
+  padding-inline: 32px 10px;
+  background-position: left 0.5rem center;
+}
+
+/* Selects de formulaire (plugin forms) : en arabe, chevron et marge réservée côté fin de ligne. */
+[dir='rtl'] select.form-select,
+[dir='rtl'] select.form-input,
+[dir='rtl'] select.input {
+  padding-inline: 2.5rem 0.75rem;
+  background-position: left 0.5rem center;
 }

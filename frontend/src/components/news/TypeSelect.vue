@@ -10,7 +10,7 @@
         <Icon :icon="selectedType.icon" class="h-4 w-4" :style="{ color: selectedType.color }" />
         <span>{{ selectedType.name }}</span>
       </div>
-      <div v-else class="text-gray-500">Select a type...</div>
+      <div v-else class="text-gray-500">{{ $t('news.selectTypePlaceholder') }}</div>
       <Icon icon="mdi:chevron-down" class="h-4 w-4" :class="{ 'rotate-180': isOpen }" />
     </button>
 
@@ -45,6 +45,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 
 const props = defineProps({
   modelValue: {
@@ -69,6 +70,9 @@ const selectType = (type) => {
   emit('update:modelValue', type.slug)
   isOpen.value = false
 }
+
+// Échap referme la liste
+useEscapeClose(isOpen, () => { isOpen.value = false })
 </script>
 
 <style scoped>

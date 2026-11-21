@@ -84,7 +84,7 @@ const defaultConfirmLabel = computed(() =>
   color: #fff;
 }
 
-:global(html.dark) .confirm-dialog__btn--danger { color: #141210; }
+html.dark .confirm-dialog__btn--danger { color: #141210; }
 
 .confirm-dialog__btn--primary:hover,
 .confirm-dialog__btn--danger:hover { filter: brightness(1.08); }

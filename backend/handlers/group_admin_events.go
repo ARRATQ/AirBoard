@@ -21,6 +21,11 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 		return
 	}
 
+	if endBeforeStart(&req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		return
+	}
+
 	// Récupérer les groupes gérés par ce group admin
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
@@ -166,6 +171,11 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		return
+	}
+
+	if endBeforeStart(&req.StartDate, req.EndDate) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
 		return
 	}
 

@@ -69,6 +69,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { adminEventsService } from '@/services/api'
@@ -118,4 +119,7 @@ const createCategory = async () => {
     isCreating.value = false
   }
 }
+
+// Échap ferme la modale
+useEscapeClose(true, () => emit('close'))
 </script>

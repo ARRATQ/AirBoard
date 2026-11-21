@@ -1,96 +1,64 @@
 <template>
-  <div class="poll-detail-page">
-    <!-- Chargement -->
-    <div v-if="loading" class="loading-state">
-      <Icon icon="mdi:loading" class="spin loading-icon" />
-      <p>{{ t('polls.loading') }}</p>
+  <div class="content-area poll-page">
+    <div v-if="loading" class="poll-page__state" role="status">
+      <Icon icon="mdi:loading" class="poll-page__spin" aria-hidden="true" />
+      <span>{{ t('polls.loading') }}</span>
     </div>
 
-    <!-- Erreur -->
-    <div v-else-if="error" class="error-state">
-      <Icon icon="mdi:alert-circle" class="error-icon" />
-      <h3>{{ t('polls.detail.notFound') }}</h3>
-      <p>{{ error }}</p>
-      <button @click="$router.push('/polls')" class="btn-primary">
-        <Icon icon="mdi:arrow-left" />
-        {{ t('polls.detail.backToPolls') }}
-      </button>
-    </div>
+    <EmptyState v-else-if="error" icon="mdi:alert-circle-outline" :title="t('polls.detail.notFound')" :description="error">
+      <BaseButton tag="router-link" to="/polls" icon="mdi:arrow-left">{{ t('polls.detail.backToPolls') }}</BaseButton>
+    </EmptyState>
 
-    <!-- Détail du sondage -->
-    <div v-else-if="poll" class="poll-detail-container">
-      <!-- Breadcrumb -->
-      <nav class="breadcrumb">
-        <router-link to="/polls" class="breadcrumb-link">
-          <Icon icon="mdi:poll" />
-          {{ t('polls.detail.breadcrumbText') }}
-        </router-link>
-        <Icon icon="mdi:chevron-right" class="breadcrumb-separator" />
-        <span class="breadcrumb-current">{{ poll.title }}</span>
+    <div v-else-if="poll" class="poll-page__body">
+      <nav class="crumbs" :aria-label="t('polls.detail.breadcrumbText')">
+        <router-link to="/polls" class="crumbs__link">{{ t('polls.detail.breadcrumbText') }}</router-link>
+        <Icon icon="mdi:chevron-right" class="crumbs__sep" aria-hidden="true" />
+        <span class="crumbs__current" aria-current="page">{{ poll.title }}</span>
       </nav>
 
-      <!-- Carte du sondage -->
       <PollCard
         :poll="poll"
         :compact="false"
         :can-manage="canManage"
+        default-expanded
         @vote-success="handleVoteSuccess"
         @edit="openEditor"
         @delete="confirmDelete"
         @close="confirmClose"
       />
 
-      <!-- Informations supplémentaires -->
-      <div class="additional-info">
-        <!-- Groupes cibles -->
-        <div v-if="poll.target_groups && poll.target_groups.length > 0" class="info-section">
-          <h3 class="info-title">
-            <Icon icon="mdi:account-group" />
-            {{ t('polls.detail.targetGroupsTitle') }}
-          </h3>
-          <div class="groups-list">
-            <span
-              v-for="group in poll.target_groups"
-              :key="group.id"
-              class="group-badge"
-              :style="{ backgroundColor: group.color + '20', color: group.color }"
-            >
-              {{ group.name }}
-            </span>
-          </div>
-        </div>
+      <section v-if="poll.target_groups && poll.target_groups.length > 0" class="poll-info">
+        <h2 class="poll-info__title">{{ t('polls.detail.targetGroupsTitle') }}</h2>
+        <ul class="poll-info__groups">
+          <li v-for="group in poll.target_groups" :key="group.id" class="poll-info__group">
+            <span class="poll-info__dot" :style="{ background: group.color || 'var(--muted)' }" aria-hidden="true"></span>
+            {{ group.name }}
+          </li>
+        </ul>
+      </section>
 
-        <!-- Lié à un article -->
-        <div v-if="poll.news" class="info-section">
-          <h3 class="info-title">
-            <Icon icon="mdi:newspaper" />
-            {{ t('polls.detail.linkedArticleTitle') }}
-          </h3>
-          <router-link :to="`/news/${poll.news.slug}`" class="linked-item">
-            <Icon icon="mdi:newspaper" class="linked-icon" />
-            <div class="linked-content">
-              <h4>{{ poll.news.title }}</h4>
-              <p>{{ poll.news.summary }}</p>
-            </div>
-            <Icon icon="mdi:chevron-right" class="linked-arrow" />
-          </router-link>
-        </div>
+      <section v-if="poll.news" class="poll-info">
+        <h2 class="poll-info__title">{{ t('polls.detail.linkedArticleTitle') }}</h2>
+        <router-link :to="`/news/${poll.news.slug}`" class="poll-info__link">
+          <Icon icon="mdi:newspaper-variant-outline" class="poll-info__icon" aria-hidden="true" />
+          <span class="poll-info__text">
+            <span class="poll-info__name">{{ poll.news.title }}</span>
+            <span v-if="poll.news.summary" class="poll-info__summary">{{ poll.news.summary }}</span>
+          </span>
+          <Icon icon="mdi:chevron-right" class="poll-info__arrow" aria-hidden="true" />
+        </router-link>
+      </section>
 
-        <!-- Lié à une annonce -->
-        <div v-if="poll.announcement" class="info-section">
-          <h3 class="info-title">
-            <Icon icon="mdi:bullhorn" />
-            {{ t('polls.detail.linkedAnnouncementTitle') }}
-          </h3>
-          <div class="linked-item">
-            <Icon icon="mdi:bullhorn" class="linked-icon" />
-            <div class="linked-content">
-              <h4>{{ poll.announcement.title }}</h4>
-              <p>{{ poll.announcement.content }}</p>
-            </div>
-          </div>
+      <section v-if="poll.announcement" class="poll-info">
+        <h2 class="poll-info__title">{{ t('polls.detail.linkedAnnouncementTitle') }}</h2>
+        <div class="poll-info__link poll-info__link--static">
+          <Icon icon="mdi:bullhorn-outline" class="poll-info__icon" aria-hidden="true" />
+          <span class="poll-info__text">
+            <span class="poll-info__name">{{ poll.announcement.title }}</span>
+            <span v-if="poll.announcement.content" class="poll-info__summary">{{ poll.announcement.content }}</span>
+          </span>
         </div>
-      </div>
+      </section>
     </div>
 
     <!-- Modal d'édition -->
@@ -114,6 +82,8 @@ import { useAuthStore } from '@/stores/auth'
 import { pollsService, adminService } from '@/services/api'
 import PollCard from '@/components/polls/PollCard.vue'
 import PollEditor from '@/components/polls/PollEditor.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -255,201 +225,109 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.poll-detail-page {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.loading-state,
-.error-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: var(--bg-card);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
-}
-
-.loading-icon {
-  font-size: 4rem;
-  color: #8B5CF6;
-  margin-bottom: 1rem;
-}
-
-.error-icon {
-  font-size: 4rem;
-  color: #ef4444;
-  margin-bottom: 1rem;
-}
-
-.loading-state p,
-.error-state p {
-  color: var(--text-muted);
-  margin: 0.5rem 0 1rem 0;
-}
-
-.error-state h3 {
-  color: var(--text-primary);
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.875rem;
-}
-
-.breadcrumb-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--text-muted);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.breadcrumb-link:hover {
-  color: #8B5CF6;
-}
-
-.breadcrumb-separator {
-  color: var(--border);
-  font-size: 1rem;
-}
-
-.breadcrumb-current {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.poll-detail-container {
+/* Détail d'un sondage (direction A+) : le sondage ouvert d'emblée, puis ses liens. */
+.poll-page__body {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 16px;
+  max-width: 860px;
+  margin-inline: auto;
 }
 
-.additional-info {
+.poll-page__state {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-.info-section {
-  background: var(--bg-card);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.1);
-}
-
-.info-title {
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 1rem 0;
+  gap: 10px;
+  padding-block: 64px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
-.info-title svg {
-  font-size: 1.5rem;
-  color: #8B5CF6;
-}
+.poll-page__spin { width: 30px; height: 30px; animation: poll-spin 1s linear infinite; }
+@keyframes poll-spin { to { transform: rotate(360deg); } }
 
-.groups-list {
+.crumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--f-num);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.group-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
+.crumbs__link { color: var(--muted); }
+.crumbs__link:hover { color: var(--text); text-decoration: underline; }
+.crumbs__link:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 2px; }
+.crumbs__sep { width: 14px; height: 14px; color: var(--muted); }
+.crumbs__current { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--text); }
+
+.poll-info {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
 }
 
-.linked-item {
+.poll-info__title {
+  margin: 0 0 10px;
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.poll-info__groups { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.poll-info__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.poll-info__dot { width: 8px; height: 8px; border-radius: 50%; }
+
+.poll-info__link {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: var(--bg-surface);
-  border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.2s;
-  cursor: pointer;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--text);
 }
 
-.linked-item:hover {
-  background: var(--hover);
-}
+a.poll-info__link:hover { border-color: var(--acc); }
+a.poll-info__link:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
 
-.linked-icon {
-  font-size: 2rem;
-  color: #8B5CF6;
-  flex-shrink: 0;
-}
+.poll-info__icon { flex: none; width: 22px; height: 22px; color: var(--muted); }
+.poll-info__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.poll-info__name { font-weight: 600; }
 
-.linked-content {
-  flex: 1;
-}
-
-.linked-content h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.25rem 0;
-}
-
-.linked-content p {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin: 0;
+.poll-info__summary {
+  font-size: 12.5px;
+  color: var(--muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.linked-arrow {
-  font-size: 1.5rem;
-  color: #9ca3af;
-  flex-shrink: 0;
-}
+.poll-info__arrow { flex: none; width: 20px; height: 20px; color: var(--muted); }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  background: #8B5CF6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
+[dir='rtl'] .crumbs__sep,
+[dir='rtl'] .poll-info__arrow { transform: scaleX(-1); }
 
-.btn-primary:hover {
-  background: #7c3aed;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@media (prefers-reduced-motion: reduce) {
+  .poll-page__spin { animation: none; }
 }
 </style>

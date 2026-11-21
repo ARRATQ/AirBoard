@@ -15,14 +15,14 @@
                 </div>
                 <div class="min-w-0">
                   <h3 class="modal-title truncate">
-                    {{ isEdit ? 'Modifier le groupe' : 'Nouveau groupe d\'utilisateurs' }}
+                    {{ isEdit ? t('groupModal.titleEdit') : t('groupModal.titleCreate') }}
                   </h3>
                   <p class="modal-subtitle truncate">
-                    {{ isEdit ? 'Modifiez les informations du groupe' : 'Créez un groupe pour organiser les permissions' }}
+                    {{ isEdit ? t('groupModal.subtitleEdit') : t('groupModal.subtitleCreate') }}
                   </p>
                 </div>
               </div>
-              <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeModal">
+              <button type="button" class="btn btn-ghost p-2" :aria-label="t('common.close')" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
@@ -43,7 +43,7 @@
               <Icon :icon="tab.icon" class="h-4 w-4" />
               {{ tab.label }}
               <span v-if="tab.count !== undefined" class="modal-tab-count">{{ tab.count }}</span>
-              <span v-if="tab.hasError" class="modal-tab-error" aria-label="Erreur"></span>
+              <span v-if="tab.hasError" class="modal-tab-error" :aria-label="t('groupModal.tabError')"></span>
             </button>
           </div>
 
@@ -53,20 +53,20 @@
             <div v-show="activeTab === 'general'" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-[1fr_15rem] gap-4">
                 <div class="form-group mb-0">
-                  <label for="name" class="form-label form-label-required">Nom du groupe</label>
+                  <label for="name" class="form-label form-label-required">{{ t('groupModal.name') }}</label>
                   <input
                     id="name"
                     v-model="form.name"
                     type="text"
                     required
                     class="form-input"
-                    placeholder="Ex : Développeurs"
+                    :placeholder="t('groupModal.namePlaceholder')"
                   />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
 
                 <div class="form-group mb-0">
-                  <label for="color" class="form-label">Couleur d'identification</label>
+                  <label for="color" class="form-label">{{ t('groupModal.color') }}</label>
                   <div class="flex items-center gap-2">
                     <input
                       id="color"
@@ -88,26 +88,26 @@
                   class="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2"
                   :class="form.color?.toLowerCase() === c.toLowerCase() ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'"
                   :style="{ backgroundColor: c }"
-                  :aria-label="`Couleur ${c}`"
+                  :aria-label="t('groupModal.colorSwatch', { color: c })"
                   @click="form.color = c"
                 ></button>
               </div>
 
               <div class="form-group mb-0">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">{{ t('common.description') }}</label>
                 <textarea
                   id="description"
                   v-model="form.description"
                   rows="3"
                   class="form-textarea resize-none"
-                  placeholder="Description du groupe d'utilisateurs..."
+                  :placeholder="t('groupModal.descriptionPlaceholder')"
                 ></textarea>
               </div>
 
               <label class="toggle-row">
                 <span>
-                  <span class="toggle-row-title">Groupe actif</span>
-                  <span class="toggle-row-desc">Les permissions du groupe sont appliquées à ses membres</span>
+                  <span class="toggle-row-title">{{ t('groupModal.activeGroup') }}</span>
+                  <span class="toggle-row-desc">{{ t('groupModal.activeGroupDesc') }}</span>
                 </span>
                 <input v-model="form.is_active" type="checkbox" class="switch-input" />
                 <span class="switch-track" aria-hidden="true"></span>
@@ -123,20 +123,20 @@
                     v-model="appGroupSearch"
                     type="search"
                     class="form-input search-input"
-                    placeholder="Rechercher un groupe de ressources..."
+                    :placeholder="t('groupModal.searchAppGroups')"
                   />
                 </div>
                 <div class="flex items-center gap-3">
-                  <button type="button" class="btn-link" @click="selectAllAppGroups">Tout sélectionner</button>
+                  <button type="button" class="btn-link" @click="selectAllAppGroups">{{ t('groupModal.selectAll') }}</button>
                   <span class="text-gray-300 dark:text-gray-600">|</span>
-                  <button type="button" class="btn-link" @click="form.app_group_ids = []">Aucun</button>
+                  <button type="button" class="btn-link" @click="form.app_group_ids = []">{{ t('groupModal.selectNone') }}</button>
                 </div>
               </div>
 
               <div v-if="appGroups.length === 0" class="empty-state flex-1 flex flex-col items-center justify-center text-center">
                 <Icon icon="mdi:folder-open-outline" class="h-12 w-12 text-gray-400 mb-2" />
-                <p class="text-sm text-gray-500">Aucun groupe de ressources disponible</p>
-                <p class="text-xs text-gray-400">Créez d'abord des groupes de ressources</p>
+                <p class="text-sm text-gray-500">{{ t('groupModal.noAppGroups') }}</p>
+                <p class="text-xs text-gray-400">{{ t('groupModal.noAppGroupsHint') }}</p>
               </div>
 
               <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1">
@@ -160,13 +160,13 @@
                         <Icon v-if="appGroup.is_private" icon="mdi:lock" class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
                       </span>
                       <span class="block text-xs text-gray-500 dark:text-gray-400">
-                        {{ appGroup.applications?.length || 0 }} ressource(s)
+                        {{ t('groupModal.resourcesCount', appGroup.applications?.length || 0) }}
                       </span>
                     </span>
                   </label>
                 </div>
                 <p v-if="filteredAppGroups.length === 0" class="text-sm text-gray-500 text-center py-8">
-                  Aucun résultat pour « {{ appGroupSearch }} »
+                  {{ t('groupModal.noResults', { query: appGroupSearch }) }}
                 </p>
               </div>
             </div>
@@ -175,8 +175,8 @@
             <div v-if="isEdit" v-show="activeTab === 'members'" class="h-full">
               <div v-if="!form.users?.length" class="h-full flex flex-col items-center justify-center text-center">
                 <Icon icon="mdi:account-off-outline" class="h-12 w-12 text-gray-400 mb-2" />
-                <p class="text-sm text-gray-500">Aucun membre dans ce groupe</p>
-                <p class="text-xs text-gray-400">Ajoutez des membres depuis la gestion des utilisateurs</p>
+                <p class="text-sm text-gray-500">{{ t('groupModal.noMembers') }}</p>
+                <p class="text-xs text-gray-400">{{ t('groupModal.noMembersHint') }}</p>
               </div>
               <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div
@@ -203,14 +203,14 @@
           <!-- Footer -->
           <div class="modal-footer-bar">
             <span class="modal-footer-hint">
-              * Champs obligatoires · {{ form.app_group_ids.length }} groupe(s) de ressources sélectionné(s)
+              {{ t('common.requiredFieldsHint') }} · {{ t('groupModal.selectedCount', form.app_group_ids.length) }}
             </span>
             <div class="modal-footer-actions">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
+              <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
                 <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
                 <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
-                {{ isEdit ? 'Enregistrer' : 'Créer le groupe' }}
+                {{ isEdit ? t('common.save') : t('groupModal.submitCreate') }}
               </button>
             </div>
           </div>
@@ -222,7 +222,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 
 const props = defineProps({
@@ -237,6 +239,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'submit'])
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const errors = ref({})
@@ -260,11 +264,11 @@ const presetColors = ['#6B7280', '#d97757', '#ef4444', '#f59e0b', '#10b981', '#0
 
 const tabs = computed(() => {
   const list = [
-    { id: 'general', label: 'Général', icon: 'mdi:information-outline', hasError: !!errors.value.name },
-    { id: 'access', label: 'Accès', icon: 'mdi:shield-key-outline', count: form.app_group_ids.length }
+    { id: 'general', label: t('groupModal.tabGeneral'), icon: 'mdi:information-outline', hasError: !!errors.value.name },
+    { id: 'access', label: t('groupModal.tabAccess'), icon: 'mdi:shield-key-outline', count: form.app_group_ids.length }
   ]
   if (isEdit.value) {
-    list.push({ id: 'members', label: 'Membres', icon: 'mdi:account-multiple-outline', count: form.users?.length || 0 })
+    list.push({ id: 'members', label: t('groupModal.tabMembers'), icon: 'mdi:account-multiple-outline', count: form.users?.length || 0 })
   }
   return list
 })
@@ -354,7 +358,7 @@ const validateForm = () => {
   errors.value = {}
   
   if (!form.name.trim()) {
-    errors.value.name = 'Le nom est requis'
+    errors.value.name = t('groupModal.errors.nameRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -386,4 +390,7 @@ const closeModal = () => {
   resetForm()
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>

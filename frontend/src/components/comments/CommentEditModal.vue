@@ -61,6 +61,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
@@ -89,4 +90,7 @@ const save = () => {
 onMounted(() => {
   editedContent.value = props.comment.content
 })
+
+// Échap ferme la modale
+useEscapeClose(true, () => emit('close'))
 </script>

@@ -22,7 +22,7 @@
               v-for="col in columns"
               :key="col.key"
               scope="col"
-              :class="`dt__cell--${col.align || 'start'}`"
+              :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]"
               :style="col.width ? { width: col.width } : null"
               :aria-sort="col.sortable ? ariaSort(col.key) : undefined"
             >
@@ -56,7 +56,7 @@
           </tr>
           <template v-else>
             <tr v-for="row in pageRows" :key="row[rowKey]" class="dt__row">
-              <td v-for="col in columns" :key="col.key" :class="`dt__cell--${col.align || 'start'}`">
+              <td v-for="col in columns" :key="col.key" :class="[`dt__cell--${col.align || 'start'}`, { 'dt__col--hide-sm': col.hideSm }]">
                 <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">{{ row[col.key] }}</slot>
               </td>
             </tr>
@@ -65,7 +65,7 @@
       </table>
     </div>
 
-    <nav v-if="!loading && total > 0" class="dt__pager" :aria-label="t('ui.table.range', { from, to, total })">
+    <nav v-if="footer && !loading && total > 0" class="dt__pager" :aria-label="t('ui.table.range', { from, to, total })">
       <span class="dt__range">{{ t('ui.table.range', { from, to, total }) }}</span>
       <template v-if="pageCount > 1">
         <button type="button" class="dt__page-btn" :disabled="page === 1" :aria-label="t('ui.table.prev')" @click="page -= 1">
@@ -87,7 +87,8 @@ import { useI18n } from 'vue-i18n'
 import EmptyState from './EmptyState.vue'
 
 const props = defineProps({
-  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width? }]
+  // [{ key, label, sortable?, align?: 'start'|'end'|'center', width?, hideSm? }]
+  // hideSm : colonne masquée sous 640 px (garder visibles le nom, le statut et les actions).
   columns: { type: Array, required: true },
   rows: { type: Array, default: () => [] },
   rowKey: { type: String, default: 'id' },
@@ -98,6 +99,8 @@ const props = defineProps({
   pageSize: { type: Number, default: 20 },
   loading: { type: Boolean, default: false },
   emptyTitle: { type: String, default: '' },
+  // false quand la page garde sa pagination serveur : évite un second compteur.
+  footer: { type: Boolean, default: true },
 })
 
 const { t } = useI18n()
@@ -216,6 +219,10 @@ const sortIcon = (key) => {
 
 .dt__scroll { overflow-x: auto; }
 
+@media (max-width: 640px) {
+  .dt__col--hide-sm { display: none; }
+}
+
 .dt__table {
   width: 100%;
   border-collapse: collapse;
@@ -327,7 +334,7 @@ const sortIcon = (key) => {
   height: 16px;
 }
 
-:global([dir='rtl']) .dt__chev { transform: scaleX(-1); }
+[dir='rtl'] .dt__chev { transform: scaleX(-1); }
 
 @keyframes dt-spin {
   to { transform: rotate(360deg); }

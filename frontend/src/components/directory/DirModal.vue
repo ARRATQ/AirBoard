@@ -1,6 +1,6 @@
 <template>
   <teleport to="body">
-    <div class="modal-overlay" @click.self="$emit('close')" @keydown.esc="$emit('close')">
+    <div class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-container">
         <form
           class="modal-panel modal-form w-full"
@@ -46,6 +46,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 
 const props = defineProps({
@@ -56,7 +57,10 @@ const props = defineProps({
   submitLabel: { type: String, default: '' },
   size: { type: String, default: 'md' }, // sm | md | lg
 })
-defineEmits(['close', 'submit'])
+const emit = defineEmits(['close', 'submit'])
 
 const widthClass = computed(() => ({ sm: 'max-w-lg', md: 'max-w-3xl', lg: 'max-w-5xl' })[props.size] || 'max-w-3xl')
+
+// Échap ferme la modale
+useEscapeClose(true, () => emit('close'))
 </script>

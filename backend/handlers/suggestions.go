@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"gorm.io/gorm"
 )
 
@@ -360,7 +361,7 @@ func (h *SuggestionsHandler) GetAdminSuggestionCategories(c *gin.Context) {
 
 func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 	var req models.SuggestionCategoryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -384,8 +385,12 @@ func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 		IsActive: isActive,
 	}
 
-	if err := h.db.Create(&category).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category (name/slug may already exist)"})
+	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category"})
 		return
 	}
 
@@ -426,7 +431,11 @@ func (h *SuggestionsHandler) UpdateSuggestionCategory(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&category).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update category (name/slug may already exist)"})
+		if isUniqueViolation(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update category"})
 		return
 	}
 
@@ -446,7 +455,7 @@ func (h *SuggestionsHandler) DeleteSuggestionCategory(c *gin.Context) {
 		return
 	}
 	if count > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Category is used by existing suggestions"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Category is used by existing suggestions"})
 		return
 	}
 

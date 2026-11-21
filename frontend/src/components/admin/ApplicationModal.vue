@@ -85,6 +85,35 @@
                 ></textarea>
               </div>
 
+              <!-- Note courte affichée sur la tuile du portail, jusqu'à une date facultative -->
+              <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+                <div class="form-group mb-0">
+                  <label for="admin_note" class="form-label">{{ $t('adminShared.applications.note') }}</label>
+                  <input
+                    id="admin_note"
+                    v-model="form.admin_note"
+                    type="text"
+                    maxlength="140"
+                    class="form-input"
+                    aria-describedby="admin_note_help"
+                    :placeholder="$t('adminShared.applications.notePlaceholder')"
+                  />
+                  <p id="admin_note_help" class="text-xs text-gray-400 mt-1">
+                    {{ $t('adminShared.applications.noteHelp', { count: form.admin_note.length }) }}
+                  </p>
+                </div>
+                <div class="form-group mb-0">
+                  <label for="admin_note_until" class="form-label">{{ $t('adminShared.applications.noteUntil') }}</label>
+                  <input
+                    id="admin_note_until"
+                    v-model="form.admin_note_until"
+                    type="date"
+                    class="form-input"
+                    :disabled="!form.admin_note.trim()"
+                  />
+                </div>
+              </div>
+
               <!-- Créateur : seulement si la page fournit la liste des utilisateurs (admin global) -->
               <div v-if="users.length" class="form-group mb-0">
                 <label for="created_by_id" class="form-label">{{ $t('adminShared.applications.creator') }}</label>
@@ -189,6 +218,8 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
+import { noteUntilFromInput, noteUntilToInput } from '@/utils/resourceType'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import IconInput from '@/components/ui/IconInput.vue'
@@ -238,7 +269,9 @@ const toFormValues = (app) => ({
   order: app?.order || 0,
   open_in_new_tab: app?.open_in_new_tab ?? true,
   is_active: app?.is_active ?? true,
-  created_by_id: app?.created_by_id || null
+  created_by_id: app?.created_by_id || null,
+  admin_note: app?.admin_note || '',
+  admin_note_until: noteUntilToInput(app?.admin_note_until)
 })
 
 const form = reactive(toFormValues(null))
@@ -299,9 +332,11 @@ const handleSubmit = () => {
 
   loading.value = true
   try {
+    const note = form.admin_note.trim()
+    const values = { ...form, admin_note: note, admin_note_until: note ? noteUntilFromInput(form.admin_note_until) : null }
     const formData = isEdit.value
-      ? { ...form, id: props.application.id }
-      : { ...form }
+      ? { ...values, id: props.application.id }
+      : values
     emit('submit', formData)
   } finally {
     loading.value = false
@@ -312,4 +347,7 @@ const closeModal = () => {
   resetForm()
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>

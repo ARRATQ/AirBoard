@@ -187,8 +187,11 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { chatbotsAdminService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
 
 const props = defineProps({
   show: Boolean,
@@ -197,6 +200,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'saved'])
+const { t } = useI18n()
+const appStore = useAppStore()
 
 const isSaving = ref(false)
 const initialMessagesText = ref('')
@@ -216,9 +221,11 @@ const defaultForm = () => ({
 
 const form = ref(defaultForm())
 
+// Formulaire repris à chaque ouverture : une saisie annulée ne doit pas réapparaître
 watch(
-  () => props.chatbot,
-  (val) => {
+  () => [props.show, props.chatbot],
+  ([show, val]) => {
+    if (!show) return
     if (val) {
       form.value = {
         name: val.name || '',
@@ -268,8 +275,12 @@ const handleSubmit = async () => {
     emit('saved')
   } catch (error) {
     console.error('Error saving chatbot:', error)
+    appStore.showError(t('common.feedback.saveError'))
   } finally {
     isSaving.value = false
   }
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => emit('close'))
 </script>

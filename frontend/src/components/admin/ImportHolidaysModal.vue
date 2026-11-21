@@ -67,7 +67,6 @@
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {{ $t('events.holidays.selectCategory') }}
-            <span class="text-gray-400 font-normal">({{ $t('common.optional') }})</span>
           </label>
           <select v-model="selectedCategoryId" class="input w-full">
             <option :value="null">{{ $t('events.holidays.noCategory') }}</option>
@@ -161,6 +160,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminEventsService } from '@/services/api'
@@ -274,4 +274,7 @@ const formatDate = (dateString) => {
 onMounted(() => {
   loadCountries()
 })
+
+// Échap ferme la modale
+useEscapeClose(true, () => emit('close'))
 </script>

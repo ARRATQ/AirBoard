@@ -36,6 +36,11 @@ function copyDocsPlugin() {
 // Dev proxy target (override with API_PROXY_TARGET when 8080 is taken)
 const apiTarget = process.env.API_PROXY_TARGET || 'http://localhost:8080'
 
+// Tests dans un fuseau non UTC, avec heure d'été : les conversions de dates
+// (champs datetime-local, agenda) y révèlent leurs décalages. Fixé avant le
+// lancement des workers, qui héritent de l'environnement.
+if (process.env.VITEST) process.env.TZ = 'Europe/Paris'
+
 export default defineConfig(({ command }) => ({
   plugins: [vue(), copyDocsPlugin()],
   // En prod, les console.log/debug sont retirés (console.warn/error restent)

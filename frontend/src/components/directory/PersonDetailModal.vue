@@ -4,7 +4,7 @@
       <div class="modal-container">
         <div class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-label="name">
           <div class="person-detail__hero" :style="{ '--unit-color': roles[0]?.unit.color || 'var(--accent)' }">
-            <button type="button" class="person-detail__close" :aria-label="$t('common.close')" @click="$emit('close')">
+            <button ref="closeBtn" type="button" class="person-detail__close" :aria-label="$t('common.close')" @click="$emit('close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
             <PersonAvatar :person="person" size="xl" />
@@ -90,7 +90,7 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import PersonAvatar from './PersonAvatar.vue'
@@ -110,6 +110,18 @@ const name = computed(() => fullName(props.person))
 const value = (f) => props.person.custom_fields?.[f.key]
 const filledFields = computed(() => props.fields.filter((f) => value(f)))
 const formatDate = (iso) => new Date(iso).toLocaleDateString(locale.value)
+
+// Le focus entre dans la fiche à l'ouverture (Échap fonctionne aussi après un clic)
+// et revient à l'élément d'origine à la fermeture.
+const closeBtn = ref(null)
+let opener = null
+onMounted(() => {
+  opener = document.activeElement
+  closeBtn.value?.focus()
+})
+onBeforeUnmount(() => {
+  if (opener?.isConnected) opener.focus()
+})
 </script>
 
 <style scoped>

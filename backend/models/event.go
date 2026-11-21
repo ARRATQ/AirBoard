@@ -9,9 +9,11 @@ import (
 )
 
 // Event représente un événement dans le calendrier
+// Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type Event struct {
 	ID          uint   `json:"id" gorm:"primaryKey"`
-	Slug        string `json:"slug" gorm:"size:255;not null;uniqueIndex:idx_event_slug,where:deleted_at IS NULL"`
+	Slug        string `json:"slug" gorm:"size:255;not null"`
 	Title       string `json:"title" gorm:"not null;size:255"`
 	Description string `json:"description" gorm:"type:text"` // Contenu riche (JSON Tiptap)
 
@@ -60,10 +62,12 @@ type Event struct {
 }
 
 // EventCategory représente une catégorie d'événements
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type EventCategory struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
-	Name        string         `json:"name" gorm:"size:100;not null;uniqueIndex:idx_event_category_name,where:deleted_at IS NULL"`
-	Slug        string         `json:"slug" gorm:"size:100;not null;uniqueIndex:idx_event_category_slug,where:deleted_at IS NULL"`
+	Name        string         `json:"name" gorm:"size:100;not null"`
+	Slug        string         `json:"slug" gorm:"size:100;not null"`
 	Description string         `json:"description" gorm:"size:500"`
 	Icon        string         `json:"icon" gorm:"size:100;default:'mdi:calendar'"` // Icône Iconify
 	Color       string         `json:"color" gorm:"size:20;default:'#3B82F6'"`      // Couleur hex

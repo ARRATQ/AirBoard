@@ -34,7 +34,7 @@
 
         <div class="mt-3 flex items-center gap-2 flex-wrap text-xs">
           <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-            {{ suggestion.category_ref?.name || suggestion.category || t('suggestions.noCategory') }}
+            {{ suggestionCategoryLabel(suggestion, t, te) }}
           </span>
           <StatusBadge :tone="suggestionStatusTone(suggestion.status)">{{ t(`suggestions.statuses.${suggestion.status}`) }}</StatusBadge>
           <span class="text-gray-500 dark:text-gray-400">
@@ -91,13 +91,14 @@ import { suggestionStatusTone } from '@/config/status'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { suggestionCategoryLabel } from '@/utils/suggestionCategory'
 import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { suggestionsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import CommentSection from '@/components/comments/CommentSection.vue'
 
-const { t, locale } = useI18n()
+const { t, te, locale } = useI18n()
 const route = useRoute()
 const authStore = useAuthStore()
 
@@ -114,7 +115,7 @@ const loadSuggestion = async () => {
     console.error('Failed to load suggestion:', error)
     suggestion.value = null
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.loadError'))
+      window.$toast.error(t('suggestions.loadError'))
     }
   } finally {
     loading.value = false
@@ -130,7 +131,7 @@ const handleVote = async (voteType) => {
     suggestion.value.user_vote = result.user_vote || ''
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.voteError'))
+      window.$toast.error(t('suggestions.voteError'))
     }
   }
 }
@@ -145,7 +146,7 @@ const updateStatus = async (status) => {
     }
   } catch (error) {
     if (window.$toast) {
-      window.$toast.error(error.response?.data?.error || t('suggestions.statusUpdateError'))
+      window.$toast.error(t('suggestions.statusUpdateError'))
     }
   }
 }

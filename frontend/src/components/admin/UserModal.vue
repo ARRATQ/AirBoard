@@ -16,14 +16,14 @@
                 </div>
                 <div class="min-w-0">
                   <h3 class="modal-title truncate">
-                    {{ isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}
+                    {{ isEdit ? t('userModal.titleEdit') : t('users.new') }}
                   </h3>
                   <p class="modal-subtitle truncate">
-                    {{ isEdit ? 'Modifiez les informations du compte' : 'Créez un nouveau compte utilisateur' }}
+                    {{ isEdit ? t('userModal.subtitleEdit') : t('userModal.subtitleCreate') }}
                   </p>
                 </div>
               </div>
-              <button type="button" class="btn btn-ghost p-2" aria-label="Fermer" @click="closeModal">
+              <button type="button" class="btn btn-ghost p-2" :aria-label="t('common.close')" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
@@ -44,7 +44,7 @@
               <Icon :icon="tab.icon" class="h-4 w-4" />
               {{ tab.label }}
               <span v-if="tab.count !== undefined" class="modal-tab-count">{{ tab.count }}</span>
-              <span v-if="tab.hasError" class="modal-tab-error" aria-label="Erreur"></span>
+              <span v-if="tab.hasError" class="modal-tab-error" :aria-label="t('userModal.tabError')"></span>
             </button>
           </div>
 
@@ -54,7 +54,7 @@
             <div v-show="activeTab === 'account'" class="space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="form-group mb-0">
-                  <label for="username" class="form-label form-label-required">Nom d'utilisateur</label>
+                  <label for="username" class="form-label form-label-required">{{ t('userModal.username') }}</label>
                   <input
                     id="username"
                     v-model="form.username"
@@ -66,11 +66,11 @@
                     placeholder="johndoe"
                   />
                   <p v-if="errors.username" class="form-error">{{ errors.username }}</p>
-                  <p v-else-if="isEdit" class="text-xs text-gray-400 mt-1">Le nom d'utilisateur ne peut pas être modifié</p>
+                  <p v-else-if="isEdit" class="text-xs text-gray-400 mt-1">{{ t('userModal.usernameLocked') }}</p>
                 </div>
 
                 <div class="form-group mb-0">
-                  <label for="email" class="form-label form-label-required">Adresse email</label>
+                  <label for="email" class="form-label form-label-required">{{ t('userModal.email') }}</label>
                   <input
                     id="email"
                     v-model="form.email"
@@ -83,17 +83,17 @@
                 </div>
 
                 <div class="form-group mb-0">
-                  <label for="first_name" class="form-label">Prénom</label>
+                  <label for="first_name" class="form-label">{{ t('userModal.firstName') }}</label>
                   <input id="first_name" v-model="form.first_name" type="text" class="form-input" placeholder="John" />
                 </div>
 
                 <div class="form-group mb-0">
-                  <label for="last_name" class="form-label">Nom de famille</label>
+                  <label for="last_name" class="form-label">{{ t('userModal.lastName') }}</label>
                   <input id="last_name" v-model="form.last_name" type="text" class="form-input" placeholder="Doe" />
                 </div>
 
                 <div v-if="!isEdit" class="form-group mb-0 md:col-span-2">
-                  <label for="password" class="form-label form-label-required">Mot de passe</label>
+                  <label for="password" class="form-label form-label-required">{{ t('userModal.password') }}</label>
                   <div class="relative">
                     <input
                       id="password"
@@ -108,21 +108,21 @@
                     <button
                       type="button"
                       class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                      :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                      :aria-label="showPassword ? t('userModal.hidePassword') : t('userModal.showPassword')"
                       @click="showPassword = !showPassword"
                     >
                       <Icon :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="h-4 w-4" />
                     </button>
                   </div>
                   <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
-                  <p v-else class="text-xs text-gray-400 mt-1">Minimum 6 caractères</p>
+                  <p v-else class="text-xs text-gray-400 mt-1">{{ t('userModal.passwordHint', { min: PASSWORD_MIN_LENGTH }) }}</p>
                 </div>
               </div>
 
               <label class="toggle-row">
                 <span>
-                  <span class="toggle-row-title">Compte actif</span>
-                  <span class="toggle-row-desc">L'utilisateur est autorisé à se connecter</span>
+                  <span class="toggle-row-title">{{ t('userModal.activeAccount') }}</span>
+                  <span class="toggle-row-desc">{{ t('userModal.activeAccountDesc') }}</span>
                 </span>
                 <input v-model="form.is_active" type="checkbox" class="switch-input" />
                 <span class="switch-track" aria-hidden="true"></span>
@@ -132,7 +132,7 @@
             <!-- Onglet : Rôle & groupes -->
             <div v-show="activeTab === 'access'" class="space-y-5">
               <div>
-                <span class="form-label form-label-required">Rôle</span>
+                <span class="form-label form-label-required">{{ t('userModal.role') }}</span>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <label
                     v-for="role in roles"
@@ -152,17 +152,17 @@
                 </div>
                 <p v-if="errors.role" class="form-error">{{ errors.role }}</p>
                 <p v-if="form.role === 'user'" class="text-xs text-gray-400 mt-2">
-                  Pour déléguer l'administration d'un groupe, assignez l'utilisateur comme administrateur depuis la gestion des groupes.
+                  {{ t('userModal.groupAdminHint') }}
                 </p>
               </div>
 
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="form-label mb-0">Groupes d'utilisateurs</span>
-                  <span class="text-xs text-gray-400">Les groupes déterminent les ressources accessibles</span>
+                  <span class="form-label mb-0">{{ t('userModal.groups') }}</span>
+                  <span class="text-xs text-gray-400">{{ t('userModal.groupsHint') }}</span>
                 </div>
                 <div v-if="groups.length === 0" class="text-sm text-gray-500 text-center py-6">
-                  Aucun groupe disponible
+                  {{ t('userModal.noGroups') }}
                 </div>
                 <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
                   <label
@@ -182,13 +182,13 @@
 
           <!-- Footer -->
           <div class="modal-footer-bar">
-            <span class="modal-footer-hint">* Champs obligatoires</span>
+            <span class="modal-footer-hint">{{ t('common.requiredFieldsHint') }}</span>
             <div class="modal-footer-actions">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Annuler</button>
+              <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
                 <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
                 <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:account-plus'" class="h-4 w-4 mr-2" />
-                {{ isEdit ? 'Enregistrer' : 'Créer l\'utilisateur' }}
+                {{ isEdit ? t('common.save') : t('userModal.submitCreate') }}
               </button>
             </div>
           </div>
@@ -200,7 +200,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 
 const props = defineProps({
@@ -215,6 +217,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'submit'])
+
+const { t } = useI18n()
+
+const USERNAME_MIN_LENGTH = 3
+const PASSWORD_MIN_LENGTH = 6
 
 const loading = ref(false)
 const errors = ref({})
@@ -236,11 +243,11 @@ const isEdit = computed(() => !!props.user)
 const activeTab = ref('account')
 const showPassword = ref(false)
 
-const roles = [
-  { value: 'user', label: 'Utilisateur', icon: 'mdi:account-outline', desc: 'Accès aux ressources de ses groupes' },
-  { value: 'editor', label: 'Éditeur', icon: 'mdi:pencil-outline', desc: 'Gère les actualités du News Hub' },
-  { value: 'admin', label: 'Administrateur', icon: 'mdi:shield-crown-outline', desc: 'Accès à toutes les fonctionnalités' }
-]
+const roles = computed(() => [
+  { value: 'user', label: t('users.role_user'), icon: 'mdi:account-outline', desc: t('userModal.roleUserDesc') },
+  { value: 'editor', label: t('users.role_editor'), icon: 'mdi:pencil-outline', desc: t('userModal.roleEditorDesc') },
+  { value: 'admin', label: t('users.role_admin'), icon: 'mdi:shield-crown-outline', desc: t('userModal.roleAdminDesc') }
+])
 
 const initials = computed(() => {
   const f = form.first_name?.trim()
@@ -252,13 +259,13 @@ const initials = computed(() => {
 const tabs = computed(() => [
   {
     id: 'account',
-    label: 'Compte',
+    label: t('userModal.tabAccount'),
     icon: 'mdi:card-account-details-outline',
     hasError: !!(errors.value.username || errors.value.email || errors.value.password)
   },
   {
     id: 'access',
-    label: 'Rôle & groupes',
+    label: t('userModal.tabAccess'),
     icon: 'mdi:shield-account-outline',
     count: form.group_ids.length,
     hasError: !!errors.value.role
@@ -331,27 +338,27 @@ const validateForm = () => {
   errors.value = {}
   
   if (!form.username.trim()) {
-    errors.value.username = 'Le nom d\'utilisateur est requis'
-  } else if (form.username.length < 3) {
-    errors.value.username = 'Le nom d\'utilisateur doit contenir au moins 3 caractères'
+    errors.value.username = t('userModal.errors.usernameRequired')
+  } else if (form.username.length < USERNAME_MIN_LENGTH) {
+    errors.value.username = t('userModal.errors.usernameTooShort', { min: USERNAME_MIN_LENGTH })
   }
   
   if (!form.email.trim()) {
-    errors.value.email = 'L\'email est requis'
+    errors.value.email = t('userModal.errors.emailRequired')
   } else if (!isValidEmail(form.email)) {
-    errors.value.email = 'L\'email n\'est pas valide'
+    errors.value.email = t('userModal.errors.emailInvalid')
   }
   
   if (!isEdit.value) {
     if (!form.password.trim()) {
-      errors.value.password = 'Le mot de passe est requis'
-    } else if (form.password.length < 6) {
-      errors.value.password = 'Le mot de passe doit contenir au moins 6 caractères'
+      errors.value.password = t('userModal.errors.passwordRequired')
+    } else if (form.password.length < PASSWORD_MIN_LENGTH) {
+      errors.value.password = t('userModal.errors.passwordTooShort', { min: PASSWORD_MIN_LENGTH })
     }
   }
   
   if (!form.role) {
-    errors.value.role = 'Le rôle est requis'
+    errors.value.role = t('userModal.errors.roleRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -390,4 +397,7 @@ const closeModal = () => {
   resetForm()
   emit('close')
 }
+
+// Échap ferme la modale
+useEscapeClose(() => props.show, () => closeModal())
 </script>

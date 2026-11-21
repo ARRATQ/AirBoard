@@ -979,6 +979,7 @@
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
+import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -1515,4 +1516,10 @@ const toggleHeroStatus = async (hero) => {
 onMounted(async () => {
   await Promise.all([loadSettings(), loadGroups(), loadHeroMessages()])
 })
+
+// Échap ferme la modale
+useEscapeClose(showPasswordModal, () => closePasswordModal())
+useEscapeClose(showResetModal, () => closeResetModal())
+useEscapeClose(showResetDatabaseModal, () => { showResetDatabaseModal.value = false })
+useEscapeClose(showHeroModal, () => { showHeroModal.value = false })
 </script>

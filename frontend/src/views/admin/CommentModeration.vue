@@ -1,303 +1,138 @@
 <template>
-  <div class="comment-moderation p-6">
-    <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        {{ $t('moderation.title') }}
-      </h1>
-      <p class="text-gray-600 dark:text-gray-400">
-        {{ $t('moderation.description') }}
-      </p>
+  <div class="content-area">
+    <PageHeader>
+      <template #title>{{ $t('moderation.title') }}</template>
+      <template #description>{{ $t('moderation.description') }}</template>
+    </PageHeader>
+
+    <div class="cm-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="cm-tab"
+        :class="{ 'cm-tab--on': activeTab === 'pending' }"
+        :aria-selected="activeTab === 'pending'"
+        @click="activeTab = 'pending'"
+      >
+        {{ $t('moderation.pending') }}
+        <span v-if="pendingCount > 0" class="cm-tab__count">{{ pendingCount }}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="cm-tab"
+        :class="{ 'cm-tab--on': activeTab === 'settings' }"
+        :aria-selected="activeTab === 'settings'"
+        @click="activeTab = 'settings'"
+      >
+        {{ $t('moderation.settings') }}
+      </button>
     </div>
 
-    <!-- Tabs -->
-    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-      <nav class="-mb-px flex space-x-8">
-        <button
-          :class="[
-            'py-4 px-1 border-b-2 font-medium text-sm',
-            activeTab === 'pending'
-              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-          ]"
-          @click="activeTab = 'pending'"
-        >
-          {{ $t('moderation.pending') }}
-          <span
-            v-if="pendingCount > 0"
-            class="ml-2 px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300 text-xs"
-          >
-            {{ pendingCount }}
+    <!-- Commentaires en attente -->
+    <template v-if="activeTab === 'pending'">
+      <EmptyState
+        v-if="!loading && pendingComments.length === 0"
+        icon="mdi:check-circle-outline"
+        :title="$t('moderation.no_pending')"
+      />
+
+      <DataTable
+        v-else
+        :columns="columns"
+        :rows="rows"
+        :loading="loading"
+        :search-keys="['author', 'content', 'target']"
+        :page-size="25"
+      >
+        <template #cell-author="{ row }">
+          <span class="cm-author">{{ row.author }}</span>
+        </template>
+
+        <template #cell-target="{ row }">
+          <span class="cm-target">
+            <span class="cm-mono">{{ row.targetType }}</span>
+            <RouterLink v-if="row.targetLink" :to="row.targetLink" class="cm-target__link">{{ row.targetTitle }}</RouterLink>
+            <span v-else>{{ row.targetTitle }}</span>
           </span>
-        </button>
-        <button
-          :class="[
-            'py-4 px-1 border-b-2 font-medium text-sm',
-            activeTab === 'settings'
-              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-          ]"
-          @click="activeTab = 'settings'"
-        >
-          {{ $t('moderation.settings') }}
-        </button>
-      </nav>
-    </div>
+        </template>
 
-    <!-- Pending Comments Tab -->
-    <div v-if="activeTab === 'pending'">
-      <div v-if="loading" class="text-center py-12">
-        <Icon icon="mdi:loading" class="animate-spin h-12 w-12 mx-auto text-primary-600" />
-      </div>
+        <template #cell-content="{ row }">
+          <p class="cm-content">{{ row.content }}</p>
+        </template>
 
-      <div v-else-if="pendingComments.length === 0" class="text-center py-12">
-        <Icon icon="mdi:check-circle-outline" class="h-16 w-16 mx-auto text-green-500 mb-4" />
-        <p class="text-gray-600 dark:text-gray-400">
-          {{ $t('moderation.no_pending') }}
-        </p>
-      </div>
+        <template #cell-createdAt="{ row }">
+          <span class="cm-mono">{{ row.createdAt }}</span>
+        </template>
 
-      <div v-else class="space-y-4">
-        <div
-          v-for="comment in pendingComments"
-          :key="comment.id"
-          class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700"
-        >
-          <!-- Comment Info -->
-          <div class="flex items-start justify-between mb-4">
-            <div>
-              <p class="font-medium text-gray-900 dark:text-white">
-                {{ getUserName(comment.user) }}
-              </p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ formatDate(comment.created_at) }} •
-                <span class="capitalize">{{ comment.entity_type }}</span> #{{ comment.entity_id }}
-              </p>
-            </div>
-            <span
-              v-if="comment.is_flagged"
-              class="px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 text-sm"
-            >
-              <Icon icon="mdi:flag" class="inline h-4 w-4 mr-1" />
-              {{ $t('moderation.flagged') }}
-            </span>
-          </div>
+        <template #cell-status="{ row }">
+          <StatusBadge v-if="row.raw.is_flagged" tone="bad">{{ $t('moderation.flagged') }}</StatusBadge>
+          <StatusBadge v-else tone="warn">{{ $t('moderation.pending') }}</StatusBadge>
+        </template>
 
-          <!-- Comment Content -->
-          <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-              {{ comment.content }}
-            </p>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-3">
+        <template #cell-actions="{ row }">
+          <RowActions :label="row.author" :editable="false" @delete="deleteComment(row.raw.id)">
             <button
-              class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg
-                     hover:bg-green-700 transition-colors"
-              @click="moderateComment(comment.id, true, false)"
+              type="button"
+              class="row-actions__btn cm-approve"
+              :aria-label="`${$t('moderation.approve')} : ${row.author}`"
+              :title="$t('moderation.approve')"
+              @click="moderateComment(row.raw.id, true, false)"
             >
-              <Icon icon="mdi:check" class="h-5 w-5" />
-              {{ $t('moderation.approve') }}
+              <Icon icon="mdi:check" aria-hidden="true" />
             </button>
             <button
-              class="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg
-                     hover:bg-yellow-700 transition-colors"
-              @click="moderateComment(comment.id, false, true)"
+              type="button"
+              class="row-actions__btn cm-flag"
+              :aria-label="`${$t('moderation.flag')} : ${row.author}`"
+              :title="$t('moderation.flag')"
+              @click="moderateComment(row.raw.id, false, true)"
             >
-              <Icon icon="mdi:flag" class="h-5 w-5" />
-              {{ $t('moderation.flag') }}
+              <Icon icon="mdi:flag-outline" aria-hidden="true" />
             </button>
-            <button
-              class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg
-                     hover:bg-red-700 transition-colors"
-              @click="deleteComment(comment.id)"
-            >
-              <Icon icon="mdi:delete" class="h-5 w-5" />
-              {{ $t('moderation.delete') }}
-            </button>
-          </div>
+          </RowActions>
+        </template>
+      </DataTable>
+    </template>
+
+    <!-- Paramètres -->
+    <section v-if="activeTab === 'settings'" class="cm-settings">
+      <h2 class="cm-settings__title">{{ $t('moderation.settings_title') }}</h2>
+
+      <div v-for="toggle in toggles" :key="toggle.key" class="cm-row">
+        <div class="cm-row__text">
+          <label :for="`cm-${toggle.key}`" class="cm-row__label">{{ $t(`moderation.${toggle.label}`) }}</label>
+          <p class="cm-row__desc">{{ $t(`moderation.${toggle.label}_desc`) }}</p>
         </div>
-      </div>
-    </div>
-
-    <!-- Settings Tab -->
-    <div v-if="activeTab === 'settings'">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-          {{ $t('moderation.settings_title') }}
-        </h2>
-
-        <div class="space-y-6">
-          <!-- Global Comments Toggle -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="font-medium text-gray-900 dark:text-white">
-                {{ $t('moderation.enable_comments') }}
-              </label>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('moderation.enable_comments_desc') }}
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="settings.comments_enabled"
-                type="checkbox"
-                class="sr-only peer"
-              >
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300
-                          dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700
-                          peer-checked:after:translate-x-full peer-checked:after:border-white
-                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:border-gray-300 after:border after:rounded-full
-                          after:h-5 after:w-5 after:transition-all dark:border-gray-600
-                          peer-checked:bg-primary-600"></div>
-            </label>
-          </div>
-
-          <hr class="border-gray-200 dark:border-gray-700">
-
-          <!-- News Comments -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="font-medium text-gray-900 dark:text-white">
-                {{ $t('moderation.news_comments') }}
-              </label>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('moderation.news_comments_desc') }}
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="settings.news_comments_enabled"
-                type="checkbox"
-                class="sr-only peer"
-                :disabled="!settings.comments_enabled"
-              >
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300
-                          dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700
-                          peer-checked:after:translate-x-full peer-checked:after:border-white
-                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:border-gray-300 after:border after:rounded-full
-                          after:h-5 after:w-5 after:transition-all dark:border-gray-600
-                          peer-checked:bg-primary-600 peer-disabled:opacity-50"></div>
-            </label>
-          </div>
-
-          <!-- App Comments -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="font-medium text-gray-900 dark:text-white">
-                {{ $t('moderation.app_comments') }}
-              </label>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('moderation.app_comments_desc') }}
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="settings.app_comments_enabled"
-                type="checkbox"
-                class="sr-only peer"
-                :disabled="!settings.comments_enabled"
-              >
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300
-                          dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700
-                          peer-checked:after:translate-x-full peer-checked:after:border-white
-                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:border-gray-300 after:border after:rounded-full
-                          after:h-5 after:w-5 after:transition-all dark:border-gray-600
-                          peer-checked:bg-primary-600 peer-disabled:opacity-50"></div>
-            </label>
-          </div>
-
-          <!-- Event Comments -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="font-medium text-gray-900 dark:text-white">
-                {{ $t('moderation.event_comments') }}
-              </label>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('moderation.event_comments_desc') }}
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="settings.event_comments_enabled"
-                type="checkbox"
-                class="sr-only peer"
-                :disabled="!settings.comments_enabled"
-              >
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300
-                          dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700
-                          peer-checked:after:translate-x-full peer-checked:after:border-white
-                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:border-gray-300 after:border after:rounded-full
-                          after:h-5 after:w-5 after:transition-all dark:border-gray-600
-                          peer-checked:bg-primary-600 peer-disabled:opacity-50"></div>
-            </label>
-          </div>
-
-          <hr class="border-gray-200 dark:border-gray-700">
-
-          <!-- Require Moderation -->
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="font-medium text-gray-900 dark:text-white">
-                {{ $t('moderation.require_moderation') }}
-              </label>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('moderation.require_moderation_desc') }}
-              </p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="settings.require_moderation"
-                type="checkbox"
-                class="sr-only peer"
-              >
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300
-                          dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700
-                          peer-checked:after:translate-x-full peer-checked:after:border-white
-                          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                          after:bg-white after:border-gray-300 after:border after:rounded-full
-                          after:h-5 after:w-5 after:transition-all dark:border-gray-600
-                          peer-checked:bg-primary-600"></div>
-            </label>
-          </div>
-
-          <!-- Max Comment Length -->
-          <div>
-            <label class="font-medium text-gray-900 dark:text-white block mb-2">
-              {{ $t('moderation.max_length') }}
-            </label>
-            <input
-              v-model.number="settings.max_comment_length"
-              type="number"
-              min="100"
-              max="5000"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                     focus:ring-2 focus:ring-primary-500 focus:border-transparent
-                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {{ $t('moderation.max_length_desc') }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="mt-6">
-          <button
-            class="w-full px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700
-                   transition-colors font-medium"
-            @click="saveSettings"
+        <label class="cm-switch">
+          <input
+            :id="`cm-${toggle.key}`"
+            v-model="settings[toggle.key]"
+            type="checkbox"
+            class="cm-switch__input"
+            :disabled="toggle.dependsOnGlobal && !settings.comments_enabled"
           >
-            {{ $t('moderation.save_settings') }}
-          </button>
-        </div>
+          <span class="cm-switch__track" aria-hidden="true"></span>
+        </label>
       </div>
-    </div>
+
+      <div class="cm-field">
+        <label for="cm-max-length" class="cm-row__label">{{ $t('moderation.max_length') }}</label>
+        <input
+          id="cm-max-length"
+          v-model.number="settings.max_comment_length"
+          type="number"
+          min="100"
+          max="5000"
+          class="form-input"
+        >
+        <p class="cm-row__desc">{{ $t('moderation.max_length_desc') }}</p>
+      </div>
+
+      <div class="cm-save">
+        <BaseButton variant="primary" @click="saveSettings">{{ $t('moderation.save_settings') }}</BaseButton>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -308,14 +143,23 @@ import { commentsService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import DataTable from '@/components/ui/DataTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
+import RowActions from '@/components/ui/RowActions.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
-const { t } = useI18n()
+const { t, te, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
 
 const activeTab = ref('pending')
 const loading = ref(false)
 const pendingComments = ref([])
+// Titre (et slug) des éléments commentés, par « type:id »
+const pendingTargets = ref({})
 const settings = ref({
   comments_enabled: true,
   news_comments_enabled: true,
@@ -324,6 +168,48 @@ const settings = ref({
   require_moderation: false,
   max_comment_length: 1000
 })
+
+// Réglages à bascule ; les types de commentaires dépendent de l'activation globale.
+const toggles = [
+  { key: 'comments_enabled', label: 'enable_comments', dependsOnGlobal: false },
+  { key: 'news_comments_enabled', label: 'news_comments', dependsOnGlobal: true },
+  { key: 'app_comments_enabled', label: 'app_comments', dependsOnGlobal: true },
+  { key: 'event_comments_enabled', label: 'event_comments', dependsOnGlobal: true },
+  { key: 'require_moderation', label: 'require_moderation', dependsOnGlobal: false },
+]
+
+const columns = computed(() => [
+  { key: 'author', label: t('ui.table.columns.author'), sortable: true },
+  { key: 'target', label: t('moderation.targetColumn'), sortable: true, hideSm: true },
+  { key: 'content', label: t('ui.table.columns.content') },
+  { key: 'createdAt', label: t('ui.table.columns.date'), sortable: true, hideSm: true },
+  { key: 'status', label: t('ui.table.columns.status'), hideSm: true },
+  { key: 'actions', label: '', align: 'end', width: '130px' },
+])
+
+const rows = computed(() =>
+  pendingComments.value.map(comment => ({
+    id: comment.id,
+    author: getUserName(comment.user),
+    ...describeTarget(comment),
+    content: comment.content,
+    createdAt: formatDate(comment.created_at),
+    raw: comment,
+  })),
+)
+
+// Pages de détail des éléments commentés ; une ressource n'en a pas.
+const TARGET_ROUTES = { news: 'NewsDetail', event: 'EventDetail' }
+
+const describeTarget = (comment) => {
+  const typeKey = `moderation.entityTypes.${comment.entity_type}`
+  const targetType = te(typeKey) ? t(typeKey) : comment.entity_type
+  const found = pendingTargets.value[`${comment.entity_type}:${comment.entity_id}`]
+  const targetTitle = found?.title || t('moderation.targetMissing')
+  const routeName = TARGET_ROUTES[comment.entity_type]
+  const targetLink = found?.slug && routeName ? { name: routeName, params: { slug: found.slug } } : null
+  return { target: `${targetType} ${targetTitle}`, targetType, targetTitle, targetLink }
+}
 
 const pendingCount = computed(() => pendingComments.value.length)
 
@@ -335,9 +221,9 @@ const getUserName = (user) => {
 }
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
+  return new Date(dateString).toLocaleDateString(dateLocaleFor(locale.value), {
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
@@ -348,9 +234,11 @@ const loadPendingComments = async () => {
   loading.value = true
   try {
     const response = await commentsService.getPendingComments()
+    pendingTargets.value = response.targets || {}
     pendingComments.value = response.comments || []
   } catch (error) {
     console.error('Erreur lors du chargement des commentaires en attente:', error)
+    appStore.showError(t('common.feedback.loadError'))
   } finally {
     loading.value = false
   }
@@ -362,6 +250,7 @@ const loadSettings = async () => {
     settings.value = response
   } catch (error) {
     console.error('Erreur lors du chargement des paramètres:', error)
+    appStore.showError(t('common.feedback.loadError'))
   }
 }
 
@@ -372,6 +261,7 @@ const moderateComment = async (commentId, isApproved, isFlagged) => {
       is_approved: isApproved,
       is_flagged: isFlagged
     })
+    appStore.showSuccess(t(isApproved ? 'moderation.approved' : 'moderation.flaggedDone'))
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la modération du commentaire:', error)
@@ -380,10 +270,16 @@ const moderateComment = async (commentId, isApproved, isFlagged) => {
 }
 
 const deleteComment = async (commentId) => {
-  if (!(await askConfirm({ message: t('comments.confirmDelete'), tone: 'danger' }))) return
+  const confirmed = await askConfirm({
+    message: t('comments.confirmDelete'),
+    confirmLabel: t('common.delete'),
+    tone: 'danger',
+  })
+  if (!confirmed) return
 
   try {
     await commentsService.deleteComment(commentId)
+    appStore.showSuccess(t('common.feedback.deleted'))
     await loadPendingComments()
   } catch (error) {
     console.error('Erreur lors de la suppression du commentaire:', error)
@@ -391,7 +287,16 @@ const deleteComment = async (commentId) => {
   }
 }
 
+// Mêmes bornes que le serveur (handlers/request_validation.go)
+const COMMENT_LENGTH_MIN = 100
+const COMMENT_LENGTH_MAX = 5000
+
 const saveSettings = async () => {
+  const maxLength = Number(settings.value.max_comment_length)
+  if (!Number.isInteger(maxLength) || maxLength < COMMENT_LENGTH_MIN || maxLength > COMMENT_LENGTH_MAX) {
+    appStore.showError(t('common.validation.commentLengthRange', { min: COMMENT_LENGTH_MIN, max: COMMENT_LENGTH_MAX }))
+    return
+  }
   try {
     await commentsService.updateSettings(settings.value)
     appStore.showSuccess(t('moderation.settingsSaved'))
@@ -406,3 +311,138 @@ onMounted(() => {
   loadSettings()
 })
 </script>
+
+<style scoped>
+.cm-tabs { display: flex; gap: 20px; margin-block-end: 16px; border-block-end: 1px solid var(--line); }
+
+.cm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-end: -1px;
+  padding: 10px 2px;
+  border: 0;
+  border-block-end: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cm-tab:hover { color: var(--text); }
+.cm-tab--on { border-block-end-color: var(--acc); color: var(--text); }
+.cm-tab:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+.cm-tab__count {
+  padding: 1px 6px;
+  border: 1px solid var(--warn);
+  border-radius: 3px;
+  color: var(--warn);
+  font-family: var(--f-num);
+  font-size: 10.5px;
+}
+
+.cm-author { font-weight: 600; color: var(--text); }
+
+.cm-content {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cm-target {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cm-target__link {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.cm-target__link:hover { text-decoration-color: currentColor; }
+
+.cm-target__link:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.cm-mono {
+  font-family: var(--f-num);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.cm-approve:hover { color: var(--ok); }
+.cm-flag:hover { color: var(--warn); }
+
+.cm-settings {
+  max-width: 720px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.cm-settings__title { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: var(--text); }
+
+.cm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block: 12px;
+  border-block-end: 1px solid var(--line);
+}
+
+.cm-row__label { display: block; font-size: 13.5px; font-weight: 600; color: var(--text); }
+.cm-row__desc { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.cm-field { display: grid; gap: 6px; padding-block: 14px; }
+.cm-save { padding-block-start: 4px; }
+
+.cm-switch { position: relative; flex: none; display: inline-flex; cursor: pointer; }
+.cm-switch__input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+
+.cm-switch__track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--sunken);
+}
+
+.cm-switch__track::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-start: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--muted);
+  transition: transform 0.15s;
+}
+
+.cm-switch__input:checked + .cm-switch__track { border-color: var(--acc); background: var(--acc); }
+.cm-switch__input:checked + .cm-switch__track::after { background: var(--surface); transform: translateX(16px); }
+[dir='rtl'] .cm-switch__input:checked + .cm-switch__track::after { transform: translateX(-16px); }
+.cm-switch__input:disabled + .cm-switch__track { opacity: 0.5; }
+.cm-switch__input:disabled { cursor: not-allowed; }
+.cm-switch__input:focus-visible + .cm-switch__track { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-switch__track::after { transition: none; }
+}
+</style>
