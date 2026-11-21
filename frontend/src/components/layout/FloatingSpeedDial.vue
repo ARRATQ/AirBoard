@@ -234,6 +234,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
+  /* Le conteneur couvre aussi la place des items fermés, au-dessus du bouton : il ne doit
+     capter aucun clic lui-même, sinon il masque le bouton d'envoi du panneau de l'assistant.
+     Seuls le bouton flottant et les items ouverts restent cliquables. */
+  pointer-events: none;
+}
+
+.speed-dial-fab-wrapper {
+  pointer-events: auto;
 }
 
 /* ── Items wrapper ──────────────────────────────────────── */

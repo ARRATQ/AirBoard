@@ -6,8 +6,8 @@
         {{ $t('home.rail.agenda') }} <span class="home-card__arrow" aria-hidden="true">→</span>
       </router-link>
     </div>
-    <ul class="up__list">
-      <li v-for="ev in events.slice(0, 4)" :key="ev.id">
+    <ul v-if="events.length" class="up__list">
+      <li v-for="ev in events.slice(0, MAX_SHOWN)" :key="ev.id">
         <router-link :to="`/events/${ev.slug}`" class="up__row" :style="{ '--c': ev.color || 'var(--muted)' }">
           <time class="up__date" :datetime="ev.start_date">
             <span class="up__month">{{ month(ev.start_date) }}</span>
@@ -15,16 +15,20 @@
           </time>
           <span class="up__body">
             <span class="up__title">{{ ev.title }}</span>
-            <span class="up__time">{{ ev.is_all_day ? $t('events.badge.allDayShort') : time(ev.start_date) }}</span>
+            <span class="up__time">
+              <span v-if="ev.isToday" class="up__today">{{ $t('common.today') }}</span>
+              {{ ev.is_all_day ? $t('events.badge.allDayShort') : time(ev.start_date) }}
+            </span>
           </span>
         </router-link>
       </li>
     </ul>
+    <p v-else class="up__empty">{{ $t('home.noEvents') }}</p>
   </section>
 </template>
 
 <script setup>
-// Quatre prochains événements ; l'agenda complet est sur /events.
+// Prochains événements (ceux du jour marqués « Aujourd'hui ») ; l'agenda complet est sur /events.
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { dateLocaleFor } from '@/utils/homeFormat'
@@ -33,6 +37,7 @@ defineProps({
   events: { type: Array, required: true },
 })
 
+const MAX_SHOWN = 4
 const { locale } = useI18n()
 const loc = computed(() => dateLocaleFor(locale.value))
 
@@ -96,4 +101,13 @@ const time = (v) => new Date(v).toLocaleTimeString(loc.value, { hour: '2-digit',
 }
 
 .up__time { font-family: var(--f-num); font-size: 11.5px; color: var(--muted); }
+
+.up__today {
+  margin-inline-end: 4px;
+  font-family: var(--f-sans);
+  font-weight: 600;
+  color: var(--acc-ink);
+}
+
+.up__empty { margin: 0; padding: 8px 4px; font-size: 13px; color: var(--muted); }
 </style>

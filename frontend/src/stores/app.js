@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import i18n, { setLocale as setI18nLocale, resolveInitialLocale } from '@/i18n'
 import { getPalette, generateCustomPalette, generatePaletteFromColors } from '@/config/palettes'
 import { paletteCSS } from '@/config/tokens'
+import { zoomScaleFor } from '@/utils/autoZoom'
 
 export const useAppStore = defineStore('app', () => {
   // Déterminer si on est sur mobile pour l'état initial de la sidebar
@@ -21,7 +22,12 @@ export const useAppStore = defineStore('app', () => {
   const appSettings = ref(null)
   const settingsLastUpdated = ref(Date.now())
   const locale = ref(resolveInitialLocale())
-  const zoomLevel = ref('100')
+  // Taille d'affichage : « auto » (par défaut) suit la largeur de la zone de contenu,
+  // sinon un pourcentage choisi dans la barre latérale.
+  const zoomLevel = ref('auto')
+  // Largeurs mesurées par App.vue (zone de contenu, fenêtre) pour le mode auto
+  const contentWidth = ref(0)
+  const viewportWidth = ref(typeof window === 'undefined' ? Infinity : window.innerWidth)
 
   // Getters
   const hasNotifications = computed(() => notifications.value.length > 0)
@@ -29,7 +35,7 @@ export const useAppStore = defineStore('app', () => {
     notifications.value.filter(n => !n.read)
   )
   const unreadCount = computed(() => unreadNotifications.value.length)
-  const zoomScale = computed(() => parseInt(zoomLevel.value) / 100)
+  const zoomScale = computed(() => zoomScaleFor(zoomLevel.value, contentWidth.value, viewportWidth.value))
 
   const _injectPaletteCSS = (paletteObj) => {
     const css = paletteCSS(paletteObj)
@@ -119,6 +125,11 @@ export const useAppStore = defineStore('app', () => {
   const setZoomLevel = (value) => {
     zoomLevel.value = value
     localStorage.setItem('airboard_zoom_level', value)
+  }
+
+  const setLayoutWidths = (content, viewport) => {
+    contentWidth.value = content
+    viewportWidth.value = viewport
   }
 
   const setLoading = (value) => {
@@ -355,6 +366,7 @@ export const useAppStore = defineStore('app', () => {
     settingsLastUpdated,
     locale,
     zoomLevel,
+    contentWidth,
 
     // Getters
     hasNotifications,
@@ -373,6 +385,7 @@ export const useAppStore = defineStore('app', () => {
     toggleNavbar,
     setShowNavbar,
     setZoomLevel,
+    setLayoutWidths,
     setLoading,
     addNotification,
     removeNotification,

@@ -832,6 +832,8 @@
       "label": "Vista"
     },
     "zoom": {
+      "auto": "Auto (se adapta a la pantalla)",
+      "autoShort": "Auto · {percent} %",
       "extraSmall": "Muy pequeño",
       "small": "Pequeño",
       "normal": "Normal",
@@ -1400,7 +1402,8 @@
       "vote": "Votar ahora",
       "endsIn": "{count} d restante | {count} d restante | {count} d restantes",
       "ended": "Cerrada",
-      "open": "Abierta"
+      "open": "Abierta",
+      "seeResults": "Ver resultados"
     },
     "quickActions": {
       "title": "Acciones rápidas",
@@ -1463,9 +1466,17 @@
       "pause": "Pausar el desfile",
       "play": "Reanudar el desfile"
     },
+    "featured": {
+      "title": "Destacados"
+    },
     "rail": {
       "portal": "Portal",
-      "agenda": "Agenda"
+      "agenda": "Agenda",
+      "label": "Herramientas y recordatorios"
+    },
+    "workingDays": {
+      "title": "Días laborables",
+      "holidaysUnavailable": "Festivos no disponibles: no se descuentan del cálculo."
     }
   },
   "email": {

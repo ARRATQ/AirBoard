@@ -16,26 +16,34 @@
         </div>
 
         <template v-else>
-          <div class="home__head">
-            <HomeGreeting
-              :first-name="firstName"
-              :pending-text="pendingActionsText"
-              :active-poll="activePoll"
-              :latest-news-group="latestNewsGroup"
-              :next-event="nextEvent"
-            />
-            <HomeXpCard :gamification="homeData.gamification || null" />
-          </div>
-
-          <HomeKeyFigures v-if="figures.length" :figures="figures" />
-
-          <div class="home__split">
-            <HomeNewsFeed :groups="homeData.recent_news_by_type || []" />
-            <div class="home__rail">
-              <HomeFavorites v-if="homeData.favorite_apps?.length" :apps="homeData.favorite_apps" />
-              <HomePollCard v-if="activePoll" :poll="activePoll" />
-              <HomeUpcomingEvents v-if="homeData.upcoming_events?.length" :events="homeData.upcoming_events" />
+          <!-- Deux colonnes : à gauche ce qu'on lit (salutation, chiffres, à la une, nouveautés et
+               agenda, actualités), à droite
+               les outils et rappels. Sur écran étroit, une seule colonne dans l'ordre d'usage. -->
+          <div class="home__layout">
+            <div class="home__main">
+              <HomeGreeting
+                class="home__greeting"
+                :first-name="firstName"
+                :pending-text="pendingActionsText"
+                :active-poll="activePoll"
+                :latest-news-group="latestNewsGroup"
+                :next-event="nextEvent"
+              />
+              <HomeKeyFigures v-if="figures.length" class="home__figures" :figures="figures" />
+              <HomeFeatured v-if="featuredNews.length" class="home__featured" :articles="featuredNews" :types="newsTypes" />
+              <div class="home__duo">
+                <HomeNewResources :apps="homeData.new_apps || []" />
+                <HomeUpcomingEvents :events="agenda" />
+              </div>
+              <HomeNewsFeed class="home__news" :groups="homeData.recent_news_by_type || []" />
             </div>
+
+            <aside class="home__rail" :aria-label="$t('home.rail.label')">
+              <HomeXpCard class="home__xp" :gamification="homeData.gamification || null" />
+              <HomeFavorites v-if="homeData.favorite_apps?.length" class="home__favorites" :apps="homeData.favorite_apps" />
+              <HomeWorkingDays class="home__workdays" />
+              <HomePollCard v-if="activePoll" class="home__poll" :poll="activePoll" />
+            </aside>
           </div>
         </template>
       </div>
@@ -45,14 +53,16 @@
 
 <script setup>
 // Accueil : charge homeService.getHomeData() et répartit les données entre les composants de
-// components/home/. Hiérarchie A+ : salutation et progression, bandeau des chiffres clés,
-// puis le fil d'actualités avec, à côté, favoris, sondage ouvert et prochains événements.
+// components/home/. Colonne principale : salutation, chiffres clés, deux derniers articles,
+// ressources récentes et agenda, fil d'actualités ; colonne de droite : progression, favoris,
+// calculateur de jours ouvrés, sondage ouvert.
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { homeService } from '@/services/api'
 import { keyFigures } from '@/utils/homeFormat'
+import { agendaAhead, latestNews } from '@/utils/homeHighlights'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import HomeTopbar from '@/components/home/HomeTopbar.vue'
@@ -63,6 +73,9 @@ import HomeNewsFeed from '@/components/home/HomeNewsFeed.vue'
 import HomeFavorites from '@/components/home/HomeFavorites.vue'
 import HomePollCard from '@/components/home/HomePollCard.vue'
 import HomeUpcomingEvents from '@/components/home/HomeUpcomingEvents.vue'
+import HomeWorkingDays from '@/components/home/HomeWorkingDays.vue'
+import HomeFeatured from '@/components/home/HomeFeatured.vue'
+import HomeNewResources from '@/components/home/HomeNewResources.vue'
 import '@/components/home/home.css'
 
 const { t } = useI18n()
@@ -87,6 +100,14 @@ const pendingActionsText = computed(() => {
 const activePoll = computed(() => homeData.value.polls?.find((p) => p.is_active) || null)
 const latestNewsGroup = computed(() => homeData.value.recent_news_by_type?.[0] || null)
 const nextEvent = computed(() => homeData.value.upcoming_events?.[0] || null)
+
+const FEATURED_COUNT = 2
+const AGENDA_COUNT = 4
+const featuredNews = computed(() => latestNews(homeData.value.recent_news, FEATURED_COUNT))
+const newsTypes = computed(() => (homeData.value.recent_news_by_type || []).map((g) => g.type))
+const agenda = computed(() =>
+  agendaAhead(homeData.value.today_events, homeData.value.upcoming_events, AGENDA_COUNT),
+)
 const figures = computed(() =>
   keyFigures(homeData.value.stats, homeData.value.user_role, homeData.value.managed_group_ids),
 )
@@ -124,6 +145,7 @@ onMounted(loadHomeData)
 }
 
 .home__inner {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -156,22 +178,14 @@ onMounted(loadHomeData)
   .home__spin { animation: none; }
 }
 
-/* Salutation à gauche, progression à droite. */
-.home__head {
+.home__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   align-items: start;
-  gap: 16px 24px;
+  gap: 20px;
 }
 
-/* Fil d'actualités dominant, colonne de droite fixe. */
-.home__split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: start;
-  gap: 16px;
-}
-
+.home__main,
 .home__rail {
   display: flex;
   flex-direction: column;
@@ -179,18 +193,35 @@ onMounted(loadHomeData)
   min-width: 0;
 }
 
-@media (max-width: 1024px) {
-  .home__split { grid-template-columns: minmax(0, 1fr); }
-
-  .home__rail {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    align-items: start;
-  }
+/* Ressources récentes et agenda côte à côte, l'un sous l'autre quand la colonne rétrécit. */
+.home__duo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+  gap: 16px;
 }
 
-@media (max-width: 900px) {
-  .home__head { grid-template-columns: minmax(0, 1fr); }
+/* Les colonnes suivent la largeur de la zone de contenu (la barre latérale peut être
+   repliée ou masquée), pas celle de la fenêtre. */
+@container (max-width: 1000px) {
+  .home__layout { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+
+/* Zone étroite : les deux colonnes se fondent en une seule, dans l'ordre d'usage. */
+@container (max-width: 760px) {
+  .home__layout { display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
+  .home__main,
+  .home__rail { display: contents; }
+
+  .home__greeting { order: 1; }
+  .home__xp { order: 2; }
+  .home__figures { order: 3; }
+  .home__featured { order: 4; }
+  .home__favorites { order: 5; }
+  .home__duo { order: 6; }
+  .home__news { order: 7; }
+  .home__workdays { order: 8; }
+  .home__poll { order: 9; }
 }
 
 @media (max-width: 640px) {
