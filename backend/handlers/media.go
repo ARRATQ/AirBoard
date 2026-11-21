@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
 	"airboard/utils"
@@ -40,22 +41,14 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "unauthorized",
-			Message: "User not authenticated",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
 	// Parse multipart form
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_file",
-			Message: "No file provided or invalid file",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "No file provided or invalid file")
 		return
 	}
 	defer file.Close()
@@ -63,11 +56,7 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 	// Enhanced security validation
 	validationResult := h.fileValidator.ValidateSecureFile(file, fileHeader)
 	if !validationResult.IsValid {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "file_security_violation",
-			Message: validationResult.Reason,
-			Code:    http.StatusBadRequest,
-		})
+		apierror.RespondCode(c, http.StatusBadRequest, apierror.CodeFileSecurity, validationResult.Reason)
 		return
 	}
 
@@ -86,11 +75,8 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 	// Upload file to storage
 	storagePath, url, err := h.storageService.Upload(c.Request.Context(), file, fileHeader)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "upload_failed",
-			Message: fmt.Sprintf("Failed to upload file: %v", err),
-			Code:    http.StatusInternalServerError,
-		})
+		log.Printf("[Media] Upload impossible : %v", err)
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to upload file")
 		return
 	}
 
@@ -123,11 +109,7 @@ func (h *MediaHandler) UploadMedia(c *gin.Context) {
 	if err := h.db.Create(&media).Error; err != nil {
 		// Try to delete uploaded file on database error
 		h.storageService.Delete(c.Request.Context(), storagePath)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to save media record",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to save media record")
 		return
 	}
 
@@ -186,11 +168,7 @@ func (h *MediaHandler) GetMediaList(c *gin.Context) {
 	var mediaList []models.Media
 	offset := (page - 1) * pageSize
 	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&mediaList).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch media list",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch media list")
 		return
 	}
 
@@ -212,29 +190,17 @@ func (h *MediaHandler) GetMediaList(c *gin.Context) {
 func (h *MediaHandler) GetMedia(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_id",
-			Message: "Invalid media ID",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid media ID")
 		return
 	}
 
 	var media models.Media
 	if err := h.db.Preload("Uploader").First(&media, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "not_found",
-				Message: "Media not found",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Media not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch media",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch media")
 		return
 	}
 
@@ -245,29 +211,17 @@ func (h *MediaHandler) GetMedia(c *gin.Context) {
 func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_id",
-			Message: "Invalid media ID",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid media ID")
 		return
 	}
 
 	var media models.Media
 	if err := h.db.First(&media, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "not_found",
-				Message: "Media not found",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Media not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch media",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch media")
 		return
 	}
 
@@ -276,11 +230,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_input",
-			Message: "Invalid input data",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid input data")
 		return
 	}
 
@@ -290,11 +240,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&media).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to update media",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update media")
 		return
 	}
 
@@ -310,11 +256,7 @@ func (h *MediaHandler) UpdateMedia(c *gin.Context) {
 func (h *MediaHandler) DeleteMedia(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_id",
-			Message: "Invalid media ID",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid media ID")
 		return
 	}
 
@@ -324,28 +266,16 @@ func (h *MediaHandler) DeleteMedia(c *gin.Context) {
 	var media models.Media
 	if err := h.db.First(&media, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "not_found",
-				Message: "Media not found",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Media not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch media",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch media")
 		return
 	}
 
 	// Check permissions: only uploader or admin can delete
 	if media.UploadedBy != userID.(uint) && role.(string) != "admin" {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "forbidden",
-			Message: "You don't have permission to delete this media",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to delete this media")
 		return
 	}
 
@@ -357,11 +287,7 @@ func (h *MediaHandler) DeleteMedia(c *gin.Context) {
 
 	// Delete from database
 	if err := h.db.Delete(&media).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to delete media record",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete media record")
 		return
 	}
 
@@ -400,11 +326,7 @@ func (h *MediaHandler) GetMediaStats(c *gin.Context) {
 		COALESCE(SUM(file_size), 0) AS total_size`).Scan(&stats).Error
 	if err != nil {
 		log.Printf("[media] statistiques : %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to compute media stats",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to compute media stats")
 		return
 	}
 	c.JSON(http.StatusOK, stats)

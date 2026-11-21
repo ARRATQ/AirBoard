@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
 
@@ -40,11 +41,7 @@ func (h *ChatbotHandler) GetChatbots(c *gin.Context) {
 
 	h.db.Model(&models.Chatbot{}).Count(&total)
 	if err := h.db.Order("created_at DESC").Limit(limit).Offset(offset).Find(&chatbots).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des chatbots",
-			Code:    500,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des chatbots")
 		return
 	}
 
@@ -66,11 +63,7 @@ func (h *ChatbotHandler) GetChatbots(c *gin.Context) {
 func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 	var req models.ChatbotRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides : " + err.Error(),
-			Code:    400,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -115,11 +108,7 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &chatbot, "is_active"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création du chatbot",
-			Code:    500,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du chatbot")
 		return
 	}
 
@@ -131,31 +120,19 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 func (h *ChatbotHandler) UpdateChatbot(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    400,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var chatbot models.Chatbot
 	if err := h.db.First(&chatbot, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Chatbot non trouvé",
-			Code:    404,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Chatbot non trouvé")
 		return
 	}
 
 	var req models.ChatbotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides : " + err.Error(),
-			Code:    400,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -184,11 +161,7 @@ func (h *ChatbotHandler) UpdateChatbot(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&chatbot).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la mise à jour du chatbot",
-			Code:    500,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du chatbot")
 		return
 	}
 
@@ -199,20 +172,12 @@ func (h *ChatbotHandler) UpdateChatbot(c *gin.Context) {
 func (h *ChatbotHandler) DeleteChatbot(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    400,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	if err := h.db.Delete(&models.Chatbot{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression du chatbot",
-			Code:    500,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du chatbot")
 		return
 	}
 
@@ -223,24 +188,24 @@ func (h *ChatbotHandler) DeleteChatbot(c *gin.Context) {
 func (h *ChatbotHandler) TrackInteraction(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	if userID == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		apierror.Respond(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var chatbot models.Chatbot
 	if err := h.db.Where("id = ? AND is_active = ?", id, true).First(&chatbot).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Chatbot non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Chatbot non trouvé")
 		return
 	}
 
 	if err := h.gamificationService.AwardXP(userID, 10, "chatbot_use", ""); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur gamification"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur gamification")
 		return
 	}
 
@@ -251,11 +216,7 @@ func (h *ChatbotHandler) TrackInteraction(c *gin.Context) {
 func (h *ChatbotHandler) GetActiveChatbots(c *gin.Context) {
 	var chatbots []models.Chatbot
 	if err := h.db.Where("is_active = ?", true).Order("created_at ASC").Find(&chatbots).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des chatbots",
-			Code:    500,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des chatbots")
 		return
 	}
 

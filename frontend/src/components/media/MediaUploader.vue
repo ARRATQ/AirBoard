@@ -90,6 +90,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { apiErrorMessage } from '@/services/apiError'
 import { mediaService } from '@/services/api'
 
 const props = defineProps({
@@ -203,7 +204,7 @@ const uploadFile = async (queueItem) => {
     }, 2000)
   } catch (error) {
     queueItem.status = 'error'
-    errorMessage.value = error.response?.data?.message || 'Upload failed'
+    errorMessage.value = apiErrorMessage(error, 'Upload failed')
     emit('upload-error', error)
 
     // Remove from queue after 5 seconds

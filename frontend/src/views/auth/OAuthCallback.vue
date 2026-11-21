@@ -22,6 +22,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { apiErrorMessage } from '@/services/apiError'
 import { useAuthStore } from '@/stores/auth'
 import { oauthService } from '@/services/api'
 import { Icon } from '@iconify/vue'
@@ -125,7 +126,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error('❌ OAuth callback error:', err)
-    error.value = err.response?.data?.message || err.message || 'Une erreur est survenue lors de l\'authentification'
+    error.value = apiErrorMessage(err, err.message || 'Une erreur est survenue lors de l\'authentification')
     isLoading.value = false
   }
 })

@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 	"fmt"
 	"log"
 	"math"
@@ -47,20 +49,20 @@ func (h *SuggestionsHandler) GetSuggestionByID(c *gin.Context) {
 		Preload("PollOption", func(db *gorm.DB) *gorm.DB { return db.Select("id", "poll_id", "text") }).
 		First(&suggestion, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Suggestion not found"})
+			apierror.Respond(c, http.StatusNotFound, "Suggestion not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch suggestion")
 		return
 	}
 
 	if suggestion.IsArchived && c.GetString("role") != "admin" {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Suggestion not found"})
+		apierror.Respond(c, http.StatusNotFound, "Suggestion not found")
 		return
 	}
 
 	if err := h.enrichVoteStats([]*models.Suggestion{&suggestion}, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load suggestion votes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load suggestion votes")
 		return
 	}
 
@@ -72,7 +74,7 @@ func (h *SuggestionsHandler) GetSuggestionByID(c *gin.Context) {
 func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 	var req models.SuggestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -81,30 +83,30 @@ func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 	description := strings.TrimSpace(req.Description)
 
 	if title == "" || description == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Title and description are required"})
+		apierror.Respond(c, http.StatusBadRequest, "Title and description are required")
 		return
 	}
 
 	if len([]rune(title)) < 3 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Title must contain at least 3 characters"})
+		apierror.Respond(c, http.StatusBadRequest, "Title must contain at least 3 characters")
 		return
 	}
 
 	if len([]rune(description)) < 3 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Description must contain at least 3 characters"})
+		apierror.Respond(c, http.StatusBadRequest, "Description must contain at least 3 characters")
 		return
 	}
 
 	category, err := h.getActiveCategory(req.CategoryID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or inactive category_id"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid or inactive category_id")
 		return
 	}
 
 	if req.PollID != nil {
 		var poll models.Poll
 		if err := h.db.First(&poll, *req.PollID).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poll_id"})
+			apierror.Respond(c, http.StatusBadRequest, "Invalid poll_id")
 			return
 		}
 	}
@@ -112,11 +114,11 @@ func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 	if req.PollOptionID != nil {
 		var pollOption models.PollOption
 		if err := h.db.First(&pollOption, *req.PollOptionID).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poll_option_id"})
+			apierror.Respond(c, http.StatusBadRequest, "Invalid poll_option_id")
 			return
 		}
 		if req.PollID != nil && pollOption.PollID != *req.PollID {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "poll_option_id does not belong to poll_id"})
+			apierror.Respond(c, http.StatusBadRequest, "poll_option_id does not belong to poll_id")
 			return
 		}
 		if req.PollID == nil {
@@ -138,16 +140,17 @@ func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&suggestion).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create suggestion")
 		return
 	}
 
 	if h.gamificationService != nil {
-		go func(userID uint, suggestionID uint) {
+		suggestionID := suggestion.ID
+		utils.SafeGo("xp-suggestion-create", func() {
 			if err := h.gamificationService.AwardXP(userID, 35, "suggestion_create", fmt.Sprintf("{\"suggestion_id\":%d}", suggestionID)); err != nil {
 				log.Printf("[Gamification] Failed to award XP for suggestion creation: %v", err)
 			}
-		}(userID, suggestion.ID)
+		})
 	}
 
 	if err := h.db.
@@ -156,12 +159,12 @@ func (h *SuggestionsHandler) CreateSuggestion(c *gin.Context) {
 		Preload("Poll", func(db *gorm.DB) *gorm.DB { return db.Select("id", "title") }).
 		Preload("PollOption", func(db *gorm.DB) *gorm.DB { return db.Select("id", "poll_id", "text") }).
 		First(&suggestion, suggestion.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch created suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch created suggestion")
 		return
 	}
 
 	if err := h.enrichVoteStats([]*models.Suggestion{&suggestion}, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load suggestion votes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load suggestion votes")
 		return
 	}
 
@@ -175,23 +178,23 @@ func (h *SuggestionsHandler) UpdateSuggestionStatus(c *gin.Context) {
 
 	var req models.SuggestionStatusUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var suggestion models.Suggestion
 	if err := h.db.First(&suggestion, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Suggestion not found"})
+			apierror.Respond(c, http.StatusNotFound, "Suggestion not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch suggestion")
 		return
 	}
 
 	suggestion.Status = req.Status
 	if err := h.db.Save(&suggestion).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update suggestion status"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update suggestion status")
 		return
 	}
 
@@ -201,12 +204,12 @@ func (h *SuggestionsHandler) UpdateSuggestionStatus(c *gin.Context) {
 		Preload("Poll", func(db *gorm.DB) *gorm.DB { return db.Select("id", "title") }).
 		Preload("PollOption", func(db *gorm.DB) *gorm.DB { return db.Select("id", "poll_id", "text") }).
 		First(&suggestion, suggestion.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch updated suggestion")
 		return
 	}
 
 	if err := h.enrichVoteStats([]*models.Suggestion{&suggestion}, c.GetUint("user_id")); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load suggestion votes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load suggestion votes")
 		return
 	}
 
@@ -218,23 +221,23 @@ func (h *SuggestionsHandler) UpdateSuggestionArchiveState(c *gin.Context) {
 
 	var req models.SuggestionArchiveUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var suggestion models.Suggestion
 	if err := h.db.First(&suggestion, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Suggestion not found"})
+			apierror.Respond(c, http.StatusNotFound, "Suggestion not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch suggestion")
 		return
 	}
 
 	suggestion.IsArchived = req.IsArchived
 	if err := h.db.Save(&suggestion).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update archive state"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update archive state")
 		return
 	}
 
@@ -244,12 +247,12 @@ func (h *SuggestionsHandler) UpdateSuggestionArchiveState(c *gin.Context) {
 		Preload("Poll", func(db *gorm.DB) *gorm.DB { return db.Select("id", "title") }).
 		Preload("PollOption", func(db *gorm.DB) *gorm.DB { return db.Select("id", "poll_id", "text") }).
 		First(&suggestion, suggestion.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch updated suggestion")
 		return
 	}
 
 	if err := h.enrichVoteStats([]*models.Suggestion{&suggestion}, c.GetUint("user_id")); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load suggestion votes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load suggestion votes")
 		return
 	}
 
@@ -259,13 +262,13 @@ func (h *SuggestionsHandler) UpdateSuggestionArchiveState(c *gin.Context) {
 func (h *SuggestionsHandler) VoteSuggestion(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid suggestion id"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid suggestion id")
 		return
 	}
 
 	var req models.SuggestionVoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -274,16 +277,16 @@ func (h *SuggestionsHandler) VoteSuggestion(c *gin.Context) {
 	var suggestion models.Suggestion
 	if err := h.db.First(&suggestion, uint(id)).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Suggestion not found"})
+			apierror.Respond(c, http.StatusNotFound, "Suggestion not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch suggestion"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch suggestion")
 		return
 	}
 
 	if req.VoteType == "none" {
 		if err := h.db.Where("suggestion_id = ? AND user_id = ?", uint(id), userID).Delete(&models.SuggestionVote{}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to remove vote")
 			return
 		}
 	} else {
@@ -294,22 +297,22 @@ func (h *SuggestionsHandler) VoteSuggestion(c *gin.Context) {
 			isFirstVoteForSuggestion = true
 			vote = models.SuggestionVote{SuggestionID: uint(id), UserID: userID, VoteType: req.VoteType}
 			if err := h.db.Create(&vote).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save vote"})
+				apierror.Respond(c, http.StatusInternalServerError, "Failed to save vote")
 				return
 			}
 		} else if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch vote"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch vote")
 			return
 		} else {
 			if vote.VoteType == req.VoteType {
 				if err := h.db.Delete(&vote).Error; err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+					apierror.Respond(c, http.StatusInternalServerError, "Failed to remove vote")
 					return
 				}
 			} else {
 				vote.VoteType = req.VoteType
 				if err := h.db.Save(&vote).Error; err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update vote"})
+					apierror.Respond(c, http.StatusInternalServerError, "Failed to update vote")
 					return
 				}
 			}
@@ -320,18 +323,19 @@ func (h *SuggestionsHandler) VoteSuggestion(c *gin.Context) {
 			if rewardErr != nil {
 				log.Printf("[Gamification] Failed to check suggestion vote reward: %v", rewardErr)
 			} else if !hasReward {
-				go func(userID uint, suggestionID uint) {
+				suggestionID := uint(id)
+				utils.SafeGo("xp-suggestion-vote", func() {
 					if err := h.gamificationService.AwardXP(userID, 8, "suggestion_vote", fmt.Sprintf("{\"suggestion_id\":%d}", suggestionID)); err != nil {
 						log.Printf("[Gamification] Failed to award XP for suggestion vote: %v", err)
 					}
-				}(userID, uint(id))
+				})
 			}
 		}
 	}
 
 	voteStats, err := h.getSuggestionVoteStats(uint(id), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load vote stats"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load vote stats")
 		return
 	}
 
@@ -348,7 +352,7 @@ func (h *SuggestionsHandler) GetSuggestionCategories(c *gin.Context) {
 
 	var categories []models.SuggestionCategory
 	if err := query.Order("\"order\" ASC, name ASC").Find(&categories).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load categories"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load categories")
 		return
 	}
 
@@ -362,14 +366,14 @@ func (h *SuggestionsHandler) GetAdminSuggestionCategories(c *gin.Context) {
 func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 	var req models.SuggestionCategoryRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	name := strings.TrimSpace(req.Name)
 	slug := normalizeSlug(req.Slug)
 	if name == "" || slug == "" || !slugRegex.MatchString(slug) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category name or slug"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid category name or slug")
 		return
 	}
 
@@ -387,10 +391,10 @@ func (h *SuggestionsHandler) CreateSuggestionCategory(c *gin.Context) {
 
 	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			apierror.Respond(c, http.StatusConflict, "Category name or slug already exists")
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to create category"})
+		apierror.Respond(c, http.StatusBadRequest, "Failed to create category")
 		return
 	}
 
@@ -403,23 +407,23 @@ func (h *SuggestionsHandler) UpdateSuggestionCategory(c *gin.Context) {
 	var category models.SuggestionCategory
 	if err := h.db.First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+			apierror.Respond(c, http.StatusNotFound, "Category not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch category"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch category")
 		return
 	}
 
 	var req models.SuggestionCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	name := strings.TrimSpace(req.Name)
 	slug := normalizeSlug(req.Slug)
 	if name == "" || slug == "" || !slugRegex.MatchString(slug) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category name or slug"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid category name or slug")
 		return
 	}
 
@@ -432,10 +436,10 @@ func (h *SuggestionsHandler) UpdateSuggestionCategory(c *gin.Context) {
 
 	if err := h.db.Save(&category).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "Category name or slug already exists"})
+			apierror.Respond(c, http.StatusConflict, "Category name or slug already exists")
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to update category"})
+		apierror.Respond(c, http.StatusBadRequest, "Failed to update category")
 		return
 	}
 
@@ -445,22 +449,22 @@ func (h *SuggestionsHandler) UpdateSuggestionCategory(c *gin.Context) {
 func (h *SuggestionsHandler) DeleteSuggestionCategory(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category id"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid category id")
 		return
 	}
 
 	var count int64
 	if err := h.db.Model(&models.Suggestion{}).Where("category_id = ?", uint(id)).Count(&count).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check category usage"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to check category usage")
 		return
 	}
 	if count > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "Category is used by existing suggestions"})
+		apierror.Respond(c, http.StatusConflict, "Category is used by existing suggestions")
 		return
 	}
 
 	if err := h.db.Delete(&models.SuggestionCategory{}, uint(id)).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete category"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete category")
 		return
 	}
 
@@ -497,7 +501,7 @@ func (h *SuggestionsHandler) listSuggestions(c *gin.Context, includeAnonymousUse
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count suggestions"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to count suggestions")
 		return
 	}
 
@@ -511,7 +515,7 @@ func (h *SuggestionsHandler) listSuggestions(c *gin.Context, includeAnonymousUse
 		Offset((page - 1) * pageSize).
 		Limit(pageSize).
 		Find(&suggestions).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch suggestions"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch suggestions")
 		return
 	}
 
@@ -521,7 +525,7 @@ func (h *SuggestionsHandler) listSuggestions(c *gin.Context, includeAnonymousUse
 		suggestionPtrs = append(suggestionPtrs, &suggestions[i])
 	}
 	if err := h.enrichVoteStats(suggestionPtrs, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load suggestion votes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to load suggestion votes")
 		return
 	}
 

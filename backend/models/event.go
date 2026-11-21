@@ -9,7 +9,7 @@ import (
 )
 
 // Event représente un événement dans le calendrier
-// Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 // Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type Event struct {
 	ID          uint   `json:"id" gorm:"primaryKey"`
@@ -62,7 +62,7 @@ type Event struct {
 }
 
 // EventCategory représente une catégorie d'événements
-// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 // Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type EventCategory struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`

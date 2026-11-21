@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/models"
 	"net/http"
 	"strconv"
@@ -23,21 +24,13 @@ func (h *FeedbackHandler) GetFeedbackStats(c *gin.Context) {
 	entityIDStr := c.Query("entity_id")
 
 	if entityType == "" || entityIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "MISSING_PARAMETERS",
-			Message: "entity_type et entity_id sont requis",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_type et entity_id sont requis")
 		return
 	}
 
 	entityID, err := strconv.ParseUint(entityIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_ENTITY_ID",
-			Message: "entity_id doit être un nombre valide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_id doit être un nombre valide")
 		return
 	}
 
@@ -78,21 +71,13 @@ func (h *FeedbackHandler) GetFeedbackStats(c *gin.Context) {
 func (h *FeedbackHandler) AddFeedback(c *gin.Context) {
 	var req models.FeedbackRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_REQUEST",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -106,11 +91,7 @@ func (h *FeedbackHandler) AddFeedback(c *gin.Context) {
 		if existingFeedback.FeedbackType == req.FeedbackType {
 			// Supprimer le feedback si c'est le même (toggle)
 			if err := h.DB.Delete(&existingFeedback).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "DATABASE_ERROR",
-					Message: "Erreur lors de la suppression du feedback",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du feedback")
 				return
 			}
 			c.JSON(http.StatusOK, models.SuccessResponse{
@@ -121,11 +102,7 @@ func (h *FeedbackHandler) AddFeedback(c *gin.Context) {
 			// Changer le type de feedback
 			existingFeedback.FeedbackType = req.FeedbackType
 			if err := h.DB.Save(&existingFeedback).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "DATABASE_ERROR",
-					Message: "Erreur lors de la mise à jour du feedback",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du feedback")
 				return
 			}
 			c.JSON(http.StatusOK, models.SuccessResponse{
@@ -135,11 +112,7 @@ func (h *FeedbackHandler) AddFeedback(c *gin.Context) {
 			return
 		}
 	} else if err != gorm.ErrRecordNotFound {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la vérification du feedback existant",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification du feedback existant")
 		return
 	}
 
@@ -152,11 +125,7 @@ func (h *FeedbackHandler) AddFeedback(c *gin.Context) {
 	}
 
 	if err := h.DB.Create(&feedback).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la création du feedback",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du feedback")
 		return
 	}
 
@@ -172,31 +141,19 @@ func (h *FeedbackHandler) RemoveFeedback(c *gin.Context) {
 	entityIDStr := c.Query("entity_id")
 
 	if entityType == "" || entityIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "MISSING_PARAMETERS",
-			Message: "entity_type et entity_id sont requis",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_type et entity_id sont requis")
 		return
 	}
 
 	entityID, err := strconv.ParseUint(entityIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_ENTITY_ID",
-			Message: "entity_id doit être un nombre valide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_id doit être un nombre valide")
 		return
 	}
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -205,20 +162,12 @@ func (h *FeedbackHandler) RemoveFeedback(c *gin.Context) {
 		userID, entityType, entityID).Delete(&models.Feedback{})
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la suppression du feedback",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du feedback")
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "FEEDBACK_NOT_FOUND",
-			Message: "Aucun feedback trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Aucun feedback trouvé")
 		return
 	}
 
@@ -233,21 +182,13 @@ func (h *FeedbackHandler) GetAllFeedback(c *gin.Context) {
 	entityIDStr := c.Query("entity_id")
 
 	if entityType == "" || entityIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "MISSING_PARAMETERS",
-			Message: "entity_type et entity_id sont requis",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_type et entity_id sont requis")
 		return
 	}
 
 	entityID, err := strconv.ParseUint(entityIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_ENTITY_ID",
-			Message: "entity_id doit être un nombre valide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_id doit être un nombre valide")
 		return
 	}
 
@@ -256,11 +197,7 @@ func (h *FeedbackHandler) GetAllFeedback(c *gin.Context) {
 		Preload("User").
 		Order("created_at DESC").
 		Find(&feedbacks).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des feedbacks",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des feedbacks")
 		return
 	}
 

@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/services"
 	"crypto/subtle"
 	"log"
+	"net/http"
 	"strings"
 	"sync"
 
@@ -87,11 +89,7 @@ func (m *SSOMiddleware) DetectSSO() gin.HandlerFunc {
 		case ssoProxyRejected:
 			log.Printf("[SECURITY] Headers SSO rejetés (secret proxy absent ou invalide) depuis %s (email: %s, username: %s)",
 				clientIP, email, username)
-			c.JSON(403, gin.H{
-				"error":   "Forbidden",
-				"message": "Headers SSO non autorisés depuis cette source",
-			})
-			c.Abort()
+			apierror.Abort(c, http.StatusForbidden, "Headers SSO non autorisés depuis cette source")
 			return
 		}
 

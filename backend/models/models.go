@@ -77,24 +77,24 @@ type AppGroup struct {
 
 // Application représente une application dans le portail
 type Application struct {
-	ID           uint           `json:"id" gorm:"primaryKey"`
-	Name         string         `json:"name" gorm:"not null"`
-	Description  string         `json:"description"`
-	URL          string         `json:"url" gorm:"not null"`
-	Icon         string         `json:"icon" gorm:"default:'mdi:application'"` // Icône Iconify
-	Color        string         `json:"color" gorm:"default:'#6366F1'"`        // Couleur pour l'affichage
-	Order        int            `json:"order" gorm:"default:0"`
-	IsActive     bool           `json:"is_active" gorm:"default:true"`
-	OpenInNewTab bool           `json:"open_in_new_tab" gorm:"default:true"`
+	ID           uint   `json:"id" gorm:"primaryKey"`
+	Name         string `json:"name" gorm:"not null"`
+	Description  string `json:"description"`
+	URL          string `json:"url" gorm:"not null"`
+	Icon         string `json:"icon" gorm:"default:'mdi:application'"` // Icône Iconify
+	Color        string `json:"color" gorm:"default:'#6366F1'"`        // Couleur pour l'affichage
+	Order        int    `json:"order" gorm:"default:0"`
+	IsActive     bool   `json:"is_active" gorm:"default:true"`
+	OpenInNewTab bool   `json:"open_in_new_tab" gorm:"default:true"`
 	// Note courte de l'admin affichée sur la tuile (ex. « Maintenance jeudi 18 h »),
 	// jusqu'à AdminNoteUntil si renseignée. Voir NormalizeAdminNote.
-	AdminNote      string     `json:"admin_note" gorm:"size:140"`
-	AdminNoteUntil *time.Time `json:"admin_note_until"`
-	AppGroupID  uint  `json:"app_group_id"`
-	CreatedByID *uint `json:"created_by_id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	AdminNote      string         `json:"admin_note" gorm:"size:140"`
+	AdminNoteUntil *time.Time     `json:"admin_note_until"`
+	AppGroupID     uint           `json:"app_group_id"`
+	CreatedByID    *uint          `json:"created_by_id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relations
 	AppGroup  *AppGroup `json:"app_group,omitempty"`
@@ -131,10 +131,13 @@ type RegisterRequest struct {
 	LastName  string `json:"last_name" binding:"max=50"`
 }
 
+// ErrorResponse est l'unique corps de réponse d'erreur de l'API (voir le paquet
+// apierror) : `error` est un message lisible, affichable tel quel ; `code` est
+// un identifiant stable (« not_found », « comments_disabled »…) pour les
+// clients qui veulent réagir à un cas précis ou traduire le message.
 type ErrorResponse struct {
-	Error   string `json:"error"`
-	Message string `json:"message"`
-	Code    int    `json:"code"`
+	Error string `json:"error"`
+	Code  string `json:"code"`
 }
 
 type SuccessResponse struct {
@@ -212,41 +215,41 @@ func (m *Media) MediaType() string {
 
 // AppSettings représente les paramètres de configuration de l'application
 type AppSettings struct {
-	ID              uint      `json:"id" gorm:"primaryKey"`
-	AppName         string    `json:"app_name" gorm:"default:'Airboard'"`
-	AppIcon         string    `json:"app_icon" gorm:"default:'mdi:view-dashboard'"`
-	DashboardTitle  string    `json:"dashboard_title" gorm:"default:'Dashboard'"`
-	WelcomeMessage  string    `json:"welcome_message" gorm:"default:'Welcome to your application portal'"`     // Message pour la page Dashboard
-	HomePageMessage string    `json:"home_page_message" gorm:"default:'Discover your personalized workspace'"` // Message pour la page d'accueil
-	SignupEnabled   bool      `json:"signup_enabled" gorm:"default:true"`                                      // Activer/désactiver l'inscription
-	DefaultGroupID  *uint     `json:"default_group_id" gorm:"default:null"`
-	HeroImageURL      string    `json:"hero_image_url" gorm:"default:''"` // URL de l'image de fond du hero (vide = gradient par défaut)
-	HeroImageURLDark  string    `json:"hero_image_url_dark" gorm:"default:''"` // URL de l'image de fond du hero en mode sombre (vide = utilise hero_image_url)
+	ID                uint      `json:"id" gorm:"primaryKey"`
+	AppName           string    `json:"app_name" gorm:"default:'Airboard'"`
+	AppIcon           string    `json:"app_icon" gorm:"default:'mdi:view-dashboard'"`
+	DashboardTitle    string    `json:"dashboard_title" gorm:"default:'Dashboard'"`
+	WelcomeMessage    string    `json:"welcome_message" gorm:"default:'Welcome to your application portal'"`     // Message pour la page Dashboard
+	HomePageMessage   string    `json:"home_page_message" gorm:"default:'Discover your personalized workspace'"` // Message pour la page d'accueil
+	SignupEnabled     bool      `json:"signup_enabled" gorm:"default:true"`                                      // Activer/désactiver l'inscription
+	DefaultGroupID    *uint     `json:"default_group_id" gorm:"default:null"`
+	HeroImageURL      string    `json:"hero_image_url" gorm:"default:''"`                   // URL de l'image de fond du hero (vide = gradient par défaut)
+	HeroImageURLDark  string    `json:"hero_image_url_dark" gorm:"default:''"`              // URL de l'image de fond du hero en mode sombre (vide = utilise hero_image_url)
 	HeroImagePosition string    `json:"hero_image_position" gorm:"default:'center center'"` // Position CSS background-position
-	ColorPalette      string    `json:"color_palette" gorm:"default:'claude'"`        // Palette de couleurs de l'interface
-	CustomAccentColor string    `json:"custom_accent_color" gorm:"default:'#d97757'"` // Couleur accent personnalisée (legacy)
-	CustomPalettes    string    `json:"custom_palettes" gorm:"type:text;default:'[]'"` // Palettes personnalisées (JSON)
-	NewsPerTab        int       `json:"news_per_tab" gorm:"default:5"`                // Nombre d'articles par onglet sur la home
+	ColorPalette      string    `json:"color_palette" gorm:"default:'claude'"`              // Palette de couleurs de l'interface
+	CustomAccentColor string    `json:"custom_accent_color" gorm:"default:'#d97757'"`       // Couleur accent personnalisée (legacy)
+	CustomPalettes    string    `json:"custom_palettes" gorm:"type:text;default:'[]'"`      // Palettes personnalisées (JSON)
+	NewsPerTab        int       `json:"news_per_tab" gorm:"default:5"`                      // Nombre d'articles par onglet sur la home
 	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
 }
 
 // AppSettingsRequest pour les requêtes de mise à jour
 type AppSettingsRequest struct {
-	AppName         string `json:"app_name" binding:"required,min=1"`
-	AppIcon         string `json:"app_icon" binding:"required"`
-	DashboardTitle  string `json:"dashboard_title" binding:"required,min=1"`
-	WelcomeMessage  string `json:"welcome_message" binding:"required,min=1"` // Message pour Dashboard
-	HomePageMessage string `json:"home_page_message"`                        // Message pour page d'accueil (optionnel)
-	SignupEnabled   *bool  `json:"signup_enabled"`                           // Activer/désactiver l'inscription
-	DefaultGroupID  *uint  `json:"default_group_id"`
-	HeroImageURL      string `json:"hero_image_url"`       // URL de l'image de fond du hero (optionnel)
-	HeroImageURLDark  string `json:"hero_image_url_dark"`  // URL de l'image en mode sombre (optionnel)
-	HeroImagePosition string `json:"hero_image_position"`  // Position CSS background-position (optionnel)
-	ColorPalette      string `json:"color_palette"`          // Palette de couleurs (optionnel)
-	CustomAccentColor string `json:"custom_accent_color"`    // Couleur accent personnalisée (optionnel)
-	CustomPalettes    string `json:"custom_palettes"`         // Palettes personnalisées JSON (optionnel)
-	NewsPerTab        int    `json:"news_per_tab"`            // Nombre d'articles par onglet (optionnel)
+	AppName           string `json:"app_name" binding:"required,min=1"`
+	AppIcon           string `json:"app_icon" binding:"required"`
+	DashboardTitle    string `json:"dashboard_title" binding:"required,min=1"`
+	WelcomeMessage    string `json:"welcome_message" binding:"required,min=1"` // Message pour Dashboard
+	HomePageMessage   string `json:"home_page_message"`                        // Message pour page d'accueil (optionnel)
+	SignupEnabled     *bool  `json:"signup_enabled"`                           // Activer/désactiver l'inscription
+	DefaultGroupID    *uint  `json:"default_group_id"`
+	HeroImageURL      string `json:"hero_image_url"`      // URL de l'image de fond du hero (optionnel)
+	HeroImageURLDark  string `json:"hero_image_url_dark"` // URL de l'image en mode sombre (optionnel)
+	HeroImagePosition string `json:"hero_image_position"` // Position CSS background-position (optionnel)
+	ColorPalette      string `json:"color_palette"`       // Palette de couleurs (optionnel)
+	CustomAccentColor string `json:"custom_accent_color"` // Couleur accent personnalisée (optionnel)
+	CustomPalettes    string `json:"custom_palettes"`     // Palettes personnalisées JSON (optionnel)
+	NewsPerTab        int    `json:"news_per_tab"`        // Nombre d'articles par onglet (optionnel)
 }
 
 // ChangePasswordRequest pour les changements de mot de passe
@@ -459,11 +462,11 @@ type Chatbot struct {
 	Description     string         `json:"description"`
 	WebhookURL      string         `json:"webhook_url" gorm:"not null"`
 	Icon            string         `json:"icon" gorm:"default:'mdi:robot-outline'"`
-	Color           string         `json:"color" gorm:"default:'#4f46e5'"`               // Couleur principale du widget
-	WelcomeTitle    string         `json:"welcome_title"`                                // Titre de l'écran d'accueil
-	WelcomeSubtitle string         `json:"welcome_subtitle"`                             // Sous-titre de l'écran d'accueil
-	HideHeader      bool           `json:"hide_header" gorm:"default:false"`             // Masquer totalement l'en-tête n8n
-	ShowAvatarIntro bool           `json:"show_avatar_intro" gorm:"default:false"`       // Afficher un avatar animé de bienvenue
+	Color           string         `json:"color" gorm:"default:'#4f46e5'"`         // Couleur principale du widget
+	WelcomeTitle    string         `json:"welcome_title"`                          // Titre de l'écran d'accueil
+	WelcomeSubtitle string         `json:"welcome_subtitle"`                       // Sous-titre de l'écran d'accueil
+	HideHeader      bool           `json:"hide_header" gorm:"default:false"`       // Masquer totalement l'en-tête n8n
+	ShowAvatarIntro bool           `json:"show_avatar_intro" gorm:"default:false"` // Afficher un avatar animé de bienvenue
 	IsActive        bool           `json:"is_active" gorm:"default:true"`
 	InitialMessages string         `json:"initial_messages" gorm:"type:text;default:'[]'"` // JSON array string
 	CreatedAt       time.Time      `json:"created_at"`

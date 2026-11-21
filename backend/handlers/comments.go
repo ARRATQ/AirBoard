@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,81 +34,49 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 	entityIDStr := c.Query("entity_id")
 
 	if entityType == "" || entityIDStr == "" {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "MISSING_PARAMETERS",
-			Message: "entity_type et entity_id sont requis",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_type et entity_id sont requis")
 		return
 	}
 
 	entityID, err := strconv.ParseUint(entityIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_ENTITY_ID",
-			Message: "entity_id doit être un nombre valide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_id doit être un nombre valide")
 		return
 	}
 
 	// Vérifier les paramètres de commentaires
 	var settings models.CommentSettings
 	if err := h.DB.First(&settings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des paramètres",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des paramètres")
 		return
 	}
 
 	// Vérifier si les commentaires sont activés pour ce type d'entité
 	if !settings.CommentsEnabled {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "COMMENTS_DISABLED",
-			Message: "Les commentaires sont désactivés",
-			Code:    http.StatusForbidden,
-		})
+		apierror.RespondCode(c, http.StatusForbidden, apierror.CodeCommentsDisabled, "Les commentaires sont désactivés")
 		return
 	}
 
 	switch entityType {
 	case "news":
 		if !settings.NewsCommentsEnabled {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "NEWS_COMMENTS_DISABLED",
-				Message: "Les commentaires sur les actualités sont désactivés",
-				Code:    http.StatusForbidden,
-			})
+			apierror.RespondCode(c, http.StatusForbidden, apierror.CodeCommentsDisabled, "Les commentaires sur les actualités sont désactivés")
 			return
 		}
 	case "application":
 		if !settings.AppCommentsEnabled {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "APP_COMMENTS_DISABLED",
-				Message: "Les commentaires sur les applications sont désactivés",
-				Code:    http.StatusForbidden,
-			})
+			apierror.RespondCode(c, http.StatusForbidden, apierror.CodeCommentsDisabled, "Les commentaires sur les applications sont désactivés")
 			return
 		}
 	case "event":
 		if !settings.EventCommentsEnabled {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "EVENT_COMMENTS_DISABLED",
-				Message: "Les commentaires sur les événements sont désactivés",
-				Code:    http.StatusForbidden,
-			})
+			apierror.RespondCode(c, http.StatusForbidden, apierror.CodeCommentsDisabled, "Les commentaires sur les événements sont désactivés")
 			return
 		}
 	case "suggestion":
 		// Suggestions utilisent uniquement le flag global comments_enabled
 	default:
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_ENTITY_TYPE",
-			Message: "entity_type invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "entity_type invalide")
 		return
 	}
 
@@ -168,63 +138,39 @@ func commentPageResponse(comments []models.Comment, total int64, page pageParams
 }
 
 func respondCommentsError(c *gin.Context) {
-	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-		Error:   "DATABASE_ERROR",
-		Message: "Erreur lors de la récupération des commentaires",
-		Code:    http.StatusInternalServerError,
-	})
+	apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des commentaires")
 }
 
 // CreateComment crée un nouveau commentaire
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var req models.CommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_REQUEST",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	// Récupérer l'utilisateur connecté
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	// Vérifier les paramètres de commentaires
 	var settings models.CommentSettings
 	if err := h.DB.First(&settings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des paramètres",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des paramètres")
 		return
 	}
 
 	if !settings.CommentsEnabled {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "COMMENTS_DISABLED",
-			Message: "Les commentaires sont désactivés",
-			Code:    http.StatusForbidden,
-		})
+		apierror.RespondCode(c, http.StatusForbidden, apierror.CodeCommentsDisabled, "Les commentaires sont désactivés")
 		return
 	}
 
 	// Vérifier la limite de longueur
 	if len(req.Content) > settings.MaxCommentLength {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "COMMENT_TOO_LONG",
-			Message: "Le commentaire est trop long",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.RespondCode(c, http.StatusBadRequest, apierror.CodeCommentTooLong, "Le commentaire est trop long")
 		return
 	}
 
@@ -252,28 +198,20 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 		return nil
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la création du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du commentaire")
 		return
 	}
 
 	// Recharger avec les relations
 	if err := h.DB.Preload("User").First(&comment, comment.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
 	// Accorder des points XP pour la création d'un commentaire
 	if h.Gamification != nil {
 		// 10 XP pour un commentaire
-		go func() {
+		utils.SafeGo("xp-comment-create", func() {
 			err := h.Gamification.AwardXP(userID.(uint), 10, "comment_create", "{}")
 			if err != nil {
 				// Log error but don't fail request
@@ -286,7 +224,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 					log.Printf("[Gamification] Failed to award XP for suggestion comment: %v", err)
 				}
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, models.SuccessResponse{
@@ -301,21 +239,13 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 
 	var req models.CommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_REQUEST",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -325,28 +255,16 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	var comment models.Comment
 	if err := h.DB.First(&comment, commentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "COMMENT_NOT_FOUND",
-				Message: "Commentaire non trouvé",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Commentaire non trouvé")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
 	// Vérifier que l'utilisateur est l'auteur ou admin
 	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "FORBIDDEN",
-			Message: "Vous n'avez pas la permission de modifier ce commentaire",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous n'avez pas la permission de modifier ce commentaire")
 		return
 	}
 
@@ -354,21 +272,13 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	comment.Content = req.Content
 
 	if err := h.DB.Save(&comment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la mise à jour du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du commentaire")
 		return
 	}
 
 	// Recharger avec les relations
 	if err := h.DB.Preload("User").First(&comment, comment.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
@@ -384,11 +294,7 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -399,38 +305,22 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	var comment models.Comment
 	if err := h.DB.First(&comment, commentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "COMMENT_NOT_FOUND",
-				Message: "Commentaire non trouvé",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Commentaire non trouvé")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
 	// Vérifier que l'utilisateur est l'auteur ou admin/editor/admin de groupe
 	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" && len(managedGroupIDs) == 0 {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "FORBIDDEN",
-			Message: "Vous n'avez pas la permission de supprimer ce commentaire",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous n'avez pas la permission de supprimer ce commentaire")
 		return
 	}
 
 	// Supprimer le commentaire
 	if err := h.DB.Delete(&comment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la suppression du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du commentaire")
 		return
 	}
 
@@ -443,21 +333,13 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 func (h *CommentHandler) ModerateComment(c *gin.Context) {
 	var req models.ModerationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_REQUEST",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "UNAUTHORIZED",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -465,18 +347,10 @@ func (h *CommentHandler) ModerateComment(c *gin.Context) {
 	var comment models.Comment
 	if err := h.DB.First(&comment, req.CommentID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "COMMENT_NOT_FOUND",
-				Message: "Commentaire non trouvé",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Commentaire non trouvé")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
@@ -489,21 +363,13 @@ func (h *CommentHandler) ModerateComment(c *gin.Context) {
 	comment.ModeratedAt = &now
 
 	if err := h.DB.Save(&comment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la modération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la modération du commentaire")
 		return
 	}
 
 	// Recharger avec les relations
 	if err := h.DB.Preload("User").Preload("Moderator").First(&comment, comment.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération du commentaire",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du commentaire")
 		return
 	}
 
@@ -543,19 +409,11 @@ func (h *CommentHandler) GetCommentSettings(c *gin.Context) {
 				MaxCommentLength:     1000,
 			}
 			if err := h.DB.Create(&settings).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "DATABASE_ERROR",
-					Message: "Erreur lors de la création des paramètres",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création des paramètres")
 				return
 			}
 		} else {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "DATABASE_ERROR",
-				Message: "Erreur lors de la récupération des paramètres",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des paramètres")
 			return
 		}
 	}
@@ -567,21 +425,13 @@ func (h *CommentHandler) GetCommentSettings(c *gin.Context) {
 func (h *CommentHandler) UpdateCommentSettings(c *gin.Context) {
 	var req models.CommentSettingsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "INVALID_REQUEST",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var settings models.CommentSettings
 	if err := h.DB.First(&settings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des paramètres",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des paramètres")
 		return
 	}
 
@@ -607,22 +457,14 @@ func (h *CommentHandler) UpdateCommentSettings(c *gin.Context) {
 	if req.MaxCommentLength != nil {
 		// 0 ou une valeur trop basse rendrait tout commentaire impossible
 		if !validCommentLength(*req.MaxCommentLength) {
-			c.JSON(http.StatusBadRequest, models.ErrorResponse{
-				Error:   "VALIDATION_ERROR",
-				Message: fmt.Sprintf("La longueur maximale doit être comprise entre %d et %d caractères", minCommentLengthSetting, maxCommentLengthSetting),
-				Code:    http.StatusBadRequest,
-			})
+			apierror.Respond(c, http.StatusBadRequest, fmt.Sprintf("La longueur maximale doit être comprise entre %d et %d caractères", minCommentLengthSetting, maxCommentLengthSetting))
 			return
 		}
 		settings.MaxCommentLength = *req.MaxCommentLength
 	}
 
 	if err := h.DB.Save(&settings).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la mise à jour des paramètres",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour des paramètres")
 		return
 	}
 

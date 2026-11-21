@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -48,7 +49,7 @@ func canManageDirectory(c *gin.Context) bool {
 func parseIDParam(c *gin.Context) (uint, bool) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil || id == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Identifiant invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Identifiant invalide")
 		return 0, false
 	}
 	return uint(id), true
@@ -65,7 +66,7 @@ func (h *DirectoryHandler) GetDirectory(c *gin.Context) {
 		Preload("Positions.Assignments", func(db *gorm.DB) *gorm.DB { return db.Order("\"order\" ASC, id ASC") }).
 		Order("\"order\" ASC, name ASC").
 		Find(&units).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de charger la structure"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de charger la structure")
 		return
 	}
 
@@ -75,7 +76,7 @@ func (h *DirectoryHandler) GetDirectory(c *gin.Context) {
 	}
 	var fields []models.DirectoryField
 	if err := fieldsQuery.Find(&fields).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de charger les champs"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de charger les champs")
 		return
 	}
 
@@ -85,7 +86,7 @@ func (h *DirectoryHandler) GetDirectory(c *gin.Context) {
 	}
 	var people []models.DirectoryPerson
 	if err := peopleQuery.Find(&people).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de charger les personnes"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de charger les personnes")
 		return
 	}
 
@@ -242,7 +243,7 @@ func (h *DirectoryHandler) SearchUsers(c *gin.Context) {
 	}
 	var users []userLite
 	if err := query.Order("last_name ASC, first_name ASC").Limit(20).Scan(&users).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Recherche impossible"})
+		apierror.Respond(c, http.StatusInternalServerError, "Recherche impossible")
 		return
 	}
 	c.JSON(http.StatusOK, users)
