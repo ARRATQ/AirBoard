@@ -108,100 +108,28 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	now := time.Now()
 
-	if userRole == "admin" {
+	switch {
+	case userRole == "admin":
 		// Admin voit tout (publié + brouillons)
-	} else if len(managedGroupIDs) > 0 {
-		// Group admin (utilisateur qui administre au moins un groupe) voit UNIQUEMENT dans l'interface d'administration :
-		// 1. Ses propres articles (publiés + brouillons)
-		// 2. Les articles (publiés + brouillons) ciblant les groupes qu'il administre
-		// Note : il ne voit PAS les articles publics globaux qu'il ne peut pas gérer
-
-		// Récupérer aussi les groupes d'appartenance pour la lecture publique
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes (appartenance + administration)
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
-
-		// Si le group_admin accède via /group-admin/news, on filtre strictement
-		// Sinon (lecture publique via /news), il voit les news publiques comme un user normal
-		isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/news")
-
-		if isAdminInterface {
-			// Interface d'administration : seulement les news qu'il peut gérer
-			if len(managedGroupIDs) > 0 {
-				query = query.Where(`
-					(author_id = ?) OR
-					EXISTS (
-						SELECT 1 FROM news_target_groups
-						WHERE news_target_groups.news_id = news.id
-						AND news_target_groups.group_id IN (?)
-					)
-				`, userID, managedGroupIDs)
-			} else {
-				// Pas de groupes gérés : uniquement ses propres articles
-				query = query.Where("author_id = ?", userID)
-			}
+	case len(managedGroupIDs) > 0:
+		// Administrateur de groupe. Dans l'interface /group-admin/news : seulement ce qu'il
+		// gère (ses articles et ceux qui ciblent ses groupes, brouillons compris). En lecture
+		// publique : ses brouillons + les news publiées globales ou de ses groupes
+		// (appartenance + administration).
+		if strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/news") {
+			query = query.Scopes(newsTargets.manageableBy(userID, managedGroupIDs))
 		} else {
-			// Interface publique : voir ses brouillons + news publiées globales + celles de ses groupes (appartenance + administration)
-			if len(combinedGroupIDs) > 0 {
-				query = query.Where(`
-					(author_id = ?) OR
-					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-						NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id) OR
-						EXISTS (
-							SELECT 1 FROM news_target_groups
-							WHERE news_target_groups.news_id = news.id
-							AND news_target_groups.group_id IN (?)
-						)
-					))
-				`, userID, true, time.Now(), combinedGroupIDs)
-			} else {
-				// Pas de groupes : ses brouillons + news publiques globales
-				query = query.Where(`
-					(author_id = ?) OR
-					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
-						NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
-					)
-				`, userID, true, time.Now())
-			}
+			groupIDs := memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)
+			query = query.Scopes(newsTargets.ownOrPublishedVisibleTo(userID, groupIDs, now))
 		}
-	} else if userRole == "editor" {
-		// Editor voit : news publiques + ses propres brouillons
-		query = query.Where("(is_published = ? AND (published_at IS NULL OR published_at <= ?)) OR author_id = ?",
-			true, time.Now(), userID)
-	} else {
-		// User régulier voit : news publiques + news ciblant ses groupes
-		query = query.Where("is_published = ?", true).
-			Where("(published_at IS NULL OR published_at <= ?)", time.Now())
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
-				OR EXISTS (
-					SELECT 1 FROM news_target_groups
-					WHERE news_target_groups.news_id = news.id
-					AND news_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
-		} else {
-			// Si pas de groupes, voir seulement les news globales
-			query = query.Where("NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)")
-		}
+	case userRole == "editor":
+		// Editor voit : news publiées + ses propres brouillons
+		query = query.Where("("+publishedCondition+") OR author_id = ?", true, now, userID)
+	default:
+		// User régulier voit : news publiées globales + celles ciblant ses groupes
+		query = query.Scopes(newsTargets.publishedVisibleTo(userGroupIDs(h.db, userID), now))
 	}
 
 	// Tri
@@ -288,44 +216,10 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 		return
 	}
 
-	// Article publié : vérifier les groupes cibles
-	// Si pas de groupes cibles, c'est une news globale (accessible à tous)
-	if len(news.TargetGroups) == 0 {
-		c.JSON(http.StatusOK, news)
-		return
-	}
-
-	// Récupérer les groupes de l'utilisateur (membership)
-	var userGroupIDs []uint
-	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-	// Vérifier l'accès : l'utilisateur doit être membre OU admin d'au moins un groupe cible
-	hasAccess := false
-	for _, targetGroup := range news.TargetGroups {
-		// Vérifier si l'utilisateur est membre du groupe cible
-		for _, userGroupID := range userGroupIDs {
-			if targetGroup.ID == userGroupID {
-				hasAccess = true
-				break
-			}
-		}
-		if hasAccess {
-			break
-		}
-
-		// Vérifier si l'utilisateur administre le groupe cible (pour les group_admin)
-		for _, managedID := range managedGroupIDs {
-			if targetGroup.ID == managedID {
-				hasAccess = true
-				break
-			}
-		}
-		if hasAccess {
-			break
-		}
-	}
-
-	if !hasAccess {
+	// Article publié ciblant des groupes : l'utilisateur doit être membre OU admin
+	// d'au moins un groupe cible (sans groupe cible, la news est globale)
+	if len(news.TargetGroups) > 0 &&
+		!targetsAnyGroup(news.TargetGroups, memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this news"})
 		return
 	}
@@ -443,14 +337,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 			var userIDs []uint
 			if len(news.TargetGroups) > 0 {
 				// Notifier les membres des groupes cibles
-				var groupIDs []uint
-				for _, g := range news.TargetGroups {
-					groupIDs = append(groupIDs, g.ID)
-				}
-				h.db.Table("user_groups").
-					Where("group_id IN ?", groupIDs).
-					Distinct("user_id").
-					Pluck("user_id", &userIDs)
+				userIDs = groupMemberIDs(h.db, groupIDsOf(news.TargetGroups))
 			} else {
 				// Article global : notifier tous les utilisateurs actifs
 				h.db.Model(&models.User{}).
@@ -716,14 +603,7 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 			var userIDs []uint
 			if len(news.TargetGroups) > 0 {
 				// Notifier les membres des groupes cibles
-				var groupIDs []uint
-				for _, g := range news.TargetGroups {
-					groupIDs = append(groupIDs, g.ID)
-				}
-				h.db.Table("user_groups").
-					Where("group_id IN ?", groupIDs).
-					Distinct("user_id").
-					Pluck("user_id", &userIDs)
+				userIDs = groupMemberIDs(h.db, groupIDsOf(news.TargetGroups))
 			} else {
 				// Article global : notifier tous les utilisateurs actifs
 				h.db.Model(&models.User{}).

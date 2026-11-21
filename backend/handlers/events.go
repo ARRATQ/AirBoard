@@ -118,108 +118,27 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
+	now := time.Now()
 
-	if userRole == "admin" {
+	switch {
+	case userRole == "admin":
 		// Admin voit tout (publié + brouillons)
-	} else if len(managedGroupIDs) > 0 {
-		// Utilisateur qui administre au moins un groupe
-		isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/events")
-
-		if isAdminInterface {
-			// Interface d'administration : événements qu'il peut gérer
-			if len(managedGroupIDs) > 0 {
-				query = query.Where(`
-					(author_id = ?) OR
-					EXISTS (
-						SELECT 1 FROM event_target_groups
-						WHERE event_target_groups.event_id = events.id
-						AND event_target_groups.group_id IN (?)
-					)
-				`, userID, managedGroupIDs)
-			} else {
-				query = query.Where("author_id = ?", userID)
-			}
+	case len(managedGroupIDs) > 0:
+		// Administrateur de groupe. Interface /group-admin/events : les événements qu'il
+		// gère. Lecture publique : événements publiés globaux ou des groupes dont il est
+		// membre ou administrateur.
+		if strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/events") {
+			query = query.Scopes(eventTargets.manageableBy(userID, managedGroupIDs))
 		} else {
-			// Interface publique : événements publiés + ceux des groupes membres ET administrés
-			var userGroupIDs []uint
-			h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-			groupIDSet := make(map[uint]bool)
-			for _, id := range managedGroupIDs {
-				groupIDSet[id] = true
-			}
-			for _, id := range userGroupIDs {
-				groupIDSet[id] = true
-			}
-			var allGroupIDs []uint
-			for id := range groupIDSet {
-				allGroupIDs = append(allGroupIDs, id)
-			}
-
-			if len(allGroupIDs) > 0 {
-				query = query.Where(`
-					(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-						NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id) OR
-						EXISTS (
-							SELECT 1 FROM event_target_groups
-							WHERE event_target_groups.event_id = events.id
-							AND event_target_groups.group_id IN (?)
-						)
-					))
-				`, true, time.Now(), allGroupIDs)
-			} else {
-				query = query.Where(`
-					is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
-					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				`, true, time.Now())
-			}
+			groupIDs := memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)
+			query = query.Scopes(eventTargets.publishedVisibleTo(groupIDs, now))
 		}
-	} else if userRole == "editor" {
+	case userRole == "editor":
 		// Editor voit : ses propres brouillons + événements publiés selon ses groupes
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				author_id = ? OR
-				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND (
-					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-					OR EXISTS (
-						SELECT 1 FROM event_target_groups
-						WHERE event_target_groups.event_id = events.id
-						AND event_target_groups.group_id IN (?)
-					)
-				))
-			`, userID, true, time.Now(), userGroupIDs)
-		} else {
-			query = query.Where(`
-				author_id = ? OR
-				(is_published = ? AND (published_at IS NULL OR published_at <= ?) AND
-					NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				)
-			`, userID, true, time.Now())
-		}
-	} else {
-		// User régulier voit : événements publiques + événements ciblant ses groupes
-		query = query.Where("is_published = ?", true).
-			Where("(published_at IS NULL OR published_at <= ?)", time.Now())
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
-		} else {
-			// Si pas de groupes, voir seulement les événements globaux
-			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
-		}
+		query = query.Scopes(eventTargets.ownOrPublishedVisibleTo(userID, userGroupIDs(h.db, userID), now))
+	default:
+		// User régulier voit : événements publiés globaux + ceux ciblant ses groupes
+		query = query.Scopes(eventTargets.publishedVisibleTo(userGroupIDs(h.db, userID), now))
 	}
 
 	// Tri
@@ -291,59 +210,15 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 		"(start_date <= ? AND (end_date IS NULL OR end_date >= ?)) OR (end_date IS NOT NULL AND end_date >= ? AND start_date <= ?)",
 		endDate, startDate, endDate, startDate)
 
-	// Appliquer filtres de visibilité selon rôle
+	// Appliquer filtres de visibilité selon rôle : l'admin voit tout ; un administrateur
+	// de groupe, les événements globaux et ceux des groupes dont il est membre ou
+	// administrateur ; un utilisateur, les événements globaux et ceux de ses groupes.
 	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	if userRole == "admin" {
-		// Admin voit tout
-	} else if len(managedGroupIDs) > 0 {
-		// Group admin : événements des groupes membres ET administrés
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		groupIDSet := make(map[uint]bool)
-		for _, id := range managedGroupIDs {
-			groupIDSet[id] = true
-		}
-		for _, id := range userGroupIDs {
-			groupIDSet[id] = true
-		}
-		var allGroupIDs []uint
-		for id := range groupIDSet {
-			allGroupIDs = append(allGroupIDs, id)
-		}
-
-		if len(allGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, allGroupIDs)
-		} else {
-			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
-		}
-	} else {
-		// User régulier : événements publics + ses groupes
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
-		} else {
-			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
-		}
+	if userRole != "admin" {
+		query = query.Scopes(eventTargets.visibleTo(memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)))
 	}
 
 	// Filtres optionnels
@@ -439,38 +314,14 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 			}
 		}
 
-		// Vérifier la visibilité par groupe
-		var targetGroupCount int64
-		h.db.Model(&event).Association("TargetGroups").Count()
-
-		if targetGroupCount > 0 {
-			// Événement privé : vérifier si l'utilisateur est dans un des groupes cibles
-			var userGroupIDs []uint
-			if len(managedGroupIDs) > 0 {
-				// Utilisateur qui administre au moins un groupe
-				userGroupIDs = managedGroupIDs
-			} else {
-				h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-			}
-
-			// Vérifier l'intersection
-			hasAccess := false
-			for _, targetGroup := range event.TargetGroups {
-				for _, userGroupID := range userGroupIDs {
-					if targetGroup.ID == userGroupID {
-						hasAccess = true
-						break
-					}
-				}
-				if hasAccess {
-					break
-				}
-			}
-
-			if !hasAccess && event.AuthorID != userID {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
-				return
-			}
+		// Vérifier la visibilité par groupe : un événement ciblé n'est visible que des
+		// membres ou administrateurs d'un groupe cible (et de son auteur), comme dans
+		// les listes. Le compte des groupes cibles n'était jusqu'ici jamais lu, ce qui
+		// laissait tout événement ciblé accessible par son identifiant.
+		if len(event.TargetGroups) > 0 && event.AuthorID != userID &&
+			!targetsAnyGroup(event.TargetGroups, memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+			return
 		}
 	}
 

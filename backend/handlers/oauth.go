@@ -380,19 +380,8 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		log.Printf("Error loading user groups: %v", err)
 	}
 
-	// Charger les IDs des groupes administrés (nécessaire pour le frontend)
-	var managedGroupIDs []uint
-	h.db.Table("group_admins").
-		Where("user_id = ?", user.ID).
-		Pluck("group_id", &managedGroupIDs)
-	user.ManagedGroupIDs = managedGroupIDs
-
-	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
-	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
-		var adminGroups []models.Group
-		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
-		user.AdminOfGroups = adminGroups
-	}
+	// Groupes administrés (nécessaires au frontend)
+	attachManagedGroups(h.db, &user)
 
 	user.Password = ""
 

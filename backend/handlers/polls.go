@@ -130,85 +130,17 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 		query = query.Where("is_active = ?", true)
 	}
 
-	if userRole == "admin" {
-		// Admin voit tout
-	} else if !isEntityFilter && len(managedGroupIDs) > 0 {
-		// Utilisateur qui administre au moins un groupe : distinguer interface admin vs interface publique
-
-		// Récupérer aussi les groupes d'appartenance pour la lecture publique
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes (appartenance + administration)
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
-
-		// Si le group_admin accède via /group-admin/polls, on filtre strictement
-		// Sinon (lecture publique via /polls), il voit les sondages comme un user normal
-		isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls")
-
-		if isAdminInterface {
-			// Interface d'administration : seulement les sondages qu'il peut gérer
-			if len(managedGroupIDs) > 0 {
-				query = query.Where(`
-					(author_id = ?) OR
-					EXISTS (
-						SELECT 1 FROM poll_target_groups
-						WHERE poll_target_groups.poll_id = polls.id
-						AND poll_target_groups.group_id IN (?)
-					)
-				`, userID, managedGroupIDs)
-			} else {
-				// Pas de groupes gérés : uniquement ses propres sondages
-				query = query.Where("author_id = ?", userID)
-			}
-		} else {
-			// Interface publique : sondages globaux + ceux de ses groupes (appartenance + administration)
-			if len(combinedGroupIDs) > 0 {
-				query = query.Where(`
-					NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-					OR EXISTS (
-						SELECT 1 FROM poll_target_groups
-						WHERE poll_target_groups.poll_id = polls.id
-						AND poll_target_groups.group_id IN (?)
-					)
-				`, combinedGroupIDs)
-			} else {
-				// Si pas de groupes, voir seulement les sondages globaux
-				query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
-			}
-		}
-	} else if !isEntityFilter {
-		// User régulier ou editor : sondages globaux + ceux de leurs groupes
-		// Mais SEULEMENT si on ne filtre pas par news_id ou announcement_id
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-				OR EXISTS (
-					SELECT 1 FROM poll_target_groups
-					WHERE poll_target_groups.poll_id = polls.id
-					AND poll_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
-		} else {
-			// Si pas de groupes, voir seulement les sondages globaux
-			query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
-		}
+	switch {
+	case userRole == "admin" || isEntityFilter:
+		// Admin voit tout ; un filtre par entité renvoie seulement les sondages liés
+	case len(managedGroupIDs) > 0 && strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls"):
+		// Interface d'administration de groupe : seulement les sondages qu'il peut gérer
+		query = query.Scopes(pollTargets.manageableBy(userID, managedGroupIDs))
+	default:
+		// Lecture publique : sondages globaux + ceux des groupes dont l'utilisateur est
+		// membre ou administrateur
+		query = query.Scopes(pollTargets.visibleTo(memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)))
 	}
-	// Si isEntityFilter est true, on ne filtre PAS par groupes, on retourne seulement
-	// les sondages liés à l'entité spécifiée (news ou announcement)
 
 	// Tri
 	query = query.Order(utils.SafeOrderClause(
@@ -283,37 +215,10 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 		return
 	}
 
-	// Vérifier l'accès pour group_admin et user
-	hasAccess := false
-
-	// Récupérer les groupes administrés ET les groupes d'appartenance
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	var userGroupIDs []uint
-	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-	// Combiner les deux listes
-	allGroupIDs := make(map[uint]bool)
-	for _, id := range userGroupIDs {
-		allGroupIDs[id] = true
-	}
-	for _, id := range managedGroupIDs {
-		allGroupIDs[id] = true
-	}
-
-	// Si pas de groupes cibles, c'est un sondage global
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		// Vérifier si l'utilisateur appartient ou administre au moins un groupe cible
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
-
-	if !hasAccess {
+	// group_admin et user : sondage global, ou ciblant un groupe dont l'utilisateur
+	// est membre ou administrateur
+	if len(poll.TargetGroups) > 0 &&
+		!targetsAnyGroup(poll.TargetGroups, memberOrManagedGroupIDs(h.db, userID, middleware.GetManagedGroupIDs(c))) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this poll"})
 		return
 	}
@@ -441,14 +346,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 			var userIDs []uint
 			if len(poll.TargetGroups) > 0 {
 				// Notifier les membres des groupes cibles
-				var groupIDs []uint
-				for _, g := range poll.TargetGroups {
-					groupIDs = append(groupIDs, g.ID)
-				}
-				h.db.Table("user_groups").
-					Where("group_id IN ?", groupIDs).
-					Distinct("user_id").
-					Pluck("user_id", &userIDs)
+				userIDs = groupMemberIDs(h.db, groupIDsOf(poll.TargetGroups))
 			} else {
 				// Sondage global : notifier tous les utilisateurs actifs
 				h.db.Model(&models.User{}).
@@ -755,33 +653,7 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 	}
 
 	// Vérifier que l'utilisateur a accès au sondage
-	hasAccess := false
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true // Sondage global
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
@@ -883,31 +755,7 @@ func (h *PollsHandler) RemoveVote(c *gin.Context) {
 	}
 
 	// Vérifier l'accès utilisateur au sondage
-	hasAccess := false
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		allGroupIDs := make(map[uint]bool)
-		for _, groupID := range userGroupIDs {
-			allGroupIDs[groupID] = true
-		}
-		for _, groupID := range managedGroupIDs {
-			allGroupIDs[groupID] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
@@ -948,35 +796,8 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 	}
 
 	// Vérifier que l'utilisateur a accès au sondage
-	hasAccess := false
-	if userRole == "admin" || poll.AuthorID == userID {
-		hasAccess = true
-	} else if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := userRole == "admin" || poll.AuthorID == userID ||
+		canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})

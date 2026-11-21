@@ -116,6 +116,9 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		newsPerTab = settings.NewsPerTab
 	}
 
+	// Groupes du visiteur, lus une fois pour tous les chargements ci-dessous
+	groups := h.loadViewerGroups(userID.(uint), role.(string))
+
 	// Use WaitGroup for parallel queries
 	var wg sync.WaitGroup
 	var mu sync.Mutex // Protect response writes
@@ -152,7 +155,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-today-events", func() {
 		defer wg.Done()
-		events, err := h.getTodayEvents(userID.(uint), role.(string))
+		events, err := h.getTodayEvents(role.(string), groups)
 		if err != nil {
 			log.Printf("[HOME] Failed to load today's events: %v", err)
 			events = []models.Event{}
@@ -166,7 +169,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-upcoming-events", func() {
 		defer wg.Done()
-		events, err := h.getUpcomingEvents(userID.(uint), role.(string))
+		events, err := h.getUpcomingEvents(role.(string), groups)
 		if err != nil {
 			log.Printf("[HOME] Failed to load upcoming events: %v", err)
 			events = []models.Event{}
@@ -180,7 +183,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-recent-news", func() {
 		defer wg.Done()
-		news, err := h.getRecentNews(userID.(uint), role.(string))
+		news, err := h.getRecentNews(role.(string), groups)
 		if err != nil {
 			log.Printf("[HOME] Failed to load recent news: %v", err)
 			news = []models.News{}
@@ -194,7 +197,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-news-by-type", func() {
 		defer wg.Done()
-		newsByType, err := h.getRecentNewsByType(userID.(uint), role.(string), newsPerTab)
+		newsByType, err := h.getRecentNewsByType(role.(string), groups, newsPerTab)
 		if err != nil {
 			log.Printf("[HOME] Failed to load recent news by type: %v", err)
 			newsByType = []NewsGroup{}
@@ -208,7 +211,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-polls", func() {
 		defer wg.Done()
-		polls, err := h.getRecentPolls(userID.(uint), role.(string))
+		polls, err := h.getRecentPolls(role.(string), groups)
 		if err != nil {
 			log.Printf("[HOME] Failed to load recent polls: %v", err)
 			polls = []models.Poll{}
@@ -238,7 +241,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		defer wg.Done()
 		userIDVal := userID.(uint)
 		roleVal := role.(string)
-		stats := h.getStats(userIDVal, roleVal, response.ManagedGroupIDs)
+		stats := h.getStats(roleVal, response.ManagedGroupIDs, groups)
 		log.Printf("[Home] GetHomeData: userID=%d, role=%s, stats=%+v", userIDVal, roleVal, stats)
 		mu.Lock()
 		response.Stats = stats
@@ -287,7 +290,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	wg.Add(1)
 	utils.SafeGo("home-pending", func() {
 		defer wg.Done()
-		pending := h.getPendingItems(userID.(uint), role.(string))
+		pending := h.getPendingItems(userID.(uint), role.(string), groups)
 		mu.Lock()
 		response.PendingItems = pending
 		mu.Unlock()
@@ -342,39 +345,38 @@ func (h *HomeHandler) getNewApps(userID uint, role string) ([]models.Application
 	return apps, err
 }
 
+// viewerGroups : groupes du visiteur, lus une seule fois par requête puis partagés
+// par les chargements parallèles de l'accueil (vides pour un admin, qui voit tout).
+type viewerGroups struct {
+	member []uint // groupes dont il est membre
+	all    []uint // groupes dont il est membre ou administrateur
+}
+
+func (h *HomeHandler) loadViewerGroups(userID uint, role string) viewerGroups {
+	if role == "admin" {
+		return viewerGroups{}
+	}
+	member := userGroupIDs(h.db, userID)
+	return viewerGroups{member: member, all: mergeGroupIDs(member, adminGroupIDs(h.db, userID))}
+}
+
 // Helper: Get today's events (events starting today only)
-func (h *HomeHandler) getTodayEvents(userID uint, role string) ([]models.Event, error) {
+func (h *HomeHandler) getTodayEvents(role string, groups viewerGroups) ([]models.Event, error) {
 	now := time.Now()
 	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
 	var events []models.Event
 
-	baseWhere := "is_published = ? AND ((start_date >= ? AND start_date < ?) OR (start_date < ? AND end_date >= ?))"
-	baseArgs := []interface{}{true, startOfDay, endOfDay, startOfDay, startOfDay}
-
 	query := h.db.Preload("Author").
 		Preload("Category").
-		Order("start_date ASC")
+		Order("start_date ASC").
+		Where("is_published = ? AND ((start_date >= ? AND start_date < ?) OR (start_date < ? AND end_date >= ?))",
+			true, startOfDay, endOfDay, startOfDay, startOfDay)
 
-	// Admins see all published events
-	if role == "admin" {
-		query = query.Where(baseWhere, baseArgs...)
-	} else {
-		// Get user's groups
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Filter: events that are either public (no target groups) OR targeted to user's groups
-		query = query.Where(baseWhere, baseArgs...).
-			Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
+	// Admins see all published events ; les autres : événements globaux ou de leurs groupes
+	if role != "admin" {
+		query = query.Scopes(eventTargets.visibleTo(groups.member))
 	}
 
 	err := query.Find(&events).Error
@@ -382,7 +384,7 @@ func (h *HomeHandler) getTodayEvents(userID uint, role string) ([]models.Event, 
 }
 
 // Helper: Get upcoming events (next 5 events starting after today)
-func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Event, error) {
+func (h *HomeHandler) getUpcomingEvents(role string, groups viewerGroups) ([]models.Event, error) {
 	tomorrow := time.Now().Add(24 * time.Hour)
 	startOfTomorrow := time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 0, 0, 0, 0, tomorrow.Location())
 
@@ -391,26 +393,12 @@ func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Even
 	query := h.db.Preload("Author").
 		Preload("Category").
 		Order("start_date ASC").
-		Limit(5)
+		Limit(5).
+		Where("is_published = ? AND start_date > ?", true, startOfTomorrow)
 
-	// Admins see all published events
-	if role == "admin" {
-		query = query.Where("is_published = ? AND start_date > ?", true, startOfTomorrow)
-	} else {
-		// Get user's groups
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Filter: events that are either public (no target groups) OR targeted to user's groups
-		query = query.Where("is_published = ? AND start_date > ?", true, startOfTomorrow).
-			Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
+	// Admins see all published events ; les autres : événements globaux ou de leurs groupes
+	if role != "admin" {
+		query = query.Scopes(eventTargets.visibleTo(groups.member))
 	}
 
 	err := query.Find(&events).Error
@@ -418,122 +406,39 @@ func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Even
 }
 
 // Helper: Get recent news (last 5 published articles filtered by user groups)
-func (h *HomeHandler) getRecentNews(userID uint, role string) ([]models.News, error) {
+func (h *HomeHandler) getRecentNews(role string, groups viewerGroups) ([]models.News, error) {
 	var news []models.News
-	var err error
 
-	// Les admins voient tous les articles publiés
-	if role == "admin" {
-		err = h.db.Where("is_published = ?", true).
-			Preload("Author").
-			Preload("Category").
-			Preload("Tags").
-			Preload("TargetGroups").
-			Order("is_pinned DESC, published_at DESC").
-			Limit(5).
-			Find(&news).Error
+	query := h.db.Where("is_published = ?", true).
+		Preload("Author").
+		Preload("Category").
+		Preload("Tags").
+		Preload("TargetGroups").
+		Order("is_pinned DESC, published_at DESC").
+		Limit(5)
 
-		if err != nil {
-			return news, err
-		}
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+	// Les admins voient tous les articles publiés ; les autres, les articles globaux
+	// et ceux ciblant un groupe dont ils sont membres ou administrateurs
+	if role != "admin" {
+		query = query.Scopes(newsTargets.visibleTo(groups.all))
+	}
 
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes (appartenance + administration)
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
-
-		if len(combinedGroupIDs) > 0 {
-			// L'utilisateur appartient à des groupes ou en administre
-			// Afficher les articles globaux (sans target_groups) OU les articles ciblant ses groupes
-			err = h.db.Where("is_published = ?", true).
-				Where(`
-					NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
-					OR EXISTS (
-						SELECT 1 FROM news_target_groups
-						WHERE news_target_groups.news_id = news.id
-						AND news_target_groups.group_id IN (?)
-					)
-				`, combinedGroupIDs).
-				Preload("Author").
-				Preload("Category").
-				Preload("Tags").
-				Preload("TargetGroups").
-				Order("is_pinned DESC, published_at DESC").
-				Limit(5).
-				Find(&news).Error
-
-			if err != nil {
-				return news, err
-			}
-		} else {
-			// L'utilisateur n'appartient à aucun groupe : seulement les articles globaux
-			err = h.db.Where("is_published = ?", true).
-				Where("NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)").
-				Preload("Author").
-				Preload("Category").
-				Preload("Tags").
-				Preload("TargetGroups").
-				Order("is_pinned DESC, published_at DESC").
-				Limit(5).
-				Find(&news).Error
-
-			if err != nil {
-				return news, err
-			}
-		}
+	if err := query.Find(&news).Error; err != nil {
+		return news, err
 	}
 
 	// Compteurs de commentaires et réactions (2 requêtes pour tous les articles)
 	applyNewsEngagementCounts(h.db, news)
 
-	return news, err
+	return news, nil
 }
 
 // Helper: Get recent news grouped by type (3 articles per type)
-func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab int) ([]NewsGroup, error) {
+func (h *HomeHandler) getRecentNewsByType(role string, groups viewerGroups, newsPerTab int) ([]NewsGroup, error) {
 	// First, fetch all active news types ordered by order
 	var types []models.NewsType
 	if err := h.db.Where("is_active = ?", true).Order("\"order\" ASC, name ASC").Find(&types).Error; err != nil {
 		return []NewsGroup{}, err
-	}
-
-	// Pre-fetch user's groups once (before the loop) for permission checks
-	var managedGroupIDs []uint
-	var userGroupIDs []uint
-	if role != "admin" {
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-	}
-
-	// Pre-compute combined group IDs once for non-admins
-	var combinedGroupIDs []uint
-	if role != "admin" {
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
 	}
 
 	if len(types) == 0 {
@@ -553,19 +458,7 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab i
 
 	// Visibilité pour les non-admins : articles sans groupe cible, ou ciblant un de ses groupes
 	if role != "admin" {
-		restrictedIDs := h.db.Session(&gorm.Session{NewDB: true}).
-			Table("news_target_groups").
-			Select("news_id")
-
-		if len(combinedGroupIDs) > 0 {
-			accessibleIDs := h.db.Session(&gorm.Session{NewDB: true}).
-				Table("news_target_groups").
-				Select("news_id").
-				Where("group_id IN ?", combinedGroupIDs)
-			ranked = ranked.Where("(id NOT IN (?) OR id IN (?))", restrictedIDs, accessibleIDs)
-		} else {
-			ranked = ranked.Where("id NOT IN (?)", restrictedIDs)
-		}
+		ranked = ranked.Scopes(newsTargets.visibleTo(groups.all))
 	}
 
 	var refs []rankedNewsRef
@@ -609,84 +502,29 @@ func (h *HomeHandler) getRecentNewsByType(userID uint, role string, newsPerTab i
 }
 
 // Helper: Get recent polls (last 10 polls - active and closed)
-func (h *HomeHandler) getRecentPolls(userID uint, role string) ([]models.Poll, error) {
+func (h *HomeHandler) getRecentPolls(role string, groups viewerGroups) ([]models.Poll, error) {
 	var polls []models.Poll
-	var err error
 
-	// Les admins voient tous les sondages actifs
-	if role == "admin" {
-		err = h.db.Preload("Author").
-			Preload("Options").
-			Where("is_active = ?", true).
-			Order("created_at DESC").
-			Limit(10).
-			Find(&polls).Error
+	query := h.db.Preload("Author").
+		Preload("Options").
+		Where("is_active = ?", true).
+		Order("created_at DESC").
+		Limit(10)
 
-		if err != nil {
-			return polls, err
-		}
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
+	// Les admins voient tous les sondages actifs ; les autres, les sondages globaux
+	// et ceux ciblant un groupe dont ils sont membres ou administrateurs
+	if role != "admin" {
+		query = query.Scopes(pollTargets.visibleTo(groups.all))
+	}
 
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes (appartenance + administration)
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
-
-		if len(combinedGroupIDs) > 0 {
-			// L'utilisateur appartient à des groupes ou en administre
-			err = h.db.Preload("Author").
-				Preload("Options").
-				Where("is_active = ?", true).
-				Where(`
-					NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-					OR EXISTS (
-						SELECT 1 FROM poll_target_groups
-						WHERE poll_target_groups.poll_id = polls.id
-						AND poll_target_groups.group_id IN (?)
-					)
-				`, combinedGroupIDs).
-				Order("created_at DESC").
-				Limit(10).
-				Find(&polls).Error
-
-			if err != nil {
-				return polls, err
-			}
-		} else {
-			// L'utilisateur n'appartient à aucun groupe : seulement les sondages globaux actifs
-			err = h.db.Preload("Author").
-				Preload("Options").
-				Where("is_active = ?", true).
-				Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)").
-				Order("created_at DESC").
-				Limit(10).
-				Find(&polls).Error
-
-			if err != nil {
-				return polls, err
-			}
-		}
+	if err := query.Find(&polls).Error; err != nil {
+		return polls, err
 	}
 
 	// Nombre total de votes de chaque sondage (1 requête)
 	applyPollVoteCounts(h.db, polls)
 
-	return polls, err
+	return polls, nil
 }
 
 // Helper: Get announcements with cache
@@ -793,7 +631,7 @@ func (h *HomeHandler) getHeroMessagesWithCache() ([]models.HeroMessage, error) {
 }
 
 // Helper: Get stats based on role
-func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint) *HomeStats {
+func (h *HomeHandler) getStats(role string, managedGroupIDs []uint, groups viewerGroups) *HomeStats {
 	stats := &HomeStats{}
 
 	if role == "admin" {
@@ -849,9 +687,7 @@ func (h *HomeHandler) getStats(userID uint, role string, managedGroupIDs []uint)
 			Count(&stats.ManagedPollsCount)
 	} else {
 		// Regular user stats
-		// Get user's groups
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
+		userGroupIDs := groups.member
 
 		// Count accessible apps (public + in user's groups)
 		h.db.Model(&models.Application{}).
@@ -967,7 +803,7 @@ func (cache *HomeCache) InvalidateAnnouncements() {
 // - unread news notifications
 // - active polls the user hasn't voted on
 // - new apps added in the last 7 days (accessible to the user)
-func (h *HomeHandler) getPendingItems(userID uint, role string) *PendingItems {
+func (h *HomeHandler) getPendingItems(userID uint, role string, groups viewerGroups) *PendingItems {
 	pending := &PendingItems{}
 
 	// Unread news notifications
@@ -980,16 +816,7 @@ func (h *HomeHandler) getPendingItems(userID uint, role string) *PendingItems {
 	pollQuery := h.db.Model(&models.Poll{}).Where("is_active = ?", true)
 	if role != "admin" {
 		// Respect poll visibility: global polls + polls targeting user's groups
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		restrictedIDs := h.db.Table("poll_target_groups").Select("poll_id")
-		if len(userGroupIDs) > 0 {
-			accessibleIDs := h.db.Table("poll_target_groups").Select("poll_id").Where("group_id IN ?", userGroupIDs)
-			pollQuery = pollQuery.Where("id NOT IN (?) OR id IN (?)", restrictedIDs, accessibleIDs)
-		} else {
-			pollQuery = pollQuery.Where("id NOT IN (?)", restrictedIDs)
-		}
+		pollQuery = pollQuery.Scopes(pollTargets.visibleTo(groups.member))
 	}
 	pollQuery.Pluck("id", &activePollIDs)
 

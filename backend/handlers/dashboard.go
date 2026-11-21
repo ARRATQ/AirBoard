@@ -27,7 +27,7 @@ func NewDashboardHandler(db *gorm.DB) *DashboardHandler {
 // @Failure 401 {object} models.ErrorResponse
 // @Router /dashboard [get]
 func (h *DashboardHandler) GetDashboard(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	_, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
 			Error:   "Unauthorized",
@@ -57,28 +57,9 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 
 		appGroups = h.withApplications(allAppGroups)
 	} else {
-		// Récupérer les groupes administrés par l'utilisateur
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		// Récupérer les groupes auxquels l'utilisateur appartient
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux : groupes d'appartenance + groupes administrés
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		// Convertir en slice
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
+		uid := c.GetUint("user_id")
+		// Groupes d'appartenance + groupes administrés (lus en base)
+		combinedGroupIDs := mergeGroupIDs(userGroupIDs(h.db, uid), adminGroupIDs(h.db, uid))
 
 		if len(combinedGroupIDs) > 0 {
 			// Récupérer les AppGroups accessibles via les groupes combinés
