@@ -72,6 +72,14 @@ describe('fichiers de langue', () => {
     expect(fake).toEqual([])
   })
 
+  it('les pluriels arabes ont les six formes CLDR (zéro | un | deux | 3-10 | 11-99 | 100+)', () => {
+    const partial = Object.entries(messages.ar)
+      .filter(([, value]) => typeof value === 'string' && value.includes('|'))
+      .filter(([, value]) => value.split('|').length !== 6 || value.split('|').some((form) => form.trim() === ''))
+      .map(([key]) => key)
+    expect(partial).toEqual([])
+  })
+
   it('toute clé littérale utilisée dans src/ existe en fr', () => {
     const missing = [...usedKeys()]
       .filter(([key]) => !(key in messages[REFERENCE]))
