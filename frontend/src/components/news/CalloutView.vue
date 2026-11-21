@@ -4,21 +4,25 @@
       <!-- Header -->
       <div class="callout-header">
         <Icon :icon="config.icon" class="callout-header-icon" :style="{ color: config.color }" />
-        <span class="callout-header-label" :style="{ color: config.color }">{{ config.label }}</span>
+        <span class="callout-header-label" :style="{ color: config.color }">{{ t(config.labelKey) }}</span>
 
         <!-- Type switcher (visible when selected) -->
         <div v-if="selected" class="callout-switcher">
           <button
-            v-for="t in types"
-            :key="t.value"
+            v-for="type in types"
+            :key="type.value"
             type="button"
             class="callout-switch-btn"
-            :class="{ 'callout-switch-active': node.attrs.type === t.value }"
-            :title="t.label"
-            :style="node.attrs.type === t.value ? { background: t.color, borderColor: t.color } : { borderColor: t.color }"
-            @mousedown.prevent="updateAttributes({ type: t.value })"
+            :class="{ 'callout-switch-active': node.attrs.type === type.value }"
+            :title="t(type.labelKey)"
+            :aria-label="t(type.labelKey)"
+            :aria-pressed="node.attrs.type === type.value"
+            :style="node.attrs.type === type.value ? { background: type.color, borderColor: type.color } : { borderColor: type.color }"
+            @mousedown.prevent="updateAttributes({ type: type.value })"
+            @keydown.enter.prevent="updateAttributes({ type: type.value })"
+            @keydown.space.prevent="updateAttributes({ type: type.value })"
           >
-            <Icon :icon="t.icon" class="h-3.5 w-3.5" :style="{ color: node.attrs.type === t.value ? '#fff' : t.color }" />
+            <Icon :icon="type.icon" class="h-3.5 w-3.5" aria-hidden="true" :style="{ color: node.attrs.type === type.value ? '#fff' : type.color }" />
           </button>
         </div>
       </div>
@@ -33,6 +37,7 @@
 import { computed } from 'vue'
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/vue-3'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { CALLOUT_TYPES } from './CalloutExtension.js'
 
 const props = defineProps({
@@ -46,9 +51,11 @@ const props = defineProps({
   deleteNode: Function,
 })
 
+const { t } = useI18n()
+
 const types = CALLOUT_TYPES
 
-const config = computed(() => types.find(t => t.value === props.node.attrs.type) || types[0])
+const config = computed(() => types.find(type => type.value === props.node.attrs.type) || types[0])
 </script>
 
 <style scoped>

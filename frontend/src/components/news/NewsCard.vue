@@ -1,7 +1,7 @@
 <template>
+  <!-- Carte cliquable : le bouton du titre s'étend sur toute la carte (pseudo-élément) -->
   <div
-    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-    @click="handleClick"
+    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
   >
     <div class="p-6">
       <!-- Header with Type Badge and Priority -->
@@ -37,11 +37,11 @@
             class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
           >
             <Icon icon="mdi:earth" class="inline h-3 w-3 me-1" />
-            Public
+            {{ $t('events.visibility.public') }}
           </span>
           <span
             v-else
-            class="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+            class="relative z-10 px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
             :title="getGroupsTooltip(news.target_groups)"
           >
             <Icon icon="mdi:lock" class="inline h-3 w-3 me-1" />
@@ -57,8 +57,14 @@
       </div>
 
       <!-- Title -->
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-        {{ news.title }}
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+        <button
+          type="button"
+          class="btn-reset w-full text-start line-clamp-2 after:absolute after:inset-0 after:content-['']"
+          @click="handleClick"
+        >
+          {{ news.title }}
+        </button>
       </h3>
 
       <!-- Summary -->
@@ -115,7 +121,8 @@
             <button
               v-for="reaction in aggregateReactions(news.reactions)"
               :key="reaction.type"
-              class="flex items-center gap-1 text-sm hover:scale-110 transition-transform"
+              type="button"
+              class="relative z-10 flex items-center gap-1 text-sm hover:scale-110 transition-transform"
               @click.stop="handleReaction(reaction.type)"
             >
               <span class="text-lg">{{ getReactionEmoji(reaction.type) }}</span>
@@ -132,8 +139,11 @@
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useNewsTypesStore } from '@/stores/newsTypes'
+import { useI18n } from 'vue-i18n'
 import { readingTime } from '@/utils/readingTime'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
+const { t, locale } = useI18n()
 const typesStore = useNewsTypesStore()
 
 const props = defineProps({
@@ -152,17 +162,17 @@ const typeData = computed(() => {
   if (!typesStore.types.length && !typesStore.loaded) {
     // If types not loaded yet, use defaults
     const defaults = {
-      article: { color: '#3B82F6', icon: 'mdi:text-box', name: 'Article' },
-      tutorial: { color: '#10B981', icon: 'mdi:book-open-variant', name: 'Tutorial' },
-      announcement: { color: '#8B5CF6', icon: 'mdi:bullhorn', name: 'Announcement' },
-      faq: { color: '#F59E0B', icon: 'mdi:help-circle', name: 'FAQ' }
+      article: { color: '#3B82F6', icon: 'mdi:text-box', name: t('news.types.article') },
+      tutorial: { color: '#10B981', icon: 'mdi:book-open-variant', name: t('news.types.tutorial') },
+      announcement: { color: '#8B5CF6', icon: 'mdi:bullhorn', name: t('news.types.announcement') },
+      faq: { color: '#F59E0B', icon: 'mdi:help-circle', name: t('news.types.faq') }
     }
     return defaults[props.news.type] || defaults.article
   }
   return typesStore.getTypeBySlug(props.news.type) || {}
 })
 
-// Get type label - uses store data instead of i18n
+// Libellé du type : nom venant du store (types gérés en admin)
 const typeLabel = computed(() => {
   const type = typeData.value
   return type.name || props.news.type
@@ -183,18 +193,19 @@ const handleClick = () => {
   emit('click')
 }
 
+// Date relative dans la langue de l'interface (jours puis semaines, date courte au-delà d'un mois)
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
   const now = new Date()
   const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+  const dateLocale = dateLocaleFor(locale.value)
+  const relative = new Intl.RelativeTimeFormat(dateLocale, { numeric: 'auto' })
 
-  if (diffInDays === 0) return 'Aujourd\'hui'
-  if (diffInDays === 1) return 'Hier'
-  if (diffInDays < 7) return `Il y a ${diffInDays} jours`
-  if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaines`
+  if (diffInDays < 7) return relative.format(-diffInDays, 'day')
+  if (diffInDays < 30) return relative.format(-Math.floor(diffInDays / 7), 'week')
 
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+  return date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 const aggregateReactions = (reactions) => {
@@ -224,19 +235,19 @@ const handleReaction = (type) => {
 
 const getVisibilityLabel = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Public'
+    return t('events.visibility.public')
   }
   if (targetGroups.length === 1) {
     return targetGroups[0].name
   }
-  return `${targetGroups.length} groupes`
+  return t('events.visibility.groupsCount', { count: targetGroups.length })
 }
 
 const getGroupsTooltip = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Visible par tous les utilisateurs'
+    return t('events.visibility.tooltip.public')
   }
   const groupNames = targetGroups.map(g => g.name).join(', ')
-  return `Visible uniquement pour: ${groupNames}`
+  return t('events.visibility.tooltip.groups', { groups: groupNames })
 }
 </script>

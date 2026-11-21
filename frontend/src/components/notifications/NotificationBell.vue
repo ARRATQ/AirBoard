@@ -2,10 +2,15 @@
   <div class="notification-bell-container relative">
     <!-- Bell Icon with Badge -->
     <button
+      type="button"
       @click="togglePanel"
       class="notification-bell-button group"
       :class="{ 'has-unread': notificationStore.hasUnread }"
       :title="$t('notifications.title')"
+      :aria-label="notificationStore.unreadCount > 0
+        ? $t('notifications.bellWithUnread', { count: notificationStore.unreadCount }, notificationStore.unreadCount)
+        : $t('notifications.title')"
+      :aria-expanded="showPanel"
     >
       <Icon
         :icon="notificationStore.hasUnread ? 'mdi:bell-badge' : 'mdi:bell-outline'"
@@ -18,6 +23,7 @@
       <span
         v-if="notificationStore.unreadCount > 0"
         class="notification-badge"
+        aria-hidden="true"
       >
         {{ notificationStore.unreadCount > 99 ? '99+' : notificationStore.unreadCount }}
       </span>
@@ -39,6 +45,7 @@
           <div class="flex items-center gap-3">
             <button
               v-if="notificationStore.hasUnread"
+              type="button"
               @click="markAllAsRead"
               class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors"
               :title="$t('notifications.markAllRead')"
@@ -46,6 +53,7 @@
               {{ $t('notifications.markAllRead') }}
             </button>
             <button
+              type="button"
               @click="openNotificationCenter"
               class="text-xs text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-medium transition-colors"
               :title="$t('notifications.viewAll')"
@@ -70,59 +78,71 @@
           </div>
 
           <div v-else class="divide-y divide-gray-100 dark:divide-gray-700/50">
+            <!-- La ligne n'est plus cliquable : l'action principale est un vrai bouton,
+                 le bouton « supprimer » reste à côté (pas de bouton imbriqué). -->
             <div
               v-for="notification in recentNotifications"
               :key="notification.id"
-              @click="handleNotificationClick(notification)"
-              class="group relative flex items-start gap-3 p-3 cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              class="group relative transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
               :class="{ 'bg-primary-50/50 dark:bg-primary-900/10 hover:bg-primary-50 dark:hover:bg-primary-900/20': !notification.is_read }"
             >
-              <!-- Icon -->
-              <div 
-                class="flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center"
-                :style="{ backgroundColor: notification.color + '20' }"
+              <button
+                type="button"
+                class="w-full flex items-start gap-3 p-3 text-start cursor-pointer"
+                @click="handleNotificationClick(notification)"
               >
-                <Icon :icon="notification.icon" class="h-5 w-5" :style="{ color: notification.color }" />
-              </div>
+                <!-- Icon -->
+                <span
+                  class="flex-shrink-0 h-9 w-9 rounded-lg flex items-center justify-center"
+                  :style="{ backgroundColor: notification.color + '20' }"
+                  aria-hidden="true"
+                >
+                  <Icon :icon="notification.icon" class="h-5 w-5" :style="{ color: notification.color }" />
+                </span>
 
-              <!-- Content -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2 mb-0.5">
-                  <p 
-                    class="text-sm font-semibold truncate pe-6"
-                    :class="notification.is_read ? 'text-gray-700 dark:text-gray-200' : 'text-gray-900 dark:text-white'"
-                  >
-                    {{ notification.title }}
-                  </p>
-                  <span class="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap flex-shrink-0">
-                    {{ formatTime(notification.created_at) }}
+                <!-- Content -->
+                <span class="block flex-1 min-w-0">
+                  <span class="flex items-start justify-between gap-2 mb-0.5">
+                    <span
+                      class="block text-sm font-semibold truncate pe-6"
+                      :class="notification.is_read ? 'text-gray-700 dark:text-gray-200' : 'text-gray-900 dark:text-white'"
+                    >
+                      {{ notification.title }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap flex-shrink-0">
+                      {{ formatTime(notification.created_at) }}
+                    </span>
                   </span>
-                </div>
-                
-                <div class="flex items-center gap-2 mb-0.5">
-                  <span v-if="notification.priority === 2" class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase tracking-wide">
-                    {{ $t('notifications.urgent') }}
-                  </span>
-                </div>
 
-                <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
-                  {{ notification.message }}
-                </p>
-              </div>
+                  <span v-if="notification.priority === 2" class="flex items-center gap-2 mb-0.5">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase tracking-wide">
+                      {{ $t('notifications.urgent') }}
+                    </span>
+                  </span>
+
+                  <span class="block text-xs text-gray-600 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                    {{ notification.message }}
+                  </span>
+                  <span v-if="!notification.is_read" class="sr-only">{{ $t('notifications.unreadItem') }}</span>
+                </span>
+              </button>
 
               <!-- Delete Action -->
               <button
+                type="button"
                 @click.stop="deleteNotification(notification.id)"
-                class="absolute top-3 end-3 opacity-0 group-hover:opacity-100 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                class="absolute top-3 end-3 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 :title="$t('notifications.delete')"
+                :aria-label="$t('notifications.delete')"
               >
                 <Icon icon="mdi:close" class="h-4 w-4" />
               </button>
 
               <!-- Unread Indicator Dot -->
-              <div 
+              <div
                 v-if="!notification.is_read"
                 class="absolute bottom-3 end-3 h-2 w-2 rounded-full bg-primary-500 dark:bg-primary-400"
+                aria-hidden="true"
               ></div>
             </div>
           </div>
@@ -131,6 +151,7 @@
         <!-- Footer -->
         <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
           <button
+            type="button"
             @click="openNotificationCenter"
             class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
           >
@@ -244,9 +265,9 @@ const formatTime = (dateString) => {
   const diffDays = Math.floor(diffHours / 24)
 
   if (diffMins < 1) return t('notifications.justNow')
-  if (diffMins < 60) return t('notifications.minutesAgo', { count: diffMins })
-  if (diffHours < 24) return t('notifications.hoursAgo', { count: diffHours })
-  if (diffDays < 7) return t('notifications.daysAgo', { count: diffDays })
+  if (diffMins < 60) return t('notifications.minutesAgo', { count: diffMins }, diffMins)
+  if (diffHours < 24) return t('notifications.hoursAgo', { count: diffHours }, diffHours)
+  if (diffDays < 7) return t('notifications.daysAgo', { count: diffDays }, diffDays)
 
   return date.toLocaleDateString()
 }

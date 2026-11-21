@@ -5,7 +5,8 @@
         <Icon icon="mdi:newspaper" class="h-5 w-5 text-primary-500" />
         {{ $t('news.widget.title') }}
         <span v-if="unreadCount > 0" class="ms-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-          {{ unreadCount }}
+          <span aria-hidden="true">{{ unreadCount }}</span>
+          <span class="sr-only">{{ $t('news.widget.unreadCount', { count: unreadCount }, unreadCount) }}</span>
         </span>
       </h2>
       <router-link
@@ -18,30 +19,35 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-8">
-      <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-primary-500" />
+    <div v-if="loading" class="flex justify-center py-8" role="status">
+      <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-primary-500" aria-hidden="true" />
+      <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
     <!-- News List -->
     <div v-else-if="newsList.length > 0" class="space-y-3">
-      <div
+      <router-link
         v-for="news in newsList"
         :key="news.id"
-        @click="viewNews(news)"
-        class="group cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-sm transition-all"
+        :to="{ name: 'NewsDetail', params: { slug: news.slug } }"
+        class="group block p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-sm transition-all"
       >
         <!-- Header -->
         <div class="flex items-start justify-between mb-2">
           <div class="flex items-center gap-2 flex-1 min-w-0">
             <!-- Priority Indicator -->
-            <div
+            <span
               v-if="news.priority === 'urgent'"
               class="flex-shrink-0 w-2 h-2 rounded-full bg-red-500 animate-pulse"
-            ></div>
-            <div
+              role="img"
+              :aria-label="$t('news.priority.urgent')"
+            ></span>
+            <span
               v-else-if="news.priority === 'important'"
               class="flex-shrink-0 w-2 h-2 rounded-full bg-orange-500"
-            ></div>
+              role="img"
+              :aria-label="$t('news.priority.important')"
+            ></span>
 
             <!-- Title -->
             <h3 class="font-medium text-gray-900 dark:text-white text-sm line-clamp-1 flex-1">
@@ -87,11 +93,12 @@
 
           <!-- Reactions count -->
           <div v-if="news.reactions && news.reactions.length > 0" class="flex items-center gap-1">
-            <Icon icon="mdi:heart" class="h-3 w-3" />
-            <span>{{ news.reactions.length }}</span>
+            <Icon icon="mdi:heart" class="h-3 w-3" aria-hidden="true" />
+            <span aria-hidden="true">{{ news.reactions.length }}</span>
+            <span class="sr-only">{{ $t('news.widget.reactionsCount', { count: news.reactions.length }, news.reactions.length) }}</span>
           </div>
         </div>
-      </div>
+      </router-link>
     </div>
 
     <!-- Empty State -->
@@ -106,11 +113,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { newsService } from '@/services/api'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
-const router = useRouter()
+const { t, locale } = useI18n()
 
 // Data
 const loading = ref(false)
@@ -142,10 +150,6 @@ const fetchUnreadCount = async () => {
   }
 }
 
-const viewNews = (news) => {
-  router.push({ name: 'NewsDetail', params: { slug: news.slug } })
-}
-
 const getTypeBadgeClass = (type) => {
   const classes = {
     article: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -162,11 +166,11 @@ const formatDate = (dateString) => {
   const now = new Date()
   const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
 
-  if (diffInDays === 0) return 'Aujourd\'hui'
-  if (diffInDays === 1) return 'Hier'
-  if (diffInDays < 7) return `Il y a ${diffInDays}j`
+  if (diffInDays === 0) return t('common.today')
+  if (diffInDays === 1) return t('common.yesterday')
+  if (diffInDays < 7) return t('common.daysAgo', { count: diffInDays })
 
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  return date.toLocaleDateString(dateLocaleFor(locale.value), { day: 'numeric', month: 'short' })
 }
 
 // Lifecycle

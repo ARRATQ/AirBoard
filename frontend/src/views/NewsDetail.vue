@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-12">
+    <div v-if="loading" class="flex justify-center py-12" role="status" :aria-label="$t('common.loading')">
       <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
     </div>
 
@@ -63,7 +63,7 @@
             class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
           >
             <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
-            Public
+            {{ $t('events.visibility.public') }}
           </span>
           <span
             v-else
@@ -110,7 +110,7 @@
           </div>
           <div v-if="articleReadingTime" class="flex items-center gap-2">
             <Icon icon="mdi:clock-outline" class="h-5 w-5" />
-            <span>{{ articleReadingTime }} de lecture</span>
+            <span>{{ $t('news.detail.readingTime', { time: articleReadingTime }) }}</span>
           </div>
         </div>
 
@@ -138,7 +138,7 @@
       <div v-if="linkedPoll" class="p-8 border-t border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Icon icon="mdi:poll" class="h-6 w-6 text-purple-600" />
-          Sondage lié à cet article
+          {{ $t('news.detail.linkedPoll') }}
         </h3>
         <PollCard :poll="linkedPoll" @vote-success="handleVoteSuccess" />
       </div>
@@ -192,6 +192,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { newsService, pollsService } from '@/services/api'
 import { readingTime } from '@/utils/readingTime'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import TiptapRenderer from '@/components/news/TiptapRenderer.vue'
 import FeedbackWidget from '@/components/feedback/FeedbackWidget.vue'
@@ -201,6 +203,7 @@ import PollCard from '@/components/polls/PollCard.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
 // Data
 const loading = ref(false)
@@ -273,7 +276,7 @@ const getTypeBadgeClass = (type) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(dateLocaleFor(locale.value), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -288,20 +291,20 @@ const editNews = () => {
 
 const getVisibilityLabel = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Public'
+    return t('events.visibility.public')
   }
   if (targetGroups.length === 1) {
     return targetGroups[0].name
   }
-  return `${targetGroups.length} groupes`
+  return t('events.visibility.groupsCount', { count: targetGroups.length })
 }
 
 const getGroupsTooltip = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Visible par tous les utilisateurs'
+    return t('events.visibility.tooltip.public')
   }
   const groupNames = targetGroups.map(g => g.name).join(', ')
-  return `Visible uniquement pour: ${groupNames}`
+  return t('events.visibility.tooltip.groups', { groups: groupNames })
 }
 
 // Lifecycle

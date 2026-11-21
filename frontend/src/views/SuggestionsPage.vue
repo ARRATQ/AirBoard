@@ -11,24 +11,28 @@
       </div>
 
         <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1" role="group" :aria-label="t('dashboard.viewModes.label')">
             <button
               type="button"
               class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
               :class="viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+              :aria-pressed="viewMode === 'grid'"
+              :aria-label="t('dashboard.viewModes.grid')"
               @click="viewMode = 'grid'"
             >
               <Icon icon="mdi:view-grid" class="h-4 w-4" />
-              <span class="hidden sm:inline">Grille</span>
+              <span class="hidden sm:inline">{{ t('dashboard.viewModes.grid') }}</span>
             </button>
             <button
               type="button"
               class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
               :class="viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+              :aria-pressed="viewMode === 'list'"
+              :aria-label="t('dashboard.viewModes.list')"
               @click="viewMode = 'list'"
             >
               <Icon icon="mdi:view-list" class="h-4 w-4" />
-              <span class="hidden sm:inline">Liste</span>
+              <span class="hidden sm:inline">{{ t('dashboard.viewModes.list') }}</span>
             </button>
           </div>
 
@@ -50,6 +54,7 @@
               type="text"
               class="w-full ps-10 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               :placeholder="t('suggestions.filters.search')"
+              :aria-label="t('suggestions.filters.search')"
               @input="debounceLoad"
             />
           </div>
@@ -57,6 +62,7 @@
 
         <select
           v-model="filters.category_id"
+          :aria-label="t('suggestions.form.category')"
           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           @change="loadSuggestions"
         >
@@ -68,6 +74,7 @@
 
         <select
           v-model="filters.status"
+          :aria-label="t('common.status')"
           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           @change="loadSuggestions"
         >
@@ -189,12 +196,12 @@
     </transition-group>
 
     <div v-if="pagination.total_pages > 1" class="flex justify-center items-center gap-2">
-      <button class="btn-secondary btn-sm" :disabled="pagination.page <= 1" @click="changePage(pagination.page - 1)">
+      <button type="button" class="btn-secondary btn-sm" :disabled="pagination.page <= 1" @click="changePage(pagination.page - 1)">
         <Icon class="rtl-flip" icon="mdi:chevron-left" />
         {{ t('polls.pagination.previous') }}
       </button>
       <span class="text-sm text-gray-600 dark:text-gray-400">{{ pagination.page }} / {{ pagination.total_pages }}</span>
-      <button class="btn-secondary btn-sm" :disabled="pagination.page >= pagination.total_pages" @click="changePage(pagination.page + 1)">
+      <button type="button" class="btn-secondary btn-sm" :disabled="pagination.page >= pagination.total_pages" @click="changePage(pagination.page + 1)">
         {{ t('polls.pagination.next') }}
         <Icon class="rtl-flip" icon="mdi:chevron-right" />
       </button>
@@ -206,10 +213,16 @@
         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
         @click.self="closeCreateModal"
       >
-        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
+        <div
+          v-focus-trap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="suggestion-create-title"
+          class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700"
+        >
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('suggestions.form.title') }}</h2>
-            <button class="btn-ghost p-2" @click="closeCreateModal" type="button">
+            <h2 id="suggestion-create-title" class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('suggestions.form.title') }}</h2>
+            <button class="btn-ghost p-2" @click="closeCreateModal" type="button" :aria-label="t('common.close')">
               <Icon icon="mdi:close" />
             </button>
           </div>

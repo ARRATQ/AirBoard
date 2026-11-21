@@ -1,16 +1,24 @@
 <template>
   <div class="fixed inset-0 z-50 overflow-y-auto" @click.self="$emit('close')">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="fixed inset-0 bg-black opacity-50" @click="$emit('close')"></div>
+      <div class="fixed inset-0 bg-black opacity-50" aria-hidden="true" @click="$emit('close')"></div>
 
-      <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 z-10">
+      <div
+        v-focus-trap
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="comment-edit-title"
+        class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-6 z-10"
+      >
         <!-- Header -->
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+          <h3 id="comment-edit-title" class="text-xl font-semibold text-gray-900 dark:text-white">
             {{ $t('comments.edit_title') }}
           </h3>
           <button
+            type="button"
             class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            :aria-label="$t('common.close')"
             @click="$emit('close')"
           >
             <Icon icon="mdi:close" class="h-6 w-6" />
@@ -21,6 +29,7 @@
         <div>
           <textarea
             v-model="editedContent"
+            :aria-label="$t('comments.edit_title')"
             :maxlength="maxLength"
             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                    focus:ring-2 focus:ring-primary-500 focus:border-transparent
@@ -38,6 +47,7 @@
         <!-- Actions -->
         <div class="flex items-center justify-end gap-3 mt-6">
           <button
+            type="button"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700
                    rounded-lg transition-colors"
             @click="$emit('close')"
@@ -45,6 +55,7 @@
             {{ $t('common.cancel') }}
           </button>
           <button
+            type="button"
             :disabled="!editedContent.trim()"
             class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700
                    disabled:opacity-50 disabled:cursor-not-allowed

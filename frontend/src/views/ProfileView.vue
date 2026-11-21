@@ -6,7 +6,7 @@
       <template #description>{{ $t('profile.subtitle') }}</template>
       <template #actions>
         <div class="flex gap-3">
-          <button @click="showPasswordModal = true" class="btn btn-secondary">
+          <button type="button" @click="showPasswordModal = true" class="btn btn-secondary">
             <Icon icon="mdi:key" class="h-4 w-4 me-2" />
             {{ $t('profile.changePassword') }}
           </button>
@@ -25,32 +25,36 @@
         <div class="flex items-center gap-6">
           <!-- Avatar Preview -->
           <div class="relative group">
-            <div
+            <button
+              type="button"
               class="h-24 w-24 rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-600 bg-gray-700 cursor-pointer"
+              :aria-label="$t('profile.uploadAvatar')"
               @click="triggerAvatarUpload"
             >
               <img
                 v-if="avatarPreview || authStore.user?.avatar_url"
                 :src="avatarPreview || getAvatarUrl(authStore.user?.avatar_url)"
-                alt="Avatar"
+                alt=""
                 class="h-full w-full object-cover"
               />
-              <span v-else class="text-3xl font-bold text-white">
+              <span v-else class="text-3xl font-bold text-white" aria-hidden="true">
                 {{ authStore.userInitials }}
               </span>
 
               <!-- Overlay on hover -->
-              <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+              <span class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity rounded-full" aria-hidden="true">
                 <Icon icon="mdi:camera" class="h-8 w-8 text-white" />
-              </div>
-            </div>
+              </span>
+            </button>
 
             <!-- Delete button if avatar exists -->
             <button
               v-if="authStore.user?.avatar_url && !avatarPreview"
+              type="button"
               @click.stop="confirmDeleteAvatar"
               class="absolute -top-1 -end-1 h-6 w-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
               :title="$t('profile.deleteAvatar')"
+              :aria-label="$t('profile.deleteAvatar')"
             >
               <Icon icon="mdi:close" class="h-4 w-4" />
             </button>
@@ -66,7 +70,7 @@
             />
 
             <div class="space-y-2">
-              <button @click="triggerAvatarUpload" class="btn btn-secondary">
+              <button type="button" @click="triggerAvatarUpload" class="btn btn-secondary">
                 <Icon icon="mdi:upload" class="h-4 w-4 me-2" />
                 {{ $t('profile.uploadAvatar') }}
               </button>
@@ -78,12 +82,12 @@
 
             <!-- Upload preview actions -->
             <div v-if="avatarPreview" class="flex gap-2 mt-3">
-              <button @click="uploadAvatar" :disabled="isUploading" class="btn btn-primary">
+              <button type="button" @click="uploadAvatar" :disabled="isUploading" class="btn btn-primary">
                 <Icon v-if="isUploading" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
                 <Icon v-else icon="mdi:check" class="h-4 w-4 me-2" />
                 {{ isUploading ? $t('profile.uploading') : $t('common.save') }}
               </button>
-              <button @click="cancelAvatarUpload" class="btn btn-secondary">
+              <button type="button" @click="cancelAvatarUpload" class="btn btn-secondary">
                 {{ $t('common.cancel') }}
               </button>
             </div>
@@ -276,10 +280,16 @@
     <!-- Password Change Modal -->
     <Teleport to="body">
       <div v-if="showPasswordModal" class="modal-overlay" @click.self="showPasswordModal = false">
-        <div class="modal-container max-w-md">
+        <div
+          v-focus-trap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profile-password-title"
+          class="modal-container max-w-md"
+        >
           <div class="modal-header">
-            <h3 class="modal-title">{{ $t('profile.changePassword') }}</h3>
-            <button @click="showPasswordModal = false" class="modal-close">
+            <h3 id="profile-password-title" class="modal-title">{{ $t('profile.changePassword') }}</h3>
+            <button type="button" @click="showPasswordModal = false" class="modal-close" :aria-label="$t('common.close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -302,6 +312,8 @@
                   type="button"
                   @click="showCurrentPassword = !showCurrentPassword"
                   class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  :aria-label="showCurrentPassword ? $t('profile.hidePassword') : $t('profile.showPassword')"
+                  :aria-pressed="showCurrentPassword"
                 >
                   <Icon :icon="showCurrentPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
                 </button>
@@ -326,6 +338,8 @@
                   type="button"
                   @click="showNewPassword = !showNewPassword"
                   class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  :aria-label="showNewPassword ? $t('profile.hidePassword') : $t('profile.showPassword')"
+                  :aria-pressed="showNewPassword"
                 >
                   <Icon :icon="showNewPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
                 </button>
@@ -371,10 +385,16 @@
     <!-- Delete Avatar Confirmation Modal -->
     <Teleport to="body">
       <div v-if="showDeleteAvatarModal" class="modal-overlay" @click.self="showDeleteAvatarModal = false">
-        <div class="modal-container max-w-md">
+        <div
+          v-focus-trap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profile-delete-avatar-title"
+          class="modal-container max-w-md"
+        >
           <div class="modal-header">
-            <h3 class="modal-title">{{ $t('profile.deleteAvatarTitle') }}</h3>
-            <button @click="showDeleteAvatarModal = false" class="modal-close">
+            <h3 id="profile-delete-avatar-title" class="modal-title">{{ $t('profile.deleteAvatarTitle') }}</h3>
+            <button type="button" @click="showDeleteAvatarModal = false" class="modal-close" :aria-label="$t('common.close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -384,10 +404,11 @@
           </div>
 
           <div class="modal-footer">
-            <button @click="showDeleteAvatarModal = false" class="btn btn-secondary">
+            <button type="button" @click="showDeleteAvatarModal = false" class="btn btn-secondary">
               {{ $t('common.cancel') }}
             </button>
             <button
+              type="button"
               @click="deleteAvatar"
               :disabled="isDeletingAvatar"
               class="btn btn-danger"

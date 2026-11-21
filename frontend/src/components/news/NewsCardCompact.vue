@@ -1,26 +1,32 @@
 <template>
-  <div
-    @click="handleClick"
-    class="group cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
+  <router-link
+    :to="{ name: 'NewsDetail', params: { slug: news.slug } }"
+    class="group block cursor-pointer p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800"
   >
     <div class="flex items-center gap-3">
       <!-- Priority & Pin Indicator -->
       <div class="flex-shrink-0 flex flex-col items-center gap-1">
-        <div
+        <span
           v-if="news.priority === 'urgent'"
-          class="w-2 h-2 rounded-full bg-red-500 animate-pulse"
-          title="Urgent"
-        ></div>
-        <div
+          class="block w-2 h-2 rounded-full bg-red-500 animate-pulse"
+          role="img"
+          :title="t('news.priority.urgent')"
+          :aria-label="t('news.priority.urgent')"
+        ></span>
+        <span
           v-else-if="news.priority === 'important'"
-          class="w-2 h-2 rounded-full bg-orange-500"
-          title="Important"
-        ></div>
+          class="block w-2 h-2 rounded-full bg-orange-500"
+          role="img"
+          :title="t('news.priority.important')"
+          :aria-label="t('news.priority.important')"
+        ></span>
         <Icon
           v-if="news.is_pinned"
           icon="mdi:pin"
           class="h-3 w-3 text-yellow-500"
-          title="Pinned"
+          role="img"
+          :title="t('news.detail.pinned')"
+          :aria-label="t('news.detail.pinned')"
         />
       </div>
 
@@ -63,25 +69,22 @@
         </div>
       </div>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup>
 import { Icon } from '@iconify/vue'
-import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
-const router = useRouter()
+const { t, locale } = useI18n()
 
-const props = defineProps({
+defineProps({
   news: {
     type: Object,
     required: true
   }
 })
-
-const handleClick = () => {
-  router.push({ name: 'NewsDetail', params: { slug: props.news.slug } })
-}
 
 const getTypeBadgeClass = (type) => {
   const classes = {
@@ -98,11 +101,13 @@ const formatDate = (dateString) => {
   const date = new Date(dateString)
   const now = new Date()
   const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+  const dateLocale = dateLocaleFor(locale.value)
 
-  if (diffInDays === 0) return 'Aujourd\'hui'
-  if (diffInDays === 1) return 'Hier'
-  if (diffInDays < 7) return `Il y a ${diffInDays}j`
+  // Format court dans la langue de l'interface (« hier », « il y a 3 j »…)
+  if (diffInDays < 7) {
+    return new Intl.RelativeTimeFormat(dateLocale, { numeric: 'auto', style: 'short' }).format(-diffInDays, 'day')
+  }
 
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  return date.toLocaleDateString(dateLocale, { day: 'numeric', month: 'short' })
 }
 </script>

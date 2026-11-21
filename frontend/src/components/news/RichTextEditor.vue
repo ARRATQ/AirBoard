@@ -9,54 +9,72 @@
           @click="editor.chain().focus().toggleBold().run()"
           :class="{ 'is-active': editor.isActive('bold') }"
           class="toolbar-button"
-          title="Gras (Ctrl+B)"
+          :aria-pressed="editor.isActive('bold')"
+          :title="t('news.editor.bold')"
+          :aria-label="t('news.editor.bold')"
         >
-          <Icon icon="mdi:format-bold" class="h-5 w-5" />
+          <Icon icon="mdi:format-bold" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleItalic().run()"
           :class="{ 'is-active': editor.isActive('italic') }"
           class="toolbar-button"
-          title="Italique (Ctrl+I)"
+          :aria-pressed="editor.isActive('italic')"
+          :title="t('news.editor.italic')"
+          :aria-label="t('news.editor.italic')"
         >
-          <Icon icon="mdi:format-italic" class="h-5 w-5" />
+          <Icon icon="mdi:format-italic" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleUnderline().run()"
           :class="{ 'is-active': editor.isActive('underline') }"
           class="toolbar-button"
-          title="Souligné (Ctrl+U)"
+          :aria-pressed="editor.isActive('underline')"
+          :title="t('news.editor.underline')"
+          :aria-label="t('news.editor.underline')"
         >
-          <Icon icon="mdi:format-underline" class="h-5 w-5" />
+          <Icon icon="mdi:format-underline" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleStrike().run()"
           :class="{ 'is-active': editor.isActive('strike') }"
           class="toolbar-button"
-          title="Barré"
+          :aria-pressed="editor.isActive('strike')"
+          :title="t('news.editor.strike')"
+          :aria-label="t('news.editor.strike')"
         >
-          <Icon icon="mdi:format-strikethrough" class="h-5 w-5" />
+          <Icon icon="mdi:format-strikethrough" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleCode().run()"
           :class="{ 'is-active': editor.isActive('code') }"
           class="toolbar-button"
-          title="Code inline"
+          :aria-pressed="editor.isActive('code')"
+          :title="t('news.editor.inlineCode')"
+          :aria-label="t('news.editor.inlineCode')"
         >
-          <Icon icon="mdi:code-tags" class="h-5 w-5" />
+          <Icon icon="mdi:code-tags" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
       <!-- Color & Highlight -->
       <div class="toolbar-group">
         <!-- Text color -->
-        <div class="color-picker-wrapper" title="Couleur du texte">
-          <button type="button" class="toolbar-button color-button" @click="toggleColorPicker">
-            <Icon icon="mdi:format-color-text" class="h-5 w-5" />
+        <div class="color-picker-wrapper">
+          <button
+            type="button"
+            class="toolbar-button color-button"
+            :title="t('news.editor.textColor')"
+            :aria-label="t('news.editor.textColor')"
+            aria-haspopup="true"
+            :aria-expanded="showColorPicker"
+            @click="toggleColorPicker"
+          >
+            <Icon icon="mdi:format-color-text" class="h-5 w-5" aria-hidden="true" />
             <span class="color-swatch" :style="{ background: activeTextColor }"></span>
           </button>
           <div v-if="showColorPicker" class="color-dropdown" @mouseleave="closeColorPicker">
@@ -67,20 +85,29 @@
                 type="button"
                 class="color-dot"
                 :style="{ background: color.value }"
-                :title="color.name"
+                :title="t(color.nameKey)"
+                :aria-label="t(color.nameKey)"
                 @click="setTextColor(color.value)"
               ></button>
             </div>
             <button type="button" class="color-remove-btn" @click="removeTextColor">
-              <Icon icon="mdi:format-color-reset" class="h-4 w-4" /> Effacer
+              <Icon icon="mdi:format-color-reset" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
             </button>
           </div>
         </div>
 
         <!-- Highlight color -->
-        <div class="color-picker-wrapper" title="Surbrillance">
-          <button type="button" class="toolbar-button color-button" @click="toggleHighlightPicker">
-            <Icon icon="mdi:marker" class="h-5 w-5" />
+        <div class="color-picker-wrapper">
+          <button
+            type="button"
+            class="toolbar-button color-button"
+            :title="t('news.editor.highlight')"
+            :aria-label="t('news.editor.highlight')"
+            aria-haspopup="true"
+            :aria-expanded="showHighlightPicker"
+            @click="toggleHighlightPicker"
+          >
+            <Icon icon="mdi:marker" class="h-5 w-5" aria-hidden="true" />
             <span class="color-swatch" :style="{ background: activeHighlightColor }"></span>
           </button>
           <div v-if="showHighlightPicker" class="color-dropdown" @mouseleave="closeHighlightPicker">
@@ -91,12 +118,13 @@
                 type="button"
                 class="color-dot"
                 :style="{ background: color.value }"
-                :title="color.name"
+                :title="t(color.nameKey)"
+                :aria-label="t(color.nameKey)"
                 @click="setHighlight(color.value)"
               ></button>
             </div>
             <button type="button" class="color-remove-btn" @click="removeHighlight">
-              <Icon icon="mdi:format-color-reset" class="h-4 w-4" /> Effacer
+              <Icon icon="mdi:format-color-reset" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
             </button>
           </div>
         </div>
@@ -109,27 +137,33 @@
           @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
           class="toolbar-button"
-          title="Titre 1"
+          :aria-pressed="editor.isActive('heading', { level: 1 })"
+          :title="t('news.editor.heading1')"
+          :aria-label="t('news.editor.heading1')"
         >
-          <Icon icon="mdi:format-header-1" class="h-5 w-5" />
+          <Icon icon="mdi:format-header-1" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
           class="toolbar-button"
-          title="Titre 2"
+          :aria-pressed="editor.isActive('heading', { level: 2 })"
+          :title="t('news.editor.heading2')"
+          :aria-label="t('news.editor.heading2')"
         >
-          <Icon icon="mdi:format-header-2" class="h-5 w-5" />
+          <Icon icon="mdi:format-header-2" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
           :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
           class="toolbar-button"
-          title="Titre 3"
+          :aria-pressed="editor.isActive('heading', { level: 3 })"
+          :title="t('news.editor.heading3')"
+          :aria-label="t('news.editor.heading3')"
         >
-          <Icon icon="mdi:format-header-3" class="h-5 w-5" />
+          <Icon icon="mdi:format-header-3" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -140,36 +174,44 @@
           @click="editor.chain().focus().setTextAlign('left').run()"
           :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
           class="toolbar-button"
-          title="Aligner à gauche"
+          :aria-pressed="editor.isActive({ textAlign: 'left' })"
+          :title="t('news.editor.alignLeft')"
+          :aria-label="t('news.editor.alignLeft')"
         >
-          <Icon icon="mdi:format-align-left" class="h-5 w-5" />
+          <Icon icon="mdi:format-align-left" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().setTextAlign('center').run()"
           :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
           class="toolbar-button"
-          title="Centrer"
+          :aria-pressed="editor.isActive({ textAlign: 'center' })"
+          :title="t('news.editor.alignCenter')"
+          :aria-label="t('news.editor.alignCenter')"
         >
-          <Icon icon="mdi:format-align-center" class="h-5 w-5" />
+          <Icon icon="mdi:format-align-center" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().setTextAlign('right').run()"
           :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
           class="toolbar-button"
-          title="Aligner à droite"
+          :aria-pressed="editor.isActive({ textAlign: 'right' })"
+          :title="t('news.editor.alignRight')"
+          :aria-label="t('news.editor.alignRight')"
         >
-          <Icon icon="mdi:format-align-right" class="h-5 w-5" />
+          <Icon icon="mdi:format-align-right" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().setTextAlign('justify').run()"
           :class="{ 'is-active': editor.isActive({ textAlign: 'justify' }) }"
           class="toolbar-button"
-          title="Justifier"
+          :aria-pressed="editor.isActive({ textAlign: 'justify' })"
+          :title="t('news.editor.alignJustify')"
+          :aria-label="t('news.editor.alignJustify')"
         >
-          <Icon icon="mdi:format-align-justify" class="h-5 w-5" />
+          <Icon icon="mdi:format-align-justify" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -180,18 +222,22 @@
           @click="editor.chain().focus().toggleBulletList().run()"
           :class="{ 'is-active': editor.isActive('bulletList') }"
           class="toolbar-button"
-          title="Liste à puces"
+          :aria-pressed="editor.isActive('bulletList')"
+          :title="t('news.editor.bulletList')"
+          :aria-label="t('news.editor.bulletList')"
         >
-          <Icon icon="mdi:format-list-bulleted" class="h-5 w-5" />
+          <Icon icon="mdi:format-list-bulleted" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleOrderedList().run()"
           :class="{ 'is-active': editor.isActive('orderedList') }"
           class="toolbar-button"
-          title="Liste numérotée"
+          :aria-pressed="editor.isActive('orderedList')"
+          :title="t('news.editor.orderedList')"
+          :aria-label="t('news.editor.orderedList')"
         >
-          <Icon icon="mdi:format-list-numbered" class="h-5 w-5" />
+          <Icon icon="mdi:format-list-numbered" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -202,48 +248,57 @@
           @click="editor.chain().focus().toggleCodeBlock().run()"
           :class="{ 'is-active': editor.isActive('codeBlock') }"
           class="toolbar-button"
-          title="Bloc de code"
+          :aria-pressed="editor.isActive('codeBlock')"
+          :title="t('news.editor.codeBlock')"
+          :aria-label="t('news.editor.codeBlock')"
         >
-          <Icon icon="mdi:code-braces" class="h-5 w-5" />
+          <Icon icon="mdi:code-braces" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().toggleBlockquote().run()"
           :class="{ 'is-active': editor.isActive('blockquote') }"
           class="toolbar-button"
-          title="Citation"
+          :aria-pressed="editor.isActive('blockquote')"
+          :title="t('news.editor.blockquote')"
+          :aria-label="t('news.editor.blockquote')"
         >
-          <Icon icon="mdi:format-quote-close" class="h-5 w-5" />
+          <Icon icon="mdi:format-quote-close" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().setHorizontalRule().run()"
           class="toolbar-button"
-          title="Séparateur horizontal"
+          :title="t('news.editor.horizontalRule')"
+          :aria-label="t('news.editor.horizontalRule')"
         >
-          <Icon icon="mdi:minus" class="h-5 w-5" />
+          <Icon icon="mdi:minus" class="h-5 w-5" aria-hidden="true" />
         </button>
 
         <!-- Callout -->
-        <div class="color-picker-wrapper" title="Callout">
+        <div class="color-picker-wrapper">
           <button
             type="button"
+            :title="t('news.editor.callout.label')"
+            :aria-label="t('news.editor.callout.label')"
+            aria-haspopup="true"
+            :aria-expanded="showCalloutMenu"
             @click="toggleCalloutMenu"
             :class="{ 'is-active': editor.isActive('callout') }"
             class="toolbar-button"
           >
-            <Icon icon="mdi:message-alert-outline" class="h-5 w-5" />
+            <Icon icon="mdi:message-alert-outline" class="h-5 w-5" aria-hidden="true" />
           </button>
           <div v-if="showCalloutMenu" class="callout-type-dropdown" @mouseleave="closeCalloutMenu">
             <button
-              v-for="t in calloutTypes"
-              :key="t.value"
+              v-for="type in calloutTypes"
+              :key="type.value"
               type="button"
               class="callout-type-item"
-              @click="insertCallout(t.value)"
+              @click="insertCallout(type.value)"
             >
-              <Icon :icon="t.icon" class="h-4 w-4" :style="{ color: t.color }" />
-              <span>{{ t.label }}</span>
+              <Icon :icon="type.icon" class="h-4 w-4" aria-hidden="true" :style="{ color: type.color }" />
+              <span>{{ t(type.labelKey) }}</span>
             </button>
           </div>
         </div>
@@ -251,43 +306,47 @@
 
       <!-- Table -->
       <div class="toolbar-group">
-        <div class="color-picker-wrapper" title="Tableau">
+        <div class="color-picker-wrapper">
           <button
             type="button"
+            :title="t('news.editor.table')"
+            :aria-label="t('news.editor.table')"
+            aria-haspopup="true"
+            :aria-expanded="showTableMenu"
             @click="toggleTableMenu"
             :class="{ 'is-active': editor.isActive('table') }"
             class="toolbar-button"
           >
-            <Icon icon="mdi:table" class="h-5 w-5" />
+            <Icon icon="mdi:table" class="h-5 w-5" aria-hidden="true" />
           </button>
           <div v-if="showTableMenu" class="table-dropdown" @mouseleave="closeTableMenu">
             <button type="button" class="table-menu-item" @click="insertTable">
-              <Icon icon="mdi:table-plus" class="h-4 w-4" /> Insérer un tableau
+              <Icon icon="mdi:table-plus" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.insertTable') }}
             </button>
             <template v-if="editor.isActive('table')">
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnBefore().run()">
-                <Icon icon="mdi:table-column-plus-before" class="h-4 w-4" /> Colonne avant
+                <Icon icon="mdi:table-column-plus-before" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnBefore') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnAfter().run()">
-                <Icon icon="mdi:table-column-plus-after" class="h-4 w-4" /> Colonne après
+                <Icon icon="mdi:table-column-plus-after" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnAfter') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteColumn().run()">
-                <Icon icon="mdi:table-column-remove" class="h-4 w-4" /> Supprimer colonne
+                <Icon icon="mdi:table-column-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteColumn') }}
               </button>
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowBefore().run()">
-                <Icon icon="mdi:table-row-plus-before" class="h-4 w-4" /> Ligne avant
+                <Icon icon="mdi:table-row-plus-before" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowBefore') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowAfter().run()">
-                <Icon icon="mdi:table-row-plus-after" class="h-4 w-4" /> Ligne après
+                <Icon icon="mdi:table-row-plus-after" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowAfter') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteRow().run()">
-                <Icon icon="mdi:table-row-remove" class="h-4 w-4" /> Supprimer ligne
+                <Icon icon="mdi:table-row-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteRow') }}
               </button>
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item table-menu-danger" @click="editor.chain().focus().deleteTable().run()">
-                <Icon icon="mdi:table-remove" class="h-4 w-4" /> Supprimer tableau
+                <Icon icon="mdi:table-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteTable') }}
               </button>
             </template>
           </div>
@@ -301,18 +360,21 @@
           @click="setLink"
           :class="{ 'is-active': editor.isActive('link') }"
           class="toolbar-button"
-          title="Ajouter un lien"
+          :aria-pressed="editor.isActive('link')"
+          :title="t('news.editor.addLink')"
+          :aria-label="t('news.editor.addLink')"
         >
-          <Icon icon="mdi:link-variant" class="h-5 w-5" />
+          <Icon icon="mdi:link-variant" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           v-if="editor.isActive('link')"
           type="button"
           @click="editor.chain().focus().unsetLink().run()"
           class="toolbar-button"
-          title="Supprimer le lien"
+          :title="t('news.editor.removeLink')"
+          :aria-label="t('news.editor.removeLink')"
         >
-          <Icon icon="mdi:link-variant-off" class="h-5 w-5" />
+          <Icon icon="mdi:link-variant-off" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -322,25 +384,28 @@
           type="button"
           @click="showMediaModal = true"
           class="toolbar-button"
-          title="Insérer une image"
+          :title="t('news.editor.insertImage')"
+          :aria-label="t('news.editor.insertImage')"
         >
-          <Icon icon="mdi:image-plus" class="h-5 w-5" />
+          <Icon icon="mdi:image-plus" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="showFileModal = true"
           class="toolbar-button"
-          title="Joindre un fichier"
+          :title="t('news.editor.attachFile')"
+          :aria-label="t('news.editor.attachFile')"
         >
-          <Icon icon="mdi:file-plus" class="h-5 w-5" />
+          <Icon icon="mdi:file-plus" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="insertVideo"
           class="toolbar-button"
-          title="Intégrer une vidéo YouTube / Vimeo"
+          :title="t('news.editor.embedVideo')"
+          :aria-label="t('news.editor.embedVideo')"
         >
-          <Icon icon="mdi:video-plus" class="h-5 w-5" />
+          <Icon icon="mdi:video-plus" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -351,18 +416,20 @@
           @click="editor.chain().focus().undo().run()"
           :disabled="!editor.can().undo()"
           class="toolbar-button"
-          title="Annuler (Ctrl+Z)"
+          :title="t('news.editor.undo')"
+          :aria-label="t('news.editor.undo')"
         >
-          <Icon icon="mdi:undo" class="h-5 w-5" />
+          <Icon icon="mdi:undo" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
           @click="editor.chain().focus().redo().run()"
           :disabled="!editor.can().redo()"
           class="toolbar-button"
-          title="Rétablir (Ctrl+Y)"
+          :title="t('news.editor.redo')"
+          :aria-label="t('news.editor.redo')"
         >
-          <Icon icon="mdi:redo" class="h-5 w-5" />
+          <Icon icon="mdi:redo" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -373,30 +440,40 @@
     <!-- Media Modal -->
     <teleport to="body">
       <div v-if="showMediaModal" class="modal-overlay" @click.self="showMediaModal = false">
-        <div class="modal-content">
+        <div
+          v-focus-trap
+          class="modal-content"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="`${uid}-media-title`"
+        >
           <div class="modal-header">
-            <h3 class="modal-title">Insérer une image</h3>
-            <button @click="showMediaModal = false" class="modal-close">
-              <Icon icon="mdi:close" class="h-6 w-6" />
+            <h3 :id="`${uid}-media-title`" class="modal-title">{{ t('news.editor.insertImage') }}</h3>
+            <button type="button" :aria-label="t('common.close')" @click="showMediaModal = false" class="modal-close">
+              <Icon icon="mdi:close" class="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div class="modal-body">
             <div class="tabs">
               <button
+                type="button"
+                :aria-pressed="mediaTab === 'upload'"
                 @click="mediaTab = 'upload'"
                 :class="{ 'active': mediaTab === 'upload' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:upload" class="h-5 w-5" />
-                Téléverser
+                <Icon icon="mdi:upload" class="h-5 w-5" aria-hidden="true" />
+                {{ t('media.upload') }}
               </button>
               <button
+                type="button"
+                :aria-pressed="mediaTab === 'gallery'"
                 @click="mediaTab = 'gallery'"
                 :class="{ 'active': mediaTab === 'gallery' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:image-multiple" class="h-5 w-5" />
-                Médiathèque
+                <Icon icon="mdi:image-multiple" class="h-5 w-5" aria-hidden="true" />
+                {{ t('directory.pickFromLibrary') }}
               </button>
             </div>
 
@@ -422,30 +499,40 @@
     <!-- File Modal -->
     <teleport to="body">
       <div v-if="showFileModal" class="modal-overlay" @click.self="showFileModal = false">
-        <div class="modal-content">
+        <div
+          v-focus-trap
+          class="modal-content"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="`${uid}-file-title`"
+        >
           <div class="modal-header">
-            <h3 class="modal-title">Joindre un fichier</h3>
-            <button @click="showFileModal = false" class="modal-close">
-              <Icon icon="mdi:close" class="h-6 w-6" />
+            <h3 :id="`${uid}-file-title`" class="modal-title">{{ t('news.editor.attachFile') }}</h3>
+            <button type="button" :aria-label="t('common.close')" @click="showFileModal = false" class="modal-close">
+              <Icon icon="mdi:close" class="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div class="modal-body">
             <div class="tabs">
               <button
+                type="button"
+                :aria-pressed="fileTab === 'upload'"
                 @click="fileTab = 'upload'"
                 :class="{ 'active': fileTab === 'upload' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:upload" class="h-5 w-5" />
-                Téléverser
+                <Icon icon="mdi:upload" class="h-5 w-5" aria-hidden="true" />
+                {{ t('media.upload') }}
               </button>
               <button
+                type="button"
+                :aria-pressed="fileTab === 'gallery'"
                 @click="fileTab = 'gallery'"
                 :class="{ 'active': fileTab === 'gallery' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:file-multiple" class="h-5 w-5" />
-                Médiathèque
+                <Icon icon="mdi:file-multiple" class="h-5 w-5" aria-hidden="true" />
+                {{ t('directory.pickFromLibrary') }}
               </button>
             </div>
 
@@ -471,7 +558,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount, useId } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -520,6 +607,8 @@ lowlight.register('css', css)
 
 const { t } = useI18n()
 const appStore = useAppStore()
+// Identifiant unique : titres des modales (plusieurs éditeurs possibles sur une page)
+const uid = useId()
 
 const props = defineProps({
   modelValue: {
@@ -528,7 +617,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Commencez à écrire...'
+    default: ''
   },
   editable: {
     type: Boolean,
@@ -552,32 +641,32 @@ const showTableMenu = ref(false)
 const showCalloutMenu = ref(false)
 const calloutTypes = CALLOUT_TYPES
 
-// Palette de couleurs pour le texte
+// Palette de couleurs pour le texte (noms traduits au rendu)
 const textColors = [
-  { name: 'Noir', value: '#000000' },
-  { name: 'Gris foncé', value: '#374151' },
-  { name: 'Gris', value: '#6B7280' },
-  { name: 'Rouge', value: '#EF4444' },
-  { name: 'Orange', value: '#F97316' },
-  { name: 'Jaune', value: '#EAB308' },
-  { name: 'Vert', value: '#22C55E' },
-  { name: 'Cyan', value: '#06B6D4' },
-  { name: 'Bleu', value: '#3B82F6' },
-  { name: 'Indigo', value: '#6366F1' },
-  { name: 'Violet', value: '#A855F7' },
-  { name: 'Rose', value: '#EC4899' },
+  { nameKey: 'news.editor.colors.black', value: '#000000' },
+  { nameKey: 'news.editor.colors.darkGray', value: '#374151' },
+  { nameKey: 'news.editor.colors.gray', value: '#6B7280' },
+  { nameKey: 'news.editor.colors.red', value: '#EF4444' },
+  { nameKey: 'news.editor.colors.orange', value: '#F97316' },
+  { nameKey: 'news.editor.colors.yellow', value: '#EAB308' },
+  { nameKey: 'news.editor.colors.green', value: '#22C55E' },
+  { nameKey: 'news.editor.colors.cyan', value: '#06B6D4' },
+  { nameKey: 'news.editor.colors.blue', value: '#3B82F6' },
+  { nameKey: 'news.editor.colors.indigo', value: '#6366F1' },
+  { nameKey: 'news.editor.colors.purple', value: '#A855F7' },
+  { nameKey: 'news.editor.colors.pink', value: '#EC4899' },
 ]
 
 // Palette de couleurs pour la surbrillance
 const highlightColors = [
-  { name: 'Jaune', value: '#FEF08A' },
-  { name: 'Vert clair', value: '#BBF7D0' },
-  { name: 'Bleu clair', value: '#BAE6FD' },
-  { name: 'Rose clair', value: '#FBCFE8' },
-  { name: 'Orange clair', value: '#FED7AA' },
-  { name: 'Violet clair', value: '#DDD6FE' },
-  { name: 'Rouge clair', value: '#FECACA' },
-  { name: 'Cyan clair', value: '#A5F3FC' },
+  { nameKey: 'news.editor.colors.yellow', value: '#FEF08A' },
+  { nameKey: 'news.editor.colors.lightGreen', value: '#BBF7D0' },
+  { nameKey: 'news.editor.colors.lightBlue', value: '#BAE6FD' },
+  { nameKey: 'news.editor.colors.lightPink', value: '#FBCFE8' },
+  { nameKey: 'news.editor.colors.lightOrange', value: '#FED7AA' },
+  { nameKey: 'news.editor.colors.lightPurple', value: '#DDD6FE' },
+  { nameKey: 'news.editor.colors.lightRed', value: '#FECACA' },
+  { nameKey: 'news.editor.colors.lightCyan', value: '#A5F3FC' },
 ]
 
 const activeTextColor = computed(() => {
@@ -643,7 +732,7 @@ const insertCallout = (type) => {
 }
 
 const insertVideo = () => {
-  const url = window.prompt('URL YouTube ou Vimeo')
+  const url = window.prompt(t('news.editor.videoPrompt'))
   if (!url) return
   const embedUrl = getEmbedUrl(url)
   if (!embedUrl) {
@@ -721,7 +810,7 @@ const editor = useEditor({
       multicolor: true,
     }),
     Placeholder.configure({
-      placeholder: props.placeholder,
+      placeholder: props.placeholder || t('news.editor.placeholder'),
     }),
   ],
   onUpdate: ({ editor }) => {

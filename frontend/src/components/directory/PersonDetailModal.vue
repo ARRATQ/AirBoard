@@ -2,14 +2,14 @@
   <teleport to="body">
     <div class="modal-overlay" @click.self="$emit('close')" @keydown.esc="$emit('close')">
       <div class="modal-container">
-        <div class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-label="name">
+        <div v-focus-trap class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-labelledby="titleId">
           <div class="person-detail__hero" :style="{ '--unit-color': roles[0]?.unit.color || 'var(--accent)' }">
             <button ref="closeBtn" type="button" class="person-detail__close" :aria-label="$t('common.close')" @click="$emit('close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
             <PersonAvatar :person="person" size="xl" />
             <div class="min-w-0">
-              <h2 class="person-detail__name">{{ name }}</h2>
+              <h2 :id="titleId" class="person-detail__name">{{ name }}</h2>
               <p v-if="roles[0]" class="person-detail__title">
                 {{ roles[0].position.title }}
                 <span v-if="roles[0].assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
@@ -90,7 +90,7 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import PersonAvatar from './PersonAvatar.vue'
@@ -107,6 +107,7 @@ defineEmits(['close', 'edit'])
 
 const { locale } = useI18n()
 const name = computed(() => fullName(props.person))
+const titleId = useId()
 const value = (f) => props.person.custom_fields?.[f.key]
 const filledFields = computed(() => props.fields.filter((f) => value(f)))
 const formatDate = (iso) => new Date(iso).toLocaleDateString(locale.value)

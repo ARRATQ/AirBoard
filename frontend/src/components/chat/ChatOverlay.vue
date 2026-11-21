@@ -1,9 +1,11 @@
 <template>
   <!-- Minimized Bubble animée -->
-  <div
+  <button
     v-if="!chatStore.isOpen && !props.hideToggle"
+    type="button"
     class="fixed z-[9999] cursor-pointer co-fab"
-    :style="{ bottom: '20px', right: '20px' }"
+    :style="{ bottom: '20px', insetInlineEnd: '20px' }"
+    :aria-label="totalUnread > 0 ? t('chat.openWithUnread', { count: totalUnread }, totalUnread) : t('chat.open')"
     @click="chatStore.toggleChat()"
   >
     <!-- Halo externe pulsant -->
@@ -17,7 +19,7 @@
       <transition name="co-face">
         <div v-if="faceMode === 'user'" key="user" class="absolute inset-0 flex flex-col items-center justify-center gap-0">
           <Icon icon="mdi:account-circle" class="text-white" style="font-size: 28px; margin-top: 2px;" />
-          <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;">CHAT</span>
+          <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;" aria-hidden="true">CHAT</span>
         </div>
       </transition>
 
@@ -25,7 +27,7 @@
       <transition name="co-face">
         <div v-if="faceMode === 'ai'" key="ai" class="absolute inset-0 flex flex-col items-center justify-center">
           <Icon icon="mdi:robot-happy-outline" class="text-white" style="font-size: 28px; margin-top: 2px;" />
-          <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;">AI</span>
+          <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;" aria-hidden="true">AI</span>
         </div>
       </transition>
 
@@ -37,7 +39,7 @@
         {{ totalUnread > 99 ? '99+' : totalUnread }}
       </span>
     </div>
-  </div>
+  </button>
 
   <!-- Chat Window -->
   <transition name="co-window-anim">
@@ -45,6 +47,8 @@
       v-if="chatStore.isOpen"
       class="co-window flex flex-col overflow-hidden bg-white dark:bg-gray-900"
       :class="isFullscreen ? 'co-window--fullscreen' : 'co-window--normal'"
+      role="dialog"
+      aria-labelledby="chat-overlay-title"
     >
       <!-- ── Header ─────────────────────────────────────── -->
       <div
@@ -56,21 +60,23 @@
             <Icon icon="mdi:chat" class="h-4 w-4 text-white" />
           </div>
           <div class="min-w-0">
-            <p class="font-semibold text-white text-sm leading-tight">Messagerie</p>
+            <h2 id="chat-overlay-title" class="font-semibold text-white text-sm leading-tight">{{ t('chat.title') }}</h2>
             <p class="text-white/60 text-xs leading-tight flex items-center gap-1">
               <span class="inline-block w-1.5 h-1.5 rounded-full" :class="chatStore.isConnected ? 'bg-green-400' : 'bg-red-400'" />
-              {{ chatStore.isConnected ? 'Connecté' : 'Hors ligne' }}
+              {{ chatStore.isConnected ? t('chat.connected') : t('chat.offline') }}
             </p>
           </div>
         </div>
         <div class="flex items-center gap-1 flex-shrink-0">
           <button
+            type="button"
             class="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
             style="background:rgba(255,255,255,0.15)"
             @mouseover="$event.currentTarget.style.background='rgba(255,255,255,0.28)'"
             @mouseleave="$event.currentTarget.style.background='rgba(255,255,255,0.15)'"
             @click="isFullscreen = !isFullscreen"
-            :title="isFullscreen ? 'Réduire' : 'Plein écran'"
+            :title="isFullscreen ? t('chatbots.exitFullscreen') : t('chatbots.fullscreen')"
+            :aria-label="isFullscreen ? t('chatbots.exitFullscreen') : t('chatbots.fullscreen')"
           >
             <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
           </button>
@@ -79,8 +85,10 @@
             style="background:rgba(255,255,255,0.15)"
             @mouseover="$event.currentTarget.style.background='rgba(255,255,255,0.28)'"
             @mouseleave="$event.currentTarget.style.background='rgba(255,255,255,0.15)'"
+            type="button"
             @click="chatStore.toggleChat()"
-            title="Fermer"
+            :title="t('common.close')"
+            :aria-label="t('common.close')"
           >
             <Icon icon="mdi:close" class="h-4 w-4" />
           </button>
@@ -104,10 +112,11 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Rechercher..."
+                :placeholder="t('chat.searchContacts')"
+                :aria-label="t('chat.searchContacts')"
                 class="w-full ps-8 pe-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400/30"
               >
-              <button v-if="searchQuery" @click="searchQuery = ''" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <button v-if="searchQuery" type="button" :aria-label="t('chat.clearSearch')" @click="searchQuery = ''" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <Icon icon="mdi:close-circle" class="text-xs" />
               </button>
             </div>
@@ -118,33 +127,35 @@
 
             <!-- Non-lus -->
             <template v-if="hasUnreadUsers">
-              <p class="text-[10px] font-bold text-primary-500 uppercase tracking-wide px-1.5 pt-1 pb-0.5">Non lus</p>
-              <div
+              <p class="text-[10px] font-bold text-primary-500 uppercase tracking-wide px-1.5 pt-1 pb-0.5">{{ t('chat.unread') }}</p>
+              <button
                 v-for="user in unreadUsers" :key="'u_'+user.id"
-                class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
+                type="button"
+                class="w-full text-start flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" alt="" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
-                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
+                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || t('chat.member') }}</div>
                 </div>
                 <span class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center flex-shrink-0">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
-              </div>
+              </button>
             </template>
 
             <!-- Groupes -->
             <template v-if="filteredGroups.length > 0">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1.5 pt-2 pb-0.5">Groupes</p>
-              <div
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1.5 pt-2 pb-0.5">{{ t('chat.groups') }}</p>
+              <button
                 v-for="group in filteredGroups" :key="group.id"
-                class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
+                type="button"
+                class="w-full text-start flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === group.id && chatStore.activeConversation?.type === 'group'
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
@@ -155,56 +166,58 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ group.name }}</div>
-                  <div class="text-[10px] text-gray-400">Groupe</div>
+                  <div class="text-[10px] text-gray-400">{{ t('chat.group') }}</div>
                 </div>
                 <span v-if="chatStore.unreadCounts['group_'+group.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['group_'+group.id] }}</span>
-              </div>
+              </button>
             </template>
 
             <!-- Users par groupe -->
             <template v-for="(groupData, groupName) in groupedUsers" :key="groupName">
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1.5 pt-2 pb-0.5">{{ groupName }}</p>
-              <div
+              <button
                 v-for="user in groupData.users" :key="user.id"
-                class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
+                type="button"
+                class="w-full text-start flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" alt="" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
-                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
+                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || t('chat.member') }}</div>
                 </div>
                 <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
-              </div>
+              </button>
             </template>
 
             <!-- Autres -->
             <template v-if="otherUsers.length > 0">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1.5 pt-2 pb-0.5">Contacts</p>
-              <div
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1.5 pt-2 pb-0.5">{{ t('chat.contacts') }}</p>
+              <button
                 v-for="user in otherUsers" :key="'o_'+user.id"
-                class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
+                type="button"
+                class="w-full text-start flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors mb-0.5"
                 :class="chatStore.activeConversation?.id === user.id && chatStore.activeConversation?.type === 'user'
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-700/50'"
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" alt="" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
-                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || 'Membre' }}</div>
+                  <div class="text-[10px] text-gray-400 truncate">{{ user.job_title || t('chat.member') }}</div>
                 </div>
                 <span v-if="chatStore.unreadCounts['user_'+user.id]" class="bg-primary-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1 flex items-center justify-center">{{ chatStore.unreadCounts['user_'+user.id] }}</span>
-              </div>
+              </button>
             </template>
 
             <!-- Vide -->
@@ -213,7 +226,7 @@
               class="flex flex-col items-center justify-center py-10 text-gray-400"
             >
               <Icon icon="mdi:account-search-outline" class="text-3xl opacity-30 mb-1" />
-              <p class="text-xs">Aucun contact trouvé</p>
+              <p class="text-xs">{{ t('chat.noContacts') }}</p>
             </div>
           </div>
         </div>
@@ -224,12 +237,13 @@
           <!-- Conversation header -->
           <div class="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0 bg-white dark:bg-gray-900">
             <div class="flex items-center gap-2 min-w-0">
-              <button v-if="isMobile" @click="chatStore.closeConversation()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 me-0.5 flex-shrink-0 transition-colors">
+              <button v-if="isMobile" type="button" :aria-label="t('chat.backToContacts')" @click="chatStore.closeConversation()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 me-0.5 flex-shrink-0 transition-colors">
                 <Icon icon="mdi:arrow-left" class="rtl-flip text-xl" />
               </button>
               <div class="relative flex-shrink-0">
                 <img loading="lazy"
                   v-if="chatStore.activeConversation.type === 'user'"
+                  alt=""
                   :src="chatStore.activeConversation.avatar || `https://ui-avatars.com/api/?name=${chatStore.activeConversation.name}&background=3b82f6&color=fff`"
                   class="w-9 h-9 rounded-full object-cover"
                 />
@@ -241,27 +255,27 @@
               <div class="min-w-0">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate leading-tight">{{ chatStore.activeConversation.name }}</p>
                 <p class="text-xs leading-tight" :class="chatStore.activeConversation.is_online ? 'text-green-500' : 'text-gray-400'">
-                  {{ chatStore.activeConversation.type === 'group' ? 'Groupe' : (chatStore.activeConversation.is_online ? 'En ligne' : 'Hors ligne') }}
+                  {{ chatStore.activeConversation.type === 'group' ? t('chat.group') : (chatStore.activeConversation.is_online ? t('chat.online') : t('chat.offline')) }}
                 </p>
               </div>
             </div>
 
             <!-- Menu ⋮ -->
-            <div class="relative flex-shrink-0">
-              <button @click.stop="toggleMenu" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            <div ref="menuRef" class="relative flex-shrink-0">
+              <button type="button" :aria-label="t('chat.options')" aria-haspopup="true" :aria-expanded="showMenu" @click.stop="toggleMenu" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                 <Icon icon="mdi:dots-vertical" class="text-lg" />
               </button>
               <transition name="co-menu-drop">
                 <div v-if="showMenu" class="absolute end-0 top-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl w-52 py-1.5 z-30">
-                  <button @click="toggleNotifications" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <button type="button" :aria-pressed="notificationsEnabled" @click="toggleNotifications" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <Icon :icon="notificationsEnabled ? 'mdi:bell-ring-outline' : 'mdi:bell-off-outline'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" class="flex-shrink-0" />
-                    <span class="flex-1 text-xs text-start">Sons de notification</span>
-                    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md" :class="notificationsEnabled ? 'bg-green-50 text-green-600 dark:bg-green-900/20' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'">{{ notificationsEnabled ? 'On' : 'Off' }}</span>
+                    <span class="flex-1 text-xs text-start">{{ t('chat.notificationSounds') }}</span>
+                    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md" :class="notificationsEnabled ? 'bg-green-50 text-green-600 dark:bg-green-900/20' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'">{{ notificationsEnabled ? t('chat.soundOn') : t('chat.soundOff') }}</span>
                   </button>
                   <div class="border-t border-gray-100 dark:border-gray-700 my-1" />
-                  <button @click="confirmClearHistory" class="w-full flex items-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                  <button type="button" @click="confirmClearHistory" class="w-full flex items-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                     <Icon icon="mdi:delete-sweep-outline" class="flex-shrink-0" />
-                    <span class="text-xs">Vider l'historique</span>
+                    <span class="text-xs">{{ t('chat.clearHistory') }}</span>
                   </button>
                 </div>
               </transition>
@@ -273,15 +287,14 @@
             ref="messagesContainer"
             class="flex-1 overflow-y-auto flex flex-col gap-2.5 px-3.5 py-3 min-h-0"
             :style="{ background: 'var(--bg-page)' }"
-            @click="showMenu = false"
           >
             <!-- Empty state -->
             <div v-if="currentMessages.length === 0" class="flex flex-col items-center justify-center py-10 text-gray-400">
               <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2">
                 <Icon icon="mdi:chat-outline" class="text-2xl opacity-40" />
               </div>
-              <p class="text-xs font-medium">Début de la conversation</p>
-              <p class="text-[11px] mt-0.5 opacity-60">Envoyez un premier message !</p>
+              <p class="text-xs font-medium">{{ t('chat.conversationStart') }}</p>
+              <p class="text-[11px] mt-0.5 opacity-60">{{ t('chat.firstMessageHint') }}</p>
             </div>
 
             <!-- Messages -->
@@ -302,6 +315,7 @@
                 <!-- Avatar (messages reçus) -->
                 <img loading="lazy"
                   v-if="msg.sender_id != myId"
+                  alt=""
                   :src="msg.sender?.avatar_url || `https://ui-avatars.com/api/?name=${msg.sender?.first_name}+${msg.sender?.last_name}&background=6366f1&color=fff&size=64`"
                   class="w-6 h-6 rounded-full object-cover flex-shrink-0 mb-0.5"
                 />
@@ -315,9 +329,11 @@
                     <span class="co-msg-text" v-html="formatMessage(msg.content)" />
                     <button
                       v-if="msg.sender_id == myId"
+                      type="button"
                       @click.stop="deleteMessage(msg.id)"
                       class="co-del-btn"
-                      title="Supprimer"
+                      :title="t('chat.deleteMessage')"
+                      :aria-label="t('chat.deleteMessage')"
                     >
                       <Icon icon="mdi:delete-outline" class="h-3 w-3" />
                     </button>
@@ -338,6 +354,7 @@
                 <div class="grid grid-cols-8 gap-0.5 max-h-32 overflow-y-auto">
                   <button
                     v-for="emoji in commonEmojis" :key="emoji"
+                    type="button"
                     @click="addEmoji(emoji)"
                     class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-lg flex items-center justify-center transition-transform hover:scale-125"
                   >{{ emoji }}</button>
@@ -347,10 +364,13 @@
 
             <div class="flex items-center gap-2 px-3 py-2.5">
               <button
+                type="button"
+                :aria-expanded="showEmojiPicker"
+                :aria-label="t('chat.insertEmoji')"
                 @click="showEmojiPicker = !showEmojiPicker"
                 class="flex-shrink-0 p-1.5 rounded-lg transition-colors"
                 :class="showEmojiPicker ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-400 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-800'"
-                title="Emoji"
+                :title="t('chat.insertEmoji')"
               >
                 <Icon icon="mdi:emoticon-outline" class="h-5 w-5" />
               </button>
@@ -360,16 +380,19 @@
                 @keyup.enter="sendMessage"
                 @focus="showEmojiPicker = false"
                 type="text"
-                placeholder="Écrire un message..."
+                :placeholder="t('chat.messagePlaceholder')"
+                :aria-label="t('chat.messagePlaceholder')"
                 class="flex-1 min-w-0 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
               >
 
               <button
+                type="button"
                 @click="sendMessage"
                 :disabled="!newMessage.trim()"
                 class="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105"
                 style="background:linear-gradient(135deg,#2563eb,#3b82f6); box-shadow:0 2px 8px rgba(37,99,235,0.35)"
-                title="Envoyer"
+                :title="t('chat.send')"
+                :aria-label="t('chat.send')"
               >
                 <Icon icon="mdi:send" class="h-4 w-4" />
               </button>
@@ -386,8 +409,8 @@
           <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style="background:linear-gradient(135deg,#dbeafe,#e0e7ff)">
             <Icon icon="mdi:chat-outline" class="text-3xl text-primary-400" />
           </div>
-          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sélectionnez une conversation</p>
-          <p class="text-xs mt-1 text-gray-400">Choisissez un contact à gauche</p>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('chat.selectConversation') }}</p>
+          <p class="text-xs mt-1 text-gray-400">{{ t('chat.selectConversationHint') }}</p>
         </div>
       </div>
     </div>
@@ -483,6 +506,12 @@ const toggleNotifications = () => {
 };
 const toggleMenu = () => { showMenu.value = !showMenu.value; };
 
+// Ferme le menu ⋮ sur un clic en dehors (remplace l'ancien @click sur la zone des messages)
+const menuRef = ref(null);
+const onDocumentClick = (event) => {
+  if (showMenu.value && menuRef.value && !menuRef.value.contains(event.target)) showMenu.value = false;
+};
+
 const formatMessage = (content) => {
   if (!content) return '';
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -537,12 +566,15 @@ onMounted(() => {
   // toujours monté ; ce panneau n'est chargé qu'à la première ouverture du chat.
   if (authStore.token) chatStore.connect();
 
+  document.addEventListener('click', onDocumentClick);
+
   faceInterval = setInterval(() => {
     faceMode.value = faceMode.value === 'user' ? 'ai' : 'user';
   }, 3000);
 });
 
 onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick);
   if (faceInterval) clearInterval(faceInterval);
 });
 
@@ -651,7 +683,8 @@ watch(activeConversation, (val) => { if (val) scrollToBottom(); });
   transition: opacity 0.15s, background 0.15s;
   flex-shrink: 0;
 }
-.group:hover .co-del-btn { opacity: 1; }
+.group:hover .co-del-btn,
+.co-del-btn:focus-visible { opacity: 1; }
 .co-del-btn:hover { background: rgba(239,68,68,0.6); }
 
 /* ── FAB flottant animé ─────────────────────────────────── */

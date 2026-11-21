@@ -3,13 +3,14 @@
   <div
     v-if="props.hideToggle && chatOpen && !selectedBot && activeChatbots.length > 1"
     class="chatbot-selector-backdrop"
+    aria-hidden="true"
     @click="chatOpen = false"
   />
 
   <div
     v-if="activeChatbots.length > 0"
     class="chatbot-widget-root"
-    :style="props.hideToggle ? { right: '20px', pointerEvents: 'none' } : {}"
+    :style="props.hideToggle ? { insetInlineEnd: '20px', pointerEvents: 'none' } : {}"
   >
     <!--
       v-if="selectedBot"  → détruit/recrée le DOM quand on change de bot (nouvelle session n8n)
@@ -21,6 +22,8 @@
           v-show="chatOpen"
           class="chatbot-panel"
           :class="{ 'chatbot-panel--fullscreen': isFullscreen }"
+          role="dialog"
+          aria-labelledby="chatbot-panel-title"
         >
           <!-- En-tête coloré -->
           <div
@@ -30,7 +33,7 @@
             <div class="flex items-center gap-2 min-w-0">
               <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="h-5 w-5 text-white flex-shrink-0" />
               <div class="min-w-0">
-                <p class="font-semibold text-white text-sm leading-tight truncate">
+                <p id="chatbot-panel-title" class="font-semibold text-white text-sm leading-tight truncate">
                   {{ selectedBot.welcome_title || selectedBot.name }}
                 </p>
                 <p v-if="selectedBot.welcome_subtitle" class="text-white/70 text-xs leading-tight truncate">
@@ -41,20 +44,24 @@
             <div class="flex items-center gap-1 flex-shrink-0">
               <button
                 v-if="activeChatbots.length > 1"
+                type="button"
                 @click="backToSelector"
                 class="chatbot-panel-btn"
                 :title="$t('chatbots.switchBot')"
+                :aria-label="$t('chatbots.switchBot')"
               >
                 <Icon icon="mdi:swap-horizontal" class="h-4 w-4" />
               </button>
               <button
+                type="button"
                 @click="isFullscreen = !isFullscreen"
                 class="chatbot-panel-btn"
                 :title="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
+                :aria-label="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
               >
                 <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
               </button>
-              <button @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')">
+              <button type="button" @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')" :aria-label="$t('common.close')">
                 <Icon icon="mdi:close" class="h-4 w-4" />
               </button>
             </div>
@@ -82,24 +89,27 @@
       >
         <!-- Bulle de bienvenue (temporaire) au-dessus du visage -->
         <transition name="bubble-anim">
-          <div
+          <!-- Toute la bulle est un seul bouton « fermer » (un seul arrêt de tabulation) -->
+          <button
             v-if="showBubble"
-            class="chatbot-bubble"
+            type="button"
+            class="chatbot-bubble text-start"
+            :aria-label="$t('chatbots.dismissWelcome')"
             @click="dismissBubble"
           >
-            <button class="chatbot-bubble-close" @click.stop="dismissBubble" :title="$t('common.close')">
+            <span class="chatbot-bubble-close" aria-hidden="true">
               <Icon icon="mdi:close" class="h-3 w-3" />
-            </button>
-            <p class="font-semibold text-sm text-gray-900 dark:text-white leading-tight">
+            </span>
+            <span class="block font-semibold text-sm text-gray-900 dark:text-white leading-tight">
               {{ selectedBot.welcome_title || selectedBot.name }}
-            </p>
-            <p
+            </span>
+            <span
               v-if="selectedBot.welcome_subtitle"
-              class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug"
+              class="block text-xs text-gray-500 dark:text-gray-400 mt-1 leading-snug"
             >
               {{ selectedBot.welcome_subtitle }}
-            </p>
-          </div>
+            </span>
+          </button>
         </transition>
 
         <!-- Visage de l'avatar -->
@@ -127,6 +137,7 @@
         <button
           v-for="bot in activeChatbots"
           :key="bot.id"
+          type="button"
           @click="selectBot(bot)"
           class="chatbot-selector-item"
         >
@@ -149,11 +160,14 @@
     <!-- ── Bouton toggle (caché quand hideToggle — le FAB le remplace) ── -->
     <button
       v-if="!props.hideToggle"
+      type="button"
       class="chatbot-toggle-btn"
       :class="{ 'chatbot-toggle-btn--open': chatOpen }"
       :style="{ background: chatOpen ? 'linear-gradient(135deg, #374151, #1f2937)' : `linear-gradient(135deg, ${primaryColor}, ${primaryColor})` }"
       @click="toggleChat"
       :title="chatOpen ? $t('common.close') : (selectedBot ? selectedBot.name : $t('chatbots.selectBot'))"
+      :aria-label="chatOpen ? $t('common.close') : (selectedBot ? selectedBot.name : $t('chatbots.selectBot'))"
+      :aria-expanded="chatOpen"
     >
       <Icon
         :icon="chatOpen ? 'mdi:close' : (selectedBot ? selectedBot.icon || 'mdi:robot-outline' : 'mdi:robot-outline')"
@@ -618,8 +632,10 @@ defineExpose({
 .chatbot-bubble {
   position: relative;
   background: var(--bg-card);
-  border-radius: 14px 14px 14px 4px;
-  padding: 0.75rem 2rem 0.75rem 1rem;
+  border-radius: 14px;
+  border-end-start-radius: 4px;
+  padding-block: 0.75rem;
+  padding-inline: 1rem 2rem;
   box-shadow: 0 6px 24px rgba(var(--shadow-rgb), 0.18);
   max-width: 210px;
   cursor: pointer;
@@ -641,7 +657,7 @@ defineExpose({
   transition: color 0.15s;
 }
 
-.chatbot-bubble-close:hover {
+.chatbot-bubble:hover .chatbot-bubble-close {
   color: #4b5563;
 }
 

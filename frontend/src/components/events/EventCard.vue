@@ -1,13 +1,13 @@
 <template>
+  <!-- Carte cliquable : le bouton du titre s'étend sur toute la carte (pseudo-élément) -->
   <div
-    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-    @click="$emit('click', event)"
+    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
   >
     <!-- Event Image -->
     <div v-if="event.cover_image" class="aspect-video overflow-hidden">
       <img loading="lazy"
         :src="event.cover_image"
-        :alt="event.title"
+        alt=""
         class="w-full h-full object-cover"
       />
     </div>
@@ -47,8 +47,14 @@
       </div>
 
       <!-- Event Title -->
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-        {{ event.title }}
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <button
+          type="button"
+          class="btn-reset w-full text-start line-clamp-2 after:absolute after:inset-0 after:content-['']"
+          @click="$emit('click', event)"
+        >
+          {{ event.title }}
+        </button>
       </h3>
 
       <!-- Event Description -->
@@ -84,18 +90,20 @@
         <div class="flex items-center gap-2">
           <!-- View Count -->
           <div v-if="event.views" class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-            <Icon icon="mdi:eye" class="h-3 w-3 me-1" />
-            <span>{{ event.views }}</span>
+            <Icon icon="mdi:eye" class="h-3 w-3 me-1" aria-hidden="true" />
+            <span aria-hidden="true">{{ event.views }}</span>
+            <span class="sr-only">{{ $t('events.card.views', { count: event.views }, event.views) }}</span>
           </div>
           
           <!-- View Icon (Clickable) -->
           <button
+            type="button"
             @click.stop="viewEvent"
-            class="flex items-center text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+            class="relative z-10 flex items-center text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
             :title="$t('events.actions.view')"
           >
-            <Icon icon="mdi:eye" class="h-3 w-3 me-1" />
-            <span class="hidden sm:inline">{{ $t('events.actions.view') }}</span>
+            <Icon icon="mdi:eye" class="h-3 w-3 me-1" aria-hidden="true" />
+            <span class="sr-only sm:not-sr-only">{{ $t('events.actions.view') }}</span>
           </button>
           
           <!-- Published Status -->
@@ -133,7 +141,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['click'])
+defineEmits(['click'])
 
 // Computed
 const isPastEvent = computed(() => {

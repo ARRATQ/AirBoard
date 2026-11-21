@@ -63,6 +63,7 @@
               type="search"
               class="form-input"
               :placeholder="$t('directory.searchAccount')"
+              :aria-label="$t('directory.searchAccount')"
               @input="searchUsers"
             />
             <ul v-if="userResults.length" class="person-form__results">
@@ -127,7 +128,14 @@
     <teleport to="body">
       <div v-if="showGallery" class="modal-overlay" style="z-index: 60" @click.self="showGallery = false">
         <div class="modal-container">
-          <div class="modal-panel w-full max-w-4xl p-4">
+          <div
+            v-focus-trap
+            class="modal-panel w-full max-w-4xl p-4"
+            role="dialog"
+            aria-modal="true"
+            :aria-labelledby="galleryTitleId"
+          >
+            <h2 :id="galleryTitleId" class="sr-only">{{ $t('directory.pickFromLibrary') }}</h2>
             <MediaGallery @select="pickMedia" @cancel="showGallery = false" />
           </div>
         </div>
@@ -137,7 +145,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, useId } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -175,6 +183,8 @@ const fileInput = ref(null)
 const userQuery = ref('')
 const userResults = ref([])
 const linkedUser = ref(null)
+// id du titre (masqué) de la médiathèque, pour aria-labelledby
+const galleryTitleId = useId()
 
 const previewPerson = computed(() => ({ ...form, id: props.person?.id }))
 

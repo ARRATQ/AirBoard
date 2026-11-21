@@ -5,6 +5,7 @@
       <div
         v-if="modelValue"
         class="fixed inset-0 z-40 bg-black/50"
+        aria-hidden="true"
         @click="close"
       />
     </Transition>
@@ -15,7 +16,13 @@
         v-if="modelValue"
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div
+          v-focus-trap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="help-drawer-title"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600 flex-shrink-0">
             <div class="flex items-center gap-3">
@@ -23,13 +30,15 @@
                 <Icon icon="mdi:help-circle" class="h-6 w-6 text-primary-600" />
               </div>
               <div>
-                <h2 class="text-lg font-semibold text-white">{{ $t('help.title') }}</h2>
+                <h2 id="help-drawer-title" class="text-lg font-semibold text-white">{{ $t('help.title') }}</h2>
                 <p class="text-sm text-primary-100">{{ $t('help.subtitle') }}</p>
               </div>
             </div>
             <button
+              type="button"
               @click="close"
               class="text-white hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-white/10"
+              :aria-label="$t('common.close')"
             >
               <Icon icon="mdi:close" class="h-6 w-6" />
             </button>
@@ -41,6 +50,8 @@
               <button
                 v-for="guide in availableGuides"
                 :key="guide.id"
+                type="button"
+                :aria-pressed="selectedGuide === guide.id"
                 @click="selectedGuide = guide.id"
                 :class="[
                   'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
@@ -62,6 +73,8 @@
               <div class="p-3">
                 <div v-for="section in currentGuide?.sections" :key="section.id" class="mb-4">
                   <button
+                    type="button"
+                    :aria-expanded="expandedSections.includes(section.id)"
                     @click="toggleSection(section.id)"
                     class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                   >
@@ -75,6 +88,8 @@
                     <ul v-if="expandedSections.includes(section.id)" class="mt-1 space-y-1">
                       <li v-for="item in section.items" :key="item.id">
                         <button
+                          type="button"
+                          :aria-current="selectedPage?.id === item.id ? 'page' : undefined"
                           @click="selectPage(item)"
                           :class="[
                             'w-full text-start px-3 py-2 text-sm rounded-lg transition-colors',
@@ -144,6 +159,7 @@
                 </div>
               </div>
               <button
+                type="button"
                 @click="close"
                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >

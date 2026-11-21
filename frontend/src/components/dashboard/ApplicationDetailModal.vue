@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 z-50 overflow-y-auto">
     <!-- Backdrop -->
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <div
@@ -12,6 +12,10 @@
 
       <!-- Modal Panel -->
       <div
+        v-focus-trap
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="app-detail-title"
         class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-start overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
       >
         <!-- Header -->
@@ -24,7 +28,7 @@
                 :style="{ color: app.color || '#6366f1' }"
               />
               <div class="mt-3 text-center sm:mt-0 sm:text-start">
-                <h3 class="text-xl leading-6 font-semibold text-gray-900 dark:text-white" id="modal-title">
+                <h3 class="text-xl leading-6 font-semibold text-gray-900 dark:text-white" id="app-detail-title">
                   {{ app.name }}
                 </h3>
                 <div class="mt-1">
@@ -35,6 +39,8 @@
               </div>
             </div>
             <button
+              type="button"
+              :aria-label="$t('common.close')"
               @click="$emit('close')"
               class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
             >
@@ -46,16 +52,18 @@
         <!-- Body -->
         <div class="px-4 py-5 sm:p-6">
           <!-- Action Buttons -->
-          <div class="flex space-x-3 mb-8">
+          <div class="flex gap-3 mb-8">
             <a
               :href="app.url"
               :target="app.open_in_new_tab ? '_blank' : '_self'"
               class="flex-1 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-              <Icon icon="mdi:open-in-new" class="me-2 h-5 w-5" />
+              <Icon icon="mdi:open-in-new" class="me-2 h-5 w-5" aria-hidden="true" />
               {{ $t('common.open') }}
             </a>
             <button
+              type="button"
+              :aria-pressed="isFavorite"
               @click="toggleFavorite"
               class="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >

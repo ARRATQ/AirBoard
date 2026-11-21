@@ -21,9 +21,18 @@
       />
 
       <!-- Delete overlay (shown when selected) -->
-      <div v-if="selected" class="video-delete-btn" @mousedown.prevent="deleteNode" title="Supprimer la vidéo">
-        <Icon icon="mdi:close" class="h-4 w-4" />
-      </div>
+      <button
+        v-if="selected"
+        type="button"
+        class="btn-reset video-delete-btn"
+        :title="t('news.editor.removeVideo')"
+        :aria-label="t('news.editor.removeVideo')"
+        @mousedown.prevent="deleteNode"
+        @keydown.enter.prevent="deleteNode"
+        @keydown.space.prevent="deleteNode"
+      >
+        <Icon icon="mdi:close" class="h-4 w-4" aria-hidden="true" />
+      </button>
     </div>
   </node-view-wrapper>
 </template>
@@ -31,6 +40,9 @@
 <script setup>
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 defineProps({
   editor: Object,
