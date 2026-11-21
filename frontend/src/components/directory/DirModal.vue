@@ -3,17 +3,18 @@
     <div class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-container">
         <form
+          v-focus-trap
           class="modal-panel modal-form w-full"
           :class="widthClass"
           role="dialog"
           aria-modal="true"
-          :aria-label="title"
+          :aria-labelledby="titleId"
           novalidate
           @submit.prevent="$emit('submit')"
         >
           <div class="modal-header flex items-start justify-between gap-4">
             <div>
-              <h3 class="modal-title">{{ title }}</h3>
+              <h3 :id="titleId" class="modal-title">{{ title }}</h3>
               <p v-if="subtitle" class="modal-subtitle">{{ subtitle }}</p>
             </div>
             <button type="button" class="btn-ghost rounded-full p-1" :aria-label="$t('common.close')" @click="$emit('close')">
@@ -33,7 +34,7 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="$emit('close')">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
-                <Icon v-if="saving" icon="mdi:loading" class="animate-spin h-4 w-4 mr-1" />
+                <Icon v-if="saving" icon="mdi:loading" class="animate-spin h-4 w-4 me-1" />
                 {{ saving ? $t('common.saving') : submitLabel || $t('common.save') }}
               </button>
             </div>
@@ -45,7 +46,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 
@@ -58,6 +59,8 @@ const props = defineProps({
   size: { type: String, default: 'md' }, // sm | md | lg
 })
 const emit = defineEmits(['close', 'submit'])
+// id unique du titre (plusieurs modales peuvent coexister)
+const titleId = useId()
 
 const widthClass = computed(() => ({ sm: 'max-w-lg', md: 'max-w-3xl', lg: 'max-w-5xl' })[props.size] || 'max-w-3xl')
 

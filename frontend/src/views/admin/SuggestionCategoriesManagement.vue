@@ -50,10 +50,10 @@
 
     <Teleport to="body">
       <div v-if="showModal" class="sc-overlay" @click.self="closeForm">
-        <div class="sc-modal" role="dialog" aria-modal="true" :aria-label="editingId ? t('common.edit') : t('common.create')">
+        <div v-focus-trap class="sc-modal" role="dialog" aria-modal="true" aria-labelledby="suggestion-category-modal-title">
           <div class="sc-modal__head">
-            <h2 class="sc-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h2>
-            <button type="button" class="row-actions__btn" :aria-label="t('common.cancel')" @click="closeForm">
+            <h2 id="suggestion-category-modal-title" class="sc-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h2>
+            <button type="button" class="row-actions__btn" :aria-label="t('common.close')" @click="closeForm">
               <Icon icon="mdi:close" aria-hidden="true" />
             </button>
           </div>

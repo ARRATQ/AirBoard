@@ -32,7 +32,7 @@
           <button
             v-else
             type="button"
-            class="ml-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            class="ms-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
             :aria-label="$t('adminShared.news.removeItem', { name: groupName(groupId) })"
             @click="removeGroup(groupId)"
           >

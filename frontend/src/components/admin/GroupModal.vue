@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container" @click.self="closeModal">
-      <div class="modal-panel w-full sm:max-w-3xl">
+      <div v-focus-trap class="modal-panel w-full sm:max-w-3xl" role="dialog" aria-modal="true" aria-labelledby="group-modal-title">
         <form class="modal-form" novalidate @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -14,7 +14,7 @@
                   <Icon icon="mdi:account-group" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">
+                  <h3 id="group-modal-title" class="modal-title truncate">
                     {{ isEdit ? t('groupModal.titleEdit') : t('groupModal.titleCreate') }}
                   </h3>
                   <p class="modal-subtitle truncate">
@@ -139,7 +139,7 @@
                 <p class="text-xs text-gray-400">{{ t('groupModal.noAppGroupsHint') }}</p>
               </div>
 
-              <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1">
+              <div v-else class="flex-1 min-h-0 overflow-y-auto pe-1">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <label
                     v-for="appGroup in filteredAppGroups"
@@ -208,8 +208,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? t('common.save') : t('groupModal.submitCreate') }}
               </button>
             </div>

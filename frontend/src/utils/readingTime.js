@@ -11,9 +11,10 @@ const extractText = (node) => {
 /**
  * Estimate reading time from a Tiptap JSON content object.
  * @param {Object|string} content - Tiptap JSON (object or serialized string)
- * @returns {string|null} e.g. "3 min" or null if no content
+ * @returns {number|null} minutes (au moins 1), ou null sans contenu ;
+ *   le libellé se traduit avec t('news.minutes', { n }).
  */
-export const readingTime = (content) => {
+export const readingMinutes = (content) => {
   if (!content) return null
   let obj = content
   if (typeof content === 'string') {
@@ -21,6 +22,5 @@ export const readingTime = (content) => {
   }
   const words = extractText(obj).trim().split(/\s+/).filter(w => w.length > 0).length
   if (words === 0) return null
-  const minutes = Math.ceil(words / 200)
-  return minutes <= 1 ? '1 min' : `${minutes} min`
+  return Math.max(1, Math.ceil(words / 200))
 }

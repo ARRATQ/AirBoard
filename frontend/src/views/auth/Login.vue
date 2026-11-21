@@ -6,13 +6,13 @@
         <!-- Header -->
         <div class="text-center space-y-4">
           <div class="flex items-center justify-center">
-            <div class="h-16 w-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
+            <div class="h-16 w-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
               <Icon icon="mdi:view-dashboard" class="h-8 w-8 text-white" />
             </div>
           </div>
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Sign in to access your dashboard</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ t('auth.login.title') }}</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login.subtitle') }}</p>
           </div>
         </div>
 
@@ -26,7 +26,7 @@
             class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 shadow-sm hover:shadow-md"
           >
             <Icon :icon="provider.icon" class="h-5 w-5" />
-            <span>Continue with {{ provider.display_name }}</span>
+            <span>{{ t('auth.login.continueWith', { provider: provider.display_name }) }}</span>
           </button>
 
           <!-- Divider -->
@@ -35,7 +35,7 @@
               <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">Or continue with</span>
+              <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">{{ t('auth.login.orContinueWith') }}</span>
             </div>
           </div>
         </div>
@@ -44,15 +44,16 @@
         <form @submit.prevent="handleSubmit" class="space-y-5">
           <div>
             <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Username <span class="text-red-500">*</span>
+              {{ t('auth.fields.username') }} <span class="text-red-500" aria-hidden="true">*</span>
             </label>
             <input
               id="username"
               v-model="form.username"
               type="text"
               required
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-              placeholder="Enter your username"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+              :placeholder="t('auth.fields.usernamePlaceholder')"
+              autocomplete="username"
               :disabled="loading"
             />
             <p v-if="errors.username" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ errors.username }}</p>
@@ -60,7 +61,7 @@
 
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password <span class="text-red-500">*</span>
+              {{ t('auth.fields.password') }} <span class="text-red-500" aria-hidden="true">*</span>
             </label>
             <div class="relative">
               <input
@@ -68,14 +69,17 @@
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 required
-                class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter your password"
+                class="w-full px-4 py-3 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                :placeholder="t('auth.fields.passwordPlaceholder')"
+                autocomplete="current-password"
                 :disabled="loading"
               />
               <button
                 type="button"
+                :aria-label="showPassword ? t('auth.fields.hidePassword') : t('auth.fields.showPassword')"
+                :aria-pressed="showPassword"
                 @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+                class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
               >
                 <Icon :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
               </button>
@@ -88,28 +92,28 @@
               <input
                 v-model="form.remember"
                 type="checkbox"
-                class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 cursor-pointer"
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 cursor-pointer"
               />
-              <span class="ml-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-200">Remember me</span>
+              <span class="ms-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-200">{{ t('auth.login.remember') }}</span>
             </label>
           </div>
 
           <button
             type="submit"
             :disabled="loading"
-            class="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            class="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-5 w-5 mr-2" />
-            <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
+            <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-5 w-5 me-2" />
+            <span>{{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}</span>
           </button>
 
           <div v-if="signupEnabled" class="text-center pt-4">
-            <span class="text-sm text-gray-600 dark:text-gray-400">Don't have an account? </span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login.noAccount') }} </span>
             <router-link
               to="/auth/register"
-              class="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold transition-colors duration-200"
+              class="ms-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors duration-200"
             >
-              Sign up
+              {{ t('auth.login.signUp') }}
             </router-link>
           </div>
         </form>
@@ -120,12 +124,14 @@
 
 <script setup>
 import { ref, reactive, nextTick, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { oauthService, authService } from '@/services/api'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -147,11 +153,11 @@ const validateForm = () => {
   errors.value = {}
   
   if (!form.username.trim()) {
-    errors.value.username = 'Username is required'
+    errors.value.username = t('auth.validation.usernameRequired')
   }
   
   if (!form.password.trim()) {
-    errors.value.password = 'Password is required'
+    errors.value.password = t('auth.validation.passwordRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -165,7 +171,7 @@ const handleSubmit = async () => {
   try {
     await authStore.login(form)
 
-    appStore.showSuccess('Welcome back!')
+    appStore.showSuccess(t('auth.login.welcomeToast'))
 
     // Force navigation with nextTick to ensure state is updated
     await nextTick()
@@ -180,16 +186,16 @@ const handleSubmit = async () => {
     console.error('Login error:', error)
 
     if (error.response?.status === 401) {
-      appStore.showError('Invalid username or password')
+      appStore.showError(t('auth.login.invalidCredentials'))
     } else if (error.response?.status === 422) {
       const validationErrors = error.response.data.errors
       if (validationErrors) {
         errors.value = validationErrors
       } else {
-        appStore.showError('Invalid input data')
+        appStore.showError(t('auth.invalidInput'))
       }
     } else {
-      appStore.showError('Login failed. Please try again.')
+      appStore.showError(t('auth.login.failed'))
     }
   } finally {
     loading.value = false
@@ -229,7 +235,7 @@ const handleOAuthLogin = async (provider) => {
     window.location.href = auth_url
   } catch (error) {
     console.error('OAuth initiation error:', error)
-    appStore.showError('Failed to initiate OAuth login')
+    appStore.showError(t('auth.oauth.initFailed'))
     loading.value = false
   }
 }
@@ -255,7 +261,7 @@ const handleOAuthCallback = async (code, state, nonce) => {
   const provider = sessionStorage.getItem('oauth_provider')
 
   if (!savedState || savedState !== state) {
-    appStore.showError('Invalid OAuth state. Please try again.')
+    appStore.showError(t('auth.oauth.invalidState'))
     router.replace('/auth/login')
     return
   }
@@ -289,11 +295,11 @@ const handleOAuthCallback = async (code, state, nonce) => {
     sessionStorage.removeItem('oauth_nonce')
     sessionStorage.removeItem('oauth_provider')
 
-    appStore.showSuccess('Welcome back!')
+    appStore.showSuccess(t('auth.login.welcomeToast'))
     await router.replace('/home')
   } catch (error) {
     console.error('OAuth callback error:', error)
-    appStore.showError('OAuth authentication failed')
+    appStore.showError(t('auth.oauth.failed'))
     router.replace('/auth/login')
   } finally {
     loading.value = false

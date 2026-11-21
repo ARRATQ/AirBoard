@@ -6,7 +6,7 @@
       <template #description>{{ headerSubtitle }}</template>
       <template #actions>
         <router-link :to="LIST_PATH" class="btn btn-secondary">
-          <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
+          <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4 me-2" />
           {{ t('common.backToList') }}
         </router-link>
       </template>
@@ -94,8 +94,8 @@
                     type="checkbox"
                     class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                    <Icon icon="mdi:weather-sunny" class="inline h-4 w-4 mr-1" />
+                  <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
+                    <Icon icon="mdi:weather-sunny" class="inline h-4 w-4 me-1" />
                     {{ t('events.editor.allDay') }}
                   </span>
                 </label>
@@ -138,7 +138,7 @@
                     type="checkbox"
                     class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                  <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
                     {{ t('events.editor.isRecurring') }}
                   </span>
                 </label>
@@ -258,7 +258,7 @@
                     type="checkbox"
                     class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                  <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
                     {{ t('events.editor.publishImmediately') }}
                   </span>
                 </label>

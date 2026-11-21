@@ -27,9 +27,9 @@
   },
   "time": {
     "justNow": "Just now",
-    "minutesAgo": "{count} minute(s) ago",
-    "hoursAgo": "{count} hour(s) ago",
-    "daysAgo": "{count} day(s) ago"
+    "minutesAgo": "{count} minutes ago | {count} minute ago | {count} minutes ago",
+    "hoursAgo": "{count} hours ago | {count} hour ago | {count} hours ago",
+    "daysAgo": "{count} days ago | {count} day ago | {count} days ago"
   },
   "common": {
     "home": "Home",
@@ -42,7 +42,6 @@
     "yesterday": "Yesterday",
     "tomorrow": "Tomorrow",
     "daysAgo": "{count} days ago",
-    "daysRemaining": "{count} day(s) remaining",
     "retry": "Retry",
     "refresh": "Refresh",
     "loading": "Loading...",
@@ -209,7 +208,6 @@
       "breakdown": "Breakdown",
       "weekendCount": "Weekend days",
       "holidaysCount": "Holidays",
-      "days": "day(s)",
       "holidaysInPeriod": "Holidays in period",
       "invalidRange": "Choose a start date and a later end date."
     },
@@ -442,7 +440,117 @@
     "defaultGroupConfiguration": "Default Group Configuration",
     "defaultGroup": "Default Group for New Users",
     "noDefaultGroup": "No default group (manual assignment)",
-    "defaultGroupHelp": "Select the group that will be automatically assigned to new users during registration. Leave empty to require manual group assignment."
+    "defaultGroupHelp": "Select the group that will be automatically assigned to new users during registration. Leave empty to require manual group assignment.",
+    "tabs": {
+      "access": "Access & authentication",
+      "appearance": "Appearance"
+    },
+    "preview": {
+      "dashboardMessageHint": "▲ Dashboard message (Resources page)",
+      "sampleMail": "Mail",
+      "sampleGitDesc": "Git repository management",
+      "sampleMailDesc": "Email management"
+    },
+    "appNameHelp": "This name appears in the header and the browser title",
+    "dashboardTitleHelp": "Main title displayed on the dashboard page",
+    "welcomeMessageHelp": "Welcome message displayed on the resources page",
+    "newsFeed": {
+      "title": "News feed",
+      "perTab": "Articles per tab",
+      "perTabHelp": "Number of articles shown per tab on the home page (pinned articles always appear first)."
+    },
+    "heroImage": {
+      "title": "Home banner background image",
+      "help": "Customise the home banner background to mark events (Ramadan, holidays, etc.). Leave empty to keep the default animated gradient.",
+      "lightTheme": "Light theme",
+      "darkTheme": "Dark theme",
+      "darkFallback": "(if empty, the light theme image is used)",
+      "lightPreviewAlt": "Light theme image preview",
+      "darkPreviewAlt": "Dark theme image preview",
+      "removeLight": "Remove image",
+      "removeDark": "Remove dark image",
+      "formatHelp": "Ideal size: 1920×480 px. JPEG, PNG or WebP recommended.",
+      "focalPoint": "Focal point",
+      "focalPointHelp": "Choose which area of the image stays visible.",
+      "uploadSuccess": "Image uploaded successfully",
+      "uploadError": "Image upload failed",
+      "uploadDarkSuccess": "Dark image uploaded successfully",
+      "uploadDarkError": "Dark image upload failed",
+      "positions": {
+        "topLeft": "Top left",
+        "topCenter": "Top centre",
+        "topRight": "Top right",
+        "middleLeft": "Middle left",
+        "center": "Centre",
+        "middleRight": "Middle right",
+        "bottomLeft": "Bottom left",
+        "bottomCenter": "Bottom centre",
+        "bottomRight": "Bottom right"
+      }
+    },
+    "heroMessages": {
+      "title": "Dynamic home banner messages",
+      "add": "Add message",
+      "help": "Manage the rotating quotes and messages shown in the home page banner.",
+      "empty": "No dynamic messages configured. Default messages will be used.",
+      "editTitle": "Edit message",
+      "subtitle": "Set up a quote or an informational message for the home page.",
+      "content": "Message content",
+      "contentPlaceholder": "E.g. The only way to do great work is to love what you do.",
+      "author": "Author / source (optional)",
+      "authorPlaceholder": "E.g. Steve Jobs",
+      "activeStatus": "Active status",
+      "activeHelp": "Visible messages are included in the home page rotation.",
+      "update": "Update message",
+      "loadError": "Unable to load the home banner messages",
+      "updated": "Message updated",
+      "added": "Message added",
+      "saveError": "Unable to save the message",
+      "deleted": "Message deleted",
+      "deleteError": "Unable to delete the message",
+      "statusError": "Unable to update the message status"
+    },
+    "palette": {
+      "title": "Colour palette",
+      "help": "Click to preview, then save to apply it to all users.",
+      "add": "Add",
+      "new": "New palette",
+      "editTitle": "Edit palette",
+      "namePlaceholder": "My palette",
+      "accent": "Accent colour",
+      "pageBackground": "Page background",
+      "auto": "Automatic",
+      "custom": "Custom",
+      "autoHelp": "The background is calculated automatically from the accent hue.",
+      "customHelp": "Choose your own background colour.",
+      "bgColor": "Background colour",
+      "delete": "Delete palette",
+      "create": "Create palette",
+      "save": "Save palette",
+      "saved": "Palette saved"
+    },
+    "password": {
+      "minLength": "At least 6 characters",
+      "currentRequired": "The current password is required",
+      "newRequired": "The new password is required",
+      "tooShort": "Password must be at least {min} characters",
+      "confirmRequired": "Please confirm your password",
+      "mismatch": "Passwords do not match",
+      "incorrect": "Incorrect current password",
+      "changed": "Password changed",
+      "changeError": "Unable to change the password"
+    },
+    "loadError": "Unable to load the settings",
+    "updated": "Settings updated",
+    "updateError": "Unable to update the settings",
+    "resetSuccess": "Settings reset to defaults",
+    "resetError": "Unable to reset the settings",
+    "validation": {
+      "appNameRequired": "The application name is required",
+      "appIconRequired": "The application icon is required",
+      "dashboardTitleRequired": "The dashboard title is required",
+      "welcomeMessageRequired": "The welcome message is required"
+    }
   },
   "admin": {
     "overviewTitle": "Administration",
@@ -513,7 +621,14 @@
     "microsoftSetup2": "Go to Azure Portal > App registrations > New registration",
     "microsoftSetup3": "Set redirect URI in Authentication settings",
     "microsoftSetup4": "Create a new client secret in Certificates & secrets",
-    "microsoftSetup5": "Copy the Application (client) ID and client secret here"
+    "microsoftSetup5": "Copy the Application (client) ID and client secret here",
+    "loadError": "Unable to load the OAuth providers",
+    "updated": "OAuth provider updated",
+    "updateError": "Unable to update the OAuth provider",
+    "copied": "Copied to clipboard",
+    "copyError": "Unable to copy to clipboard",
+    "copyRedirectUri": "Copy the redirect URI",
+    "clientIdPlaceholder": "Enter your client ID"
   },
   "analytics": {
     "title": "Analytics",
@@ -537,7 +652,24 @@
     "noData": "No data available",
     "noAnalytics": "No Analytics Data",
     "noAnalyticsText": "Start using resources to see analytics data here.",
-    "exportStarted": "CSV data export started..."
+    "exportStarted": "CSV data export started...",
+    "loading": "Loading analytics...",
+    "distribution30d": "Distribution over 30 days",
+    "actionTracking": "Action tracking",
+    "pointTooltip": "{date}: no clicks | {date}: {count} click | {date}: {count} clicks",
+    "top10": "Top 10",
+    "clickCount": "no clicks | {count} click | {count} clicks",
+    "userCount": "no users | {count} user | {count} users",
+    "noActivity": "No activity detected",
+    "actions": "Actions",
+    "newsStats": {
+      "title": "News Hub statistics",
+      "subtitle": "Content performance",
+      "totalArticles": "Total articles",
+      "published": "Published",
+      "totalViews": "Total views",
+      "topNews": "Most popular articles"
+    }
   },
   "reports": {
     "title": "Reports",
@@ -581,7 +713,11 @@
       "group_admin": "Group Admins",
       "editor": "Editor",
       "user": "User"
-    }
+    },
+    "topContributors": "Top contributors",
+    "score": "Score",
+    "scoreFormula": "* Score = resource clicks ×1 + articles read ×2 + reactions ×1 + poll votes ×1 + resources created ×5 + articles published ×10",
+    "unknownError": "Unknown error"
   },
   "announcements": {
     "title": "Announcements",
@@ -644,14 +780,18 @@
     "hideHeader": "Hide chat header",
     "hideHeaderHelp": "Remove the title and subtitle displayed by the n8n widget (useful if you already have a custom header)",
     "showAvatarIntro": "Show animated welcome avatar",
-    "showAvatarIntroHelp": "When the chat opens, an animated avatar appears in the corner and gently floats while the window is open. A welcome bubble pops up then closes automatically after a few seconds."
+    "showAvatarIntroHelp": "When the chat opens, an animated avatar appears in the corner and gently floats while the window is open. A welcome bubble pops up then closes automatically after a few seconds.",
+    "assistants": "AI assistants",
+    "dismissWelcome": "Dismiss the welcome message"
   },
   "news": {
     "selectTypePlaceholder": "Select a type…",
     "widget": {
       "title": "Featured",
       "viewAll": "View all",
-      "noNews": "No news at the moment"
+      "noNews": "No news at the moment",
+      "unreadCount": "no unread articles | {count} unread article | {count} unread articles",
+      "reactionsCount": "no reactions | {count} reaction | {count} reactions"
     },
     "center": {
       "title": "News Hub",
@@ -668,7 +808,9 @@
       "reactions": "Reactions",
       "edit": "Edit article",
       "notFound": "Article not found",
-      "backToList": "Back to articles"
+      "backToList": "Back to articles",
+      "readingTime": "{time} read",
+      "linkedPoll": "Poll linked to this article"
     },
     "types": {
       "article": "Article",
@@ -690,8 +832,78 @@
       "titleZA": "Title (Z-A)"
     },
     "editor": {
-      "invalidVideoUrl": "Unrecognized URL. Use a YouTube or Vimeo URL."
-    }
+      "invalidVideoUrl": "Unrecognized URL. Use a YouTube or Vimeo URL.",
+      "placeholder": "Start writing...",
+      "videoPrompt": "YouTube or Vimeo URL",
+      "removeVideo": "Remove video",
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "underline": "Underline (Ctrl+U)",
+      "strike": "Strikethrough",
+      "inlineCode": "Inline code",
+      "textColor": "Text color",
+      "highlight": "Highlight",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "heading3": "Heading 3",
+      "alignLeft": "Align left",
+      "alignCenter": "Center",
+      "alignRight": "Align right",
+      "alignJustify": "Justify",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "codeBlock": "Code block",
+      "blockquote": "Quote",
+      "horizontalRule": "Horizontal rule",
+      "callout": {
+        "label": "Callout",
+        "info": "Info",
+        "warning": "Warning",
+        "success": "Success",
+        "danger": "Danger"
+      },
+      "table": "Table",
+      "insertTable": "Insert table",
+      "addColumnBefore": "Column before",
+      "addColumnAfter": "Column after",
+      "deleteColumn": "Delete column",
+      "addRowBefore": "Row before",
+      "addRowAfter": "Row after",
+      "deleteRow": "Delete row",
+      "deleteTable": "Delete table",
+      "addLink": "Add link",
+      "removeLink": "Remove link",
+      "insertImage": "Insert image",
+      "attachFile": "Attach file",
+      "embedVideo": "Embed a YouTube / Vimeo video",
+      "undo": "Undo (Ctrl+Z)",
+      "redo": "Redo (Ctrl+Y)",
+      "colors": {
+        "black": "Black",
+        "darkGray": "Dark gray",
+        "gray": "Gray",
+        "red": "Red",
+        "orange": "Orange",
+        "yellow": "Yellow",
+        "green": "Green",
+        "cyan": "Cyan",
+        "blue": "Blue",
+        "indigo": "Indigo",
+        "purple": "Purple",
+        "pink": "Pink",
+        "lightGreen": "Light green",
+        "lightBlue": "Light blue",
+        "lightPink": "Light pink",
+        "lightOrange": "Light orange",
+        "lightPurple": "Light purple",
+        "lightRed": "Light red",
+        "lightCyan": "Light cyan"
+      }
+    },
+    "viewModes": {
+      "compact": "Compact"
+    },
+    "minutes": "{n} min"
   },
   "dashboard": {
     "collapseAll": "Collapse All",
@@ -714,7 +926,6 @@
     "sortByCategory": "Sort by category",
     "sortByRecent": "Most recent",
     "resetFilters": "Reset filters",
-    "applicationsFound": "resource(s) found",
     "application": "Resource",
     "description": "Description",
     "category": "Category",
@@ -723,9 +934,9 @@
     "noApplicationsFound": "No resources found",
     "time": {
       "justNow": "Just now",
-      "minutesAgo": "{count} minute(s) ago",
-      "hoursAgo": "{count} hour(s) ago",
-      "daysAgo": "{count} day(s) ago"
+      "minutesAgo": "{count} minutes ago | {count} minute ago | {count} minutes ago",
+      "hoursAgo": "{count} hours ago | {count} hour ago | {count} hours ago",
+      "daysAgo": "{count} days ago | {count} day ago | {count} days ago"
     },
     "subtitle": "The tools and links available to you, sorted by category.",
     "emptyTitle": "No resources available",
@@ -1255,7 +1466,15 @@
       "draft": "Draft",
       "draftDescription": "This event is not yet published",
       "created": "Created on",
-      "externalLinks": "Links"
+      "externalLinks": "Links",
+      "recurrenceRule": {
+        "daily": "Every day",
+        "weekly": "Weekly",
+        "weeklyOn": "Weekly ({days})",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "generic": "Recurring"
+      }
     },
     "types": {
       "upcoming": "Upcoming",
@@ -1390,17 +1609,20 @@
       "selectCategory": "Category (optional)",
       "noCategory": "No category",
       "preview": "Preview",
-      "previewResults": "{count} holiday(s) found",
+      "previewResults": "No holidays found | {count} holiday found | {count} holidays found",
       "import": "Import",
-      "importSuccess": "{count} holiday(s) imported successfully",
+      "importSuccess": "No holidays imported | {count} holiday imported | {count} holidays imported",
       "imported": "{count} imported",
-      "skipped": "{count} skipped (already exist)",
+      "skipped": "{count} skipped (already exist) | {count} skipped (already exists) | {count} skipped (already exist)",
       "loadCountriesError": "Error loading countries",
       "previewError": "Error previewing",
       "importError": "Error importing holidays"
     },
     "actions": {
       "view": "View event"
+    },
+    "card": {
+      "views": "no views | {count} view | {count} views"
     }
   },
   "version": {
@@ -1444,9 +1666,9 @@
         "groupAdmin": "My Groups",
         "editor": "Editor"
       },
-      "pendingNews": "{count} unread article(s)",
-      "pendingPolls": "{count} poll(s) awaiting your vote",
-      "pendingApps": "{count} new resource(s) this week",
+      "pendingNews": "{count} unread articles | {count} unread article | {count} unread articles",
+      "pendingPolls": "{count} polls awaiting your vote | {count} poll awaiting your vote | {count} polls awaiting your vote",
+      "pendingApps": "{count} new resources this week | {count} new resource this week | {count} new resources this week",
       "pendingText": "{items}."
     },
     "stats": {
@@ -1494,7 +1716,6 @@
       "expiringSoon": "Ending soon",
       "latestResults": "Latest results",
       "closesIn": "Closes in",
-      "votes": "{count} vote(s)",
       "vote": "Vote now",
       "endsIn": "{count} d left | {count} d left | {count} d left",
       "ended": "Closed",
@@ -1600,7 +1821,61 @@
     "statusPending": "Pending",
     "statusSending": "Sending",
     "statusCompleted": "Completed",
-    "statusFailed": "Failed"
+    "statusFailed": "Failed",
+    "tabs": {
+      "smtpDeprecated": "SMTP configuration (deprecated)"
+    },
+    "oauth": {
+      "title": "OAuth 2.0 configuration",
+      "bannerTitle": "Modern OAuth 2.0 authentication",
+      "bannerText": "Replaces the deprecated SMTP authentication (username / password). Requires an App Registration in Azure AD.",
+      "provider": "Provider",
+      "googleSoon": "Google Workspace (coming soon)",
+      "tenantId": "Tenant ID",
+      "toggleHelp": "Show or hide the setup help",
+      "tenantIdHelp": "Found in Azure AD > App Registration > Overview",
+      "clientIdHelp": "Application (client) ID from Azure AD",
+      "clientSecretPlaceholder": "Secret value from Azure AD",
+      "clientSecretHelp": "Created in Certificates & secrets",
+      "showSecret": "Show secret",
+      "hideSecret": "Hide secret",
+      "grantType": "Grant type",
+      "grantClientCredentials": "Client Credentials (recommended)",
+      "grantHelp": "Client Credentials = automatic service-to-service",
+      "scopesClientCredentials": "Client Credentials uses {scope} (Microsoft Graph API)",
+      "scopesRefreshToken": "Refresh Token uses {scope} (SMTP)",
+      "tokenStatus": "Token status",
+      "tokenType": "Type:",
+      "tokenExpires": "Expires:",
+      "lastRefresh": "Last refresh:",
+      "errorLabel": "Error:",
+      "azureSetupTitle": "Azure AD setup",
+      "step1": "Create an App Registration in Azure Portal",
+      "step2": "Add the API permission {permission} (Application) under Microsoft Graph",
+      "step3": "{consent} (green check mark required)",
+      "step3Consent": "Grant admin consent",
+      "step4": "Create a client secret (24-month expiry)",
+      "step5": "Copy: Tenant ID, Client ID, {secretValue} (not Secret ID)",
+      "openPortal": "Open Azure Portal",
+      "error535Title": "Error 535 \"Authentication unsuccessful\"?",
+      "commonCauses": "Common causes:",
+      "cause1": "Admin consent not granted (no green check mark)",
+      "cause2": "Wrong secret copied (use VALUE, not Secret ID)",
+      "cause3": "The \"Sender email\" address does not exist in your M365 tenant",
+      "cause4": "Incorrect Tenant ID (must be a GUID, not a domain name)",
+      "troubleshootingLink": "See the full troubleshooting guide →",
+      "test": "Test OAuth",
+      "refreshToken": "Refresh token",
+      "testModalTitle": "Test the OAuth connection",
+      "saved": "OAuth configuration saved",
+      "testFailed": "Connection test failed",
+      "tokenRefreshed": "Token refreshed",
+      "refreshError": "Token refresh failed",
+      "expired": "Expired",
+      "inDaysHours": "In {days} d {hours} h",
+      "inHoursMinutes": "In {hours} h {minutes} min",
+      "inMinutes": "In {minutes} min"
+    }
   },
   "comments": {
     "title": "Comments",
@@ -1701,7 +1976,9 @@
       "poll": "Poll",
       "comment": "Comment",
       "reaction": "Reaction"
-    }
+    },
+    "bellWithUnread": "Notifications, none unread | Notifications, {count} unread | Notifications, {count} unread",
+    "unreadItem": "Unread"
   },
   "polls": {
     "title": "Polls",
@@ -1827,7 +2104,8 @@
         "createSuccess": "Poll created successfully",
         "updateSuccess": "Poll updated successfully",
         "saveError": "Error while saving"
-      }
+      },
+      "removeOption": "Remove option {index}"
     },
     "detail": {
       "breadcrumb": "Polls",
@@ -1898,7 +2176,7 @@
       "details": {
         "until": "Until",
         "options": "options",
-        "groups": "group(s)"
+        "groups": "{count} groups | {count} group | {count} groups"
       }
     },
     "media": {
@@ -1917,6 +2195,9 @@
       "uploadError": "Upload failed",
       "deleteSuccess": "Media deleted successfully",
       "deleteError": "Failed to delete media"
+    },
+    "card": {
+      "voted": "You have voted"
     }
   },
   "suggestions": {
@@ -2082,6 +2363,10 @@
       "suggestion_create_count": "Total suggestions created.",
       "suggestion_vote_count": "Total suggestion votes.",
       "suggestion_comment_count": "Total suggestion comments."
+    },
+    "categories": {
+      "user": "User",
+      "contributor": "Contributor"
     }
   },
   "help": {
@@ -2189,7 +2474,11 @@
     "insert": "Insert",
     "dropFiles": "Drop your files here",
     "orClickToSelect": "or click to choose them",
-    "uploadQueue": "Upload queue"
+    "uploadQueue": "Upload queue",
+    "removeSelected": "Remove the selected file",
+    "pageOf": "Page {page} / {total}",
+    "typeArchives": "Archives",
+    "fileTooLarge": "{name} is too large (max {max} MB)"
   },
   "profile": {
     "title": "My Profile",
@@ -2240,7 +2529,9 @@
     "passwordChanged": "Password changed successfully",
     "currentPasswordIncorrect": "Current password is incorrect",
     "passwordChangeError": "Error changing password",
-    "saveError": "Error saving profile"
+    "saveError": "Error saving profile",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "gamification": {
     "title": "My XP",
@@ -2311,12 +2602,12 @@
     "empty": "The directory is still empty.",
     "noResults": "No one matches your search.",
     "resultsCount": "No people | 1 person | {count} people",
-    "peopleCount": "{count} person(s) in this branch",
+    "peopleCount": "{count} people in this branch | {count} person in this branch | {count} people in this branch",
     "interim": "Acting",
     "interimHelp": "This person holds the position on an acting basis.",
     "vacant": "Vacant position",
     "noPosition": "No position assigned",
-    "otherPositions": "other position(s)",
+    "otherPositions": "+{count} other positions | +{count} other position | +{count} other positions",
     "head": "Head of unit",
     "contact": "Contact",
     "positions": "Positions held",
@@ -2509,12 +2800,67 @@
       "error": "Error",
       "warning": "Warning",
       "info": "Information"
+    },
+    "iconInput": {
+      "placeholder": "e.g. mdi:home, lucide:settings, heroicons:user",
+      "popular": "Popular suggestions:",
+      "help": "Use the \"collection:name\" format with mdi, lucide or heroicons (e.g. mdi:home, lucide:user, heroicons:cog). Search on iconify.design",
+      "suggestions": {
+        "user": "User",
+        "folder": "Folder",
+        "document": "Document",
+        "chart": "Chart",
+        "application": "Application",
+        "web": "Web",
+        "database": "Database",
+        "server": "Server",
+        "cloud": "Cloud",
+        "email": "Email",
+        "chat": "Chat",
+        "calendar": "Calendar",
+        "tools": "Tools",
+        "groups": "Groups",
+        "team": "Team",
+        "security": "Security",
+        "development": "Development",
+        "analytics": "Analytics",
+        "business": "Business"
+      }
     }
   },
   "chat": {
     "confirmDeleteMessage": "Delete this message?",
     "confirmClearHistory": "Do you really want to clear the entire history of this conversation?",
-    "clearHistory": "Clear history"
+    "clearHistory": "Clear history",
+    "title": "Messages",
+    "open": "Open messages",
+    "openWithUnread": "Open messages, no unread messages | Open messages, {count} unread message | Open messages, {count} unread messages",
+    "connected": "Connected",
+    "offline": "Offline",
+    "online": "Online",
+    "searchContacts": "Search contacts…",
+    "clearSearch": "Clear search",
+    "unread": "Unread",
+    "groups": "Groups",
+    "group": "Group",
+    "contacts": "Contacts",
+    "member": "Member",
+    "noContacts": "No contacts found",
+    "backToContacts": "Back to contacts",
+    "options": "Conversation options",
+    "notificationSounds": "Notification sounds",
+    "soundOn": "On",
+    "soundOff": "Off",
+    "conversationStart": "Start of the conversation",
+    "firstMessageHint": "Send the first message!",
+    "deleteMessage": "Delete message",
+    "insertEmoji": "Insert an emoji",
+    "messagePlaceholder": "Write a message…",
+    "send": "Send",
+    "selectConversation": "Select a conversation",
+    "selectConversationHint": "Choose a contact from the list",
+    "unreadCount": "no unread messages | {count} unread message | {count} unread messages",
+    "speedDialOpen": "Messages and assistants"
   },
   "adminShared": {
     "applications": {
@@ -2661,5 +3007,89 @@
     "CommentModeration": "Comment moderation",
     "Unauthorized": "Access denied",
     "NotFound": "Page not found"
+  },
+  "auth": {
+    "invalidInput": "Invalid input data",
+    "fields": {
+      "username": "Username",
+      "usernamePlaceholder": "Your username",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "passwordConfirm": "Confirm password",
+      "passwordConfirmPlaceholder": "Enter the password again",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "validation": {
+      "usernameRequired": "Username is required",
+      "usernameMin": "Username must be at least {min} characters",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least {min} characters",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooLong": "Password must not exceed {max} characters",
+      "passwordUpper": "Password must contain an uppercase letter",
+      "passwordLower": "Password must contain a lowercase letter",
+      "passwordDigit": "Password must contain a digit",
+      "passwordSpecial": "Password must contain a special character (for example ! ? - _ #)",
+      "passwordCommon": "Password contains a word that is too common (password, admin, 123456…)"
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to access your portal",
+      "continueWith": "Continue with {provider}",
+      "orContinueWith": "or with your account",
+      "remember": "Remember me",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "welcomeToast": "Welcome back!",
+      "invalidCredentials": "Invalid username or password",
+      "failed": "Sign-in failed. Please try again."
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Join Airboard",
+      "passwordHint": "At least 8 characters, with an uppercase letter, a lowercase letter, a digit and a special character",
+      "terms": "I agree to the {terms} and the {privacy}",
+      "termsLink": "Terms of Service",
+      "privacyLink": "Privacy Policy",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "disabled": "Sign-up is currently disabled",
+      "success": "Account created. You can now sign in.",
+      "alreadyExists": "This username or email is already in use",
+      "failed": "Sign-up failed. Please try again."
+    },
+    "oauth": {
+      "initFailed": "Could not start the external sign-in",
+      "invalidState": "Invalid sign-in response. Please try again.",
+      "failed": "Authentication failed"
+    },
+    "oauthCallback": {
+      "loading": "Signing in…",
+      "with": "Authenticating with {provider}",
+      "errorTitle": "Sign-in error",
+      "backToLogin": "Back to sign-in"
+    }
+  },
+  "errors": {
+    "backHome": "Back to home",
+    "previousPage": "Previous page",
+    "notFound": {
+      "title": "Page not found",
+      "message": "The page you are looking for doesn't exist or has been moved."
+    },
+    "unauthorized": {
+      "title": "Access denied",
+      "message": "You don't have permission to open this page. Contact your administrator if you think this is a mistake."
+    }
   }
 }

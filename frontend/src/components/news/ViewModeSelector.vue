@@ -3,6 +3,8 @@
     <button
       v-for="mode in viewModes"
       :key="mode.value"
+      type="button"
+      :aria-pressed="modelValue === mode.value"
       @click="$emit('update:modelValue', mode.value)"
       :class="[
         'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
@@ -10,10 +12,11 @@
           ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
       ]"
-      :title="mode.label"
+      :title="t(mode.labelKey)"
+      :aria-label="t(mode.labelKey)"
     >
-      <Icon :icon="mode.icon" class="h-4 w-4" />
-      <span class="hidden sm:inline">{{ mode.label }}</span>
+      <Icon :icon="mode.icon" class="h-4 w-4" aria-hidden="true" />
+      <span class="hidden sm:inline">{{ t(mode.labelKey) }}</span>
     </button>
   </div>
 </template>
@@ -33,20 +36,21 @@ defineProps({
 
 defineEmits(['update:modelValue'])
 
+// Libellés traduits au rendu (clés i18n)
 const viewModes = [
   {
     value: 'grid',
-    label: 'Grille',
+    labelKey: 'dashboard.viewModes.grid',
     icon: 'mdi:view-grid'
   },
   {
     value: 'list',
-    label: 'Liste',
+    labelKey: 'dashboard.viewModes.list',
     icon: 'mdi:view-list'
   },
   {
     value: 'compact',
-    label: 'Compact',
+    labelKey: 'news.viewModes.compact',
     icon: 'mdi:view-compact'
   }
 ]

@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container" @click.self="closeModal">
-      <div class="modal-panel w-full sm:max-w-5xl">
+      <div v-focus-trap class="modal-panel w-full sm:max-w-5xl" role="dialog" aria-modal="true" aria-labelledby="application-modal-title">
         <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- En-tête -->
           <div class="modal-header">
@@ -14,7 +14,7 @@
                   <Icon :icon="form.icon || 'mdi:application'" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">
+                  <h3 id="application-modal-title" class="modal-title truncate">
                     {{ isEdit ? $t('groupAdmin.applicationModal.title.edit') : $t('groupAdmin.applicationModal.title.new') }}
                   </h3>
                   <p class="modal-subtitle truncate">
@@ -60,7 +60,7 @@
               <div class="form-group mb-0">
                 <label for="url" class="form-label form-label-required">{{ $t('groupAdmin.applicationModal.applicationUrl') }}</label>
                 <div class="relative">
-                  <Icon icon="mdi:link-variant" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Icon icon="mdi:link-variant" class="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     id="url"
                     v-model="form.url"
@@ -204,8 +204,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ $t('common.cancel') }}</button>
               <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}
               </button>
             </div>

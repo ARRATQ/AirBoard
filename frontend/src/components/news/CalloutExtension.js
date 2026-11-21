@@ -2,11 +2,12 @@ import { Node, mergeAttributes } from '@tiptap/core'
 import { VueNodeViewRenderer } from '@tiptap/vue-3'
 import CalloutView from './CalloutView.vue'
 
+// labelKey : clé i18n, traduite là où le libellé est affiché (CalloutView, barre d'outils)
 export const CALLOUT_TYPES = [
-  { value: 'info',    label: 'Info',      icon: 'mdi:information',   color: '#3B82F6' },
-  { value: 'warning', label: 'Attention', icon: 'mdi:alert',          color: '#F59E0B' },
-  { value: 'success', label: 'Succès',    icon: 'mdi:check-circle',   color: '#22C55E' },
-  { value: 'danger',  label: 'Danger',    icon: 'mdi:alert-circle',   color: '#EF4444' },
+  { value: 'info',    labelKey: 'news.editor.callout.info',    icon: 'mdi:information',   color: '#3B82F6' },
+  { value: 'warning', labelKey: 'news.editor.callout.warning', icon: 'mdi:alert',          color: '#F59E0B' },
+  { value: 'success', labelKey: 'news.editor.callout.success', icon: 'mdi:check-circle',   color: '#22C55E' },
+  { value: 'danger',  labelKey: 'news.editor.callout.danger',  icon: 'mdi:alert-circle',   color: '#EF4444' },
 ]
 
 export const CalloutExtension = Node.create({

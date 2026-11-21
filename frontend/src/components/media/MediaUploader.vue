@@ -4,10 +4,16 @@
     <div
       class="upload-zone"
       :class="{ 'drag-over': isDragOver, 'uploading': isUploading }"
+      role="button"
+      tabindex="0"
+      :aria-label="$t('media.upload_title')"
+      :aria-disabled="isUploading"
       @drop.prevent="handleDrop"
       @dragover.prevent="isDragOver = true"
       @dragleave.prevent="isDragOver = false"
       @click="triggerFileInput"
+      @keydown.enter.prevent="triggerFileInput"
+      @keydown.space.prevent="triggerFileInput"
     >
       <input
         ref="fileInput"
@@ -15,11 +21,13 @@
         :accept="acceptedTypes"
         multiple
         class="hidden"
+        tabindex="-1"
+        aria-hidden="true"
         @change="handleFileSelect"
       />
 
       <div v-if="!isUploading" class="upload-content">
-        <Icon icon="mdi:cloud-upload" class="upload-icon" />
+        <Icon icon="mdi:cloud-upload" class="upload-icon" aria-hidden="true" />
         <p class="upload-text">
           {{ $t('media.dropFiles') }}
         </p>
@@ -43,8 +51,8 @@
     </div>
 
     <!-- Error message -->
-    <div v-if="errorMessage" class="error-message">
-      <Icon icon="mdi:alert-circle" class="h-5 w-5" />
+    <div v-if="errorMessage" class="error-message" role="alert">
+      <Icon icon="mdi:alert-circle" class="h-5 w-5" aria-hidden="true" />
       <span>{{ errorMessage }}</span>
     </div>
 
@@ -92,6 +100,7 @@ import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { apiErrorMessage } from '@/services/apiError'
 import { mediaService } from '@/services/api'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   accept: {
@@ -110,6 +119,8 @@ const props = defineProps({
 
 const emit = defineEmits(['upload-success', 'upload-error'])
 
+const { t } = useI18n()
+
 const fileInput = ref(null)
 const isDragOver = ref(false)
 const isUploading = ref(false)
@@ -121,12 +132,12 @@ const acceptedTypes = computed(() => props.accept)
 
 const acceptedTypesText = computed(() => {
   const types = []
-  if (props.accept.includes('image')) types.push('Images')
+  if (props.accept.includes('image')) types.push(t('media.type_image'))
   if (props.accept.includes('pdf')) types.push('PDF')
   if (props.accept.includes('doc')) types.push('Word')
   if (props.accept.includes('xls')) types.push('Excel')
   if (props.accept.includes('ppt')) types.push('PowerPoint')
-  if (props.accept.includes('zip')) types.push('Archives')
+  if (props.accept.includes('zip')) types.push(t('media.typeArchives'))
   return types.join(', ')
 })
 
@@ -160,7 +171,7 @@ const handleFiles = async (files) => {
   const validFiles = []
   for (const file of files) {
     if (file.size > props.maxSizeMB * 1024 * 1024) {
-      errorMessage.value = `${file.name} is too large (max ${props.maxSizeMB}MB)`
+      errorMessage.value = t('media.fileTooLarge', { name: file.name, max: props.maxSizeMB })
       continue
     }
     validFiles.push(file)
@@ -204,7 +215,7 @@ const uploadFile = async (queueItem) => {
     }, 2000)
   } catch (error) {
     queueItem.status = 'error'
-    errorMessage.value = apiErrorMessage(error, 'Upload failed')
+    errorMessage.value = apiErrorMessage(error, t('media.upload_error'))
     emit('upload-error', error)
 
     // Remove from queue after 5 seconds

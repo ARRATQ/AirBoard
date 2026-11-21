@@ -1,13 +1,19 @@
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-container">
-      <div class="modal-panel sm:max-w-6xl sm:w-full">
+      <div
+        v-focus-trap
+        class="modal-panel sm:max-w-6xl sm:w-full"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="poll-editor-title"
+      >
         <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="modal-title">
+                <h3 id="poll-editor-title" class="modal-title">
                   {{ isEdit ? t('polls.editor.title.edit') : t('polls.editor.title.new') }}
                 </h3>
                 <p class="modal-subtitle">
@@ -18,8 +24,9 @@
                 type="button"
                 @click="closeModal"
                 class="btn-ghost p-2"
+                :aria-label="t('common.close')"
               >
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="mdi:close" class="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -86,9 +93,11 @@
                     required
                     class="form-input flex-1"
                     :placeholder="t('polls.editor.optionPlaceholder', { index: index + 1 })"
+                    :aria-label="t('polls.editor.optionPlaceholder', { index: index + 1 })"
                   />
                   <button
                     type="button"
+                    :aria-pressed="!!option.is_other"
                     @click="toggleOtherOption(index)"
                     :class="[
                       'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap',
@@ -97,7 +106,7 @@
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     ]"
                   >
-                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 mr-1" />
+                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 me-1" aria-hidden="true" />
                     {{ option.is_other ? t('polls.editor.optionIsOther') : t('polls.editor.markAsOther') }}
                   </button>
                   <button
@@ -105,8 +114,10 @@
                     type="button"
                     @click="removeOption(index)"
                     class="btn-ghost p-2 text-red-600 hover:bg-red-50"
+                    :aria-label="t('polls.editor.removeOption', { index: index + 1 })"
+                    :title="t('polls.editor.removeOption', { index: index + 1 })"
                   >
-                    <Icon icon="mdi:delete" class="h-5 w-5" />
+                    <Icon icon="mdi:delete" class="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -126,7 +137,7 @@
 
             </div>
 
-            <div class="space-y-6 lg:border-l lg:pl-8 border-gray-200 dark:border-gray-700">
+            <div class="space-y-6 lg:border-s lg:ps-8 border-gray-200 dark:border-gray-700">
             <!-- Type et paramètres -->
             <div>
               <div class="section-header">
@@ -230,14 +241,15 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">
+                <span id="poll-editor-groups" class="form-label">
                   {{ t('polls.editor.targetGroups') }}
-                </label>
-                <div class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[60px]">
+                </span>
+                <div role="group" aria-labelledby="poll-editor-groups" class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[60px]">
                   <button
                     v-for="group in availableGroups"
                     :key="group.id"
                     type="button"
+                    :aria-pressed="form.target_group_ids.includes(group.id)"
                     @click="toggleGroup(group.id)"
                     :class="[
                       'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
@@ -248,7 +260,8 @@
                   >
                     <Icon
                       :icon="form.target_group_ids.includes(group.id) ? 'mdi:check' : 'mdi:plus'"
-                      class="inline h-4 w-4 mr-1"
+                      class="inline h-4 w-4 me-1"
+                      aria-hidden="true"
                     />
                     {{ group.name }}
                   </button>
@@ -289,7 +302,7 @@
                     </option>
                   </select>
                   <p v-if="loadingNews" class="form-help text-gray-500">
-                    <Icon icon="mdi:loading" class="inline animate-spin" /> {{ t('common.loading') }}...
+                    <Icon icon="mdi:loading" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
                   </p>
                 </div>
 
@@ -312,7 +325,7 @@
                     </option>
                   </select>
                   <p v-if="loadingAnnouncements" class="form-help text-gray-500">
-                    <Icon icon="mdi:loading" class="inline animate-spin" /> {{ t('common.loading') }}...
+                    <Icon icon="mdi:loading" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
                   </p>
                 </div>
               </div>
@@ -320,6 +333,7 @@
 
             <button
               type="button"
+              :aria-expanded="showAdvanced"
               @click="showAdvanced = !showAdvanced"
               class="btn-ghost btn-sm"
             >

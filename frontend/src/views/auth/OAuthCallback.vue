@@ -3,16 +3,16 @@
     <div class="callback-container">
       <div v-if="isLoading" class="loading-state">
         <div class="spinner"></div>
-        <p class="loading-text">Connexion en cours...</p>
-        <p class="loading-subtext">Authentification avec {{ providerName }}</p>
+        <p class="loading-text" role="status">{{ t('auth.oauthCallback.loading') }}</p>
+        <p class="loading-subtext">{{ t('auth.oauthCallback.with', { provider: providerName }) }}</p>
       </div>
 
       <div v-else-if="error" class="error-state">
         <Icon icon="mdi:alert-circle" class="error-icon" />
-        <h2>Erreur de connexion</h2>
+        <h2>{{ t('auth.oauthCallback.errorTitle') }}</h2>
         <p class="error-message">{{ error }}</p>
-        <button @click="redirectToLogin" class="btn-primary">
-          Retour à la connexion
+        <button type="button" @click="redirectToLogin" class="btn-primary">
+          {{ t('auth.oauthCallback.backToLogin') }}
         </button>
       </div>
     </div>
@@ -22,11 +22,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { apiErrorMessage } from '@/services/apiError'
 import { useAuthStore } from '@/stores/auth'
 import { oauthService } from '@/services/api'
 import { Icon } from '@iconify/vue'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
@@ -126,7 +128,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error('❌ OAuth callback error:', err)
-    error.value = apiErrorMessage(err, err.message || 'Une erreur est survenue lors de l\'authentification')
+    error.value = apiErrorMessage(err, err.message || t('auth.oauth.failed'))
     isLoading.value = false
   }
 })

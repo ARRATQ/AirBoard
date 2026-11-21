@@ -78,9 +78,9 @@ const pendingActionsText = computed(() => {
   const pending = homeData.value.pending_items
   if (!pending) return ''
   const parts = []
-  if (pending.unread_news) parts.push(t('home.hero.pendingNews', { count: pending.unread_news }))
-  if (pending.unanswered_polls) parts.push(t('home.hero.pendingPolls', { count: pending.unanswered_polls }))
-  if (pending.new_apps_count) parts.push(t('home.hero.pendingApps', { count: pending.new_apps_count }))
+  if (pending.unread_news) parts.push(t('home.hero.pendingNews', { count: pending.unread_news }, pending.unread_news))
+  if (pending.unanswered_polls) parts.push(t('home.hero.pendingPolls', { count: pending.unanswered_polls }, pending.unanswered_polls))
+  if (pending.new_apps_count) parts.push(t('home.hero.pendingApps', { count: pending.new_apps_count }, pending.new_apps_count))
   return parts.length ? t('home.hero.pendingText', { items: parts.join(t('common.and')) }) : ''
 })
 

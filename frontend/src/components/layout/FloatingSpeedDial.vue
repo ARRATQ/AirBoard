@@ -13,25 +13,45 @@
   <!-- Speed Dial -->
   <div class="speed-dial-container">
     <!-- Items (glissent vers le haut au clic sur le FAB) -->
-    <div class="speed-dial-items" :class="{ 'speed-dial-items--open': dialOpen }">
+    <!-- Chaque item est un seul bouton (libellé + pastille) : un arrêt de tabulation par action.
+         Items fermés : retirés de l'ordre de tabulation et de l'arbre d'accessibilité. -->
+    <div
+      id="speed-dial-items"
+      class="speed-dial-items"
+      :class="{ 'speed-dial-items--open': dialOpen }"
+      :aria-hidden="dialOpen ? undefined : 'true'"
+    >
       <!-- Assistants IA -->
-      <div v-if="hasChatbots" class="speed-dial-item" @click="openBot">
-        <span class="speed-dial-label">Assistants IA</span>
-        <button class="speed-dial-btn speed-dial-btn--indigo" :title="$t('chatbots.selectBot')">
+      <button
+        v-if="hasChatbots"
+        type="button"
+        class="speed-dial-item"
+        :tabindex="dialOpen ? 0 : -1"
+        :title="$t('chatbots.selectBot')"
+        @click="openBot"
+      >
+        <span class="speed-dial-label">{{ $t('chatbots.assistants') }}</span>
+        <span class="speed-dial-btn speed-dial-btn--indigo" aria-hidden="true">
           <Icon icon="mdi:robot-outline" class="h-5 w-5 text-white" />
-        </button>
-      </div>
+        </span>
+      </button>
 
       <!-- Messagerie -->
-      <div class="speed-dial-item" @click="openChat">
-        <span class="speed-dial-label">Messagerie</span>
-        <button class="speed-dial-btn speed-dial-btn--blue" title="Messagerie équipe">
-          <Icon icon="mdi:chat" class="h-5 w-5 text-white" />
+      <button
+        type="button"
+        class="speed-dial-item"
+        :tabindex="dialOpen ? 0 : -1"
+        @click="openChat"
+      >
+        <span class="speed-dial-label">{{ $t('chat.title') }}</span>
+        <span class="speed-dial-btn speed-dial-btn--blue">
+          <Icon icon="mdi:chat" class="h-5 w-5 text-white" aria-hidden="true" />
           <span v-if="totalUnread > 0" class="speed-dial-badge">
-            {{ totalUnread > 99 ? '99+' : totalUnread }}
+            <span class="sr-only">{{ $t('chat.unreadCount', { count: totalUnread }, totalUnread) }}</span>
+            <span aria-hidden="true">{{ totalUnread > 99 ? '99+' : totalUnread }}</span>
           </span>
-        </button>
-      </div>
+        </span>
+      </button>
     </div>
 
     <!-- FAB principal -->
@@ -47,13 +67,17 @@
       />
 
       <button
+        type="button"
         class="speed-dial-fab"
         :class="[
           { 'speed-dial-fab--open': dialOpen },
           !dialOpen ? (faceMode === 'ai' ? 'speed-dial-fab--ai' : 'speed-dial-fab--user') : ''
         ]"
         @click="toggleDial"
-        :title="dialOpen ? $t('common.close') : 'Messages'"
+        :title="fabLabel"
+        :aria-label="fabLabel"
+        :aria-expanded="hasChatbots ? dialOpen : undefined"
+        :aria-controls="hasChatbots ? 'speed-dial-items' : undefined"
       >
         <!-- Icône fermer -->
         <transition name="sd-face">
@@ -66,7 +90,7 @@
         <transition name="sd-face">
           <div v-if="!dialOpen && faceMode === 'user'" key="user" class="sd-face-slot">
             <Icon icon="mdi:account-circle" class="text-white" style="font-size: 26px; margin-top: 2px;" />
-            <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;">CHAT</span>
+            <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;" aria-hidden="true">CHAT</span>
           </div>
         </transition>
 
@@ -74,11 +98,11 @@
         <transition name="sd-face">
           <div v-if="!dialOpen && faceMode === 'ai'" key="ai" class="sd-face-slot">
             <Icon icon="mdi:robot-happy-outline" class="text-white" style="font-size: 26px; margin-top: 2px;" />
-            <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;">AI</span>
+            <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;" aria-hidden="true">AI</span>
           </div>
         </transition>
 
-        <span v-if="!dialOpen && totalUnread > 0" class="speed-dial-fab-badge">
+        <span v-if="!dialOpen && totalUnread > 0" class="speed-dial-fab-badge" aria-hidden="true">
           {{ totalUnread > 99 ? '99+' : totalUnread }}
         </span>
       </button>
@@ -91,6 +115,7 @@ import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent } fr
 import { Icon } from '@iconify/vue'
 import { useChatStore } from '@/stores/chat'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import { chatbotsService } from '@/services/api'
 import { playChatNotificationSound } from '@/utils/chatNotificationSound'
 
@@ -112,6 +137,16 @@ let idleHandle = null
 const totalUnread = computed(() =>
   Object.values(chatStore.unreadCounts).reduce((a, b) => a + b, 0)
 )
+
+const { t } = useI18n()
+// Nom accessible du FAB : fermer, ouvrir le menu (bots disponibles) ou ouvrir directement la messagerie
+const fabLabel = computed(() => {
+  if (dialOpen.value) return t('common.close')
+  if (hasChatbots.value) return t('chat.speedDialOpen')
+  return totalUnread.value > 0
+    ? t('chat.openWithUnread', { count: totalUnread.value }, totalUnread.value)
+    : t('chat.open')
+})
 
 // Le panneau de messagerie est chargé dès que le chat s'ouvre (clic ou ouverture
 // d'une conversation depuis une autre page), puis reste monté.
@@ -216,6 +251,13 @@ onUnmounted(() => {
 
 /* ── Chaque item ────────────────────────────────────────── */
 .speed-dial-item {
+  /* bouton sans habillage */
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -269,7 +311,8 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.speed-dial-btn:hover {
+.speed-dial-item:hover .speed-dial-btn,
+.speed-dial-item:focus-visible .speed-dial-btn {
   transform: scale(1.1);
   box-shadow: 0 5px 16px rgba(0, 0, 0, 0.3);
 }

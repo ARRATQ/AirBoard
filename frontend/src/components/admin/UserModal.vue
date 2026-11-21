@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container" @click.self="closeModal">
-      <div class="modal-panel w-full sm:max-w-3xl">
+      <div v-focus-trap class="modal-panel w-full sm:max-w-3xl" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
         <form class="modal-form" novalidate @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -15,7 +15,7 @@
                   <Icon v-else icon="mdi:account" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">
+                  <h3 id="user-modal-title" class="modal-title truncate">
                     {{ isEdit ? t('userModal.titleEdit') : t('users.new') }}
                   </h3>
                   <p class="modal-subtitle truncate">
@@ -100,14 +100,14 @@
                       v-model="form.password"
                       :type="showPassword ? 'text' : 'password'"
                       required
-                      class="form-input !pr-10"
+                      class="form-input !pe-10"
                       placeholder="••••••••"
                       minlength="6"
                       autocomplete="new-password"
                     />
                     <button
                       type="button"
-                      class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      class="absolute inset-y-0 end-0 px-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                       :aria-label="showPassword ? t('userModal.hidePassword') : t('userModal.showPassword')"
                       @click="showPassword = !showPassword"
                     >
@@ -164,7 +164,7 @@
                 <div v-if="groups.length === 0" class="text-sm text-gray-500 text-center py-6">
                   {{ t('userModal.noGroups') }}
                 </div>
-                <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
+                <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pe-1">
                   <label
                     v-for="group in groups"
                     :key="group.id"
@@ -186,8 +186,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:account-plus'" class="h-4 w-4 mr-2" />
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:account-plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? t('common.save') : t('userModal.submitCreate') }}
               </button>
             </div>

@@ -113,9 +113,11 @@
         <div class="flex items-center justify-between mb-3">
           <ZoomControl v-model="appStore.zoomLevel" @update:modelValue="appStore.setZoomLevel" />
           <button
+            type="button"
             @click="appStore.toggleSidebar()"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             :title="$t('common.toggleSidebar')"
+            :aria-label="$t('common.toggleSidebar')"
           >
             <Icon icon="mdi:menu-open" class="h-5 w-5" />
           </button>
@@ -125,9 +127,11 @@
         <div class="flex items-center justify-between mb-4">
           <!-- Theme toggle -->
           <button
+            type="button"
             @click="appStore.toggleDarkMode()"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             :title="$t('common.darkMode')"
+            :aria-label="$t('common.darkMode')"
           >
             <Icon
               :icon="appStore.isDarkMode ? 'mdi:weather-night' : 'mdi:weather-sunny'"
@@ -137,9 +141,11 @@
 
           <!-- Help button -->
           <button
+            type="button"
             @click="showHelpDrawer = true"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             :title="$t('help.title')"
+            :aria-label="$t('help.title')"
           >
             <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
           </button>
@@ -150,6 +156,7 @@
             :value="appStore.locale"
             @change="onChangeLocale($event.target.value)"
             :title="$t('common.language')"
+            :aria-label="$t('common.language')"
           >
             <option value="ar">Ar</option>
             <option value="en">En</option>
@@ -163,18 +170,22 @@
       <div v-else class="flex flex-col items-center gap-3 mb-4">
         <!-- Sidebar expand button -->
         <button
+          type="button"
           @click="appStore.toggleSidebar()"
           class="hidden lg:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           :title="$t('common.expandSidebar')"
+          :aria-label="$t('common.expandSidebar')"
         >
           <Icon icon="mdi:menu" class="h-5 w-5" />
         </button>
 
         <!-- Theme toggle -->
         <button
+          type="button"
           @click="appStore.toggleDarkMode()"
           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           :title="$t('common.darkMode')"
+          :aria-label="$t('common.darkMode')"
         >
           <Icon
             :icon="appStore.isDarkMode ? 'mdi:weather-night' : 'mdi:weather-sunny'"
@@ -184,9 +195,11 @@
 
         <!-- Help button -->
         <button
+          type="button"
           @click="showHelpDrawer = true"
           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           :title="$t('help.title')"
+          :aria-label="$t('help.title')"
         >
           <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
         </button>
@@ -197,6 +210,7 @@
           :value="appStore.locale"
           @change="onChangeLocale($event.target.value)"
           :title="$t('common.language')"
+          :aria-label="$t('common.language')"
         >
           <option value="ar">Ar</option>
           <option value="en">En</option>
@@ -208,6 +222,9 @@
       <!-- User profile with dropdown -->
       <div class="relative" ref="userMenuRef">
         <button
+          type="button"
+          :aria-expanded="showUserMenu"
+          aria-haspopup="true"
           @click="toggleUserMenu"
           class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
         >
@@ -216,7 +233,7 @@
               <img
                 v-if="authStore.user?.avatar_url"
                 :src="authStore.user.avatar_url"
-                alt="Avatar"
+                alt=""
                 class="h-full w-full object-cover"
               />
               <span v-else class="text-sm font-medium text-gray-900 dark:text-white">
@@ -224,14 +241,14 @@
               </span>
               <!-- Prominent Level Badge -->
               <div 
-                class="absolute -bottom-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-2 border-white dark:border-gray-800 text-[10px] font-black text-white shadow-lg animate-pulse-slow" 
-                :title="`Niveau ${authStore.gamificationProfile?.level || 1}`"
+                class="absolute -bottom-1 -end-1 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-2 border-white dark:border-gray-800 text-[10px] font-black text-white shadow-lg animate-pulse-slow" 
+                :title="$t('gamification.level', { level: authStore.gamificationProfile?.level || 1 })"
               >
                 {{ authStore.gamificationProfile?.level || 1 }}
               </div>
             </div>
           </div>
-          <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-left">
+          <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-start">
             <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
               {{ authStore.userDisplayName }}
             </p>
@@ -257,7 +274,7 @@
         >
           <div
             v-if="showUserMenu"
-            class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+            class="absolute bottom-full start-0 end-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
           >
             <router-link
               to="/profile"
@@ -269,6 +286,7 @@
             </router-link>
             <div class="border-t border-gray-200 dark:border-gray-700"></div>
             <button
+              type="button"
               @click="handleLogout"
               class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
             >
@@ -287,7 +305,13 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
         @click.self="showUpdateModal = false"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div
+          v-focus-trap
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sidebar-update-title"
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+        >
           <!-- Header -->
           <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600">
             <div class="flex items-center justify-between">
@@ -296,13 +320,15 @@
                   <Icon icon="mdi:update" class="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
-                  <h3 class="text-lg font-semibold text-white">{{ $t('version.newVersionAvailable') }}</h3>
+                  <h3 id="sidebar-update-title" class="text-lg font-semibold text-white">{{ $t('version.newVersionAvailable') }}</h3>
                   <p class="text-sm text-primary-100">{{ $t('version.updateReady') }}</p>
                 </div>
               </div>
               <button
+                type="button"
                 @click="showUpdateModal = false"
                 class="text-white hover:text-gray-200 transition-colors"
+                :aria-label="$t('common.close')"
               >
                 <Icon icon="mdi:close" class="h-6 w-6" />
               </button>
@@ -322,7 +348,7 @@
                     </p>
                   </div>
                 </div>
-                <Icon icon="mdi:arrow-right" class="h-8 w-8 text-gray-400" />
+                <Icon icon="mdi:arrow-right" class="rtl-flip h-8 w-8 text-gray-400" />
                 <div class="text-center">
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('version.newVersion') }}</p>
                   <div class="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-lg">
@@ -351,6 +377,7 @@
           <!-- Footer -->
           <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-end gap-3">
             <button
+              type="button"
               @click="showUpdateModal = false"
               class="btn-secondary"
             >

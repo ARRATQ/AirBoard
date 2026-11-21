@@ -2,6 +2,7 @@
 // dans le code arrivent avec leur module ; les autres (saisies en base) via des paquets à la demande.
 import { _api, setCustomIconsLoader } from '@iconify/vue'
 import { ICON_BUCKETS, ICON_PREFIXES, iconBucket } from '@/utils/iconBucket'
+import { placeholderIconSet } from '@/utils/iconPlaceholder'
 
 // La table des paquets (~640 entrées) n'est chargée qu'à la première icône venue de la base.
 let shardLoadersPromise = null
@@ -28,8 +29,14 @@ async function loadFromShards(names, prefix) {
 }
 
 export function setupIcons() {
-  // Plus aucune requête vers api.iconify.design : une collection non embarquée reste sans icône.
-  _api.setFetch(() => Promise.resolve(new Response(null, { status: 404 })))
+  // Plus aucune requête vers api.iconify.design : une collection non embarquée reçoit un
+  // pictogramme neutre, servi localement.
+  _api.setFetch((url) => {
+    const set = placeholderIconSet(String(url))
+    return Promise.resolve(set
+      ? new Response(JSON.stringify(set), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      : new Response(null, { status: 404 }))
+  })
 
   ICON_PREFIXES.forEach((prefix) => {
     setCustomIconsLoader((names) => loadFromShards(names, prefix), prefix)

@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import { arabicPluralRule } from './arabicPlural'
 
 const DEFAULT_LOCALE_KEY = 'airboard_locale'
 const FALLBACK_LOCALE = 'en'
@@ -34,6 +35,8 @@ export const i18n = createI18n({
   locale: resolveInitialLocale(),
   fallbackLocale: FALLBACK_LOCALE,
   messages: {},
+  // Les messages arabes à six formes suivent la règle CLDR (zéro, un, deux, 3-10, 11-99, 100+).
+  pluralRules: { ar: arabicPluralRule },
 })
 
 const pendingLoads = new Map()

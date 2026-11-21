@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-12">
+    <div v-if="loading" class="flex justify-center py-12" role="status" :aria-label="$t('common.loading')">
       <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
     </div>
 
@@ -15,7 +15,7 @@
             @click="$router.back()"
             class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500"
           >
-            <Icon icon="mdi:arrow-left" class="h-4 w-4" />
+            <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4" />
             {{ $t('news.detail.back') }}
           </button>
         </div>
@@ -37,14 +37,14 @@
             v-if="news.priority === 'urgent'"
             class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
           >
-            <Icon icon="mdi:alert" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:alert" class="inline h-4 w-4 me-1" />
             {{ $t('news.priority.urgent') }}
           </span>
           <span
             v-else-if="news.priority === 'important'"
             class="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
           >
-            <Icon icon="mdi:star" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:star" class="inline h-4 w-4 me-1" />
             {{ $t('news.priority.important') }}
           </span>
 
@@ -53,7 +53,7 @@
             v-if="news.is_pinned"
             class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
           >
-            <Icon icon="mdi:pin" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:pin" class="inline h-4 w-4 me-1" />
             {{ $t('news.detail.pinned') }}
           </span>
 
@@ -62,15 +62,15 @@
             v-if="!news.target_groups || news.target_groups.length === 0"
             class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
           >
-            <Icon icon="mdi:earth" class="inline h-4 w-4 mr-1" />
-            Public
+            <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
+            {{ $t('events.visibility.public') }}
           </span>
           <span
             v-else
             class="px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
             :title="getGroupsTooltip(news.target_groups)"
           >
-            <Icon icon="mdi:lock" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:lock" class="inline h-4 w-4 me-1" />
             {{ getVisibilityLabel(news.target_groups) }}
           </span>
 
@@ -79,7 +79,7 @@
             v-if="news.category"
             class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
           >
-            <Icon :icon="news.category.icon || 'mdi:folder'" class="inline h-4 w-4 mr-1" :style="{ color: news.category.color }" />
+            <Icon :icon="news.category.icon || 'mdi:folder'" class="inline h-4 w-4 me-1" :style="{ color: news.category.color }" />
             {{ news.category.name }}
           </span>
         </div>
@@ -110,7 +110,7 @@
           </div>
           <div v-if="articleReadingTime" class="flex items-center gap-2">
             <Icon icon="mdi:clock-outline" class="h-5 w-5" />
-            <span>{{ articleReadingTime }} de lecture</span>
+            <span>{{ $t('news.detail.readingTime', { time: articleReadingTime }) }}</span>
           </div>
         </div>
 
@@ -138,7 +138,7 @@
       <div v-if="linkedPoll" class="p-8 border-t border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Icon icon="mdi:poll" class="h-6 w-6 text-purple-600" />
-          Sondage lié à cet article
+          {{ $t('news.detail.linkedPoll') }}
         </h3>
         <PollCard :poll="linkedPoll" @vote-success="handleVoteSuccess" />
       </div>
@@ -191,7 +191,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { newsService, pollsService } from '@/services/api'
-import { readingTime } from '@/utils/readingTime'
+import { readingMinutes } from '@/utils/readingTime'
+import { dateLocaleFor } from '@/utils/homeFormat'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import TiptapRenderer from '@/components/news/TiptapRenderer.vue'
 import FeedbackWidget from '@/components/feedback/FeedbackWidget.vue'
@@ -201,13 +203,17 @@ import PollCard from '@/components/polls/PollCard.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
 // Data
 const loading = ref(false)
 const news = ref(null)
 const linkedPoll = ref(null)
 
-const articleReadingTime = computed(() => readingTime(news.value?.content))
+const articleReadingTime = computed(() => {
+  const n = readingMinutes(news.value?.content)
+  return n ? t('news.minutes', { n }) : null
+})
 
 // Computed
 const canEdit = computed(() => {
@@ -273,7 +279,7 @@ const getTypeBadgeClass = (type) => {
 const formatDate = (dateString) => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', {
+  return date.toLocaleDateString(dateLocaleFor(locale.value), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -288,20 +294,20 @@ const editNews = () => {
 
 const getVisibilityLabel = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Public'
+    return t('events.visibility.public')
   }
   if (targetGroups.length === 1) {
     return targetGroups[0].name
   }
-  return `${targetGroups.length} groupes`
+  return t('events.visibility.groupsCount', { count: targetGroups.length })
 }
 
 const getGroupsTooltip = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
-    return 'Visible par tous les utilisateurs'
+    return t('events.visibility.tooltip.public')
   }
   const groupNames = targetGroups.map(g => g.name).join(', ')
-  return `Visible uniquement pour: ${groupNames}`
+  return t('events.visibility.tooltip.groups', { groups: groupNames })
 }
 
 // Lifecycle

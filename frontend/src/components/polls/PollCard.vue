@@ -1,55 +1,58 @@
 <template>
   <div class="poll-card" :key="`poll-${poll.id}`" :class="{ 'is-expanded': isExpanded }" :data-poll-id="poll.id">
-    <!-- En-tête du sondage -->
-    <div class="poll-header" @click="toggleExpanded" :class="{ 'clickable': true }">
-      <div class="poll-header-content">
-        <div
-          class="h-7 w-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0"
-          :style="{ backgroundColor: poll.is_active ? '#8B5CF6' : '#10b981' }"
-        >
-          <Icon :icon="poll.is_active ? 'mdi:poll' : 'mdi:checkbox-marked-circle-outline'" class="h-4 w-4 text-white" />
-        </div>
-        <div class="poll-info">
-          <div class="flex items-center gap-2 flex-1 min-w-0">
-            <h3 class="poll-title">{{ poll.title }}</h3>
-            <!-- Indicateur de vote utilisateur -->
-            <div v-if="hasVoted" class="voted-indicator-header">
-              <Icon icon="mdi:check-circle" class="voted-icon" />
-            </div>
-            <div class="poll-badges">
-              <span v-if="!poll.is_active" class="badge badge-closed">
-                <Icon icon="mdi:lock" class="h-3 w-3" />
-                <span class="badge-text">{{ t('polls.status.closed') }}</span>
-              </span>
-              <span v-else-if="isExpiringSoon" class="badge badge-warning">
-                <Icon icon="mdi:clock-alert" class="h-3 w-3" />
-                <span class="badge-text">{{ t('polls.status.expiringSoon') }}</span>
-              </span>
-              <span v-if="poll.is_anonymous" class="badge badge-anonymous">
-                <Icon icon="mdi:incognito" class="h-3 w-3" />
-                <span class="badge-text">{{ t('polls.status.anonymous') }}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Bouton de toggle -->
-      <button 
-        @click.stop="toggleExpanded" 
+    <!-- En-tête du sondage : un seul bouton (titre + badges + chevron) qui déplie le contenu -->
+    <h3 class="poll-heading">
+      <button
         type="button"
-        class="toggle-btn"
-        :class="{ 'expanded': isExpanded }"
+        class="poll-header"
         :aria-expanded="isExpanded"
-        :aria-label="poll.title"
+        :aria-controls="contentId"
+        @click="toggleExpanded"
       >
-        <Icon icon="mdi:chevron-down" class="chevron-icon" />
+        <span class="poll-header-content">
+          <span
+            class="h-7 w-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0"
+            :style="{ backgroundColor: poll.is_active ? '#8B5CF6' : '#10b981' }"
+            aria-hidden="true"
+          >
+            <Icon :icon="poll.is_active ? 'mdi:poll' : 'mdi:checkbox-marked-circle-outline'" class="h-4 w-4 text-white" />
+          </span>
+          <span class="poll-info">
+            <span class="flex items-center gap-2 flex-1 min-w-0">
+              <span class="poll-title">{{ poll.title }}</span>
+              <!-- Indicateur de vote utilisateur -->
+              <span v-if="hasVoted" class="voted-indicator-header">
+                <Icon icon="mdi:check-circle" class="voted-icon" aria-hidden="true" />
+                <span class="sr-only">{{ t('polls.card.voted') }}</span>
+              </span>
+              <span class="poll-badges">
+                <span v-if="!poll.is_active" class="badge badge-closed">
+                  <Icon icon="mdi:lock" class="h-3 w-3" aria-hidden="true" />
+                  <span class="badge-text">{{ t('polls.status.closed') }}</span>
+                </span>
+                <span v-else-if="isExpiringSoon" class="badge badge-warning">
+                  <Icon icon="mdi:clock-alert" class="h-3 w-3" aria-hidden="true" />
+                  <span class="badge-text">{{ t('polls.status.expiringSoon') }}</span>
+                </span>
+                <span v-if="poll.is_anonymous" class="badge badge-anonymous">
+                  <Icon icon="mdi:incognito" class="h-3 w-3" aria-hidden="true" />
+                  <span class="badge-text">{{ t('polls.status.anonymous') }}</span>
+                </span>
+              </span>
+            </span>
+          </span>
+        </span>
+
+        <!-- Chevron (décoratif : l'état est porté par aria-expanded) -->
+        <span class="toggle-btn" :class="{ 'expanded': isExpanded }" aria-hidden="true">
+          <Icon icon="mdi:chevron-down" class="chevron-icon" />
+        </span>
       </button>
-    </div>
+    </h3>
 
     <!-- Contenu collapsible -->
     <Transition name="slide-fade">
-      <div v-if="isExpanded" class="collapsible-content">
+      <div v-if="isExpanded" :id="contentId" class="collapsible-content">
         <!-- Informations sur le sondage (publicateur et date) -->
         <div class="poll-meta">
           <div class="meta-item">
@@ -109,6 +112,7 @@
             </div>
 
             <button
+              type="button"
               @click="submitVote"
               :disabled="!canSubmitVote || isVoting"
               class="btn btn-primary vote-btn"
@@ -132,6 +136,7 @@
             </p>
             <button
               v-if="hasVoted && poll.show_results === 'after'"
+              type="button"
               @click="showResults = true"
               class="btn btn-secondary"
             >
@@ -142,6 +147,7 @@
 
           <button
             v-if="canRemoveVote"
+            type="button"
             @click="removeVote"
             :disabled="isRemovingVote"
             class="btn btn-danger-outline unvote-btn"
@@ -154,19 +160,20 @@
 
         <!-- Actions -->
         <div v-if="canManage" class="poll-actions">
-          <button @click="$emit('edit', poll)" class="btn btn-ghost btn-sm">
+          <button type="button" @click="$emit('edit', poll)" class="btn btn-ghost btn-sm">
             <Icon icon="mdi:pencil" />
             {{ t('polls.actions.edit') }}
           </button>
           <button
             v-if="poll.is_active && canClose"
+            type="button"
             @click="$emit('close', poll)"
             class="btn btn-ghost btn-sm"
           >
             <Icon icon="mdi:lock" />
             {{ t('polls.actions.close') }}
           </button>
-          <button @click="$emit('delete', poll)" class="btn btn-ghost btn-sm text-danger">
+          <button type="button" @click="$emit('delete', poll)" class="btn btn-ghost btn-sm text-danger">
             <Icon icon="mdi:delete" />
             {{ t('polls.actions.delete') }}
           </button>
@@ -177,7 +184,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
@@ -222,6 +229,8 @@ const userVotes = ref([]) // Stocker les votes de l'utilisateur
 
 // État d'expansion isolé pour chaque bloc
 const isExpanded = ref(props.defaultExpanded)
+// id du contenu dépliable (aria-controls)
+const contentId = useId()
 
 // Fonction pour toggle l'expansion
 const toggleExpanded = () => {
@@ -504,14 +513,31 @@ const getWaitingMessage = () => {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
 }
 
+.poll-heading {
+  margin: 0;
+  font: inherit;
+}
+
 .poll-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
+  background: none;
+  border: 0;
   border-bottom: 1px solid var(--border);
+  font: inherit;
+  color: inherit;
+  text-align: start;
+}
+
+.poll-info {
+  display: flex;
+  flex: 1;
+  min-width: 0;
 }
 
 .poll-header:hover {
@@ -527,6 +553,7 @@ const getWaitingMessage = () => {
 }
 
 .poll-title {
+  display: block;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -634,7 +661,7 @@ const getWaitingMessage = () => {
   flex-shrink: 0;
 }
 
-.toggle-btn:hover {
+.poll-header:hover .toggle-btn {
   background: var(--hover);
 }
 

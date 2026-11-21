@@ -5,17 +5,19 @@
       <button
         v-for="filter in filters"
         :key="filter.value"
+        type="button"
+        :aria-pressed="selectedFilter === filter.value"
         @click="selectedFilter = filter.value"
         :class="{ 'active': selectedFilter === filter.value }"
         class="filter-button"
       >
-        <Icon :icon="filter.icon" class="h-5 w-5" />
-        <span>{{ filter.label }}</span>
+        <Icon :icon="filter.icon" class="h-5 w-5" aria-hidden="true" />
+        <span>{{ $t(filter.labelKey) }}</span>
       </button>
     </div>
 
     <!-- Media grid -->
-    <div v-if="loading" class="loading">
+    <div v-if="loading" class="loading" role="status">
       <Icon icon="mdi:loading" class="animate-spin h-8 w-8" />
       <p>{{ $t('media.loading') }}</p>
     </div>
@@ -26,63 +28,70 @@
     </div>
 
     <div v-else class="media-grid">
-      <div
+      <button
         v-for="media in mediaList"
         :key="media.id"
+        type="button"
+        :aria-pressed="selectedMediaId === media.id"
         @click="selectMedia(media)"
-        class="media-item"
+        class="btn-reset media-item"
         :class="{ 'selected': selectedMediaId === media.id }"
       >
         <!-- Image preview -->
-        <div v-if="media.mime_type.startsWith('image/')" class="media-preview">
+        <span v-if="media.mime_type.startsWith('image/')" class="media-preview">
           <img loading="lazy" :src="media.url" :alt="media.filename" />
-        </div>
+        </span>
 
         <!-- File preview -->
-        <div v-else class="media-preview file-preview">
-          <Icon :icon="getFileIcon(media)" class="h-12 w-12" />
-        </div>
+        <span v-else class="media-preview file-preview">
+          <Icon :icon="getFileIcon(media)" class="h-12 w-12" aria-hidden="true" />
+        </span>
 
         <!-- Media info -->
-        <div class="media-info">
-          <p class="media-filename">{{ media.filename }}</p>
-          <p class="media-size">{{ formatFileSize(media.file_size) }}</p>
-        </div>
+        <span class="media-info">
+          <span class="media-filename">{{ media.filename }}</span>
+          <span class="media-size">{{ formatFileSize(media.file_size) }}</span>
+        </span>
 
         <!-- Selected indicator -->
-        <div v-if="selectedMediaId === media.id" class="selected-indicator">
-          <Icon icon="mdi:check-circle" class="h-6 w-6" />
-        </div>
-      </div>
+        <span v-if="selectedMediaId === media.id" class="selected-indicator">
+          <Icon icon="mdi:check-circle" class="h-6 w-6" aria-hidden="true" />
+        </span>
+      </button>
     </div>
 
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="pagination">
       <button
+        type="button"
+        :aria-label="$t('ui.table.prev')"
         @click="currentPage--"
         :disabled="currentPage === 1"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+        <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" aria-hidden="true" />
       </button>
       <span class="pagination-info">
-        Page {{ currentPage }} / {{ totalPages }}
+        {{ $t('media.pageOf', { page: currentPage, total: totalPages }) }}
       </span>
       <button
+        type="button"
+        :aria-label="$t('ui.table.next')"
         @click="currentPage++"
         :disabled="currentPage === totalPages"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+        <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" aria-hidden="true" />
       </button>
     </div>
 
     <!-- Actions -->
     <div class="actions">
-      <button @click="$emit('cancel')" class="button-secondary">
+      <button type="button" @click="$emit('cancel')" class="button-secondary">
         {{ $t('common.cancel') }}
       </button>
       <button
+        type="button"
         @click="insertSelected"
         :disabled="!selectedMediaId"
         class="button-primary"
@@ -94,17 +103,18 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { mediaService } from '@/services/api'
 
 const emit = defineEmits(['select', 'cancel'])
 
+// Libellés traduits au rendu (clés i18n)
 const filters = [
-  { label: 'All', value: '', icon: 'mdi:file-multiple' },
-  { label: 'Images', value: 'image', icon: 'mdi:image' },
-  { label: 'Documents', value: 'document', icon: 'mdi:file-document' },
-  { label: 'PDF', value: 'pdf', icon: 'mdi:file-pdf-box' },
+  { labelKey: 'media.filter_all_types', value: '', icon: 'mdi:file-multiple' },
+  { labelKey: 'media.type_image', value: 'image', icon: 'mdi:image' },
+  { labelKey: 'media.type_document', value: 'document', icon: 'mdi:file-document' },
+  { labelKey: 'media.type_pdf', value: 'pdf', icon: 'mdi:file-pdf-box' },
 ]
 
 const selectedFilter = ref('')
@@ -217,6 +227,7 @@ export default {
 }
 
 .media-item {
+  @apply block w-full text-start;
   @apply relative cursor-pointer rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden transition-all;
   @apply hover:border-primary-500 hover:shadow-lg;
 }
@@ -226,6 +237,7 @@ export default {
 }
 
 .media-preview {
+  @apply w-full;
   @apply aspect-square flex items-center justify-center;
   background-color: var(--bg-surface);
 }
@@ -239,20 +251,23 @@ export default {
 }
 
 .media-info {
+  @apply block;
   @apply p-2;
   background-color: var(--bg-card);
 }
 
 .media-filename {
+  @apply block;
   @apply text-xs font-medium text-gray-700 dark:text-gray-300 truncate;
 }
 
 .media-size {
+  @apply block;
   @apply text-xs text-gray-500 dark:text-gray-400;
 }
 
 .selected-indicator {
-  @apply absolute top-2 right-2 bg-primary-500 text-white rounded-full p-1;
+  @apply absolute top-2 end-2 bg-primary-500 text-white rounded-full p-1;
 }
 
 .pagination {

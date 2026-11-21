@@ -20,12 +20,12 @@
             class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
             @change="emit('update:isPublic', $event.target.checked)"
           />
-          <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-            <Icon icon="mdi:earth" class="inline h-4 w-4 mr-1" />
+          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
+            <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
             {{ t('groupAdmin.eventEditor.publicEvent') }}
           </span>
         </label>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-8">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 ms-8">
           {{ t('groupAdmin.eventEditor.publicEventHelp') }}
         </p>
       </div>
@@ -45,7 +45,7 @@
             {{ groupName(groupId) }}
             <button
               type="button"
-              class="ml-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+              class="ms-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
               :aria-label="t('common.delete')"
               @click="removeGroup(groupId)"
             >

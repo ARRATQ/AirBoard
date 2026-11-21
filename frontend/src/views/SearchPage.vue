@@ -13,19 +13,19 @@
     <!-- Search Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
       <div class="relative">
-        <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <input
           ref="searchInput"
           v-model="searchQuery"
           type="text"
           :placeholder="$t('search.placeholder')"
-          class="w-full pl-10 pr-10 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          class="w-full ps-10 pe-10 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           @input="debouncedSearch"
         />
         <button
           v-if="searchQuery"
           @click="clearSearch"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
           <Icon icon="mdi:close" class="h-5 w-5" />
         </button>
@@ -44,10 +44,10 @@
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
           ]"
         >
-          <Icon :icon="tab.icon" class="h-4 w-4 inline mr-1" />
+          <Icon :icon="tab.icon" class="h-4 w-4 inline me-1" />
           {{ tab.label }}
-          <span v-if="tab.value === '' && results" class="ml-1 text-xs opacity-75">({{ results.total_count }})</span>
-          <span v-else-if="results && getCountForType(tab.value) > 0" class="ml-1 text-xs opacity-75">({{ getCountForType(tab.value) }})</span>
+          <span v-if="tab.value === '' && results" class="ms-1 text-xs opacity-75">({{ results.total_count }})</span>
+          <span v-else-if="results && getCountForType(tab.value) > 0" class="ms-1 text-xs opacity-75">({{ getCountForType(tab.value) }})</span>
         </button>
       </div>
     </div>

@@ -2,14 +2,14 @@
   <teleport to="body">
     <div class="modal-overlay" @click.self="$emit('close')" @keydown.esc="$emit('close')">
       <div class="modal-container">
-        <div class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-label="name">
+        <div v-focus-trap class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-labelledby="titleId">
           <div class="person-detail__hero" :style="{ '--unit-color': roles[0]?.unit.color || 'var(--accent)' }">
             <button ref="closeBtn" type="button" class="person-detail__close" :aria-label="$t('common.close')" @click="$emit('close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
             <PersonAvatar :person="person" size="xl" />
             <div class="min-w-0">
-              <h2 class="person-detail__name">{{ name }}</h2>
+              <h2 :id="titleId" class="person-detail__name">{{ name }}</h2>
               <p v-if="roles[0]" class="person-detail__title">
                 {{ roles[0].position.title }}
                 <span v-if="roles[0].assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
@@ -77,7 +77,7 @@
             <span class="modal-footer-hint" />
             <div class="modal-footer-actions">
               <button v-if="canManage" type="button" class="btn btn-secondary" @click="$emit('edit', person)">
-                <Icon icon="mdi:pencil" class="h-4 w-4 mr-1" /> {{ $t('common.edit') }}
+                <Icon icon="mdi:pencil" class="h-4 w-4 me-1" /> {{ $t('common.edit') }}
               </button>
               <button type="button" class="btn btn-primary" @click="$emit('close')">{{ $t('common.close') }}</button>
             </div>
@@ -90,7 +90,7 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import PersonAvatar from './PersonAvatar.vue'
@@ -107,6 +107,7 @@ defineEmits(['close', 'edit'])
 
 const { locale } = useI18n()
 const name = computed(() => fullName(props.person))
+const titleId = useId()
 const value = (f) => props.person.custom_fields?.[f.key]
 const filledFields = computed(() => props.fields.filter((f) => value(f)))
 const formatDate = (iso) => new Date(iso).toLocaleDateString(locale.value)
@@ -139,13 +140,12 @@ onBeforeUnmount(() => {
 .person-detail__close {
   position: absolute;
   top: 0.75rem;
-  right: 0.75rem;
+  inset-inline-end: 0.75rem;
   padding: 0.4rem;
   border-radius: 9999px;
   color: var(--text-muted);
 }
 .person-detail__close:hover { background: var(--hover); color: var(--text-primary); }
-[dir='rtl'] .person-detail__close { right: auto; left: 0.75rem; }
 .person-detail__name { font-size: 1.6rem; font-weight: 800; line-height: 1.15; color: var(--text-primary); }
 .person-detail__title { margin-top: 0.25rem; font-weight: 500; color: var(--accent); display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .person-detail__section {

@@ -1,10 +1,16 @@
 <template>
-  <div v-if="event" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="$emit('close')">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+  <div v-if="event" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="$emit('close')">
+    <div
+      v-focus-trap
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-detail-title"
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+    >
       <!-- Header -->
       <div class="flex items-start justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div class="flex-1">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+          <h2 id="event-detail-title" class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {{ event.title }}
           </h2>
           <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -23,7 +29,7 @@
         </div>
         
         <!-- Status badges -->
-        <div class="flex items-center gap-2 ml-4">
+        <div class="flex items-center gap-2 ms-4">
           <span 
             v-if="event.is_all_day"
             class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full"
@@ -81,7 +87,7 @@
             >
               <Icon :icon="link.icon || 'mdi:link'" class="h-4 w-4" />
               <span>{{ link.title }}</span>
-              <Icon icon="mdi:external-link" class="h-3 w-3" />
+              <Icon icon="mdi:external-link" class="h-3 w-3" aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -155,15 +161,17 @@
           <!-- Edit button for authorized users -->
           <button
             v-if="canEdit"
+            type="button"
             @click="editEvent"
             class="px-3 py-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            <Icon icon="mdi:pencil" class="h-4 w-4 mr-1 inline" />
+            <Icon icon="mdi:pencil" class="h-4 w-4 me-1 inline" aria-hidden="true" />
             {{ $t('common.edit') }}
           </button>
           
           <!-- Close button -->
           <button
+            type="button"
             @click="$emit('close')"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
           >
@@ -181,8 +189,10 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
+import { dateLocaleFor } from '@/utils/homeFormat'
 import TiptapRenderer from '@/components/news/TiptapRenderer.vue'
 
 const props = defineProps({
@@ -196,6 +206,8 @@ const emit = defineEmits(['close', 'updated'])
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
+const dateLocale = computed(() => dateLocaleFor(locale.value))
 
 // Computed
 const canEdit = computed(() => {
@@ -220,16 +232,16 @@ const formatDateRange = (startDate, endDate) => {
   }
 
   if (end && start.toDateString() === end.toDateString()) {
-    return `${start.toLocaleDateString(undefined, { ...formatOptions, hour: undefined, minute: undefined })} - ${end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+    return `${start.toLocaleDateString(dateLocale.value, { ...formatOptions, hour: undefined, minute: undefined })} - ${end.toLocaleTimeString(dateLocale.value, { hour: '2-digit', minute: '2-digit' })}`
   } else if (end) {
-    return `${start.toLocaleDateString(undefined, formatOptions)} - ${end.toLocaleDateString(undefined, formatOptions)}`
+    return `${start.toLocaleDateString(dateLocale.value, formatOptions)} - ${end.toLocaleDateString(dateLocale.value, formatOptions)}`
   } else {
-    return start.toLocaleDateString(undefined, formatOptions)
+    return start.toLocaleDateString(dateLocale.value, formatOptions)
   }
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString(undefined, {
+  return new Date(date).toLocaleDateString(dateLocale.value, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -247,26 +259,31 @@ const parseExternalLinks = (linksJson) => {
   }
 }
 
+// Nom du jour dans la langue de l'interface (0 = dimanche, comme Date.getDay)
+const weekdayName = (day) =>
+  new Intl.DateTimeFormat(dateLocale.value, { weekday: 'long' }).format(new Date(2024, 0, 7 + Number(day)))
+
 const formatRecurrenceRule = (ruleJson) => {
   try {
     const rule = JSON.parse(ruleJson)
     switch (rule.type) {
       case 'daily':
-        return 'Tous les jours'
+        return t('events.detail.recurrenceRule.daily')
       case 'weekly': {
-        const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-        const dayNames = rule.days_of_week?.map(day => days[day]).join(', ') || 'Semanalement'
-        return `Hebdomadaire (${dayNames})`
+        const dayNames = (rule.days_of_week || []).map(weekdayName).join(', ')
+        return dayNames
+          ? t('events.detail.recurrenceRule.weeklyOn', { days: dayNames })
+          : t('events.detail.recurrenceRule.weekly')
       }
       case 'monthly':
-        return 'Mensuel'
+        return t('events.detail.recurrenceRule.monthly')
       case 'yearly':
-        return 'Annuel'
+        return t('events.detail.recurrenceRule.yearly')
       default:
-        return 'Récurrent'
+        return t('events.detail.recurrenceRule.generic')
     }
   } catch (e) {
-    return 'Récurrent'
+    return t('events.detail.recurrenceRule.generic')
   }
 }
 

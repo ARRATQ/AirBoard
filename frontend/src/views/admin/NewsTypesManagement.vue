@@ -55,12 +55,12 @@
         class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
         @click.self="closeForm"
       >
-        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
+        <div v-focus-trap class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700" role="dialog" aria-modal="true" aria-labelledby="news-type-modal-title">
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 id="news-type-modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ editingId ? t('common.edit') : t('common.create') }}
             </h2>
-            <BaseButton variant="ghost" size="sm" icon="mdi:close" :aria-label="t('common.cancel')" @click="closeForm" />
+            <BaseButton variant="ghost" size="sm" icon="mdi:close" :aria-label="t('common.close')" @click="closeForm" />
           </div>
 
           <form class="p-5 space-y-4" @submit.prevent="saveType">

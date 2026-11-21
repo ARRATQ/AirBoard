@@ -6,6 +6,7 @@
     <!-- Overlay mobile - s'affiche quand la sidebar est ouverte sur mobile/tablette -->
     <div
       v-if="isAuthenticated && !isAuthPage && appStore.sidebarOpen"
+      aria-hidden="true"
       @click="appStore.setSidebarOpen(false)"
       class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
     />

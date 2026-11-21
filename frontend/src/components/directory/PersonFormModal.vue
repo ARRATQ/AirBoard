@@ -15,14 +15,14 @@
           <PersonAvatar :person="previewPerson" size="lg" />
           <div class="flex flex-wrap gap-2">
             <button type="button" class="btn btn-secondary text-xs" :disabled="uploading" @click="fileInput?.click()">
-              <Icon :icon="uploading ? 'mdi:loading' : 'mdi:upload'" class="h-4 w-4 mr-1" :class="{ 'animate-spin': uploading }" />
+              <Icon :icon="uploading ? 'mdi:loading' : 'mdi:upload'" class="h-4 w-4 me-1" :class="{ 'animate-spin': uploading }" />
               {{ $t('directory.uploadPhoto') }}
             </button>
             <button type="button" class="btn btn-secondary text-xs" @click="showGallery = true">
-              <Icon icon="mdi:image-multiple-outline" class="h-4 w-4 mr-1" /> {{ $t('directory.pickFromLibrary') }}
+              <Icon icon="mdi:image-multiple-outline" class="h-4 w-4 me-1" /> {{ $t('directory.pickFromLibrary') }}
             </button>
             <button v-if="form.photo_url" type="button" class="btn btn-ghost text-xs" @click="form.photo_url = ''">
-              <Icon icon="mdi:close" class="h-4 w-4 mr-1" /> {{ $t('directory.removePhoto') }}
+              <Icon icon="mdi:close" class="h-4 w-4 me-1" /> {{ $t('directory.removePhoto') }}
             </button>
             <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFile" />
           </div>
@@ -63,6 +63,7 @@
               type="search"
               class="form-input"
               :placeholder="$t('directory.searchAccount')"
+              :aria-label="$t('directory.searchAccount')"
               @input="searchUsers"
             />
             <ul v-if="userResults.length" class="person-form__results">
@@ -127,7 +128,14 @@
     <teleport to="body">
       <div v-if="showGallery" class="modal-overlay" style="z-index: 60" @click.self="showGallery = false">
         <div class="modal-container">
-          <div class="modal-panel w-full max-w-4xl p-4">
+          <div
+            v-focus-trap
+            class="modal-panel w-full max-w-4xl p-4"
+            role="dialog"
+            aria-modal="true"
+            :aria-labelledby="galleryTitleId"
+          >
+            <h2 :id="galleryTitleId" class="sr-only">{{ $t('directory.pickFromLibrary') }}</h2>
             <MediaGallery @select="pickMedia" @cancel="showGallery = false" />
           </div>
         </div>
@@ -137,7 +145,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, useId } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
@@ -175,6 +183,8 @@ const fileInput = ref(null)
 const userQuery = ref('')
 const userResults = ref([])
 const linkedUser = ref(null)
+// id du titre (masqué) de la médiathèque, pour aria-labelledby
+const galleryTitleId = useId()
 
 const previewPerson = computed(() => ({ ...form, id: props.person?.id }))
 

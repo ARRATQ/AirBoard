@@ -14,7 +14,7 @@
     </span>
     <span v-if="primaryRole" class="person-card__unit">{{ primaryRole.unit.name }}</span>
     <span v-else class="person-card__unit person-card__unit--none">{{ $t('directory.noPosition') }}</span>
-    <span v-if="roles.length > 1" class="person-card__more">+{{ roles.length - 1 }} {{ $t('directory.otherPositions') }}</span>
+    <span v-if="roles.length > 1" class="person-card__more">{{ $t('directory.otherPositions', { count: roles.length - 1 }) }}</span>
 
     <span v-if="cardFields.length" class="person-card__fields">
       <span v-for="f in cardFields" :key="f.key" class="person-card__field">

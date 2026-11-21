@@ -8,15 +8,16 @@
     :aria-busy="loading || undefined"
   >
     <Icon v-if="loading" icon="mdi:loading" class="base-btn__icon base-btn__spin" aria-hidden="true" />
-    <Icon v-else-if="icon" :icon="icon" class="base-btn__icon" aria-hidden="true" />
+    <Icon v-else-if="icon" :icon="icon" class="base-btn__icon" :class="{ 'rtl-flip': isDirectional }" aria-hidden="true" />
     <slot />
   </component>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 
-defineProps({
+const props = defineProps({
   variant: {
     type: String,
     default: 'secondary',
@@ -30,6 +31,9 @@ defineProps({
   disabled: { type: Boolean, default: false },
   block: { type: Boolean, default: false },
 })
+
+// Chevrons et flèches gauche/droite indiquent un sens de lecture : ils s'inversent en arabe.
+const isDirectional = computed(() => /(chevron|arrow)-(left|right)$/.test(props.icon))
 </script>
 
 <style scoped>

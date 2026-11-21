@@ -23,7 +23,10 @@
           type="button"
           class="image-size-preset"
           :class="{ 'image-size-active': currentWidth === p.value }"
+          :aria-pressed="currentWidth === p.value"
           @mousedown.prevent="setWidth(p.value)"
+          @keydown.enter.prevent="setWidth(p.value)"
+          @keydown.space.prevent="setWidth(p.value)"
         >
           {{ p.label }}
         </button>
@@ -39,10 +42,14 @@
           type="button"
           class="image-align-btn"
           :class="{ 'image-size-active': currentAlign === a.value }"
-          :title="a.label"
+          :title="t(a.labelKey)"
+          :aria-label="t(a.labelKey)"
+          :aria-pressed="currentAlign === a.value"
           @mousedown.prevent="setAlign(a.value)"
+          @keydown.enter.prevent="setAlign(a.value)"
+          @keydown.space.prevent="setAlign(a.value)"
         >
-          <Icon :icon="a.icon" class="h-3.5 w-3.5" />
+          <Icon :icon="a.icon" class="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
 
@@ -50,6 +57,7 @@
       <div
         v-if="selected"
         class="image-resize-handle"
+        aria-hidden="true"
         @mousedown.prevent.stop="startResize"
       />
     </div>
@@ -60,6 +68,7 @@
 import { ref, computed, onBeforeUnmount } from 'vue'
 import { NodeViewWrapper } from '@tiptap/vue-3'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   editor: Object,
@@ -73,6 +82,7 @@ const props = defineProps({
 })
 
 const containerRef = ref(null)
+const { t } = useI18n()
 
 const presets = [
   { label: '25%', value: '25%' },
@@ -81,10 +91,11 @@ const presets = [
   { label: '100%', value: '100%' },
 ]
 
+// Libellés traduits au rendu (clés i18n partagées avec la barre d'outils de l'éditeur)
 const alignOptions = [
-  { value: 'left', label: 'Aligner à gauche', icon: 'mdi:format-align-left' },
-  { value: 'center', label: 'Centrer', icon: 'mdi:format-align-center' },
-  { value: 'right', label: 'Aligner à droite', icon: 'mdi:format-align-right' },
+  { value: 'left', labelKey: 'news.editor.alignLeft', icon: 'mdi:format-align-left' },
+  { value: 'center', labelKey: 'news.editor.alignCenter', icon: 'mdi:format-align-center' },
+  { value: 'right', labelKey: 'news.editor.alignRight', icon: 'mdi:format-align-right' },
 ]
 
 const currentWidth = computed(() => props.node.attrs.width || '100%')
@@ -219,9 +230,9 @@ onBeforeUnmount(() => {
 .image-size-indicator {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.4);
-  padding-left: 6px;
-  margin-left: 4px;
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  padding-inline-start: 6px;
+  margin-inline-start: 4px;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Divider between size and align controls */
