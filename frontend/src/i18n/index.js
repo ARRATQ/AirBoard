@@ -62,7 +62,7 @@ function loadArabicFont() {
   const link = document.createElement('link')
   link.id = 'font-arabic'
   link.rel = 'stylesheet'
-  link.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap'
+  link.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap'
   document.head.appendChild(link)
 }
 
