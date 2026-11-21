@@ -147,12 +147,13 @@
                 class="h-4 w-4 mt-0.5 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 cursor-pointer"
               />
               <span class="ms-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 transition-colors duration-200">
+                <!-- Pas encore de page de conditions ni de confidentialité : texte simple plutôt qu'un lien vers « # ». -->
                 <i18n-t keypath="auth.register.terms" tag="span" scope="global">
                   <template #terms>
-                    <a href="#" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">{{ t('auth.register.termsLink') }}</a>
+                    <strong class="text-gray-800 dark:text-gray-200 font-medium">{{ t('auth.register.termsLink') }}</strong>
                   </template>
                   <template #privacy>
-                    <a href="#" class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">{{ t('auth.register.privacyLink') }}</a>
+                    <strong class="text-gray-800 dark:text-gray-200 font-medium">{{ t('auth.register.privacyLink') }}</strong>
                   </template>
                 </i18n-t>
               </span>
