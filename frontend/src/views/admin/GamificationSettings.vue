@@ -91,7 +91,7 @@
 
     <Teleport to="body">
       <div v-if="showModal" class="gm-overlay" @click.self="closeModal">
-        <div class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gm-modal-title">
+        <div v-focus-trap class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gm-modal-title">
           <h3 id="gm-modal-title" class="gm-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h3>
           <form class="gm-form" @submit.prevent="saveBadge">
             <div>
@@ -160,10 +160,10 @@
             <div>
               <label for="gm-category" class="form-label">{{ t('gamificationAdmin.form.category') }}</label>
               <select id="gm-category" v-model="form.category" class="form-select">
-                <option value="user">user</option>
-                <option value="contributor">contributor</option>
+                <option value="user">{{ t('gamificationAdmin.categories.user') }}</option>
+                <option value="contributor">{{ t('gamificationAdmin.categories.contributor') }}</option>
               </select>
-              <p class="gm-hint">{{ t('gamificationAdmin.form.categoryHint', { code: 'contributor' }) }}</p>
+              <p class="gm-hint">{{ t('gamificationAdmin.form.categoryHint', { code: t('gamificationAdmin.categories.contributor') }) }}</p>
             </div>
 
             <div>

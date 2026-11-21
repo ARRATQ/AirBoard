@@ -28,7 +28,7 @@
           :class="activeTab === 'general' ? 'border-primary-500 text-primary-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
           <Icon icon="mdi:cog" class="inline-block me-2 h-4 w-4" />
-          {{ $t('settings.general') || 'General' }}
+          {{ $t('settings.general') }}
         </button>
         <button 
           @click="activeTab = 'hero'"
@@ -44,7 +44,7 @@
           :class="activeTab === 'auth' ? 'border-purple-500 text-purple-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
           <Icon icon="mdi:shield-account" class="inline-block me-2 h-4 w-4" />
-          Access & Auth
+          {{ $t('settings.tabs.access') }}
         </button>
         <button
           @click="activeTab = 'apparence'"
@@ -52,7 +52,7 @@
           :class="activeTab === 'apparence' ? 'border-orange-400 text-orange-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
           <Icon icon="mdi:palette" class="inline-block me-2 h-4 w-4" />
-          Apparence
+          {{ $t('settings.tabs.appearance') }}
         </button>
         <button
           @click="activeTab = 'danger'"
@@ -60,7 +60,7 @@
           :class="activeTab === 'danger' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
           <Icon icon="mdi:alert" class="inline-block me-2 h-4 w-4" />
-          Danger Zone
+          {{ $t('admin.dangerZone') }}
         </button>
       </div>
 
@@ -89,7 +89,7 @@
               <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ form.dashboard_title || $t('settings.previewDashboardTitle') }}</h2>
                 <p class="text-gray-700 dark:text-gray-300 text-sm mb-2">{{ form.welcome_message || $t('settings.previewWelcome') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 italic">▲ Message Dashboard (page Ressources)</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 italic">{{ $t('settings.preview.dashboardMessageHint') }}</p>
                 <!-- Sample App Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -101,7 +101,7 @@
                         <h3 class="font-medium text-gray-900 dark:text-white text-sm">GitLab</h3>
                       </div>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Git repository management</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('settings.preview.sampleGitDesc') }}</p>
                   </div>
                   
                   <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -110,10 +110,10 @@
                         <Icon icon="mdi:email" class="h-4 w-4 text-white" />
                       </div>
                       <div>
-                        <h3 class="font-medium text-gray-900 dark:text-white text-sm">Mail</h3>
+                        <h3 class="font-medium text-gray-900 dark:text-white text-sm">{{ $t('settings.preview.sampleMail') }}</h3>
                       </div>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Email management</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('settings.preview.sampleMailDesc') }}</p>
                   </div>
                 </div>
               </div>
@@ -139,7 +139,7 @@
                   :placeholder="$t('settings.appNamePlaceholder')"
                 />
                 <p v-if="errors.app_name" class="form-error">{{ errors.app_name }}</p>
-                <p class="form-help">This name appears in the header and browser title</p>
+                <p class="form-help">{{ $t('settings.appNameHelp') }}</p>
               </div>
 
               <IconInput
@@ -172,7 +172,7 @@
                   :placeholder="$t('settings.dashboardTitlePlaceholder')"
                 />
                 <p v-if="errors.dashboard_title" class="form-error">{{ errors.dashboard_title }}</p>
-                <p class="form-help">Main title displayed on the dashboard page</p>
+                <p class="form-help">{{ $t('settings.dashboardTitleHelp') }}</p>
               </div>
 
               <div class="form-group">
@@ -186,7 +186,7 @@
                   :placeholder="$t('settings.welcomeMessagePlaceholder')"
                 ></textarea>
                 <p v-if="errors.welcome_message" class="form-error">{{ errors.welcome_message }}</p>
-                <p class="form-help">Friendly message displayed on the resources page</p>
+                <p class="form-help">{{ $t('settings.welcomeMessageHelp') }}</p>
               </div>
 
             </div>
@@ -196,11 +196,11 @@
           <div>
             <div class="section-header">
               <Icon icon="mdi:newspaper-variant-outline" class="section-icon" />
-              <h4 class="section-title">Fil d'actualités</h4>
+              <h4 class="section-title">{{ $t('settings.newsFeed.title') }}</h4>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="form-group">
-                <label for="news_per_tab" class="form-label">Articles par onglet</label>
+                <label for="news_per_tab" class="form-label">{{ $t('settings.newsFeed.perTab') }}</label>
                 <div class="flex items-center gap-3">
                   <input
                     id="news_per_tab"
@@ -221,7 +221,7 @@
                     </button>
                   </div>
                 </div>
-                <p class="form-help">Nombre d'articles affichés par onglet sur la page d'accueil (les articles épinglés apparaissent toujours en tête).</p>
+                <p class="form-help">{{ $t('settings.newsFeed.perTabHelp') }}</p>
               </div>
             </div>
           </div>
@@ -230,24 +230,24 @@
           <div>
             <div class="section-header">
               <Icon icon="mdi:image-outline" class="section-icon" />
-              <h4 class="section-title">Image de fond du Hero</h4>
+              <h4 class="section-title">{{ $t('settings.heroImage.title') }}</h4>
             </div>
 
             <div class="space-y-6">
-              <p class="form-help">Personnalisez l'arrière-plan du bandeau d'accueil pour marquer des événements (Ramadan, fêtes, etc.). Laissez vide pour conserver le dégradé animé par défaut.</p>
+              <p class="form-help">{{ $t('settings.heroImage.help') }}</p>
 
               <!-- Light theme image -->
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
                   <Icon icon="mdi:white-balance-sunny" class="h-4 w-4 text-yellow-400" />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Thème clair</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.heroImage.lightTheme') }}</span>
                 </div>
 
                 <!-- Preview light -->
                 <div v-if="form.hero_image_url" class="relative rounded-lg overflow-hidden h-28 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                   <img loading="lazy"
                     :src="form.hero_image_url"
-                    alt="Aperçu image thème clair"
+                    :alt="$t('settings.heroImage.lightPreviewAlt')"
                     class="w-full h-full object-cover"
                     @error="form.hero_image_url = ''"
                   />
@@ -256,7 +256,8 @@
                       type="button"
                       @click="form.hero_image_url = ''"
                       class="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-lg text-white transition-colors"
-                      title="Supprimer l'image"
+                      :title="$t('settings.heroImage.removeLight')"
+                      :aria-label="$t('settings.heroImage.removeLight')"
                     >
                       <Icon icon="mdi:close" class="h-4 w-4" />
                     </button>
@@ -278,7 +279,7 @@
                     >
                       <Icon v-if="heroImageUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
                       <Icon v-else icon="mdi:upload" class="h-4 w-4" />
-                      <span>{{ heroImageUploading ? 'Upload...' : 'Uploader' }}</span>
+                      <span>{{ heroImageUploading ? $t('media.uploading') : $t('media.upload') }}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -294,15 +295,15 @@
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
                   <Icon icon="mdi:moon-waning-crescent" class="h-4 w-4 text-blue-400" />
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Thème sombre</span>
-                  <span class="text-xs text-gray-500">(si vide, l'image du thème clair est utilisée)</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.heroImage.darkTheme') }}</span>
+                  <span class="text-xs text-gray-500">{{ $t('settings.heroImage.darkFallback') }}</span>
                 </div>
 
                 <!-- Preview dark -->
                 <div v-if="form.hero_image_url_dark" class="relative rounded-lg overflow-hidden h-28 bg-gray-900 border border-gray-300 dark:border-gray-600">
                   <img loading="lazy"
                     :src="form.hero_image_url_dark"
-                    alt="Aperçu image thème sombre"
+                    :alt="$t('settings.heroImage.darkPreviewAlt')"
                     class="w-full h-full object-cover"
                     @error="form.hero_image_url_dark = ''"
                   />
@@ -311,7 +312,8 @@
                       type="button"
                       @click="form.hero_image_url_dark = ''"
                       class="p-1.5 bg-red-600/80 hover:bg-red-600 rounded-lg text-white transition-colors"
-                      title="Supprimer l'image sombre"
+                      :title="$t('settings.heroImage.removeDark')"
+                      :aria-label="$t('settings.heroImage.removeDark')"
                     >
                       <Icon icon="mdi:close" class="h-4 w-4" />
                     </button>
@@ -333,7 +335,7 @@
                     >
                       <Icon v-if="heroImageDarkUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
                       <Icon v-else icon="mdi:upload" class="h-4 w-4" />
-                      <span>{{ heroImageDarkUploading ? 'Upload...' : 'Uploader' }}</span>
+                      <span>{{ heroImageDarkUploading ? $t('media.uploading') : $t('media.upload') }}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -345,18 +347,20 @@
                 </div>
               </div>
 
-              <p class="form-help">Format idéal : 1920×480 px. JPEG, PNG ou WebP recommandés.</p>
+              <p class="form-help">{{ $t('settings.heroImage.formatHelp') }}</p>
 
               <!-- Position selector (visible only when at least one image is set) -->
               <div v-if="form.hero_image_url || form.hero_image_url_dark" class="form-group">
-                <label class="form-label">Point de cadrage</label>
+                <label class="form-label">{{ $t('settings.heroImage.focalPoint') }}</label>
                 <div class="grid grid-cols-3 gap-1.5 w-36">
                   <button
                     v-for="pos in positions"
                     :key="pos.value"
                     type="button"
                     @click="form.hero_image_position = pos.value"
-                    :title="pos.label"
+                    :title="t(pos.labelKey)"
+                    :aria-label="t(pos.labelKey)"
+                    :aria-pressed="form.hero_image_position === pos.value"
                     class="h-9 rounded-md border transition-colors flex items-center justify-center"
                     :class="form.hero_image_position === pos.value
                       ? 'border-primary-500 bg-primary-500/20 text-primary-400'
@@ -365,7 +369,7 @@
                     <Icon :icon="pos.icon" class="h-4 w-4" />
                   </button>
                 </div>
-                <p class="form-help mt-2">Choisissez quelle zone de l'image reste visible.</p>
+                <p class="form-help mt-2">{{ $t('settings.heroImage.focalPointHelp') }}</p>
               </div>
             </div>
           </div>
@@ -378,20 +382,20 @@
               <div class="section-header">
                 <Icon icon="mdi:format-quote-close" class="section-icon" />
                 <div class="flex-1 flex items-center justify-between">
-                  <h4 class="section-title">Dynamic Hero Messages</h4>
+                  <h4 class="section-title">{{ $t('settings.heroMessages.title') }}</h4>
                   <button type="button" @click="openHeroModal()" class="btn btn-secondary btn-sm">
                     <Icon icon="mdi:plus" class="h-4 w-4 me-1" />
-                    Add Message
+                    {{ $t('settings.heroMessages.add') }}
                   </button>
                 </div>
               </div>
 
               <div class="space-y-4">
-                <p class="form-help mb-4">Manage the rotating quotes and messages displayed on the home page hero section.</p>
+                <p class="form-help mb-4">{{ $t('settings.heroMessages.help') }}</p>
                 
                 <div v-if="heroMessages.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                   <Icon icon="mdi:format-quote-open" class="h-12 w-12 text-gray-600 mx-auto mb-2" />
-                  <p class="text-gray-500 dark:text-gray-400">No dynamic messages configured. Default messages will be used.</p>
+                  <p class="text-gray-500 dark:text-gray-400">{{ $t('settings.heroMessages.empty') }}</p>
                 </div>
 
                 <div v-else class="grid grid-cols-1 gap-4">
@@ -407,13 +411,14 @@
                         <button type="button" @click="toggleHeroStatus(hero)" 
                           class="p-1.5 rounded-lg transition-colors"
                           :class="hero.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-gray-500 hover:bg-gray-500/10'"
-                          :title="hero.is_active ? 'Deactivate' : 'Activate'">
+                          :title="hero.is_active ? $t('common.deactivate') : $t('common.activate')"
+                          :aria-label="hero.is_active ? $t('common.deactivate') : $t('common.activate')">
                           <Icon :icon="hero.is_active ? 'mdi:eye' : 'mdi:eye-off'" class="h-5 w-5" />
                         </button>
-                        <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors">
+                        <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors" :title="$t('common.edit')" :aria-label="$t('common.edit')">
                           <Icon icon="mdi:pencil" class="h-5 w-5" />
                         </button>
-                        <button type="button" @click="deleteHeroMessage(hero.id)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                        <button type="button" @click="deleteHeroMessage(hero.id)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" :title="$t('common.delete')" :aria-label="$t('common.delete')">
                           <Icon icon="mdi:trash-can" class="h-5 w-5" />
                         </button>
                       </div>
@@ -489,10 +494,10 @@
             <div>
               <div class="section-header mb-1">
                 <Icon icon="mdi:palette-outline" class="section-icon text-orange-400" />
-                <h4 class="section-title">Palette de couleurs</h4>
+                <h4 class="section-title">{{ $t('settings.palette.title') }}</h4>
               </div>
               <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
-                Cliquez pour prévisualiser, puis sauvegardez pour appliquer à tous les utilisateurs.
+                {{ $t('settings.palette.help') }}
               </p>
 
               <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -541,13 +546,13 @@
                     </div>
                   </button>
                   <div class="px-2 py-1.5 bg-gray-50 dark:bg-gray-800 flex items-center gap-1">
-                    <span class="text-xs font-semibold text-gray-900 dark:text-white truncate flex-1 cursor-pointer" @click="selectPalette(cp.id)">{{ cp.name }}</span>
+                    <button type="button" class="btn-reset text-xs font-semibold text-gray-900 dark:text-white truncate flex-1 cursor-pointer text-start" @click="selectPalette(cp.id)">{{ cp.name }}</button>
                     <button type="button" @click.stop="openEditCustomPalette(cp)"
-                      class="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none" title="Modifier">
+                      class="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none" :title="$t('common.edit')" :aria-label="$t('common.edit')">
                       <Icon icon="mdi:pencil-outline" class="h-3 w-3" />
                     </button>
                     <button type="button" @click.stop="deleteCustomPalette(cp.id)"
-                      class="p-1 text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors focus:outline-none" title="Supprimer">
+                      class="p-1 text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors focus:outline-none" :title="$t('common.delete')" :aria-label="$t('common.delete')">
                       <Icon icon="mdi:delete-outline" class="h-3 w-3" />
                     </button>
                   </div>
@@ -560,7 +565,7 @@
                   class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 hover:scale-[1.02] transition-all duration-200 focus:outline-none min-h-[88px]"
                 >
                   <Icon icon="mdi:plus-circle-outline" class="h-6 w-6 text-gray-500 dark:text-gray-400" />
-                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ajouter</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('settings.palette.add') }}</span>
                 </button>
               </div>
             </div>
@@ -569,20 +574,20 @@
             <div v-if="customPaletteEditor.show" class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600 space-y-4">
               <h5 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon icon="mdi:palette-advanced" class="h-4 w-4 text-orange-400" />
-                {{ customPaletteEditor.isNew ? 'Nouvelle palette' : 'Modifier la palette' }}
+                {{ customPaletteEditor.isNew ? $t('settings.palette.new') : $t('settings.palette.editTitle') }}
               </h5>
 
               <!-- Nom -->
               <div>
-                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Nom</label>
-                <input type="text" v-model="customPaletteEditor.name" placeholder="Ma palette"
+                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">{{ $t('common.name') }}</label>
+                <input type="text" v-model="customPaletteEditor.name" :placeholder="$t('settings.palette.namePlaceholder')"
                   class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm focus:outline-none focus:border-orange-400" />
               </div>
 
               <!-- Couleur d'accent -->
               <div>
                 <label class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mb-2">
-                  <Icon icon="mdi:eyedropper-variant" class="h-3 w-3" /> Couleur d'accent
+                  <Icon icon="mdi:eyedropper-variant" class="h-3 w-3" /> {{ $t('settings.palette.accent') }}
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.accent" @input="previewEditor"
@@ -597,28 +602,28 @@
 
               <!-- Mode de fond -->
               <div>
-                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-2">Fond de page</label>
+                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-2">{{ $t('settings.palette.pageBackground') }}</label>
                 <div class="flex gap-2">
                   <button type="button" @click="customPaletteEditor.auto_bg = true; previewEditor()"
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
                     :class="customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'">
-                    <Icon icon="mdi:auto-fix" class="h-3.5 w-3.5" /> Automatique
+                    <Icon icon="mdi:auto-fix" class="h-3.5 w-3.5" /> {{ $t('settings.palette.auto') }}
                   </button>
                   <button type="button" @click="customPaletteEditor.auto_bg = false; previewEditor()"
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
                     :class="!customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'">
-                    <Icon icon="mdi:eyedropper-variant" class="h-3.5 w-3.5" /> Personnalisé
+                    <Icon icon="mdi:eyedropper-variant" class="h-3.5 w-3.5" /> {{ $t('settings.palette.custom') }}
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 mt-1.5">
-                  {{ customPaletteEditor.auto_bg ? 'Le fond est calculé automatiquement depuis la teinte de l\'accent.' : 'Choisissez votre propre couleur de fond.' }}
+                  {{ customPaletteEditor.auto_bg ? $t('settings.palette.autoHelp') : $t('settings.palette.customHelp') }}
                 </p>
               </div>
 
               <!-- Couleur de fond (si personnalisé) -->
               <div v-if="!customPaletteEditor.auto_bg">
                 <label class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mb-2">
-                  <Icon icon="mdi:palette-swatch-outline" class="h-3 w-3" /> Couleur de fond
+                  <Icon icon="mdi:palette-swatch-outline" class="h-3 w-3" /> {{ $t('settings.palette.bgColor') }}
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.bg" @input="previewEditor"
@@ -635,17 +640,17 @@
               <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                 <button v-if="!customPaletteEditor.isNew" type="button" @click="deleteCurrentEditPalette"
                   class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors">
-                  <Icon icon="mdi:delete-outline" class="h-3.5 w-3.5" /> Supprimer la palette
+                  <Icon icon="mdi:delete-outline" class="h-3.5 w-3.5" /> {{ $t('settings.palette.delete') }}
                 </button>
                 <div v-else />
                 <div class="flex gap-2">
                   <button type="button" @click="cancelCustomPaletteEditor" class="btn btn-secondary text-xs py-1.5 px-3">
-                    Annuler
+                    {{ $t('common.cancel') }}
                   </button>
                   <button type="button" @click="saveCustomPaletteEditor"
                     :disabled="!customPaletteEditor.name.trim()"
                     class="btn btn-primary text-xs py-1.5 px-3 disabled:opacity-40 disabled:cursor-not-allowed">
-                    {{ customPaletteEditor.isNew ? 'Créer la palette' : 'Enregistrer' }}
+                    {{ customPaletteEditor.isNew ? $t('settings.palette.create') : $t('common.save') }}
                   </button>
                 </div>
               </div>
@@ -656,7 +661,7 @@
               <button type="button" @click="saveApparence" :disabled="loading" class="btn btn-primary">
                 <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
                 <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
-                Sauvegarder la palette
+                {{ $t('settings.palette.save') }}
               </button>
             </div>
           </div>
@@ -728,14 +733,14 @@
     <!-- Password Change Modal -->
     <div v-if="showPasswordModal" class="modal-overlay">
       <div class="modal-container">
-        <div class="modal-panel sm:max-w-md sm:w-full">
+        <div v-focus-trap class="modal-panel sm:max-w-md sm:w-full" role="dialog" aria-modal="true" aria-labelledby="settings-password-modal-title">
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
                 <Icon icon="mdi:key" class="h-6 w-6 text-green-500" />
               </div>
               <div>
-                <h3 class="modal-title">{{ $t('settings.changePassword') }}</h3>
+                <h3 id="settings-password-modal-title" class="modal-title">{{ $t('settings.changePassword') }}</h3>
                 <p class="modal-subtitle">
                   {{ $t('settings.changePasswordSubtitle') }}
                 </p>
@@ -770,7 +775,7 @@
                   minlength="6"
                 />
                 <p v-if="passwordErrors.newPassword" class="form-error">{{ passwordErrors.newPassword }}</p>
-                <p class="form-help">Minimum 6 characters</p>
+                <p class="form-help">{{ $t('settings.password.minLength') }}</p>
               </div>
 
               <div class="form-group">
@@ -813,14 +818,14 @@
     <!-- Reset Confirmation Modal -->
     <div v-if="showResetModal" class="modal-overlay">
       <div class="modal-container">
-        <div class="modal-panel sm:max-w-lg sm:w-full">
+        <div v-focus-trap class="modal-panel sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="settings-reset-modal-title">
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
                 <Icon icon="mdi:restore" class="h-6 w-6 text-yellow-500" />
               </div>
               <div>
-                <h3 class="modal-title">{{ $t('settings.resetTitle') }}</h3>
+                <h3 id="settings-reset-modal-title" class="modal-title">{{ $t('settings.resetTitle') }}</h3>
                 <p class="modal-subtitle">
                   {{ $t('settings.resetSubtitle') }}
                 </p>
@@ -848,7 +853,7 @@
     <!-- Reset Database Confirmation Modal -->
     <div v-if="showResetDatabaseModal" class="modal-overlay">
       <div class="modal-container">
-        <div class="modal-panel sm:max-w-md sm:w-full">
+        <div v-focus-trap class="modal-panel sm:max-w-md sm:w-full" role="dialog" aria-modal="true" aria-labelledby="settings-reset-db-modal-title">
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
@@ -857,7 +862,7 @@
                 </div>
               </div>
               <div>
-                <h3 class="modal-title">{{ $t('admin.confirmResetTitle') }}</h3>
+                <h3 id="settings-reset-db-modal-title" class="modal-title">{{ $t('admin.confirmResetTitle') }}</h3>
                 <p class="modal-subtitle">
                   {{ $t('admin.confirmResetMessage') }}
                 </p>
@@ -896,16 +901,16 @@
     <!-- Hero Message Modal -->
     <div v-if="showHeroModal" class="modal-overlay">
       <div class="modal-container">
-        <div class="modal-panel sm:max-w-lg sm:w-full">
+        <div v-focus-trap class="modal-panel sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="settings-hero-modal-title">
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
                 <Icon icon="mdi:format-quote-close" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
-                <h3 class="modal-title">{{ editingHero ? 'Edit Message' : 'Add Hero Message' }}</h3>
+                <h3 id="settings-hero-modal-title" class="modal-title">{{ editingHero ? $t('settings.heroMessages.editTitle') : $t('settings.heroMessages.add') }}</h3>
                 <p class="modal-subtitle">
-                  Configure a quote or informational message for the homepage.
+                  {{ $t('settings.heroMessages.subtitle') }}
                 </p>
               </div>
             </div>
@@ -914,33 +919,33 @@
           <form @submit.prevent="handleHeroSubmit" class="modal-content">
             <div class="space-y-4">
               <div class="form-group">
-                <label for="hero_content" class="form-label form-label-required">Message Content</label>
+                <label for="hero_content" class="form-label form-label-required">{{ $t('settings.heroMessages.content') }}</label>
                 <textarea
                   id="hero_content"
                   v-model="heroForm.content"
                   rows="3"
                   required
                   class="form-textarea"
-                  placeholder="e.g. The only way to do great work is to love what you do."
+                  :placeholder="$t('settings.heroMessages.contentPlaceholder')"
                 ></textarea>
               </div>
 
               <div class="form-group">
-                <label for="hero_author" class="form-label">Author / Source (Optional)</label>
+                <label for="hero_author" class="form-label">{{ $t('settings.heroMessages.author') }}</label>
                 <input
                   id="hero_author"
                   v-model="heroForm.author"
                   type="text"
                   class="form-input"
-                  placeholder="e.g. Steve Jobs"
+                  :placeholder="$t('settings.heroMessages.authorPlaceholder')"
                 />
               </div>
 
               <div class="form-group">
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="form-label">Active Status</label>
-                    <p class="form-help">Visible messages will be included in the homepage rotation.</p>
+                    <label class="form-label">{{ $t('settings.heroMessages.activeStatus') }}</label>
+                    <p class="form-help">{{ $t('settings.heroMessages.activeHelp') }}</p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input
@@ -966,7 +971,7 @@
                 type="submit"
                 class="btn btn-primary"
               >
-                {{ editingHero ? 'Update Message' : 'Add Message' }}
+                {{ editingHero ? $t('settings.heroMessages.update') : $t('settings.heroMessages.add') }}
               </button>
             </div>
           </form>
@@ -1048,15 +1053,15 @@ const customPaletteEditor = reactive({
 })
 
 const positions = [
-  { value: 'left top',     icon: 'mdi:arrow-top-left',     label: 'Haut gauche' },
-  { value: 'center top',   icon: 'mdi:arrow-up',           label: 'Haut centre' },
-  { value: 'right top',    icon: 'mdi:arrow-top-right',    label: 'Haut droite' },
-  { value: 'left center',  icon: 'mdi:arrow-left',         label: 'Milieu gauche' },
-  { value: 'center center',icon: 'mdi:circle-small',       label: 'Centre' },
-  { value: 'right center', icon: 'mdi:arrow-right',        label: 'Milieu droite' },
-  { value: 'left bottom',  icon: 'mdi:arrow-bottom-left',  label: 'Bas gauche' },
-  { value: 'center bottom',icon: 'mdi:arrow-down',         label: 'Bas centre' },
-  { value: 'right bottom', icon: 'mdi:arrow-bottom-right', label: 'Bas droite' },
+  { value: 'left top',     icon: 'mdi:arrow-top-left',     labelKey: 'settings.heroImage.positions.topLeft' },
+  { value: 'center top',   icon: 'mdi:arrow-up',           labelKey: 'settings.heroImage.positions.topCenter' },
+  { value: 'right top',    icon: 'mdi:arrow-top-right',    labelKey: 'settings.heroImage.positions.topRight' },
+  { value: 'left center',  icon: 'mdi:arrow-left',         labelKey: 'settings.heroImage.positions.middleLeft' },
+  { value: 'center center',icon: 'mdi:circle-small',       labelKey: 'settings.heroImage.positions.center' },
+  { value: 'right center', icon: 'mdi:arrow-right',        labelKey: 'settings.heroImage.positions.middleRight' },
+  { value: 'left bottom',  icon: 'mdi:arrow-bottom-left',  labelKey: 'settings.heroImage.positions.bottomLeft' },
+  { value: 'center bottom',icon: 'mdi:arrow-down',         labelKey: 'settings.heroImage.positions.bottomCenter' },
+  { value: 'right bottom', icon: 'mdi:arrow-bottom-right', labelKey: 'settings.heroImage.positions.bottomRight' },
 ]
 
 const groups = ref([])
@@ -1076,7 +1081,7 @@ const loadGroups = async () => {
     // Ne pas afficher d'erreur si l'utilisateur n'est pas authentifié (lors de la déconnexion)
     if (authStore.isAuthenticated) {
       console.error('Error loading groups:', error)
-      appStore.showError('Failed to load groups')
+      appStore.showError(t('groups.loadError'))
     }
   }
 }
@@ -1091,10 +1096,10 @@ const handleHeroImageUpload = async (event) => {
     formData.append('file', file)
     const response = await uploadAdminMedia(formData)
     form.hero_image_url = response.data.media.url
-    appStore.showSuccess('Image uploadée avec succès')
+    appStore.showSuccess(t('settings.heroImage.uploadSuccess'))
   } catch (error) {
     console.error('Error uploading hero image:', error)
-    appStore.showError("Échec de l'upload de l'image")
+    appStore.showError(t('settings.heroImage.uploadError'))
   } finally {
     heroImageUploading.value = false
     event.target.value = ''
@@ -1111,10 +1116,10 @@ const handleHeroImageDarkUpload = async (event) => {
     formData.append('file', file)
     const response = await uploadAdminMedia(formData)
     form.hero_image_url_dark = response.data.media.url
-    appStore.showSuccess('Image sombre uploadée avec succès')
+    appStore.showSuccess(t('settings.heroImage.uploadDarkSuccess'))
   } catch (error) {
     console.error('Error uploading dark hero image:', error)
-    appStore.showError("Échec de l'upload de l'image sombre")
+    appStore.showError(t('settings.heroImage.uploadDarkError'))
   } finally {
     heroImageDarkUploading.value = false
     event.target.value = ''
@@ -1139,8 +1144,8 @@ const loadSettings = async () => {
     Object.assign(form, {
       app_name: data.app_name || 'Airboard',
       app_icon: data.app_icon || 'mdi:view-dashboard',
-      dashboard_title: data.dashboard_title || 'Dashboard',
-      welcome_message: data.welcome_message || 'Welcome to your application portal',
+      dashboard_title: data.dashboard_title || t('settings.previewDashboardTitle'),
+      welcome_message: data.welcome_message || t('settings.previewWelcome'),
       signup_enabled: data.signup_enabled !== undefined ? data.signup_enabled : true,
       default_group_id: data.default_group_id || null,
       hero_image_url: data.hero_image_url || '',
@@ -1156,7 +1161,7 @@ const loadSettings = async () => {
     // Ne pas afficher d'erreur si l'utilisateur n'est pas authentifié (lors de la déconnexion)
     if (authStore.isAuthenticated) {
       console.error('Error loading settings:', error)
-      appStore.showError('Failed to load settings')
+      appStore.showError(t('settings.loadError'))
     }
   } finally {
     appStore.setLoading(false)
@@ -1167,19 +1172,19 @@ const validateForm = () => {
   errors.value = {}
   
   if (!form.app_name.trim()) {
-    errors.value.app_name = 'Application name is required'
+    errors.value.app_name = t('settings.validation.appNameRequired')
   }
   
   if (!form.app_icon.trim()) {
-    errors.value.app_icon = 'Application icon is required'
+    errors.value.app_icon = t('settings.validation.appIconRequired')
   }
   
   if (!form.dashboard_title.trim()) {
-    errors.value.dashboard_title = 'Dashboard title is required'
+    errors.value.dashboard_title = t('settings.validation.dashboardTitleRequired')
   }
   
   if (!form.welcome_message.trim()) {
-    errors.value.welcome_message = 'Welcome message is required'
+    errors.value.welcome_message = t('settings.validation.welcomeMessageRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -1282,12 +1287,12 @@ const saveApparence = async () => {
   try {
     const settingsData = { ...form, custom_palettes: JSON.stringify(form.custom_palettes) }
     await adminService.updateAppSettings(settingsData)
-    appStore.showSuccess('Palette sauvegardée avec succès')
+    appStore.showSuccess(t('settings.palette.saved'))
     appStore.setCustomPalettes(form.custom_palettes)
     appStore.applyPalette(form.color_palette)
   } catch (error) {
     console.error('Error saving palette:', error)
-    appStore.showError('Échec de la sauvegarde')
+    appStore.showError(t('common.feedback.saveError'))
   } finally {
     loading.value = false
   }
@@ -1299,7 +1304,7 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     await adminService.updateAppSettings({ ...form, custom_palettes: JSON.stringify(form.custom_palettes) })
-    appStore.showSuccess('Settings updated successfully')
+    appStore.showSuccess(t('settings.updated'))
     appStore.applyPalette(form.color_palette)
     await loadSettings()
     appStore.invalidateSettings()
@@ -1310,7 +1315,7 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('Error updating settings:', error)
-    appStore.showError('Failed to update settings')
+    appStore.showError(t('settings.updateError'))
   } finally {
     loading.value = false
   }
@@ -1341,11 +1346,11 @@ const confirmReset = async () => {
     } catch (e) {
       console.warn('Could not refresh global settings:', e)
     }
-    appStore.showSuccess('Settings reset to defaults successfully')
+    appStore.showSuccess(t('settings.resetSuccess'))
     closeResetModal()
   } catch (error) {
     console.error('Error resetting settings:', error)
-    appStore.showError('Failed to reset settings')
+    appStore.showError(t('settings.resetError'))
   } finally {
     resetLoading.value = false
   }
@@ -1355,19 +1360,19 @@ const validatePasswordForm = () => {
   passwordErrors.value = {}
   
   if (!passwordForm.oldPassword.trim()) {
-    passwordErrors.value.oldPassword = 'Current password is required'
+    passwordErrors.value.oldPassword = t('settings.password.currentRequired')
   }
   
   if (!passwordForm.newPassword.trim()) {
-    passwordErrors.value.newPassword = 'New password is required'
+    passwordErrors.value.newPassword = t('settings.password.newRequired')
   } else if (passwordForm.newPassword.length < 6) {
-    passwordErrors.value.newPassword = 'Password must be at least 6 characters'
+    passwordErrors.value.newPassword = t('settings.password.tooShort')
   }
   
   if (!passwordForm.confirmPassword.trim()) {
-    passwordErrors.value.confirmPassword = 'Please confirm your password'
+    passwordErrors.value.confirmPassword = t('settings.password.confirmRequired')
   } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    passwordErrors.value.confirmPassword = 'Passwords do not match'
+    passwordErrors.value.confirmPassword = t('settings.password.mismatch')
   }
   
   return Object.keys(passwordErrors.value).length === 0
@@ -1379,14 +1384,14 @@ const handlePasswordChange = async () => {
   passwordLoading.value = true
   try {
     await authService.changePassword(passwordForm.oldPassword, passwordForm.newPassword)
-    appStore.showSuccess('Password changed successfully')
+    appStore.showSuccess(t('settings.password.changed'))
     closePasswordModal()
   } catch (error) {
     console.error('Error changing password:', error)
     if (error.response?.status === 401) {
-      passwordErrors.value.oldPassword = 'Incorrect current password'
+      passwordErrors.value.oldPassword = t('settings.password.incorrect')
     } else {
-      appStore.showError('Failed to change password')
+      appStore.showError(t('settings.password.changeError'))
     }
   } finally {
     passwordLoading.value = false
@@ -1441,7 +1446,7 @@ const loadHeroMessages = async () => {
     heroMessages.value = data
   } catch (error) {
     console.error('Error loading hero messages:', error)
-    appStore.showError('Failed to load hero messages')
+    appStore.showError(t('settings.heroMessages.loadError'))
   } finally {
     heroLoading.value = false
   }
@@ -1472,16 +1477,16 @@ const handleHeroSubmit = async () => {
   try {
     if (editingHero.value) {
       await adminService.updateHeroMessage(editingHero.value.id, heroForm)
-      appStore.showSuccess('Message updated successfully')
+      appStore.showSuccess(t('settings.heroMessages.updated'))
     } else {
       await adminService.createHeroMessage(heroForm)
-      appStore.showSuccess('Message added successfully')
+      appStore.showSuccess(t('settings.heroMessages.added'))
     }
     showHeroModal.value = false
     await loadHeroMessages()
   } catch (error) {
     console.error('Error saving hero message:', error)
-    appStore.showError('Failed to save message')
+    appStore.showError(t('settings.heroMessages.saveError'))
   }
 }
 
@@ -1490,11 +1495,11 @@ const deleteHeroMessage = async (id) => {
 
   try {
     await adminService.deleteHeroMessage(id)
-    appStore.showSuccess('Message deleted successfully')
+    appStore.showSuccess(t('settings.heroMessages.deleted'))
     await loadHeroMessages()
   } catch (error) {
     console.error('Error deleting hero message:', error)
-    appStore.showError('Failed to delete message')
+    appStore.showError(t('settings.heroMessages.deleteError'))
   }
 }
 
@@ -1508,7 +1513,7 @@ const toggleHeroStatus = async (hero) => {
     await loadHeroMessages()
   } catch (error) {
     console.error('Error toggling hero status:', error)
-    appStore.showError('Failed to update message status')
+    appStore.showError(t('settings.heroMessages.statusError'))
   }
 }
 

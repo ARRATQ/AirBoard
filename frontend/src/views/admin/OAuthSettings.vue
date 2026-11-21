@@ -48,14 +48,14 @@
     <!-- Edit Provider Modal -->
     <div v-if="showEditModal && selectedProvider" class="modal-overlay">
       <div class="modal-container">
-        <div class="modal-panel sm:max-w-2xl sm:w-full">
+        <div v-focus-trap class="modal-panel sm:max-w-2xl sm:w-full" role="dialog" aria-modal="true" aria-labelledby="oauth-edit-modal-title">
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
                 <Icon :icon="selectedProvider.icon" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
-                <h3 class="modal-title">{{ $t('oauth.configure') }} {{ selectedProvider.display_name }}</h3>
+                <h3 id="oauth-edit-modal-title" class="modal-title">{{ $t('oauth.configure') }} {{ selectedProvider.display_name }}</h3>
                 <p class="modal-subtitle">{{ $t('oauth.configureSubtitle') }}</p>
               </div>
             </div>
@@ -104,6 +104,7 @@
                   <button
                     type="button"
                     @click="showSecret = !showSecret"
+                    :aria-label="showSecret ? $t('email.oauth.hideSecret') : $t('email.oauth.showSecret')"
                     class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
                   >
                     <Icon :icon="showSecret ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
@@ -126,6 +127,8 @@
                   <button
                     type="button"
                     @click="copyToClipboard(editForm.redirect_uri)"
+                    :title="$t('oauth.copyRedirectUri')"
+                    :aria-label="$t('oauth.copyRedirectUri')"
                     class="btn btn-secondary"
                   >
                     <Icon icon="mdi:content-copy" class="h-4 w-4" />
@@ -139,6 +142,7 @@
                 <button
                   type="button"
                   @click="showAdvanced = !showAdvanced"
+                  :aria-expanded="showAdvanced"
                   class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                 >
                   <Icon :icon="showAdvanced ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="rtl-flip h-5 w-5" />
@@ -247,10 +251,12 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 
 // State
 const loading = ref(false)
@@ -282,7 +288,7 @@ const loadProviders = async () => {
     providers.value = data.providers || []
   } catch (error) {
     console.error('Error loading OAuth providers:', error)
-    appStore.showError('Failed to load OAuth providers')
+    appStore.showError(t('oauth.loadError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -312,12 +318,12 @@ const handleSave = async () => {
   loading.value = true
   try {
     await adminService.updateOAuthProvider(selectedProvider.value.id, editForm)
-    appStore.showSuccess('OAuth provider updated successfully')
+    appStore.showSuccess(t('oauth.updated'))
     await loadProviders()
     closeEditModal()
   } catch (error) {
     console.error('Error updating OAuth provider:', error)
-    appStore.showError('Failed to update OAuth provider')
+    appStore.showError(t('oauth.updateError'))
   } finally {
     loading.value = false
   }
@@ -333,9 +339,9 @@ const closeEditModal = () => {
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
-    appStore.showSuccess('Copied to clipboard')
+    appStore.showSuccess(t('oauth.copied'))
   } catch (error) {
-    appStore.showError('Failed to copy to clipboard')
+    appStore.showError(t('oauth.copyError'))
   }
 }
 
@@ -346,7 +352,7 @@ const getClientIdPlaceholder = (providerName) => {
     case 'microsoft':
       return 'a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6'
     default:
-      return 'Enter your client ID'
+      return t('oauth.clientIdPlaceholder')
   }
 }
 

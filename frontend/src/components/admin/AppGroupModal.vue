@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container" @click.self="closeModal">
-      <div class="modal-panel w-full sm:max-w-5xl">
+      <div v-focus-trap class="modal-panel w-full sm:max-w-5xl" role="dialog" aria-modal="true" aria-labelledby="app-group-modal-title">
         <form class="modal-form" @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -14,7 +14,7 @@
                   <Icon :icon="form.icon || 'mdi:folder'" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">
+                  <h3 id="app-group-modal-title" class="modal-title truncate">
                     {{ isEdit ? $t('groupAdmin.appGroupModal.title.edit') : $t('groupAdmin.appGroupModal.title.new') }}
                   </h3>
                   <p class="modal-subtitle truncate">

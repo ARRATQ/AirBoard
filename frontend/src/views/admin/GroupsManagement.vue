@@ -103,7 +103,7 @@
     <!-- Group Admins Modal -->
     <div v-if="showGroupAdminsModal" class="modal-overlay" @click.self="closeGroupAdminsModal">
       <div class="modal-container" @click.self="closeGroupAdminsModal">
-        <div class="modal-panel w-full sm:max-w-2xl">
+        <div v-focus-trap class="modal-panel w-full sm:max-w-2xl" role="dialog" aria-modal="true" aria-labelledby="group-admins-modal-title">
           <div class="modal-form">
             <div class="modal-header">
               <div class="flex items-center justify-between gap-4">
@@ -115,7 +115,7 @@
                     <Icon icon="mdi:shield-account" class="h-5 w-5" />
                   </div>
                   <div class="min-w-0">
-                    <h3 class="modal-title truncate">{{ $t('groupAdminsModal.title') }}</h3>
+                    <h3 id="group-admins-modal-title" class="modal-title truncate">{{ $t('groupAdminsModal.title') }}</h3>
                     <p class="modal-subtitle truncate">{{ selectedGroupForAdmins?.name }}</p>
                   </div>
                 </div>

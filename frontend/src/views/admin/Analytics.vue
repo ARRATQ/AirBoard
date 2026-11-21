@@ -25,7 +25,7 @@
       <!-- Loading state -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-24">
         <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-primary-500" />
-        <p class="mt-4 text-gray-500 animate-pulse">Chargement des analyses...</p>
+        <p class="mt-4 text-gray-500 animate-pulse">{{ $t('analytics.loading') }}</p>
       </div>
 
       <!-- Analytics Dashboard -->
@@ -90,7 +90,7 @@
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('analytics.peakUsage') }}</p>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ peakUsageLabel }}</h3>
-                <p class="text-xs text-gray-400 mt-2 italic">Distribution sur 30j</p>
+                <p class="text-xs text-gray-400 mt-2 italic">{{ $t('analytics.distribution30d') }}</p>
               </div>
               <div class="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-full group-hover:scale-110 transition-transform">
                 <Icon icon="mdi:clock-fast" class="h-6 w-6 text-orange-600 dark:text-orange-400" />
@@ -109,7 +109,7 @@
                 {{ $t('analytics.dailyActivity') }}
               </h2>
               <div class="bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full text-xs font-medium text-primary-600 dark:text-primary-400">
-                Action tracking
+                {{ $t('analytics.actionTracking') }}
               </div>
             </div>
 
@@ -135,7 +135,7 @@
                 <g v-for="(point, i) in chartPoints" :key="'p'+i" class="group">
                   <circle :cx="point.x" :cy="point.y" r="4" class="fill-white stroke-primary-500 stroke-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <rect :x="point.x - 15" y="0" width="30" height="200" fill="transparent" class="cursor-pointer">
-                    <title>{{ formatDate(point.date) }}: {{ point.val }} clicks</title>
+                    <title>{{ $t('analytics.pointTooltip', { date: formatDate(point.date), count: point.val }, point.val) }}</title>
                   </rect>
                 </g>
               </svg>
@@ -192,7 +192,7 @@
                 <Icon icon="mdi:trophy" class="text-yellow-500" />
                 {{ $t('analytics.topApplications') }}
               </h2>
-              <span class="text-xs text-gray-400 font-medium">Top 10</span>
+              <span class="text-xs text-gray-400 font-medium">{{ $t('analytics.top10') }}</span>
             </div>
             <div class="p-0">
               <div v-if="analytics.top_applications && analytics.top_applications.length > 0">
@@ -204,9 +204,9 @@
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ app.application_name }}</h4>
                     <div class="flex items-center gap-2 mt-0.5">
-                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ app.click_count }} Clics</span>
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('analytics.clickCount', { count: app.click_count }, app.click_count) }}</span>
                       <span class="text-[10px] text-gray-300">•</span>
-                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ app.unique_users }} Users</span>
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('analytics.userCount', { count: app.unique_users }, app.unique_users) }}</span>
                     </div>
                   </div>
                   <div class="w-24 flex-shrink-0">
@@ -216,7 +216,7 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="py-12 text-center text-gray-400 italic">No data found</div>
+              <div v-else class="py-12 text-center text-gray-400 italic">{{ $t('analytics.noData') }}</div>
             </div>
           </div>
 
@@ -227,7 +227,7 @@
                 <Icon icon="mdi:account-star" class="text-green-500" />
                 {{ $t('analytics.topUsers') }}
               </h2>
-              <span class="text-xs text-gray-400 font-medium">Top 10</span>
+              <span class="text-xs text-gray-400 font-medium">{{ $t('analytics.top10') }}</span>
             </div>
             <div class="p-0">
               <div v-if="analytics.top_users && analytics.top_users.length > 0">
@@ -243,11 +243,11 @@
                   </div>
                   <div class="text-end">
                     <span class="text-sm font-black text-gray-900 dark:text-white">{{ user.click_count }}</span>
-                    <span class="text-[10px] font-bold text-gray-400 block uppercase tracking-tighter">Actions</span>
+                    <span class="text-[10px] font-bold text-gray-400 block uppercase tracking-tighter">{{ $t('analytics.actions') }}</span>
                   </div>
                 </div>
               </div>
-              <div v-else class="py-12 text-center text-gray-400 italic">No activity detected</div>
+              <div v-else class="py-12 text-center text-gray-400 italic">{{ $t('analytics.noActivity') }}</div>
             </div>
           </div>
         </div>
@@ -259,39 +259,39 @@
               <Icon icon="mdi:newspaper" class="h-8 w-8 text-red-600" />
             </div>
             <div>
-              <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none uppercase">Statistiques News Hub</h2>
-              <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest font-bold">Performance du contenu</p>
+              <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none uppercase">{{ $t('analytics.newsStats.title') }}</h2>
+              <p class="text-gray-500 text-sm mt-1 uppercase tracking-widest font-bold">{{ $t('analytics.newsStats.subtitle') }}</p>
             </div>
           </div>
 
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             <div class="news-kpi">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Articles totaux</p>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('analytics.newsStats.totalArticles') }}</p>
               <p class="text-3xl font-black text-gray-900 dark:text-white">{{ newsStats.total_news }}</p>
             </div>
             <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Publiés</p>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('analytics.newsStats.published') }}</p>
               <p class="text-3xl font-black text-green-600">{{ newsStats.published_news }}</p>
             </div>
             <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Vues totales</p>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('analytics.newsStats.totalViews') }}</p>
               <p class="text-3xl font-black text-blue-600">{{ newsStats.total_views }}</p>
             </div>
             <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
-              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Réactions</p>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('reports.reactions') }}</p>
               <p class="text-3xl font-black text-red-600">{{ newsStats.total_reactions }}</p>
             </div>
           </div>
 
           <!-- Top News -->
           <div v-if="newsStats.top_news && newsStats.top_news.length > 0">
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Articles les plus populaires</h3>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">{{ $t('analytics.newsStats.topNews') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div
+              <router-link
                 v-for="(article, index) in newsStats.top_news"
                 :key="article.id"
-                class="group p-4 bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-red-200 dark:hover:border-red-900/50 transition-all cursor-pointer"
-                @click="viewArticle(article.slug)"
+                :to="{ name: 'NewsDetail', params: { slug: article.slug } }"
+                class="group block p-4 bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-red-200 dark:hover:border-red-900/50 transition-all cursor-pointer"
               >
                 <div class="flex gap-4 items-start">
                   <span class="text-lg font-black text-gray-200 dark:text-gray-700">0{{ index + 1 }}</span>
@@ -307,7 +307,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </router-link>
             </div>
           </div>
         </div>
@@ -327,14 +327,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { analyticsService, newsService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
+import { dateLocaleFor } from '@/utils/homeFormat'
 
-const { t } = useI18n()
-const router = useRouter()
+const { t, locale } = useI18n()
 const appStore = useAppStore()
 const analytics = ref(null)
 const newsStats = ref(null)
@@ -461,12 +460,12 @@ const xAxisLabels = computed(() => {
 
 const formatDateShort = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+  return date.toLocaleDateString(dateLocaleFor(locale.value), { day: '2-digit', month: 'short' })
 }
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' })
+  return date.toLocaleDateString(dateLocaleFor(locale.value), { day: '2-digit', month: 'long' })
 }
 
 const getHourlyHeight = (count) => {
@@ -474,10 +473,6 @@ const getHourlyHeight = (count) => {
   const max = Math.max(...analytics.value.hourly_activity.map(h => h.click_count))
   if (max === 0) return 0
   return Math.max((count / max) * 100, 2)
-}
-
-const viewArticle = (slug) => {
-  router.push({ name: 'NewsDetail', params: { slug } })
 }
 
 const mockExport = () => {

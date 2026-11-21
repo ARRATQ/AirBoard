@@ -3,7 +3,7 @@
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     @click.self="$emit('close')"
   >
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+    <div v-focus-trap class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="import-holidays-modal-title">
       <!-- Header -->
       <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
@@ -11,7 +11,7 @@
             <Icon icon="mdi:calendar-star" class="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <div>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 id="import-holidays-modal-title" class="text-xl font-bold text-gray-900 dark:text-white">
               {{ $t('events.holidays.importTitle') }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -20,7 +20,9 @@
           </div>
         </div>
         <button
+          type="button"
           @click="$emit('close')"
+          :aria-label="$t('common.close')"
           class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
           <Icon icon="mdi:close" class="h-5 w-5 text-gray-500" />
@@ -130,7 +132,7 @@
         <div v-if="importResult" class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
           <div class="flex items-center gap-2 text-green-600 dark:text-green-400 mb-2">
             <Icon icon="mdi:check-circle" class="h-5 w-5" />
-            <span class="font-medium">{{ $t('events.holidays.importSuccess') }}</span>
+            <span class="font-medium">{{ $t('events.holidays.importSuccess', { count: importResult.imported }) }}</span>
           </div>
           <ul class="text-sm text-green-600 dark:text-green-400 ms-7 space-y-1">
             <li>{{ $t('events.holidays.imported', { count: importResult.imported }) }}</li>

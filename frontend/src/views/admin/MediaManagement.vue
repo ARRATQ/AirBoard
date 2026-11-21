@@ -131,12 +131,12 @@
     </nav>
 
     <!-- Upload Modal -->
-    <div v-if="showUploadModal" class="modal-overlay" @click="closeUploadModal">
-      <div class="modal-container" @click.stop>
-        <div class="modal-panel sm:max-w-lg sm:w-full">
+    <div v-if="showUploadModal" class="modal-overlay" @click.self="closeUploadModal">
+      <div class="modal-container">
+        <div v-focus-trap class="modal-panel sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="media-upload-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">{{ $t('media.upload_title') }}</h3>
-            <button @click="closeUploadModal" class="row-actions__btn">
+            <h3 id="media-upload-modal-title" class="modal-title">{{ $t('media.upload_title') }}</h3>
+            <button @click="closeUploadModal" class="row-actions__btn" :aria-label="$t('common.close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -172,7 +172,7 @@
                     <p class="mm-dim">{{ formatSize(selectedFile.size) }}</p>
                   </div>
                 </div>
-                <button @click="selectedFile = null" class="row-actions__btn row-actions__btn--danger">
+                <button @click="selectedFile = null" class="row-actions__btn row-actions__btn--danger" :aria-label="$t('media.removeSelected')" :title="$t('media.removeSelected')">
                   <Icon icon="mdi:close" class="h-5 w-5" />
                 </button>
               </div>
@@ -207,12 +207,12 @@
     </div>
 
     <!-- Edit Modal -->
-    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
-      <div class="modal-container" @click.stop>
-        <div class="modal-panel sm:max-w-lg sm:w-full">
+    <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-container">
+        <div v-focus-trap class="modal-panel sm:max-w-lg sm:w-full" role="dialog" aria-modal="true" aria-labelledby="media-edit-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">{{ $t('media.edit_title') }}</h3>
-            <button @click="closeEditModal" class="row-actions__btn">
+            <h3 id="media-edit-modal-title" class="modal-title">{{ $t('media.edit_title') }}</h3>
+            <button @click="closeEditModal" class="row-actions__btn" :aria-label="$t('common.close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -247,12 +247,12 @@
     </div>
 
     <!-- View Modal -->
-    <div v-if="showViewModal" class="modal-overlay" @click="closeViewModal">
-      <div class="modal-container" @click.stop>
-        <div class="modal-panel sm:max-w-4xl sm:w-full">
+    <div v-if="showViewModal" class="modal-overlay" @click.self="closeViewModal">
+      <div class="modal-container">
+        <div v-focus-trap class="modal-panel sm:max-w-4xl sm:w-full" role="dialog" aria-modal="true" aria-labelledby="media-view-modal-title">
           <div class="modal-header">
-            <h3 class="modal-title">{{ viewingMedia?.filename }}</h3>
-            <button @click="closeViewModal" class="row-actions__btn">
+            <h3 id="media-view-modal-title" class="modal-title">{{ viewingMedia?.filename }}</h3>
+            <button @click="closeViewModal" class="row-actions__btn" :aria-label="$t('common.close')">
               <Icon icon="mdi:close" class="h-5 w-5" />
             </button>
           </div>
@@ -275,10 +275,10 @@
               <p v-if="viewingMedia?.width && viewingMedia?.height">
                 <strong>{{ $t('media.dimensions') }}:</strong> {{ viewingMedia.width }} × {{ viewingMedia.height }}
               </p>
-              <p><strong>{{ $t('media.uploaded_by') }}:</strong> {{ viewingMedia?.uploader?.username || 'N/A' }}</p>
+              <p><strong>{{ $t('media.uploaded_by') }}:</strong> {{ viewingMedia?.uploader?.username || '—' }}</p>
               <p><strong>{{ $t('media.uploaded_at') }}:</strong> {{ formatDate(viewingMedia?.created_at) }}</p>
               <p><strong>{{ $t('media.url') }}:</strong>
-                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" class="mm-link">
+                <a :href="getMediaUrl(viewingMedia?.url)" target="_blank" rel="noopener noreferrer" class="mm-link" dir="ltr">
                   {{ getMediaUrl(viewingMedia?.url) }}
                 </a>
               </p>

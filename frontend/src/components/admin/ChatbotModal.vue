@@ -4,13 +4,13 @@
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
     @click.self="$emit('close')"
   >
-    <div class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div v-focus-trap class="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="chatbot-modal-title">
       <!-- En-tête -->
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 id="chatbot-modal-title" class="text-2xl font-bold text-gray-900 dark:text-white">
           {{ isEdit ? $t('chatbots.edit') : $t('chatbots.create') }}
         </h2>
-        <button type="button" @click="$emit('close')"
+        <button type="button" @click="$emit('close')" :aria-label="$t('common.close')"
           class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
           <Icon icon="mdi:close" class="h-5 w-5 text-gray-500" />
         </button>

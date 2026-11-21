@@ -134,20 +134,23 @@ html.dark {
   --tw-divide-x-reverse: 1;
 }
 
-/* Bouton sans habillage : remplace un div/span cliquable en gardant son apparence. */
-.btn-reset {
-  appearance: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: inherit;
-  cursor: pointer;
-}
-.btn-reset:disabled {
-  cursor: not-allowed;
+/* Bouton sans habillage : remplace un div/span cliquable en gardant son apparence.
+   Dans @layer components pour que les utilitaires Tailwind (px-*, bg-*…) gardent la main. */
+@layer components {
+  .btn-reset {
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+  .btn-reset:disabled {
+    cursor: not-allowed;
+  }
 }
 
 /* Focus clavier visible partout (la souris n'affiche rien grâce à :focus-visible). */

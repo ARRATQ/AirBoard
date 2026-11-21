@@ -19,7 +19,7 @@
           ]"
         >
           <Icon icon="mdi:email-edit-outline" class="inline h-5 w-5 me-2" />
-          Configuration SMTP (Deprecated)
+          {{ $t('email.tabs.smtpDeprecated') }}
         </button>
         <button
           @click="activeTab = 'oauth'"
@@ -43,7 +43,7 @@
           ]"
         >
           <Icon icon="mdi:file-document-edit" class="inline h-5 w-5 me-2" />
-          Templates
+          {{ $t('email.templates') }}
         </button>
         <button
           @click="activeTab = 'logs'"
@@ -55,7 +55,7 @@
           ]"
         >
           <Icon icon="mdi:history" class="inline h-5 w-5 me-2" />
-          Logs
+          {{ $t('email.logs') }}
         </button>
       </nav>
     </div>
@@ -152,6 +152,7 @@
                   <button
                     type="button"
                     @click="showPassword = !showPassword"
+                    :aria-label="showPassword ? $t('userModal.hidePassword') : $t('userModal.showPassword')"
                     class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
                   >
                     <Icon
@@ -381,17 +382,18 @@
                   }}</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <span
+                  <button
                     v-for="variable in getVariablesForType(
                       selectedTemplate.type,
                     )"
                     :key="variable.name"
+                    type="button"
                     @click="copyVariable(variable.name)"
                     class="px-2 py-1 bg-gray-600 dark:bg-gray-500 text-yellow-300 dark:text-yellow-200 rounded text-xs font-mono cursor-pointer hover:bg-gray-500 dark:hover:bg-gray-400 transition-colors"
                     :title="variable.description"
                   >
                     {{ variable.name }}
-                  </span>
+                  </button>
                 </div>
               </div>
 
@@ -456,6 +458,8 @@
           </div>
           <button
             @click="loadLogs"
+            :title="$t('common.refresh')"
+            :aria-label="$t('common.refresh')"
             class="btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
             <Icon icon="mdi:refresh" class="h-4 w-4" />
@@ -564,13 +568,14 @@
       @click.self="showTestModal = false"
     >
       <div class="modal-container max-w-md">
-        <div class="modal-panel">
+        <div v-focus-trap class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="email-test-modal-title">
           <div class="modal-header">
-            <h3 class="text-lg font-semibold text-white">
+            <h3 id="email-test-modal-title" class="text-lg font-semibold text-white">
               {{ $t("email.testEmail") }}
             </h3>
             <button
               @click="showTestModal = false"
+              :aria-label="$t('common.close')"
               class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
               <Icon icon="mdi:close" class="h-5 w-5" />
@@ -618,10 +623,10 @@
       @click.self="showPreviewModal = false"
     >
       <div class="modal-container max-w-4xl">
-        <div class="modal-panel">
+        <div v-focus-trap class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="email-preview-modal-title">
           <div class="modal-header">
             <div>
-              <h3 class="text-lg font-semibold text-white">
+              <h3 id="email-preview-modal-title" class="text-lg font-semibold text-white">
                 {{ $t("email.preview") }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -630,6 +635,7 @@
             </div>
             <button
               @click="showPreviewModal = false"
+              :aria-label="$t('common.close')"
               class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
               <Icon icon="mdi:close" class="h-5 w-5" />
@@ -638,6 +644,7 @@
           <div class="p-0 bg-white dark:bg-gray-800">
             <iframe
               :srcdoc="previewBody"
+              :title="$t('email.preview')"
               class="w-full h-[500px] border-0"
               sandbox="allow-same-origin"
             ></iframe>

@@ -1,7 +1,7 @@
 <template>
   <div v-if="show" class="modal-overlay" @click.self="closeModal">
     <div class="modal-container" @click.self="closeModal">
-      <div class="modal-panel w-full sm:max-w-3xl">
+      <div v-focus-trap class="modal-panel w-full sm:max-w-3xl" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
         <form class="modal-form" novalidate @submit.prevent="handleSubmit">
           <!-- Header -->
           <div class="modal-header">
@@ -15,7 +15,7 @@
                   <Icon v-else icon="mdi:account" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">
+                  <h3 id="user-modal-title" class="modal-title truncate">
                     {{ isEdit ? t('userModal.titleEdit') : t('users.new') }}
                   </h3>
                   <p class="modal-subtitle truncate">
