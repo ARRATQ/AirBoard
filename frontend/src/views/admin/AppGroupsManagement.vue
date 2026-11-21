@@ -236,10 +236,15 @@ const handleSubmit = async (formData) => {
   }
 }
 
+const resourceCount = (group) => group?.applications?.length || 0
+
 const confirmDelete = async (group) => {
   const confirmed = await askConfirm({
     title: t('groupAdmin.appGroupsManagement.deleteConfirm.title'),
-    message: t('groupAdmin.appGroupsManagement.deleteConfirm.message', { name: group.name }),
+    // Les ressources de la catégorie sont supprimées définitivement avec elle : le dire
+    message: resourceCount(group)
+      ? t('groupAdmin.appGroupsManagement.deleteConfirm.messageWithResources', { name: group.name, count: resourceCount(group) }, resourceCount(group))
+      : t('groupAdmin.appGroupsManagement.deleteConfirm.message', { name: group.name }),
     confirmLabel: t('common.delete'),
     tone: 'danger',
   })

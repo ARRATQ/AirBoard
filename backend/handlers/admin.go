@@ -248,13 +248,13 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		}
 	}
 
-	// Updates(struct) ignore false et 0 : les cases à cocher et l'ordre sont appliqués à part
+	// Updates(struct) ignore false, 0 et "" : cases à cocher, ordre et description sont appliqués à part
 	err = h.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&appGroup).Updates(updateData).Error; err != nil {
 			return err
 		}
-		if values := flagUpdates(flags, "is_active", "is_private", "order"); len(values) > 0 {
-			return tx.Model(&appGroup).Updates(values).Error
+		if values := flagUpdates(flags, "is_active", "is_private", "order", "description"); len(values) > 0 {
+			return tx.Model(&appGroup).Omit(clause.Associations).Updates(values).Error
 		}
 		return nil
 	})
@@ -618,7 +618,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		if err := tx.Model(&application).Omit(clause.Associations).Updates(updateData).Error; err != nil {
 			return err
 		}
-		if values := flagUpdates(flags, "is_active", "open_in_new_tab", "order"); len(values) > 0 {
+		if values := flagUpdates(flags, "is_active", "open_in_new_tab", "order", "description"); len(values) > 0 {
 			if err := tx.Model(&application).Omit(clause.Associations).Updates(values).Error; err != nil {
 				return err
 			}
@@ -763,7 +763,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		GroupIDs  []uint `json:"group_ids"`
 	}
 
-	if err := c.ShouldBindJSON(&createData); err != nil {
+	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -804,7 +804,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 		IsActive:  createData.IsActive,
 	}
 
-	if err := h.db.Create(&user).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &user, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création de l'utilisateur",
@@ -1286,7 +1286,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		AppGroupIDs []uint `json:"app_group_ids"`
 	}
 
-	if err := c.ShouldBindJSON(&createData); err != nil {
+	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -1302,7 +1302,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		IsActive:    createData.IsActive,
 	}
 
-	if err := h.db.Create(&group).Error; err != nil {
+	if err := createKeepingFalse(h.db, c, &group, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création du groupe",
