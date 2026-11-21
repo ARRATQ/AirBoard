@@ -990,3 +990,11 @@ html {
   padding-inline: 32px 10px;
   background-position: left 0.5rem center;
 }
+
+/* Selects de formulaire (plugin forms) : en arabe, chevron et marge réservée côté fin de ligne. */
+[dir='rtl'] select.form-select,
+[dir='rtl'] select.form-input,
+[dir='rtl'] select.input {
+  padding-inline: 2.5rem 0.75rem;
+  background-position: left 0.5rem center;
+}

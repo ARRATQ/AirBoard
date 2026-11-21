@@ -120,7 +120,13 @@
     "name": "Nom",
     "color": "Couleur",
     "icon": "Icône",
-    "order": "Ordre"
+    "order": "Ordre",
+    "open": "Ouvrir",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "notConfigured": "Non configuré"
   },
   "calendar": {
     "title": "Calendrier des Événements",
@@ -227,7 +233,9 @@
     "updated": "Groupe modifié avec succès",
     "loadError": "Erreur lors du chargement des groupes",
     "saveError": "Erreur lors de la sauvegarde du groupe",
-    "deleteError": "Erreur lors de la suppression du groupe"
+    "deleteError": "Erreur lors de la suppression du groupe",
+    "adminsSaved": "Administrateurs du groupe mis à jour.",
+    "adminsLoadError": "Impossible de charger les utilisateurs du groupe."
   },
   "applications": {
     "title": "Ressources",
@@ -242,7 +250,8 @@
     "emptyText": "Ajoutez votre première ressource pour commencer.",
     "order": "Ordre",
     "confirmDeleteTitle": "Supprimer la ressource",
-    "confirmDeleteText": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
+    "confirmDeleteText": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible.",
+    "noDescription": "Aucune description."
   },
   "users": {
     "title": "Utilisateurs",
@@ -272,7 +281,22 @@
     "viewTrash": "Corbeille",
     "viewLabel": "Afficher",
     "deleteTitle": "Supprimer l'utilisateur",
-    "deleteMessage": "L'utilisateur « {name} » sera placé dans la corbeille. Vous pourrez le restaurer."
+    "deleteMessage": "L'utilisateur « {name} » sera placé dans la corbeille. Vous pourrez le restaurer.",
+    "toast": {
+      "loadError": "Impossible de charger les utilisateurs.",
+      "created": "Utilisateur créé.",
+      "updated": "Utilisateur modifié.",
+      "saveError": "Impossible d'enregistrer l'utilisateur.",
+      "deleted": "Utilisateur placé dans la corbeille.",
+      "deleteError": "Impossible de supprimer l'utilisateur.",
+      "activated": "Utilisateur activé.",
+      "deactivated": "Utilisateur désactivé.",
+      "statusError": "Impossible de modifier le statut.",
+      "restored": "{name} est restauré.",
+      "restoreError": "Impossible de restaurer l'utilisateur.",
+      "permanentlyDeleted": "Utilisateur supprimé définitivement.",
+      "permanentDeleteError": "Impossible de supprimer définitivement."
+    }
   },
   "settings": {
     "general": "Général",
@@ -792,6 +816,9 @@
       "loadCountriesError": "Erreur lors du chargement des pays",
       "previewError": "Erreur lors de la prévisualisation",
       "importError": "Erreur lors de l'import des jours fériés"
+    },
+    "actions": {
+      "view": "Voir l'événement"
     }
   },
   "groupAdmin": {
@@ -1831,7 +1858,58 @@
     "points": "Points",
     "threshold": "Seuil",
     "badgeReward": "Recompense XP",
-    "confirmDeleteBadge": "Supprimer le badge « {name} » ?"
+    "confirmDeleteBadge": "Supprimer le badge « {name} » ?",
+    "form": {
+      "code": "Code technique",
+      "codeHint": "Identifiant interne unique, invisible pour l'utilisateur.",
+      "name": "Nom du badge",
+      "nameHint": "Texte affiché aux utilisateurs.",
+      "icon": "Icône",
+      "iconHint": "Format Iconify, par exemple {example}.",
+      "color": "Couleur",
+      "pickColor": "Choisir une couleur",
+      "colorHint": "Couleur hexadécimale du badge.",
+      "preview": "Aperçu du badge",
+      "xpReward": "Bonus XP du badge",
+      "xpRewardHint": "XP accordés une seule fois, au déblocage du badge.",
+      "category": "Catégorie",
+      "categoryHint": "La catégorie {code} est réservée aux profils contributeurs.",
+      "trigger": "Événement déclencheur",
+      "triggerPlaceholder": "Choisir un événement",
+      "triggerHelp": "Choisissez l'événement qui fait progresser ce badge.",
+      "metric": "Métrique de progression",
+      "metricPlaceholder": "Choisir une métrique",
+      "metricHelp": "Choisissez comment mesurer la progression vers le badge.",
+      "threshold": "Seuil de déblocage",
+      "thresholdHint": "Nombre d'actions nécessaires pour obtenir le badge.",
+      "active": "Badge actif"
+    },
+    "reasons": {
+      "daily_login": "À chaque connexion journalière récompensée.",
+      "app_click": "À chaque ouverture d'une ressource.",
+      "news_read": "À chaque lecture d'article.",
+      "news_publish": "À chaque publication d'article.",
+      "event_publish": "À chaque création d'événement.",
+      "poll_vote": "À chaque vote dans un sondage.",
+      "poll_create": "À chaque création de sondage.",
+      "comment_create": "À chaque commentaire publié.",
+      "suggestion_create": "À chaque suggestion envoyée.",
+      "suggestion_vote": "À chaque vote sur une suggestion.",
+      "suggestion_comment": "À chaque commentaire sur une suggestion."
+    },
+    "metrics": {
+      "reason_count": "Nombre de fois où l'événement se produit.",
+      "app_click_distinct": "Nombre de ressources différentes ouvertes.",
+      "news_read_count": "Total d'articles lus.",
+      "news_publish_count": "Total d'articles publiés.",
+      "event_publish_count": "Total d'événements publiés.",
+      "poll_vote_count": "Total de votes dans les sondages.",
+      "poll_create_count": "Total de sondages créés.",
+      "comment_count": "Total de commentaires.",
+      "suggestion_create_count": "Total de suggestions créées.",
+      "suggestion_vote_count": "Total de votes sur les suggestions.",
+      "suggestion_comment_count": "Total de commentaires sur les suggestions."
+    }
   },
   "help": {
     "title": "Aide",
@@ -1932,7 +2010,13 @@
     "url_copied": "URL copiée dans le presse-papiers !",
     "upload_error": "Erreur lors du téléversement du fichier",
     "update_error": "Erreur lors de la mise à jour du média",
-    "delete_error": "Erreur lors de la suppression du média"
+    "delete_error": "Erreur lors de la suppression du média",
+    "loading": "Chargement des médias…",
+    "noMedia": "Aucun média.",
+    "insert": "Insérer",
+    "dropFiles": "Déposez vos fichiers ici",
+    "orClickToSelect": "ou cliquez pour les choisir",
+    "uploadQueue": "File d'envoi"
   },
   "profile": {
     "title": "Mon Profil",
@@ -2353,5 +2437,36 @@
     "managedGroups": "Groupes administrés",
     "resourceCategories": "Catégories de ressources",
     "manage": "Gérer"
+  },
+  "oauth": {
+    "title": "Authentification OAuth",
+    "subtitle": "Configurez les fournisseurs d'authentification externes (Google, Microsoft)",
+    "configure": "Configurer",
+    "configureSubtitle": "Renseignez les identifiants OAuth de ce fournisseur",
+    "enableProvider": "Activer ce fournisseur OAuth",
+    "enableProviderHelp": "Un bouton de connexion pour ce fournisseur apparaîtra sur la page de connexion",
+    "clientId": "ID client",
+    "clientIdHelp": "À récupérer dans la console développeur du fournisseur",
+    "clientSecret": "Secret client",
+    "clientSecretPlaceholder": "Laisser vide pour garder le secret actuel",
+    "clientSecretHelp": "Gardez ce secret en lieu sûr et ne le partagez jamais",
+    "redirectUri": "URI de redirection",
+    "redirectUriHelp": "Copiez cette URL dans les URI de redirection autorisées du fournisseur",
+    "advancedSettings": "Réglages avancés",
+    "authUrl": "URL d'autorisation",
+    "tokenUrl": "URL du jeton",
+    "userInfoUrl": "URL des infos utilisateur",
+    "scopes": "Scopes OAuth",
+    "setupInstructions": "Instructions de configuration",
+    "googleSetup1": "Pour configurer Google OAuth :",
+    "googleSetup2": "Ouvrez Google Cloud Console > APIs & Services > Credentials",
+    "googleSetup3": "Créez un ID client OAuth 2.0 (application Web)",
+    "googleSetup4": "Ajoutez l'URI de redirection aux URI autorisées",
+    "googleSetup5": "Copiez ici l'ID client et le secret client",
+    "microsoftSetup1": "Pour configurer Microsoft OAuth :",
+    "microsoftSetup2": "Ouvrez Azure Portal > App registrations > New registration",
+    "microsoftSetup3": "Indiquez l'URI de redirection dans les réglages Authentication",
+    "microsoftSetup4": "Créez un secret client dans Certificates & secrets",
+    "microsoftSetup5": "Copiez ici l'ID d'application (client) et le secret client"
   }
 }

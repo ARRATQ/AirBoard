@@ -86,38 +86,38 @@
       </DataTable>
     </section>
 
-        <Teleport to="body">
+    <Teleport to="body">
       <div v-if="showModal" class="gm-overlay" @click.self="closeModal">
-        <div class="gm-modal" role="dialog" aria-modal="true">
-          <h3 class="gm-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h3>
+        <div class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gm-modal-title">
+          <h3 id="gm-modal-title" class="gm-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h3>
           <form class="gm-form" @submit.prevent="saveBadge">
             <div>
-              <label class="form-label">Code technique</label>
-              <input v-model="form.code" class="form-input" placeholder="ex: suggestion_master" required />
-              <p class="gm-hint">Identifiant unique interne (non visible par l'utilisateur).</p>
+              <label for="gm-code" class="form-label">{{ t('gamificationAdmin.form.code') }}</label>
+              <input id="gm-code" v-model="form.code" class="form-input" placeholder="suggestion_master" dir="ltr" required />
+              <p class="gm-hint">{{ t('gamificationAdmin.form.codeHint') }}</p>
             </div>
 
             <div>
-              <label class="form-label">Nom du badge</label>
-              <input v-model="form.name" class="form-input" :placeholder="t('common.name')" required />
-              <p class="gm-hint">Texte affiché aux utilisateurs.</p>
+              <label for="gm-name" class="form-label">{{ t('gamificationAdmin.form.name') }}</label>
+              <input id="gm-name" v-model="form.name" class="form-input" required />
+              <p class="gm-hint">{{ t('gamificationAdmin.form.nameHint') }}</p>
             </div>
 
             <div>
-              <label class="form-label">Icône</label>
-              <input v-model="form.icon" class="form-input" placeholder="mdi:medal" />
-              <p class="gm-hint">Format Iconify, ex: <code>mdi:medal</code>.</p>
+              <label for="gm-icon" class="form-label">{{ t('gamificationAdmin.form.icon') }}</label>
+              <input id="gm-icon" v-model="form.icon" class="form-input" placeholder="mdi:medal" dir="ltr" />
+              <p class="gm-hint">{{ t('gamificationAdmin.form.iconHint', { example: 'mdi:medal' }) }}</p>
             </div>
 
             <div>
-              <label class="form-label">Couleur</label>
+              <label for="gm-color" class="form-label">{{ t('gamificationAdmin.form.color') }}</label>
               <div class="gm-colorrow">
-                <input v-model="form.color" class="form-input" placeholder="#FBBF24" />
+                <input id="gm-color" v-model="form.color" class="form-input" placeholder="#FBBF24" dir="ltr" />
                 <input
                   v-model="form.color"
                   type="color"
                   class="gm-color"
-                  aria-label="Choisir une couleur"
+                  :aria-label="t('gamificationAdmin.form.pickColor')"
                 />
               </div>
               <div class="gm-presets">
@@ -128,68 +128,69 @@
                   class="gm-preset"
                   :style="{ backgroundColor: preset }"
                   :title="preset"
+                  :aria-label="preset"
                   @click="form.color = preset"
                 ></button>
               </div>
-              <p class="gm-hint">Couleur hexadécimale du badge.</p>
+              <p class="gm-hint">{{ t('gamificationAdmin.form.colorHint') }}</p>
             </div>
 
             <div class="gm-form__wide">
-              <label class="form-label">Aperçu du badge</label>
+              <p class="form-label">{{ t('gamificationAdmin.form.preview') }}</p>
               <div class="gm-preview">
                 <div class="gm-preview__badge" :style="badgePreviewStyle">
-                  <Icon :icon="safePreviewIcon" class="gm-preview__icon" />
+                  <Icon :icon="safePreviewIcon" class="gm-preview__icon" aria-hidden="true" />
                 </div>
                 <div>
-                  <p class="gm-preview__name">{{ form.name || 'Nom du badge' }}</p>
-                  <p class="gm-hint">{{ form.icon || 'mdi:medal' }} · {{ form.color || '#FBBF24' }}</p>
+                  <p class="gm-preview__name">{{ form.name || t('gamificationAdmin.form.name') }}</p>
+                  <p class="gm-hint" dir="ltr">{{ form.icon || 'mdi:medal' }} · {{ form.color || '#FBBF24' }}</p>
                 </div>
               </div>
             </div>
 
             <div>
-              <label class="form-label">Bonus XP du badge</label>
-              <input v-model.number="form.xp_reward" type="number" class="form-input" :placeholder="t('gamificationAdmin.badgeReward')" />
-              <p class="gm-hint">XP accordé une seule fois au déblocage du badge.</p>
+              <label for="gm-xp" class="form-label">{{ t('gamificationAdmin.form.xpReward') }}</label>
+              <input id="gm-xp" v-model.number="form.xp_reward" type="number" min="0" class="form-input" />
+              <p class="gm-hint">{{ t('gamificationAdmin.form.xpRewardHint') }}</p>
             </div>
 
             <div>
-              <label class="form-label">Catégorie</label>
-              <select v-model="form.category" class="form-select">
+              <label for="gm-category" class="form-label">{{ t('gamificationAdmin.form.category') }}</label>
+              <select id="gm-category" v-model="form.category" class="form-select">
                 <option value="user">user</option>
                 <option value="contributor">contributor</option>
               </select>
-              <p class="gm-hint"><code>contributor</code> est réservé aux profils contributeurs.</p>
+              <p class="gm-hint">{{ t('gamificationAdmin.form.categoryHint', { code: 'contributor' }) }}</p>
             </div>
 
             <div>
-              <label class="form-label">Événement déclencheur</label>
-              <select v-model="form.trigger_reason" class="form-select">
-                <option value="">Sélectionner un trigger</option>
+              <label for="gm-trigger" class="form-label">{{ t('gamificationAdmin.form.trigger') }}</label>
+              <select id="gm-trigger" v-model="form.trigger_reason" class="form-select">
+                <option value="">{{ t('gamificationAdmin.form.triggerPlaceholder') }}</option>
                 <option v-for="reason in reasonOptions" :key="reason" :value="reason">{{ reason }}</option>
               </select>
               <p class="gm-hint">{{ selectedReasonHelp }}</p>
             </div>
 
             <div>
-              <label class="form-label">Métrique de progression</label>
-              <select v-model="form.metric" class="form-select">
-                <option value="">Sélectionner une métrique</option>
+              <label for="gm-metric" class="form-label">{{ t('gamificationAdmin.form.metric') }}</label>
+              <select id="gm-metric" v-model="form.metric" class="form-select">
+                <option value="">{{ t('gamificationAdmin.form.metricPlaceholder') }}</option>
                 <option v-for="metric in metricOptions" :key="metric" :value="metric">{{ metric }}</option>
               </select>
               <p class="gm-hint">{{ selectedMetricHelp }}</p>
             </div>
 
             <div>
-              <label class="form-label">Seuil de déblocage</label>
-              <input v-model.number="form.threshold" type="number" min="0" class="form-input" :placeholder="t('gamificationAdmin.threshold')" />
-              <p class="gm-hint">Nombre d'actions nécessaires pour obtenir le badge.</p>
+              <label for="gm-threshold" class="form-label">{{ t('gamificationAdmin.form.threshold') }}</label>
+              <input id="gm-threshold" v-model.number="form.threshold" type="number" min="0" class="form-input" />
+              <p class="gm-hint">{{ t('gamificationAdmin.form.thresholdHint') }}</p>
             </div>
 
-            <label class="gm-check"><input v-model="form.is_active" type="checkbox" class="form-checkbox" />Badge actif</label>
+            <label class="gm-check"><input v-model="form.is_active" type="checkbox" class="form-checkbox" />{{ t('gamificationAdmin.form.active') }}</label>
             <div class="gm-form__wide">
-              <label class="form-label">Description</label>
-              <textarea v-model="form.description" rows="3" class="form-textarea" :placeholder="t('common.description')"></textarea>
+              <label for="gm-description" class="form-label">{{ t('common.description') }}</label>
+              <textarea id="gm-description" v-model="form.description" rows="3" class="form-textarea"></textarea>
             </div>
             <div class="gm-form__wide gm-form__actions">
               <BaseButton variant="secondary" @click="closeModal">{{ t('common.cancel') }}</BaseButton>
@@ -215,7 +216,7 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 
 const rules = ref([])
@@ -238,34 +239,6 @@ const metricOptions = [
   'suggestion_comment_count'
 ]
 
-const reasonHelpMap = {
-  daily_login: 'Se déclenche à chaque connexion journalière récompensée.',
-  app_click: 'Se déclenche à chaque ouverture de ressource.',
-  news_read: 'Se déclenche à chaque lecture d\'article.',
-  news_publish: 'Se déclenche à chaque publication d\'article.',
-  event_publish: 'Se déclenche à chaque création d\'événement.',
-  poll_vote: 'Se déclenche à chaque vote sur un sondage.',
-  poll_create: 'Se déclenche à chaque création de sondage.',
-  comment_create: 'Se déclenche à chaque commentaire créé.',
-  suggestion_create: 'Se déclenche à chaque suggestion envoyée.',
-  suggestion_vote: 'Se déclenche à chaque vote de suggestion.',
-  suggestion_comment: 'Se déclenche à chaque commentaire sur suggestion.'
-}
-
-const metricHelpMap = {
-  reason_count: 'Compter le nombre de fois que le trigger est reçu.',
-  app_click_distinct: 'Compter le nombre de ressources différentes ouvertes.',
-  news_read_count: 'Compter le total d\'articles lus.',
-  news_publish_count: 'Compter le total d\'articles publiés.',
-  event_publish_count: 'Compter le total d\'événements publiés.',
-  poll_vote_count: 'Compter le total de votes sur sondages.',
-  poll_create_count: 'Compter le total de sondages créés.',
-  comment_count: 'Compter le total de commentaires.',
-  suggestion_create_count: 'Compter le total de suggestions créées.',
-  suggestion_vote_count: 'Compter le total de votes sur suggestions.',
-  suggestion_comment_count: 'Compter le total de commentaires sur suggestions.'
-}
-
 const reasonToMetricDefault = {
   daily_login: 'reason_count',
   app_click: 'app_click_distinct',
@@ -280,13 +253,14 @@ const reasonToMetricDefault = {
   suggestion_comment: 'suggestion_comment_count'
 }
 
-const selectedReasonHelp = computed(() => {
-  return reasonHelpMap[form.value.trigger_reason] || 'Choisissez l\'événement qui fait progresser ce badge.'
-})
+// Aide contextuelle : une phrase par déclencheur ou métrique connus, sinon la consigne générale.
+const helpFor = (group, key, fallback) => {
+  const path = `gamificationAdmin.${group}.${key}`
+  return key && te(path) ? t(path) : t(fallback)
+}
 
-const selectedMetricHelp = computed(() => {
-  return metricHelpMap[form.value.metric] || 'Choisissez la façon de mesurer la progression vers le badge.'
-})
+const selectedReasonHelp = computed(() => helpFor('reasons', form.value.trigger_reason, 'gamificationAdmin.form.triggerHelp'))
+const selectedMetricHelp = computed(() => helpFor('metrics', form.value.metric, 'gamificationAdmin.form.metricHelp'))
 
 const safePreviewIcon = computed(() => form.value.icon?.trim() || 'mdi:medal')
 
@@ -355,7 +329,7 @@ const saveRule = async (rule) => {
     await gamificationService.upsertRule({ reason: rule.reason, points: Number(rule.points) || 0, enabled: !!rule.enabled })
     window.$toast?.success(t('common.save'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || 'Error')
+    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
   }
 }
 
@@ -395,7 +369,7 @@ const saveBadge = async () => {
     await loadData()
     window.$toast?.success(t('common.save'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || 'Error')
+    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
   }
 }
 
@@ -411,7 +385,7 @@ const removeBadge = async (badge) => {
     await loadData()
     window.$toast?.success(t('common.delete'))
   } catch (e) {
-    window.$toast?.error(e.response?.data?.error || 'Error')
+    window.$toast?.error(e.response?.data?.error || t('ui.toast.error'))
   }
 }
 

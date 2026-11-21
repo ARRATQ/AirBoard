@@ -120,7 +120,13 @@
     "name": "الاسم",
     "color": "اللون",
     "icon": "الأيقونة",
-    "order": "الترتيب"
+    "order": "الترتيب",
+    "open": "فتح",
+    "previous": "السابق",
+    "next": "التالي",
+    "enabled": "مفعّل",
+    "disabled": "معطّل",
+    "notConfigured": "غير مُهيّأ"
   },
   "calendar": {
     "title": "تقويم الأحداث",
@@ -227,7 +233,9 @@
     "updated": "تم تعديل المجموعة بنجاح",
     "loadError": "خطأ أثناء تحميل المجموعات",
     "saveError": "خطأ أثناء حفظ المجموعة",
-    "deleteError": "خطأ أثناء حذف المجموعة"
+    "deleteError": "خطأ أثناء حذف المجموعة",
+    "adminsSaved": "تم تحديث مشرفي المجموعة.",
+    "adminsLoadError": "تعذّر تحميل مستخدمي المجموعة."
   },
   "applications": {
     "title": "الموارد",
@@ -242,7 +250,8 @@
     "emptyText": "ابدأ بإضافة أول مورد.",
     "order": "الترتيب",
     "confirmDeleteTitle": "حذف المورد",
-    "confirmDeleteText": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه."
+    "confirmDeleteText": "هل أنت متأكد من حذف \"{name}\"؟ هذا الإجراء لا يمكن التراجع عنه.",
+    "noDescription": "لا يوجد وصف."
   },
   "users": {
     "title": "المستخدمون",
@@ -272,7 +281,22 @@
     "viewTrash": "سلة المحذوفات",
     "viewLabel": "عرض",
     "deleteTitle": "حذف المستخدم",
-    "deleteMessage": "سيُنقل المستخدم «{name}» إلى سلة المحذوفات، ويمكنك استعادته."
+    "deleteMessage": "سيُنقل المستخدم «{name}» إلى سلة المحذوفات، ويمكنك استعادته.",
+    "toast": {
+      "loadError": "تعذّر تحميل المستخدمين.",
+      "created": "تم إنشاء المستخدم.",
+      "updated": "تم تعديل المستخدم.",
+      "saveError": "تعذّر حفظ المستخدم.",
+      "deleted": "تم نقل المستخدم إلى سلة المحذوفات.",
+      "deleteError": "تعذّر حذف المستخدم.",
+      "activated": "تم تفعيل المستخدم.",
+      "deactivated": "تم تعطيل المستخدم.",
+      "statusError": "تعذّر تغيير الحالة.",
+      "restored": "تمت استعادة {name}.",
+      "restoreError": "تعذّرت استعادة المستخدم.",
+      "permanentlyDeleted": "تم حذف المستخدم نهائيًا.",
+      "permanentDeleteError": "تعذّر الحذف النهائي."
+    }
   },
   "settings": {
     "general": "عام",
@@ -1594,7 +1618,58 @@
     "points": "النقاط",
     "threshold": "العتبة",
     "badgeReward": "مكافاة XP",
-    "confirmDeleteBadge": "هل تريد حذف الشارة «{name}»؟"
+    "confirmDeleteBadge": "هل تريد حذف الشارة «{name}»؟",
+    "form": {
+      "code": "الرمز التقني",
+      "codeHint": "معرّف داخلي فريد لا يظهر للمستخدم.",
+      "name": "اسم الشارة",
+      "nameHint": "النص الذي يراه المستخدمون.",
+      "icon": "الأيقونة",
+      "iconHint": "بصيغة Iconify، مثل {example}.",
+      "color": "اللون",
+      "pickColor": "اختر لونًا",
+      "colorHint": "لون الشارة بالنظام الست عشري.",
+      "preview": "معاينة الشارة",
+      "xpReward": "مكافأة XP للشارة",
+      "xpRewardHint": "نقاط XP تُمنح مرة واحدة عند فتح الشارة.",
+      "category": "الفئة",
+      "categoryHint": "الفئة {code} مخصّصة لملفات المساهمين.",
+      "trigger": "الحدث المُطلِق",
+      "triggerPlaceholder": "اختر حدثًا",
+      "triggerHelp": "اختر الحدث الذي يُقدّم هذه الشارة.",
+      "metric": "مقياس التقدّم",
+      "metricPlaceholder": "اختر مقياسًا",
+      "metricHelp": "اختر طريقة قياس التقدّم نحو الشارة.",
+      "threshold": "حدّ الفتح",
+      "thresholdHint": "عدد الإجراءات اللازمة للحصول على الشارة.",
+      "active": "الشارة مفعّلة"
+    },
+    "reasons": {
+      "daily_login": "عند كل تسجيل دخول يومي مُكافأ.",
+      "app_click": "عند كل فتح لمورد.",
+      "news_read": "عند كل قراءة لمقال.",
+      "news_publish": "عند كل نشر لمقال.",
+      "event_publish": "عند كل إنشاء لحدث.",
+      "poll_vote": "عند كل تصويت في استطلاع.",
+      "poll_create": "عند كل إنشاء لاستطلاع.",
+      "comment_create": "عند كل تعليق يُنشر.",
+      "suggestion_create": "عند كل اقتراح يُرسل.",
+      "suggestion_vote": "عند كل تصويت على اقتراح.",
+      "suggestion_comment": "عند كل تعليق على اقتراح."
+    },
+    "metrics": {
+      "reason_count": "عدد مرات وقوع الحدث.",
+      "app_click_distinct": "عدد الموارد المختلفة التي فُتحت.",
+      "news_read_count": "إجمالي المقالات المقروءة.",
+      "news_publish_count": "إجمالي المقالات المنشورة.",
+      "event_publish_count": "إجمالي الأحداث المنشورة.",
+      "poll_vote_count": "إجمالي الأصوات في الاستطلاعات.",
+      "poll_create_count": "إجمالي الاستطلاعات المُنشأة.",
+      "comment_count": "إجمالي التعليقات.",
+      "suggestion_create_count": "إجمالي الاقتراحات المُنشأة.",
+      "suggestion_vote_count": "إجمالي الأصوات على الاقتراحات.",
+      "suggestion_comment_count": "إجمالي التعليقات على الاقتراحات."
+    }
   },
   "media": {
     "title": "إدارة الوسائط",
@@ -1636,7 +1711,13 @@
     "url_copied": "تم نسخ الرابط إلى الحافظة!",
     "upload_error": "خطأ في رفع الملف",
     "update_error": "خطأ في تحديث الوسائط",
-    "delete_error": "خطأ في حذف الوسائط"
+    "delete_error": "خطأ في حذف الوسائط",
+    "loading": "جارٍ تحميل الوسائط…",
+    "noMedia": "لا توجد وسائط.",
+    "insert": "إدراج",
+    "dropFiles": "أفلت ملفاتك هنا",
+    "orClickToSelect": "أو انقر لاختيارها",
+    "uploadQueue": "قائمة الرفع"
   },
   "help": {
     "sections": {
@@ -2256,6 +2337,9 @@
       "loadCountriesError": "خطأ أثناء تحميل البلدان",
       "previewError": "خطأ أثناء المعاينة",
       "importError": "خطأ أثناء استيراد العطل الرسمية"
+    },
+    "actions": {
+      "view": "عرض الحدث"
     }
   },
   "profile": {
@@ -2356,5 +2440,36 @@
       "other": "نشاط"
     },
     "lockedPlural": "المقفلة"
+  },
+  "oauth": {
+    "title": "المصادقة عبر OAuth",
+    "subtitle": "هيّئ مزوّدي المصادقة الخارجيين (Google وMicrosoft)",
+    "configure": "تهيئة",
+    "configureSubtitle": "أدخل بيانات اعتماد OAuth لهذا المزوّد",
+    "enableProvider": "تفعيل مزوّد OAuth هذا",
+    "enableProviderHelp": "سيرى المستخدمون زر دخول لهذا المزوّد في صفحة تسجيل الدخول",
+    "clientId": "معرّف العميل",
+    "clientIdHelp": "احصل عليه من وحدة تحكم المطوّرين لدى المزوّد",
+    "clientSecret": "السر الخاص بالعميل",
+    "clientSecretPlaceholder": "اتركه فارغًا للإبقاء على السر الحالي",
+    "clientSecretHelp": "احفظ هذا السر بأمان ولا تشاركه أبدًا",
+    "redirectUri": "عنوان إعادة التوجيه",
+    "redirectUriHelp": "انسخ هذا العنوان وأضفه إلى عناوين إعادة التوجيه المسموح بها لدى المزوّد",
+    "advancedSettings": "إعدادات متقدّمة",
+    "authUrl": "عنوان التفويض",
+    "tokenUrl": "عنوان الرمز المميّز",
+    "userInfoUrl": "عنوان معلومات المستخدم",
+    "scopes": "نطاقات OAuth",
+    "setupInstructions": "تعليمات الإعداد",
+    "googleSetup1": "لتهيئة Google OAuth:",
+    "googleSetup2": "افتح Google Cloud Console > APIs & Services > Credentials",
+    "googleSetup3": "أنشئ معرّف عميل OAuth 2.0 (تطبيق ويب)",
+    "googleSetup4": "أضف عنوان إعادة التوجيه إلى العناوين المصرّح بها",
+    "googleSetup5": "انسخ معرّف العميل والسر هنا",
+    "microsoftSetup1": "لتهيئة Microsoft OAuth:",
+    "microsoftSetup2": "افتح Azure Portal > App registrations > New registration",
+    "microsoftSetup3": "حدّد عنوان إعادة التوجيه في إعدادات Authentication",
+    "microsoftSetup4": "أنشئ سرًّا جديدًا للعميل في Certificates & secrets",
+    "microsoftSetup5": "انسخ معرّف التطبيق (العميل) والسر هنا"
   }
 }

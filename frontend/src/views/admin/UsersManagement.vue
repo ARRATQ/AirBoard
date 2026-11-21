@@ -274,7 +274,7 @@ const loadUsers = async () => {
   } catch (error) {
     console.error('Erreur lors du chargement des utilisateurs:', error)
     users.value = []
-    appStore.showError('Erreur lors du chargement des utilisateurs')
+    appStore.showError(t('users.toast.loadError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -316,12 +316,12 @@ const confirmDelete = async (user) => {
 
   try {
     await adminService.deleteUser(user.id)
-    appStore.showSuccess('Utilisateur supprimé avec succès')
+    appStore.showSuccess(t('users.toast.deleted'))
     await loadUsers()
     await loadDeletedUsers()
   } catch (error) {
     console.error('Erreur lors de la suppression:', error)
-    appStore.showError('Erreur lors de la suppression de l\'utilisateur')
+    appStore.showError(t('users.toast.deleteError'))
   }
 }
 
@@ -333,19 +333,19 @@ const handleSubmit = async (formData) => {
       // Update existing user - only send relevant fields
       const { id, ...updateData } = formData
       await adminService.updateUser(id, updateData)
-      appStore.showSuccess('Utilisateur modifié avec succès')
+      appStore.showSuccess(t('users.toast.updated'))
     } else {
       // Create new user - only send relevant fields  
       const { id, ...createData } = formData
       await adminService.createUser(createData)
-      appStore.showSuccess('Utilisateur créé avec succès')
+      appStore.showSuccess(t('users.toast.created'))
     }
     
     closeModal()
     await loadUsers()
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
-    appStore.showError('Erreur lors de la sauvegarde de l\'utilisateur')
+    appStore.showError(t('users.toast.saveError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -359,23 +359,23 @@ const toggleUserStatus = async (user) => {
     }
     
     await adminService.updateUser(user.id, updatedData)
-    appStore.showSuccess(`Utilisateur ${!user.is_active ? 'activé' : 'désactivé'} avec succès`)
+    appStore.showSuccess(t(!user.is_active ? 'users.toast.activated' : 'users.toast.deactivated'))
     await loadUsers()
   } catch (error) {
     console.error('Erreur lors de la modification du statut:', error)
-    appStore.showError('Erreur lors de la modification du statut')
+    appStore.showError(t('users.toast.statusError'))
   }
 }
 
 const restoreUser = async (user) => {
   try {
     await adminService.restoreUser(user.id)
-    appStore.showSuccess(`Utilisateur ${user.username} restauré avec succès`)
+    appStore.showSuccess(t('users.toast.restored', { name: user.username }))
     await loadUsers()
     await loadDeletedUsers()
   } catch (error) {
     console.error('Erreur lors de la restauration:', error)
-    appStore.showError('Erreur lors de la restauration de l\'utilisateur')
+    appStore.showError(t('users.toast.restoreError'))
   }
 }
 
@@ -389,11 +389,11 @@ const confirmPermanentDelete = async (user) => {
   ) {
     try {
       await adminService.permanentlyDeleteUser(user.id)
-      appStore.showSuccess('Utilisateur supprimé définitivement')
+      appStore.showSuccess(t('users.toast.permanentlyDeleted'))
       await loadDeletedUsers()
     } catch (error) {
       console.error('Erreur lors de la suppression définitive:', error)
-      appStore.showError('Erreur lors de la suppression définitive')
+      appStore.showError(t('users.toast.permanentDeleteError'))
     }
   }
 }

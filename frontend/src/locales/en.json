@@ -123,7 +123,10 @@
     "name": "Name",
     "color": "Colour",
     "icon": "Icon",
-    "order": "Order"
+    "order": "Order",
+    "open": "Open",
+    "previous": "Previous",
+    "next": "Next"
   },
   "calendar": {
     "title": "Event Calendar",
@@ -230,7 +233,9 @@
     "updated": "Group updated successfully",
     "loadError": "Error while loading groups",
     "saveError": "Error while saving group",
-    "deleteError": "Error while deleting group"
+    "deleteError": "Error while deleting group",
+    "adminsSaved": "Group admins updated.",
+    "adminsLoadError": "Could not load the group users."
   },
   "applications": {
     "title": "Resources",
@@ -245,7 +250,8 @@
     "emptyText": "Add your first resource to get started.",
     "order": "Order",
     "confirmDeleteTitle": "Delete Resource",
-    "confirmDeleteText": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+    "confirmDeleteText": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "noDescription": "No description."
   },
   "users": {
     "title": "Users",
@@ -275,7 +281,22 @@
     "viewTrash": "Trash",
     "viewLabel": "Show",
     "deleteTitle": "Delete user",
-    "deleteMessage": "User \"{name}\" will be moved to the trash. You can restore them later."
+    "deleteMessage": "User \"{name}\" will be moved to the trash. You can restore them later.",
+    "toast": {
+      "loadError": "Could not load users.",
+      "created": "User created.",
+      "updated": "User updated.",
+      "saveError": "Could not save the user.",
+      "deleted": "User moved to the trash.",
+      "deleteError": "Could not delete the user.",
+      "activated": "User activated.",
+      "deactivated": "User deactivated.",
+      "statusError": "Could not change the status.",
+      "restored": "{name} has been restored.",
+      "restoreError": "Could not restore the user.",
+      "permanentlyDeleted": "User permanently deleted.",
+      "permanentDeleteError": "Could not delete permanently."
+    }
   },
   "settings": {
     "general": "General",
@@ -1271,6 +1292,9 @@
       "loadCountriesError": "Error loading countries",
       "previewError": "Error previewing",
       "importError": "Error importing holidays"
+    },
+    "actions": {
+      "view": "View event"
     }
   },
   "version": {
@@ -1865,7 +1889,58 @@
     "points": "Points",
     "threshold": "Threshold",
     "badgeReward": "XP reward",
-    "confirmDeleteBadge": "Delete the badge \"{name}\"?"
+    "confirmDeleteBadge": "Delete the badge \"{name}\"?",
+    "form": {
+      "code": "Technical code",
+      "codeHint": "Unique internal identifier, not shown to users.",
+      "name": "Badge name",
+      "nameHint": "Text shown to users.",
+      "icon": "Icon",
+      "iconHint": "Iconify format, for example {example}.",
+      "color": "Color",
+      "pickColor": "Pick a color",
+      "colorHint": "Badge color in hexadecimal.",
+      "preview": "Badge preview",
+      "xpReward": "Badge XP bonus",
+      "xpRewardHint": "XP granted once, when the badge is unlocked.",
+      "category": "Category",
+      "categoryHint": "The {code} category is for contributor profiles only.",
+      "trigger": "Trigger event",
+      "triggerPlaceholder": "Choose an event",
+      "triggerHelp": "Choose the event that moves this badge forward.",
+      "metric": "Progress metric",
+      "metricPlaceholder": "Choose a metric",
+      "metricHelp": "Choose how progress toward the badge is measured.",
+      "threshold": "Unlock threshold",
+      "thresholdHint": "Number of actions needed to earn the badge.",
+      "active": "Badge active"
+    },
+    "reasons": {
+      "daily_login": "On each rewarded daily login.",
+      "app_click": "Each time a resource is opened.",
+      "news_read": "Each time an article is read.",
+      "news_publish": "Each time an article is published.",
+      "event_publish": "Each time an event is created.",
+      "poll_vote": "Each time someone votes in a poll.",
+      "poll_create": "Each time a poll is created.",
+      "comment_create": "Each time a comment is posted.",
+      "suggestion_create": "Each time a suggestion is sent.",
+      "suggestion_vote": "Each time someone votes on a suggestion.",
+      "suggestion_comment": "Each time a suggestion is commented on."
+    },
+    "metrics": {
+      "reason_count": "Number of times the event occurs.",
+      "app_click_distinct": "Number of different resources opened.",
+      "news_read_count": "Total articles read.",
+      "news_publish_count": "Total articles published.",
+      "event_publish_count": "Total events published.",
+      "poll_vote_count": "Total poll votes.",
+      "poll_create_count": "Total polls created.",
+      "comment_count": "Total comments.",
+      "suggestion_create_count": "Total suggestions created.",
+      "suggestion_vote_count": "Total suggestion votes.",
+      "suggestion_comment_count": "Total suggestion comments."
+    }
   },
   "help": {
     "title": "Help",
@@ -1966,7 +2041,13 @@
     "url_copied": "URL copied to clipboard!",
     "upload_error": "Error uploading file",
     "update_error": "Error updating media",
-    "delete_error": "Error deleting media"
+    "delete_error": "Error deleting media",
+    "loading": "Loading media…",
+    "noMedia": "No media.",
+    "insert": "Insert",
+    "dropFiles": "Drop your files here",
+    "orClickToSelect": "or click to choose them",
+    "uploadQueue": "Upload queue"
   },
   "profile": {
     "title": "My Profile",

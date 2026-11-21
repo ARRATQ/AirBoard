@@ -173,7 +173,7 @@
                     }"
                     class="badge text-xs flex-shrink-0"
                   >
-                    {{ user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Editor' : 'User' }}
+                    {{ t(user.role === 'admin' ? 'users.role_admin' : user.role === 'editor' ? 'users.role_editor' : 'users.role_user') }}
                   </span>
                 </label>
               </div>
@@ -384,7 +384,7 @@ const manageGroupAdmins = async (group) => {
     selectedAdminIds.value = currentAdmins.map(admin => admin.id)
   } catch (error) {
     console.error('Error loading group admins:', error)
-    appStore.showError('Erreur lors du chargement des données')
+    appStore.showError(t('groups.adminsLoadError'))
   } finally {
     loadingUsers.value = false
   }
@@ -404,11 +404,11 @@ const saveGroupAdmins = async () => {
   try {
     savingAdmins.value = true
     await adminService.assignGroupAdmins(selectedGroupForAdmins.value.id, selectedAdminIds.value)
-    appStore.showSuccess('Administrateurs de groupe mis à jour avec succès')
+    appStore.showSuccess(t('groups.adminsSaved'))
     closeGroupAdminsModal()
   } catch (error) {
     console.error('Error saving group admins:', error)
-    appStore.showError('Erreur lors de la sauvegarde')
+    appStore.showError(t('groups.saveError'))
   } finally {
     savingAdmins.value = false
   }

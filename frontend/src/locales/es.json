@@ -120,7 +120,13 @@
     "name": "Nombre",
     "color": "Color",
     "icon": "Icono",
-    "order": "Orden"
+    "order": "Orden",
+    "open": "Abrir",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "enabled": "Activado",
+    "disabled": "Desactivado",
+    "notConfigured": "No configurado"
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -227,7 +233,9 @@
     "updated": "Grupo actualizado correctamente",
     "loadError": "Error al cargar los grupos",
     "saveError": "Error al guardar el grupo",
-    "deleteError": "Error al eliminar el grupo"
+    "deleteError": "Error al eliminar el grupo",
+    "adminsSaved": "Administradores del grupo actualizados.",
+    "adminsLoadError": "No se pudieron cargar los usuarios del grupo."
   },
   "applications": {
     "title": "Recursos",
@@ -242,7 +250,8 @@
     "emptyText": "Añade tu primer recurso para empezar.",
     "order": "Orden",
     "confirmDeleteTitle": "Eliminar recurso",
-    "confirmDeleteText": "¿Seguro que desea eliminar \"{name}\"? Esta acción no se puede deshacer."
+    "confirmDeleteText": "¿Seguro que desea eliminar \"{name}\"? Esta acción no se puede deshacer.",
+    "noDescription": "Sin descripción."
   },
   "users": {
     "title": "Usuarios",
@@ -272,7 +281,22 @@
     "viewTrash": "Papelera",
     "viewLabel": "Mostrar",
     "deleteTitle": "Eliminar usuario",
-    "deleteMessage": "El usuario «{name}» se moverá a la papelera. Podrá restaurarlo."
+    "deleteMessage": "El usuario «{name}» se moverá a la papelera. Podrá restaurarlo.",
+    "toast": {
+      "loadError": "No se pudieron cargar los usuarios.",
+      "created": "Usuario creado.",
+      "updated": "Usuario modificado.",
+      "saveError": "No se pudo guardar el usuario.",
+      "deleted": "Usuario movido a la papelera.",
+      "deleteError": "No se pudo eliminar el usuario.",
+      "activated": "Usuario activado.",
+      "deactivated": "Usuario desactivado.",
+      "statusError": "No se pudo cambiar el estado.",
+      "restored": "{name} ha sido restaurado.",
+      "restoreError": "No se pudo restaurar el usuario.",
+      "permanentlyDeleted": "Usuario eliminado definitivamente.",
+      "permanentDeleteError": "No se pudo eliminar definitivamente."
+    }
   },
   "settings": {
     "general": "General",
@@ -1594,7 +1618,58 @@
     "points": "Puntos",
     "threshold": "Umbral",
     "badgeReward": "Recompensa XP",
-    "confirmDeleteBadge": "¿Eliminar la insignia «{name}»?"
+    "confirmDeleteBadge": "¿Eliminar la insignia «{name}»?",
+    "form": {
+      "code": "Código técnico",
+      "codeHint": "Identificador interno único, no visible para el usuario.",
+      "name": "Nombre de la insignia",
+      "nameHint": "Texto que ven los usuarios.",
+      "icon": "Icono",
+      "iconHint": "Formato Iconify, por ejemplo {example}.",
+      "color": "Color",
+      "pickColor": "Elegir un color",
+      "colorHint": "Color hexadecimal de la insignia.",
+      "preview": "Vista previa de la insignia",
+      "xpReward": "Bonificación de XP",
+      "xpRewardHint": "XP otorgados una sola vez, al desbloquear la insignia.",
+      "category": "Categoría",
+      "categoryHint": "La categoría {code} está reservada a los perfiles colaboradores.",
+      "trigger": "Evento desencadenante",
+      "triggerPlaceholder": "Elegir un evento",
+      "triggerHelp": "Elija el evento que hace avanzar esta insignia.",
+      "metric": "Métrica de progreso",
+      "metricPlaceholder": "Elegir una métrica",
+      "metricHelp": "Elija cómo se mide el progreso hacia la insignia.",
+      "threshold": "Umbral de desbloqueo",
+      "thresholdHint": "Número de acciones necesarias para obtener la insignia.",
+      "active": "Insignia activa"
+    },
+    "reasons": {
+      "daily_login": "En cada inicio de sesión diario recompensado.",
+      "app_click": "Cada vez que se abre un recurso.",
+      "news_read": "Cada vez que se lee un artículo.",
+      "news_publish": "Cada vez que se publica un artículo.",
+      "event_publish": "Cada vez que se crea un evento.",
+      "poll_vote": "Cada vez que se vota en una encuesta.",
+      "poll_create": "Cada vez que se crea una encuesta.",
+      "comment_create": "Cada vez que se publica un comentario.",
+      "suggestion_create": "Cada vez que se envía una sugerencia.",
+      "suggestion_vote": "Cada vez que se vota una sugerencia.",
+      "suggestion_comment": "Cada vez que se comenta una sugerencia."
+    },
+    "metrics": {
+      "reason_count": "Número de veces que ocurre el evento.",
+      "app_click_distinct": "Número de recursos distintos abiertos.",
+      "news_read_count": "Total de artículos leídos.",
+      "news_publish_count": "Total de artículos publicados.",
+      "event_publish_count": "Total de eventos publicados.",
+      "poll_vote_count": "Total de votos en encuestas.",
+      "poll_create_count": "Total de encuestas creadas.",
+      "comment_count": "Total de comentarios.",
+      "suggestion_create_count": "Total de sugerencias creadas.",
+      "suggestion_vote_count": "Total de votos en sugerencias.",
+      "suggestion_comment_count": "Total de comentarios en sugerencias."
+    }
   },
   "media": {
     "title": "Gestión de medios",
@@ -1636,7 +1711,13 @@
     "url_copied": "¡URL copiada al portapapeles!",
     "upload_error": "Error al subir el archivo",
     "update_error": "Error al actualizar el medio",
-    "delete_error": "Error al eliminar el medio"
+    "delete_error": "Error al eliminar el medio",
+    "loading": "Cargando medios…",
+    "noMedia": "Sin medios.",
+    "insert": "Insertar",
+    "dropFiles": "Suelte sus archivos aquí",
+    "orClickToSelect": "o haga clic para elegirlos",
+    "uploadQueue": "Cola de subida"
   },
   "help": {
     "sections": {
@@ -2256,6 +2337,9 @@
       "loadCountriesError": "Error al cargar los países",
       "previewError": "Error al previsualizar",
       "importError": "Error al importar los días festivos"
+    },
+    "actions": {
+      "view": "Ver evento"
     }
   },
   "profile": {
@@ -2356,5 +2440,36 @@
       "other": "Actividad"
     },
     "lockedPlural": "Bloqueadas"
+  },
+  "oauth": {
+    "title": "Autenticación OAuth",
+    "subtitle": "Configure los proveedores de autenticación externos (Google, Microsoft)",
+    "configure": "Configurar",
+    "configureSubtitle": "Configure las credenciales OAuth de este proveedor",
+    "enableProvider": "Activar este proveedor OAuth",
+    "enableProviderHelp": "Los usuarios verán un botón de inicio de sesión para este proveedor",
+    "clientId": "ID de cliente",
+    "clientIdHelp": "Obténgalo en la consola de desarrollador del proveedor",
+    "clientSecret": "Secreto de cliente",
+    "clientSecretPlaceholder": "Déjelo vacío para conservar el secreto actual",
+    "clientSecretHelp": "Guarde este secreto en un lugar seguro y no lo comparta nunca",
+    "redirectUri": "URI de redirección",
+    "redirectUriHelp": "Copie esta URL en las URI de redirección autorizadas del proveedor",
+    "advancedSettings": "Ajustes avanzados",
+    "authUrl": "URL de autorización",
+    "tokenUrl": "URL del token",
+    "userInfoUrl": "URL de información del usuario",
+    "scopes": "Ámbitos OAuth",
+    "setupInstructions": "Instrucciones de configuración",
+    "googleSetup1": "Para configurar Google OAuth:",
+    "googleSetup2": "Abra Google Cloud Console > APIs & Services > Credentials",
+    "googleSetup3": "Cree un ID de cliente OAuth 2.0 (aplicación web)",
+    "googleSetup4": "Añada la URI de redirección a las URI autorizadas",
+    "googleSetup5": "Copie aquí el ID y el secreto de cliente",
+    "microsoftSetup1": "Para configurar Microsoft OAuth:",
+    "microsoftSetup2": "Abra Azure Portal > App registrations > New registration",
+    "microsoftSetup3": "Indique la URI de redirección en los ajustes de Authentication",
+    "microsoftSetup4": "Cree un secreto de cliente en Certificates & secrets",
+    "microsoftSetup5": "Copie aquí el ID de aplicación (cliente) y el secreto"
   }
 }
