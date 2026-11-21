@@ -25,16 +25,12 @@ func main() {
 		log.Fatalf("Erreur lors des migrations: %v", err)
 	}
 
-	// Créer les données initiales
-	if err := createInitialData(db, cfg); err != nil {
+	if err := seedInitialData(db, cfg); err != nil {
 		log.Fatalf("Erreur lors de la création des données initiales: %v", err)
 	}
-	ensureDefaultSuggestionCategories(db)
-	ensureDefaultNewsTypes(db)
 
 	// Initialiser le service email global
 	InitEmailService(db, cfg)
-	ensureChatMessageTemplate(db)
 
 	// Initialiser le service de stockage
 	storageService, err := services.NewLocalStorage(cfg.Storage.UploadDir, cfg.Storage.BaseURL)
@@ -44,7 +40,6 @@ func main() {
 
 	// Gamification
 	gamificationService := services.NewGamificationService(db)
-	seedGamification(gamificationService)
 
 	// Initialisation du Chat
 	chat.SetAllowedOrigins(cfg.Server.Origins)

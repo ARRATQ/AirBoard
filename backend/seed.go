@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"airboard/config"
 	"airboard/models"
@@ -11,7 +12,35 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 )
+
+// seedInitialData crée les données de départ absentes : compte admin, groupe
+// Common, fournisseurs OAuth, catégories, modèles d'e-mail, badges... Chaque étape
+// est idempotente : relancer le démarrage ne crée ni doublon ni erreur.
+func seedInitialData(db *gorm.DB, cfg *config.Config) error {
+	// Les « record not found » attendus des vérifications d'existence ne sont pas
+	// des erreurs : on ne les journalise pas pendant le seed.
+	quiet := db.Session(&gorm.Session{Logger: logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			LogLevel:                  logger.Warn,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		},
+	)})
+
+	if err := createInitialData(quiet, cfg); err != nil {
+		return err
+	}
+	ensureDefaultSuggestionCategories(quiet)
+	ensureDefaultNewsTypes(quiet)
+	ensureChatMessageTemplate(quiet)
+	seedGamification(services.NewGamificationService(quiet))
+	return nil
+}
 
 func createInitialData(db *gorm.DB, cfg *config.Config) (err error) {
 	// Commencer une transaction pour garantir la cohérence des données
@@ -139,19 +168,10 @@ func ensureDefaultSuggestionCategories(db *gorm.DB) {
 		{Name: "Bug", Slug: "bug", Order: 6, IsActive: true},
 		{Name: "Autre", Slug: "other", Order: 7, IsActive: true},
 	}
-
-	for _, category := range defaults {
-		var existing models.SuggestionCategory
-		err := db.Where("slug = ?", category.Slug).First(&existing).Error
-		if err == gorm.ErrRecordNotFound {
-			if createErr := db.Create(&category).Error; createErr != nil {
-				log.Printf("Avertissement: impossible de creer la categorie suggestion %s: %v", category.Slug, createErr)
-			}
-			continue
-		}
-		if err != nil {
-			log.Printf("Avertissement: impossible de verifier la categorie suggestion %s: %v", category.Slug, err)
-		}
+	if created, err := insertMissing(db, defaults); err != nil {
+		log.Printf("Avertissement: impossible de créer les catégories de suggestion par défaut: %v", err)
+	} else if created > 0 {
+		log.Printf("✅ %d catégorie(s) de suggestion par défaut créée(s)", created)
 	}
 }
 
@@ -162,21 +182,21 @@ func ensureDefaultNewsTypes(db *gorm.DB) {
 		{Name: "Announcement", Slug: "announcement", Icon: "mdi:bullhorn", Color: "#8B5CF6", Order: 3, IsActive: true},
 		{Name: "FAQ", Slug: "faq", Icon: "mdi:help-circle", Color: "#F59E0B", Order: 4, IsActive: true},
 	}
-
-	for _, newsType := range defaults {
-		var existing models.NewsType
-		err := db.Where("slug = ?", newsType.Slug).First(&existing).Error
-		if err == gorm.ErrRecordNotFound {
-			if createErr := db.Create(&newsType).Error; createErr != nil {
-				log.Printf("Avertissement: impossible de creer le type de news %s: %v", newsType.Slug, createErr)
-			}
-			continue
-		}
-		if err != nil {
-			log.Printf("Avertissement: impossible de verifier le type de news %s: %v", newsType.Slug, err)
-		}
+	if _, err := insertMissing(db, defaults); err != nil {
+		log.Printf("Avertissement: impossible de créer les types d'articles par défaut: %v", err)
+		return
 	}
 	log.Println("✓ Types d'articles par défaut créés/vérifiés")
+}
+
+// insertMissing insère les éléments par défaut absents, en une requête. Un élément
+// dont le slug ou le nom existe déjà (hors éléments supprimés, cf. les index uniques
+// partiels de la migration 00002) est ignoré par ON CONFLICT DO NOTHING : relancer
+// le seed ne produit ni doublon ni erreur de clé unique. Renvoie le nombre de lignes
+// créées.
+func insertMissing[T any](db *gorm.DB, defaults []T) (int64, error) {
+	res := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&defaults)
+	return res.RowsAffected, res.Error
 }
 
 func createDefaultEmailTemplates(db *gorm.DB) error {
