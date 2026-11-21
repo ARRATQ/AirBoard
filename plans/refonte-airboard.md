@@ -329,6 +329,26 @@ visuelle. Ensuite :
 7. Bruit au démarrage : le seed recrée des catégories de suggestion déjà existantes (erreur de clé
    unique `idx_suggestion_categories_slug`, `main.go:1443`).
 
+### Fait — partie A (branche `claude/chantier-7a-structure`)
+
+- **Point 1** : `main.go` découpé (déplacement pur) en `db.go`, `routes.go`, `seed.go`,
+  `seed_defaults.go`, `seed_demo.go`, `server.go` ; `main()` tient sur un écran.
+- **Point 2** : migrations goose embarquées (`backend/migrations/`, mode d'emploi dans
+  `backend/MIGRATIONS.md`), AutoMigrate et DDL manuel retirés du démarrage. `00001_baseline`
+  est extrait du schéma que l'ancien démarrage construisait et rendu idempotent pour reprendre
+  une base de production existante ; `00002` index uniques partiels, `00003` index de
+  performance (ex-`EnsurePerformanceIndexes`). Vérifié : ancien code sur base vide = nouveau
+  code sur base vide (schémas identiques), base construite par `main` puis migrée = identique,
+  copie de la base de dev migrée = seule `goose_db_version` ajoutée. Test d'intégration qui
+  échoue si un champ de modèle n'a pas de migration.
+- **Point 5 (moitié serveur)** : `http.Server` avec délais (en-têtes 10 s, lecture et écriture
+  2 min, inactivité 2 min ; WebSocket du chat non coupé, test dédié) et arrêt propre sur
+  SIGINT/SIGTERM (8 s, puis fermeture de la base).
+- **Point 7** : seed idempotent (`ON CONFLICT DO NOTHING`), plus de « record not found » au
+  démarrage ; test d'intégration en deux passages.
+
+Reste pour la partie B : points 3, 4, 6 et le `recover()` des goroutines du point 5.
+
 ---
 
 ## Comment reprendre
