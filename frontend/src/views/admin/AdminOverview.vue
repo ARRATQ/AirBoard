@@ -151,7 +151,7 @@ const settle = async (loaders) => {
 const loadAdmin = async () => {
   const data = await settle({
     stats: () => dashboardService.getDashboard().then((d) => d.stats),
-    pendingComments: () => commentsService.getPendingComments().then((d) => countOf(d, 'comments')),
+    pendingComments: () => commentsService.getPendingComments({ page_size: 1 }).then((d) => countOf(d, 'comments')),
     newSuggestions: () => suggestionsService
       .getAdminSuggestions({ status: 'new', page: 1, page_size: 1 })
       .then((d) => countOf(d, 'suggestions'))
