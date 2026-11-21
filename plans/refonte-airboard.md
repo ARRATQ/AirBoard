@@ -297,7 +297,34 @@ visuelle. Ensuite :
   `DirectoryPage`, `GamificationHub` (qui n'a pas non plus d'état de chargement) ;
 - les pages admin, en les migrant sur `PageHeader` + `DataTable` + `ConfirmDialog`.
 
-## Chantier 6 — Langues, arabe et accessibilité
+## Chantier 6 — Langues, arabe et accessibilité ✅ fait (2026-11-21)
+
+**Fait** (branche `claude/chantier-6-i18n-rtl-a11y`) :
+- **Langues** : fr/en/es/ar ont les mêmes 2 574 clés (avant : 2 225 en fr/en, 2 228 en es/ar). Environ
+  480 textes en dur traduits : Login, Register, OAuthCallback, 404/403 (nouveau gabarit `ErrorPage`),
+  ChatOverlay, éditeur riche, paramètres, e-mail/OAuth, analyses, rapports, médias, cartes, bouton
+  flottant… Les « (s) » sont remplacés par des pluriels vue-i18n. Test `locales/__tests__/locales.test.js` :
+  parité des clés, pas de valeur vide, pas de « (s) », toute clé littérale `t('…')` de `src/` existe en fr.
+- **Arabe** : 318 classes Tailwind physiques passées en logiques (0 restante hors centrage `left-1/2`),
+  propriétés CSS logiques dans les panneaux de chat, l'éditeur et les encadrés ; surcharges `[dir=rtl]`
+  devenues inutiles supprimées ; `space-x`/`divide-x` inversés par une règle globale ; chevrons et flèches
+  en `rtl-flip` (BaseButton le fait seul). Bouton flottant, chat et toasts côté fin de ligne.
+- **Accessibilité** : directive globale `v-focus-trap` (piège, retour du focus, pile, cède à Headless UI)
+  posée avec `role="dialog"`, `aria-modal`, `aria-labelledby` sur une quarantaine de modales maison ;
+  26 éléments cliquables non interactifs devenus boutons ou liens (6 fonds de modale restent des `div`
+  `aria-hidden`) ; contour `:focus-visible` commun en `var(--acc)` ; `.btn-reset`.
+- Vérifié en navigateur (ar 375/1440, fr 1440, clair/sombre) : aucun débordement horizontal, aucune
+  erreur de page, Tab reste dans la modale, Échap la ferme et rend le focus.
+
+**Reste / à surveiller** :
+- Pluriels arabes limités à 3 formes (zéro/un/autre) : pas de règle CLDR à 6 formes (`pluralRules`).
+- L'aide « 6 caractères minimum » de l'inscription ne dit pas que le backend exige aussi un caractère
+  spécial (refus « Weak Password »).
+- `readingTime.js` renvoie encore « N min » ; les poignées de redimensionnement d'image restent
+  physiques (la position est enregistrée dans l'article).
+- `RichTextEditor.insertFile` concatène du HTML à partir du nom et de l'URL du média (à revoir).
+
+État initial (2026-11-19) :
 
 1. Il manque environ 412 clés en `es` et en `ar` (events 166, profile 49, help 48, reports 40…), les
    29 clés `oauth.*` en `fr`, et 25 clés utilisées dans le code n'existent dans aucune langue.
