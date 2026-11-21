@@ -46,6 +46,7 @@ pour un utilisateur comme pour un administrateur.
 | `2457a4c` | Chantier 2 : listes app-groups et applications de l'admin de groupe paginées (100 par défaut, ≤ 1000) ; le front demande 1000 lignes en attendant une vraie pagination |
 | `41d7491` | Correctif : en arabe, la barre de pagination retournait toute la page (`:global([dir='rtl']) .x` compilé en `[dir='rtl']`), défaut déjà présent dans DataTable sur main |
 | (suivi) | Correctifs : les sélecteurs de groupes d'applications de l'admin voient tous les groupes (et non 10) ; les liens des articles s'ouvrent toujours dans un nouvel onglet (`DOMPurify.addHook`) |
+| (suivi) | Après fusion du chantier 4 : graisse 700 chargée ; `/group-admin/managed-groups` renvoie `user_count` au lieu des utilisateurs (adresses e-mail comprises) ; icône `mdi:poll-check` remplacée ; écrans du chantier 4 adaptés aux listes paginées |
 | `728934c` | Chantier 4 : lien actif exact (`utils/navigation.js`), libellés et `aria-label` du menu replié, un seul hamburger |
 | `ff5e747` | Chantier 4 : une page par module pour l'admin et l'admin de groupe (actualités, événements, sondages, ressources, catégories) ; rôles et périmètre dans `config/access.js` et `useManagementScope` ; anciennes URL `/group-admin/…` redirigées |
 | `c0ba933` | Chantier 4 : menu admin décrit dans `config/navigation.js`, rangé par domaine ; taxonomies en onglets (`SectionTabs`) ; annuaire sous `/admin/directory` |
@@ -103,17 +104,14 @@ l'URL publique https), un envoi d'avatar de plus de 1 Mo, et le log de désactiv
 ## Chantier 2 — Performance (gains rapides) — fait
 
 Fait : front 1 à 8 ; back 1 à 8. Gzip (back 2) traité dans nginx, par où passe toute l'API en prod.
-Polices (front 7) : les graisses étaient déjà limitées à 400–600 depuis le passage à IBM Plex
-(chantier 3) ; seule la police arabe a été retirée du chargement commun.
+Polices (front 7) : la police arabe n'est plus chargée que pour `ar` ; la graisse 700 d'IBM Plex est
+chargée (le code utilisait le gras, dessiné jusque-là avec la 600 ; IBM Plex s'arrête à 700, donc 800
+et `font-black` s'affichent en 700).
 
 Reste, ou à suivre :
+- écrans de ressources et de catégories (admin et admin de groupe) : ils demandent une page de 1000
+  lignes ; leur donner une vraie pagination si les volumes l'exigent ;
 - rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1) ;
-- vues de l'admin de groupe : elles demandent une page de 1000 lignes ; leur donner une vraie
-  pagination une fois la PR du chantier 4 (qui les modifie) fusionnée ;
-- `GetManagedGroups` précharge les utilisateurs seulement pour les compter ;
-- `mdi:poll-check` n'existe pas (PollsManagement, laissé à la PR du chantier 4) : le build l'indique ;
-- le code utilise les graisses 700 et 800, rendues avec la 600 chargée : choisir entre ajouter ces
-  graisses ou ramener le code à 600 ;
 - une icône d'une autre collection que mdi, lucide ou heroicons saisie en base ne s'affiche plus
   (auparavant récupérée sur api.iconify.design).
 
