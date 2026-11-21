@@ -318,15 +318,16 @@ visuelle. Ensuite :
   erreur de page, Tab reste dans la modale, Échap la ferme et rend le focus.
 
 **Reste / à surveiller** :
-- Pluriels arabes limités à 3 formes (zéro/un/autre) : pas de règle CLDR à 6 formes (`pluralRules`).
+- ~~Pluriels arabes limités à 3 formes~~ → fait : règle CLDR à 6 formes (`i18n/arabicPlural.js`), 36
+  messages réécrits avec le duel et l'accord des nombres, test de cohérence.
 - ~~Aide « 6 caractères » de l'inscription~~ → fait : `utils/passwordPolicy.js` reproduit la règle du
   backend (8 caractères, majuscule, minuscule, chiffre, caractère spécial, mots courants refusés) ;
   le changement de mot de passe demande aussi 8 caractères.
 - ~~`readingTime.js` renvoie « N min »~~ → fait (`readingMinutes` + `news.minutes`). Les poignées de
   redimensionnement d'image restent physiques (la position est enregistrée dans l'article).
 - ~~`RichTextEditor.insertFile` concatène du HTML~~ → fait : contenu structuré.
-- Liens « Conditions d'utilisation » et « Confidentialité » de l'inscription toujours vers `#` (pas de
-  page à viser).
+- Liens « Conditions d'utilisation » et « Confidentialité » vers `#` → remplacés par du texte simple ;
+  à relier le jour où ces pages existent.
 
 État initial (2026-11-19) :
 
