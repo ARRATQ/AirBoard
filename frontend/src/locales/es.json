@@ -832,6 +832,8 @@
       "label": "Vista"
     },
     "zoom": {
+      "auto": "Auto (se adapta a la pantalla)",
+      "autoShort": "Auto · {percent} %",
       "extraSmall": "Muy pequeño",
       "small": "Pequeño",
       "normal": "Normal",

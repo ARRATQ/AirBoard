@@ -918,6 +918,8 @@
       "label": "Display"
     },
     "zoom": {
+      "auto": "Auto (fits the screen)",
+      "autoShort": "Auto · {percent}%",
       "extraSmall": "Extra Small",
       "small": "Small",
       "normal": "Normal",

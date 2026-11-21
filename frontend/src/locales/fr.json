@@ -880,6 +880,8 @@
       "label": "Affichage"
     },
     "zoom": {
+      "auto": "Auto (adapté à l'écran)",
+      "autoShort": "Auto · {percent} %",
       "extraSmall": "Très petit",
       "small": "Petit",
       "normal": "Normal",

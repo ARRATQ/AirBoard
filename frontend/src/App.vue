@@ -12,7 +12,7 @@
     />
 
     <!-- Main content -->
-    <div :class="mainContentClasses">
+    <div ref="mainContent" :class="mainContentClasses">
       <!-- Barre mobile : le bouton menu occupe sa propre bande au lieu de flotter sur les titres -->
       <div v-if="isAuthenticated && !isAuthPage" class="mobile-bar lg:hidden">
         <button
@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { pageTitle } from '@/utils/pageTitle'
@@ -159,11 +159,24 @@ const loadAdminSettings = async () => {
 let cleanupThemeWatcher = null
 let cleanupResizeWatcher = null
 
+// Taille d'affichage automatique : largeur de la zone de contenu (hors barre latérale, non
+// zoomée) et de la fenêtre, transmises au store qui en déduit l'échelle.
+const mainContent = ref(null)
+let contentObserver = null
+function observeContentWidth () {
+  if (!mainContent.value || typeof ResizeObserver === 'undefined') return
+  contentObserver = new ResizeObserver(([entry]) => {
+    appStore.setLayoutWidths(Math.round(entry.contentRect.width), window.innerWidth)
+  })
+  contentObserver.observe(mainContent.value)
+}
+
 // Enregistré avant tout await : un onUnmounted appelé après un await n'est pas rattaché au composant.
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
   if (cleanupThemeWatcher) cleanupThemeWatcher()
   if (cleanupResizeWatcher) cleanupResizeWatcher()
+  contentObserver?.disconnect()
 })
 
 // Lifecycle
@@ -175,6 +188,7 @@ onMounted(async () => {
   window.addEventListener('keydown', handleKeydown)
   cleanupThemeWatcher = appStore.initSystemThemeWatcher()
   cleanupResizeWatcher = appStore.initResizeWatcher()
+  observeContentWidth()
 
   if (hasStoredAuth) {
     // Profil (admin_of_groups peut changer sans reconnexion), palette et réglages admin

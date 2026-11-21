@@ -832,6 +832,8 @@
       "label": "طريقة العرض"
     },
     "zoom": {
+      "auto": "تلقائي (حسب الشاشة)",
+      "autoShort": "تلقائي · {percent}٪",
       "extraSmall": "صغير جدا",
       "small": "صغير",
       "normal": "عادي",
