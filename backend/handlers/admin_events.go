@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/models"
 	"airboard/services"
@@ -19,12 +20,12 @@ import (
 func (h *EventsHandler) CreateEvent(c *gin.Context) {
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(&req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -64,7 +65,7 @@ func (h *EventsHandler) CreateEvent(c *gin.Context) {
 	// Créer l'événement en BDD
 	if err := h.db.Create(&event).Error; err != nil {
 		log.Printf("[ERROR] CreateEvent DB Error: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de l'événement"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'événement")
 		return
 	}
 
@@ -128,7 +129,7 @@ func (h *EventsHandler) UpdateEvent(c *gin.Context) {
 	}
 
 	if err := query.First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Événement non trouvé")
 		return
 	}
 
@@ -137,18 +138,18 @@ func (h *EventsHandler) UpdateEvent(c *gin.Context) {
 	userRole := c.GetString("role")
 
 	if userRole != "admin" && event.AuthorID != userID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Vous ne pouvez modifier que vos propres événements"})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez modifier que vos propres événements")
 		return
 	}
 
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(&req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -184,7 +185,7 @@ func (h *EventsHandler) UpdateEvent(c *gin.Context) {
 
 	// Sauvegarder
 	if err := h.db.Save(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour")
 		return
 	}
 
@@ -231,7 +232,7 @@ func (h *EventsHandler) DeleteEvent(c *gin.Context) {
 	}
 
 	if err := query.First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Événement non trouvé")
 		return
 	}
 
@@ -240,13 +241,13 @@ func (h *EventsHandler) DeleteEvent(c *gin.Context) {
 	userRole := c.GetString("role")
 
 	if userRole != "admin" && event.AuthorID != userID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Vous ne pouvez supprimer que vos propres événements"})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez supprimer que vos propres événements")
 		return
 	}
 
 	// Soft delete (GORM)
 	if err := h.db.Delete(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -399,7 +400,7 @@ func (h *EventsHandler) GetAnalytics(c *gin.Context) {
 func (h *EventsHandler) CreateCategory(c *gin.Context) {
 	var req models.EventCategoryRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -414,10 +415,10 @@ func (h *EventsHandler) CreateCategory(c *gin.Context) {
 
 	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "Une catégorie porte déjà ce nom"})
+			apierror.Respond(c, http.StatusConflict, "Une catégorie porte déjà ce nom")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la catégorie"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de la catégorie")
 		return
 	}
 
@@ -430,13 +431,13 @@ func (h *EventsHandler) UpdateCategory(c *gin.Context) {
 
 	var category models.EventCategory
 	if err := h.db.First(&category, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Catégorie non trouvée"})
+		apierror.Respond(c, http.StatusNotFound, "Catégorie non trouvée")
 		return
 	}
 
 	var req models.EventCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -449,10 +450,10 @@ func (h *EventsHandler) UpdateCategory(c *gin.Context) {
 
 	if err := h.db.Save(&category).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "Une catégorie porte déjà ce nom"})
+			apierror.Respond(c, http.StatusConflict, "Une catégorie porte déjà ce nom")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour")
 		return
 	}
 
@@ -465,7 +466,7 @@ func (h *EventsHandler) DeleteCategory(c *gin.Context) {
 
 	var category models.EventCategory
 	if err := h.db.First(&category, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Catégorie non trouvée"})
+		apierror.Respond(c, http.StatusNotFound, "Catégorie non trouvée")
 		return
 	}
 
@@ -474,12 +475,12 @@ func (h *EventsHandler) DeleteCategory(c *gin.Context) {
 	h.db.Model(&models.Event{}).Where("category_id = ?", id).Count(&eventCount)
 
 	if eventCount > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Impossible de supprimer : des événements utilisent cette catégorie"})
+		apierror.Respond(c, http.StatusBadRequest, "Impossible de supprimer : des événements utilisent cette catégorie")
 		return
 	}
 
 	if err := h.db.Delete(&category).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -496,7 +497,7 @@ func (h *EventsHandler) GetAvailableCountries(c *gin.Context) {
 
 	countries, err := holidayService.GetAvailableCountries()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -514,14 +515,14 @@ type ImportHolidaysRequest struct {
 func (h *EventsHandler) ImportHolidays(c *gin.Context) {
 	var req ImportHolidaysRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	// Validation de l'année
 	currentYear := time.Now().Year()
 	if req.Year < currentYear-5 || req.Year > currentYear+5 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "L'année doit être comprise entre " + strconv.Itoa(currentYear-5) + " et " + strconv.Itoa(currentYear+5)})
+		apierror.Respond(c, http.StatusBadRequest, "L'année doit être comprise entre "+strconv.Itoa(currentYear-5)+" et "+strconv.Itoa(currentYear+5))
 		return
 	}
 
@@ -531,7 +532,7 @@ func (h *EventsHandler) ImportHolidays(c *gin.Context) {
 	holidayService := services.NewHolidayService(h.db)
 	result, err := holidayService.ImportHolidays(req.CountryCode, req.Year, authorID, req.CategoryID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -549,20 +550,21 @@ func (h *EventsHandler) DeleteHolidays(c *gin.Context) {
 	yearStr := c.Query("year")
 
 	if countryCode == "" || yearStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "country_code et year sont requis"})
+		apierror.Respond(c, http.StatusBadRequest, "country_code et year sont requis")
 		return
 	}
 
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Année invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Année invalide")
 		return
 	}
 
 	holidayService := services.NewHolidayService(h.db)
 	deleted, err := holidayService.DeleteHolidaysByCountryAndYear(countryCode, year)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("[Holidays] Suppression %s/%d impossible : %v", countryCode, year, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des jours fériés")
 		return
 	}
 
@@ -578,20 +580,20 @@ func (h *EventsHandler) PreviewHolidays(c *gin.Context) {
 	yearStr := c.Query("year")
 
 	if countryCode == "" || yearStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "country_code et year sont requis"})
+		apierror.Respond(c, http.StatusBadRequest, "country_code et year sont requis")
 		return
 	}
 
 	year, err := strconv.Atoi(yearStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Année invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Année invalide")
 		return
 	}
 
 	holidayService := services.NewHolidayService(h.db)
 	holidays, err := holidayService.FetchHolidays(countryCode, year)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

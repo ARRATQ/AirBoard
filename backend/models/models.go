@@ -131,10 +131,13 @@ type RegisterRequest struct {
 	LastName  string `json:"last_name" binding:"max=50"`
 }
 
+// ErrorResponse est l'unique corps de réponse d'erreur de l'API (voir le paquet
+// apierror) : `error` est un message lisible, affichable tel quel ; `code` est
+// un identifiant stable (« not_found », « comments_disabled »…) pour les
+// clients qui veulent réagir à un cas précis ou traduire le message.
 type ErrorResponse struct {
-	Error   string `json:"error"`
-	Message string `json:"message"`
-	Code    int    `json:"code"`
+	Error string `json:"error"`
+	Code  string `json:"code"`
 }
 
 type SuccessResponse struct {

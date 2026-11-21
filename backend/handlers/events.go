@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
@@ -101,7 +102,7 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 	if search := c.Query("search"); search != "" {
 		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
 		if listSearchTooLong(search) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
+			apierror.Respond(c, http.StatusBadRequest, "La recherche ne peut pas dépasser 100 caractères")
 			return
 		}
 
@@ -177,19 +178,19 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 	endDateStr := c.Query("end_date")
 
 	if startDateStr == "" || endDateStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "start_date et end_date sont requis (format YYYY-MM-DD)"})
+		apierror.Respond(c, http.StatusBadRequest, "start_date et end_date sont requis (format YYYY-MM-DD)")
 		return
 	}
 
 	startDate, err := time.Parse("2006-01-02", startDateStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Format start_date invalide (YYYY-MM-DD requis)"})
+		apierror.Respond(c, http.StatusBadRequest, "Format start_date invalide (YYYY-MM-DD requis)")
 		return
 	}
 
 	endDate, err := time.Parse("2006-01-02", endDateStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Format end_date invalide (YYYY-MM-DD requis)"})
+		apierror.Respond(c, http.StatusBadRequest, "Format end_date invalide (YYYY-MM-DD requis)")
 		return
 	}
 
@@ -295,7 +296,7 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 	}
 
 	if err := query.First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Événement non trouvé")
 		return
 	}
 
@@ -309,7 +310,7 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 		if !event.IsPublished {
 			// Seul l'auteur peut voir un brouillon
 			if event.AuthorID != userID {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+				apierror.Respond(c, http.StatusForbidden, "Accès refusé")
 				return
 			}
 		}
@@ -320,7 +321,7 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 		// laissait tout événement ciblé accessible par son identifiant.
 		if len(event.TargetGroups) > 0 && event.AuthorID != userID &&
 			!targetsAnyGroup(event.TargetGroups, memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)) {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Accès refusé"})
+			apierror.Respond(c, http.StatusForbidden, "Accès refusé")
 			return
 		}
 	}

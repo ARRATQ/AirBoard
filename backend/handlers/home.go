@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/utils"
 
@@ -90,11 +91,7 @@ type HomeResponse struct {
 func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 

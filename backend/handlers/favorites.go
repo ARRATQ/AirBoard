@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -22,21 +23,13 @@ func NewFavoritesHandler(db *gorm.DB) *FavoritesHandler {
 func (h *FavoritesHandler) GetUserFavorites(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	var user models.User
 	if err := h.db.Preload("Favorites", "is_active = ?", true).First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des favoris",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des favoris")
 		return
 	}
 
@@ -47,11 +40,7 @@ func (h *FavoritesHandler) GetUserFavorites(c *gin.Context) {
 func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -60,33 +49,21 @@ func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
 	// Vérifier que l'application existe et est active
 	var application models.Application
 	if err := h.db.Where("id = ? AND is_active = ?", requestData.ApplicationID, true).First(&application).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Application non trouvée ou inactive",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Application non trouvée ou inactive")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération de l'utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de l'utilisateur")
 		return
 	}
 
@@ -94,21 +71,13 @@ func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 	var count int64
 	h.db.Model(&user).Where("id = ?", application.ID).Association("Favorites").Count()
 	if count > 0 {
-		c.JSON(http.StatusConflict, models.ErrorResponse{
-			Error:   "Conflict",
-			Message: "Cette application est déjà dans vos favoris",
-			Code:    http.StatusConflict,
-		})
+		apierror.Respond(c, http.StatusConflict, "Cette application est déjà dans vos favoris")
 		return
 	}
 
 	// Ajouter l'application aux favoris
 	if err := h.db.Model(&user).Association("Favorites").Append(&application); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de l'ajout aux favoris",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'ajout aux favoris")
 		return
 	}
 
@@ -122,11 +91,7 @@ func (h *FavoritesHandler) AddFavorite(c *gin.Context) {
 func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -134,43 +99,27 @@ func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 	appIDStr := c.Param("id")
 	appID, err := strconv.ParseUint(appIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID d'application invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID d'application invalide")
 		return
 	}
 
 	// Vérifier que l'application existe
 	var application models.Application
 	if err := h.db.First(&application, appID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Application non trouvée",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Application non trouvée")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération de l'utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de l'utilisateur")
 		return
 	}
 
 	// Retirer l'application des favoris
 	if err := h.db.Model(&user).Association("Favorites").Delete(&application); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression du favori",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du favori")
 		return
 	}
 
@@ -183,11 +132,7 @@ func (h *FavoritesHandler) RemoveFavorite(c *gin.Context) {
 func (h *FavoritesHandler) IsFavorite(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -195,22 +140,14 @@ func (h *FavoritesHandler) IsFavorite(c *gin.Context) {
 	appIDStr := c.Param("id")
 	appID, err := strconv.ParseUint(appIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID d'application invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID d'application invalide")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération de l'utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de l'utilisateur")
 		return
 	}
 

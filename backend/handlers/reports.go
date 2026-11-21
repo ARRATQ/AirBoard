@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -504,11 +505,7 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 
 	var user models.User
 	if err := h.db.Preload("Groups").Where("deleted_at IS NULL").First(&user, userIDParam).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -674,11 +671,7 @@ func (h *ReportsHandler) GetGroupDetailReport(c *gin.Context) {
 
 	var group models.Group
 	if err := h.db.Where("deleted_at IS NULL").First(&group, groupIDParam).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 

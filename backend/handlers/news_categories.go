@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
+	"airboard/apierror"
 	"airboard/models"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -21,7 +23,7 @@ func (h *NewsHandler) GetCategories(c *gin.Context) {
 	}
 
 	if err := query.Order("\"order\" ASC, name ASC").Find(&categories).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch categories"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch categories")
 		return
 	}
 
@@ -35,9 +37,9 @@ func (h *NewsHandler) GetCategory(c *gin.Context) {
 	var category models.NewsCategory
 	if err := h.db.First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+			apierror.Respond(c, http.StatusNotFound, "Category not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch category"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch category")
 		}
 		return
 	}
@@ -49,7 +51,7 @@ func (h *NewsHandler) GetCategory(c *gin.Context) {
 func (h *NewsHandler) CreateCategory(c *gin.Context) {
 	var req models.CategoryRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -64,10 +66,10 @@ func (h *NewsHandler) CreateCategory(c *gin.Context) {
 
 	if err := createKeepingFalse(h.db, c, &category, "is_active"); err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A category with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A category with this name already exists")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create category"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create category")
 		return
 	}
 
@@ -81,16 +83,16 @@ func (h *NewsHandler) UpdateCategory(c *gin.Context) {
 	var category models.NewsCategory
 	if err := h.db.First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+			apierror.Respond(c, http.StatusNotFound, "Category not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch category"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch category")
 		}
 		return
 	}
 
 	var req models.CategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -103,10 +105,10 @@ func (h *NewsHandler) UpdateCategory(c *gin.Context) {
 
 	if err := h.db.Save(&category).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A category with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A category with this name already exists")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update category")
 		return
 	}
 
@@ -120,9 +122,9 @@ func (h *NewsHandler) DeleteCategory(c *gin.Context) {
 	var category models.NewsCategory
 	if err := h.db.First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
+			apierror.Respond(c, http.StatusNotFound, "Category not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch category"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch category")
 		}
 		return
 	}
@@ -131,15 +133,13 @@ func (h *NewsHandler) DeleteCategory(c *gin.Context) {
 	var newsCount int64
 	h.db.Model(&models.News{}).Where("category_id = ?", id).Count(&newsCount)
 	if newsCount > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":      "Cannot delete category with associated news",
-			"news_count": newsCount,
-		})
+		apierror.Respond(c, http.StatusBadRequest,
+			fmt.Sprintf("Cannot delete category with associated news (%d)", newsCount))
 		return
 	}
 
 	if err := h.db.Delete(&category).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete category"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete category")
 		return
 	}
 
@@ -151,7 +151,7 @@ func (h *NewsHandler) GetTags(c *gin.Context) {
 	var tags []models.Tag
 
 	if err := h.db.Order("name ASC").Find(&tags).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tags"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch tags")
 		return
 	}
 
@@ -165,9 +165,9 @@ func (h *NewsHandler) GetTag(c *gin.Context) {
 	var tag models.Tag
 	if err := h.db.First(&tag, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
+			apierror.Respond(c, http.StatusNotFound, "Tag not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tag"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch tag")
 		}
 		return
 	}
@@ -179,7 +179,7 @@ func (h *NewsHandler) GetTag(c *gin.Context) {
 func (h *NewsHandler) CreateTag(c *gin.Context) {
 	var req models.TagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -190,10 +190,10 @@ func (h *NewsHandler) CreateTag(c *gin.Context) {
 
 	if err := h.db.Create(&tag).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A tag with this name already exists")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create tag"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create tag")
 		return
 	}
 
@@ -207,16 +207,16 @@ func (h *NewsHandler) UpdateTag(c *gin.Context) {
 	var tag models.Tag
 	if err := h.db.First(&tag, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
+			apierror.Respond(c, http.StatusNotFound, "Tag not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tag"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch tag")
 		}
 		return
 	}
 
 	var req models.TagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -225,10 +225,10 @@ func (h *NewsHandler) UpdateTag(c *gin.Context) {
 
 	if err := h.db.Save(&tag).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A tag with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A tag with this name already exists")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update tag"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update tag")
 		return
 	}
 
@@ -242,9 +242,9 @@ func (h *NewsHandler) DeleteTag(c *gin.Context) {
 	var tag models.Tag
 	if err := h.db.First(&tag, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Tag not found"})
+			apierror.Respond(c, http.StatusNotFound, "Tag not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tag"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch tag")
 		}
 		return
 	}
@@ -253,7 +253,7 @@ func (h *NewsHandler) DeleteTag(c *gin.Context) {
 	h.db.Exec("DELETE FROM news_tags WHERE tag_id = ?", id)
 
 	if err := h.db.Delete(&tag).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete tag"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete tag")
 		return
 	}
 

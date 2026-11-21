@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -82,11 +83,11 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 
 	// Validation de la requête
 	if len(q) < 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche doit contenir au moins 2 caractères"})
+		apierror.Respond(c, http.StatusBadRequest, "La recherche doit contenir au moins 2 caractères")
 		return
 	}
 	if len(q) > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
+		apierror.Respond(c, http.StatusBadRequest, "La recherche ne peut pas dépasser 100 caractères")
 		return
 	}
 

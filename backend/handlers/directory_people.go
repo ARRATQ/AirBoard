@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,30 +18,30 @@ import (
 func (h *DirectoryHandler) buildPerson(c *gin.Context) (*models.DirectoryPerson, bool) {
 	var req models.DirectoryPersonRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return nil, false
 	}
 	if !isValidPhotoURL(strings.TrimSpace(req.PhotoURL)) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "URL de photo invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "URL de photo invalide")
 		return nil, false
 	}
 	if req.Phone != "" && !phonePattern.MatchString(req.Phone) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Numéro de téléphone invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Numéro de téléphone invalide")
 		return nil, false
 	}
 	if req.UserID != nil && !h.exists(&models.User{}, *req.UserID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Compte utilisateur introuvable"})
+		apierror.Respond(c, http.StatusBadRequest, "Compte utilisateur introuvable")
 		return nil, false
 	}
 
 	var fields []models.DirectoryField
 	if err := h.db.Find(&fields).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de charger les champs"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de charger les champs")
 		return nil, false
 	}
 	custom, err := validateCustomFields(fields, req.CustomFields)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return nil, false
 	}
 
@@ -70,12 +71,12 @@ func (h *DirectoryHandler) CreatePerson(c *gin.Context) {
 	// mémoriser la valeur voulue avant l'insertion et la forcer ensuite.
 	wantActive := person.IsActive
 	if err := h.db.Create(person).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer la personne"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer la personne")
 		return
 	}
 	if !wantActive {
 		if err := h.db.Model(person).Update("is_active", false).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer la personne"})
+			apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer la personne")
 			return
 		}
 		person.IsActive = false
@@ -109,7 +110,7 @@ func (h *DirectoryHandler) UpdatePerson(c *gin.Context) {
 		"custom_fields": person.CustomFields,
 	}
 	if err := h.db.Model(&existing).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de modifier la personne"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de modifier la personne")
 		return
 	}
 	h.db.First(&existing, id)
@@ -159,11 +160,11 @@ func parseStartDate(raw string) (*time.Time, error) {
 func (h *DirectoryHandler) CreateAssignment(c *gin.Context) {
 	var req models.PositionAssignmentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	if !h.exists(&models.OrgPosition{}, req.PositionID) || !h.exists(&models.DirectoryPerson{}, req.PersonID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Poste ou personne introuvable"})
+		apierror.Respond(c, http.StatusBadRequest, "Poste ou personne introuvable")
 		return
 	}
 	var dup int64
@@ -171,12 +172,12 @@ func (h *DirectoryHandler) CreateAssignment(c *gin.Context) {
 		Where("position_id = ? AND person_id = ?", req.PositionID, req.PersonID).
 		Count(&dup)
 	if dup > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "Cette personne occupe déjà ce poste"})
+		apierror.Respond(c, http.StatusConflict, "Cette personne occupe déjà ce poste")
 		return
 	}
 	start, err := parseStartDate(req.StartDate)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Date de prise de fonction invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Date de prise de fonction invalide")
 		return
 	}
 
@@ -188,7 +189,7 @@ func (h *DirectoryHandler) CreateAssignment(c *gin.Context) {
 		Order:      req.Order,
 	}
 	if err := h.db.Create(&assignment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer l'affectation"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer l'affectation")
 		return
 	}
 	c.JSON(http.StatusCreated, assignment)
@@ -207,12 +208,12 @@ func (h *DirectoryHandler) UpdateAssignment(c *gin.Context) {
 	}
 	var req models.PositionAssignmentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	start, err := parseStartDate(req.StartDate)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Date de prise de fonction invalide"})
+		apierror.Respond(c, http.StatusBadRequest, "Date de prise de fonction invalide")
 		return
 	}
 	updates := map[string]interface{}{
@@ -221,7 +222,7 @@ func (h *DirectoryHandler) UpdateAssignment(c *gin.Context) {
 		"order":      req.Order,
 	}
 	if err := h.db.Model(&assignment).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de modifier l'affectation"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de modifier l'affectation")
 		return
 	}
 	h.db.First(&assignment, id)
@@ -236,11 +237,11 @@ func (h *DirectoryHandler) DeleteAssignment(c *gin.Context) {
 	}
 	res := h.db.Delete(&models.PositionAssignment{}, id)
 	if res.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de supprimer l'affectation"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de supprimer l'affectation")
 		return
 	}
 	if res.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Affectation introuvable"})
+		apierror.Respond(c, http.StatusNotFound, "Affectation introuvable")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Affectation supprimée"})

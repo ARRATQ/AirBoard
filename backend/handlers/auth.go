@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/middleware"
 	"airboard/models"
@@ -69,11 +70,7 @@ func NewAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, sign
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données de connexion invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données de connexion invalides")
 		return
 	}
 
@@ -116,21 +113,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Nom d'utilisateur ou mot de passe incorrect",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Nom d'utilisateur ou mot de passe incorrect")
 		return
 	}
 
 	// Vérifier le compte actif (après le mot de passe, pour ne rien révéler aux inconnus)
 	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Compte désactivé",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Compte désactivé")
 		return
 	}
 
@@ -163,21 +152,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// Générer les tokens
 	token, err := h.authMiddleware.GenerateToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du token")
 		return
 	}
 
 	refreshToken, err := h.authMiddleware.GenerateRefreshToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du refresh token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du refresh token")
 		return
 	}
 
@@ -211,11 +192,7 @@ func (h *AuthHandler) dummyPasswordHash() []byte {
 // respondLoginLocked répond 429 avec le temps d'attente restant.
 func respondLoginLocked(c *gin.Context, remaining time.Duration) {
 	minutes := int(math.Ceil(remaining.Minutes()))
-	c.JSON(http.StatusTooManyRequests, models.ErrorResponse{
-		Error:   "Too Many Requests",
-		Message: fmt.Sprintf("Trop de tentatives échouées. Réessayez dans %d minute(s)", minutes),
-		Code:    http.StatusTooManyRequests,
-	})
+	apierror.Respond(c, http.StatusTooManyRequests, fmt.Sprintf("Trop de tentatives échouées. Réessayez dans %d minute(s)", minutes))
 }
 
 // @Summary Inscription utilisateur
@@ -232,11 +209,7 @@ func respondLoginLocked(c *gin.Context, remaining time.Duration) {
 func (h *AuthHandler) Register(c *gin.Context) {
 	// Vérifier si l'inscription est activée via la variable d'environnement
 	if !h.signupEnabled {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "L'inscription est actuellement désactivée",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "L'inscription est actuellement désactivée")
 		return
 	}
 
@@ -244,54 +217,34 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var settings models.AppSettings
 	if err := h.db.First(&settings).Error; err == nil {
 		if !settings.SignupEnabled {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "L'inscription est actuellement désactivée",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "L'inscription est actuellement désactivée")
 			return
 		}
 	}
 
 	var req models.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données d'inscription invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données d'inscription invalides")
 		return
 	}
 
 	// Valider la force du mot de passe
 	if err := h.authSecurity.ValidatePassword(req.Password); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Weak Password",
-			Message: fmt.Sprintf("Mot de passe trop faible: %v", err),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.RespondCode(c, http.StatusBadRequest, apierror.CodeWeakPassword, fmt.Sprintf("Mot de passe trop faible: %v", err))
 		return
 	}
 
 	// Vérifier si l'utilisateur existe déjà
 	var existingUser models.User
 	if err := h.db.Where("username = ? OR email = ?", req.Username, req.Email).First(&existingUser).Error; err == nil {
-		c.JSON(http.StatusConflict, models.ErrorResponse{
-			Error:   "Conflict",
-			Message: "Nom d'utilisateur ou email déjà utilisé",
-			Code:    http.StatusConflict,
-		})
+		apierror.Respond(c, http.StatusConflict, "Nom d'utilisateur ou email déjà utilisé")
 		return
 	}
 
 	// Hasher le mot de passe avec coût sécurisé (12 minimum - OWASP 2025)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), h.bcryptCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors du hashage du mot de passe",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du hashage du mot de passe")
 		return
 	}
 
@@ -307,11 +260,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création de l'utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'utilisateur")
 		return
 	}
 
@@ -354,21 +303,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	// Générer les tokens
 	token, err := h.authMiddleware.GenerateToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du token")
 		return
 	}
 
 	refreshToken, err := h.authMiddleware.GenerateRefreshToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du refresh token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du refresh token")
 		return
 	}
 
@@ -398,11 +339,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Refresh token manquant",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Refresh token manquant")
 		return
 	}
 
@@ -412,61 +349,37 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		// Si c'est une erreur de secret JWT changé, c'est probablement un redémarrage du serveur
 		if strings.Contains(err.Error(), "secret_jwt_changed") {
 			log.Printf("[Auth] Refresh token signé avec un ancien secret JWT (redémarrage serveur détecté)")
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "JWT_SECRET_CHANGED",
-				Message: "Le serveur a redémarré avec un nouveau secret JWT. Veuillez vous reconnecter.",
-				Code:    http.StatusUnauthorized,
-			})
+			apierror.RespondCode(c, http.StatusUnauthorized, apierror.CodeJWTSecretChanged, "Le serveur a redémarré avec un nouveau secret JWT. Veuillez vous reconnecter.")
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Refresh token invalide ou expiré",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Refresh token invalide ou expiré")
 		return
 	}
 
 	// Récupérer l'utilisateur avec ses relations
 	var user models.User
 	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, claims.UserID).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non trouvé")
 		return
 	}
 
 	// Vérifier que le compte est actif
 	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Compte désactivé",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Compte désactivé")
 		return
 	}
 
 	// Générer de nouveaux tokens
 	newToken, err := h.authMiddleware.GenerateToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du token")
 		return
 	}
 
 	newRefreshToken, err := h.authMiddleware.GenerateRefreshToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du refresh token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du refresh token")
 		return
 	}
 
@@ -491,21 +404,13 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 func (h *AuthHandler) GetProfile(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	var user models.User
 	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -532,64 +437,40 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	var req models.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
 	// Vérifier l'ancien mot de passe
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword)); err != nil {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Ancien mot de passe incorrect",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Ancien mot de passe incorrect")
 		return
 	}
 
 	// Hasher le nouveau mot de passe avec coût sécurisé (12 minimum - OWASP 2025)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), h.bcryptCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors du hashage du mot de passe",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du hashage du mot de passe")
 		return
 	}
 
 	// Mettre à jour le mot de passe
 	user.Password = string(hashedPassword)
 	if err := h.db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la mise à jour du mot de passe",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du mot de passe")
 		return
 	}
 
@@ -630,42 +511,26 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 	// Vérifier si SSO est actif dans le contexte (injecté par le middleware SSO)
 	ssoActive, exists := c.Get("sso_active")
 	if !exists || !ssoActive.(bool) {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "SSO non disponible ou non configuré",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "SSO non disponible ou non configuré")
 		return
 	}
 
 	// Récupérer l'utilisateur SSO du contexte
 	ssoUserInterface, exists := c.Get("sso_user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur SSO non trouvé dans le contexte",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur SSO non trouvé dans le contexte")
 		return
 	}
 
 	ssoUser, ok := ssoUserInterface.(*models.User)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des informations SSO",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des informations SSO")
 		return
 	}
 
 	// Vérifier que le compte est actif
 	if !ssoUser.IsActive {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Compte désactivé",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Compte désactivé")
 		return
 	}
 
@@ -673,11 +538,7 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 	token, err := h.authMiddleware.GenerateToken(ssoUser)
 	if err != nil {
 		log.Printf("[SSO] Erreur lors de la génération du token: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du token")
 		return
 	}
 
@@ -691,22 +552,14 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 	refreshToken, err := h.authMiddleware.GenerateRefreshToken(ssoUser)
 	if err != nil {
 		log.Printf("[SSO] Erreur lors de la génération du refresh token: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la génération du refresh token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la génération du refresh token")
 		return
 	}
 
 	// Recharger l'utilisateur avec les groupes et les groupes administrés
 	var user models.User
 	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, ssoUser.ID).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des informations utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des informations utilisateur")
 		return
 	}
 
@@ -745,32 +598,20 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	var req models.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -783,11 +624,7 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	user.Location = req.Location
 
 	if err := h.db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la mise à jour du profil",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du profil")
 		return
 	}
 
@@ -814,54 +651,34 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	// Récupérer le fichier
 	file, err := c.FormFile("avatar")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Aucun fichier fourni",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Aucun fichier fourni")
 		return
 	}
 
 	// Vérifier la taille (max 5MB)
 	if file.Size > 5*1024*1024 {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Le fichier est trop volumineux (max 5MB)",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Le fichier est trop volumineux (max 5MB)")
 		return
 	}
 
 	// Vérifier le type réel du fichier (octets de tête), pas le Content-Type envoyé par le client
 	contentType, err := sniffImageType(file)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Type de fichier non autorisé (JPG, PNG, GIF, WEBP uniquement)",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Type de fichier non autorisé (JPG, PNG, GIF, WEBP uniquement)")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -869,11 +686,7 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	avatarDir := "./uploads/avatars"
 	if err := utils.EnsureDir(avatarDir); err != nil {
 		log.Printf("Erreur lors de la création du dossier avatars: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la sauvegarde de l'avatar",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la sauvegarde de l'avatar")
 		return
 	}
 
@@ -885,11 +698,7 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	// Sauvegarder le fichier
 	if err := c.SaveUploadedFile(file, filepath); err != nil {
 		log.Printf("Erreur lors de la sauvegarde du fichier avatar: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la sauvegarde de l'avatar",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la sauvegarde de l'avatar")
 		return
 	}
 
@@ -905,11 +714,7 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	// Mettre à jour l'URL de l'avatar
 	user.AvatarURL = fmt.Sprintf("/uploads/avatars/%s", filename)
 	if err := h.db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la mise à jour du profil",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du profil")
 		return
 	}
 
@@ -961,22 +766,14 @@ func sniffImageType(fh *multipart.FileHeader) (string, error) {
 func (h *AuthHandler) DeleteAvatar(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
 	// Récupérer l'utilisateur
 	var user models.User
 	if err := h.db.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -992,11 +789,7 @@ func (h *AuthHandler) DeleteAvatar(c *gin.Context) {
 	// Réinitialiser l'URL de l'avatar
 	user.AvatarURL = ""
 	if err := h.db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la mise à jour du profil",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du profil")
 		return
 	}
 

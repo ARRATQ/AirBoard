@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -29,11 +30,7 @@ func NewDashboardHandler(db *gorm.DB) *DashboardHandler {
 func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 	_, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -47,11 +44,7 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 		if err := h.db.Where("is_active = ?", true).
 			Order("\"order\" ASC, name ASC").
 			Find(&allAppGroups).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "Internal Server Error",
-				Message: "Erreur lors de la récupération des groupes d'applications",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes d'applications")
 			return
 		}
 
@@ -70,11 +63,7 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 				Group("app_groups.id").
 				Order("app_groups.\"order\" ASC, app_groups.name ASC").
 				Find(&userAppGroups).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "Internal Server Error",
-					Message: "Erreur lors de la récupération des groupes d'applications",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes d'applications")
 				return
 			}
 

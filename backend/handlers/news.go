@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/middleware"
 	"airboard/models"
@@ -92,7 +93,7 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 	if search := c.Query("search"); search != "" {
 		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
 		if listSearchTooLong(search) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
+			apierror.Respond(c, http.StatusBadRequest, "La recherche ne peut pas dépasser 100 caractères")
 			return
 		}
 
@@ -150,7 +151,7 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 
 	// Récupération avec pagination
 	if err := query.Offset(offset).Limit(pageSize).Find(&news).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch news"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch news")
 		return
 	}
 
@@ -187,9 +188,9 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 		Where("slug = ?", slug).
 		First(&news).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+			apierror.Respond(c, http.StatusNotFound, "News not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch news"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch news")
 		}
 		return
 	}
@@ -212,7 +213,7 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 			c.JSON(http.StatusOK, news)
 			return
 		}
-		c.JSON(http.StatusForbidden, gin.H{"error": "News not published"})
+		apierror.Respond(c, http.StatusForbidden, "News not published")
 		return
 	}
 
@@ -220,7 +221,7 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	// d'au moins un groupe cible (sans groupe cible, la news est globale)
 	if len(news.TargetGroups) > 0 &&
 		!targetsAnyGroup(news.TargetGroups, memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this news"})
+		apierror.Respond(c, http.StatusForbidden, "Access denied to this news")
 		return
 	}
 
@@ -231,7 +232,7 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 func (h *NewsHandler) CreateNews(c *gin.Context) {
 	var req models.NewsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -262,7 +263,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 	// Créer la news
 	if err := h.db.Create(&news).Error; err != nil {
 		log.Printf("[ERROR CreateNews] Failed to create news: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create news", "details": err.Error()})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create news")
 		return
 	}
 
@@ -289,9 +290,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 					}
 				}
 				if !canManage {
-					c.JSON(http.StatusForbidden, gin.H{
-						"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-					})
+					apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 					// Supprimer la news créée
 					h.db.Delete(&news)
 					return
@@ -371,9 +370,9 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 	var news models.News
 	if err := h.db.Where("slug = ?", slug).First(&news).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+			apierror.Respond(c, http.StatusNotFound, "News not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch news"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch news")
 		}
 		return
 	}
@@ -416,13 +415,13 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 	}
 
 	if !canEdit {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to edit this news"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to edit this news")
 		return
 	}
 
 	var req models.NewsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -454,7 +453,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 
 	// Sauvegarder
 	if err := h.db.Save(&news).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update news"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update news")
 		return
 	}
 
@@ -479,9 +478,7 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 			}
 			merged, ok := mergeGroupAdminTargets(existing, req.TargetGroupIDs, managedGroupIDs)
 			if !ok {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-				})
+				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 				return
 			}
 			targetIDs = merged
@@ -511,9 +508,9 @@ func (h *NewsHandler) DeleteNews(c *gin.Context) {
 	var news models.News
 	if err := h.db.First(&news, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+			apierror.Respond(c, http.StatusNotFound, "News not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch news"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch news")
 		}
 		return
 	}
@@ -557,14 +554,14 @@ func (h *NewsHandler) DeleteNews(c *gin.Context) {
 
 	if !canDelete {
 		log.Printf("[DEBUG DeleteNews] Permission denied for user %d (role=%s) to delete news %d", userID, userRole, news.ID)
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to delete this news"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to delete this news")
 		return
 	}
 
 	log.Printf("[DEBUG DeleteNews] Deleting news ID=%d by user %d (role=%s)", news.ID, userID, userRole)
 	if err := h.db.Delete(&news).Error; err != nil {
 		log.Printf("[ERROR DeleteNews] Failed to delete news %d: %v", news.ID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete news"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete news")
 		return
 	}
 
@@ -579,9 +576,9 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 	var news models.News
 	if err := h.db.Preload("TargetGroups").First(&news, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+			apierror.Respond(c, http.StatusNotFound, "News not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch news"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch news")
 		}
 		return
 	}
@@ -590,7 +587,7 @@ func (h *NewsHandler) TogglePin(c *gin.Context) {
 	news.IsPinned = !news.IsPinned
 
 	if err := h.db.Save(&news).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update news"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update news")
 		return
 	}
 
@@ -628,7 +625,7 @@ func (h *NewsHandler) IncrementView(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid news ID"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid news ID")
 		return
 	}
 	userID := c.GetUint("user_id")
@@ -676,14 +673,14 @@ func (h *NewsHandler) AddReaction(c *gin.Context) {
 
 	var req models.ReactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	// Vérifier si la news existe
 	var news models.News
 	if err := h.db.First(&news, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "News not found"})
+		apierror.Respond(c, http.StatusNotFound, "News not found")
 		return
 	}
 
@@ -695,7 +692,7 @@ func (h *NewsHandler) AddReaction(c *gin.Context) {
 		// Déjà une réaction, la mettre à jour
 		existingReaction.ReactionType = req.ReactionType
 		if err := h.db.Save(&existingReaction).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update reaction"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to update reaction")
 			return
 		}
 		c.JSON(http.StatusOK, existingReaction)
@@ -711,7 +708,7 @@ func (h *NewsHandler) AddReaction(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&reaction).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add reaction"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to add reaction")
 		return
 	}
 
@@ -726,12 +723,12 @@ func (h *NewsHandler) RemoveReaction(c *gin.Context) {
 	result := h.db.Where("news_id = ? AND user_id = ?", id, userID).Delete(&models.NewsReaction{})
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove reaction"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to remove reaction")
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Reaction not found"})
+		apierror.Respond(c, http.StatusNotFound, "Reaction not found")
 		return
 	}
 
@@ -744,7 +741,7 @@ func (h *NewsHandler) GetReactions(c *gin.Context) {
 
 	var reactions []models.NewsReaction
 	if err := h.db.Where("news_id = ?", id).Find(&reactions).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch reactions"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch reactions")
 		return
 	}
 
