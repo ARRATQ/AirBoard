@@ -1724,6 +1724,9 @@
       "pause": "Mettre le défilement en pause",
       "play": "Reprendre le défilement"
     },
+    "featured": {
+      "title": "À la une"
+    },
     "rail": {
       "portal": "Portail",
       "agenda": "Agenda",

@@ -1762,6 +1762,9 @@
       "pause": "Pause rotation",
       "play": "Resume rotation"
     },
+    "featured": {
+      "title": "Featured"
+    },
     "rail": {
       "portal": "Portal",
       "agenda": "Calendar",

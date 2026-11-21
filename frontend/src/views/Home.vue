@@ -16,7 +16,8 @@
         </div>
 
         <template v-else>
-          <!-- Deux colonnes : à gauche ce qu'on lit (salutation, chiffres, actualités), à droite
+          <!-- Deux colonnes : à gauche ce qu'on lit (salutation, chiffres, à la une, nouveautés et
+               agenda, actualités), à droite
                les outils et rappels. Sur écran étroit, une seule colonne dans l'ordre d'usage. -->
           <div class="home__layout">
             <div class="home__main">
@@ -29,6 +30,11 @@
                 :next-event="nextEvent"
               />
               <HomeKeyFigures v-if="figures.length" class="home__figures" :figures="figures" />
+              <HomeFeatured v-if="featuredNews.length" class="home__featured" :articles="featuredNews" :types="newsTypes" />
+              <div class="home__duo">
+                <HomeNewResources :apps="homeData.new_apps || []" />
+                <HomeUpcomingEvents :events="agenda" />
+              </div>
               <HomeNewsFeed class="home__news" :groups="homeData.recent_news_by_type || []" />
             </div>
 
@@ -37,7 +43,6 @@
               <HomeFavorites v-if="homeData.favorite_apps?.length" class="home__favorites" :apps="homeData.favorite_apps" />
               <HomeWorkingDays class="home__workdays" />
               <HomePollCard v-if="activePoll" class="home__poll" :poll="activePoll" />
-              <HomeUpcomingEvents v-if="homeData.upcoming_events?.length" class="home__events" :events="homeData.upcoming_events" />
             </aside>
           </div>
         </template>
@@ -48,14 +53,16 @@
 
 <script setup>
 // Accueil : charge homeService.getHomeData() et répartit les données entre les composants de
-// components/home/. Colonne principale : salutation, chiffres clés, fil d'actualités ; colonne
-// de droite : progression, favoris, calculateur de jours ouvrés, sondage ouvert, événements.
+// components/home/. Colonne principale : salutation, chiffres clés, deux derniers articles,
+// ressources récentes et agenda, fil d'actualités ; colonne de droite : progression, favoris,
+// calculateur de jours ouvrés, sondage ouvert.
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
 import { homeService } from '@/services/api'
 import { keyFigures } from '@/utils/homeFormat'
+import { agendaAhead, latestNews } from '@/utils/homeHighlights'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import HomeTopbar from '@/components/home/HomeTopbar.vue'
@@ -67,6 +74,8 @@ import HomeFavorites from '@/components/home/HomeFavorites.vue'
 import HomePollCard from '@/components/home/HomePollCard.vue'
 import HomeUpcomingEvents from '@/components/home/HomeUpcomingEvents.vue'
 import HomeWorkingDays from '@/components/home/HomeWorkingDays.vue'
+import HomeFeatured from '@/components/home/HomeFeatured.vue'
+import HomeNewResources from '@/components/home/HomeNewResources.vue'
 import '@/components/home/home.css'
 
 const { t } = useI18n()
@@ -91,6 +100,14 @@ const pendingActionsText = computed(() => {
 const activePoll = computed(() => homeData.value.polls?.find((p) => p.is_active) || null)
 const latestNewsGroup = computed(() => homeData.value.recent_news_by_type?.[0] || null)
 const nextEvent = computed(() => homeData.value.upcoming_events?.[0] || null)
+
+const FEATURED_COUNT = 2
+const AGENDA_COUNT = 4
+const featuredNews = computed(() => latestNews(homeData.value.recent_news, FEATURED_COUNT))
+const newsTypes = computed(() => (homeData.value.recent_news_by_type || []).map((g) => g.type))
+const agenda = computed(() =>
+  agendaAhead(homeData.value.today_events, homeData.value.upcoming_events, AGENDA_COUNT),
+)
 const figures = computed(() =>
   keyFigures(homeData.value.stats, homeData.value.user_role, homeData.value.managed_group_ids),
 )
@@ -176,6 +193,14 @@ onMounted(loadHomeData)
   min-width: 0;
 }
 
+/* Ressources récentes et agenda côte à côte, l'un sous l'autre quand la colonne rétrécit. */
+.home__duo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
 /* Les colonnes suivent la largeur de la zone de contenu (la barre latérale peut être
    repliée ou masquée), pas celle de la fenêtre. */
 @container (max-width: 1000px) {
@@ -191,11 +216,12 @@ onMounted(loadHomeData)
   .home__greeting { order: 1; }
   .home__xp { order: 2; }
   .home__figures { order: 3; }
-  .home__favorites { order: 4; }
-  .home__news { order: 5; }
-  .home__workdays { order: 6; }
-  .home__poll { order: 7; }
-  .home__events { order: 8; }
+  .home__featured { order: 4; }
+  .home__favorites { order: 5; }
+  .home__duo { order: 6; }
+  .home__news { order: 7; }
+  .home__workdays { order: 8; }
+  .home__poll { order: 9; }
 }
 
 @media (max-width: 640px) {

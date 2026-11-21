@@ -1466,6 +1466,9 @@
       "pause": "Pausar el desfile",
       "play": "Reanudar el desfile"
     },
+    "featured": {
+      "title": "Destacados"
+    },
     "rail": {
       "portal": "Portal",
       "agenda": "Agenda",
