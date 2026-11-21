@@ -172,12 +172,12 @@ func (h *GamificationHandler) GetLeaderboard(c *gin.Context) {
 	}
 
 	var userAchievements []struct {
-		UserID      uint   `json:"user_id"`
-		Code        string `json:"code"`
-		Icon        string `json:"icon"`
-		Color       string `json:"color"`
-		Name        string `json:"name"`
-		UnlockedAt  string `json:"unlocked_at"`
+		UserID     uint   `json:"user_id"`
+		Code       string `json:"code"`
+		Icon       string `json:"icon"`
+		Color      string `json:"color"`
+		Name       string `json:"name"`
+		UnlockedAt string `json:"unlocked_at"`
 	}
 	h.db.Table("user_achievements").
 		Select("user_achievements.user_id, achievements.code, achievements.icon, achievements.color, achievements.name, user_achievements.unlocked_at").

@@ -62,27 +62,27 @@ type NewsGroup struct {
 }
 
 type PendingItems struct {
-	UnreadNews    int64 `json:"unread_news"`
+	UnreadNews      int64 `json:"unread_news"`
 	UnansweredPolls int64 `json:"unanswered_polls"`
-	NewAppsCount  int64 `json:"new_apps_count"`
+	NewAppsCount    int64 `json:"new_apps_count"`
 }
 
 type HomeResponse struct {
-	FavoriteApps      []models.Application  `json:"favorite_apps"`
-	NewApps           []models.Application  `json:"new_apps"`
-	TodayEvents       []models.Event        `json:"today_events"`
-	UpcomingEvents    []models.Event        `json:"upcoming_events"`
-	RecentNews        []models.News         `json:"recent_news"`
-	RecentNewsByType  []NewsGroup           `json:"recent_news_by_type"`
-	Polls             []models.Poll         `json:"polls"`
-	Announcements     []models.Announcement `json:"announcements"`
-	Stats             *HomeStats            `json:"stats"`
-	Gamification      *GamificationSummary  `json:"gamification,omitempty"`
-	UserRole          string                `json:"user_role"`
-	ManagedGroupIDs   []uint                `json:"managed_group_ids,omitempty"`
-	AppSettings       *models.AppSettings   `json:"app_settings,omitempty"`
-	HeroMessages      []models.HeroMessage  `json:"hero_messages,omitempty"`
-	PendingItems      *PendingItems         `json:"pending_items,omitempty"`
+	FavoriteApps     []models.Application  `json:"favorite_apps"`
+	NewApps          []models.Application  `json:"new_apps"`
+	TodayEvents      []models.Event        `json:"today_events"`
+	UpcomingEvents   []models.Event        `json:"upcoming_events"`
+	RecentNews       []models.News         `json:"recent_news"`
+	RecentNewsByType []NewsGroup           `json:"recent_news_by_type"`
+	Polls            []models.Poll         `json:"polls"`
+	Announcements    []models.Announcement `json:"announcements"`
+	Stats            *HomeStats            `json:"stats"`
+	Gamification     *GamificationSummary  `json:"gamification,omitempty"`
+	UserRole         string                `json:"user_role"`
+	ManagedGroupIDs  []uint                `json:"managed_group_ids,omitempty"`
+	AppSettings      *models.AppSettings   `json:"app_settings,omitempty"`
+	HeroMessages     []models.HeroMessage  `json:"hero_messages,omitempty"`
+	PendingItems     *PendingItems         `json:"pending_items,omitempty"`
 }
 
 // Main handler

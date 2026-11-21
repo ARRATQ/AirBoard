@@ -411,7 +411,6 @@ func (s *EmailService) sendEmail(config *models.SMTPConfig, to, subject, htmlBod
 	return s.SendEmailWithOAuth(config, to, subject, htmlBody)
 }
 
-
 // SendEmailWithOAuth envoie un email via OAuth 2.0 Microsoft Graph API
 func (s *EmailService) SendEmailWithOAuth(config *models.SMTPConfig, to, subject, htmlBody string) error {
 	if config.EmailOAuthConfig == nil {
@@ -492,8 +491,6 @@ func (s *EmailService) sendEmailViaGraphAPI(config *models.SMTPConfig, accessTok
 	log.Printf("[Email OAuth] Email envoyé via Graph API à %s", to)
 	return nil
 }
-
-
 
 // TestConnection teste la connexion OAuth avec un email de test
 func (s *EmailService) TestConnection(smtpConfig *models.SMTPConfig, testEmail string) error {

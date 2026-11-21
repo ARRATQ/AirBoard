@@ -175,15 +175,15 @@ func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 // CreateApplication crée une nouvelle application dans un AppGroup privé géré
 func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 	var req struct {
-		Name         string `json:"name" binding:"required"`
-		Description  string `json:"description"`
-		URL          string `json:"url" binding:"required,url"`
-		Icon         string `json:"icon"`
-		Color        string `json:"color"`
-		Order        int    `json:"order"`
-		OpenInNewTab bool   `json:"open_in_new_tab"`
-		IsActive     bool   `json:"is_active"`
-		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		Name           string     `json:"name" binding:"required"`
+		Description    string     `json:"description"`
+		URL            string     `json:"url" binding:"required,url"`
+		Icon           string     `json:"icon"`
+		Color          string     `json:"color"`
+		Order          int        `json:"order"`
+		OpenInNewTab   bool       `json:"open_in_new_tab"`
+		IsActive       bool       `json:"is_active"`
+		AppGroupID     uint       `json:"app_group_id" binding:"required"`
 		AdminNote      string     `json:"admin_note"`
 		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
@@ -244,16 +244,16 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 	}
 
 	application := models.Application{
-		Name:        req.Name,
-		Description: req.Description,
-		URL:         req.URL,
-		Icon:        req.Icon,
-		Color:       req.Color,
-		Order:       req.Order,
-		OpenInNewTab: req.OpenInNewTab,
-		IsActive:    req.IsActive,
-		AppGroupID:  req.AppGroupID,
-		CreatedByID: createdByID,
+		Name:           req.Name,
+		Description:    req.Description,
+		URL:            req.URL,
+		Icon:           req.Icon,
+		Color:          req.Color,
+		Order:          req.Order,
+		OpenInNewTab:   req.OpenInNewTab,
+		IsActive:       req.IsActive,
+		AppGroupID:     req.AppGroupID,
+		CreatedByID:    createdByID,
 		AdminNote:      note,
 		AdminNoteUntil: noteUntil,
 	}
@@ -276,15 +276,15 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
-		Name         string `json:"name" binding:"required"`
-		Description  string `json:"description"`
-		URL          string `json:"url" binding:"required,url"`
-		Icon         string `json:"icon"`
-		Color        string `json:"color"`
-		Order        int    `json:"order"`
-		OpenInNewTab bool   `json:"open_in_new_tab"`
-		IsActive     bool   `json:"is_active"`
-		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		Name           string     `json:"name" binding:"required"`
+		Description    string     `json:"description"`
+		URL            string     `json:"url" binding:"required,url"`
+		Icon           string     `json:"icon"`
+		Color          string     `json:"color"`
+		Order          int        `json:"order"`
+		OpenInNewTab   bool       `json:"open_in_new_tab"`
+		IsActive       bool       `json:"is_active"`
+		AppGroupID     uint       `json:"app_group_id" binding:"required"`
 		AdminNote      string     `json:"admin_note"`
 		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}

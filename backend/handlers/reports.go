@@ -297,16 +297,16 @@ type NewsSummary struct {
 }
 
 type GroupStat struct {
-	GroupID          uint          `json:"group_id"`
-	GroupName        string        `json:"group_name"`
-	GroupColor       string        `json:"group_color"`
-	MemberCount      int64         `json:"member_count"`
-	ActiveMembers    int64         `json:"active_members"`
-	EngagementRate   float64       `json:"engagement_rate"`
-	AppClicks        int64         `json:"app_clicks"`
-	NewsRead         int64         `json:"news_read"`
-	ReactionsGiven   int64         `json:"reactions_given"`
-	PollVotes        int64         `json:"poll_votes"`
+	GroupID           uint          `json:"group_id"`
+	GroupName         string        `json:"group_name"`
+	GroupColor        string        `json:"group_color"`
+	MemberCount       int64         `json:"member_count"`
+	ActiveMembers     int64         `json:"active_members"`
+	EngagementRate    float64       `json:"engagement_rate"`
+	AppClicks         int64         `json:"app_clicks"`
+	NewsRead          int64         `json:"news_read"`
+	ReactionsGiven    int64         `json:"reactions_given"`
+	PollVotes         int64         `json:"poll_votes"`
 	AppsCreated       int64         `json:"apps_created"`
 	AppsCreatedTotal  int64         `json:"apps_created_total"`
 	ArticlesPublished int64         `json:"articles_published"`
