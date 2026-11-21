@@ -218,9 +218,11 @@ Décisions : menu admin Vue d'ensemble / Contenu / Communauté / Ressources / Ut
 l'admin de groupe voit une liste courte (Vue d'ensemble, Actualités, Événements, Sondages, Ressources),
 l'éditeur Actualités et Événements ; terme retenu « Ressources » + « Catégories de ressources ».
 
-Reste côté backend, vu pendant la fusion : `CreateAppGroup` impose le premier groupe administré et
-ignore le choix ; `Updates(struct)` GORM n'enregistre pas `false` (décocher actif/privé) ; filtres de
-statut des événements ignorés ; recherche d'un caractère → 400.
+Corrigé ensuite côté backend (même PR) : `CreateAppGroup` garde le groupe propriétaire choisi ;
+`false` et `0` (actif, privé, nouvel onglet, ordre) sont enregistrés à la création et à la modification ;
+filtres publié/brouillon, récurrent et journée entière de la liste des événements ; recherche d'un
+caractère acceptée (longueur comptée en caractères). Reste : la recherche refuse toujours l'apostrophe
+et des mots comme « update » ou « create » (liste de termes interdits inutile avec des requêtes paramétrées).
 
 Constat de départ :
 

@@ -81,12 +81,8 @@ func (h *NewsHandler) GetNews(c *gin.Context) {
 
 	// Recherche sécurisée avec validation et assainissement
 	if search := c.Query("search"); search != "" {
-		// Valider l'input de recherche
-		if len(search) < 2 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche doit contenir au moins 2 caractères"})
-			return
-		}
-		if len(search) > 100 {
+		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
+		if listSearchTooLong(search) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
 			return
 		}
