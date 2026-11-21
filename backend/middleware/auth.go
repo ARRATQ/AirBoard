@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/models"
 
@@ -67,11 +68,7 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			// Extraire le token (format: "Bearer <token>")
 			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
 			if tokenString == authHeader {
-				c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-					Error:   "Unauthorized",
-					Message: "Format de token invalide",
-					Code:    http.StatusUnauthorized,
-				})
+				apierror.Respond(c, http.StatusUnauthorized, "Format de token invalide")
 				c.Abort()
 				return
 			}
@@ -79,11 +76,7 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			// Essayer de récupérer le token depuis les query params (pour WebSocket)
 			tokenString = c.Query("token")
 			if tokenString == "" {
-				c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-					Error:   "Unauthorized",
-					Message: "Token d'autorisation manquant",
-					Code:    http.StatusUnauthorized,
-				})
+				apierror.Respond(c, http.StatusUnauthorized, "Token d'autorisation manquant")
 				c.Abort()
 				return
 			}
@@ -92,11 +85,7 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		// Vérifier le token
 		claims, err := am.verifyToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Token invalide ou expiré",
-				Code:    http.StatusUnauthorized,
-			})
+			apierror.Respond(c, http.StatusUnauthorized, "Token invalide ou expiré")
 			c.Abort()
 			return
 		}
@@ -106,20 +95,12 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		status, err := am.userCache.Get(c.Request.Context(), claims.UserID)
 		if err != nil && !errors.Is(err, errUserUnavailable) {
 			log.Printf("[Auth] Impossible de vérifier l'utilisateur %d: %v", claims.UserID, err)
-			c.JSON(http.StatusServiceUnavailable, models.ErrorResponse{
-				Error:   "Service Unavailable",
-				Message: "Vérification du compte impossible, réessayez",
-				Code:    http.StatusServiceUnavailable,
-			})
+			apierror.Respond(c, http.StatusServiceUnavailable, "Vérification du compte impossible, réessayez")
 			c.Abort()
 			return
 		}
 		if err != nil || !status.IsActive {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Compte désactivé ou supprimé",
-				Code:    http.StatusUnauthorized,
-			})
+			apierror.Respond(c, http.StatusUnauthorized, "Compte désactivé ou supprimé")
 			c.Abort()
 			return
 		}
@@ -139,11 +120,7 @@ func (am *AuthMiddleware) RequireAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
 		if !exists || role != "admin" {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Droits administrateur requis",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Droits administrateur requis")
 			c.Abort()
 			return
 		}

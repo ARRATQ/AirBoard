@@ -11,7 +11,7 @@ import (
 )
 
 // News représente un article du News Hub
-// Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 type News struct {
 	ID          uint       `json:"id" gorm:"primaryKey"`
 	Slug        string     `json:"slug" gorm:"not null"`
@@ -54,7 +54,7 @@ type News struct {
 }
 
 // NewsCategory représente une catégorie de news
-// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 // Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type NewsCategory struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
@@ -71,7 +71,7 @@ type NewsCategory struct {
 }
 
 // NewsType représente un type d'article (article, tutorial, announcement, faq)
-// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 // Avec GORM 1.25, un uniqueIndex sur une seule colonne ajoute aussi une contrainte UNIQUE complète.
 type NewsType struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
@@ -87,7 +87,7 @@ type NewsType struct {
 }
 
 // Tag représente un tag/étiquette
-// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL dans main.go.
+// Name et Slug : unicité partielle (hors éléments supprimés) posée en SQL (migrations/00002_soft_delete_unique_indexes.sql).
 type Tag struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Name      string         `json:"name" gorm:"not null"`

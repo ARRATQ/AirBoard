@@ -793,6 +793,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { apiErrorMessage } from '@/services/apiError'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
@@ -883,7 +884,7 @@ async function loadCurrentTab() {
     }
   } catch (e) {
     console.error('Error loading report:', e)
-    loadError.value = e?.response?.data?.message || e.message || t('reports.unknownError')
+    loadError.value = apiErrorMessage(e, e?.message || t('reports.unknownError'))
   } finally {
     isLoading.value = false
   }

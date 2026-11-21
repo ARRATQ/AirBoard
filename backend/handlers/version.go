@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+	"airboard/apierror"
 )
 
 type VersionHandler struct{}
@@ -56,13 +58,13 @@ func (h *VersionHandler) GetVersion(c *gin.Context) {
 	// Read file
 	data, err := ioutil.ReadFile(versionFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read version file"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to read version file")
 		return
 	}
 
 	var versionInfo VersionInfo
 	if err := json.Unmarshal(data, &versionInfo); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse version file"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to parse version file")
 		return
 	}
 
@@ -100,7 +102,7 @@ func (h *VersionHandler) CheckForUpdates(c *gin.Context) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create request")
 		return
 	}
 
@@ -139,13 +141,13 @@ func (h *VersionHandler) CheckForUpdates(c *gin.Context) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to read response")
 		return
 	}
 
 	var latestRelease GitHubRelease
 	if err := json.Unmarshal(body, &latestRelease); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse release data"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to parse release data")
 		return
 	}
 

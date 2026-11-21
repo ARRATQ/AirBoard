@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
@@ -38,11 +39,7 @@ func NewOAuthHandler(db *gorm.DB, authMiddleware *middleware.AuthMiddleware, gs 
 func (h *OAuthHandler) GetEnabledProviders(c *gin.Context) {
 	var providers []models.OAuthProvider
 	if err := h.db.Where("is_enabled = ?", true).Find(&providers).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch OAuth providers",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch OAuth providers")
 		return
 	}
 
@@ -68,11 +65,7 @@ func (h *OAuthHandler) GetEnabledProviders(c *gin.Context) {
 func (h *OAuthHandler) GetAllProviders(c *gin.Context) {
 	var providers []models.OAuthProvider
 	if err := h.db.Find(&providers).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch OAuth providers",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch OAuth providers")
 		return
 	}
 
@@ -87,21 +80,13 @@ func (h *OAuthHandler) UpdateProvider(c *gin.Context) {
 
 	var req models.OAuthProviderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "validation_error",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var provider models.OAuthProvider
 	if err := h.db.First(&provider, providerID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "not_found",
-			Message: "OAuth provider not found",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "OAuth provider not found")
 		return
 	}
 
@@ -120,11 +105,7 @@ func (h *OAuthHandler) UpdateProvider(c *gin.Context) {
 	provider.Scopes = req.Scopes
 
 	if err := h.db.Save(&provider).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to update OAuth provider",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update OAuth provider")
 		return
 	}
 
@@ -140,22 +121,14 @@ func (h *OAuthHandler) InitiateOAuth(c *gin.Context) {
 
 	var provider models.OAuthProvider
 	if err := h.db.Where("provider_name = ? AND is_enabled = ?", providerName, true).First(&provider).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "not_found",
-			Message: "OAuth provider not found or disabled",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "OAuth provider not found or disabled")
 		return
 	}
 
 	// Générer un state et nonce sécurisés
 	state, nonce, err := h.stateManager.GenerateState(providerName, provider.ClientID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "state_generation_error",
-			Message: "Failed to generate secure state",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to generate secure state")
 		return
 	}
 
@@ -168,11 +141,7 @@ func (h *OAuthHandler) InitiateOAuth(c *gin.Context) {
 	}, state, nonce)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "auth_url_error",
-			Message: "Failed to construct authorization URL",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to construct authorization URL")
 		return
 	}
 
@@ -198,11 +167,7 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		}
 		if err := c.ShouldBindJSON(&req); err != nil {
 			log.Printf("[OAuth] Error parsing POST body: %v", err)
-			c.JSON(http.StatusBadRequest, models.ErrorResponse{
-				Error:   "bad_request",
-				Message: "Invalid request body",
-				Code:    http.StatusBadRequest,
-			})
+			apierror.Respond(c, http.StatusBadRequest, "Invalid request body")
 			return
 		}
 		code = req.Code
@@ -220,22 +185,14 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		providerName, code != "", state != "", nonce != "")
 
 	if code == "" {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "bad_request",
-			Message: "Missing authorization code",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Missing authorization code")
 		return
 	}
 
 	// Récupérer le provider pour la validation
 	var provider models.OAuthProvider
 	if err := h.db.Where("provider_name = ? AND is_enabled = ?", providerName, true).First(&provider).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "not_found",
-			Message: "OAuth provider not found or disabled",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "OAuth provider not found or disabled")
 		return
 	}
 
@@ -243,42 +200,26 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	// Le frontend les conserve en sessionStorage et Microsoft renvoie toujours le state.
 	if state == "" || nonce == "" {
 		log.Printf("[OAuth] Callback rejected for %s: missing state or nonce", providerName)
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "missing_state",
-			Message: "Missing state or nonce parameter",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.RespondCode(c, http.StatusBadRequest, apierror.CodeOAuthStateMismatch, "Missing state or nonce parameter")
 		return
 	}
 
 	validatedNonce, err := h.stateManager.ValidateState(state, providerName, provider.ClientID)
 	if err != nil {
 		log.Printf("[OAuth] State validation failed: %v", err)
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "invalid_state",
-			Message: "Invalid or expired state parameter",
-			Code:    http.StatusForbidden,
-		})
+		apierror.RespondCode(c, http.StatusForbidden, apierror.CodeOAuthStateMismatch, "Invalid or expired state parameter")
 		return
 	}
 
 	if err := h.stateManager.ValidateNonce(state, nonce); err != nil {
 		log.Printf("[OAuth] Nonce validation failed: %v", err)
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "invalid_nonce",
-			Message: "Invalid nonce parameter",
-			Code:    http.StatusForbidden,
-		})
+		apierror.RespondCode(c, http.StatusForbidden, apierror.CodeOAuthStateMismatch, "Invalid nonce parameter")
 		return
 	}
 
 	if validatedNonce != nonce {
 		log.Printf("[OAuth] Nonce mismatch for %s", providerName)
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "nonce_mismatch",
-			Message: "Nonce validation failed",
-			Code:    http.StatusForbidden,
-		})
+		apierror.RespondCode(c, http.StatusForbidden, apierror.CodeOAuthStateMismatch, "Nonce validation failed")
 		return
 	}
 
@@ -291,11 +232,7 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		if gin.Mode() == gin.DebugMode {
 			log.Printf("[OAuth] Continuing in debug mode despite callback URL validation failure")
 		} else {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "invalid_callback",
-				Message: "Callback URL validation failed",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Callback URL validation failed")
 			return
 		}
 	}
@@ -310,11 +247,7 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		if strings.Contains(errMsg, "redirect_uri") || strings.Contains(errMsg, "AADSTS") {
 			log.Printf("[OAuth] ❌ Likely redirect_uri mismatch. Stored redirect_uri: %s", provider.RedirectURI)
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "oauth_error",
-			Message: "Failed to exchange code for token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to exchange code for token")
 		return
 	}
 	log.Printf("[OAuth] ✅ Token exchange successful")
@@ -324,11 +257,7 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	userInfo, err := h.getUserInfo(provider, token)
 	if err != nil {
 		log.Printf("[OAuth] ❌ Error getting user info: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "oauth_error",
-			Message: "Failed to get user information",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to get user information")
 		return
 	}
 	log.Printf("[OAuth] ✅ User info retrieved: %v", userInfo["mail"])
@@ -338,11 +267,7 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	user, err := h.findOrCreateOAuthUser(provider.ProviderName, userInfo)
 	if err != nil {
 		log.Printf("[OAuth] ❌ Error finding or creating user: %v", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to create or find user",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create or find user")
 		return
 	}
 	log.Printf("[OAuth] ✅ User found/created: %s (%s)", user.Username, user.Email)
@@ -357,21 +282,13 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 	// Générer les tokens JWT
 	jwtToken, err := h.authMiddleware.GenerateToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "token_error",
-			Message: "Failed to generate JWT token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to generate JWT token")
 		return
 	}
 
 	refreshToken, err := h.authMiddleware.GenerateRefreshToken(&user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "token_error",
-			Message: "Failed to generate refresh token",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to generate refresh token")
 		return
 	}
 
@@ -380,19 +297,8 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		log.Printf("Error loading user groups: %v", err)
 	}
 
-	// Charger les IDs des groupes administrés (nécessaire pour le frontend)
-	var managedGroupIDs []uint
-	h.db.Table("group_admins").
-		Where("user_id = ?", user.ID).
-		Pluck("group_id", &managedGroupIDs)
-	user.ManagedGroupIDs = managedGroupIDs
-
-	// Si AdminOfGroups est vide mais qu'il y a des groupes administrés, les charger
-	if len(user.AdminOfGroups) == 0 && len(managedGroupIDs) > 0 {
-		var adminGroups []models.Group
-		h.db.Where("id IN ?", managedGroupIDs).Find(&adminGroups)
-		user.AdminOfGroups = adminGroups
-	}
+	// Groupes administrés (nécessaires au frontend)
+	attachManagedGroups(h.db, &user)
 
 	user.Password = ""
 

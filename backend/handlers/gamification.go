@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
 
@@ -55,7 +56,7 @@ func (h *GamificationHandler) GetMyProfile(c *gin.Context) {
 			profile = models.GamificationProfile{UserID: userID, Level: 1, XP: 0}
 			h.db.Create(&profile)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération du profil"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du profil")
 			return
 		}
 	}
@@ -90,7 +91,7 @@ func (h *GamificationHandler) GetMyAchievements(c *gin.Context) {
 
 	var userAchievements []models.UserAchievement
 	if err := h.db.Preload("Achievement").Where("user_id = ?", userID).Order("user_achievements.unlocked_at DESC").Find(&userAchievements).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des badges"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des badges")
 		return
 	}
 
@@ -118,7 +119,7 @@ func (h *GamificationHandler) GetAllAchievements(c *gin.Context) {
 	}
 
 	if err := query.Find(&achievements).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des badges"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des badges")
 		return
 	}
 
@@ -172,12 +173,12 @@ func (h *GamificationHandler) GetLeaderboard(c *gin.Context) {
 	}
 
 	var userAchievements []struct {
-		UserID      uint   `json:"user_id"`
-		Code        string `json:"code"`
-		Icon        string `json:"icon"`
-		Color       string `json:"color"`
-		Name        string `json:"name"`
-		UnlockedAt  string `json:"unlocked_at"`
+		UserID     uint   `json:"user_id"`
+		Code       string `json:"code"`
+		Icon       string `json:"icon"`
+		Color      string `json:"color"`
+		Name       string `json:"name"`
+		UnlockedAt string `json:"unlocked_at"`
 	}
 	h.db.Table("user_achievements").
 		Select("user_achievements.user_id, achievements.code, achievements.icon, achievements.color, achievements.name, user_achievements.unlocked_at").
@@ -227,7 +228,7 @@ func (h *GamificationHandler) GetMyTransactions(c *gin.Context) {
 		Order("created_at DESC").
 		Limit(20).
 		Find(&transactions).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de l'historique"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de l'historique")
 		return
 	}
 
@@ -237,7 +238,7 @@ func (h *GamificationHandler) GetMyTransactions(c *gin.Context) {
 func (h *GamificationHandler) GetRules(c *gin.Context) {
 	var rules []models.GamificationRule
 	if err := h.db.Order("reason ASC").Find(&rules).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des règles"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des règles")
 		return
 	}
 
@@ -247,13 +248,13 @@ func (h *GamificationHandler) GetRules(c *gin.Context) {
 func (h *GamificationHandler) UpsertRule(c *gin.Context) {
 	var req GamificationRuleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	reason := strings.TrimSpace(req.Reason)
 	if reason == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Reason is required"})
+		apierror.Respond(c, http.StatusBadRequest, "Reason is required")
 		return
 	}
 
@@ -267,21 +268,21 @@ func (h *GamificationHandler) UpsertRule(c *gin.Context) {
 	if err == gorm.ErrRecordNotFound {
 		rule = models.GamificationRule{Reason: reason, Points: req.Points, Enabled: enabled}
 		if createErr := h.db.Create(&rule).Error; createErr != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la règle"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de la règle")
 			return
 		}
 		c.JSON(http.StatusCreated, rule)
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de la règle"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de la règle")
 		return
 	}
 
 	rule.Points = req.Points
 	rule.Enabled = enabled
 	if err := h.db.Save(&rule).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour de la règle"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour de la règle")
 		return
 	}
 
@@ -291,7 +292,7 @@ func (h *GamificationHandler) UpsertRule(c *gin.Context) {
 func (h *GamificationHandler) GetAdminAchievements(c *gin.Context) {
 	var achievements []models.Achievement
 	if err := h.db.Order("created_at DESC").Find(&achievements).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des badges"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des badges")
 		return
 	}
 
@@ -301,7 +302,7 @@ func (h *GamificationHandler) GetAdminAchievements(c *gin.Context) {
 func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
 	var req AchievementRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -333,7 +334,7 @@ func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &achievement, "is_active"); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur lors de la création du badge (code peut déjà exister)"})
+		apierror.Respond(c, http.StatusBadRequest, "Erreur lors de la création du badge (code peut déjà exister)")
 		return
 	}
 
@@ -346,16 +347,16 @@ func (h *GamificationHandler) UpdateAchievement(c *gin.Context) {
 	var achievement models.Achievement
 	if err := h.db.First(&achievement, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Badge introuvable"})
+			apierror.Respond(c, http.StatusNotFound, "Badge introuvable")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération du badge"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération du badge")
 		return
 	}
 
 	var req AchievementRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -382,7 +383,7 @@ func (h *GamificationHandler) UpdateAchievement(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&achievement).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur lors de la mise à jour du badge"})
+		apierror.Respond(c, http.StatusBadRequest, "Erreur lors de la mise à jour du badge")
 		return
 	}
 
@@ -393,7 +394,7 @@ func (h *GamificationHandler) DeleteAchievement(c *gin.Context) {
 	id := c.Param("id")
 
 	if err := h.db.Delete(&models.Achievement{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression du badge"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression du badge")
 		return
 	}
 

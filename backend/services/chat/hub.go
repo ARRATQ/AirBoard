@@ -6,6 +6,8 @@ import (
 	"log"
 	"sync"
 	"time"
+
+	"airboard/utils"
 )
 
 // EmailNotifier is an interface for sending chat email notifications.
@@ -180,11 +182,11 @@ func (h *Hub) NotifyOfflineUser(senderID, recipientID uint) {
 	h.emailRateLimit[key] = time.Now()
 	h.rateMu.Unlock()
 
-	go func() {
+	utils.SafeGo("chat-email-notification", func() {
 		if err := h.EmailService.SendChatNotificationEmail(senderID, recipientID); err != nil {
 			log.Printf("[Chat Email] Error sending notification: %v", err)
 		}
-	}()
+	})
 }
 
 // BroadcastStatus sends a status update (online/offline) to all clients

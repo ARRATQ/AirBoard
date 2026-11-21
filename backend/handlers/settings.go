@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/models"
 	"net/http"
 
@@ -41,19 +42,11 @@ func (h *SettingsHandler) GetAppSettings(c *gin.Context) {
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "database_error",
-					Message: "Failed to create default settings",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Failed to create default settings")
 				return
 			}
 		} else {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to fetch app settings",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch app settings")
 			return
 		}
 	}
@@ -70,11 +63,7 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 
 	// Valider les données de la requête
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "validation_error",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -110,19 +99,11 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 			}
 
 			if err := h.DB.Create(&settings).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-					Error:   "database_error",
-					Message: "Failed to create app settings",
-					Code:    http.StatusInternalServerError,
-				})
+				apierror.Respond(c, http.StatusInternalServerError, "Failed to create app settings")
 				return
 			}
 		} else {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to fetch app settings",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch app settings")
 			return
 		}
 	} else {
@@ -147,11 +128,7 @@ func (h *SettingsHandler) UpdateAppSettings(c *gin.Context) {
 		}
 
 		if err := h.DB.Save(&settings).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to update app settings",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to update app settings")
 			return
 		}
 	}
@@ -174,11 +151,7 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	// Récupérer les paramètres existants
 	result := h.DB.First(&settings)
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch app settings",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch app settings")
 		return
 	}
 
@@ -200,21 +173,13 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 	if result.Error == gorm.ErrRecordNotFound {
 		// Créer de nouveaux paramètres avec les valeurs par défaut
 		if err := h.DB.Create(&settings).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to create default settings",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to create default settings")
 			return
 		}
 	} else {
 		// Mettre à jour les paramètres existants
 		if err := h.DB.Save(&settings).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to reset app settings",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to reset app settings")
 			return
 		}
 	}
@@ -245,11 +210,7 @@ func (h *SettingsHandler) GetPublicSettings(c *gin.Context) {
 			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch settings",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch settings")
 		return
 	}
 
@@ -306,11 +267,7 @@ func GetDefaultGroupFromDB(db *gorm.DB) *models.Group {
 func (h *SettingsHandler) GetHeroMessages(c *gin.Context) {
 	var messages []models.HeroMessage
 	if err := h.DB.Order("created_at DESC").Find(&messages).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to fetch hero messages",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch hero messages")
 		return
 	}
 
@@ -324,11 +281,7 @@ func (h *SettingsHandler) GetHeroMessages(c *gin.Context) {
 func (h *SettingsHandler) CreateHeroMessage(c *gin.Context) {
 	var request models.HeroMessageRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "validation_error",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -344,11 +297,7 @@ func (h *SettingsHandler) CreateHeroMessage(c *gin.Context) {
 	}
 
 	if err := h.DB.Create(&message).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to create hero message",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create hero message")
 		return
 	}
 
@@ -367,28 +316,16 @@ func (h *SettingsHandler) UpdateHeroMessage(c *gin.Context) {
 	var message models.HeroMessage
 	if err := h.DB.First(&message, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "not_found",
-				Message: "Hero message not found",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Hero message not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "database_error",
-				Message: "Failed to fetch hero message",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch hero message")
 		}
 		return
 	}
 
 	var request models.HeroMessageRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "validation_error",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -399,11 +336,7 @@ func (h *SettingsHandler) UpdateHeroMessage(c *gin.Context) {
 	}
 
 	if err := h.DB.Save(&message).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to update hero message",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update hero message")
 		return
 	}
 
@@ -420,11 +353,7 @@ func (h *SettingsHandler) UpdateHeroMessage(c *gin.Context) {
 func (h *SettingsHandler) DeleteHeroMessage(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.DB.Delete(&models.HeroMessage{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "database_error",
-			Message: "Failed to delete hero message",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete hero message")
 		return
 	}
 

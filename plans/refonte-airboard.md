@@ -342,7 +342,7 @@ visuelle. Ensuite :
    - piège du focus et Échap dans toutes les modales (via `BaseModal`) ;
    - le raccourci `⌘K` s'affiche aussi sous Windows et Linux.
 
-## Chantier 7 — Structure du backend
+## Chantier 7 — Structure du backend ✅ fait (branche `claude/chantier-7-backend`)
 
 1. Découper `main.go` (1 522 lignes) : migrations, index SQL, routes (`routes.go`) et données initiales
    (`seed.go`).
@@ -355,6 +355,43 @@ visuelle. Ensuite :
 6. Tests table-driven sur les règles d'autorisation (`CanManage*`) et sur les handlers critiques.
 7. Bruit au démarrage : le seed recrée des catégories de suggestion déjà existantes (erreur de clé
    unique `idx_suggestion_categories_slug`, `main.go:1443`).
+
+### Fait — partie A (branche `claude/chantier-7a-structure`)
+
+- **Point 1** : `main.go` découpé (déplacement pur) en `db.go`, `routes.go`, `seed.go`,
+  `seed_defaults.go`, `seed_demo.go`, `server.go` ; `main()` tient sur un écran.
+- **Point 2** : migrations goose embarquées (`backend/migrations/`, mode d'emploi dans
+  `backend/MIGRATIONS.md`), AutoMigrate et DDL manuel retirés du démarrage. `00001_baseline`
+  est extrait du schéma que l'ancien démarrage construisait et rendu idempotent pour reprendre
+  une base de production existante ; `00002` index uniques partiels, `00003` index de
+  performance (ex-`EnsurePerformanceIndexes`). Vérifié : ancien code sur base vide = nouveau
+  code sur base vide (schémas identiques), base construite par `main` puis migrée = identique,
+  copie de la base de dev migrée = seule `goose_db_version` ajoutée. Test d'intégration qui
+  échoue si un champ de modèle n'a pas de migration.
+- **Point 5 (moitié serveur)** : `http.Server` avec délais (en-têtes 10 s, lecture et écriture
+  2 min, inactivité 2 min ; WebSocket du chat non coupé, test dédié) et arrêt propre sur
+  SIGINT/SIGTERM (8 s, puis fermeture de la base).
+- **Point 7** : seed idempotent (`ON CONFLICT DO NOTHING`), plus de « record not found » au
+  démarrage ; test d'intégration en deux passages.
+
+### Fait — partie B (branche `claude/chantier-7b-handlers`)
+
+- **Point 3 fait.** `handlers/visibility.go` regroupe la visibilité (`newsTargets`, `eventTargets`,
+  `pollTargets` : `visibleTo`, `publishedVisibleTo`, `ownOrPublishedVisibleTo`, `manageableBy`) et
+  les recherches de groupes (`userGroupIDs`, `adminGroupIDs`, `attachManagedGroups`,
+  `canSeeTargeted`…). La page d'accueil calcule les groupes du lecteur une seule fois (55 → 44
+  requêtes). Deux failles corrigées au passage : le `OR` de visibilité n'était pas parenthésé
+  (brouillons, sondages inactifs et contenus supprimés visibles des groupes ciblés) et
+  `GetEventBySlug` ne vérifiait pas le ciblage.
+- **Point 4 fait.** Corps d'erreur unique `{"error": "...", "code": "..."}` via le paquet
+  `apierror` (705 appels, statuts inchangés). Les erreurs de binding donnent un message lisible et
+  les erreurs SQL brutes ne sortent plus. Côté front, `services/apiError.js` lit `error` puis
+  `message`.
+- **Point 5, partie recover faite.** `utils.SafeGo` couvre les 17 goroutines sans suivi et les 13 de
+  l'accueil. Le `CustomRecovery` de Gin répond aussi au format commun.
+- **Point 6 fait.** Tests table-driven des gardes de rôle, `CanManage*`, `canManageDirectory`, SQL
+  de visibilité (sans base), et tests d'intégration (tag `integration`) sur le ciblage, le périmètre
+  admin de groupe et le verrouillage de connexion.
 
 ---
 

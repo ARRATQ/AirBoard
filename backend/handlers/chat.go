@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
 	"airboard/services/chat"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -38,7 +40,7 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		// Try to get from query param if middleware failed (e.g. strict header check)
 		// This requires a custom middleware adaptation, but for now let's assume standard auth worked
 		// or implementing a fallback if standard Middleware checks headers only.
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		apierror.Respond(c, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -65,8 +67,8 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
-	go client.WritePump()
-	go client.ReadPump()
+	utils.SafeGo("chat-write-pump", client.WritePump)
+	utils.SafeGo("chat-read-pump", client.ReadPump)
 }
 
 // GetContacts returns list of users (DMs) and groups
@@ -132,7 +134,7 @@ func (h *ChatHandler) GetHistory(c *gin.Context) {
 			userID, targetID, targetID, userID,
 		)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "target_id or group_id required"})
+		apierror.Respond(c, http.StatusBadRequest, "target_id or group_id required")
 		return
 	}
 
@@ -149,25 +151,25 @@ func (h *ChatHandler) DeleteMessage(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	msgID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid message ID"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid message ID")
 		return
 	}
 
 	var msg models.ChatMessage
 	// Check content existence and ownership
 	if err := h.db.First(&msg, msgID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Message not found"})
+		apierror.Respond(c, http.StatusNotFound, "Message not found")
 		return
 	}
 
 	if msg.SenderID != userID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own messages"})
+		apierror.Respond(c, http.StatusForbidden, "You can only delete your own messages")
 		return
 	}
 
 	// Soft delete
 	if err := h.db.Delete(&msg).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting message"})
+		apierror.Respond(c, http.StatusInternalServerError, "Error deleting message")
 		return
 	}
 
@@ -193,12 +195,12 @@ func (h *ChatHandler) ClearConversation(c *gin.Context) {
 			// Also allow if user is global admin?
 			// Let's keep it simple: Only group admin or system admin.
 			// Currently strict: Group Admin.
-			c.JSON(http.StatusForbidden, gin.H{"error": "Only group admins can clear group chat"})
+			apierror.Respond(c, http.StatusForbidden, "Only group admins can clear group chat")
 			return
 		}
 
 		if err := h.db.Where("group_id = ?", groupID).Delete(&models.ChatMessage{}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error clearing conversation"})
+			apierror.Respond(c, http.StatusInternalServerError, "Error clearing conversation")
 			return
 		}
 	} else if targetID > 0 {
@@ -224,7 +226,7 @@ func (h *ChatHandler) ClearConversation(c *gin.Context) {
 			userID, targetID, targetID, userID,
 		).Delete(&models.ChatMessage{})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "target_id or group_id required"})
+		apierror.Respond(c, http.StatusBadRequest, "target_id or group_id required")
 		return
 	}
 

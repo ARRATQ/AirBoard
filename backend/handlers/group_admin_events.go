@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 
@@ -17,12 +18,12 @@ import (
 func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(&req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -40,9 +41,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-				})
+				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 				return
 			}
 		}
@@ -83,7 +82,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 
 	// Créer l'événement en BDD
 	if err := h.db.Create(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de l'événement"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'événement")
 		return
 	}
 
@@ -134,7 +133,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	}
 
 	if err := query.First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Événement non trouvé")
 		return
 	}
 
@@ -164,18 +163,18 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	}
 
 	if !canManage {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Vous ne pouvez modifier que les événements de vos groupes gérés"})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez modifier que les événements de vos groupes gérés")
 		return
 	}
 
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(&req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -190,9 +189,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-				})
+				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 				return
 			}
 		}
@@ -230,7 +227,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 
 	// Sauvegarder
 	if err := h.db.Save(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour")
 		return
 	}
 
@@ -278,7 +275,7 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	}
 
 	if err := query.First(&event).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Événement non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Événement non trouvé")
 		return
 	}
 
@@ -308,13 +305,13 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	}
 
 	if !canManage {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Vous ne pouvez supprimer que les événements de vos groupes gérés"})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez supprimer que les événements de vos groupes gérés")
 		return
 	}
 
 	// Soft delete (GORM)
 	if err := h.db.Delete(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la suppression"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 

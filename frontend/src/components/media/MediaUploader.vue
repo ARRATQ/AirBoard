@@ -98,6 +98,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import { apiErrorMessage } from '@/services/apiError'
 import { mediaService } from '@/services/api'
 import { useI18n } from 'vue-i18n'
 
@@ -214,7 +215,7 @@ const uploadFile = async (queueItem) => {
     }, 2000)
   } catch (error) {
     queueItem.status = 'error'
-    errorMessage.value = error.response?.data?.message || t('media.upload_error')
+    errorMessage.value = apiErrorMessage(error, t('media.upload_error'))
     emit('upload-error', error)
 
     // Remove from queue after 5 seconds

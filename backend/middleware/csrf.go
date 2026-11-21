@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"airboard/models"
+	"airboard/apierror"
 
 	"github.com/gin-gonic/gin"
 )
@@ -110,11 +110,7 @@ func CSRFProtection(csrfManager *CSRFManager) gin.HandlerFunc {
 			// Vérifier la présence du token CSRF
 			userID, exists := c.Get("user_id")
 			if !exists {
-				c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-					Error:   "Unauthorized",
-					Message: "Token CSRF requis - utilisateur non authentifié",
-					Code:    http.StatusUnauthorized,
-				})
+				apierror.Respond(c, http.StatusUnauthorized, "Token CSRF requis - utilisateur non authentifié")
 				c.Abort()
 				return
 			}
@@ -130,11 +126,7 @@ func CSRFProtection(csrfManager *CSRFManager) gin.HandlerFunc {
 
 			// Valider le token CSRF
 			if !csrfManager.validateCSRFToken(userID.(uint), csrfToken) {
-				c.JSON(http.StatusForbidden, models.ErrorResponse{
-					Error:   "Forbidden",
-					Message: "Token CSRF invalide ou expiré",
-					Code:    http.StatusForbidden,
-				})
+				apierror.Respond(c, http.StatusForbidden, "Token CSRF invalide ou expiré")
 				c.Abort()
 				return
 			}
@@ -150,11 +142,7 @@ func CSRFTokenHandler(csrfManager *CSRFManager) gin.HandlerFunc {
 		// Vérifier l'authentification
 		userID, exists := c.Get("user_id")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Authentification requise pour générer un token CSRF",
-				Code:    http.StatusUnauthorized,
-			})
+			apierror.Respond(c, http.StatusUnauthorized, "Authentification requise pour générer un token CSRF")
 			return
 		}
 
@@ -194,11 +182,7 @@ func OptionalCSRFProtection(csrfManager *CSRFManager) gin.HandlerFunc {
 
 			// Si token présent, le valider
 			if csrfToken != "" && !csrfManager.validateCSRFToken(userID.(uint), csrfToken) {
-				c.JSON(http.StatusForbidden, models.ErrorResponse{
-					Error:   "Forbidden",
-					Message: "Token CSRF invalide",
-					Code:    http.StatusForbidden,
-				})
+				apierror.Respond(c, http.StatusForbidden, "Token CSRF invalide")
 				c.Abort()
 				return
 			}

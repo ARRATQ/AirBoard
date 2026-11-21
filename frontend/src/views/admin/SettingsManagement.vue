@@ -984,6 +984,7 @@
 <script setup>
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, reactive, onMounted } from 'vue'
+import { apiErrorMessage } from '@/services/apiError'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -1432,7 +1433,7 @@ const handleResetDatabase = async () => {
     }, 1000)
   } catch (error) {
     console.error('Erreur lors de la réinitialisation:', error)
-    appStore.showError(t('admin.resetDatabaseError', { error: error.response?.data?.message || error.message }))
+    appStore.showError(t('admin.resetDatabaseError', { error: apiErrorMessage(error, error.message) }))
   } finally {
     isResetting.value = false
   }

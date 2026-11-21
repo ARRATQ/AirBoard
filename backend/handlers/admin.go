@@ -6,10 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
+	"airboard/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -82,11 +84,7 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 		Order("\"order\" ASC, name ASC").
 		Limit(limit).Offset(offset).
 		Find(&appGroups).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des groupes d'applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes d'applications")
 		return
 	}
 
@@ -120,11 +118,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	var appGroup models.AppGroup
 	var flags resourceFlags
 	if err := c.ShouldBindBodyWith(&appGroup, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
@@ -137,11 +131,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	if isGroupAdmin {
 		ownerID, ok := resolveOwnerGroup(appGroup.OwnerGroupID, managedGroupIDs)
 		if !ok {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Vous n'administrez pas le groupe propriétaire choisi",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Vous n'administrez pas le groupe propriétaire choisi")
 			return
 		}
 		appGroup.IsPrivate = true
@@ -151,21 +141,13 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 
 	// Créer l'AppGroup
 	if err := h.db.Create(&appGroup).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création du groupe d'applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du groupe d'applications")
 		return
 	}
 
 	// Create ignore les false des champs à valeur par défaut (is_active) : les appliquer ensuite
 	if err := h.applyFlags(&appGroup, flags, "is_active"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création du groupe d'applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du groupe d'applications")
 		return
 	}
 
@@ -194,43 +176,27 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var appGroup models.AppGroup
 	if err := h.db.First(&appGroup, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe d'applications non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe d'applications non trouvé")
 		return
 	}
 
 	// Vérification des permissions pour les admins de groupe
 	// Un admin de groupe peut modifier un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
 	if !middleware.CanManageAppGroupWithDB(c, appGroup.ID, h.db) {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Vous ne pouvez pas modifier ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être modifiés.",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas modifier ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être modifiés.")
 		return
 	}
 
 	var updateData models.AppGroup
 	var flags resourceFlags
 	if err := c.ShouldBindBodyWith(&updateData, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
@@ -240,11 +206,7 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		updateData.IsPrivate = true
 		flags.IsPrivate = nil
 		if updateData.OwnerGroupID != nil && !containsUint(middleware.GetManagedGroupIDs(c), *updateData.OwnerGroupID) {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Vous n'administrez pas le groupe propriétaire choisi",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Vous n'administrez pas le groupe propriétaire choisi")
 			return
 		}
 	}
@@ -260,11 +222,7 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		return nil
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la modification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la modification")
 		return
 	}
 
@@ -283,63 +241,39 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 func (h *AdminHandler) DeleteAppGroup(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	// Vérification des permissions pour les admins de groupe
 	// Un admin de groupe peut supprimer un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
 	if !middleware.CanManageAppGroupWithDB(c, uint(id), h.db) {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Vous ne pouvez pas supprimer ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être supprimés.",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas supprimer ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être supprimés.")
 		return
 	}
 
 	// Vérifier si le groupe existe
 	var appGroup models.AppGroup
 	if err := h.db.First(&appGroup, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe d'applications non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe d'applications non trouvé")
 		return
 	}
 
 	// Supprimer d'abord les applications associées (hard delete)
 	if err := h.db.Unscoped().Where("app_group_id = ?", id).Delete(&models.Application{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des applications")
 		return
 	}
 
 	// Supprimer les associations many-to-many (group_app_groups)
 	if err := h.db.Exec("DELETE FROM group_app_groups WHERE app_group_id = ?", id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression des associations",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des associations")
 		return
 	}
 
 	// Supprimer le groupe d'applications (hard delete pour permettre la recréation avec le même nom)
 	if err := h.db.Unscoped().Delete(&models.AppGroup{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -405,11 +339,7 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 		Order("\"order\" ASC, name ASC").
 		Limit(limit).Offset(offset).
 		Find(&applications).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des applications")
 		return
 	}
 
@@ -440,22 +370,14 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 	var application models.Application
 	var flags resourceFlags
 	if err := c.ShouldBindBodyWith(&application, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
 	note, noteUntil, err := models.NormalizeAdminNote(application.AdminNote, application.AdminNoteUntil)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	application.AdminNote, application.AdminNoteUntil = note, noteUntil
@@ -471,30 +393,18 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 	// Vérification des permissions pour les admins de groupe
 	// Un admin de groupe peut créer une application seulement dans un AppGroup privé qu'il possède
 	if !middleware.CanManageAppGroupWithDB(c, application.AppGroupID, h.db) {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Vous ne pouvez pas créer d'application dans cet AppGroup. Seuls les AppGroups privés appartenant à votre groupe sont autorisés.",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas créer d'application dans cet AppGroup. Seuls les AppGroups privés appartenant à votre groupe sont autorisés.")
 		return
 	}
 
 	if err := h.db.Create(&application).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création de l'application",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'application")
 		return
 	}
 
 	// Create ignore les false des champs à valeur par défaut : une application créée inactive le reste
 	if err := h.applyFlags(&application, flags, "is_active", "open_in_new_tab"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création de l'application",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'application")
 		return
 	}
 
@@ -503,7 +413,7 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 
 	// Envoyer une notification email si l'application est active
 	if application.IsActive {
-		go func() {
+		utils.SafeGo("email-application", func() {
 			emailService := services.NewEmailService(h.db, config.LoadConfig())
 			// Récupérer les groupes liés à l'AppGroup
 			var targetGroupIDs []uint
@@ -511,7 +421,7 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 			if err := emailService.SendNotification("application", application.ID, targetGroupIDs); err != nil {
 				log.Printf("[Email] Échec de l'envoi de la notification application: %v", err)
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, application)
@@ -530,52 +440,32 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var application models.Application
 	if err := h.db.Preload("AppGroup").First(&application, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Application non trouvée",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Application non trouvée")
 		return
 	}
 
 	// Vérification des permissions pour les admins de groupe
 	// Un admin de groupe peut modifier une application seulement si elle est dans un AppGroup privé qu'il possède
 	if application.AppGroup == nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "AppGroup introuvable pour cette application",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "AppGroup introuvable pour cette application")
 		return
 	}
 
 	if !middleware.CanManageAppGroupWithDB(c, application.AppGroup.ID, h.db) {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Vous ne pouvez pas modifier cette application. Seules les applications des AppGroups privés appartenant à votre groupe sont autorisées.",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas modifier cette application. Seules les applications des AppGroups privés appartenant à votre groupe sont autorisées.")
 		return
 	}
 
 	var updateData models.Application
 	var flags resourceFlags
 	if err := c.ShouldBindBodyWith(&updateData, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
@@ -590,11 +480,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	if notePresence.AdminNote != nil {
 		note, noteUntil, err := models.NormalizeAdminNote(*notePresence.AdminNote, updateData.AdminNoteUntil)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.ErrorResponse{
-				Error:   "Bad Request",
-				Message: err.Error(),
-				Code:    http.StatusBadRequest,
-			})
+			apierror.Respond(c, http.StatusBadRequest, err.Error())
 			return
 		}
 		noteFields = map[string]interface{}{"admin_note": note, "admin_note_until": noteUntil}
@@ -604,11 +490,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	// Déplacer l'application exige aussi le droit de gérer la catégorie d'arrivée
 	if updateData.AppGroupID != 0 && updateData.AppGroupID != application.AppGroupID &&
 		!middleware.CanManageAppGroupWithDB(c, updateData.AppGroupID, h.db) {
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Vous ne pouvez pas déplacer cette application dans cette catégorie.",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas déplacer cette application dans cette catégorie.")
 		return
 	}
 
@@ -630,11 +512,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return nil
 	})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la modification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la modification")
 		return
 	}
 
@@ -659,11 +537,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
@@ -673,40 +547,24 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 	if role != "admin" && len(managedGroupIDs) > 0 {
 		var application models.Application
 		if err := h.db.Preload("AppGroup").First(&application, id).Error; err != nil {
-			c.JSON(http.StatusNotFound, models.ErrorResponse{
-				Error:   "Not Found",
-				Message: "Application non trouvée",
-				Code:    http.StatusNotFound,
-			})
+			apierror.Respond(c, http.StatusNotFound, "Application non trouvée")
 			return
 		}
 
 		// Vérifier que l'application appartient à un AppGroup privé que l'admin de groupe possède
 		if application.AppGroup == nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "Internal Server Error",
-				Message: "AppGroup introuvable pour cette application",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "AppGroup introuvable pour cette application")
 			return
 		}
 
 		if !middleware.CanManageAppGroupWithDB(c, application.AppGroup.ID, h.db) {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Vous ne pouvez pas supprimer cette application. Seules les applications des AppGroups privés appartenant à votre groupe sont autorisées.",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas supprimer cette application. Seules les applications des AppGroups privés appartenant à votre groupe sont autorisées.")
 			return
 		}
 	}
 
 	if err := h.db.Delete(&models.Application{}, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -810,11 +668,7 @@ func filterUsers(query *gorm.DB, search, role, status string) *gorm.DB {
 }
 
 func respondUsersError(c *gin.Context) {
-	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-		Error:   "Internal Server Error",
-		Message: "Erreur lors de la récupération des utilisateurs",
-		Code:    http.StatusInternalServerError,
-	})
+	apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des utilisateurs")
 }
 
 // @Summary Créer un utilisateur
@@ -839,33 +693,21 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
 	// Vérifier si l'utilisateur existe déjà
 	var existingUser models.User
 	if err := h.db.Where("username = ? OR email = ?", createData.Username, createData.Email).First(&existingUser).Error; err == nil {
-		c.JSON(http.StatusConflict, models.ErrorResponse{
-			Error:   "Conflict",
-			Message: "Nom d'utilisateur ou email déjà utilisé",
-			Code:    http.StatusConflict,
-		})
+		apierror.Respond(c, http.StatusConflict, "Nom d'utilisateur ou email déjà utilisé")
 		return
 	}
 
 	// Hasher le mot de passe avec coût sécurisé (12 minimum - OWASP 2025)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createData.Password), h.bcryptCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors du hashage du mot de passe",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du hashage du mot de passe")
 		return
 	}
 
@@ -880,11 +722,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &user, "is_active"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création de l'utilisateur",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'utilisateur")
 		return
 	}
 
@@ -915,21 +753,13 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var user models.User
 	if err := h.db.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -945,11 +775,7 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
@@ -977,22 +803,14 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 	if updateData.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), h.bcryptCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "Internal Server Error",
-				Message: "Erreur lors du hashage du mot de passe",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du hashage du mot de passe")
 			return
 		}
 		user.Password = string(hashedPassword)
 	}
 
 	if err := h.db.Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la modification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la modification")
 		return
 	}
 
@@ -1023,22 +841,14 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 func (h *AdminHandler) DeleteUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	// Vérifier que l'utilisateur existe
 	var user models.User
 	if err := h.db.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
@@ -1047,11 +857,7 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
 
 	// Supprimer l'utilisateur
 	if err := h.db.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -1066,11 +872,7 @@ func (h *AdminHandler) GetDeletedUsers(c *gin.Context) {
 
 	// Utiliser Unscoped() pour voir les enregistrements soft deleted
 	if err := h.db.Unscoped().Where("deleted_at IS NOT NULL").Preload("Groups").Find(&users).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des utilisateurs supprimés",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des utilisateurs supprimés")
 		return
 	}
 
@@ -1088,43 +890,27 @@ func (h *AdminHandler) GetDeletedUsers(c *gin.Context) {
 func (h *AdminHandler) RestoreUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	// Trouver l'utilisateur supprimé
 	var user models.User
 	if err := h.db.Unscoped().First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
 	// Vérifier qu'il est bien supprimé
 	if user.DeletedAt.Time.IsZero() {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Cet utilisateur n'est pas supprimé",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Cet utilisateur n'est pas supprimé")
 		return
 	}
 
 	// Restaurer l'utilisateur
 	user.DeletedAt = gorm.DeletedAt{}
 	if err := h.db.Unscoped().Save(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la restauration",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la restauration")
 		return
 	}
 
@@ -1138,32 +924,20 @@ func (h *AdminHandler) RestoreUser(c *gin.Context) {
 func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	// Trouver l'utilisateur supprimé
 	var user models.User
 	if err := h.db.Unscoped().First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
 	// Vérifier qu'il est bien supprimé
 	if user.DeletedAt.Time.IsZero() {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Cet utilisateur doit d'abord être supprimé",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Cet utilisateur doit d'abord être supprimé")
 		return
 	}
 
@@ -1240,11 +1014,7 @@ func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 		return nil
 	}); err != nil {
 		log.Printf("[PermanentlyDeleteUser] utilisateur %d : %v", user.ID, err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression définitive",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression définitive")
 		return
 	}
 
@@ -1266,52 +1036,32 @@ func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 func (h *AdminHandler) AssignUserToGroups(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var user models.User
 	if err := h.db.First(&user, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Utilisateur non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
 	var groupIDs []uint
 	if err := c.ShouldBindJSON(&groupIDs); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "IDs de groupes invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "IDs de groupes invalides")
 		return
 	}
 
 	// Récupérer les groupes
 	var groups []models.Group
 	if err := h.db.Where("id IN ?", groupIDs).Find(&groups).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des groupes",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes")
 		return
 	}
 
 	// Remplacer les associations
 	if err := h.db.Model(&user).Association("Groups").Replace(groups); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de l'assignation",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'assignation")
 		return
 	}
 
@@ -1332,11 +1082,7 @@ func (h *AdminHandler) AssignUserToGroups(c *gin.Context) {
 func (h *AdminHandler) GetGroups(c *gin.Context) {
 	var groups []models.Group
 	if err := h.db.Preload("Users").Preload("AppGroups").Find(&groups).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des groupes",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes")
 		return
 	}
 
@@ -1362,11 +1108,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
@@ -1378,11 +1120,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 	}
 
 	if err := createKeepingFalse(h.db, c, &group, "is_active"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la création du groupe",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création du groupe")
 		return
 	}
 
@@ -1413,21 +1151,13 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 func (h *AdminHandler) UpdateGroup(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var group models.Group
 	if err := h.db.First(&group, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 
@@ -1440,11 +1170,7 @@ func (h *AdminHandler) UpdateGroup(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
@@ -1463,11 +1189,7 @@ func (h *AdminHandler) UpdateGroup(c *gin.Context) {
 	}
 
 	if err := h.db.Save(&group).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la modification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la modification")
 		return
 	}
 
@@ -1501,21 +1223,13 @@ func (h *AdminHandler) UpdateGroup(c *gin.Context) {
 func (h *AdminHandler) DeleteGroup(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var group models.Group
 	if err := h.db.First(&group, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 
@@ -1525,11 +1239,7 @@ func (h *AdminHandler) DeleteGroup(c *gin.Context) {
 
 	// Supprimer le groupe
 	if err := h.db.Delete(&group).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la suppression",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
 		return
 	}
 
@@ -1551,52 +1261,32 @@ func (h *AdminHandler) DeleteGroup(c *gin.Context) {
 func (h *AdminHandler) AssignGroupToAppGroups(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "ID invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
 		return
 	}
 
 	var group models.Group
 	if err := h.db.First(&group, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 
 	var appGroupIDs []uint
 	if err := c.ShouldBindJSON(&appGroupIDs); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "IDs de groupes d'applications invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "IDs de groupes d'applications invalides")
 		return
 	}
 
 	// Récupérer les groupes d'applications
 	var appGroups []models.AppGroup
 	if err := h.db.Where("id IN ?", appGroupIDs).Find(&appGroups).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de la récupération des groupes d'applications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes d'applications")
 		return
 	}
 
 	// Remplacer les associations
 	if err := h.db.Model(&group).Association("AppGroups").Replace(appGroups); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de l'assignation",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'assignation")
 		return
 	}
 
@@ -1690,11 +1380,7 @@ func (h *AdminHandler) GetGroupAdmins(c *gin.Context) {
 	// Charger le groupe avec ses admins
 	var group models.Group
 	if err := h.db.Preload("Users", "users.id IN (SELECT user_id FROM group_admins WHERE group_id = ?)", groupID).First(&group, groupID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 
@@ -1723,22 +1409,14 @@ func (h *AdminHandler) AssignGroupAdmins(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Format de requête invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Format de requête invalide")
 		return
 	}
 
 	// Charger le groupe
 	var group models.Group
 	if err := h.db.First(&group, groupID).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not Found",
-			Message: "Groupe non trouvé",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
 		return
 	}
 
@@ -1746,11 +1424,7 @@ func (h *AdminHandler) AssignGroupAdmins(c *gin.Context) {
 	var users []models.User
 	if len(request.UserIDs) > 0 {
 		if err := h.db.Where("id IN ?", request.UserIDs).Find(&users).Error; err != nil {
-			c.JSON(http.StatusBadRequest, models.ErrorResponse{
-				Error:   "Bad Request",
-				Message: "Certains utilisateurs n'ont pas été trouvés",
-				Code:    http.StatusBadRequest,
-			})
+			apierror.Respond(c, http.StatusBadRequest, "Certains utilisateurs n'ont pas été trouvés")
 			return
 		}
 	}

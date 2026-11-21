@@ -23,6 +23,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { apiErrorMessage } from '@/services/apiError'
 import { useAuthStore } from '@/stores/auth'
 import { oauthService } from '@/services/api'
 import { Icon } from '@iconify/vue'
@@ -127,7 +128,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error('❌ OAuth callback error:', err)
-    error.value = err.response?.data?.message || err.message || t('auth.oauth.failed')
+    error.value = apiErrorMessage(err, err.message || t('auth.oauth.failed'))
     isLoading.value = false
   }
 })

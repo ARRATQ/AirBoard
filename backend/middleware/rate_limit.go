@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"airboard/models"
+	"airboard/apierror"
 
 	"github.com/gin-gonic/gin"
 	"github.com/ulule/limiter/v3"
@@ -25,11 +25,7 @@ func RateLimitMiddleware(rate limiter.Rate) gin.HandlerFunc {
 		context, err := instance.Get(c.Request.Context(), key)
 		if err != nil {
 			log.Printf("[RateLimit] Erreur lors de la vérification: %v", err)
-			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-				Error:   "Internal Server Error",
-				Message: "Erreur lors de la vérification du rate limit",
-				Code:    http.StatusInternalServerError,
-			})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification du rate limit")
 			c.Abort()
 			return
 		}
@@ -42,11 +38,7 @@ func RateLimitMiddleware(rate limiter.Rate) gin.HandlerFunc {
 		// Si la limite est dépassée, retourner une erreur 429
 		if context.Reached {
 			log.Printf("[RateLimit] Limite atteinte pour %s - IP: %s", key, c.ClientIP())
-			c.JSON(http.StatusTooManyRequests, models.ErrorResponse{
-				Error:   "Too Many Requests",
-				Message: "Trop de requêtes. Veuillez réessayer plus tard.",
-				Code:    http.StatusTooManyRequests,
-			})
+			apierror.Respond(c, http.StatusTooManyRequests, "Trop de requêtes. Veuillez réessayer plus tard.")
 			c.Abort()
 			return
 		}
