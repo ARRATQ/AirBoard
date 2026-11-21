@@ -4,7 +4,7 @@
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
         <Icon icon="mdi:newspaper" class="h-5 w-5 text-primary-500" />
         {{ $t('news.widget.title') }}
-        <span v-if="unreadCount > 0" class="ml-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
+        <span v-if="unreadCount > 0" class="ms-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
           {{ unreadCount }}
         </span>
       </h2>
@@ -13,7 +13,7 @@
         class="text-sm text-primary-500 hover:text-primary-600 font-medium flex items-center gap-1"
       >
         {{ $t('news.widget.viewAll') }}
-        <Icon icon="mdi:arrow-right" class="h-4 w-4" />
+        <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
       </router-link>
     </div>
 
@@ -59,7 +59,7 @@
           <!-- Type Badge -->
           <span
             :class="[
-              'ml-2 px-2 py-0.5 rounded text-xs font-medium flex-shrink-0',
+              'ms-2 px-2 py-0.5 rounded text-xs font-medium flex-shrink-0',
               getTypeBadgeClass(news.type)
             ]"
           >

@@ -4,7 +4,7 @@
     <button
       type="button"
       @click="isOpen = !isOpen"
-      class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm text-left flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+      class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm text-start flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
       <div v-if="selectedType" class="flex items-center gap-2">
         <Icon :icon="selectedType.icon" class="h-4 w-4" :style="{ color: selectedType.color }" />
@@ -24,18 +24,18 @@
     <transition name="dropdown">
       <div
         v-if="isOpen"
-        class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+        class="absolute top-full start-0 end-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
       >
         <div
           v-for="type in types"
           :key="type.id"
           @click="selectType(type)"
-          class="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors border-l-3"
+          class="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors border-s-3"
           :style="{ borderColor: modelValue === type.slug ? type.color : 'transparent' }"
         >
           <Icon :icon="type.icon" class="h-4 w-4" :style="{ color: type.color }" />
           <span class="dark:text-white">{{ type.name }}</span>
-          <Icon v-if="modelValue === type.slug" icon="mdi:check" class="h-4 w-4 ml-auto" :style="{ color: type.color }" />
+          <Icon v-if="modelValue === type.slug" icon="mdi:check" class="h-4 w-4 ms-auto" :style="{ color: type.color }" />
         </div>
       </div>
     </transition>

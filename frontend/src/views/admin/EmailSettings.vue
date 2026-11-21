@@ -18,7 +18,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:email-edit-outline" class="inline h-5 w-5 mr-2" />
+          <Icon icon="mdi:email-edit-outline" class="inline h-5 w-5 me-2" />
           Configuration SMTP (Deprecated)
         </button>
         <button
@@ -30,7 +30,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:shield-lock" class="inline h-5 w-5 mr-2" />
+          <Icon icon="mdi:shield-lock" class="inline h-5 w-5 me-2" />
           OAuth 2.0
         </button>
         <button
@@ -42,7 +42,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:file-document-edit" class="inline h-5 w-5 mr-2" />
+          <Icon icon="mdi:file-document-edit" class="inline h-5 w-5 me-2" />
           Templates
         </button>
         <button
@@ -54,7 +54,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:history" class="inline h-5 w-5 mr-2" />
+          <Icon icon="mdi:history" class="inline h-5 w-5 me-2" />
           Logs
         </button>
       </nav>
@@ -92,7 +92,7 @@
                   class="sr-only peer"
                 />
                 <div
-                  class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
+                  class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
                 ></div>
               </label>
             </div>
@@ -142,7 +142,7 @@
                   <input
                     v-model="smtpPassword"
                     :type="showPassword ? 'text' : 'password'"
-                    class="form-input pr-10"
+                    class="form-input pe-10"
                     :placeholder="
                       smtpConfig.id
                         ? $t('email.passwordKeep')
@@ -152,7 +152,7 @@
                   <button
                     type="button"
                     @click="showPassword = !showPassword"
-                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
+                    class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
                   >
                     <Icon
                       :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
@@ -265,9 +265,9 @@
                 <Icon
                   v-if="savingSmtp"
                   icon="mdi:loading"
-                  class="h-4 w-4 mr-2 animate-spin"
+                  class="h-4 w-4 me-2 animate-spin"
                 />
-                <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
                 {{ $t("common.save") }}
               </button>
               <button
@@ -275,7 +275,7 @@
                 :disabled="!smtpConfig.id"
                 class="btn btn-secondary"
               >
-                <Icon icon="mdi:email-fast" class="h-4 w-4 mr-2" />
+                <Icon icon="mdi:email-fast" class="h-4 w-4 me-2" />
                 {{ $t("email.testEmail") }}
               </button>
             </div>
@@ -318,7 +318,7 @@
               >
                 <Icon
                   :icon="getTemplateIcon(template.type)"
-                  class="h-4 w-4 inline mr-2"
+                  class="h-4 w-4 inline me-2"
                 />
                 {{ getTemplateName(template.type) }}
               </button>
@@ -351,7 +351,7 @@
                     class="sr-only peer"
                   />
                   <div
-                    class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
+                    class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"
                   ></div>
                 </label>
               </div>
@@ -429,13 +429,13 @@
                   <Icon
                     v-if="savingTemplate"
                     icon="mdi:loading"
-                    class="h-4 w-4 mr-2 animate-spin"
+                    class="h-4 w-4 me-2 animate-spin"
                   />
-                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
                   {{ $t("common.save") }}
                 </button>
                 <button @click="resetTemplate" class="btn btn-secondary">
-                  <Icon icon="mdi:restore" class="h-4 w-4 mr-2" />
+                  <Icon icon="mdi:restore" class="h-4 w-4 me-2" />
                   {{ $t("email.resetTemplate") }}
                 </button>
               </div>
@@ -479,12 +479,12 @@
               <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
                   <th
-                    class="text-left py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
+                    class="text-start py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
                   >
                     {{ $t("email.logType") }}
                   </th>
                   <th
-                    class="text-left py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
+                    class="text-start py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
                   >
                     {{ $t("email.logTitle") }}
                   </th>
@@ -499,7 +499,7 @@
                     {{ $t("email.logStatus") }}
                   </th>
                   <th
-                    class="text-left py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
+                    class="text-start py-3 px-4 text-sm font-medium text-gray-400 dark:text-gray-500"
                   >
                     {{ $t("email.logDate") }}
                   </th>
@@ -601,9 +601,9 @@
               <Icon
                 v-if="sendingTest"
                 icon="mdi:loading"
-                class="h-4 w-4 mr-2 animate-spin"
+                class="h-4 w-4 me-2 animate-spin"
               />
-              <Icon v-else icon="mdi:send" class="h-4 w-4 mr-2" />
+              <Icon v-else icon="mdi:send" class="h-4 w-4 me-2" />
               {{ $t("email.send") }}
             </button>
           </div>

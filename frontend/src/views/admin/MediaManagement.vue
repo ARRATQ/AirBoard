@@ -198,7 +198,7 @@
               :disabled="!selectedFile || uploading"
               class="btn btn-primary w-full sm:w-auto"
             >
-              <Icon v-if="uploading" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
+              <Icon v-if="uploading" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
               {{ uploading ? $t('media.uploading') : $t('media.upload') }}
             </button>
           </div>
@@ -238,7 +238,7 @@
               :disabled="updating"
               class="btn btn-primary w-full sm:w-auto"
             >
-              <Icon v-if="updating" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
+              <Icon v-if="updating" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
               {{ updating ? $t('common.updating') : $t('common.update') }}
             </button>
           </div>

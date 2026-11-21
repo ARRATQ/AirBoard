@@ -59,26 +59,26 @@ const config = computed(() => types.find(t => t.value === props.node.attrs.type)
 
 .callout-block {
   border-radius: 8px;
-  border-left: 4px solid;
+  border-inline-start: 4px solid;
   padding: 12px 16px;
   margin: 0;
 }
 
 .callout-block[data-callout-type="info"] {
   background: #EFF6FF;
-  border-left-color: #3B82F6;
+  border-inline-start-color: #3B82F6;
 }
 .callout-block[data-callout-type="warning"] {
   background: #FFFBEB;
-  border-left-color: #F59E0B;
+  border-inline-start-color: #F59E0B;
 }
 .callout-block[data-callout-type="success"] {
   background: #F0FDF4;
-  border-left-color: #22C55E;
+  border-inline-start-color: #22C55E;
 }
 .callout-block[data-callout-type="danger"] {
   background: #FEF2F2;
-  border-left-color: #EF4444;
+  border-inline-start-color: #EF4444;
 }
 
 /* Dark mode */
@@ -112,7 +112,7 @@ const config = computed(() => types.find(t => t.value === props.node.attrs.type)
 .callout-switcher {
   display: flex;
   gap: 4px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .callout-switch-btn {

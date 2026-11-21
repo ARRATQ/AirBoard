@@ -18,12 +18,12 @@
       
       <div class="space-y-4">
         <router-link to="/home" class="btn-primary btn-md w-full">
-          <Icon icon="mdi:home" class="h-5 w-5 mr-2" />
+          <Icon icon="mdi:home" class="h-5 w-5 me-2" />
           Retour à l'accueil
         </router-link>
         
         <button @click="$router.back()" class="btn-secondary btn-md w-full">
-          <Icon icon="mdi:arrow-left" class="h-5 w-5 mr-2" />
+          <Icon icon="mdi:arrow-left" class="rtl-flip h-5 w-5 me-2" />
           Page précédente
         </button>
       </div>

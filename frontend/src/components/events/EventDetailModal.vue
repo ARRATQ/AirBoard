@@ -23,7 +23,7 @@
         </div>
         
         <!-- Status badges -->
-        <div class="flex items-center gap-2 ml-4">
+        <div class="flex items-center gap-2 ms-4">
           <span 
             v-if="event.is_all_day"
             class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full"
@@ -158,7 +158,7 @@
             @click="editEvent"
             class="px-3 py-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            <Icon icon="mdi:pencil" class="h-4 w-4 mr-1 inline" />
+            <Icon icon="mdi:pencil" class="h-4 w-4 me-1 inline" />
             {{ $t('common.edit') }}
           </button>
           

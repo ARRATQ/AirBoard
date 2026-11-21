@@ -345,7 +345,7 @@
       </div>
 
       <!-- Undo/Redo -->
-      <div class="toolbar-group ml-auto">
+      <div class="toolbar-group ms-auto">
         <button
           type="button"
           @click="editor.chain().focus().undo().run()"
@@ -826,13 +826,13 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 }
 
 .toolbar-group {
-  @apply flex items-center gap-1 pr-2 mr-2;
-  border-right: 1px solid var(--border);
+  @apply flex items-center gap-1 pe-2 me-2;
+  border-inline-end: 1px solid var(--border);
   position: relative;
 }
 
 .toolbar-group:last-child {
-  @apply border-r-0 mr-0 pr-0;
+  @apply border-e-0 me-0 pe-0;
 }
 
 .toolbar-button {
@@ -863,7 +863,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 .color-dropdown {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
+  inset-inline-start: 0;
   z-index: 50;
   @apply rounded-lg shadow-xl p-3;
   background-color: var(--bg-card);
@@ -901,7 +901,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 .table-dropdown {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
+  inset-inline-start: 0;
   z-index: 50;
   @apply rounded-lg shadow-xl py-1;
   background-color: var(--bg-card);
@@ -910,7 +910,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 }
 
 .table-menu-item {
-  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-left;
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-start;
   color: var(--text-primary);
 }
 .table-menu-item:hover {
@@ -940,7 +940,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 
 .editor-content :deep(.ProseMirror p.is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
-  @apply text-gray-400 dark:text-gray-500 float-left h-0 pointer-events-none;
+  @apply text-gray-400 dark:text-gray-500 float-start h-0 pointer-events-none;
 }
 
 /* Heading styles */
@@ -967,20 +967,20 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 
 /* List styling */
 .editor-content :deep(.ProseMirror ul) {
-  @apply list-disc ml-6 mb-4 space-y-1;
+  @apply list-disc ms-6 mb-4 space-y-1;
 }
 
 .editor-content :deep(.ProseMirror ol) {
-  @apply list-decimal ml-6 mb-4 space-y-1;
+  @apply list-decimal ms-6 mb-4 space-y-1;
 }
 
 .editor-content :deep(.ProseMirror li) {
-  @apply ml-2;
+  @apply ms-2;
 }
 
 .editor-content :deep(.ProseMirror ul ul),
 .editor-content :deep(.ProseMirror ol ol) {
-  @apply ml-6 mb-0 mt-1;
+  @apply ms-6 mb-0 mt-1;
 }
 
 /* Code block styling */
@@ -1003,7 +1003,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
   overflow-x: auto;
   margin: 1rem 0;
   /* Allow resize handles to overflow the wrapper edges */
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }
 
 .editor-content :deep(.ProseMirror table) {
@@ -1030,7 +1030,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 /* ── Column resize handle ── */
 .editor-content :deep(.ProseMirror .column-resize-handle) {
   position: absolute;
-  right: -3px;
+  inset-inline-end: -3px;
   top: 0;
   bottom: 0;
   width: 6px;
@@ -1042,7 +1042,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 .editor-content :deep(.ProseMirror .column-resize-handle::after) {
   content: '';
   position: absolute;
-  left: 2px;
+  inset-inline-start: 2px;
   top: 10%;
   bottom: 10%;
   width: 2px;
@@ -1073,7 +1073,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
   z-index: 2;
   position: absolute;
   content: '';
-  left: 0; right: 0; top: 0; bottom: 0;
+  inset-inline-start: 0; inset-inline-end: 0; top: 0; bottom: 0;
   background: rgba(99, 102, 241, 0.12);
   pointer-events: none;
 }
@@ -1145,7 +1145,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 .callout-type-dropdown {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
+  inset-inline-start: 0;
   z-index: 50;
   @apply rounded-lg shadow-xl py-1;
   background-color: var(--bg-card);
@@ -1154,7 +1154,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 }
 
 .callout-type-item {
-  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-left;
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors text-start;
   color: var(--text-primary);
 }
 .callout-type-item:hover {

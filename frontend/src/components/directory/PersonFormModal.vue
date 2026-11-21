@@ -15,14 +15,14 @@
           <PersonAvatar :person="previewPerson" size="lg" />
           <div class="flex flex-wrap gap-2">
             <button type="button" class="btn btn-secondary text-xs" :disabled="uploading" @click="fileInput?.click()">
-              <Icon :icon="uploading ? 'mdi:loading' : 'mdi:upload'" class="h-4 w-4 mr-1" :class="{ 'animate-spin': uploading }" />
+              <Icon :icon="uploading ? 'mdi:loading' : 'mdi:upload'" class="h-4 w-4 me-1" :class="{ 'animate-spin': uploading }" />
               {{ $t('directory.uploadPhoto') }}
             </button>
             <button type="button" class="btn btn-secondary text-xs" @click="showGallery = true">
-              <Icon icon="mdi:image-multiple-outline" class="h-4 w-4 mr-1" /> {{ $t('directory.pickFromLibrary') }}
+              <Icon icon="mdi:image-multiple-outline" class="h-4 w-4 me-1" /> {{ $t('directory.pickFromLibrary') }}
             </button>
             <button v-if="form.photo_url" type="button" class="btn btn-ghost text-xs" @click="form.photo_url = ''">
-              <Icon icon="mdi:close" class="h-4 w-4 mr-1" /> {{ $t('directory.removePhoto') }}
+              <Icon icon="mdi:close" class="h-4 w-4 me-1" /> {{ $t('directory.removePhoto') }}
             </button>
             <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFile" />
           </div>

@@ -7,7 +7,7 @@
       <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
-            <Icon icon="mdi:key" class="h-4 w-4 mr-2" />
+            <Icon icon="mdi:key" class="h-4 w-4 me-2" />
             {{ $t('profile.changePassword') }}
           </button>
         </div>
@@ -49,7 +49,7 @@
             <button
               v-if="authStore.user?.avatar_url && !avatarPreview"
               @click.stop="confirmDeleteAvatar"
-              class="absolute -top-1 -right-1 h-6 w-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+              class="absolute -top-1 -end-1 h-6 w-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
               :title="$t('profile.deleteAvatar')"
             >
               <Icon icon="mdi:close" class="h-4 w-4" />
@@ -67,7 +67,7 @@
 
             <div class="space-y-2">
               <button @click="triggerAvatarUpload" class="btn btn-secondary">
-                <Icon icon="mdi:upload" class="h-4 w-4 mr-2" />
+                <Icon icon="mdi:upload" class="h-4 w-4 me-2" />
                 {{ $t('profile.uploadAvatar') }}
               </button>
 
@@ -79,8 +79,8 @@
             <!-- Upload preview actions -->
             <div v-if="avatarPreview" class="flex gap-2 mt-3">
               <button @click="uploadAvatar" :disabled="isUploading" class="btn btn-primary">
-                <Icon v-if="isUploading" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-                <Icon v-else icon="mdi:check" class="h-4 w-4 mr-2" />
+                <Icon v-if="isUploading" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+                <Icon v-else icon="mdi:check" class="h-4 w-4 me-2" />
                 {{ isUploading ? $t('profile.uploading') : $t('common.save') }}
               </button>
               <button @click="cancelAvatarUpload" class="btn btn-secondary">
@@ -264,8 +264,8 @@
               :disabled="isSaving"
               class="btn btn-primary"
             >
-              <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-              <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+              <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+              <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
               {{ isSaving ? $t('common.saving') : $t('common.save') }}
             </button>
           </div>
@@ -295,13 +295,13 @@
                   v-model="passwordForm.current_password"
                   :type="showCurrentPassword ? 'text' : 'password'"
                   required
-                  class="form-input pr-10"
+                  class="form-input pe-10"
                   :placeholder="$t('profile.currentPasswordPlaceholder')"
                 />
                 <button
                   type="button"
                   @click="showCurrentPassword = !showCurrentPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                 >
                   <Icon :icon="showCurrentPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
                 </button>
@@ -319,13 +319,13 @@
                   :type="showNewPassword ? 'text' : 'password'"
                   required
                   minlength="8"
-                  class="form-input pr-10"
+                  class="form-input pe-10"
                   :placeholder="$t('profile.newPasswordPlaceholder')"
                 />
                 <button
                   type="button"
                   @click="showNewPassword = !showNewPassword"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                 >
                   <Icon :icon="showNewPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
                 </button>
@@ -359,7 +359,7 @@
                 :disabled="isChangingPassword || !isPasswordFormValid"
                 class="btn btn-primary"
               >
-                <Icon v-if="isChangingPassword" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
+                <Icon v-if="isChangingPassword" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
                 {{ isChangingPassword ? $t('common.saving') : $t('profile.changePassword') }}
               </button>
             </div>
@@ -392,7 +392,7 @@
               :disabled="isDeletingAvatar"
               class="btn btn-danger"
             >
-              <Icon v-if="isDeletingAvatar" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
+              <Icon v-if="isDeletingAvatar" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
               {{ isDeletingAvatar ? $t('common.deleting') : $t('common.delete') }}
             </button>
           </div>

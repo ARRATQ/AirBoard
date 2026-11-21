@@ -4,7 +4,7 @@
       <div class="flex items-start justify-between gap-4 flex-wrap mb-4">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          <Icon icon="mdi:lightbulb-on-outline" class="inline mr-3 text-3xl text-amber-500" />
+          <Icon icon="mdi:lightbulb-on-outline" class="inline me-3 text-3xl text-amber-500" />
           {{ t('suggestions.title') }}
         </h1>
         <p class="text-gray-600 dark:text-gray-400">{{ t('suggestions.subtitle') }}</p>
@@ -44,11 +44,11 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="md:col-span-2">
           <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               v-model="filters.search"
               type="text"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              class="w-full ps-10 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               :placeholder="t('suggestions.filters.search')"
               @input="debounceLoad"
             />
@@ -138,7 +138,7 @@
             </span>
             <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
               {{ t('suggestions.viewDetails') }}
-              <Icon icon="mdi:arrow-right" class="h-4 w-4" />
+              <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
             </RouterLink>
           </div>
         </div>
@@ -182,7 +182,7 @@
           </span>
           <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
             {{ t('suggestions.viewDetails') }}
-            <Icon icon="mdi:arrow-right" class="h-4 w-4" />
+            <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
           </RouterLink>
         </div>
       </article>
@@ -190,13 +190,13 @@
 
     <div v-if="pagination.total_pages > 1" class="flex justify-center items-center gap-2">
       <button class="btn-secondary btn-sm" :disabled="pagination.page <= 1" @click="changePage(pagination.page - 1)">
-        <Icon icon="mdi:chevron-left" />
+        <Icon class="rtl-flip" icon="mdi:chevron-left" />
         {{ t('polls.pagination.previous') }}
       </button>
       <span class="text-sm text-gray-600 dark:text-gray-400">{{ pagination.page }} / {{ pagination.total_pages }}</span>
       <button class="btn-secondary btn-sm" :disabled="pagination.page >= pagination.total_pages" @click="changePage(pagination.page + 1)">
         {{ t('polls.pagination.next') }}
-        <Icon icon="mdi:chevron-right" />
+        <Icon class="rtl-flip" icon="mdi:chevron-right" />
       </button>
     </div>
 

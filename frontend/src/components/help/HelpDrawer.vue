@@ -58,7 +58,7 @@
           <!-- Content -->
           <div class="flex-1 overflow-hidden flex min-h-0">
             <!-- Sidebar Navigation -->
-            <div class="w-56 border-r border-gray-200 dark:border-gray-700 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
+            <div class="w-56 border-e border-gray-200 dark:border-gray-700 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
               <div class="p-3">
                 <div v-for="section in currentGuide?.sections" :key="section.id" class="mb-4">
                   <button
@@ -68,7 +68,7 @@
                     <span>{{ section.title }}</span>
                     <Icon
                       :icon="expandedSections.includes(section.id) ? 'mdi:chevron-down' : 'mdi:chevron-right'"
-                      class="h-4 w-4"
+                      class="rtl-flip h-4 w-4"
                     />
                   </button>
                   <Transition name="expand">
@@ -77,7 +77,7 @@
                         <button
                           @click="selectPage(item)"
                           :class="[
-                            'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors',
+                            'w-full text-start px-3 py-2 text-sm rounded-lg transition-colors',
                             selectedPage?.id === item.id
                               ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium'
                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -109,7 +109,7 @@
                   <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <Icon :icon="currentGuide?.icon" class="h-4 w-4" />
                     <span>{{ currentGuide?.label }}</span>
-                    <Icon icon="mdi:chevron-right" class="h-4 w-4" />
+                    <Icon icon="mdi:chevron-right" class="rtl-flip h-4 w-4" />
                     <span>{{ selectedPage.section }}</span>
                   </div>
                 </div>
@@ -580,6 +580,6 @@ useEscapeClose(() => props.modelValue, () => close())
 }
 
 :deep(.prose blockquote) {
-  @apply border-l-4 border-primary-500 bg-primary-50 dark:bg-primary-900/20 pl-4 py-2 italic;
+  @apply border-s-4 border-primary-500 bg-primary-50 dark:bg-primary-900/20 ps-4 py-2 italic;
 }
 </style>

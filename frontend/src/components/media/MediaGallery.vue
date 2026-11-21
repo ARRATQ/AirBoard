@@ -63,7 +63,7 @@
         :disabled="currentPage === 1"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+        <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" />
       </button>
       <span class="pagination-info">
         Page {{ currentPage }} / {{ totalPages }}
@@ -73,7 +73,7 @@
         :disabled="currentPage === totalPages"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+        <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" />
       </button>
     </div>
 
@@ -252,7 +252,7 @@ export default {
 }
 
 .selected-indicator {
-  @apply absolute top-2 right-2 bg-primary-500 text-white rounded-full p-1;
+  @apply absolute top-2 end-2 bg-primary-500 text-white rounded-full p-1;
 }
 
 .pagination {

@@ -15,7 +15,7 @@
           </p>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ formatDate(comment.created_at) }}
-            <span v-if="comment.created_at !== comment.updated_at" class="ml-1">
+            <span v-if="comment.created_at !== comment.updated_at" class="ms-1">
               ({{ $t('comments.edited') }})
             </span>
           </p>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Content -->
-    <div class="ml-13">
+    <div class="ms-13">
       <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
         {{ comment.content }}
       </p>
@@ -55,14 +55,14 @@
           v-if="!comment.is_approved"
           class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
         >
-          <Icon icon="mdi:clock-outline" class="inline h-3 w-3 mr-1" />
+          <Icon icon="mdi:clock-outline" class="inline h-3 w-3 me-1" />
           {{ $t('comments.pending') }}
         </span>
         <span
           v-if="comment.is_flagged"
           class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
         >
-          <Icon icon="mdi:flag" class="inline h-3 w-3 mr-1" />
+          <Icon icon="mdi:flag" class="inline h-3 w-3 me-1" />
           {{ $t('comments.flagged') }}
         </span>
       </div>

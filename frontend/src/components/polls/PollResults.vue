@@ -221,14 +221,14 @@ watch(() => props.poll.id, () => {
 .result-option.leading-option {
   background: rgba(59, 130, 246, 0.08);
   border: none;
-  border-left: 4px solid #3B82F6;
+  border-inline-start: 4px solid #3B82F6;
   border-radius: 4px;
 }
 
 :is(.dark .result-option.leading-option) {
   background: rgba(59, 130, 246, 0.15);
   border: none;
-  border-left: 4px solid #3B82F6;
+  border-inline-start: 4px solid #3B82F6;
 }
 
 /* Text colors for leading option to match event style */
@@ -256,14 +256,14 @@ watch(() => props.poll.id, () => {
 .result-option.user-choice.leading-option {
   background: rgba(59, 130, 246, 0.08);
   border: none;
-  border-left: 4px solid #3B82F6;
+  border-inline-start: 4px solid #3B82F6;
   border-radius: 4px;
 }
 
 :is(.dark .result-option.user-choice.leading-option) {
   background: rgba(59, 130, 246, 0.15);
   border: none;
-  border-left: 4px solid #3B82F6;
+  border-inline-start: 4px solid #3B82F6;
 }
 
 /* Force blue progress bar for leading option even if user selected it */

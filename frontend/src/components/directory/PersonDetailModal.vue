@@ -77,7 +77,7 @@
             <span class="modal-footer-hint" />
             <div class="modal-footer-actions">
               <button v-if="canManage" type="button" class="btn btn-secondary" @click="$emit('edit', person)">
-                <Icon icon="mdi:pencil" class="h-4 w-4 mr-1" /> {{ $t('common.edit') }}
+                <Icon icon="mdi:pencil" class="h-4 w-4 me-1" /> {{ $t('common.edit') }}
               </button>
               <button type="button" class="btn btn-primary" @click="$emit('close')">{{ $t('common.close') }}</button>
             </div>
@@ -139,13 +139,12 @@ onBeforeUnmount(() => {
 .person-detail__close {
   position: absolute;
   top: 0.75rem;
-  right: 0.75rem;
+  inset-inline-end: 0.75rem;
   padding: 0.4rem;
   border-radius: 9999px;
   color: var(--text-muted);
 }
 .person-detail__close:hover { background: var(--hover); color: var(--text-primary); }
-[dir='rtl'] .person-detail__close { right: auto; left: 0.75rem; }
 .person-detail__name { font-size: 1.6rem; font-weight: 800; line-height: 1.15; color: var(--text-primary); }
 .person-detail__title { margin-top: 0.25rem; font-weight: 500; color: var(--accent); display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 .person-detail__section {

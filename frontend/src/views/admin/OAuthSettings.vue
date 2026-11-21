@@ -25,7 +25,7 @@
               {{ provider.is_enabled ? $t('common.enabled') : $t('common.disabled') }}
             </span>
             <button @click="editProvider(provider)" class="btn btn-secondary btn-sm">
-              <Icon icon="mdi:pencil" class="h-4 w-4 mr-2" />
+              <Icon icon="mdi:pencil" class="h-4 w-4 me-2" />
               {{ $t('common.edit') }}
             </button>
           </div>
@@ -98,13 +98,13 @@
                     id="client_secret"
                     v-model="editForm.client_secret"
                     :type="showSecret ? 'text' : 'password'"
-                    class="form-input font-mono pr-10"
+                    class="form-input font-mono pe-10"
                     :placeholder="$t('oauth.clientSecretPlaceholder')"
                   />
                   <button
                     type="button"
                     @click="showSecret = !showSecret"
-                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                    class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
                   >
                     <Icon :icon="showSecret ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
                   </button>
@@ -141,7 +141,7 @@
                   @click="showAdvanced = !showAdvanced"
                   class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                 >
-                  <Icon :icon="showAdvanced ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="h-5 w-5" />
+                  <Icon :icon="showAdvanced ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="rtl-flip h-5 w-5" />
                   {{ $t('oauth.advancedSettings') }}
                 </button>
 
@@ -231,7 +231,7 @@
                 :disabled="loading"
                 class="btn btn-primary w-full sm:w-auto"
               >
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
                 {{ $t('common.save') }}
               </button>
             </div>

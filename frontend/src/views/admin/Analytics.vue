@@ -39,9 +39,9 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('analytics.totalClicks') }}</p>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ analytics.total_clicks.toLocaleString() }}</h3>
                 <div v-if="analytics.clicks_growth !== 0" class="flex items-center mt-2 text-xs font-semibold" :class="analytics.clicks_growth > 0 ? 'text-green-500' : 'text-red-500'">
-                  <Icon :icon="analytics.clicks_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="mr-1" />
+                  <Icon :icon="analytics.clicks_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="me-1" />
                   {{ Math.abs(analytics.clicks_growth).toFixed(1) }}% 
-                  <span class="ml-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
+                  <span class="ms-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
                 </div>
               </div>
               <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full group-hover:scale-110 transition-transform">
@@ -57,9 +57,9 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('analytics.uniqueUsers') }}</p>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ analytics.total_unique_users.toLocaleString() }}</h3>
                 <div v-if="analytics.users_growth !== 0" class="flex items-center mt-2 text-xs font-semibold" :class="analytics.users_growth > 0 ? 'text-green-500' : 'text-red-500'">
-                  <Icon :icon="analytics.users_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="mr-1" />
+                  <Icon :icon="analytics.users_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="me-1" />
                   {{ Math.abs(analytics.users_growth).toFixed(1) }}%
-                  <span class="ml-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
+                  <span class="ms-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
                 </div>
               </div>
               <div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-full group-hover:scale-110 transition-transform">
@@ -235,13 +235,13 @@
                   <span class="w-6 text-sm font-bold text-gray-400">#{{ index + 1 }}</span>
                   <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center border-2 border-white dark:border-gray-800 shadow-sm relative">
                     <span class="text-xs font-black text-gray-600 dark:text-gray-300">{{ getUserInitials(user) }}</span>
-                    <div class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border border-white dark:border-gray-800"></div>
+                    <div class="absolute -bottom-0.5 -end-0.5 h-3 w-3 rounded-full bg-green-500 border border-white dark:border-gray-800"></div>
                   </div>
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ user.first_name }} {{ user.last_name }}</h4>
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5 block">@{{ user.username }}</span>
                   </div>
-                  <div class="text-right">
+                  <div class="text-end">
                     <span class="text-sm font-black text-gray-900 dark:text-white">{{ user.click_count }}</span>
                     <span class="text-[10px] font-bold text-gray-400 block uppercase tracking-tighter">Actions</span>
                   </div>
@@ -269,15 +269,15 @@
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Articles totaux</p>
               <p class="text-3xl font-black text-gray-900 dark:text-white">{{ newsStats.total_news }}</p>
             </div>
-            <div class="news-kpi border-l border-gray-100 dark:border-gray-800 pl-8">
+            <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Publiés</p>
               <p class="text-3xl font-black text-green-600">{{ newsStats.published_news }}</p>
             </div>
-            <div class="news-kpi border-l border-gray-100 dark:border-gray-800 pl-8">
+            <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Vues totales</p>
               <p class="text-3xl font-black text-blue-600">{{ newsStats.total_views }}</p>
             </div>
-            <div class="news-kpi border-l border-gray-100 dark:border-gray-800 pl-8">
+            <div class="news-kpi border-s border-gray-100 dark:border-gray-800 ps-8">
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Réactions</p>
               <p class="text-3xl font-black text-red-600">{{ newsStats.total_reactions }}</p>
             </div>

@@ -142,20 +142,20 @@ const sanitizedContent = computed(() => {
 }
 
 .tiptap-content ul {
-  @apply list-disc ml-6 mb-4 space-y-1;
+  @apply list-disc ms-6 mb-4 space-y-1;
 }
 
 .tiptap-content ol {
-  @apply list-decimal ml-6 mb-4 space-y-1;
+  @apply list-decimal ms-6 mb-4 space-y-1;
 }
 
 .tiptap-content li {
-  @apply ml-2;
+  @apply ms-2;
 }
 
 .tiptap-content ul ul,
 .tiptap-content ol ol {
-  @apply ml-6 mb-0 mt-1;
+  @apply ms-6 mb-0 mt-1;
 }
 
 .tiptap-content a {
@@ -163,7 +163,7 @@ const sanitizedContent = computed(() => {
 }
 
 .tiptap-content blockquote {
-  @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4 text-gray-700 dark:text-gray-300;
+  @apply border-s-4 border-gray-300 dark:border-gray-600 ps-4 italic my-4 text-gray-700 dark:text-gray-300;
 }
 
 .tiptap-content code {
@@ -188,7 +188,7 @@ const sanitizedContent = computed(() => {
 }
 
 .tiptap-content th {
-  @apply px-4 py-2 text-left font-semibold;
+  @apply px-4 py-2 text-start font-semibold;
   background-color: var(--bg-surface);
   border: 1px solid var(--border);
 }
@@ -241,7 +241,7 @@ const sanitizedContent = computed(() => {
 
 /* ── Callout blocks ──────────────────────────────── */
 .tiptap-content [data-callout-type] {
-  border-left: 4px solid;
+  border-inline-start: 4px solid;
   border-radius: 8px;
   padding: 12px 16px;
   margin: 1rem 0;

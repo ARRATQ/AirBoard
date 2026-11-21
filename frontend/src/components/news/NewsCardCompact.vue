@@ -51,7 +51,7 @@
             {{ news.category.name }}
           </span>
 
-          <span class="flex items-center gap-1 ml-auto">
+          <span class="flex items-center gap-1 ms-auto">
             <Icon icon="mdi:eye" class="h-3 w-3" />
             {{ news.views || 0 }}
           </span>

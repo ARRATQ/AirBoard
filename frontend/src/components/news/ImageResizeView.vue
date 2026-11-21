@@ -219,9 +219,9 @@ onBeforeUnmount(() => {
 .image-size-indicator {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.4);
-  padding-left: 6px;
-  margin-left: 4px;
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  padding-inline-start: 6px;
+  margin-inline-start: 4px;
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Divider between size and align controls */

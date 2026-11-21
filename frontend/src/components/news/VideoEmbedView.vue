@@ -75,7 +75,7 @@ defineProps({
 .video-service-badge {
   position: absolute;
   top: 10px;
-  left: 10px;
+  inset-inline-start: 10px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -93,7 +93,7 @@ defineProps({
 .video-delete-btn {
   position: absolute;
   top: 10px;
-  right: 10px;
+  inset-inline-end: 10px;
   width: 28px;
   height: 28px;
   display: flex;

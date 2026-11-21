@@ -2,7 +2,7 @@
   <div class="w-full p-6 space-y-6">
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <RouterLink to="/suggestions" class="suggestion-back-btn">
-        <Icon icon="mdi:arrow-left" />
+        <Icon class="rtl-flip" icon="mdi:arrow-left" />
         {{ t('suggestions.backToList') }}
       </RouterLink>
 

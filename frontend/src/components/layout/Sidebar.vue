@@ -224,14 +224,14 @@
               </span>
               <!-- Prominent Level Badge -->
               <div 
-                class="absolute -bottom-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-2 border-white dark:border-gray-800 text-[10px] font-black text-white shadow-lg animate-pulse-slow" 
+                class="absolute -bottom-1 -end-1 flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 border-2 border-white dark:border-gray-800 text-[10px] font-black text-white shadow-lg animate-pulse-slow" 
                 :title="`Niveau ${authStore.gamificationProfile?.level || 1}`"
               >
                 {{ authStore.gamificationProfile?.level || 1 }}
               </div>
             </div>
           </div>
-          <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-left">
+          <div v-if="appStore.sidebarOpen" class="flex-1 min-w-0 text-start">
             <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
               {{ authStore.userDisplayName }}
             </p>
@@ -257,7 +257,7 @@
         >
           <div
             v-if="showUserMenu"
-            class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+            class="absolute bottom-full start-0 end-0 mb-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
           >
             <router-link
               to="/profile"
@@ -322,7 +322,7 @@
                     </p>
                   </div>
                 </div>
-                <Icon icon="mdi:arrow-right" class="h-8 w-8 text-gray-400" />
+                <Icon icon="mdi:arrow-right" class="rtl-flip h-8 w-8 text-gray-400" />
                 <div class="text-center">
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('version.newVersion') }}</p>
                   <div class="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-lg">

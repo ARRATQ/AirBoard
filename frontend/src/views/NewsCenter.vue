@@ -23,12 +23,12 @@
         <!-- Search -->
         <div class="md:col-span-2">
           <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               v-model="filters.search"
               type="text"
               :placeholder="$t('news.center.searchPlaceholder')"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              class="w-full ps-10 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               @input="debouncedSearch"
             />
           </div>
@@ -120,7 +120,7 @@
     >
       <!-- Pinned News -->
       <div v-for="news in pinnedNews" :key="'pinned-' + news.id" class="relative">
-        <div class="absolute -top-2 -left-2 z-10">
+        <div class="absolute -top-2 -start-2 z-10">
           <div class="bg-yellow-500 text-white rounded-full p-2 shadow-lg">
             <Icon icon="mdi:pin" class="h-4 w-4" />
           </div>
@@ -167,7 +167,7 @@
           :disabled="currentPage === 1"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+          <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" />
         </button>
 
         <button
@@ -189,7 +189,7 @@
           :disabled="currentPage === totalPages"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+          <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" />
         </button>
       </nav>
     </div>

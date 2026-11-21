@@ -20,14 +20,14 @@
             v-if="news.priority === 'urgent'"
             class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
           >
-            <Icon icon="mdi:alert" class="inline h-3 w-3 mr-1" />
+            <Icon icon="mdi:alert" class="inline h-3 w-3 me-1" />
             {{ $t('news.priority.urgent') }}
           </span>
           <span
             v-else-if="news.priority === 'important'"
             class="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
           >
-            <Icon icon="mdi:star" class="inline h-3 w-3 mr-1" />
+            <Icon icon="mdi:star" class="inline h-3 w-3 me-1" />
             {{ $t('news.priority.important') }}
           </span>
 
@@ -36,7 +36,7 @@
             v-if="!news.target_groups || news.target_groups.length === 0"
             class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
           >
-            <Icon icon="mdi:earth" class="inline h-3 w-3 mr-1" />
+            <Icon icon="mdi:earth" class="inline h-3 w-3 me-1" />
             Public
           </span>
           <span
@@ -44,7 +44,7 @@
             class="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
             :title="getGroupsTooltip(news.target_groups)"
           >
-            <Icon icon="mdi:lock" class="inline h-3 w-3 mr-1" />
+            <Icon icon="mdi:lock" class="inline h-3 w-3 me-1" />
             {{ getVisibilityLabel(news.target_groups) }}
           </span>
         </div>

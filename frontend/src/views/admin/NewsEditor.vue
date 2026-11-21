@@ -5,7 +5,7 @@
       <template #description>{{ pageSubtitle }}</template>
       <template #actions>
         <router-link :to="LIST_ROUTE" class="btn btn-secondary">
-          <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
+          <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4 me-2" />
           {{ $t('groupAdmin.newsEditor.backToList') }}
         </router-link>
       </template>
@@ -92,7 +92,7 @@
                     type="checkbox"
                     class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                  <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
                     {{ $t('groupAdmin.newsEditor.publishImmediately') }}
                   </span>
                 </label>
@@ -115,7 +115,7 @@
                 <label for="news-expires-at" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
                   <Icon icon="mdi:calendar-remove" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.expiryDate') }}
-                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">{{ $t('groupAdmin.newsEditor.expiryDateOptional') }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ms-1">{{ $t('groupAdmin.newsEditor.expiryDateOptional') }}</span>
                 </label>
                 <input
                   id="news-expires-at"

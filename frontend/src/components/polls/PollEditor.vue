@@ -97,7 +97,7 @@
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     ]"
                   >
-                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 mr-1" />
+                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 me-1" />
                     {{ option.is_other ? t('polls.editor.optionIsOther') : t('polls.editor.markAsOther') }}
                   </button>
                   <button
@@ -126,7 +126,7 @@
 
             </div>
 
-            <div class="space-y-6 lg:border-l lg:pl-8 border-gray-200 dark:border-gray-700">
+            <div class="space-y-6 lg:border-s lg:ps-8 border-gray-200 dark:border-gray-700">
             <!-- Type et paramètres -->
             <div>
               <div class="section-header">
@@ -248,7 +248,7 @@
                   >
                     <Icon
                       :icon="form.target_group_ids.includes(group.id) ? 'mdi:check' : 'mdi:plus'"
-                      class="inline h-4 w-4 mr-1"
+                      class="inline h-4 w-4 me-1"
                     />
                     {{ group.name }}
                   </button>

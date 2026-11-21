@@ -32,7 +32,7 @@
       <!-- Badge non-lus -->
       <span
         v-if="totalUnread > 0"
-        class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[19px] h-[19px] px-1 flex items-center justify-center border-2 border-white z-10"
+        class="absolute -top-1 -end-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[19px] h-[19px] px-1 flex items-center justify-center border-2 border-white z-10"
       >
         {{ totalUnread > 99 ? '99+' : totalUnread }}
       </span>
@@ -93,21 +93,21 @@
         <!-- Sidebar contacts -->
         <div
           v-if="!isMobile || !chatStore.activeConversation"
-          class="flex flex-col border-r border-gray-100 dark:border-gray-700/60 flex-shrink-0 min-h-0"
+          class="flex flex-col border-e border-gray-100 dark:border-gray-700/60 flex-shrink-0 min-h-0"
           :class="isFullscreen ? 'w-72' : 'w-full md:w-[220px]'"
           :style="{ background: 'var(--bg-surface)' }"
         >
           <!-- Search -->
           <div class="px-2.5 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0">
             <div class="relative">
-              <Icon icon="mdi:magnify" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <Icon icon="mdi:magnify" class="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Rechercher..."
-                class="w-full pl-8 pr-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400/30"
+                class="w-full ps-8 pe-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400/30"
               >
-              <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <button v-if="searchQuery" @click="searchQuery = ''" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <Icon icon="mdi:close-circle" class="text-xs" />
               </button>
             </div>
@@ -129,7 +129,7 @@
               >
                 <div class="relative flex-shrink-0">
                   <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
-                  <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
+                  <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
@@ -174,7 +174,7 @@
               >
                 <div class="relative flex-shrink-0">
                   <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
-                  <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
+                  <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
@@ -197,7 +197,7 @@
               >
                 <div class="relative flex-shrink-0">
                   <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
-                  <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
+                  <span v-if="user.is_online" class="absolute bottom-0 end-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ user.first_name }} {{ user.last_name }}</div>
@@ -224,8 +224,8 @@
           <!-- Conversation header -->
           <div class="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0 bg-white dark:bg-gray-900">
             <div class="flex items-center gap-2 min-w-0">
-              <button v-if="isMobile" @click="chatStore.closeConversation()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 mr-0.5 flex-shrink-0 transition-colors">
-                <Icon icon="mdi:arrow-left" class="text-xl" />
+              <button v-if="isMobile" @click="chatStore.closeConversation()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 me-0.5 flex-shrink-0 transition-colors">
+                <Icon icon="mdi:arrow-left" class="rtl-flip text-xl" />
               </button>
               <div class="relative flex-shrink-0">
                 <img loading="lazy"
@@ -236,7 +236,7 @@
                 <div v-else class="w-9 h-9 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
                   <Icon icon="mdi:account-group" class="h-5 w-5 text-white" />
                 </div>
-                <span v-if="chatStore.activeConversation.type === 'user' && chatStore.activeConversation.is_online" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full" />
+                <span v-if="chatStore.activeConversation.type === 'user' && chatStore.activeConversation.is_online" class="absolute bottom-0 end-0 w-2.5 h-2.5 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full" />
               </div>
               <div class="min-w-0">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate leading-tight">{{ chatStore.activeConversation.name }}</p>
@@ -252,10 +252,10 @@
                 <Icon icon="mdi:dots-vertical" class="text-lg" />
               </button>
               <transition name="co-menu-drop">
-                <div v-if="showMenu" class="absolute right-0 top-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl w-52 py-1.5 z-30">
+                <div v-if="showMenu" class="absolute end-0 top-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl w-52 py-1.5 z-30">
                   <button @click="toggleNotifications" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <Icon :icon="notificationsEnabled ? 'mdi:bell-ring-outline' : 'mdi:bell-off-outline'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" class="flex-shrink-0" />
-                    <span class="flex-1 text-xs text-left">Sons de notification</span>
+                    <span class="flex-1 text-xs text-start">Sons de notification</span>
                     <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md" :class="notificationsEnabled ? 'bg-green-50 text-green-600 dark:bg-green-900/20' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'">{{ notificationsEnabled ? 'On' : 'Off' }}</span>
                   </button>
                   <div class="border-t border-gray-100 dark:border-gray-700 my-1" />
@@ -293,7 +293,7 @@
               <!-- Nom expéditeur (groupes, messages reçus) -->
               <span
                 v-if="chatStore.activeConversation?.type === 'group' && msg.sender_id != myId"
-                class="text-[10px] font-semibold text-gray-400 mb-1 ml-8"
+                class="text-[10px] font-semibold text-gray-400 mb-1 ms-8"
               >
                 {{ msg.sender?.first_name }} {{ msg.sender?.last_name || msg.sender?.username }}
               </span>
@@ -322,7 +322,7 @@
                       <Icon icon="mdi:delete-outline" class="h-3 w-3" />
                     </button>
                   </div>
-                  <span class="text-[10px] text-gray-400 mt-0.5 block" :class="msg.sender_id == myId ? 'text-right' : 'text-left'">
+                  <span class="text-[10px] text-gray-400 mt-0.5 block" :class="msg.sender_id == myId ? 'text-end' : 'text-start'">
                     {{ formatTime(msg.created_at) }}
                   </span>
                 </div>
@@ -559,7 +559,7 @@ watch(activeConversation, (val) => { if (val) scrollToBottom(); });
 .co-window--normal {
   position: fixed;
   bottom: 80px;
-  right: 20px;
+  inset-inline-end: 20px;
   width: 360px;
   height: 520px;
   max-width: calc(100vw - 32px);
@@ -736,8 +736,8 @@ watch(activeConversation, (val) => { if (val) scrollToBottom(); });
 /* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .co-window--normal {
-    left: 8px !important;
-    right: 8px !important;
+    inset-inline-start: 8px !important;
+    inset-inline-end: 8px !important;
     width: auto !important;
     max-width: none !important;
     bottom: 80px !important;

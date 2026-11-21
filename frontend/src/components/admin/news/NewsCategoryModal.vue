@@ -63,7 +63,7 @@
         :disabled="!form.name.trim() || isSaving"
         class="btn btn-primary"
       >
-        <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
+        <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
         {{ isSaving ? $t('groupAdmin.newsEditor.actions.saving') : $t('common.create') }}
       </button>
     </template>

@@ -136,7 +136,7 @@
           >
             <Icon :icon="bot.icon || 'mdi:robot-outline'" class="h-4 w-4" :style="{ color: bot.color || '#4f46e5' }" />
           </div>
-          <div class="text-left">
+          <div class="text-start">
             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ bot.name }}</p>
             <p v-if="bot.description" class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-40">
               {{ bot.description }}
@@ -373,11 +373,11 @@ defineExpose({
 </script>
 
 <style scoped>
-/* Positionné à GAUCHE du ChatOverlay (ou right:20px quand hideToggle) */
+/* Positionné à GAUCHE du ChatOverlay (ou inset-inline-end:20px quand hideToggle) */
 .chatbot-widget-root {
   position: fixed;
   bottom: 20px;
-  right: 90px;
+  inset-inline-end: 90px;
   z-index: 10000;
 }
 
@@ -419,7 +419,7 @@ defineExpose({
 .chatbot-panel {
   position: absolute;
   bottom: 70px;
-  right: 0;
+  inset-inline-end: 0;
   width: 380px;
   height: 520px;
   border-radius: 12px;
@@ -435,8 +435,8 @@ defineExpose({
 .chatbot-panel--fullscreen {
   position: fixed;
   bottom: 0;
-  right: 0;
-  left: 0;
+  inset-inline-end: 0;
+  inset-inline-start: 0;
   top: 0;
   width: 100vw;
   height: 100vh;
@@ -510,8 +510,8 @@ defineExpose({
 :global([id^="n8n-chat-"] .chat-input-wrapper) {
   outline: none !important;
   box-shadow: none !important;
-  border-left: none !important;
-  border-right: none !important;
+  border-inline-start: none !important;
+  border-inline-end: none !important;
   border-bottom: none !important;
 }
 
@@ -545,12 +545,12 @@ defineExpose({
 
 /* ══════════════════════════════════════════════════════════
    Zone avatar — EXTÉRIEURE au panneau, à sa gauche
-   right: 395px = 380px (panel) + 15px (gap)
+   inset-inline-end: 395px = 380px (panel) + 15px (gap)
    ══════════════════════════════════════════════════════════ */
 .chatbot-avatar-zone {
   position: absolute;
   bottom: 70px;
-  right: 395px;
+  inset-inline-end: 395px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -577,7 +577,7 @@ defineExpose({
 .chatbot-avatar-shine {
   position: absolute;
   top: 10px;
-  left: 14px;
+  inset-inline-start: 14px;
   width: 26px;
   height: 16px;
   border-radius: 50%;
@@ -628,7 +628,7 @@ defineExpose({
 .chatbot-bubble-close {
   position: absolute;
   top: 6px;
-  right: 6px;
+  inset-inline-end: 6px;
   color: #9ca3af;
   background: none;
   border: none;
@@ -683,7 +683,7 @@ defineExpose({
 .chatbot-selector-menu {
   position: absolute;
   bottom: 70px;
-  right: 0;
+  inset-inline-end: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
@@ -732,14 +732,14 @@ defineExpose({
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
   .chatbot-widget-root {
-    right: 12px;
+    inset-inline-end: 12px;
   }
 
   .chatbot-panel {
     /* Surcharge : fixed pleine largeur avec marges latérales */
     position: fixed !important;
-    left: 8px !important;
-    right: 8px !important;
+    inset-inline-start: 8px !important;
+    inset-inline-end: 8px !important;
     width: auto !important;
     bottom: 80px !important;
     height: 72vh !important;
@@ -749,8 +749,8 @@ defineExpose({
 
   /* Fullscreen reste intact */
   .chatbot-panel--fullscreen {
-    left: 0 !important;
-    right: 0 !important;
+    inset-inline-start: 0 !important;
+    inset-inline-end: 0 !important;
     bottom: 0 !important;
     height: 100vh !important;
     max-height: none !important;
@@ -759,8 +759,8 @@ defineExpose({
 
   .chatbot-selector-menu {
     position: fixed !important;
-    left: 8px !important;
-    right: 8px !important;
+    inset-inline-start: 8px !important;
+    inset-inline-end: 8px !important;
     bottom: 80px !important;
     max-height: 60vh;
     overflow-y: auto;

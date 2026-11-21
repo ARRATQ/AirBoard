@@ -11,7 +11,7 @@
         </span>
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" v-model="oauthConfig.is_enabled" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+          <div class="w-11 h-6 bg-gray-600 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
         </label>
       </div>
     </div>
@@ -49,7 +49,7 @@
             <button
               type="button"
               @click="showHelp = !showHelp"
-              class="ml-2 text-gray-400 hover:text-gray-300"
+              class="ms-2 text-gray-400 hover:text-gray-300"
             >
               <Icon icon="mdi:help-circle" class="h-4 w-4" />
             </button>
@@ -88,13 +88,13 @@
             <input
               v-model="clientSecret"
               :type="showSecret ? 'text' : 'password'"
-              class="form-input pr-10"
+              class="form-input pe-10"
               :placeholder="oauthConfig.id ? '••••••••••••••••' : 'Secret value depuis Azure AD'"
             />
             <button
               type="button"
               @click="showSecret = !showSecret"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
+              class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
               <Icon :icon="showSecret ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
             </button>
@@ -165,7 +165,7 @@
         <!-- Configuration Steps -->
         <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
           <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-            <Icon icon="mdi:help-circle" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:help-circle" class="inline h-4 w-4 me-1" />
             Configuration Azure AD
           </h4>
           <ol class="text-xs text-yellow-700 dark:text-yellow-400 space-y-1 list-decimal list-inside">
@@ -188,12 +188,12 @@
         <!-- Common Issues -->
         <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <h4 class="text-sm font-medium text-red-800 dark:text-red-300 mb-2">
-            <Icon icon="mdi:alert-circle" class="inline h-4 w-4 mr-1" />
+            <Icon icon="mdi:alert-circle" class="inline h-4 w-4 me-1" />
             Erreur 535 Authentication unsuccessful ?
           </h4>
           <div class="text-xs text-red-700 dark:text-red-400 space-y-2">
             <p><strong>Causes fréquentes :</strong></p>
-            <ul class="list-disc list-inside space-y-1 ml-2">
+            <ul class="list-disc list-inside space-y-1 ms-2">
               <li>Consentement administrateur non accordé (pas de coche verte)</li>
               <li>Mauvais secret copié (utilisez VALUE, pas Secret ID)</li>
               <li>Adresse "From Email" n'existe pas dans votre tenant M365</li>
@@ -211,8 +211,8 @@
       <!-- Actions -->
       <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button @click="saveOAuthConfig" :disabled="saving" class="btn btn-primary">
-          <Icon v-if="saving" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-          <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+          <Icon v-if="saving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
           Sauvegarder
         </button>
         <button
@@ -220,7 +220,7 @@
           :disabled="!oauthConfig.id || !oauthConfig.is_enabled"
           class="btn btn-secondary"
         >
-          <Icon icon="mdi:email-fast" class="h-4 w-4 mr-2" />
+          <Icon icon="mdi:email-fast" class="h-4 w-4 me-2" />
           Tester OAuth
         </button>
         <button
@@ -228,8 +228,8 @@
           :disabled="!oauthConfig.id || !oauthConfig.is_enabled || refreshing"
           class="btn btn-secondary"
         >
-          <Icon v-if="refreshing" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-          <Icon v-else icon="mdi:refresh" class="h-4 w-4 mr-2" />
+          <Icon v-if="refreshing" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="mdi:refresh" class="h-4 w-4 me-2" />
           Rafraîchir Token
         </button>
       </div>
@@ -263,8 +263,8 @@
             Annuler
           </button>
           <button @click="testOAuth" :disabled="!testEmail || testing" class="btn btn-primary">
-            <Icon v-if="testing" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-            <Icon v-else icon="mdi:send" class="h-4 w-4 mr-2" />
+            <Icon v-if="testing" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+            <Icon v-else icon="mdi:send" class="h-4 w-4 me-2" />
             Envoyer
           </button>
         </div>

@@ -7,11 +7,11 @@
       <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
-            <Icon icon="mdi:key" class="h-4 w-4 mr-2" />
+            <Icon icon="mdi:key" class="h-4 w-4 me-2" />
             {{ $t('settings.changePassword') }}
           </button>
           <button @click="resetSettings" class="btn btn-secondary">
-            <Icon icon="mdi:restore" class="h-4 w-4 mr-2" />
+            <Icon icon="mdi:restore" class="h-4 w-4 me-2" />
             {{ $t('settings.resetToDefault') }}
           </button>
         </div>
@@ -27,7 +27,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'general' ? 'border-primary-500 text-primary-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:cog" class="inline-block mr-2 h-4 w-4" />
+          <Icon icon="mdi:cog" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.general') || 'General' }}
         </button>
         <button 
@@ -35,7 +35,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'hero' ? 'border-green-500 text-green-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:format-quote-close" class="inline-block mr-2 h-4 w-4" />
+          <Icon icon="mdi:format-quote-close" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.dynamicMessages') }}
         </button>
         <button 
@@ -43,7 +43,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'auth' ? 'border-purple-500 text-purple-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:shield-account" class="inline-block mr-2 h-4 w-4" />
+          <Icon icon="mdi:shield-account" class="inline-block me-2 h-4 w-4" />
           Access & Auth
         </button>
         <button
@@ -51,7 +51,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'apparence' ? 'border-orange-400 text-orange-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:palette" class="inline-block mr-2 h-4 w-4" />
+          <Icon icon="mdi:palette" class="inline-block me-2 h-4 w-4" />
           Apparence
         </button>
         <button
@@ -59,7 +59,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'danger' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:alert" class="inline-block mr-2 h-4 w-4" />
+          <Icon icon="mdi:alert" class="inline-block me-2 h-4 w-4" />
           Danger Zone
         </button>
       </div>
@@ -380,7 +380,7 @@
                 <div class="flex-1 flex items-center justify-between">
                   <h4 class="section-title">Dynamic Hero Messages</h4>
                   <button type="button" @click="openHeroModal()" class="btn btn-secondary btn-sm">
-                    <Icon icon="mdi:plus" class="h-4 w-4 mr-1" />
+                    <Icon icon="mdi:plus" class="h-4 w-4 me-1" />
                     Add Message
                   </button>
                 </div>
@@ -446,7 +446,7 @@
                       v-model="form.signup_enabled"
                       class="sr-only peer"
                     />
-                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                   </label>
                 </div>
               </div>
@@ -510,7 +510,7 @@
                   <div class="h-14 w-full relative"
                     :style="{ background: `linear-gradient(135deg, ${palette.light.gradientFrom} 0%, ${palette.light.accent} 65%, ${palette.light.accentLight} 100%)` }">
                     <div v-if="appStore.currentPalette === palette.slug"
-                      class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      class="absolute top-2 end-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
                       <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
                     </div>
                   </div>
@@ -536,7 +536,7 @@
                     @click="selectPalette(cp.id)"
                     :style="{ background: `linear-gradient(135deg, ${darkenHex(cp.accent, 70)} 0%, ${cp.accent} 65%, ${lightenHex(cp.accent, 30)} 100%)` }">
                     <div v-if="appStore.currentPalette === cp.id"
-                      class="absolute top-2 right-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
+                      class="absolute top-2 end-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
                       <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
                     </div>
                   </button>
@@ -654,8 +654,8 @@
             <!-- Bouton sauvegarder pour l'onglet Apparence -->
             <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
               <button type="button" @click="saveApparence" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-                <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
                 Sauvegarder la palette
               </button>
             </div>
@@ -709,7 +709,7 @@
               @click="loadSettings"
               class="btn btn-secondary"
             >
-              <Icon icon="mdi:refresh" class="h-4 w-4 mr-2" />
+              <Icon icon="mdi:refresh" class="h-4 w-4 me-2" />
               {{ $t('settings.reload') }}
             </button>
             <button
@@ -717,7 +717,7 @@
               :disabled="loading"
               class="btn btn-primary"
             >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
               {{ $t('settings.save') }}
             </button>
           </div>
@@ -801,7 +801,7 @@
                 :disabled="passwordLoading"
                 class="btn btn-primary w-full sm:w-auto"
               >
-                <Icon v-if="passwordLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+                <Icon v-if="passwordLoading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
                 {{ $t('settings.changePassword') }}
               </button>
             </div>
@@ -837,7 +837,7 @@
               :disabled="resetLoading"
               class="btn btn-danger w-full sm:w-auto"
             >
-              <Icon v-if="resetLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+              <Icon v-if="resetLoading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
               {{ $t('settings.resetButton') }}
             </button>
           </div>
@@ -885,7 +885,7 @@
               :disabled="isResetting"
               class="btn btn-danger w-full sm:w-auto"
             >
-              <Icon v-if="isResetting" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
+              <Icon v-if="isResetting" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
               {{ isResetting ? $t('admin.resetInProgress') : $t('admin.confirmResetButton') }}
             </button>
           </div>
@@ -948,7 +948,7 @@
                       v-model="heroForm.is_active"
                       class="sr-only peer"
                     />
-                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    <div class="w-11 h-6 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                   </label>
                 </div>
               </div>

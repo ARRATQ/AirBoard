@@ -144,7 +144,7 @@
                 <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-gray-400" />
               </div>
 
-              <div v-else class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+              <div v-else class="flex-1 min-h-0 overflow-y-auto pe-1 space-y-2">
                 <p v-if="filteredUsersForAdmins.length === 0" class="py-8 text-center text-sm text-gray-500">
                   {{ $t('groupAdminsModal.noUsers') }}
                 </p>
@@ -188,8 +188,8 @@
               <div class="modal-footer-actions">
                 <button type="button" class="btn btn-secondary" @click="closeGroupAdminsModal">{{ $t('common.cancel') }}</button>
                 <button type="button" :disabled="savingAdmins" class="btn btn-primary" @click="saveGroupAdmins">
-                  <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 mr-2" />
+                  <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
                   {{ $t('common.save') }}
                 </button>
               </div>

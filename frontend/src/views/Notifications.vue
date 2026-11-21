@@ -115,14 +115,14 @@
             class="group relative flex items-start gap-4 p-5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/30"
             :class="{
               'bg-primary-50/40 dark:bg-primary-900/10': !notification.is_read,
-              'border-l-4 border-l-red-500': notification.priority === 2,
-              'border-l-4 border-l-yellow-500': notification.priority === 1,
-              'border-l-4 border-l-transparent': notification.priority === 0
+              'border-s-4 border-s-red-500': notification.priority === 2,
+              'border-s-4 border-s-yellow-500': notification.priority === 1,
+              'border-s-4 border-s-transparent': notification.priority === 0
             }"
           >
             <!-- Priority Badge for Mobile/Compact -->
             <div v-if="notification.priority > 0" 
-              class="absolute top-2 right-2 flex items-center justify-center w-6 h-6 rounded-full"
+              class="absolute top-2 end-2 flex items-center justify-center w-6 h-6 rounded-full"
               :class="{
                 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400': notification.priority === 2,
                 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400': notification.priority === 1
@@ -214,7 +214,7 @@
           :disabled="notificationStore.page === 1"
           class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Icon icon="mdi:chevron-left" class="h-5 w-5" />
+          <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" />
           {{ $t('common.previous') }}
         </button>
 
@@ -228,7 +228,7 @@
           class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {{ $t('common.next') }}
-          <Icon icon="mdi:chevron-right" class="h-5 w-5" />
+          <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" />
         </button>
       </div>
     </div>

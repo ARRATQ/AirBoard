@@ -33,7 +33,7 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="$emit('close')">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
-                <Icon v-if="saving" icon="mdi:loading" class="animate-spin h-4 w-4 mr-1" />
+                <Icon v-if="saving" icon="mdi:loading" class="animate-spin h-4 w-4 me-1" />
                 {{ saving ? $t('common.saving') : submitLabel || $t('common.save') }}
               </button>
             </div>

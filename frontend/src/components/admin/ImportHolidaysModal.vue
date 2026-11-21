@@ -45,7 +45,7 @@
                 {{ country.name }} ({{ country.countryCode }})
               </option>
             </select>
-            <div v-if="isLoadingCountries" class="absolute right-3 top-1/2 -translate-y-1/2">
+            <div v-if="isLoadingCountries" class="absolute end-3 top-1/2 -translate-y-1/2">
               <Icon icon="mdi:loading" class="h-5 w-5 animate-spin text-gray-400" />
             </div>
           </div>
@@ -83,8 +83,8 @@
             :disabled="!selectedCountry || isLoadingPreview"
             class="btn btn-secondary w-full"
           >
-            <Icon v-if="isLoadingPreview" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-            <Icon v-else icon="mdi:eye" class="h-4 w-4 mr-2" />
+            <Icon v-if="isLoadingPreview" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+            <Icon v-else icon="mdi:eye" class="h-4 w-4 me-2" />
             {{ $t('events.holidays.preview') }}
           </button>
         </div>
@@ -132,7 +132,7 @@
             <Icon icon="mdi:check-circle" class="h-5 w-5" />
             <span class="font-medium">{{ $t('events.holidays.importSuccess') }}</span>
           </div>
-          <ul class="text-sm text-green-600 dark:text-green-400 ml-7 space-y-1">
+          <ul class="text-sm text-green-600 dark:text-green-400 ms-7 space-y-1">
             <li>{{ $t('events.holidays.imported', { count: importResult.imported }) }}</li>
             <li v-if="importResult.skipped > 0">{{ $t('events.holidays.skipped', { count: importResult.skipped }) }}</li>
           </ul>
@@ -149,8 +149,8 @@
           :disabled="!selectedCountry || isImporting"
           class="btn btn-primary"
         >
-          <Icon v-if="isImporting" icon="mdi:loading" class="h-4 w-4 mr-2 animate-spin" />
-          <Icon v-else icon="mdi:download" class="h-4 w-4 mr-2" />
+          <Icon v-if="isImporting" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="mdi:download" class="h-4 w-4 me-2" />
           {{ $t('events.holidays.import') }}
         </button>
       </div>

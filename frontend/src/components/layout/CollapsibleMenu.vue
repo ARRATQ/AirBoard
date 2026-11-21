@@ -122,7 +122,7 @@ const toggle = () => {
 }
 
 .collapsible-menu.nested {
-  @apply ml-0;
+  @apply ms-0;
 }
 
 .collapsible-menu-header {
@@ -144,7 +144,7 @@ const toggle = () => {
 }
 
 .collapsible-menu.nested .collapsible-menu-header {
-  @apply text-xs py-1.5 pl-2;
+  @apply text-xs py-1.5 ps-2;
 }
 
 .collapsible-menu-content {
@@ -152,14 +152,14 @@ const toggle = () => {
 }
 
 .collapsible-menu.nested .collapsible-menu-content {
-  @apply pl-2 border-l-2 border-gray-200 dark:border-gray-700 ml-3 mt-1;
+  @apply ps-2 border-s-2 border-gray-200 dark:border-gray-700 ms-3 mt-1;
 }
 
 .collapsible-menu-content :deep(.nav-link) {
-  @apply pl-3 ml-3;
+  @apply ps-3 ms-3;
 }
 
 .collapsible-menu.nested .collapsible-menu-content :deep(.nav-link) {
-  @apply pl-4 text-xs py-1.5;
+  @apply ps-4 text-xs py-1.5;
 }
 </style>

@@ -89,7 +89,7 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2 mb-0.5">
                   <p 
-                    class="text-sm font-semibold truncate pr-6"
+                    class="text-sm font-semibold truncate pe-6"
                     :class="notification.is_read ? 'text-gray-700 dark:text-gray-200' : 'text-gray-900 dark:text-white'"
                   >
                     {{ notification.title }}
@@ -113,7 +113,7 @@
               <!-- Delete Action -->
               <button
                 @click.stop="deleteNotification(notification.id)"
-                class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                class="absolute top-3 end-3 opacity-0 group-hover:opacity-100 p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 :title="$t('notifications.delete')"
               >
                 <Icon icon="mdi:close" class="h-4 w-4" />
@@ -122,7 +122,7 @@
               <!-- Unread Indicator Dot -->
               <div 
                 v-if="!notification.is_read"
-                class="absolute bottom-3 right-3 h-2 w-2 rounded-full bg-primary-500 dark:bg-primary-400"
+                class="absolute bottom-3 end-3 h-2 w-2 rounded-full bg-primary-500 dark:bg-primary-400"
               ></div>
             </div>
           </div>
@@ -135,7 +135,7 @@
             class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
           >
             {{ $t('notifications.viewAll') }}
-            <Icon icon="mdi:arrow-right" class="h-4 w-4" />
+            <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
           </button>
         </div>
       </div>
@@ -321,7 +321,7 @@ onBeforeUnmount(() => {
 .notification-badge {
   position: absolute;
   top: 4px;
-  right: 4px;
+  inset-inline-end: 4px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;

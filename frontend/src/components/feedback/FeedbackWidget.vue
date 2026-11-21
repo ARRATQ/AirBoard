@@ -38,7 +38,7 @@
       </div>
 
       <!-- Percentage (optionnel) -->
-      <div v-if="stats.total_count > 0" class="ml-auto text-sm text-gray-500 dark:text-gray-400">
+      <div v-if="stats.total_count > 0" class="ms-auto text-sm text-gray-500 dark:text-gray-400">
         {{ positivePercentage }}% {{ $t('feedback.positive') }}
       </div>
     </div>
