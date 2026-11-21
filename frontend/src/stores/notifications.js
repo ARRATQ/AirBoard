@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { apiErrorMessage } from '@/services/apiError'
 import { notificationService } from '@/services/api'
 
 export const NOTIFICATION_POLL_MS = 60000
@@ -53,7 +54,7 @@ export const useNotificationStore = defineStore('notifications', {
         this.totalPages = response.total_pages || 0
       } catch (error) {
         console.error('Erreur lors de la récupération des notifications:', error)
-        this.error = error.response?.data?.message || 'Erreur lors de la récupération des notifications'
+        this.error = apiErrorMessage(error, 'Erreur lors de la récupération des notifications')
       } finally {
         this.loading = false
       }
