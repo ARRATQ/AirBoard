@@ -112,8 +112,9 @@ Reste, ou à suivre :
 - écrans de ressources et de catégories (admin et admin de groupe) : ils demandent une page de 1000
   lignes ; leur donner une vraie pagination si les volumes l'exigent ;
 - rapports par rôle et de détail (~60 requêtes, nombre constant, non N+1) ;
-- une icône d'une autre collection que mdi, lucide ou heroicons saisie en base ne s'affiche plus
-  (auparavant récupérée sur api.iconify.design).
+- ~~une icône d'une autre collection que mdi, lucide ou heroicons saisie en base ne s'affiche plus~~
+  → fait : elle s'affiche avec un pictogramme neutre servi localement (`utils/iconPlaceholder.js`).
+  Dans la base de dev : `et:newspaper` (type d'article) et `fluent-emoji-flat:…` (chatbot).
 
 **Frontend** (premier chargement : environ 235 kB de JS compressé avant la moindre route)
 1. Retirer la transition de page `out-in` de 0,3 s (`App.vue:31-41`), qui ajoute environ 600 ms à chaque
@@ -318,11 +319,14 @@ visuelle. Ensuite :
 
 **Reste / à surveiller** :
 - Pluriels arabes limités à 3 formes (zéro/un/autre) : pas de règle CLDR à 6 formes (`pluralRules`).
-- L'aide « 6 caractères minimum » de l'inscription ne dit pas que le backend exige aussi un caractère
-  spécial (refus « Weak Password »).
-- `readingTime.js` renvoie encore « N min » ; les poignées de redimensionnement d'image restent
-  physiques (la position est enregistrée dans l'article).
-- `RichTextEditor.insertFile` concatène du HTML à partir du nom et de l'URL du média (à revoir).
+- ~~Aide « 6 caractères » de l'inscription~~ → fait : `utils/passwordPolicy.js` reproduit la règle du
+  backend (8 caractères, majuscule, minuscule, chiffre, caractère spécial, mots courants refusés) ;
+  le changement de mot de passe demande aussi 8 caractères.
+- ~~`readingTime.js` renvoie « N min »~~ → fait (`readingMinutes` + `news.minutes`). Les poignées de
+  redimensionnement d'image restent physiques (la position est enregistrée dans l'article).
+- ~~`RichTextEditor.insertFile` concatène du HTML~~ → fait : contenu structuré.
+- Liens « Conditions d'utilisation » et « Confidentialité » de l'inscription toujours vers `#` (pas de
+  page à viser).
 
 État initial (2026-11-19) :
 
