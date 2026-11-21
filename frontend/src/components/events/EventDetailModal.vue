@@ -280,11 +280,9 @@ const getPriorityClass = (priority) => {
 }
 
 const editEvent = () => {
-  const userRole = authStore.user?.role
-  const editRoute = userRole === 'admin' || userRole === 'editor' ? 'AdminEventEdit' : 'GroupAdminEventEdit'
-
+  // Même éditeur pour tous les rôles : il choisit l'API selon le périmètre (useManagementScope)
   router.push({
-    name: editRoute,
+    name: 'AdminEventEdit',
     params: { slug: props.event.slug }
   })
 

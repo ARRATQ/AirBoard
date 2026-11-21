@@ -95,28 +95,15 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 
 	// Recherche sécurisée avec validation et assainissement
 	if search := c.Query("search"); search != "" {
-		// Valider l'input de recherche
-		if len(search) < 2 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche doit contenir au moins 2 caractères"})
-			return
-		}
-		if len(search) > 100 {
+		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
+		if listSearchTooLong(search) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
 			return
 		}
 
-		// Vérifier les caractères interdits pour prévenir SQL injection et XSS
-		forbiddenChars := []string{"<", ">", "&", "\"", "'", "(", ")", "=", "+", ";", "--", "/*", "*/", "union", "select", "insert", "update", "delete", "drop", "create"}
-		lowerSearch := strings.ToLower(search)
-		for _, char := range forbiddenChars {
-			if strings.Contains(lowerSearch, char) {
-				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Caractère ou terme interdit dans la recherche: %s", char)})
-				return
-			}
-		}
-
-		// Assainir l'input pour les requêtes LIKE
-		sanitizedSearch := strings.ReplaceAll(search, "%", "\\%")
+		// Requête paramétrée : seuls les jokers de LIKE (\, % et _) sont échappés
+		sanitizedSearch := strings.ReplaceAll(search, "\\", "\\\\")
+		sanitizedSearch = strings.ReplaceAll(sanitizedSearch, "%", "\\%")
 		sanitizedSearch = strings.ReplaceAll(sanitizedSearch, "_", "\\_")
 
 		query = query.Where("title ILIKE ? OR description ILIKE ?", "%"+sanitizedSearch+"%", "%"+sanitizedSearch+"%")

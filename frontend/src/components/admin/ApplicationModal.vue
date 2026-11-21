@@ -3,7 +3,7 @@
     <div class="modal-container" @click.self="closeModal">
       <div class="modal-panel w-full sm:max-w-5xl">
         <form class="modal-form" @submit.prevent="handleSubmit">
-          <!-- Header -->
+          <!-- En-tête -->
           <div class="modal-header">
             <div class="flex items-center justify-between gap-4">
               <div class="flex items-center gap-3 min-w-0">
@@ -14,91 +14,106 @@
                   <Icon :icon="form.icon || 'mdi:application'" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
-                  <h3 class="modal-title truncate">{{ isEdit ? 'Edit Resource' : 'New Resource' }}</h3>
-                  <p class="modal-subtitle truncate">{{ isEdit ? 'Modify resource settings' : 'Add a new resource to the portal' }}</p>
+                  <h3 class="modal-title truncate">
+                    {{ isEdit ? $t('groupAdmin.applicationModal.title.edit') : $t('groupAdmin.applicationModal.title.new') }}
+                  </h3>
+                  <p class="modal-subtitle truncate">
+                    {{ isEdit ? $t('groupAdmin.applicationModal.subtitle.edit') : $t('groupAdmin.applicationModal.subtitle.new') }}
+                  </p>
                 </div>
               </div>
-              <button type="button" class="btn btn-ghost p-2" aria-label="Close" @click="closeModal">
+              <button type="button" class="btn btn-ghost p-2" :aria-label="$t('common.close')" @click="closeModal">
                 <Icon icon="mdi:close" class="h-5 w-5" />
               </button>
             </div>
           </div>
 
-          <!-- Content : infos | apparence -->
+          <!-- Contenu : infos | apparence -->
           <div class="modal-content grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
             <!-- Colonne gauche -->
             <div class="space-y-4">
               <div class="section-header mb-0">
                 <Icon icon="mdi:information-outline" class="section-icon" />
-                <h4 class="section-title">Basic Information</h4>
+                <h4 class="section-title">{{ $t('groupAdmin.applicationModal.basicInfo') }}</h4>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="form-group mb-0">
-                  <label for="name" class="form-label form-label-required">Resource Name</label>
+                  <label for="name" class="form-label form-label-required">{{ $t('groupAdmin.applicationModal.applicationName') }}</label>
                   <input id="name" v-model="form.name" type="text" required class="form-input" placeholder="GitLab" />
                   <p v-if="errors.name" class="form-error">{{ errors.name }}</p>
                 </div>
                 <div class="form-group mb-0">
-                  <label for="app_group_id" class="form-label form-label-required">Resource Group</label>
+                  <label for="app_group_id" class="form-label form-label-required">{{ $t('groupAdmin.applicationModal.appGroup') }}</label>
                   <select id="app_group_id" v-model="form.app_group_id" required class="form-select">
-                    <option value="">Select a group</option>
-                    <option v-for="group in props.appGroups" :key="group.id" :value="group.id">{{ group.name }}</option>
+                    <option value="">{{ $t('groupAdmin.applicationModal.selectGroup') }}</option>
+                    <option v-for="group in availableAppGroups" :key="group.id" :value="group.id">{{ group.name }}</option>
                   </select>
                   <p v-if="errors.app_group_id" class="form-error">{{ errors.app_group_id }}</p>
+                  <!-- Admin de groupe : seuls les groupes de ressources privés de ses groupes sont proposés -->
+                  <p v-if="privateGroupsOnly && availableAppGroups.length === 0" class="form-help text-yellow-500">
+                    {{ $t('groupAdmin.applicationModal.noPrivateGroups') }}
+                  </p>
                 </div>
               </div>
 
               <div class="form-group mb-0">
-                <label for="url" class="form-label form-label-required">Resource URL</label>
+                <label for="url" class="form-label form-label-required">{{ $t('groupAdmin.applicationModal.applicationUrl') }}</label>
                 <div class="relative">
                   <Icon icon="mdi:link-variant" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input id="url" v-model="form.url" type="url" required class="form-input !pl-9" placeholder="https://gitlab.example.com" />
+                  <input
+                    id="url"
+                    v-model="form.url"
+                    type="url"
+                    required
+                    class="form-input !pl-9"
+                    :placeholder="$t('groupAdmin.applicationModal.urlPlaceholder')"
+                  />
                 </div>
                 <p v-if="errors.url" class="form-error">{{ errors.url }}</p>
-                <p v-else class="text-xs text-gray-400 mt-1">Complete URL to the resource (with https://)</p>
+                <p v-else class="text-xs text-gray-400 mt-1">{{ $t('groupAdmin.applicationModal.urlHelp') }}</p>
               </div>
 
               <div class="form-group mb-0">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">{{ $t('groupAdmin.applicationModal.description') }}</label>
                 <textarea
                   id="description"
                   v-model="form.description"
                   rows="2"
                   class="form-textarea resize-none"
-                  placeholder="Resource description..."
+                  :placeholder="$t('groupAdmin.applicationModal.descriptionPlaceholder')"
                 ></textarea>
               </div>
 
-              <div v-if="props.users && props.users.length" class="form-group mb-0">
-                <label for="created_by_id" class="form-label">Créateur</label>
+              <!-- Créateur : seulement si la page fournit la liste des utilisateurs (admin global) -->
+              <div v-if="users.length" class="form-group mb-0">
+                <label for="created_by_id" class="form-label">{{ $t('adminShared.applications.creator') }}</label>
                 <select id="created_by_id" v-model="form.created_by_id" class="form-select">
-                  <option :value="null">— Non attribué —</option>
-                  <option v-for="u in props.users" :key="u.id" :value="u.id">
+                  <option :value="null">{{ $t('adminShared.applications.creatorNone') }}</option>
+                  <option v-for="u in users" :key="u.id" :value="u.id">
                     {{ u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username }}
                     <template v-if="u.first_name || u.last_name"> ({{ u.username }})</template>
                   </option>
                 </select>
-                <p class="text-xs text-gray-400 mt-1">Définit le créateur pour les rapports d'activité.</p>
+                <p class="text-xs text-gray-400 mt-1">{{ $t('adminShared.applications.creatorHelp') }}</p>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <label class="toggle-row">
-                <span>
-                  <span class="toggle-row-title">New tab</span>
-                  <span class="toggle-row-desc">Open in a new tab</span>
-                </span>
-                <input v-model="form.open_in_new_tab" type="checkbox" class="switch-input" />
-                <span class="switch-track" aria-hidden="true"></span>
-              </label>
+                  <span>
+                    <span class="toggle-row-title">{{ $t('groupAdmin.applicationModal.openInNewTab') }}</span>
+                  </span>
+                  <input v-model="form.open_in_new_tab" type="checkbox" class="switch-input" />
+                  <span class="switch-track" aria-hidden="true"></span>
+                </label>
                 <label class="toggle-row">
-                <span>
-                  <span class="toggle-row-title">Active</span>
-                  <span class="toggle-row-desc">Visible to users</span>
-                </span>
-                <input v-model="form.is_active" type="checkbox" class="switch-input" />
-                <span class="switch-track" aria-hidden="true"></span>
-              </label>
+                  <span>
+                    <span class="toggle-row-title">{{ $t('common.active') }}</span>
+                    <span class="toggle-row-desc">{{ $t('groupAdmin.applicationModal.activeAndVisible') }}</span>
+                  </span>
+                  <input v-model="form.is_active" type="checkbox" class="switch-input" />
+                  <span class="switch-track" aria-hidden="true"></span>
+                </label>
               </div>
             </div>
 
@@ -106,15 +121,19 @@
             <div class="space-y-4">
               <div class="section-header mb-0">
                 <Icon icon="mdi:palette-outline" class="section-icon" />
-                <h4 class="section-title">Appearance</h4>
+                <h4 class="section-title">{{ $t('groupAdmin.applicationModal.appearance') }}</h4>
               </div>
 
               <div class="card p-3">
                 <div class="flex items-center gap-3">
                   <Icon :icon="form.icon || 'mdi:application'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
                   <div class="min-w-0 flex-1">
-                    <div class="font-medium text-gray-900 dark:text-white truncate">{{ form.name || 'Resource Name' }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ form.url || 'URL...' }}</div>
+                    <div class="font-medium text-gray-900 dark:text-white truncate">
+                      {{ form.name || $t('groupAdmin.applicationModal.previewName') }}
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {{ form.url || $t('groupAdmin.applicationModal.previewUrl') }}
+                    </div>
                   </div>
                   <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
                 </div>
@@ -122,44 +141,43 @@
 
               <div class="grid grid-cols-[1fr_7rem] gap-4">
                 <div class="form-group mb-0">
-                <label for="color" class="form-label">Color</label>
-                <div class="flex items-center gap-2">
-                  <input
-                    id="color"
-                    v-model="form.color"
-                    type="color"
-                    class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
-                    style="border-color: var(--border); background-color: var(--bg-card)"
-                  />
-                  <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#6366f1" />
+                  <label for="color" class="form-label">{{ $t('groupAdmin.applicationModal.color') }}</label>
+                  <div class="flex items-center gap-2">
+                    <input
+                      id="color"
+                      v-model="form.color"
+                      type="color"
+                      class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
+                      style="border-color: var(--border); background-color: var(--bg-card)"
+                    />
+                    <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#6366f1" />
+                  </div>
                 </div>
-              </div>
                 <div class="form-group mb-0">
-                  <label for="order" class="form-label">Order</label>
+                  <label for="order" class="form-label">{{ $t('groupAdmin.applicationModal.displayOrder') }}</label>
                   <input id="order" v-model.number="form.order" type="number" min="0" class="form-input" placeholder="0" />
                 </div>
               </div>
 
               <IconInput
                 v-model="form.icon"
-                label="Icon"
+                :label="$t('groupAdmin.applicationModal.icon')"
                 placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
                 category="application"
                 :show-suggestions="true"
               />
-
             </div>
           </div>
 
-          <!-- Footer -->
+          <!-- Pied -->
           <div class="modal-footer-bar">
-            <span class="modal-footer-hint">* Required fields</span>
+            <span class="modal-footer-hint">{{ $t('common.requiredFieldsHint') }}</span>
             <div class="modal-footer-actions">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
-              <button type="submit" :disabled="loading" class="btn btn-primary">
+              <button type="button" class="btn btn-secondary" @click="closeModal">{{ $t('common.cancel') }}</button>
+              <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn btn-primary">
                 <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
                 <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 mr-2" />
-                {{ isEdit ? 'Update' : 'Create' }}
+                {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}
               </button>
             </div>
           </div>
@@ -172,6 +190,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
 import IconInput from '@/components/ui/IconInput.vue'
 
 const props = defineProps({
@@ -187,105 +206,63 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  // Liste des utilisateurs pour choisir le créateur (admin global uniquement)
   users: {
     type: Array,
     default: () => []
+  },
+  // Admin de groupe : ne proposer que les groupes de ressources privés
+  privateGroupsOnly: {
+    type: Boolean,
+    default: false
   }
 })
 
 const emit = defineEmits(['close', 'submit'])
+const { t } = useI18n()
+
+const DEFAULT_COLOR = '#6366f1'
+const DEFAULT_ICON = 'mdi:application'
 
 const loading = ref(false)
 const errors = ref({})
 
-const form = reactive({
-  name: '',
-  description: '',
-  url: '',
-  app_group_id: '',
-  color: '#6366f1',
-  icon: 'mdi:application',
-  order: 0,
-  open_in_new_tab: true,
-  is_active: true,
-  created_by_id: null
+/** Valeurs du formulaire à partir d'une ressource existante (ou vides) */
+const toFormValues = (app) => ({
+  name: app?.name || '',
+  description: app?.description || '',
+  url: app?.url || '',
+  app_group_id: app?.app_group_id || '',
+  color: app?.color || DEFAULT_COLOR,
+  icon: app?.icon || DEFAULT_ICON,
+  order: app?.order || 0,
+  open_in_new_tab: app?.open_in_new_tab ?? true,
+  is_active: app?.is_active ?? true,
+  created_by_id: app?.created_by_id || null
 })
+
+const form = reactive(toFormValues(null))
 
 const isEdit = computed(() => !!props.application)
 
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    resetForm()
-  }
-})
-
-watch(() => props.application, (newVal) => {
-  if (newVal) {
-    Object.assign(form, {
-      name: newVal.name || '',
-      description: newVal.description || '',
-      url: newVal.url || '',
-      app_group_id: newVal.app_group_id || '',
-      color: newVal.color || '#6366f1',
-      icon: newVal.icon || 'mdi:application',
-      order: newVal.order || 0,
-      open_in_new_tab: newVal.open_in_new_tab ?? true,
-      is_active: newVal.is_active ?? true,
-      created_by_id: newVal.created_by_id || null
-    })
-  }
-}, { immediate: true })
+const availableAppGroups = computed(() =>
+  props.privateGroupsOnly
+    ? props.appGroups.filter(group => group.is_private === true)
+    : props.appGroups
+)
 
 const resetForm = () => {
-  if (props.application) {
-    Object.assign(form, {
-      name: props.application.name || '',
-      description: props.application.description || '',
-      url: props.application.url || '',
-      app_group_id: props.application.app_group_id || '',
-      color: props.application.color || '#6366f1',
-      icon: props.application.icon || 'mdi:application',
-      order: props.application.order || 0,
-      open_in_new_tab: props.application.open_in_new_tab ?? true,
-      is_active: props.application.is_active ?? true,
-      created_by_id: props.application.created_by_id || null
-    })
-  } else {
-    Object.assign(form, {
-      name: '',
-      description: '',
-      url: '',
-      app_group_id: '',
-      color: '#6366f1',
-      icon: 'mdi:application',
-      order: 0,
-      open_in_new_tab: true,
-      is_active: true,
-      created_by_id: null
-    })
-  }
+  Object.assign(form, toFormValues(props.application))
   errors.value = {}
 }
 
-const validateForm = () => {
-  errors.value = {}
+watch(() => props.show, (isOpen) => {
+  if (isOpen) resetForm()
+})
 
-  if (!form.name.trim()) {
-    errors.value.name = 'Name is required'
-  }
-
-  if (!form.url.trim()) {
-    errors.value.url = 'URL is required'
-  } else if (!isValidUrl(form.url)) {
-    errors.value.url = 'Invalid URL format'
-  }
-
-  if (!form.app_group_id) {
-    errors.value.app_group_id = 'Resource group is required'
-  }
-
-  return Object.keys(errors.value).length === 0
-}
+watch(() => props.application, (app) => {
+  if (app) Object.assign(form, toFormValues(app))
+}, { immediate: true })
 
 const isValidUrl = (url) => {
   try {
@@ -296,16 +273,35 @@ const isValidUrl = (url) => {
   }
 }
 
-const handleSubmit = async () => {
+const validateForm = () => {
+  const nextErrors = {}
+
+  if (!form.name.trim()) {
+    nextErrors.name = t('groupAdmin.applicationModal.errors.nameRequired')
+  }
+
+  if (!form.url.trim()) {
+    nextErrors.url = t('groupAdmin.applicationModal.errors.urlRequired')
+  } else if (!isValidUrl(form.url)) {
+    nextErrors.url = t('groupAdmin.applicationModal.errors.invalidUrl')
+  }
+
+  if (!form.app_group_id) {
+    nextErrors.app_group_id = t('groupAdmin.applicationModal.errors.appGroupRequired')
+  }
+
+  errors.value = nextErrors
+  return Object.keys(nextErrors).length === 0
+}
+
+const handleSubmit = () => {
   if (!validateForm()) return
 
   loading.value = true
   try {
-    const formData = { ...form }
-    if (isEdit.value) {
-      formData.id = props.application.id
-    }
-
+    const formData = isEdit.value
+      ? { ...form, id: props.application.id }
+      : { ...form }
     emit('submit', formData)
   } finally {
     loading.value = false

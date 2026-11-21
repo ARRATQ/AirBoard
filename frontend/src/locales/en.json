@@ -36,7 +36,7 @@
     "dashboard": "Dashboard",
     "administration": "Administration",
     "overview": "Overview",
-    "appGroups": "Resource Groups",
+    "appGroups": "Resource categories",
     "applications": "Resources",
     "today": "Today",
     "yesterday": "Yesterday",
@@ -89,7 +89,7 @@
     "newsHub": "News Hub",
     "events": "Events",
     "gamification": "My XP",
-    "noGroup": "No group",
+    "noGroup": "No category",
     "close": "Close",
     "applicationsManagement": "Resource Management",
     "contentManagement": "Content Management",
@@ -196,8 +196,8 @@
     "status_active": "Active only",
     "status_inactive": "Inactive only",
     "users": "users",
-    "appsLabel": "resource groups",
-    "appsAccess": "Access to resource groups:",
+    "appsLabel": "resource categories",
+    "appsAccess": "Access to resource categories:",
     "usersLabel": "Users:",
     "noResultsTitle": "No results",
     "noResultsText": "No group matches your search criteria.",
@@ -222,7 +222,7 @@
     "new": "New Resource",
     "add": "Add Resource",
     "searchPlaceholder": "Search resources...",
-    "filter_all_groups": "All Groups",
+    "filter_all_groups": "All categories",
     "noResultsTitle": "No Results",
     "noResultsText": "No resources match your search criteria.",
     "emptyTitle": "No Resources",
@@ -335,8 +335,8 @@
     "confirmDeleteHeroMessage": "Are you sure you want to delete this message?"
   },
   "appGroups": {
-    "subtitle": "Organize your resources into groups",
-    "new": "New Group"
+    "subtitle": "Sort your resources into categories",
+    "new": "New category"
   },
   "oauth": {
     "title": "OAuth Authentication",
@@ -578,17 +578,23 @@
       "minutesAgo": "{count} minute(s) ago",
       "hoursAgo": "{count} hour(s) ago",
       "daysAgo": "{count} day(s) ago"
-    }
+    },
+    "subtitle": "The tools and links available to you, sorted by category.",
+    "emptyTitle": "No resources available",
+    "emptyAdmin": "Start by creating a resource category, then add resources to it.",
+    "emptyUser": "Contact your administrator to get access to resources.",
+    "createCategory": "Create a category",
+    "loadError": "Could not load resources"
   },
   "groupAdmin": {
     "title": "Group Administration",
     "subtitle": "Manage the resources of groups you administrate",
     "managedGroups": "Managed Groups",
-    "appGroups": "Resource Groups",
+    "appGroups": "Resource categories",
     "applications": "Resources",
     "news": "Group News",
     "dashboard": "Dashboard",
-    "myAppGroups": "My Resource Groups",
+    "myAppGroups": "My resource categories",
     "myApplications": "My Resources",
     "myPolls": "My Polls",
     "events": "Events",
@@ -597,34 +603,34 @@
     "yourGroupsSubtitle": "Groups you administrate",
     "noManagedGroups": "No managed groups",
     "noManagedGroupsHelp": "Contact an administrator to obtain group administration rights",
-    "manageAppGroups": "Manage AppGroups",
-    "manageAppGroupsDesc": "Create and organize your resource groups",
+    "manageAppGroups": "Manage resource categories",
+    "manageAppGroupsDesc": "Create and organize your resource categories",
     "manageApplications": "Manage Resources",
     "manageApplicationsDesc": "Add and configure resources",
     "manageNews": "Manage News",
     "manageNewsDesc": "Publish news for your groups",
     "appGroupModal": {
       "title": {
-        "new": "New Group",
-        "edit": "Edit Group"
+        "new": "New category",
+        "edit": "Edit category"
       },
       "subtitle": {
-        "new": "Create a new group to organize resources",
-        "edit": "Modify the resource group settings"
+        "new": "Create a category to sort resources",
+        "edit": "Modify the resource category settings"
       },
       "ownerGroup": "Owner Group",
       "group": "Group",
       "selectGroup": "Select a group",
-      "ownerGroupHelp": "This resource group will be private and accessible only by members of this group.",
+      "ownerGroupHelp": "This resource category will be private and accessible only by members of this group.",
       "ownerGroupEditHelp": "The owner group cannot be modified.",
       "basicInfo": "Basic Information",
-      "groupName": "Group Name",
+      "groupName": "Category name",
       "displayOrder": "Display Order",
       "description": "Description",
-      "descriptionPlaceholder": "Describe this resource group...",
+      "descriptionPlaceholder": "Describe this resource category...",
       "appearance": "Appearance",
       "preview": "Preview",
-      "previewName": "Group Name",
+      "previewName": "Category name",
       "previewDescription": "Description...",
       "color": "Color",
       "icon": "Icon",
@@ -649,8 +655,8 @@
       },
       "basicInfo": "Basic Information",
       "applicationName": "Resource Name",
-      "appGroup": "Resource Group",
-      "selectGroup": "Select a group",
+      "appGroup": "Resource category",
+      "selectGroup": "Select a category",
       "applicationUrl": "Resource URL",
       "urlPlaceholder": "https://gitlab.example.com",
       "urlHelp": "Complete URL to the resource (with https://)",
@@ -669,21 +675,21 @@
       "cancel": "Cancel",
       "update": "Update",
       "create": "Create",
-      "noPrivateGroups": "No private resource groups available. Create a private resource group first.",
+      "noPrivateGroups": "No private resource categories available. Create a private resource category first.",
       "errors": {
         "nameRequired": "Name is required",
         "urlRequired": "URL is required",
         "invalidUrl": "Invalid URL format",
-        "appGroupRequired": "Resource group is required"
+        "appGroupRequired": "Resource category is required"
       }
     },
     "appGroupsManagement": {
-      "title": "Resource Groups",
-      "subtitle": "Manage resource groups of your managed groups",
+      "title": "Resource categories",
+      "subtitle": "Manage resource categories of your managed groups",
       "newGroup": "New Group",
       "noManagedGroups": "No managed groups",
-      "noManagedGroupsHelp": "You must be administrator of at least one group to create resource groups. Contact a system administrator to obtain group administration rights.",
-      "searchPlaceholder": "Search groups...",
+      "noManagedGroupsHelp": "You must be administrator of at least one group to create resource categories. Contact a system administrator to obtain group administration rights.",
+      "searchPlaceholder": "Search categories...",
       "status": {
         "all": "All statuses",
         "active": "Active only",
@@ -701,26 +707,26 @@
       "order": "Order:",
       "ownerGroup": "Group:",
       "empty": {
-        "title": "No resource groups",
-        "description": "Create your first resource group to get started.",
-        "createButton": "Create group"
+        "title": "No resource categories",
+        "description": "Create your first resource category to get started.",
+        "createButton": "Create a category"
       },
       "noResults": {
         "title": "No results",
-        "description": "No group matches your search criteria."
+        "description": "No category matches your search criteria."
       },
       "deleteConfirm": {
-        "title": "Delete group",
+        "title": "Delete category",
         "message": "Are you sure you want to delete \"{name}\"? This action is irreversible."
       },
-      "deleteError": "Error while deleting the group"
+      "deleteError": "Error while deleting the category"
     },
     "applicationsManagement": {
       "title": "Resources",
       "subtitle": "Manage resources of your groups",
       "newApplication": "New Resource",
-      "noAppGroups": "No resource groups",
-      "noAppGroupsHelp": "You must first create a resource group before you can add resources.",
+      "noAppGroups": "No resource categories",
+      "noAppGroupsHelp": "You must first create a resource category before you can add resources.",
       "searchPlaceholder": "Search resources...",
       "groupFilter": {
         "all": "All groups"
@@ -1272,14 +1278,14 @@
       "subtitle": "Overview of your platform",
       "users": "Users",
       "groups": "Groups",
-      "appGroups": "Resource Groups",
+      "appGroups": "Resource categories",
       "apps": "Resources",
       "news": "Articles",
       "events": "Events",
       "polls": "Polls",
       "managedGroups": "Managed groups",
       "totalMembers": "Total members",
-      "managedAppGroups": "Managed resource groups",
+      "managedAppGroups": "Managed resource categories",
       "managedApps": "My resources",
       "managedNews": "Managed articles",
       "managedPolls": "Managed polls",
@@ -1840,12 +1846,12 @@
       "managingTags": "Managing Tags",
       "bestPractices": "Best Practices",
       "permissions": "Permissions",
-      "managingAppGroups": "Managing Resource Groups",
+      "managingAppGroups": "Managing resource categories",
       "managingApplications": "Managing Resources",
       "groupMembers": "Group Members",
       "userManagement": "User Management",
       "groupManagement": "Group Management",
-      "appGroups": "Resource Groups",
+      "appGroups": "Resource categories",
       "newsManagement": "News Management",
       "eventsManagement": "Events Management",
       "pollsManagement": "Polls Management",
@@ -2162,5 +2168,97 @@
     "confirmDeleteMessage": "Delete this message?",
     "confirmClearHistory": "Do you really want to clear the entire history of this conversation?",
     "clearHistory": "Clear history"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "Failed to load resources",
+      "saveError": "Failed to save resource",
+      "created": "Resource created successfully",
+      "updated": "Resource updated successfully",
+      "deleted": "Resource deleted successfully",
+      "creator": "Creator",
+      "creatorNone": "— Unassigned —",
+      "creatorHelp": "Sets the creator for activity reports."
+    },
+    "appGroups": {
+      "private": "Private",
+      "public": "Public",
+      "privateToggle": "Private resource category",
+      "privateToggleHelp": "Only the admins of its owner group can manage it",
+      "ownerGroupManageHelp": "The admins of this group will manage this resource category",
+      "created": "Resource category created",
+      "updated": "Resource category updated",
+      "deleted": "Resource category deleted",
+      "saveError": "Failed to save resource category",
+      "loadError": "Failed to load resource categories"
+    },
+    "news": {
+      "subtitle": "Manage news articles across the organization",
+      "createFirst": "Create your first article.",
+      "loadError": "Failed to load articles",
+      "deleteSuccess": "Article deleted",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "pinned": "Article pinned",
+      "unpinned": "Article unpinned",
+      "pinError": "Failed to update pin",
+      "editorSubtitleNew": "Create a new news article",
+      "editorSubtitleEdit": "Update your article",
+      "newTagPlaceholder": "New tag name...",
+      "tagColor": "Tag color",
+      "tagExists": "This tag already exists and has been added",
+      "tagCreated": "Tag \"{name}\" created",
+      "removeItem": "Remove {name}",
+      "lockedGroup": "Group targeted by another administrator: you cannot remove it"
+    }
+  },
+  "nav": {
+    "admin": {
+      "title": "Administration",
+      "overview": "Overview",
+      "content": "Content",
+      "community": "Community",
+      "resources": "Resources",
+      "users": "Users",
+      "system": "System",
+      "news": "News",
+      "events": "Events",
+      "polls": "Polls",
+      "announcements": "Announcements",
+      "media": "Media",
+      "suggestions": "Suggestions",
+      "moderation": "Moderation",
+      "gamification": "Gamification",
+      "directory": "Who's Who",
+      "groups": "Groups",
+      "oauth": "OAuth sign-in",
+      "settings": "Settings",
+      "email": "Email",
+      "analytics": "Analytics",
+      "reports": "Reports",
+      "chatbots": "Chatbots"
+    },
+    "tabs": {
+      "label": "Page sections",
+      "articles": "Articles",
+      "categories": "Categories",
+      "types": "Types",
+      "suggestions": "Suggestions",
+      "resources": "Resources"
+    },
+    "mainLabel": "Main navigation"
+  },
+  "adminHome": {
+    "title": "Overview",
+    "subtitleAdmin": "Key figures, what needs action, and a way into each area.",
+    "subtitleGroup": "Your groups, their resources and the pages you can manage.",
+    "keyFigures": "Key figures",
+    "todo": "To do",
+    "nothingPending": "nothing pending",
+    "pendingComments": "Comments awaiting moderation",
+    "newSuggestions": "New suggestions",
+    "managedGroups": "Managed groups",
+    "resourceCategories": "Resource categories",
+    "manage": "Manage"
   }
 }

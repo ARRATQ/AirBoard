@@ -2,10 +2,10 @@
   <div class="content-area">
     <!-- Header -->
     <PageHeader>
-      <template #title>{{ isEditMode ? t('events.editor.editEvent') : t('events.editor.newEvent') }}</template>
-      <template #description>{{ isEditMode ? t('events.editor.editSubtitle') : t('events.editor.newSubtitle') }}</template>
+      <template #title>{{ headerTitle }}</template>
+      <template #description>{{ headerSubtitle }}</template>
       <template #actions>
-        <router-link :to="isGroupAdminMode ? '/group-admin/events' : '/admin/events'" class="btn btn-secondary">
+        <router-link :to="LIST_PATH" class="btn btn-secondary">
           <Icon icon="mdi:arrow-left" class="h-4 w-4 mr-2" />
           {{ t('common.backToList') }}
         </router-link>
@@ -45,7 +45,7 @@
                 <RichTextEditor
                   v-model="form.description"
                   :placeholder="t('events.editor.descriptionPlaceholder')"
-                  :as-group-admin="isGroupAdminMode"
+                  :as-group-admin="!isGlobal"
                 />
               </div>
             </div>
@@ -279,6 +279,13 @@
             </div>
           </div>
 
+          <!-- Visibilité : public ou groupes ciblés -->
+          <EventVisibilityPicker
+            v-model:group-ids="form.target_group_ids"
+            v-model:is-public="isPublicEvent"
+            :groups="availableGroups"
+          />
+
           <!-- Category & Classification -->
           <div class="card">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -300,7 +307,9 @@
                       {{ cat.name }}
                     </option>
                   </select>
+                  <!-- Création de catégorie : POST /admin/events/categories, admin global uniquement -->
                   <button
+                    v-if="isAdmin"
                     type="button"
                     @click="showAddCategoryDialog = true"
                     class="flex-shrink-0 px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-1"
@@ -339,53 +348,6 @@
             </div>
           </div>
 
-          <!-- Target Groups -->
-          <div class="card">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Icon icon="mdi:account-group" class="h-5 w-5 text-primary-500" />
-              {{ t('events.editor.visibility') }}
-            </h3>
-
-            <div class="space-y-3">
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border-2 border-gray-200 dark:border-gray-700">
-                <label class="flex items-center cursor-pointer">
-                  <input
-                    v-model="isPublic"
-                    type="checkbox"
-                    class="form-checkbox h-5 w-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                  />
-                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                    <Icon icon="mdi:earth" class="inline h-4 w-4 mr-1" />
-                    {{ t('events.visibility.public') }}
-                  </span>
-                </label>
-              </div>
-
-              <div v-if="!isPublic" class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('events.editor.targetGroups') }}
-                </label>
-                <div class="max-h-32 overflow-y-auto space-y-2">
-                  <label
-                    v-for="group in availableGroups"
-                    :key="group.id"
-                    class="flex items-center cursor-pointer"
-                  >
-                    <input
-                      v-model="form.target_group_ids"
-                      type="checkbox"
-                      :value="group.id"
-                      class="form-checkbox h-4 w-4 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
-                    />
-                    <span class="ml-2 text-sm text-gray-900 dark:text-white">
-                      {{ group.name }}
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Actions -->
           <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
             <div class="space-y-3">
@@ -400,7 +362,7 @@
               </button>
 
               <router-link
-                :to="isGroupAdminMode ? '/group-admin/events' : '/admin/events'"
+                :to="LIST_PATH"
                 class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 <Icon icon="mdi:close" class="h-5 w-5" />
@@ -412,346 +374,233 @@
       </div>
     </form>
 
-    <!-- Add Category Dialog -->
-    <div v-if="showAddCategoryDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" @click.self="showAddCategoryDialog = false">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4 transform transition-all">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('events.editor.addCategory') }}</h3>
-          <button
-            type="button"
-            @click="showAddCategoryDialog = false"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-          >
-            <Icon icon="mdi:close" class="h-5 w-5" />
-          </button>
-        </div>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryName') }} *</label>
-            <input
-              v-model="newCategory.name"
-              type="text"
-              required
-              class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
-              :placeholder="t('events.editor.categoryNamePlaceholder')"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryIcon') }}</label>
-            <input
-              v-model="newCategory.icon"
-              type="text"
-              class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
-              placeholder="mdi:folder"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryColor') }}</label>
-            <input
-              v-model="newCategory.color"
-              type="color"
-              class="w-full h-10 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer"
-            />
-          </div>
-        </div>
-        <div class="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            @click="showAddCategoryDialog = false"
-            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
-          >
-            {{ t('common.cancel') }}
-          </button>
-          <button
-            type="button"
-            @click="createCategory"
-            :disabled="!newCategory.name.trim()"
-            class="px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
-          >
-            <Icon icon="mdi:plus" class="h-4 w-4" />
-            {{ t('common.create') }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <EventCategoryDialog
+      v-if="isAdmin && showAddCategoryDialog"
+      :categories="categories"
+      @close="showAddCategoryDialog = false"
+      @created="handleCategoryCreated"
+    />
   </div>
 </template>
 
 <script setup>
-import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
-import { useEventsStore } from '@/stores/events'
-import { useAppStore } from '@/stores/app'
-import { useAuthStore } from '@/stores/auth'
+import PageHeader from '@/components/ui/PageHeader.vue'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
+import EventCategoryDialog from '@/components/admin/events/EventCategoryDialog.vue'
+import EventVisibilityPicker from '@/components/admin/events/EventVisibilityPicker.vue'
+import { getEventWriteService } from '@/components/admin/events/eventServices'
+import { adminService, eventsService, groupAdminService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
+import { useManagementScope } from '@/composables/useManagementScope'
+import { CONTENT } from '@/config/access'
+
+const LIST_PATH = '/admin/events'
+const DEFAULT_COLOR = '#6366f1'
+const DEFAULT_RECURRENCE = Object.freeze({ type: 'weekly', interval: 1 })
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const eventsStore = useEventsStore()
 const appStore = useAppStore()
-const authStore = useAuthStore()
+// Admin et éditeur : API globale ; admin de groupe : API /group-admin, groupes administrés
+const { isGlobal, isAdmin } = useManagementScope(CONTENT)
 
-// Déterminer si on est en mode group-admin
-const isGroupAdminMode = computed(() => route.path.startsWith('/group-admin'))
-// Un editor (non-admin) doit utiliser les routes /editor/events
-const isEditorMode = computed(() => !isGroupAdminMode.value && authStore.user?.role === 'editor')
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
 const isSaving = ref(false)
 const categories = ref([])
 const availableGroups = ref([])
-
-// Dialogs
 const showAddCategoryDialog = ref(false)
-
-// New category form
-const newCategory = ref({
-  name: '',
-  icon: 'mdi:calendar',
-  color: '#6366f1'
-})
-
-// Recurrence pattern
-const recurrencePattern = ref({
-  type: 'weekly',
-  interval: 1
-})
-
-// External links
+const isPublicEvent = ref(true)
+const recurrencePattern = ref({ ...DEFAULT_RECURRENCE })
 const externalLinks = ref([])
 
-// Form
+const headerTitle = computed(() => {
+  if (isGlobal.value) return isEditMode.value ? t('events.editor.editEvent') : t('events.editor.newEvent')
+  return isEditMode.value ? t('groupAdmin.eventEditor.title.edit') : t('groupAdmin.eventEditor.title.new')
+})
+
+const headerSubtitle = computed(() => {
+  if (isGlobal.value) return isEditMode.value ? t('events.editor.editSubtitle') : t('events.editor.newSubtitle')
+  return isEditMode.value ? t('groupAdmin.eventEditor.subtitle.edit') : t('groupAdmin.eventEditor.subtitle.new')
+})
+
+// Valeurs par défaut reprises des deux anciennes pages :
+// global → fuseau UTC, publié d'emblée ; groupe → Europe/Paris, brouillon
+const defaultTimezone = () => (isGlobal.value ? 'UTC' : 'Europe/Paris')
+
 const form = ref({
   title: '',
   description: '',
   start_date: '',
   end_date: '',
   is_all_day: false,
-  timezone: 'UTC',
+  timezone: defaultTimezone(),
   location: '',
   is_recurring: false,
   recurrence_rule: '',
   recurrence_end: '',
   external_links: '',
-  color: '#6366f1',
+  color: DEFAULT_COLOR,
   priority: 'normal',
-  is_published: true,
+  is_published: isGlobal.value,
   published_at: null,
   category_id: null,
   target_group_ids: []
 })
 
-// Computed
-const isPublic = computed({
-  get: () => form.value.target_group_ids.length === 0,
-  set: (value) => {
-    if (value) {
-      form.value.target_group_ids = []
-    }
-  }
-})
-
-// Methods
 const addLink = () => {
-  externalLinks.value.push({ title: '', url: '' })
+  externalLinks.value = [...externalLinks.value, { title: '', url: '' }]
 }
 
 const removeLink = (index) => {
-  externalLinks.value.splice(index, 1)
+  externalLinks.value = externalLinks.value.filter((_, i) => i !== index)
 }
 
-// Create new category
-const createCategory = async () => {
+const handleCategoryCreated = (category) => {
+  categories.value = [...categories.value, category]
+  form.value = { ...form.value, category_id: category.id }
+  showAddCategoryDialog.value = false
+}
+
+// JSON stocké en chaîne ; en cas d'échec on garde la valeur de repli
+const parseJson = (value, fallback) => {
+  if (!value) return fallback
   try {
-    // Check if category name already exists
-    const existingCategory = categories.value.find(cat => 
-      cat.name.toLowerCase() === newCategory.value.name.trim().toLowerCase()
-    )
-    
-    if (existingCategory) {
-      appStore.showError(t('events.editor.categoryNameExists'))
-      return
-    }
-    
-    const category = await eventsStore.createCategory(newCategory.value)
-    categories.value.push(category)
-    form.value.category_id = category.id
-    showAddCategoryDialog.value = false
-    // Reset form
-    newCategory.value = {
-      name: '',
-      icon: 'mdi:calendar',
-      color: '#6366f1'
-    }
-    appStore.showSuccess(t('events.editor.categoryCreateSuccess'))
-  } catch (error) {
-    console.error('Error creating category:', error)
-    if (error.response?.status === 409) {
-      appStore.showError(t('events.editor.categoryNameExists'))
-    } else {
-      appStore.showError(t('events.editor.categoryCreateError'))
-    }
+    return JSON.parse(value)
+  } catch {
+    return fallback
   }
 }
 
-// Load event for editing
+const toDateTimeInput = (value) => (value ? new Date(value).toISOString().slice(0, 16) : '')
+const toDateInput = (value) => (value ? new Date(value).toISOString().slice(0, 10) : '')
+
 const loadEvent = async () => {
   if (!isEditMode.value) return
 
   try {
-    const event = await eventsStore.fetchEventBySlug(route.params.slug)
+    const event = await eventsService.getEventBySlug(route.params.slug)
 
-    // Parse description content if it's a JSON string
-    let description = event.description || ''
-    if (typeof description === 'string' && description.trim().startsWith('{')) {
-      try {
-        description = JSON.parse(description)
-      } catch (e) {
-        console.warn('Failed to parse description as JSON, using as-is')
-      }
-    }
+    // Description Tiptap stockée en JSON (sinon texte brut)
+    const rawDescription = event.description || ''
+    const description = typeof rawDescription === 'string' && rawDescription.trim().startsWith('{')
+      ? parseJson(rawDescription, rawDescription)
+      : rawDescription
 
-    // Parse external links
-    let links = []
-    if (event.external_links) {
-      try {
-        links = JSON.parse(event.external_links)
-      } catch (e) {
-        console.warn('Failed to parse external links')
-      }
-    }
-    externalLinks.value = links
+    externalLinks.value = parseJson(event.external_links, [])
+    recurrencePattern.value = parseJson(event.recurrence_rule, { ...DEFAULT_RECURRENCE })
 
-    // Parse recurrence rule
-    let recurrenceRule = { type: 'weekly', interval: 1 }
-    if (event.recurrence_rule) {
-      try {
-        recurrenceRule = JSON.parse(event.recurrence_rule)
-      } catch (e) {
-        console.warn('Failed to parse recurrence rule')
-      }
-    }
-    recurrencePattern.value = recurrenceRule
+    const targetGroups = event.target_groups || []
+    isPublicEvent.value = targetGroups.length === 0
 
     form.value = {
       title: event.title,
-      description: description,
-      start_date: event.start_date ? new Date(event.start_date).toISOString().slice(0, 16) : '',
-      end_date: event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '',
+      description,
+      start_date: toDateTimeInput(event.start_date),
+      end_date: toDateTimeInput(event.end_date),
       is_all_day: event.is_all_day,
-      timezone: event.timezone || 'UTC',
+      timezone: event.timezone || defaultTimezone(),
       location: event.location || '',
       is_recurring: event.is_recurring,
       recurrence_rule: event.recurrence_rule || '',
-      recurrence_end: event.recurrence_end ? new Date(event.recurrence_end).toISOString().slice(0, 10) : '',
+      recurrence_end: toDateInput(event.recurrence_end),
       external_links: event.external_links || '',
-      color: event.color || '#6366f1',
+      color: event.color || DEFAULT_COLOR,
       priority: event.priority || 'normal',
       is_published: event.is_published,
-      published_at: event.published_at ? new Date(event.published_at).toISOString().slice(0, 16) : null,
+      published_at: event.published_at ? toDateTimeInput(event.published_at) : null,
       category_id: event.category_id,
-      target_group_ids: event.target_groups ? event.target_groups.map(g => g.id) : []
+      target_group_ids: targetGroups.map((g) => g.id)
     }
   } catch (error) {
-    console.error('Error loading event:', error)
+    console.error('Erreur au chargement de l\'événement :', error)
     appStore.showError(t('events.editor.loadError'))
-    router.push(isGroupAdminMode.value ? '/group-admin/events' : '/admin/events')
+    router.push(LIST_PATH)
   }
 }
 
-// Load categories and groups
-const loadMetadata = async () => {
+const loadCategories = async () => {
   try {
-    await eventsStore.fetchCategories()
-    categories.value = eventsStore.categories
-
-    // Load groups (this would need to be implemented in the store)
-    // For now, we'll use a placeholder
-    availableGroups.value = []
+    const data = await eventsService.getCategories()
+    categories.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (error) {
-    console.error('Error loading metadata:', error)
+    console.error('Erreur au chargement des catégories :', error)
+    categories.value = []
   }
 }
 
-// Save event
-const saveEvent = async () => {
+// Groupes proposés comme cibles : tous pour l'admin, ceux qu'il administre pour l'admin de groupe.
+// L'éditeur n'a pas d'API listant les groupes (GET /admin/groups est réservé à l'admin).
+const fetchTargetGroups = async () => {
+  if (!isGlobal.value) {
+    const data = await groupAdminService.getManagedGroups()
+    return Array.isArray(data) ? data : (data?.groups || data?.data || [])
+  }
+  if (isAdmin.value) {
+    const data = await adminService.getGroups()
+    return Array.isArray(data) ? data : (data?.data || data?.groups || [])
+  }
+  return []
+}
+
+const loadGroups = async () => {
   try {
-    isSaving.value = true
+    availableGroups.value = await fetchTargetGroups()
+  } catch (error) {
+    console.error('Erreur au chargement des groupes :', error)
+    availableGroups.value = []
+  }
+}
 
-    // Prepare recurrence rule
-    let recurrenceRule = ''
-    if (form.value.is_recurring) {
-      recurrenceRule = JSON.stringify(recurrencePattern.value)
-    }
+const toIsoDateTime = (value) => (value ? new Date(value).toISOString() : null)
+const toIsoDate = (value) => (value ? new Date(value).toISOString().split('T')[0] : null)
 
-    // Prepare external links
-    const externalLinksJson = JSON.stringify(externalLinks.value.filter(link => link.title && link.url))
+const buildPayload = () => ({
+  ...form.value,
+  // Description Tiptap (objet) envoyée en chaîne JSON
+  description: typeof form.value.description === 'object'
+    ? JSON.stringify(form.value.description)
+    : form.value.description,
+  recurrence_rule: form.value.is_recurring ? JSON.stringify(recurrencePattern.value) : '',
+  external_links: JSON.stringify(externalLinks.value.filter((link) => link.title && link.url)),
+  start_date: toIsoDateTime(form.value.start_date),
+  end_date: toIsoDateTime(form.value.end_date),
+  published_at: toIsoDateTime(form.value.published_at),
+  recurrence_end: toIsoDate(form.value.recurrence_end),
+  // Événement public : aucun groupe ciblé
+  target_group_ids: isPublicEvent.value ? [] : form.value.target_group_ids
+})
 
-    // Format dates properly with ISO 8601 format (UTC)
-    const formatDateTime = (dateStr) => {
-      if (!dateStr) return null
-      const date = new Date(dateStr)
-      // Convert to ISO 8601 format with UTC timezone
-      return date.toISOString()
-    }
-
-    const formatDate = (dateStr) => {
-      if (!dateStr) return null
-      const date = new Date(dateStr)
-      // Format as YYYY-MM-DD in UTC
-      return date.toISOString().split('T')[0]
-    }
-
-    const data = {
-      ...form.value,
-      // Convert Tiptap JSON description to string
-      description: typeof form.value.description === 'object'
-        ? JSON.stringify(form.value.description)
-        : form.value.description,
-      recurrence_rule: recurrenceRule,
-      external_links: externalLinksJson,
-      start_date: formatDateTime(form.value.start_date),
-      end_date: form.value.end_date ? formatDateTime(form.value.end_date) : null,
-      published_at: formatDateTime(form.value.published_at),
-      recurrence_end: formatDate(form.value.recurrence_end)
-    }
+const saveEvent = async () => {
+  isSaving.value = true
+  try {
+    const service = getEventWriteService(isAdmin.value, isGlobal.value)
+    const data = buildPayload()
 
     if (isEditMode.value) {
-      if (isGroupAdminMode.value) {
-        await eventsStore.updateGroupAdminEvent(route.params.slug, data)
-      } else if (isEditorMode.value) {
-        await eventsStore.updateEditorEvent(route.params.slug, data)
-      } else {
-        await eventsStore.updateEvent(route.params.slug, data)
-      }
+      await service.updateEvent(route.params.slug, data)
       appStore.showSuccess(t('events.editor.updateSuccess'))
     } else {
-      if (isGroupAdminMode.value) {
-        await eventsStore.createGroupAdminEvent(data)
-      } else if (isEditorMode.value) {
-        await eventsStore.createEditorEvent(data)
-      } else {
-        await eventsStore.createEvent(data)
-      }
+      await service.createEvent(data)
       appStore.showSuccess(t('events.editor.createSuccess'))
     }
 
-    // Rediriger vers la bonne page selon le mode
-    router.push(isGroupAdminMode.value ? '/group-admin/events' : '/admin/events')
+    router.push(LIST_PATH)
   } catch (error) {
-    console.error('Error saving event:', error)
+    console.error('Erreur à l\'enregistrement de l\'événement :', error)
     appStore.showError(t('events.editor.saveError'))
   } finally {
     isSaving.value = false
   }
 }
 
-// Lifecycle
 onMounted(() => {
-  loadMetadata()
+  loadCategories()
+  loadGroups()
   loadEvent()
 })
 </script>

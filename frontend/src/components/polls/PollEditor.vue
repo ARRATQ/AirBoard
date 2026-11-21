@@ -350,11 +350,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { pollsService, newsService, announcementsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
+import { getRoles } from '@/config/access'
 
 const props = defineProps({
   show: {
@@ -590,30 +591,28 @@ const handleSubmit = async () => {
       }))
     }
 
+    // Même règle de rôle que le menu et le routeur (config/access.js) ;
+    // sans rôle reconnu, on s'arrête au lieu d'annoncer un faux succès
+    const { isAdmin, isGroupAdmin, isEditor } = getRoles(authStore.user)
+    if (!isAdmin && !isGroupAdmin && !isEditor) {
+      throw new Error('Rôle insuffisant pour enregistrer un sondage')
+    }
+
     let result
-    const userRole = authStore.user.role
-
-    const user = authStore.user
-    const isGroupAdmin = user.admin_of_groups && user.admin_of_groups.length > 0
-
     if (isEdit.value) {
-      // Mise à jour
-      if (userRole === 'admin') {
+      if (isAdmin) {
         result = await pollsService.updatePoll(props.poll.id, payload)
       } else if (isGroupAdmin) {
         result = await pollsService.updatePollAsGroupAdmin(props.poll.id, payload)
-      } else if (userRole === 'editor') {
+      } else {
         result = await pollsService.updatePollAsEditor(props.poll.id, payload)
       }
+    } else if (isAdmin) {
+      result = await pollsService.createPoll(payload)
+    } else if (isGroupAdmin) {
+      result = await pollsService.createPollAsGroupAdmin(payload)
     } else {
-      // Création
-      if (userRole === 'admin') {
-        result = await pollsService.createPoll(payload)
-      } else if (isGroupAdmin) {
-        result = await pollsService.createPollAsGroupAdmin(payload)
-      } else if (userRole === 'editor') {
-        result = await pollsService.createPollAsEditor(payload)
-      }
+      result = await pollsService.createPollAsEditor(payload)
     }
 
     if (window.$toast) {

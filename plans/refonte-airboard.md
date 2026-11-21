@@ -46,6 +46,11 @@ pour un utilisateur comme pour un administrateur.
 | `2457a4c` | Chantier 2 : listes app-groups et applications de l'admin de groupe paginées (100 par défaut, ≤ 1000) ; le front demande 1000 lignes en attendant une vraie pagination |
 | `41d7491` | Correctif : en arabe, la barre de pagination retournait toute la page (`:global([dir='rtl']) .x` compilé en `[dir='rtl']`), défaut déjà présent dans DataTable sur main |
 | (suivi) | Correctifs : les sélecteurs de groupes d'applications de l'admin voient tous les groupes (et non 10) ; les liens des articles s'ouvrent toujours dans un nouvel onglet (`DOMPurify.addHook`) |
+| `728934c` | Chantier 4 : lien actif exact (`utils/navigation.js`), libellés et `aria-label` du menu replié, un seul hamburger |
+| `ff5e747` | Chantier 4 : une page par module pour l'admin et l'admin de groupe (actualités, événements, sondages, ressources, catégories) ; rôles et périmètre dans `config/access.js` et `useManagementScope` ; anciennes URL `/group-admin/…` redirigées |
+| `c0ba933` | Chantier 4 : menu admin décrit dans `config/navigation.js`, rangé par domaine ; taxonomies en onglets (`SectionTabs`) ; annuaire sous `/admin/directory` |
+| `ade5e18` | Chantier 4 : page « Vue d'ensemble » à `/admin` (chiffres clés, à traiter, raccourcis), aussi pour l'admin de groupe ; `/group-admin` redirige |
+| `4eebfc2` | Chantier 4 : « Ressources » et « Catégories de ressources » partout ; `/dashboard` → `/resources` ; page d'arrivée unique `/home` ; page Ressources traduite, sans statistiques admin |
 
 Mesures du chantier 2 (local) : JS+CSS au premier chargement 240 → 205 kB compressés ; appels API au
 chargement de `/home` 9 → 8 (utilisateur) et 11 → 9 (admin), puis 7 / 8 quand la vérification de mise à
@@ -243,7 +248,19 @@ des chiffres clés.
 « Nouveau » pendant 14 jours, note admin datée, calendrier restylé et vue Liste en tableau d'affichage
 (chantier 5).
 
-## Chantier 4 — Navigation et organisation
+## Chantier 4 — Navigation et organisation ✅ fait (branche `claude/loving-nash-195cdb`)
+
+Décisions : menu admin Vue d'ensemble / Contenu / Communauté / Ressources / Utilisateurs / Système ;
+l'admin de groupe voit une liste courte (Vue d'ensemble, Actualités, Événements, Sondages, Ressources),
+l'éditeur Actualités et Événements ; terme retenu « Ressources » + « Catégories de ressources ».
+
+Corrigé ensuite côté backend (même PR) : `CreateAppGroup` garde le groupe propriétaire choisi ;
+`false` et `0` (actif, privé, nouvel onglet, ordre) sont enregistrés à la création et à la modification ;
+filtres publié/brouillon, récurrent et journée entière de la liste des événements ; recherche d'un
+caractère acceptée (longueur comptée en caractères) ; liste de termes interdits retirée (l'apostrophe,
+« update » ou « create » sont acceptés), seuls les jokers de LIKE sont échappés.
+
+Constat de départ :
 
 1. **Menu admin** : environ 37 liens pour un admin, parce que tout le bloc « Administration de groupe »
    s'affiche aussi pour lui (`Sidebar.vue:102`), en doublon des entrées admin globales. Le groupe
