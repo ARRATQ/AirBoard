@@ -27,9 +27,9 @@
   },
   "time": {
     "justNow": "À l'instant",
-    "minutesAgo": "il y a {count} minute(s)",
-    "hoursAgo": "il y a {count} heure(s)",
-    "daysAgo": "il y a {count} jour(s)"
+    "minutesAgo": "il y a {count} minute | il y a {count} minute | il y a {count} minutes",
+    "hoursAgo": "il y a {count} heure | il y a {count} heure | il y a {count} heures",
+    "daysAgo": "il y a {count} jour | il y a {count} jour | il y a {count} jours"
   },
   "common": {
     "home": "Accueil",
@@ -42,7 +42,6 @@
     "yesterday": "Hier",
     "tomorrow": "Demain",
     "daysAgo": "Il y a {count} jours",
-    "daysRemaining": "{count} jour(s) restant(s)",
     "retry": "Réessayer",
     "refresh": "Rafraîchir",
     "loading": "Chargement...",
@@ -154,7 +153,7 @@
     "noEvents": "Aucun événement",
     "noEventsHelp": "Aucun événement sur cette période",
     "noEventsForDay": "Aucun événement pour ce jour",
-    "andMore": "et {count} autre(s)",
+    "andMore": "et {count} autre | et {count} autre | et {count} autres",
     "month": "Mois",
     "week": "Semaine",
     "day": "Jour",
@@ -209,7 +208,6 @@
       "breakdown": "Détail",
       "weekendCount": "Jours de week-end",
       "holidaysCount": "Jours fériés",
-      "days": "jour(s)",
       "holidaysInPeriod": "Jours fériés dans la période",
       "invalidRange": "Choisissez une date de début et une date de fin postérieure."
     },
@@ -442,7 +440,117 @@
     "defaultGroupConfiguration": "Configuration du groupe par défaut",
     "defaultGroup": "Groupe par défaut pour les nouveaux utilisateurs",
     "noDefaultGroup": "Aucun groupe par défaut (attribution manuelle)",
-    "defaultGroupHelp": "Sélectionnez le groupe qui sera automatiquement attribué aux nouveaux utilisateurs lors de l'inscription. Laisser vide pour exiger une attribution manuelle."
+    "defaultGroupHelp": "Sélectionnez le groupe qui sera automatiquement attribué aux nouveaux utilisateurs lors de l'inscription. Laisser vide pour exiger une attribution manuelle.",
+    "tabs": {
+      "access": "Accès et authentification",
+      "appearance": "Apparence"
+    },
+    "preview": {
+      "dashboardMessageHint": "▲ Message du tableau de bord (page Ressources)",
+      "sampleMail": "Messagerie",
+      "sampleGitDesc": "Gestion des dépôts Git",
+      "sampleMailDesc": "Gestion des e-mails"
+    },
+    "appNameHelp": "Ce nom apparaît dans l'en-tête et dans le titre du navigateur",
+    "dashboardTitleHelp": "Titre principal affiché sur la page du tableau de bord",
+    "welcomeMessageHelp": "Message d'accueil affiché sur la page des ressources",
+    "newsFeed": {
+      "title": "Fil d'actualités",
+      "perTab": "Articles par onglet",
+      "perTabHelp": "Nombre d'articles affichés par onglet sur la page d'accueil (les articles épinglés apparaissent toujours en tête)."
+    },
+    "heroImage": {
+      "title": "Image de fond du bandeau d'accueil",
+      "help": "Personnalisez l'arrière-plan du bandeau d'accueil pour marquer des événements (Ramadan, fêtes, etc.). Laissez vide pour conserver le dégradé animé par défaut.",
+      "lightTheme": "Thème clair",
+      "darkTheme": "Thème sombre",
+      "darkFallback": "(si vide, l'image du thème clair est utilisée)",
+      "lightPreviewAlt": "Aperçu de l'image du thème clair",
+      "darkPreviewAlt": "Aperçu de l'image du thème sombre",
+      "removeLight": "Supprimer l'image",
+      "removeDark": "Supprimer l'image sombre",
+      "formatHelp": "Format idéal : 1920×480 px. JPEG, PNG ou WebP recommandés.",
+      "focalPoint": "Point de cadrage",
+      "focalPointHelp": "Choisissez quelle zone de l'image reste visible.",
+      "uploadSuccess": "Image téléversée avec succès",
+      "uploadError": "Échec du téléversement de l'image",
+      "uploadDarkSuccess": "Image sombre téléversée avec succès",
+      "uploadDarkError": "Échec du téléversement de l'image sombre",
+      "positions": {
+        "topLeft": "Haut gauche",
+        "topCenter": "Haut centre",
+        "topRight": "Haut droite",
+        "middleLeft": "Milieu gauche",
+        "center": "Centre",
+        "middleRight": "Milieu droite",
+        "bottomLeft": "Bas gauche",
+        "bottomCenter": "Bas centre",
+        "bottomRight": "Bas droite"
+      }
+    },
+    "heroMessages": {
+      "title": "Messages dynamiques du bandeau d'accueil",
+      "add": "Ajouter un message",
+      "help": "Gérez les citations et messages qui défilent dans le bandeau de la page d'accueil.",
+      "empty": "Aucun message dynamique configuré. Les messages par défaut seront utilisés.",
+      "editTitle": "Modifier le message",
+      "subtitle": "Configurez une citation ou un message d'information pour la page d'accueil.",
+      "content": "Contenu du message",
+      "contentPlaceholder": "Ex. : La seule façon de faire du bon travail est d'aimer ce que vous faites.",
+      "author": "Auteur / source (facultatif)",
+      "authorPlaceholder": "Ex. : Steve Jobs",
+      "activeStatus": "Statut d'activation",
+      "activeHelp": "Les messages visibles sont inclus dans la rotation de la page d'accueil.",
+      "update": "Mettre à jour le message",
+      "loadError": "Impossible de charger les messages du bandeau d'accueil",
+      "updated": "Message mis à jour",
+      "added": "Message ajouté",
+      "saveError": "Impossible d'enregistrer le message",
+      "deleted": "Message supprimé",
+      "deleteError": "Impossible de supprimer le message",
+      "statusError": "Impossible de mettre à jour le statut du message"
+    },
+    "palette": {
+      "title": "Palette de couleurs",
+      "help": "Cliquez pour prévisualiser, puis enregistrez pour appliquer à tous les utilisateurs.",
+      "add": "Ajouter",
+      "new": "Nouvelle palette",
+      "editTitle": "Modifier la palette",
+      "namePlaceholder": "Ma palette",
+      "accent": "Couleur d'accent",
+      "pageBackground": "Fond de page",
+      "auto": "Automatique",
+      "custom": "Personnalisé",
+      "autoHelp": "Le fond est calculé automatiquement à partir de la teinte de l'accent.",
+      "customHelp": "Choisissez votre propre couleur de fond.",
+      "bgColor": "Couleur de fond",
+      "delete": "Supprimer la palette",
+      "create": "Créer la palette",
+      "save": "Enregistrer la palette",
+      "saved": "Palette enregistrée"
+    },
+    "password": {
+      "minLength": "6 caractères minimum",
+      "currentRequired": "Le mot de passe actuel est obligatoire",
+      "newRequired": "Le nouveau mot de passe est obligatoire",
+      "tooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "confirmRequired": "Veuillez confirmer votre mot de passe",
+      "mismatch": "Les mots de passe ne correspondent pas",
+      "incorrect": "Mot de passe actuel incorrect",
+      "changed": "Mot de passe modifié",
+      "changeError": "Impossible de modifier le mot de passe"
+    },
+    "loadError": "Impossible de charger les paramètres",
+    "updated": "Paramètres mis à jour",
+    "updateError": "Impossible de mettre à jour les paramètres",
+    "resetSuccess": "Paramètres réinitialisés aux valeurs par défaut",
+    "resetError": "Impossible de réinitialiser les paramètres",
+    "validation": {
+      "appNameRequired": "Le nom de l'application est obligatoire",
+      "appIconRequired": "L'icône de l'application est obligatoire",
+      "dashboardTitleRequired": "Le titre du tableau de bord est obligatoire",
+      "welcomeMessageRequired": "Le message d'accueil est obligatoire"
+    }
   },
   "admin": {
     "overviewTitle": "Administration",
@@ -506,7 +614,24 @@
     "noData": "Aucune donnée disponible",
     "noAnalytics": "Aucune donnée d'analyse",
     "noAnalyticsText": "Commencez à utiliser les ressources pour voir les statistiques ici.",
-    "exportStarted": "Export des données au format CSV initié..."
+    "exportStarted": "Export des données au format CSV initié...",
+    "loading": "Chargement des analyses...",
+    "distribution30d": "Répartition sur 30 jours",
+    "actionTracking": "Suivi des actions",
+    "pointTooltip": "{date} : aucun clic | {date} : {count} clic | {date} : {count} clics",
+    "top10": "Top 10",
+    "clickCount": "aucun clic | {count} clic | {count} clics",
+    "userCount": "aucun utilisateur | {count} utilisateur | {count} utilisateurs",
+    "noActivity": "Aucune activité détectée",
+    "actions": "Actions",
+    "newsStats": {
+      "title": "Statistiques du News Hub",
+      "subtitle": "Performance du contenu",
+      "totalArticles": "Articles au total",
+      "published": "Publiés",
+      "totalViews": "Vues au total",
+      "topNews": "Articles les plus populaires"
+    }
   },
   "reports": {
     "title": "Rapports",
@@ -550,7 +675,11 @@
       "group_admin": "Admins de Groupe",
       "editor": "Éditeur",
       "user": "Utilisateur"
-    }
+    },
+    "topContributors": "Top contributeurs",
+    "score": "Score",
+    "scoreFormula": "* Score = clics sur les ressources ×1 + articles lus ×2 + réactions ×1 + votes aux sondages ×1 + ressources créées ×5 + articles publiés ×10",
+    "unknownError": "Erreur inconnue"
   },
   "announcements": {
     "title": "Annonces",
@@ -613,14 +742,18 @@
     "hideHeader": "Masquer l'en-tête du chat",
     "hideHeaderHelp": "Supprime le titre et le sous-titre affichés par le widget n8n (utile si vous avez déjà un en-tête personnalisé)",
     "showAvatarIntro": "Afficher un avatar de bienvenue animé",
-    "showAvatarIntroHelp": "À l'ouverture du chat, un avatar animé surgit dans le coin et flotte doucement tant que la fenêtre est ouverte. Une bulle de bienvenue apparaît puis se referme automatiquement après quelques secondes."
+    "showAvatarIntroHelp": "À l'ouverture du chat, un avatar animé surgit dans le coin et flotte doucement tant que la fenêtre est ouverte. Une bulle de bienvenue apparaît puis se referme automatiquement après quelques secondes.",
+    "assistants": "Assistants IA",
+    "dismissWelcome": "Fermer le message de bienvenue"
   },
   "news": {
     "selectTypePlaceholder": "Choisir un type…",
     "widget": {
       "title": "À la Une",
       "viewAll": "Voir tout",
-      "noNews": "Aucune actualité pour le moment"
+      "noNews": "Aucune actualité pour le moment",
+      "unreadCount": "aucun article non lu | {count} article non lu | {count} articles non lus",
+      "reactionsCount": "aucune réaction | {count} réaction | {count} réactions"
     },
     "center": {
       "title": "News Hub",
@@ -637,7 +770,9 @@
       "reactions": "Réactions",
       "edit": "Modifier l'article",
       "notFound": "Article introuvable",
-      "backToList": "Retour aux articles"
+      "backToList": "Retour aux articles",
+      "readingTime": "{time} de lecture",
+      "linkedPoll": "Sondage lié à cet article"
     },
     "types": {
       "article": "Article",
@@ -659,7 +794,76 @@
       "titleZA": "Titre (Z-A)"
     },
     "editor": {
-      "invalidVideoUrl": "URL non reconnue. Utilisez une URL YouTube ou Vimeo."
+      "invalidVideoUrl": "URL non reconnue. Utilisez une URL YouTube ou Vimeo.",
+      "placeholder": "Commencez à écrire...",
+      "videoPrompt": "URL YouTube ou Vimeo",
+      "removeVideo": "Supprimer la vidéo",
+      "bold": "Gras (Ctrl+B)",
+      "italic": "Italique (Ctrl+I)",
+      "underline": "Souligné (Ctrl+U)",
+      "strike": "Barré",
+      "inlineCode": "Code inline",
+      "textColor": "Couleur du texte",
+      "highlight": "Surbrillance",
+      "heading1": "Titre 1",
+      "heading2": "Titre 2",
+      "heading3": "Titre 3",
+      "alignLeft": "Aligner à gauche",
+      "alignCenter": "Centrer",
+      "alignRight": "Aligner à droite",
+      "alignJustify": "Justifier",
+      "bulletList": "Liste à puces",
+      "orderedList": "Liste numérotée",
+      "codeBlock": "Bloc de code",
+      "blockquote": "Citation",
+      "horizontalRule": "Séparateur horizontal",
+      "callout": {
+        "label": "Encadré",
+        "info": "Info",
+        "warning": "Attention",
+        "success": "Succès",
+        "danger": "Danger"
+      },
+      "table": "Tableau",
+      "insertTable": "Insérer un tableau",
+      "addColumnBefore": "Colonne avant",
+      "addColumnAfter": "Colonne après",
+      "deleteColumn": "Supprimer la colonne",
+      "addRowBefore": "Ligne avant",
+      "addRowAfter": "Ligne après",
+      "deleteRow": "Supprimer la ligne",
+      "deleteTable": "Supprimer le tableau",
+      "addLink": "Ajouter un lien",
+      "removeLink": "Supprimer le lien",
+      "insertImage": "Insérer une image",
+      "attachFile": "Joindre un fichier",
+      "embedVideo": "Intégrer une vidéo YouTube / Vimeo",
+      "undo": "Annuler (Ctrl+Z)",
+      "redo": "Rétablir (Ctrl+Y)",
+      "colors": {
+        "black": "Noir",
+        "darkGray": "Gris foncé",
+        "gray": "Gris",
+        "red": "Rouge",
+        "orange": "Orange",
+        "yellow": "Jaune",
+        "green": "Vert",
+        "cyan": "Cyan",
+        "blue": "Bleu",
+        "indigo": "Indigo",
+        "purple": "Violet",
+        "pink": "Rose",
+        "lightGreen": "Vert clair",
+        "lightBlue": "Bleu clair",
+        "lightPink": "Rose clair",
+        "lightOrange": "Orange clair",
+        "lightPurple": "Violet clair",
+        "lightRed": "Rouge clair",
+        "lightCyan": "Cyan clair"
+      }
+    },
+    "viewModes": {
+      "compact": "Compact"
     }
   },
   "dashboard": {
@@ -683,7 +887,6 @@
     "sortByCategory": "Trier par catégorie",
     "sortByRecent": "Plus récentes",
     "resetFilters": "Réinitialiser les filtres",
-    "applicationsFound": "ressource(s) trouvée(s)",
     "application": "Ressource",
     "description": "Description",
     "category": "Catégorie",
@@ -692,9 +895,9 @@
     "noApplicationsFound": "Aucune ressource trouvée",
     "time": {
       "justNow": "À l'instant",
-      "minutesAgo": "il y a {count} minute(s)",
-      "hoursAgo": "il y a {count} heure(s)",
-      "daysAgo": "il y a {count} jour(s)"
+      "minutesAgo": "il y a {count} minute | il y a {count} minute | il y a {count} minutes",
+      "hoursAgo": "il y a {count} heure | il y a {count} heure | il y a {count} heures",
+      "daysAgo": "il y a {count} jour | il y a {count} jour | il y a {count} jours"
     },
     "subtitle": "Les outils et liens mis à votre disposition, rangés par catégorie.",
     "emptyTitle": "Aucune ressource disponible",
@@ -778,7 +981,15 @@
       "draft": "Brouillon",
       "draftDescription": "Cet événement n'est pas encore publié",
       "created": "Créé le",
-      "externalLinks": "Liens"
+      "externalLinks": "Liens",
+      "recurrenceRule": {
+        "daily": "Tous les jours",
+        "weekly": "Hebdomadaire",
+        "weeklyOn": "Hebdomadaire ({days})",
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "generic": "Récurrent"
+      }
     },
     "types": {
       "upcoming": "À venir",
@@ -913,17 +1124,20 @@
       "selectCategory": "Catégorie (optionnel)",
       "noCategory": "Sans catégorie",
       "preview": "Prévisualiser",
-      "previewResults": "{count} jour(s) férié(s) trouvé(s)",
+      "previewResults": "Aucun jour férié trouvé | {count} jour férié trouvé | {count} jours fériés trouvés",
       "import": "Importer",
-      "importSuccess": "{count} jour(s) férié(s) importé(s) avec succès",
-      "imported": "{count} importé(s)",
-      "skipped": "{count} ignoré(s) (déjà existants)",
+      "importSuccess": "Aucun jour férié importé | {count} jour férié importé | {count} jours fériés importés",
+      "imported": "{count} importé | {count} importé | {count} importés",
+      "skipped": "{count} ignoré (déjà existant) | {count} ignoré (déjà existant) | {count} ignorés (déjà existants)",
       "loadCountriesError": "Erreur lors du chargement des pays",
       "previewError": "Erreur lors de la prévisualisation",
       "importError": "Erreur lors de l'import des jours fériés"
     },
     "actions": {
       "view": "Voir l'événement"
+    },
+    "card": {
+      "views": "aucune vue | {count} vue | {count} vues"
     }
   },
   "groupAdmin": {
@@ -1413,9 +1627,9 @@
         "groupAdmin": "Mes Groupes",
         "editor": "Éditeur"
       },
-      "pendingNews": "{count} article(s) non lu(s)",
-      "pendingPolls": "{count} sondage(s) en attente",
-      "pendingApps": "{count} nouvelle(s) ressource(s) cette semaine",
+      "pendingNews": "{count} article non lu | {count} article non lu | {count} articles non lus",
+      "pendingPolls": "{count} sondage en attente | {count} sondage en attente | {count} sondages en attente",
+      "pendingApps": "{count} nouvelle ressource cette semaine | {count} nouvelle ressource cette semaine | {count} nouvelles ressources cette semaine",
       "pendingText": "{items}."
     },
     "stats": {
@@ -1463,7 +1677,6 @@
       "expiringSoon": "Se termine bientôt",
       "latestResults": "Derniers résultats",
       "closesIn": "Se ferme dans",
-      "votes": "{count} vote(s)",
       "vote": "Voter maintenant",
       "endsIn": "{count} j restant | {count} j restant | {count} j restants",
       "ended": "Terminé",
@@ -1569,7 +1782,61 @@
     "statusPending": "En attente",
     "statusSending": "En cours",
     "statusCompleted": "Terminé",
-    "statusFailed": "Échoué"
+    "statusFailed": "Échoué",
+    "tabs": {
+      "smtpDeprecated": "Configuration SMTP (obsolète)"
+    },
+    "oauth": {
+      "title": "Configuration OAuth 2.0",
+      "bannerTitle": "Authentification moderne OAuth 2.0",
+      "bannerText": "Remplace l'authentification SMTP obsolète (nom d'utilisateur / mot de passe). Requiert une inscription d'application (App Registration) dans Azure AD.",
+      "provider": "Fournisseur",
+      "googleSoon": "Google Workspace (bientôt disponible)",
+      "tenantId": "ID de locataire (Tenant ID)",
+      "toggleHelp": "Afficher ou masquer l'aide à la configuration",
+      "tenantIdHelp": "Disponible dans Azure AD > App Registration > Overview",
+      "clientIdHelp": "ID d'application (client) depuis Azure AD",
+      "clientSecretPlaceholder": "Valeur du secret depuis Azure AD",
+      "clientSecretHelp": "Créé dans Certificates & secrets",
+      "showSecret": "Afficher le secret",
+      "hideSecret": "Masquer le secret",
+      "grantType": "Type d'autorisation (grant type)",
+      "grantClientCredentials": "Client Credentials (recommandé)",
+      "grantHelp": "Client Credentials = service à service, automatique",
+      "scopesClientCredentials": "Client Credentials utilise {scope} (Microsoft Graph API)",
+      "scopesRefreshToken": "Refresh Token utilise {scope} (SMTP)",
+      "tokenStatus": "Statut du jeton",
+      "tokenType": "Type :",
+      "tokenExpires": "Expiration :",
+      "lastRefresh": "Dernier rafraîchissement :",
+      "errorLabel": "Erreur :",
+      "azureSetupTitle": "Configuration Azure AD",
+      "step1": "Créez une inscription d'application (App Registration) dans Azure Portal",
+      "step2": "Ajoutez la permission d'API {permission} (Application) sous Microsoft Graph",
+      "step3": "{consent} (coche verte requise)",
+      "step3Consent": "Accordez le consentement administrateur",
+      "step4": "Créez un secret client (expiration 24 mois)",
+      "step5": "Copiez : Tenant ID, Client ID, {secretValue} (pas Secret ID)",
+      "openPortal": "Ouvrir Azure Portal",
+      "error535Title": "Erreur 535 « Authentication unsuccessful » ?",
+      "commonCauses": "Causes fréquentes :",
+      "cause1": "Consentement administrateur non accordé (pas de coche verte)",
+      "cause2": "Mauvais secret copié (utilisez VALUE, pas Secret ID)",
+      "cause3": "L'adresse « Email expéditeur » n'existe pas dans votre tenant M365",
+      "cause4": "Tenant ID incorrect (doit être un GUID, pas un nom de domaine)",
+      "troubleshootingLink": "Voir le guide de dépannage complet →",
+      "test": "Tester OAuth",
+      "refreshToken": "Rafraîchir le jeton",
+      "testModalTitle": "Tester la connexion OAuth",
+      "saved": "Configuration OAuth enregistrée",
+      "testFailed": "Échec du test de connexion",
+      "tokenRefreshed": "Jeton rafraîchi",
+      "refreshError": "Échec du rafraîchissement du jeton",
+      "expired": "Expiré",
+      "inDaysHours": "Dans {days} j {hours} h",
+      "inHoursMinutes": "Dans {hours} h {minutes} min",
+      "inMinutes": "Dans {minutes} min"
+    }
   },
   "comments": {
     "title": "Commentaires",
@@ -1670,7 +1937,9 @@
       "poll": "Sondage",
       "comment": "Commentaire",
       "reaction": "Réaction"
-    }
+    },
+    "bellWithUnread": "Notifications, aucune non lue | Notifications, {count} non lue | Notifications, {count} non lues",
+    "unreadItem": "Non lue"
   },
   "polls": {
     "title": "Sondages",
@@ -1796,7 +2065,8 @@
         "createSuccess": "Sondage créé avec succès",
         "updateSuccess": "Sondage modifié avec succès",
         "saveError": "Erreur lors de la sauvegarde"
-      }
+      },
+      "removeOption": "Supprimer l'option {index}"
     },
     "detail": {
       "breadcrumb": "Sondages",
@@ -1867,7 +2137,7 @@
       "details": {
         "until": "Jusqu'au",
         "options": "options",
-        "groups": "groupe(s)"
+        "groups": "{count} groupe | {count} groupe | {count} groupes"
       }
     },
     "media": {
@@ -1886,6 +2156,9 @@
       "uploadError": "Échec du téléversement",
       "deleteSuccess": "Média supprimé avec succès",
       "deleteError": "Échec de la suppression du média"
+    },
+    "card": {
+      "voted": "Vous avez voté"
     }
   },
   "suggestions": {
@@ -2051,6 +2324,10 @@
       "suggestion_create_count": "Total de suggestions créées.",
       "suggestion_vote_count": "Total de votes sur les suggestions.",
       "suggestion_comment_count": "Total de commentaires sur les suggestions."
+    },
+    "categories": {
+      "user": "Utilisateur",
+      "contributor": "Contributeur"
     }
   },
   "help": {
@@ -2158,7 +2435,11 @@
     "insert": "Insérer",
     "dropFiles": "Déposez vos fichiers ici",
     "orClickToSelect": "ou cliquez pour les choisir",
-    "uploadQueue": "File d'envoi"
+    "uploadQueue": "File d'envoi",
+    "removeSelected": "Retirer le fichier sélectionné",
+    "pageOf": "Page {page} / {total}",
+    "typeArchives": "Archives",
+    "fileTooLarge": "{name} est trop volumineux (max. {max} Mo)"
   },
   "profile": {
     "title": "Mon Profil",
@@ -2209,7 +2490,9 @@
     "passwordChanged": "Mot de passe modifié avec succès",
     "currentPasswordIncorrect": "Le mot de passe actuel est incorrect",
     "passwordChangeError": "Erreur lors du changement de mot de passe",
-    "saveError": "Erreur lors de la sauvegarde du profil"
+    "saveError": "Erreur lors de la sauvegarde du profil",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "gamification": {
     "title": "My XP",
@@ -2280,12 +2563,12 @@
     "empty": "Le trombinoscope est encore vide.",
     "noResults": "Aucune personne ne correspond à votre recherche.",
     "resultsCount": "Aucune personne | 1 personne | {count} personnes",
-    "peopleCount": "{count} personne(s) dans cette branche",
+    "peopleCount": "{count} personne dans cette branche | {count} personne dans cette branche | {count} personnes dans cette branche",
     "interim": "Intérim",
     "interimHelp": "La personne assure ce poste par intérim.",
     "vacant": "Poste vacant",
     "noPosition": "Aucun poste attribué",
-    "otherPositions": "autre(s) poste(s)",
+    "otherPositions": "+{count} autre poste | +{count} autre poste | +{count} autres postes",
     "head": "Responsable de l'unité",
     "contact": "Coordonnées",
     "positions": "Postes occupés",
@@ -2478,12 +2761,67 @@
       "error": "Erreur",
       "warning": "Attention",
       "info": "Information"
+    },
+    "iconInput": {
+      "placeholder": "Ex. : mdi:home, lucide:settings, heroicons:user",
+      "popular": "Suggestions populaires :",
+      "help": "Utilisez le format « collection:nom » avec mdi, lucide ou heroicons (ex. : mdi:home, lucide:user, heroicons:cog). Recherchez sur iconify.design",
+      "suggestions": {
+        "user": "Utilisateur",
+        "folder": "Dossier",
+        "document": "Document",
+        "chart": "Graphique",
+        "application": "Application",
+        "web": "Web",
+        "database": "Base de données",
+        "server": "Serveur",
+        "cloud": "Cloud",
+        "email": "E-mail",
+        "chat": "Messagerie",
+        "calendar": "Calendrier",
+        "tools": "Outils",
+        "groups": "Groupes",
+        "team": "Équipe",
+        "security": "Sécurité",
+        "development": "Développement",
+        "analytics": "Analytique",
+        "business": "Business"
+      }
     }
   },
   "chat": {
     "confirmDeleteMessage": "Supprimer ce message ?",
     "confirmClearHistory": "Voulez-vous vraiment effacer tout l'historique de cette conversation ?",
-    "clearHistory": "Vider l'historique"
+    "clearHistory": "Vider l'historique",
+    "title": "Messagerie",
+    "open": "Ouvrir la messagerie",
+    "openWithUnread": "Ouvrir la messagerie, aucun message non lu | Ouvrir la messagerie, {count} message non lu | Ouvrir la messagerie, {count} messages non lus",
+    "connected": "Connecté",
+    "offline": "Hors ligne",
+    "online": "En ligne",
+    "searchContacts": "Rechercher un contact…",
+    "clearSearch": "Effacer la recherche",
+    "unread": "Non lus",
+    "groups": "Groupes",
+    "group": "Groupe",
+    "contacts": "Contacts",
+    "member": "Membre",
+    "noContacts": "Aucun contact trouvé",
+    "backToContacts": "Retour aux contacts",
+    "options": "Options de la conversation",
+    "notificationSounds": "Sons de notification",
+    "soundOn": "On",
+    "soundOff": "Off",
+    "conversationStart": "Début de la conversation",
+    "firstMessageHint": "Envoyez un premier message !",
+    "deleteMessage": "Supprimer le message",
+    "insertEmoji": "Insérer un emoji",
+    "messagePlaceholder": "Écrire un message…",
+    "send": "Envoyer",
+    "selectConversation": "Sélectionnez une conversation",
+    "selectConversationHint": "Choisissez un contact dans la liste",
+    "unreadCount": "aucun message non lu | {count} message non lu | {count} messages non lus",
+    "speedDialOpen": "Messagerie et assistants"
   },
   "adminShared": {
     "applications": {
@@ -2610,7 +2948,14 @@
     "microsoftSetup2": "Ouvrez Azure Portal > App registrations > New registration",
     "microsoftSetup3": "Indiquez l'URI de redirection dans les réglages Authentication",
     "microsoftSetup4": "Créez un secret client dans Certificates & secrets",
-    "microsoftSetup5": "Copiez ici l'ID d'application (client) et le secret client"
+    "microsoftSetup5": "Copiez ici l'ID d'application (client) et le secret client",
+    "loadError": "Impossible de charger les fournisseurs OAuth",
+    "updated": "Fournisseur OAuth mis à jour",
+    "updateError": "Impossible de mettre à jour le fournisseur OAuth",
+    "copied": "Copié dans le presse-papiers",
+    "copyError": "Impossible de copier dans le presse-papiers",
+    "copyRedirectUri": "Copier l'URI de redirection",
+    "clientIdPlaceholder": "Saisissez votre ID client"
   },
   "pageTitles": {
     "default": "Portail applicatif",
@@ -2661,5 +3006,83 @@
     "CommentModeration": "Modération des commentaires",
     "Unauthorized": "Accès non autorisé",
     "NotFound": "Page introuvable"
+  },
+  "auth": {
+    "invalidInput": "Données saisies invalides",
+    "fields": {
+      "username": "Nom d'utilisateur",
+      "usernamePlaceholder": "Votre nom d'utilisateur",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "passwordConfirm": "Confirmer le mot de passe",
+      "passwordConfirmPlaceholder": "Saisissez à nouveau le mot de passe",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe"
+    },
+    "validation": {
+      "usernameRequired": "Le nom d'utilisateur est obligatoire",
+      "usernameMin": "Le nom d'utilisateur doit contenir au moins {min} caractères",
+      "emailRequired": "L'e-mail est obligatoire",
+      "emailInvalid": "Format d'e-mail invalide",
+      "passwordRequired": "Le mot de passe est obligatoire",
+      "passwordMin": "Le mot de passe doit contenir au moins {min} caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas"
+    },
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous pour accéder à votre portail",
+      "continueWith": "Continuer avec {provider}",
+      "orContinueWith": "ou avec votre compte",
+      "remember": "Se souvenir de moi",
+      "submit": "Se connecter",
+      "submitting": "Connexion…",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "Créer un compte",
+      "welcomeToast": "Bon retour !",
+      "invalidCredentials": "Nom d'utilisateur ou mot de passe incorrect",
+      "failed": "La connexion a échoué. Veuillez réessayer."
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Airboard",
+      "passwordHint": "Au moins 6 caractères",
+      "terms": "J'accepte les {terms} et la {privacy}",
+      "termsLink": "conditions d'utilisation",
+      "privacyLink": "politique de confidentialité",
+      "submit": "Créer le compte",
+      "submitting": "Création du compte…",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter",
+      "disabled": "L'inscription est actuellement désactivée",
+      "success": "Compte créé. Vous pouvez maintenant vous connecter.",
+      "alreadyExists": "Ce nom d'utilisateur ou cet e-mail est déjà utilisé",
+      "failed": "L'inscription a échoué. Veuillez réessayer."
+    },
+    "oauth": {
+      "initFailed": "Impossible de lancer la connexion externe",
+      "invalidState": "Réponse de connexion invalide. Veuillez réessayer.",
+      "failed": "L'authentification a échoué"
+    },
+    "oauthCallback": {
+      "loading": "Connexion en cours…",
+      "with": "Authentification avec {provider}",
+      "errorTitle": "Erreur de connexion",
+      "backToLogin": "Retour à la connexion"
+    }
+  },
+  "errors": {
+    "backHome": "Retour à l'accueil",
+    "previousPage": "Page précédente",
+    "notFound": {
+      "title": "Page introuvable",
+      "message": "La page que vous cherchez n'existe pas ou a été déplacée."
+    },
+    "unauthorized": {
+      "title": "Accès non autorisé",
+      "message": "Vous n'avez pas les droits nécessaires pour ouvrir cette page. Contactez votre administrateur si vous pensez qu'il s'agit d'une erreur."
+    }
   }
 }

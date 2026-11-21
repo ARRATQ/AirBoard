@@ -237,7 +237,7 @@ const rows = computed(() =>
     optionCount: poll.options?.length || 0,
     // Admin de groupe : noms de ses groupes ; admin global : nombre de groupes
     groupNames: poll.target_groups?.length
-      ? (isGlobal.value ? `${poll.target_groups.length} ${t('polls.adminPollsManagement.details.groups')}` : poll.target_groups.map(g => g.name).join(', '))
+      ? (isGlobal.value ? t('polls.adminPollsManagement.details.groups', { count: poll.target_groups.length }) : poll.target_groups.map(g => g.name).join(', '))
       : '',
     raw: poll,
   })),

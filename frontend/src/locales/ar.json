@@ -27,9 +27,9 @@
   },
   "time": {
     "justNow": "الآن",
-    "minutesAgo": "منذ {count} دقيقة",
-    "hoursAgo": "منذ {count} ساعة",
-    "daysAgo": "منذ {count} يوم"
+    "minutesAgo": "منذ {count} دقيقة | منذ دقيقة واحدة | منذ {count} دقائق",
+    "hoursAgo": "منذ {count} ساعة | منذ ساعة واحدة | منذ {count} ساعات",
+    "daysAgo": "منذ {count} يوم | منذ يوم واحد | منذ {count} أيام"
   },
   "common": {
     "home": "الصفحة الرئيسية",
@@ -42,7 +42,6 @@
     "yesterday": "أمس",
     "tomorrow": "غداً",
     "daysAgo": "منذ {count} أيام",
-    "daysRemaining": "{count} يوم متبقي",
     "retry": "إعادة المحاولة",
     "users": "المستخدمون",
     "groups": "المجموعات",
@@ -209,7 +208,6 @@
       "breakdown": "التفاصيل",
       "weekendCount": "أيام نهاية الأسبوع",
       "holidaysCount": "العطل الرسمية",
-      "days": "يوم/أيام",
       "holidaysInPeriod": "العطل الرسمية خلال الفترة",
       "invalidRange": "اختر تاريخ بداية وتاريخ نهاية لاحقًا له."
     },
@@ -442,7 +440,117 @@
     "defaultGroupHelp": "حدد المجموعة التي سيتم تعيينها تلقائيًا للمستخدمين الجدد أثناء التسجيل. اتركه فارغًا لطلب التعيين اليدوي.",
     "homePageMessage": "رسالة الترحيب (الصفحة الرئيسية)",
     "homePageMessagePlaceholder": "اكتشف مساحة عملك المخصصة",
-    "dynamicMessages": "الرسائل الديناميكية"
+    "dynamicMessages": "الرسائل الديناميكية",
+    "tabs": {
+      "access": "الوصول والمصادقة",
+      "appearance": "المظهر"
+    },
+    "preview": {
+      "dashboardMessageHint": "▲ رسالة لوحة التحكم (صفحة الموارد)",
+      "sampleMail": "البريد",
+      "sampleGitDesc": "إدارة مستودعات Git",
+      "sampleMailDesc": "إدارة البريد الإلكتروني"
+    },
+    "appNameHelp": "يظهر هذا الاسم في الترويسة وفي عنوان المتصفح",
+    "dashboardTitleHelp": "العنوان الرئيسي المعروض في صفحة لوحة التحكم",
+    "welcomeMessageHelp": "رسالة ترحيب تُعرض في صفحة الموارد",
+    "newsFeed": {
+      "title": "موجز الأخبار",
+      "perTab": "عدد المقالات في كل تبويب",
+      "perTabHelp": "عدد المقالات المعروضة في كل تبويب على الصفحة الرئيسية (تظهر المقالات المثبّتة دائمًا في المقدمة)."
+    },
+    "heroImage": {
+      "title": "صورة خلفية لافتة الصفحة الرئيسية",
+      "help": "خصّص خلفية لافتة الصفحة الرئيسية لإبراز المناسبات (رمضان، الأعياد، إلخ). اتركها فارغة للإبقاء على التدرّج المتحرك الافتراضي.",
+      "lightTheme": "المظهر الفاتح",
+      "darkTheme": "المظهر الداكن",
+      "darkFallback": "(إذا تُركت فارغة، تُستخدم صورة المظهر الفاتح)",
+      "lightPreviewAlt": "معاينة صورة المظهر الفاتح",
+      "darkPreviewAlt": "معاينة صورة المظهر الداكن",
+      "removeLight": "إزالة الصورة",
+      "removeDark": "إزالة الصورة الداكنة",
+      "formatHelp": "المقاس المثالي: 1920×480 بكسل. يُنصح بصيغ JPEG أو PNG أو WebP.",
+      "focalPoint": "نقطة التأطير",
+      "focalPointHelp": "اختر الجزء الذي يبقى ظاهرًا من الصورة.",
+      "uploadSuccess": "تم رفع الصورة بنجاح",
+      "uploadError": "تعذّر رفع الصورة",
+      "uploadDarkSuccess": "تم رفع الصورة الداكنة بنجاح",
+      "uploadDarkError": "تعذّر رفع الصورة الداكنة",
+      "positions": {
+        "topLeft": "أعلى اليسار",
+        "topCenter": "أعلى الوسط",
+        "topRight": "أعلى اليمين",
+        "middleLeft": "وسط اليسار",
+        "center": "الوسط",
+        "middleRight": "وسط اليمين",
+        "bottomLeft": "أسفل اليسار",
+        "bottomCenter": "أسفل الوسط",
+        "bottomRight": "أسفل اليمين"
+      }
+    },
+    "heroMessages": {
+      "title": "الرسائل المتغيّرة في لافتة الصفحة الرئيسية",
+      "add": "إضافة رسالة",
+      "help": "أدِر الاقتباسات والرسائل التي تتناوب في لافتة الصفحة الرئيسية.",
+      "empty": "لا توجد رسائل متغيّرة مهيّأة. ستُستخدم الرسائل الافتراضية.",
+      "editTitle": "تعديل الرسالة",
+      "subtitle": "هيّئ اقتباسًا أو رسالة إعلامية للصفحة الرئيسية.",
+      "content": "محتوى الرسالة",
+      "contentPlaceholder": "مثال: الطريقة الوحيدة لإنجاز عمل عظيم هي أن تحب ما تفعله.",
+      "author": "المؤلف / المصدر (اختياري)",
+      "authorPlaceholder": "مثال: ستيف جوبز",
+      "activeStatus": "حالة التفعيل",
+      "activeHelp": "تُدرج الرسائل الظاهرة في تناوب الصفحة الرئيسية.",
+      "update": "تحديث الرسالة",
+      "loadError": "تعذّر تحميل رسائل لافتة الصفحة الرئيسية",
+      "updated": "تم تحديث الرسالة",
+      "added": "تمت إضافة الرسالة",
+      "saveError": "تعذّر حفظ الرسالة",
+      "deleted": "تم حذف الرسالة",
+      "deleteError": "تعذّر حذف الرسالة",
+      "statusError": "تعذّر تحديث حالة الرسالة"
+    },
+    "palette": {
+      "title": "لوحة الألوان",
+      "help": "انقر للمعاينة، ثم احفظ لتطبيقها على جميع المستخدمين.",
+      "add": "إضافة",
+      "new": "لوحة جديدة",
+      "editTitle": "تعديل اللوحة",
+      "namePlaceholder": "لوحتي",
+      "accent": "لون التمييز",
+      "pageBackground": "خلفية الصفحة",
+      "auto": "تلقائي",
+      "custom": "مخصّص",
+      "autoHelp": "تُحسب الخلفية تلقائيًا انطلاقًا من درجة لون التمييز.",
+      "customHelp": "اختر لون الخلفية الخاص بك.",
+      "bgColor": "لون الخلفية",
+      "delete": "حذف اللوحة",
+      "create": "إنشاء اللوحة",
+      "save": "حفظ اللوحة",
+      "saved": "تم حفظ اللوحة"
+    },
+    "password": {
+      "minLength": "6 أحرف على الأقل",
+      "currentRequired": "كلمة المرور الحالية مطلوبة",
+      "newRequired": "كلمة المرور الجديدة مطلوبة",
+      "tooShort": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+      "confirmRequired": "يُرجى تأكيد كلمة المرور",
+      "mismatch": "كلمتا المرور غير متطابقتين",
+      "incorrect": "كلمة المرور الحالية غير صحيحة",
+      "changed": "تم تغيير كلمة المرور",
+      "changeError": "تعذّر تغيير كلمة المرور"
+    },
+    "loadError": "تعذّر تحميل الإعدادات",
+    "updated": "تم تحديث الإعدادات",
+    "updateError": "تعذّر تحديث الإعدادات",
+    "resetSuccess": "تمت إعادة الإعدادات إلى القيم الافتراضية",
+    "resetError": "تعذّرت إعادة تعيين الإعدادات",
+    "validation": {
+      "appNameRequired": "اسم التطبيق مطلوب",
+      "appIconRequired": "أيقونة التطبيق مطلوبة",
+      "dashboardTitleRequired": "عنوان لوحة التحكم مطلوب",
+      "welcomeMessageRequired": "رسالة الترحيب مطلوبة"
+    }
   },
   "admin": {
     "overviewTitle": "الإدارة",
@@ -506,7 +614,24 @@
     "hourlyActivity": "التوزيع حسب الساعة",
     "exportData": "تصدير البيانات",
     "activeUsers": "المستخدمون المسجلون",
-    "peakUsage": "ذروة الاستخدام"
+    "peakUsage": "ذروة الاستخدام",
+    "loading": "جارٍ تحميل التحليلات...",
+    "distribution30d": "التوزيع على 30 يومًا",
+    "actionTracking": "تتبّع الإجراءات",
+    "pointTooltip": "{date}: لا نقرات | {date}: نقرة واحدة | {date}: {count} نقرة",
+    "top10": "أفضل 10",
+    "clickCount": "لا نقرات | نقرة واحدة | {count} نقرة",
+    "userCount": "لا مستخدمين | مستخدم واحد | {count} مستخدم",
+    "noActivity": "لم يُرصد أي نشاط",
+    "actions": "إجراءات",
+    "newsStats": {
+      "title": "إحصاءات News Hub",
+      "subtitle": "أداء المحتوى",
+      "totalArticles": "إجمالي المقالات",
+      "published": "المنشورة",
+      "totalViews": "إجمالي المشاهدات",
+      "topNews": "المقالات الأكثر شعبية"
+    }
   },
   "announcements": {
     "title": "الإعلانات",
@@ -569,14 +694,18 @@
     "hideHeader": "إخفاء رأس المحادثة",
     "hideHeaderHelp": "إزالة العنوان والعنوان الفرعي اللذين يعرضهما عنصر n8n (مفيد إذا كان لديك رأس مخصص بالفعل)",
     "showAvatarIntro": "عرض صورة رمزية متحركة للترحيب",
-    "showAvatarIntroHelp": "عند فتح المحادثة، تظهر صورة رمزية متحركة في الزاوية وتطفو بلطف طالما النافذة مفتوحة. تظهر فقاعة ترحيب ثم تُغلق تلقائياً بعد بضع ثوانٍ."
+    "showAvatarIntroHelp": "عند فتح المحادثة، تظهر صورة رمزية متحركة في الزاوية وتطفو بلطف طالما النافذة مفتوحة. تظهر فقاعة ترحيب ثم تُغلق تلقائياً بعد بضع ثوانٍ.",
+    "assistants": "مساعدو الذكاء الاصطناعي",
+    "dismissWelcome": "إغلاق رسالة الترحيب"
   },
   "news": {
     "selectTypePlaceholder": "اختر نوعًا…",
     "widget": {
       "title": "أبرز الأخبار",
       "viewAll": "عرض الكل",
-      "noNews": "لا توجد أخبار في الوقت الحالي"
+      "noNews": "لا توجد أخبار في الوقت الحالي",
+      "unreadCount": "لا توجد مقالات غير مقروءة | مقال واحد غير مقروء | {count} مقالات غير مقروءة",
+      "reactionsCount": "لا توجد تفاعلات | تفاعل واحد | {count} تفاعلات"
     },
     "center": {
       "title": "مركز الأخبار",
@@ -593,7 +722,9 @@
       "reactions": "التفاعلات",
       "edit": "تعديل المقال",
       "notFound": "المقال غير موجود",
-      "backToList": "العودة إلى المقالات"
+      "backToList": "العودة إلى المقالات",
+      "readingTime": "{time} للقراءة",
+      "linkedPoll": "استطلاع مرتبط بهذا المقال"
     },
     "types": {
       "article": "مقال",
@@ -615,7 +746,76 @@
       "titleZA": "العنوان (ي-أ)"
     },
     "editor": {
-      "invalidVideoUrl": "رابط غير معروف. استخدم رابطًا من YouTube أو Vimeo."
+      "invalidVideoUrl": "رابط غير معروف. استخدم رابطًا من YouTube أو Vimeo.",
+      "placeholder": "ابدأ الكتابة...",
+      "videoPrompt": "رابط YouTube أو Vimeo",
+      "removeVideo": "حذف الفيديو",
+      "bold": "غامق (Ctrl+B)",
+      "italic": "مائل (Ctrl+I)",
+      "underline": "تسطير (Ctrl+U)",
+      "strike": "يتوسطه خط",
+      "inlineCode": "رمز برمجي ضمن السطر",
+      "textColor": "لون النص",
+      "highlight": "تمييز",
+      "heading1": "عنوان 1",
+      "heading2": "عنوان 2",
+      "heading3": "عنوان 3",
+      "alignLeft": "محاذاة لليسار",
+      "alignCenter": "توسيط",
+      "alignRight": "محاذاة لليمين",
+      "alignJustify": "ضبط",
+      "bulletList": "قائمة نقطية",
+      "orderedList": "قائمة مرقمة",
+      "codeBlock": "كتلة برمجية",
+      "blockquote": "اقتباس",
+      "horizontalRule": "فاصل أفقي",
+      "callout": {
+        "label": "إطار تنبيه",
+        "info": "معلومة",
+        "warning": "تنبيه",
+        "success": "نجاح",
+        "danger": "خطر"
+      },
+      "table": "جدول",
+      "insertTable": "إدراج جدول",
+      "addColumnBefore": "عمود قبل",
+      "addColumnAfter": "عمود بعد",
+      "deleteColumn": "حذف العمود",
+      "addRowBefore": "صف قبل",
+      "addRowAfter": "صف بعد",
+      "deleteRow": "حذف الصف",
+      "deleteTable": "حذف الجدول",
+      "addLink": "إضافة رابط",
+      "removeLink": "إزالة الرابط",
+      "insertImage": "إدراج صورة",
+      "attachFile": "إرفاق ملف",
+      "embedVideo": "تضمين فيديو YouTube / Vimeo",
+      "undo": "تراجع (Ctrl+Z)",
+      "redo": "إعادة (Ctrl+Y)",
+      "colors": {
+        "black": "أسود",
+        "darkGray": "رمادي داكن",
+        "gray": "رمادي",
+        "red": "أحمر",
+        "orange": "برتقالي",
+        "yellow": "أصفر",
+        "green": "أخضر",
+        "cyan": "سماوي",
+        "blue": "أزرق",
+        "indigo": "نيلي",
+        "purple": "بنفسجي",
+        "pink": "وردي",
+        "lightGreen": "أخضر فاتح",
+        "lightBlue": "أزرق فاتح",
+        "lightPink": "وردي فاتح",
+        "lightOrange": "برتقالي فاتح",
+        "lightPurple": "بنفسجي فاتح",
+        "lightRed": "أحمر فاتح",
+        "lightCyan": "سماوي فاتح"
+      }
+    },
+    "viewModes": {
+      "compact": "مضغوط"
     }
   },
   "dashboard": {
@@ -639,7 +839,6 @@
     "sortByCategory": "الترتيب حسب الفئة",
     "sortByRecent": "الأحدث",
     "resetFilters": "إعادة تعيين الفلاتر",
-    "applicationsFound": "مورد (موارد) تم العثور عليها",
     "application": "المورد",
     "description": "الوصف",
     "category": "الفئة",
@@ -648,9 +847,9 @@
     "noApplicationsFound": "لم يتم العثور على موارد",
     "time": {
       "justNow": "الآن",
-      "minutesAgo": "منذ {count} دقيقة",
-      "hoursAgo": "منذ {count} ساعة",
-      "daysAgo": "منذ {count} يوم"
+      "minutesAgo": "منذ {count} دقيقة | منذ دقيقة واحدة | منذ {count} دقائق",
+      "hoursAgo": "منذ {count} ساعة | منذ ساعة واحدة | منذ {count} ساعات",
+      "daysAgo": "منذ {count} يوم | منذ يوم واحد | منذ {count} أيام"
     },
     "subtitle": "الأدوات والروابط المتاحة لك، مرتبة حسب الفئة.",
     "emptyTitle": "لا توجد موارد متاحة",
@@ -1194,7 +1393,6 @@
       "expiringSoon": "ينتهي قريباً",
       "latestResults": "آخر النتائج",
       "closesIn": "يغلق في",
-      "votes": "{count} صوت",
       "vote": "صوّت الآن",
       "endsIn": "متبقٍ {count} يوم | متبقٍ {count} يوم | متبقية {count} أيام",
       "ended": "مغلق",
@@ -1234,9 +1432,8 @@
         "afternoon": "مساء الخير",
         "evening": "مساء الخير"
       },
-      "pendingPoll": "{count} استطلاع نشط",
-      "pendingNews": "{count} مقال",
-      "pendingText": "لديك {items} منذ الأمس.",
+      "pendingNews": "{count} مقال غير مقروء | مقال واحد غير مقروء | {count} مقالات غير مقروءة",
+      "pendingText": "{items}.",
       "apps": "الموارد",
       "events": "الأحداث",
       "news": "الأخبار",
@@ -1249,8 +1446,8 @@
         "groupAdmin": "مجموعاتي",
         "editor": "المحرر"
       },
-      "pendingPolls": "{count} استطلاع/استطلاعات بانتظار تصويتك",
-      "pendingApps": "{count} مورد/موارد جديدة هذا الأسبوع"
+      "pendingPolls": "{count} استطلاع بانتظار تصويتك | استطلاع واحد بانتظار تصويتك | {count} استطلاعات بانتظار تصويتك",
+      "pendingApps": "{count} مورد جديد هذا الأسبوع | مورد جديد واحد هذا الأسبوع | {count} موارد جديدة هذا الأسبوع"
     },
     "keyFigures": "أرقام رئيسية",
     "searchLabel": "البحث في البوابة",
@@ -1327,7 +1524,61 @@
     "statusPending": "قيد الانتظار",
     "statusSending": "جاري الإرسال",
     "statusCompleted": "مكتمل",
-    "statusFailed": "فشل"
+    "statusFailed": "فشل",
+    "tabs": {
+      "smtpDeprecated": "إعداد SMTP (متقادم)"
+    },
+    "oauth": {
+      "title": "إعداد OAuth 2.0",
+      "bannerTitle": "مصادقة حديثة عبر OAuth 2.0",
+      "bannerText": "تحلّ محلّ مصادقة SMTP المتقادمة (اسم المستخدم / كلمة المرور). تتطلّب تسجيل تطبيق (App Registration) في Azure AD.",
+      "provider": "المزوّد",
+      "googleSoon": "Google Workspace (قريبًا)",
+      "tenantId": "معرّف المستأجر (Tenant ID)",
+      "toggleHelp": "إظهار أو إخفاء مساعدة الإعداد",
+      "tenantIdHelp": "متوفر في Azure AD > App Registration > Overview",
+      "clientIdHelp": "معرّف التطبيق (العميل) من Azure AD",
+      "clientSecretPlaceholder": "قيمة السر من Azure AD",
+      "clientSecretHelp": "يُنشأ في Certificates & secrets",
+      "showSecret": "إظهار السر",
+      "hideSecret": "إخفاء السر",
+      "grantType": "نوع التفويض (grant type)",
+      "grantClientCredentials": "Client Credentials (موصى به)",
+      "grantHelp": "Client Credentials = اتصال تلقائي بين الخدمات",
+      "scopesClientCredentials": "يستخدم Client Credentials النطاق {scope} (Microsoft Graph API)",
+      "scopesRefreshToken": "يستخدم Refresh Token النطاق {scope} (SMTP)",
+      "tokenStatus": "حالة الرمز المميّز",
+      "tokenType": "النوع:",
+      "tokenExpires": "ينتهي:",
+      "lastRefresh": "آخر تحديث:",
+      "errorLabel": "خطأ:",
+      "azureSetupTitle": "إعداد Azure AD",
+      "step1": "أنشئ تسجيل تطبيق (App Registration) في Azure Portal",
+      "step2": "أضف إذن الواجهة البرمجية {permission} (Application) ضمن Microsoft Graph",
+      "step3": "{consent} (علامة الصح الخضراء مطلوبة)",
+      "step3Consent": "امنح موافقة المسؤول",
+      "step4": "أنشئ سرّ عميل (صلاحية 24 شهرًا)",
+      "step5": "انسخ: Tenant ID وClient ID و{secretValue} (وليس Secret ID)",
+      "openPortal": "فتح Azure Portal",
+      "error535Title": "خطأ 535 «Authentication unsuccessful»؟",
+      "commonCauses": "الأسباب الشائعة:",
+      "cause1": "لم تُمنح موافقة المسؤول (لا توجد علامة صح خضراء)",
+      "cause2": "نُسخ سرّ خاطئ (استخدم VALUE وليس Secret ID)",
+      "cause3": "عنوان «بريد المرسِل» غير موجود في مستأجر M365 الخاص بك",
+      "cause4": "Tenant ID غير صحيح (يجب أن يكون GUID وليس اسم نطاق)",
+      "troubleshootingLink": "الاطلاع على دليل استكشاف الأخطاء الكامل ←",
+      "test": "اختبار OAuth",
+      "refreshToken": "تحديث الرمز المميّز",
+      "testModalTitle": "اختبار اتصال OAuth",
+      "saved": "تم حفظ إعداد OAuth",
+      "testFailed": "فشل اختبار الاتصال",
+      "tokenRefreshed": "تم تحديث الرمز المميّز",
+      "refreshError": "تعذّر تحديث الرمز المميّز",
+      "expired": "منتهي الصلاحية",
+      "inDaysHours": "خلال {days} ي {hours} س",
+      "inHoursMinutes": "خلال {hours} س {minutes} د",
+      "inMinutes": "خلال {minutes} د"
+    }
   },
   "comments": {
     "title": "التعليقات",
@@ -1428,7 +1679,9 @@
       "poll": "استطلاع",
       "comment": "تعليق",
       "reaction": "تفاعل"
-    }
+    },
+    "bellWithUnread": "الإشعارات، لا يوجد غير مقروء | الإشعارات، إشعار واحد غير مقروء | الإشعارات، {count} غير مقروءة",
+    "unreadItem": "غير مقروء"
   },
   "polls": {
     "title": "الاستطلاعات",
@@ -1536,9 +1789,7 @@
       "targetGroupsHelp": "اضغط Ctrl (Cmd على Mac) لتحديد مجموعات متعددة. إذا لم يتم تحديد أي مجموعة، سيكون الاستطلاع مرئياً للجميع.",
       "optionalLinks": "روابط (اختياري)",
       "linkToArticle": "رابط إلى مقال",
-      "linkToArticlePlaceholder": "معرف المقال",
       "linkToAnnouncement": "رابط إلى إعلان",
-      "linkToAnnouncementPlaceholder": "معرف الإعلان",
       "advancedOptions": "الخيارات المتقدمة",
       "showAdvanced": "إظهار",
       "hideAdvanced": "إخفاء",
@@ -1556,7 +1807,8 @@
       },
       "noGroupsAvailable": "لا توجد مجموعات متاحة",
       "noArticleSelected": "-- بدون مقال --",
-      "noAnnouncementSelected": "-- بدون إعلان --"
+      "noAnnouncementSelected": "-- بدون إعلان --",
+      "removeOption": "حذف الخيار {index}"
     },
     "detail": {
       "breadcrumb": "الاستطلاعات",
@@ -1627,7 +1879,7 @@
       "details": {
         "until": "حتى",
         "options": "خيارات",
-        "groups": "مجموعة(مجموعات)"
+        "groups": "{count} مجموعة | مجموعة واحدة | {count} مجموعات"
       }
     },
     "media": {
@@ -1646,6 +1898,9 @@
       "uploadError": "فشل الرفع",
       "deleteSuccess": "تم حذف الوسائط بنجاح",
       "deleteError": "فشل حذف الوسائط"
+    },
+    "card": {
+      "voted": "لقد صوّتّ"
     }
   },
   "suggestions": {
@@ -1811,6 +2066,10 @@
       "suggestion_create_count": "إجمالي الاقتراحات المُنشأة.",
       "suggestion_vote_count": "إجمالي الأصوات على الاقتراحات.",
       "suggestion_comment_count": "إجمالي التعليقات على الاقتراحات."
+    },
+    "categories": {
+      "user": "مستخدم",
+      "contributor": "مساهم"
     }
   },
   "media": {
@@ -1859,7 +2118,11 @@
     "insert": "إدراج",
     "dropFiles": "أفلت ملفاتك هنا",
     "orClickToSelect": "أو انقر لاختيارها",
-    "uploadQueue": "قائمة الرفع"
+    "uploadQueue": "قائمة الرفع",
+    "removeSelected": "إزالة الملف المحدد",
+    "pageOf": "الصفحة {page} / {total}",
+    "typeArchives": "ملفات مضغوطة",
+    "fileTooLarge": "{name} كبير جدًا (الحد الأقصى {max} ميغابايت)"
   },
   "help": {
     "sections": {
@@ -1941,12 +2204,12 @@
     "empty": "الدليل فارغ حاليًا.",
     "noResults": "لا يوجد أي شخص يطابق بحثك.",
     "resultsCount": "لا أحد | شخص واحد | {count} أشخاص",
-    "peopleCount": "{count} شخص في هذا الفرع",
+    "peopleCount": "{count} شخص في هذا الفرع | شخص واحد في هذا الفرع | {count} أشخاص في هذا الفرع",
     "interim": "بالنيابة",
     "interimHelp": "يشغل هذا الشخص المنصب بالنيابة.",
     "vacant": "منصب شاغر",
     "noPosition": "لا يوجد منصب مُسند",
-    "otherPositions": "منصب/مناصب أخرى",
+    "otherPositions": "+{count} منصب آخر | +منصب واحد آخر | +{count} مناصب أخرى",
     "head": "رئيس الوحدة",
     "contact": "معلومات الاتصال",
     "positions": "المناصب المشغولة",
@@ -2139,12 +2402,67 @@
       "error": "خطأ",
       "warning": "تنبيه",
       "info": "معلومة"
+    },
+    "iconInput": {
+      "placeholder": "مثال: mdi:home، lucide:settings، heroicons:user",
+      "popular": "اقتراحات شائعة:",
+      "help": "استخدم الصيغة «collection:name» مع mdi أو lucide أو heroicons (مثال: mdi:home، lucide:user، heroicons:cog). ابحث في iconify.design",
+      "suggestions": {
+        "user": "مستخدم",
+        "folder": "مجلد",
+        "document": "مستند",
+        "chart": "رسم بياني",
+        "application": "تطبيق",
+        "web": "ويب",
+        "database": "قاعدة بيانات",
+        "server": "خادم",
+        "cloud": "سحابة",
+        "email": "بريد إلكتروني",
+        "chat": "دردشة",
+        "calendar": "تقويم",
+        "tools": "أدوات",
+        "groups": "مجموعات",
+        "team": "فريق",
+        "security": "أمان",
+        "development": "تطوير",
+        "analytics": "تحليلات",
+        "business": "أعمال"
+      }
     }
   },
   "chat": {
     "confirmDeleteMessage": "هل تريد حذف هذه الرسالة؟",
     "confirmClearHistory": "هل تريد حقًا مسح سجل هذه المحادثة بالكامل؟",
-    "clearHistory": "مسح السجل"
+    "clearHistory": "مسح السجل",
+    "title": "المراسلة",
+    "open": "فتح المراسلة",
+    "openWithUnread": "فتح المراسلة، لا توجد رسائل غير مقروءة | فتح المراسلة، رسالة واحدة غير مقروءة | فتح المراسلة، {count} رسائل غير مقروءة",
+    "connected": "متصل",
+    "offline": "غير متصل",
+    "online": "متصل الآن",
+    "searchContacts": "ابحث عن جهة اتصال…",
+    "clearSearch": "مسح البحث",
+    "unread": "غير مقروءة",
+    "groups": "المجموعات",
+    "group": "مجموعة",
+    "contacts": "جهات الاتصال",
+    "member": "عضو",
+    "noContacts": "لم يتم العثور على أي جهة اتصال",
+    "backToContacts": "العودة إلى جهات الاتصال",
+    "options": "خيارات المحادثة",
+    "notificationSounds": "أصوات الإشعارات",
+    "soundOn": "تشغيل",
+    "soundOff": "إيقاف",
+    "conversationStart": "بداية المحادثة",
+    "firstMessageHint": "أرسل أول رسالة!",
+    "deleteMessage": "حذف الرسالة",
+    "insertEmoji": "إدراج رمز تعبيري",
+    "messagePlaceholder": "اكتب رسالة…",
+    "send": "إرسال",
+    "selectConversation": "اختر محادثة",
+    "selectConversationHint": "اختر جهة اتصال من القائمة",
+    "unreadCount": "لا توجد رسائل غير مقروءة | رسالة واحدة غير مقروءة | {count} رسائل غير مقروءة",
+    "speedDialOpen": "المراسلة والمساعدون"
   },
   "adminShared": {
     "applications": {
@@ -2284,7 +2602,11 @@
       "group_admin": "مشرفو المجموعات",
       "editor": "محرر",
       "user": "مستخدم"
-    }
+    },
+    "topContributors": "أبرز المساهمين",
+    "score": "النقاط",
+    "scoreFormula": "* النقاط = النقرات على الموارد ×1 + المقالات المقروءة ×2 + التفاعلات ×1 + الأصوات في الاستطلاعات ×1 + الموارد المُنشأة ×5 + المقالات المنشورة ×10",
+    "unknownError": "خطأ غير معروف"
   },
   "events": {
     "center": {
@@ -2337,7 +2659,15 @@
       "draft": "مسودة",
       "draftDescription": "هذا الحدث لم يُنشر بعد",
       "created": "تاريخ الإنشاء",
-      "externalLinks": "الروابط"
+      "externalLinks": "الروابط",
+      "recurrenceRule": {
+        "daily": "كل يوم",
+        "weekly": "أسبوعي",
+        "weeklyOn": "أسبوعي ({days})",
+        "monthly": "شهري",
+        "yearly": "سنوي",
+        "generic": "متكرر"
+      }
     },
     "types": {
       "upcoming": "قادم",
@@ -2472,17 +2802,20 @@
       "selectCategory": "الفئة (اختياري)",
       "noCategory": "بدون فئة",
       "preview": "معاينة",
-      "previewResults": "تم العثور على {count} عطلة رسمية",
+      "previewResults": "لم يتم العثور على أي عطلة رسمية | تم العثور على عطلة رسمية واحدة | تم العثور على {count} عطلة رسمية",
       "import": "استيراد",
-      "importSuccess": "تم استيراد {count} عطلة رسمية بنجاح",
+      "importSuccess": "لم يتم استيراد أي عطلة رسمية | تم استيراد عطلة رسمية واحدة بنجاح | تم استيراد {count} عطلة رسمية بنجاح",
       "imported": "تم استيراد {count}",
-      "skipped": "تم تجاوز {count} (موجودة مسبقاً)",
+      "skipped": "تم تجاوز {count} (موجودة مسبقًا)",
       "loadCountriesError": "خطأ أثناء تحميل البلدان",
       "previewError": "خطأ أثناء المعاينة",
       "importError": "خطأ أثناء استيراد العطل الرسمية"
     },
     "actions": {
       "view": "عرض الحدث"
+    },
+    "card": {
+      "views": "لا توجد مشاهدات | مشاهدة واحدة | {count} مشاهدات"
     }
   },
   "profile": {
@@ -2534,7 +2867,9 @@
     "passwordChanged": "تم تغيير كلمة المرور بنجاح",
     "currentPasswordIncorrect": "كلمة المرور الحالية غير صحيحة",
     "passwordChangeError": "خطأ أثناء تغيير كلمة المرور",
-    "saveError": "خطأ أثناء حفظ الملف الشخصي"
+    "saveError": "خطأ أثناء حفظ الملف الشخصي",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "gamification": {
     "title": "نقاطي",
@@ -2613,7 +2948,14 @@
     "microsoftSetup2": "افتح Azure Portal > App registrations > New registration",
     "microsoftSetup3": "حدّد عنوان إعادة التوجيه في إعدادات Authentication",
     "microsoftSetup4": "أنشئ سرًّا جديدًا للعميل في Certificates & secrets",
-    "microsoftSetup5": "انسخ معرّف التطبيق (العميل) والسر هنا"
+    "microsoftSetup5": "انسخ معرّف التطبيق (العميل) والسر هنا",
+    "loadError": "تعذّر تحميل مزوّدي OAuth",
+    "updated": "تم تحديث مزوّد OAuth",
+    "updateError": "تعذّر تحديث مزوّد OAuth",
+    "copied": "تم النسخ إلى الحافظة",
+    "copyError": "تعذّر النسخ إلى الحافظة",
+    "copyRedirectUri": "نسخ عنوان إعادة التوجيه",
+    "clientIdPlaceholder": "أدخل معرّف العميل"
   },
   "pageTitles": {
     "default": "بوابة التطبيقات",
@@ -2664,5 +3006,83 @@
     "CommentModeration": "إشراف التعليقات",
     "Unauthorized": "وصول غير مصرح به",
     "NotFound": "الصفحة غير موجودة"
+  },
+  "auth": {
+    "invalidInput": "البيانات المدخلة غير صالحة",
+    "fields": {
+      "username": "اسم المستخدم",
+      "usernamePlaceholder": "اسم المستخدم الخاص بك",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "كلمة المرور الخاصة بك",
+      "passwordConfirm": "تأكيد كلمة المرور",
+      "passwordConfirmPlaceholder": "أعد إدخال كلمة المرور",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "showPassword": "إظهار كلمة المرور",
+      "hidePassword": "إخفاء كلمة المرور"
+    },
+    "validation": {
+      "usernameRequired": "اسم المستخدم مطلوب",
+      "usernameMin": "يجب أن يتكون اسم المستخدم من {min} أحرف على الأقل",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "صيغة البريد الإلكتروني غير صالحة",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "passwordMin": "يجب أن تتكون كلمة المرور من {min} أحرف على الأقل",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين"
+    },
+    "login": {
+      "title": "مرحبًا بعودتك",
+      "subtitle": "سجّل الدخول للوصول إلى بوابتك",
+      "continueWith": "المتابعة باستخدام {provider}",
+      "orContinueWith": "أو باستخدام حسابك",
+      "remember": "تذكرني",
+      "submit": "تسجيل الدخول",
+      "submitting": "جارٍ تسجيل الدخول…",
+      "noAccount": "ليس لديك حساب؟",
+      "signUp": "إنشاء حساب",
+      "welcomeToast": "مرحبًا بعودتك!",
+      "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
+      "failed": "تعذّر تسجيل الدخول. يرجى المحاولة مرة أخرى."
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "subtitle": "انضم إلى Airboard",
+      "passwordHint": "6 أحرف على الأقل",
+      "terms": "أوافق على {terms} و{privacy}",
+      "termsLink": "شروط الاستخدام",
+      "privacyLink": "سياسة الخصوصية",
+      "submit": "إنشاء الحساب",
+      "submitting": "جارٍ إنشاء الحساب…",
+      "haveAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول",
+      "disabled": "التسجيل معطّل حاليًا",
+      "success": "تم إنشاء الحساب. يمكنك الآن تسجيل الدخول.",
+      "alreadyExists": "اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل",
+      "failed": "تعذّر إتمام التسجيل. يرجى المحاولة مرة أخرى."
+    },
+    "oauth": {
+      "initFailed": "تعذّر بدء تسجيل الدخول الخارجي",
+      "invalidState": "استجابة تسجيل الدخول غير صالحة. يرجى المحاولة مرة أخرى.",
+      "failed": "فشلت المصادقة"
+    },
+    "oauthCallback": {
+      "loading": "جارٍ تسجيل الدخول…",
+      "with": "المصادقة عبر {provider}",
+      "errorTitle": "خطأ في تسجيل الدخول",
+      "backToLogin": "العودة إلى تسجيل الدخول"
+    }
+  },
+  "errors": {
+    "backHome": "العودة إلى الرئيسية",
+    "previousPage": "الصفحة السابقة",
+    "notFound": {
+      "title": "الصفحة غير موجودة",
+      "message": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+    },
+    "unauthorized": {
+      "title": "وصول غير مصرّح به",
+      "message": "ليست لديك الصلاحيات اللازمة لفتح هذه الصفحة. تواصل مع المسؤول إذا كنت تعتقد أن هذا خطأ."
+    }
   }
 }
