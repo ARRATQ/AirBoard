@@ -329,6 +329,26 @@ visuelle. Ensuite :
 7. Bruit au démarrage : le seed recrée des catégories de suggestion déjà existantes (erreur de clé
    unique `idx_suggestion_categories_slug`, `main.go:1443`).
 
+### Avancement — partie B (branche `claude/chantier-7b-handlers`)
+
+- **Point 3 fait.** `handlers/visibility.go` regroupe la visibilité (`newsTargets`, `eventTargets`,
+  `pollTargets` : `visibleTo`, `publishedVisibleTo`, `ownOrPublishedVisibleTo`, `manageableBy`) et
+  les recherches de groupes (`userGroupIDs`, `adminGroupIDs`, `attachManagedGroups`,
+  `canSeeTargeted`…). La page d'accueil calcule les groupes du lecteur une seule fois (55 → 44
+  requêtes). Deux failles corrigées au passage : le `OR` de visibilité n'était pas parenthésé
+  (brouillons, sondages inactifs et contenus supprimés visibles des groupes ciblés) et
+  `GetEventBySlug` ne vérifiait pas le ciblage.
+- **Point 4 fait.** Corps d'erreur unique `{"error": "...", "code": "..."}` via le paquet
+  `apierror` (705 appels, statuts inchangés). Les erreurs de binding donnent un message lisible et
+  les erreurs SQL brutes ne sortent plus. Côté front, `services/apiError.js` lit `error` puis
+  `message`.
+- **Point 5, partie recover faite.** `utils.SafeGo` couvre les 17 goroutines sans suivi et les 13 de
+  l'accueil. Reste pour la partie A : `http.Server` avec timeouts et arrêt propre, et le
+  `CustomRecovery` de `main.go` à passer sur `apierror.Abort`.
+- **Point 6 fait.** Tests table-driven des gardes de rôle, `CanManage*`, `canManageDirectory`, SQL
+  de visibilité (sans base), et tests d'intégration (tag `integration`) sur le ciblage, le périmètre
+  admin de groupe et le verrouillage de connexion.
+
 ---
 
 ## Comment reprendre
