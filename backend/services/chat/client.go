@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"airboard/models"
+	"airboard/utils"
 
 	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
@@ -160,7 +161,8 @@ func (c *Client) handleMessage(msg []byte) {
 	}
 
 	if c.OnMessageSent != nil {
-		go c.OnMessageSent(c.UserID)
+		onMessageSent, senderID := c.OnMessageSent, c.UserID
+		utils.SafeGo("chat-on-message-sent", func() { onMessageSent(senderID) })
 	}
 
 	// Load sender for response

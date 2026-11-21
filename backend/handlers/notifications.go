@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"airboard/apierror"
 	"airboard/models"
 	"net/http"
 	"strconv"
@@ -45,11 +46,7 @@ func (h *NotificationHandler) GetNotifications(c *gin.Context) {
 		Limit(pageSize).
 		Offset(offset).
 		Find(&notifications).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "fetch_error",
-			Message: "Erreur lors de la récupération des notifications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des notifications")
 		return
 	}
 
@@ -75,11 +72,7 @@ func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
 	if err := h.db.Model(&models.Notification{}).
 		Where("user_id = ? AND is_read = ?", userID, false).
 		Count(&count).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "count_error",
-			Message: "Erreur lors du comptage des notifications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du comptage des notifications")
 		return
 	}
 
@@ -93,11 +86,7 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 	userID := c.MustGet("user_id").(uint)
 	notificationID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_id",
-			Message: "ID de notification invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID de notification invalide")
 		return
 	}
 
@@ -110,20 +99,12 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 		})
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "update_error",
-			Message: "Erreur lors de la mise à jour de la notification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour de la notification")
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "not_found",
-			Message: "Notification non trouvée",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Notification non trouvée")
 		return
 	}
 
@@ -143,11 +124,7 @@ func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
 			"is_read": true,
 			"read_at": now,
 		}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "update_error",
-			Message: "Erreur lors de la mise à jour des notifications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour des notifications")
 		return
 	}
 
@@ -161,11 +138,7 @@ func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
 	userID := c.MustGet("user_id").(uint)
 	notificationID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_id",
-			Message: "ID de notification invalide",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "ID de notification invalide")
 		return
 	}
 
@@ -173,20 +146,12 @@ func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
 		Delete(&models.Notification{})
 
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "delete_error",
-			Message: "Erreur lors de la suppression de la notification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression de la notification")
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "not_found",
-			Message: "Notification non trouvée",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Notification non trouvée")
 		return
 	}
 
@@ -201,11 +166,7 @@ func (h *NotificationHandler) DeleteAllRead(c *gin.Context) {
 
 	if err := h.db.Where("user_id = ? AND is_read = ?", userID, true).
 		Delete(&models.Notification{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "delete_error",
-			Message: "Erreur lors de la suppression des notifications",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des notifications")
 		return
 	}
 
@@ -243,11 +204,7 @@ func (h *NotificationHandler) CreateNotification(c *gin.Context) {
 	var req models.NotificationRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "invalid_request",
-			Message: "Données invalides: " + err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -265,11 +222,7 @@ func (h *NotificationHandler) CreateNotification(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&notification).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "create_error",
-			Message: "Erreur lors de la création de la notification",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de la notification")
 		return
 	}
 

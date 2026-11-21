@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"airboard/models"
+	"airboard/apierror"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,33 +14,21 @@ func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "Authentication requise",
-				Code:    http.StatusUnauthorized,
-			})
+			apierror.Respond(c, http.StatusUnauthorized, "Authentication requise")
 			c.Abort()
 			return
 		}
 
 		roleStr, ok := role.(string)
 		if !ok {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Rôle invalide",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Rôle invalide")
 			c.Abort()
 			return
 		}
 
 		// Vérifier les rôles non autorisés
 		if roleStr == "" || roleStr == "banned" {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "Accès non autorisé",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "Accès non autorisé")
 			c.Abort()
 			return
 		}
@@ -67,11 +55,7 @@ func (am *AuthMiddleware) RequireGroupAdmin() gin.HandlerFunc {
 		}
 
 		// Sinon, accès refusé
-		c.JSON(http.StatusForbidden, models.ErrorResponse{
-			Error:   "Forbidden",
-			Message: "Rôle Admin ou Admin de groupe requis",
-			Code:    http.StatusForbidden,
-		})
+		apierror.Respond(c, http.StatusForbidden, "Rôle Admin ou Admin de groupe requis")
 		c.Abort()
 	}
 }

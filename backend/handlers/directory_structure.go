@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"airboard/apierror"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,11 +18,11 @@ import (
 func (h *DirectoryHandler) CreateUnit(c *gin.Context) {
 	var req models.OrgUnitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	if req.ParentID != nil && !h.exists(&models.OrgUnit{}, *req.ParentID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Unité parente introuvable"})
+		apierror.Respond(c, http.StatusBadRequest, "Unité parente introuvable")
 		return
 	}
 
@@ -34,7 +35,7 @@ func (h *DirectoryHandler) CreateUnit(c *gin.Context) {
 		Order:       req.Order,
 	}
 	if err := h.db.Create(&unit).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer l'unité"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer l'unité")
 		return
 	}
 	unit.Positions = []models.OrgPosition{}
@@ -54,16 +55,16 @@ func (h *DirectoryHandler) UpdateUnit(c *gin.Context) {
 	}
 	var req models.OrgUnitRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	if req.ParentID != nil {
 		if !h.exists(&models.OrgUnit{}, *req.ParentID) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Unité parente introuvable"})
+			apierror.Respond(c, http.StatusBadRequest, "Unité parente introuvable")
 			return
 		}
 		if h.wouldCreateCycle(id, *req.ParentID) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Une unité ne peut pas être rattachée à elle-même ou à l'une de ses sous-unités"})
+			apierror.Respond(c, http.StatusBadRequest, "Une unité ne peut pas être rattachée à elle-même ou à l'une de ses sous-unités")
 			return
 		}
 	}
@@ -77,7 +78,7 @@ func (h *DirectoryHandler) UpdateUnit(c *gin.Context) {
 		"order":       req.Order,
 	}
 	if err := h.db.Model(&unit).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de modifier l'unité"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de modifier l'unité")
 		return
 	}
 	h.db.First(&unit, id)
@@ -93,7 +94,7 @@ func (h *DirectoryHandler) DeleteUnit(c *gin.Context) {
 	var children int64
 	h.db.Model(&models.OrgUnit{}).Where("parent_id = ?", id).Count(&children)
 	if children > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "Supprimez ou déplacez d'abord les sous-unités"})
+		apierror.Respond(c, http.StatusConflict, "Supprimez ou déplacez d'abord les sous-unités")
 		return
 	}
 
@@ -147,11 +148,11 @@ func (h *DirectoryHandler) wouldCreateCycle(unitID, newParentID uint) bool {
 func (h *DirectoryHandler) CreatePosition(c *gin.Context) {
 	var req models.OrgPositionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	if !h.exists(&models.OrgUnit{}, req.UnitID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Unité introuvable"})
+		apierror.Respond(c, http.StatusBadRequest, "Unité introuvable")
 		return
 	}
 	position := models.OrgPosition{
@@ -161,7 +162,7 @@ func (h *DirectoryHandler) CreatePosition(c *gin.Context) {
 		Order:  req.Order,
 	}
 	if err := h.db.Create(&position).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer le poste"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer le poste")
 		return
 	}
 	position.Assignments = []models.PositionAssignment{}
@@ -181,11 +182,11 @@ func (h *DirectoryHandler) UpdatePosition(c *gin.Context) {
 	}
 	var req models.OrgPositionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	if !h.exists(&models.OrgUnit{}, req.UnitID) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Unité introuvable"})
+		apierror.Respond(c, http.StatusBadRequest, "Unité introuvable")
 		return
 	}
 	updates := map[string]interface{}{
@@ -195,7 +196,7 @@ func (h *DirectoryHandler) UpdatePosition(c *gin.Context) {
 		"order":   req.Order,
 	}
 	if err := h.db.Model(&position).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de modifier le poste"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de modifier le poste")
 		return
 	}
 	h.db.Preload("Assignments").First(&position, id)
@@ -234,7 +235,7 @@ func (h *DirectoryHandler) DeletePosition(c *gin.Context) {
 func (h *DirectoryHandler) CreateField(c *gin.Context) {
 	var req models.DirectoryFieldRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	key := strings.TrimSpace(req.Key)
@@ -242,18 +243,18 @@ func (h *DirectoryHandler) CreateField(c *gin.Context) {
 		key = normalizeFieldKey(req.Label)
 	}
 	if !fieldKeyPattern.MatchString(key) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Clé invalide (lettres minuscules, chiffres et _)"})
+		apierror.Respond(c, http.StatusBadRequest, "Clé invalide (lettres minuscules, chiffres et _)")
 		return
 	}
 	var count int64
 	h.db.Model(&models.DirectoryField{}).Where("key = ?", key).Count(&count)
 	if count > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "Un champ avec cette clé existe déjà"})
+		apierror.Respond(c, http.StatusConflict, "Un champ avec cette clé existe déjà")
 		return
 	}
 	options, err := cleanFieldOptions(req.Type, req.Options)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -268,7 +269,7 @@ func (h *DirectoryHandler) CreateField(c *gin.Context) {
 		Order:      req.Order,
 	}
 	if err := h.db.Create(&field).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de créer le champ"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer le champ")
 		return
 	}
 	c.JSON(http.StatusCreated, field)
@@ -287,12 +288,12 @@ func (h *DirectoryHandler) UpdateField(c *gin.Context) {
 	}
 	var req models.DirectoryFieldRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 	options, err := cleanFieldOptions(req.Type, req.Options)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	updates := map[string]interface{}{
@@ -305,7 +306,7 @@ func (h *DirectoryHandler) UpdateField(c *gin.Context) {
 		"order":        req.Order,
 	}
 	if err := h.db.Model(&field).Updates(updates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de modifier le champ"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de modifier le champ")
 		return
 	}
 	h.db.First(&field, id)
@@ -320,11 +321,11 @@ func (h *DirectoryHandler) DeleteField(c *gin.Context) {
 	}
 	res := h.db.Delete(&models.DirectoryField{}, id)
 	if res.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Impossible de supprimer le champ"})
+		apierror.Respond(c, http.StatusInternalServerError, "Impossible de supprimer le champ")
 		return
 	}
 	if res.RowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Champ introuvable"})
+		apierror.Respond(c, http.StatusNotFound, "Champ introuvable")
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Champ supprimé"})
@@ -363,10 +364,10 @@ func (h *DirectoryHandler) exists(model interface{}, id uint) bool {
 
 func respondNotFoundOr500(c *gin.Context, err error, notFoundMsg string) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{"error": notFoundMsg})
+		apierror.Respond(c, http.StatusNotFound, notFoundMsg)
 		return
 	}
-	c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur interne"})
+	apierror.Respond(c, http.StatusInternalServerError, "Erreur interne")
 }
 
 func defaultColor(color string) string {

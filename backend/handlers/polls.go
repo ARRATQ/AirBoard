@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
@@ -74,7 +75,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 		newsIDUint, err := strconv.ParseUint(newsIDFilter, 10, 32)
 		if err != nil {
 			log.Printf("[WARN GetPolls] Invalid news_id format: %s", newsIDFilter)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid news_id format"})
+			apierror.Respond(c, http.StatusBadRequest, "Invalid news_id format")
 			return
 		} else {
 			// Filtre strict : seulement les sondages avec ce news_id exact (pas NULL)
@@ -89,7 +90,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 		announcementIDUint, err := strconv.ParseUint(announcementID, 10, 32)
 		if err != nil {
 			log.Printf("[WARN GetPolls] Invalid announcement_id format: %s", announcementID)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid announcement_id format"})
+			apierror.Respond(c, http.StatusBadRequest, "Invalid announcement_id format")
 			return
 		}
 		query = query.Where("polls.announcement_id = ?", announcementIDUint)
@@ -99,7 +100,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	if search := c.Query("search"); search != "" {
 		// Valider l'input de recherche (longueur en caractères ; un seul caractère est permis)
 		if listSearchTooLong(search) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
+			apierror.Respond(c, http.StatusBadRequest, "La recherche ne peut pas dépasser 100 caractères")
 			return
 		}
 
@@ -130,85 +131,17 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 		query = query.Where("is_active = ?", true)
 	}
 
-	if userRole == "admin" {
-		// Admin voit tout
-	} else if !isEntityFilter && len(managedGroupIDs) > 0 {
-		// Utilisateur qui administre au moins un groupe : distinguer interface admin vs interface publique
-
-		// Récupérer aussi les groupes d'appartenance pour la lecture publique
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes (appartenance + administration)
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-		var combinedGroupIDs []uint
-		for id := range allGroupIDs {
-			combinedGroupIDs = append(combinedGroupIDs, id)
-		}
-
-		// Si le group_admin accède via /group-admin/polls, on filtre strictement
-		// Sinon (lecture publique via /polls), il voit les sondages comme un user normal
-		isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls")
-
-		if isAdminInterface {
-			// Interface d'administration : seulement les sondages qu'il peut gérer
-			if len(managedGroupIDs) > 0 {
-				query = query.Where(`
-					(author_id = ?) OR
-					EXISTS (
-						SELECT 1 FROM poll_target_groups
-						WHERE poll_target_groups.poll_id = polls.id
-						AND poll_target_groups.group_id IN (?)
-					)
-				`, userID, managedGroupIDs)
-			} else {
-				// Pas de groupes gérés : uniquement ses propres sondages
-				query = query.Where("author_id = ?", userID)
-			}
-		} else {
-			// Interface publique : sondages globaux + ceux de ses groupes (appartenance + administration)
-			if len(combinedGroupIDs) > 0 {
-				query = query.Where(`
-					NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-					OR EXISTS (
-						SELECT 1 FROM poll_target_groups
-						WHERE poll_target_groups.poll_id = polls.id
-						AND poll_target_groups.group_id IN (?)
-					)
-				`, combinedGroupIDs)
-			} else {
-				// Si pas de groupes, voir seulement les sondages globaux
-				query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
-			}
-		}
-	} else if !isEntityFilter {
-		// User régulier ou editor : sondages globaux + ceux de leurs groupes
-		// Mais SEULEMENT si on ne filtre pas par news_id ou announcement_id
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		if len(userGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-				OR EXISTS (
-					SELECT 1 FROM poll_target_groups
-					WHERE poll_target_groups.poll_id = polls.id
-					AND poll_target_groups.group_id IN (?)
-				)
-			`, userGroupIDs)
-		} else {
-			// Si pas de groupes, voir seulement les sondages globaux
-			query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
-		}
+	switch {
+	case userRole == "admin" || isEntityFilter:
+		// Admin voit tout ; un filtre par entité renvoie seulement les sondages liés
+	case len(managedGroupIDs) > 0 && strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls"):
+		// Interface d'administration de groupe : seulement les sondages qu'il peut gérer
+		query = query.Scopes(pollTargets.manageableBy(userID, managedGroupIDs))
+	default:
+		// Lecture publique : sondages globaux + ceux des groupes dont l'utilisateur est
+		// membre ou administrateur
+		query = query.Scopes(pollTargets.visibleTo(memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)))
 	}
-	// Si isEntityFilter est true, on ne filtre PAS par groupes, on retourne seulement
-	// les sondages liés à l'entité spécifiée (news ou announcement)
 
 	// Tri
 	query = query.Order(utils.SafeOrderClause(
@@ -223,7 +156,7 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 
 	// Récupération avec pagination
 	if err := query.Offset(offset).Limit(pageSize).Find(&polls).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch polls"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch polls")
 		return
 	}
 
@@ -266,9 +199,9 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 		Preload("Announcement").
 		First(&poll, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+			apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch poll"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch poll")
 		}
 		return
 	}
@@ -283,44 +216,17 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 		return
 	}
 
-	// Vérifier l'accès pour group_admin et user
-	hasAccess := false
-
-	// Récupérer les groupes administrés ET les groupes d'appartenance
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	var userGroupIDs []uint
-	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-	// Combiner les deux listes
-	allGroupIDs := make(map[uint]bool)
-	for _, id := range userGroupIDs {
-		allGroupIDs[id] = true
-	}
-	for _, id := range managedGroupIDs {
-		allGroupIDs[id] = true
-	}
-
-	// Si pas de groupes cibles, c'est un sondage global
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		// Vérifier si l'utilisateur appartient ou administre au moins un groupe cible
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
-
-	if !hasAccess {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied to this poll"})
+	// group_admin et user : sondage global, ou ciblant un groupe dont l'utilisateur
+	// est membre ou administrateur
+	if len(poll.TargetGroups) > 0 &&
+		!targetsAnyGroup(poll.TargetGroups, memberOrManagedGroupIDs(h.db, userID, middleware.GetManagedGroupIDs(c))) {
+		apierror.Respond(c, http.StatusForbidden, "Access denied to this poll")
 		return
 	}
 
 	// Les non-admins ne peuvent pas voir un sondage inactif
 	if !poll.IsActive {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		return
 	}
 
@@ -331,12 +237,12 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 func (h *PollsHandler) CreatePoll(c *gin.Context) {
 	var req models.PollRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -346,7 +252,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 
 	// Validation : au moins 2 options, max 10
 	if len(req.Options) < 2 || len(req.Options) > 10 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Poll must have between 2 and 10 options"})
+		apierror.Respond(c, http.StatusBadRequest, "Poll must have between 2 and 10 options")
 		return
 	}
 
@@ -357,7 +263,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		}
 	}
 	if otherOptionsCount > 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only one option can be marked as 'other'"})
+		apierror.Respond(c, http.StatusBadRequest, "Only one option can be marked as 'other'")
 		return
 	}
 
@@ -373,9 +279,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 				}
 			}
 			if !canManage {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-				})
+				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 				return
 			}
 		}
@@ -397,7 +301,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 
 	// Créer le sondage
 	if err := createKeepingFalse(h.db, c, &poll, "is_active"); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create poll"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to create poll")
 		return
 	}
 
@@ -412,7 +316,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		if err := h.db.Create(&option).Error; err != nil {
 			// Rollback : supprimer le sondage créé
 			h.db.Delete(&poll)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create poll options"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to create poll options")
 			return
 		}
 	}
@@ -434,21 +338,14 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 
 	// Envoyer des notifications
 	if poll.IsActive {
-		go func() {
+		utils.SafeGo("notify-poll-created", func() {
 			notifService := services.NewNotificationService(h.db)
 
 			// Récupérer les utilisateurs à notifier
 			var userIDs []uint
 			if len(poll.TargetGroups) > 0 {
 				// Notifier les membres des groupes cibles
-				var groupIDs []uint
-				for _, g := range poll.TargetGroups {
-					groupIDs = append(groupIDs, g.ID)
-				}
-				h.db.Table("user_groups").
-					Where("group_id IN ?", groupIDs).
-					Distinct("user_id").
-					Pluck("user_id", &userIDs)
+				userIDs = groupMemberIDs(h.db, groupIDsOf(poll.TargetGroups))
 			} else {
 				// Sondage global : notifier tous les utilisateurs actifs
 				h.db.Model(&models.User{}).
@@ -463,14 +360,14 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 					log.Printf("[Notification] Échec de l'envoi de la notification de sondage: %v", err)
 				}
 			}
-		}()
+		})
 
 		// Accorder de l'XP pour la création du sondage (50 XP)
-		go func() {
+		utils.SafeGo("xp-poll-create", func() {
 			if err := h.gamificationService.AwardXP(userID, 50, "poll_create", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
 				log.Printf("[Gamification] Failed to award XP for poll creation: %v", err)
 			}
-		}()
+		})
 	}
 
 	c.JSON(http.StatusCreated, poll)
@@ -483,9 +380,9 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	var poll models.Poll
 	if err := h.db.Preload("Options").Preload("TargetGroups").First(&poll, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+			apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch poll"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch poll")
 		}
 		return
 	}
@@ -519,18 +416,18 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	}
 
 	if !canEdit {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to edit this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to edit this poll")
 		return
 	}
 
 	var req models.PollRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	if endBeforeStart(req.StartDate, req.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": msgEndBeforeStart})
+		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
 
@@ -541,7 +438,7 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		}
 	}
 	if otherOptionsCount > 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only one option can be marked as 'other'"})
+		apierror.Respond(c, http.StatusBadRequest, "Only one option can be marked as 'other'")
 		return
 	}
 
@@ -556,9 +453,7 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 				}
 			}
 			if !canManage {
-				c.JSON(http.StatusForbidden, gin.H{
-					"error": "Vous ne pouvez cibler que les groupes que vous administrez",
-				})
+				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
 				return
 			}
 		}
@@ -612,7 +507,7 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	})
 	if err != nil {
 		log.Printf("[UpdatePoll] sondage %d : %v", poll.ID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update poll"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update poll")
 		return
 	}
 
@@ -641,9 +536,9 @@ func (h *PollsHandler) DeletePoll(c *gin.Context) {
 	var poll models.Poll
 	if err := h.db.Preload("TargetGroups").First(&poll, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+			apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch poll"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch poll")
 		}
 		return
 	}
@@ -676,12 +571,12 @@ func (h *PollsHandler) DeletePoll(c *gin.Context) {
 	}
 
 	if !canDelete {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to delete this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to delete this poll")
 		return
 	}
 
 	if err := h.db.Delete(&poll).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete poll"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete poll")
 		return
 	}
 
@@ -695,9 +590,9 @@ func (h *PollsHandler) ClosePoll(c *gin.Context) {
 	var poll models.Poll
 	if err := h.db.First(&poll, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+			apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch poll"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch poll")
 		}
 		return
 	}
@@ -707,13 +602,13 @@ func (h *PollsHandler) ClosePoll(c *gin.Context) {
 	userRole := c.GetString("role")
 
 	if userRole != "admin" && poll.AuthorID != userID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have permission to close this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have permission to close this poll")
 		return
 	}
 
 	poll.IsActive = false
 	if err := h.db.Save(&poll).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to close poll"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to close poll")
 		return
 	}
 
@@ -727,82 +622,56 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 
 	var req models.PollVoteRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	// Vérifier que le sondage existe et est actif
 	var poll models.Poll
 	if err := h.db.Preload("Options").Preload("TargetGroups").First(&poll, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		return
 	}
 
 	if !poll.IsActive {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll is closed"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll is closed")
 		return
 	}
 
 	// Vérifier la période de vote
 	now := time.Now()
 	if poll.StartDate != nil && now.Before(*poll.StartDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll has not started yet"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll has not started yet")
 		return
 	}
 	if poll.EndDate != nil && now.After(*poll.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll has ended"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll has ended")
 		return
 	}
 
 	// Vérifier que l'utilisateur a accès au sondage
-	hasAccess := false
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true // Sondage global
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have access to this poll")
 		return
 	}
 
 	// Vérifier que les options existent et appartiennent au sondage
 	var validOptions []models.PollOption
 	if err := h.db.Where("poll_id = ? AND id IN ?", poll.ID, req.PollOptionIDs).Find(&validOptions).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poll options"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid poll options")
 		return
 	}
 
 	if len(validOptions) != len(req.PollOptionIDs) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Some poll options are invalid"})
+		apierror.Respond(c, http.StatusBadRequest, "Some poll options are invalid")
 		return
 	}
 
 	// Vérifier le type de sondage
 	if poll.PollType == "single" && len(req.PollOptionIDs) > 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll allows only one choice"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll allows only one choice")
 		return
 	}
 
@@ -811,7 +680,7 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 	h.db.Where("poll_id = ? AND user_id = ?", poll.ID, userID).Find(&existingVotes)
 
 	if len(existingVotes) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You have already voted in this poll"})
+		apierror.Respond(c, http.StatusBadRequest, "You have already voted in this poll")
 		return
 	}
 
@@ -826,14 +695,14 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 		}
 		if err := h.db.Create(&vote).Error; err != nil {
 			log.Printf("[Vote] Erreur lors de la création du vote: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to record vote"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to record vote")
 			return
 		}
 		votesCreated++
 	}
 
 	if votesCreated == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to record vote"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to record vote")
 		return
 	}
 
@@ -851,11 +720,11 @@ func (h *PollsHandler) Vote(c *gin.Context) {
 		if rewardErr != nil {
 			log.Printf("[Gamification] Failed to check poll vote reward: %v", rewardErr)
 		} else if !hasReward {
-			go func() {
+			utils.SafeGo("xp-poll-vote", func() {
 				if err := h.gamificationService.AwardXP(userID, 10, "poll_vote", fmt.Sprintf("{\"poll_id\": %d}", poll.ID)); err != nil {
 					log.Printf("[Gamification] Failed to award XP for poll vote: %v", err)
 				}
-			}()
+			})
 		}
 	}
 }
@@ -867,61 +736,37 @@ func (h *PollsHandler) RemoveVote(c *gin.Context) {
 
 	var poll models.Poll
 	if err := h.db.Preload("TargetGroups").First(&poll, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		return
 	}
 
 	if !poll.IsActive {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll is closed"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll is closed")
 		return
 	}
 
 	now := time.Now()
 	if poll.EndDate != nil && now.After(*poll.EndDate) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "This poll has ended"})
+		apierror.Respond(c, http.StatusBadRequest, "This poll has ended")
 		return
 	}
 
 	// Vérifier l'accès utilisateur au sondage
-	hasAccess := false
-	if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		allGroupIDs := make(map[uint]bool)
-		for _, groupID := range userGroupIDs {
-			allGroupIDs[groupID] = true
-		}
-		for _, groupID := range managedGroupIDs {
-			allGroupIDs[groupID] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have access to this poll")
 		return
 	}
 
 	result := h.db.Where("poll_id = ? AND user_id = ?", poll.ID, userID).Delete(&models.PollVote{})
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove vote"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to remove vote")
 		return
 	}
 
 	if result.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "You have not voted in this poll"})
+		apierror.Respond(c, http.StatusBadRequest, "You have not voted in this poll")
 		return
 	}
 
@@ -943,43 +788,16 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 		Preload("TargetGroups").
 		Preload("Options").
 		First(&poll, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Poll not found"})
+		apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		return
 	}
 
 	// Vérifier que l'utilisateur a accès au sondage
-	hasAccess := false
-	if userRole == "admin" || poll.AuthorID == userID {
-		hasAccess = true
-	} else if len(poll.TargetGroups) == 0 {
-		hasAccess = true
-	} else {
-		// Récupérer les groupes administrés ET les groupes d'appartenance
-		var managedGroupIDs []uint
-		h.db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &managedGroupIDs)
-
-		var userGroupIDs []uint
-		h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-		// Combiner les deux listes
-		allGroupIDs := make(map[uint]bool)
-		for _, id := range userGroupIDs {
-			allGroupIDs[id] = true
-		}
-		for _, id := range managedGroupIDs {
-			allGroupIDs[id] = true
-		}
-
-		for _, targetGroup := range poll.TargetGroups {
-			if allGroupIDs[targetGroup.ID] {
-				hasAccess = true
-				break
-			}
-		}
-	}
+	hasAccess := userRole == "admin" || poll.AuthorID == userID ||
+		canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You don't have access to this poll"})
+		apierror.Respond(c, http.StatusForbidden, "You don't have access to this poll")
 		return
 	}
 
@@ -1003,7 +821,7 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 	}
 
 	if !canSeeResults {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Results not available yet"})
+		apierror.Respond(c, http.StatusForbidden, "Results not available yet")
 		return
 	}
 

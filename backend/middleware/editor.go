@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"airboard/apierror"
 )
 
 // RequireEditor vérifie que l'utilisateur a le rôle editor ou admin
@@ -11,14 +13,14 @@ func (m *AuthMiddleware) RequireEditor() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			apierror.Respond(c, http.StatusUnauthorized, "Unauthorized")
 			c.Abort()
 			return
 		}
 
 		roleStr, ok := role.(string)
 		if !ok || (roleStr != "editor" && roleStr != "admin") {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Editor or Admin role required"})
+			apierror.Respond(c, http.StatusForbidden, "Editor or Admin role required")
 			c.Abort()
 			return
 		}

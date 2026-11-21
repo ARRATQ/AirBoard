@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/models"
 	"airboard/services"
@@ -44,7 +45,7 @@ func (h *EmailHandler) GetSMTPConfig(c *gin.Context) {
 		})
 		return
 	} else if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de la configuration email"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération de la configuration email")
 		return
 	}
 
@@ -55,7 +56,7 @@ func (h *EmailHandler) GetSMTPConfig(c *gin.Context) {
 func (h *EmailHandler) UpdateSMTPConfig(c *gin.Context) {
 	var req models.SMTPConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -69,12 +70,12 @@ func (h *EmailHandler) UpdateSMTPConfig(c *gin.Context) {
 
 	if smtpConfig.ID == 0 {
 		if err := h.db.Create(&smtpConfig).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la configuration email"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de la configuration email")
 			return
 		}
 	} else {
 		if err := h.db.Save(&smtpConfig).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour de la configuration email"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour de la configuration email")
 			return
 		}
 	}
@@ -87,7 +88,7 @@ func (h *EmailHandler) TestSMTPConfig(c *gin.Context) {
 	var req models.TestEmailRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("[Email] Erreur binding JSON: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides: " + err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -96,7 +97,7 @@ func (h *EmailHandler) TestSMTPConfig(c *gin.Context) {
 	var smtpConfig models.SMTPConfig
 	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
 		log.Printf("[Email] Configuration email non trouvée: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Configuration email non trouvée. Veuillez d'abord configurer OAuth."})
+		apierror.Respond(c, http.StatusBadRequest, "Configuration email non trouvée. Veuillez d'abord configurer OAuth.")
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *EmailHandler) TestSMTPConfig(c *gin.Context) {
 		smtpConfig.LastTestedAt = &now
 		smtpConfig.LastTestSuccess = false
 		h.db.Save(&smtpConfig)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test échoué: " + err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, "Test échoué: "+err.Error())
 		return
 	}
 
@@ -122,7 +123,7 @@ func (h *EmailHandler) GetEmailTemplates(c *gin.Context) {
 	var templates []models.EmailTemplate
 
 	if err := h.db.Order("type").Find(&templates).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des templates"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des templates")
 		return
 	}
 
@@ -144,7 +145,7 @@ func (h *EmailHandler) GetEmailTemplate(c *gin.Context) {
 
 	var template models.EmailTemplate
 	if err := h.db.Where("type = ?", templateType).First(&template).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Template non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Template non trouvé")
 		return
 	}
 
@@ -157,13 +158,13 @@ func (h *EmailHandler) UpdateEmailTemplate(c *gin.Context) {
 
 	var req models.EmailTemplateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var template models.EmailTemplate
 	if err := h.db.Where("type = ?", templateType).First(&template).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Template non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Template non trouvé")
 		return
 	}
 
@@ -173,7 +174,7 @@ func (h *EmailHandler) UpdateEmailTemplate(c *gin.Context) {
 	template.IsEnabled = req.IsEnabled
 
 	if err := h.db.Save(&template).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour du template"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour du template")
 		return
 	}
 
@@ -195,13 +196,13 @@ func (h *EmailHandler) ResetEmailTemplate(c *gin.Context) {
 	}
 
 	if defaultTemplate == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Type de template inconnu"})
+		apierror.Respond(c, http.StatusNotFound, "Type de template inconnu")
 		return
 	}
 
 	var template models.EmailTemplate
 	if err := h.db.Where("type = ?", templateType).First(&template).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Template non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Template non trouvé")
 		return
 	}
 
@@ -211,7 +212,7 @@ func (h *EmailHandler) ResetEmailTemplate(c *gin.Context) {
 	template.Name = defaultTemplate.Name
 
 	if err := h.db.Save(&template).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la réinitialisation du template"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la réinitialisation du template")
 		return
 	}
 
@@ -224,27 +225,27 @@ func (h *EmailHandler) PreviewTemplate(c *gin.Context) {
 
 	var template models.EmailTemplate
 	if err := h.db.Where("type = ?", templateType).First(&template).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Template non trouvé"})
+		apierror.Respond(c, http.StatusNotFound, "Template non trouvé")
 		return
 	}
 
 	// Récupérer les données exemple
 	sampleData := h.emailService.GetSampleData(templateType)
 	if sampleData == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Type de template inconnu"})
+		apierror.Respond(c, http.StatusBadRequest, "Type de template inconnu")
 		return
 	}
 
 	// Exécuter les templates
 	subject, err := h.emailService.ExecuteTemplate(template.Subject, sampleData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur dans le sujet: " + err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, "Erreur dans le sujet: "+err.Error())
 		return
 	}
 
 	body, err := h.emailService.ExecuteTemplate(template.HTMLBody, sampleData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Erreur dans le corps: " + err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, "Erreur dans le corps: "+err.Error())
 		return
 	}
 
@@ -259,7 +260,7 @@ func (h *EmailHandler) GetEmailLogs(c *gin.Context) {
 	var logs []models.EmailNotificationLog
 
 	if err := h.db.Order("created_at DESC").Limit(100).Find(&logs).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération des logs"})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des logs")
 		return
 	}
 
@@ -315,7 +316,7 @@ func (h *EmailHandler) GetTemplateVariables(c *gin.Context) {
 func (h *EmailHandler) GetOAuthConfig(c *gin.Context) {
 	var smtpConfig models.SMTPConfig
 	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		apierror.Respond(c, http.StatusNotFound, "Configuration SMTP non trouvée")
 		return
 	}
 
@@ -337,7 +338,7 @@ func (h *EmailHandler) GetOAuthConfig(c *gin.Context) {
 func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 	var req models.EmailOAuthConfigRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -347,7 +348,7 @@ func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 	// Get or create SMTP config
 	var smtpConfig models.SMTPConfig
 	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Veuillez d'abord configurer les paramètres SMTP"})
+		apierror.Respond(c, http.StatusBadRequest, "Veuillez d'abord configurer les paramètres SMTP")
 		return
 	}
 
@@ -400,7 +401,7 @@ func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 	if req.ClientSecret != "" {
 		encrypted, err := oauthService.EncryptToken(req.ClientSecret)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement du secret client"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du chiffrement du secret client")
 			return
 		}
 		oauthConfig.ClientSecret = encrypted
@@ -411,7 +412,7 @@ func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 	if req.GrantType == "refresh_token" && req.RefreshToken != "" {
 		encrypted, err := oauthService.EncryptToken(req.RefreshToken)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors du chiffrement du refresh token"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors du chiffrement du refresh token")
 			return
 		}
 		oauthConfig.RefreshToken = encrypted
@@ -422,14 +423,14 @@ func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 	if oauthConfig.ID == 0 {
 		if err := h.db.Create(&oauthConfig).Error; err != nil {
 			log.Printf("[Email OAuth] Erreur création config: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la création de la configuration OAuth"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de la configuration OAuth")
 			return
 		}
 		log.Printf("[Email OAuth] Config créée avec ID: %d", oauthConfig.ID)
 	} else {
 		if err := h.db.Save(&oauthConfig).Error; err != nil {
 			log.Printf("[Email OAuth] Erreur sauvegarde config: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la mise à jour de la configuration OAuth"})
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour de la configuration OAuth")
 			return
 		}
 		log.Printf("[Email OAuth] Config mise à jour ID: %d", oauthConfig.ID)
@@ -456,7 +457,7 @@ func (h *EmailHandler) UpdateOAuthConfig(c *gin.Context) {
 func (h *EmailHandler) TestOAuthConnection(c *gin.Context) {
 	var req models.EmailOAuthTestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -464,12 +465,12 @@ func (h *EmailHandler) TestOAuthConnection(c *gin.Context) {
 
 	var smtpConfig models.SMTPConfig
 	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		apierror.Respond(c, http.StatusNotFound, "Configuration SMTP non trouvée")
 		return
 	}
 
 	if smtpConfig.EmailOAuthConfig == nil || !smtpConfig.EmailOAuthConfig.IsEnabled {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth non configuré ou désactivé"})
+		apierror.Respond(c, http.StatusBadRequest, "OAuth non configuré ou désactivé")
 		return
 	}
 
@@ -526,7 +527,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 
 	if err := h.emailService.SendEmailWithOAuth(&smtpConfig, req.ToEmail, testSubject, testBody); err != nil {
 		log.Printf("[Email OAuth] Test échoué: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Test OAuth échoué: " + err.Error()})
+		apierror.Respond(c, http.StatusBadRequest, "Test OAuth échoué: "+err.Error())
 		return
 	}
 
@@ -543,19 +544,19 @@ func (h *EmailHandler) RefreshOAuthToken(c *gin.Context) {
 
 	var smtpConfig models.SMTPConfig
 	if err := h.db.Preload("EmailOAuthConfig").First(&smtpConfig).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration SMTP non trouvée"})
+		apierror.Respond(c, http.StatusNotFound, "Configuration SMTP non trouvée")
 		return
 	}
 
 	if smtpConfig.EmailOAuthConfig == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "OAuth non configuré"})
+		apierror.Respond(c, http.StatusBadRequest, "OAuth non configuré")
 		return
 	}
 
 	oauthService := services.NewEmailOAuthService(h.db, h.config)
 	if err := oauthService.RefreshAccessToken(smtpConfig.EmailOAuthConfig); err != nil {
 		log.Printf("[Email OAuth] Échec rafraîchissement: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Échec du rafraîchissement du token: " + err.Error()})
+		apierror.Respond(c, http.StatusInternalServerError, "Échec du rafraîchissement du token: "+err.Error())
 		return
 	}
 

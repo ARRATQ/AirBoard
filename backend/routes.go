@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"airboard/apierror"
 	"airboard/config"
 	"airboard/handlers"
 	"airboard/middleware"
@@ -85,12 +86,8 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 
 	// Middleware de récupération d'erreurs
 	router.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
-		if err, ok := recovered.(string); ok {
-			log.Printf("Panic occurred: %s", err)
-		}
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "Internal server error",
-		})
+		log.Printf("Panic occurred: %v", recovered)
+		apierror.Abort(c, http.StatusInternalServerError, "Internal server error")
 	}))
 
 	// Taille maximale des corps de requête

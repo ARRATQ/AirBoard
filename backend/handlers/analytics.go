@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"airboard/apierror"
 	"airboard/models"
 	"airboard/services"
 
@@ -26,11 +27,7 @@ func NewAnalyticsHandler(db *gorm.DB, gs *services.GamificationService) *Analyti
 func (h *AnalyticsHandler) TrackClick(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "Utilisateur non authentifié",
-			Code:    http.StatusUnauthorized,
-		})
+		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non authentifié")
 		return
 	}
 
@@ -39,11 +36,7 @@ func (h *AnalyticsHandler) TrackClick(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&requestData); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Bad Request",
-			Message: "Données invalides",
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
 	}
 
@@ -55,11 +48,7 @@ func (h *AnalyticsHandler) TrackClick(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&click).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Internal Server Error",
-			Message: "Erreur lors de l'enregistrement du clic",
-			Code:    http.StatusInternalServerError,
-		})
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'enregistrement du clic")
 		return
 	}
 

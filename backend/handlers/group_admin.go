@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 	"airboard/models"
 
@@ -36,11 +37,7 @@ func (h *GroupAdminHandler) privateAppGroupIDs(managedGroupIDs []uint) *gorm.DB 
 // respondGroupAdminListError journalise l'erreur SQL et renvoie un message sans détail technique.
 func respondGroupAdminListError(c *gin.Context, what string, err error) {
 	log.Printf("group-admin: lecture des %s impossible : %v", what, err)
-	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-		Error:   "Internal Server Error",
-		Message: "Erreur lors de la récupération des " + what,
-		Code:    http.StatusInternalServerError,
-	})
+	apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des "+what)
 }
 
 // GetAppGroups retourne une page des AppGroups accessibles : tous pour l'admin global,
@@ -175,25 +172,21 @@ func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 // CreateApplication crée une nouvelle application dans un AppGroup privé géré
 func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 	var req struct {
-		Name         string `json:"name" binding:"required"`
-		Description  string `json:"description"`
-		URL          string `json:"url" binding:"required,url"`
-		Icon         string `json:"icon"`
-		Color        string `json:"color"`
-		Order        int    `json:"order"`
-		OpenInNewTab bool   `json:"open_in_new_tab"`
-		IsActive     bool   `json:"is_active"`
-		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		Name           string     `json:"name" binding:"required"`
+		Description    string     `json:"description"`
+		URL            string     `json:"url" binding:"required,url"`
+		Icon           string     `json:"icon"`
+		Color          string     `json:"color"`
+		Order          int        `json:"order"`
+		OpenInNewTab   bool       `json:"open_in_new_tab"`
+		IsActive       bool       `json:"is_active"`
+		AppGroupID     uint       `json:"app_group_id" binding:"required"`
 		AdminNote      string     `json:"admin_note"`
 		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
 
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -202,11 +195,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		// Vérifier que l'AppGroup est privé et appartient aux groupes administrés
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't manage any groups",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't manage any groups")
 			return
 		}
 
@@ -218,11 +207,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 			Count(&count)
 
 		if count == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't have access to this app group",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't have access to this app group")
 			return
 		}
 	}
@@ -235,35 +220,28 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 
 	note, noteUntil, err := models.NormalizeAdminNote(req.AdminNote, req.AdminNoteUntil)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	application := models.Application{
-		Name:        req.Name,
-		Description: req.Description,
-		URL:         req.URL,
-		Icon:        req.Icon,
-		Color:       req.Color,
-		Order:       req.Order,
-		OpenInNewTab: req.OpenInNewTab,
-		IsActive:    req.IsActive,
-		AppGroupID:  req.AppGroupID,
-		CreatedByID: createdByID,
+		Name:           req.Name,
+		Description:    req.Description,
+		URL:            req.URL,
+		Icon:           req.Icon,
+		Color:          req.Color,
+		Order:          req.Order,
+		OpenInNewTab:   req.OpenInNewTab,
+		IsActive:       req.IsActive,
+		AppGroupID:     req.AppGroupID,
+		CreatedByID:    createdByID,
 		AdminNote:      note,
 		AdminNoteUntil: noteUntil,
 	}
 
 	if err := createKeepingFalse(h.db, c, &application, "is_active", "open_in_new_tab"); err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Database error",
-			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
-		})
+		log.Printf("group-admin: création de l'application impossible : %v", err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la création de l'application")
 		return
 	}
 
@@ -276,35 +254,27 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
-		Name         string `json:"name" binding:"required"`
-		Description  string `json:"description"`
-		URL          string `json:"url" binding:"required,url"`
-		Icon         string `json:"icon"`
-		Color        string `json:"color"`
-		Order        int    `json:"order"`
-		OpenInNewTab bool   `json:"open_in_new_tab"`
-		IsActive     bool   `json:"is_active"`
-		AppGroupID   uint   `json:"app_group_id" binding:"required"`
+		Name           string     `json:"name" binding:"required"`
+		Description    string     `json:"description"`
+		URL            string     `json:"url" binding:"required,url"`
+		Icon           string     `json:"icon"`
+		Color          string     `json:"color"`
+		Order          int        `json:"order"`
+		OpenInNewTab   bool       `json:"open_in_new_tab"`
+		IsActive       bool       `json:"is_active"`
+		AppGroupID     uint       `json:"app_group_id" binding:"required"`
 		AdminNote      string     `json:"admin_note"`
 		AdminNoteUntil *time.Time `json:"admin_note_until"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
 	var application models.Application
 	if err := h.db.First(&application, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not found",
-			Message: "Application not found",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Application not found")
 		return
 	}
 
@@ -313,11 +283,7 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 		// Vérifier que l'application actuelle et le nouveau AppGroup sont accessibles
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't manage any groups",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't manage any groups")
 			return
 		}
 
@@ -330,11 +296,7 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 			Count(&currentCount)
 
 		if currentCount == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't have access to this application",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't have access to this application")
 			return
 		}
 
@@ -348,11 +310,7 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 				Count(&newCount)
 
 			if newCount == 0 {
-				c.JSON(http.StatusForbidden, models.ErrorResponse{
-					Error:   "Forbidden",
-					Message: "You don't have access to the target app group",
-					Code:    http.StatusForbidden,
-				})
+				apierror.Respond(c, http.StatusForbidden, "You don't have access to the target app group")
 				return
 			}
 		}
@@ -360,11 +318,7 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 
 	note, noteUntil, err := models.NormalizeAdminNote(req.AdminNote, req.AdminNoteUntil)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-			Code:    http.StatusBadRequest,
-		})
+		apierror.Respond(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -381,11 +335,8 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 	application.AdminNoteUntil = noteUntil
 
 	if err := h.db.Save(&application).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Database error",
-			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
-		})
+		log.Printf("group-admin: mise à jour de l'application %d impossible : %v", application.ID, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la mise à jour de l'application")
 		return
 	}
 
@@ -399,11 +350,7 @@ func (h *GroupAdminHandler) DeleteApplication(c *gin.Context) {
 
 	var application models.Application
 	if err := h.db.First(&application, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, models.ErrorResponse{
-			Error:   "Not found",
-			Message: "Application not found",
-			Code:    http.StatusNotFound,
-		})
+		apierror.Respond(c, http.StatusNotFound, "Application not found")
 		return
 	}
 
@@ -412,11 +359,7 @@ func (h *GroupAdminHandler) DeleteApplication(c *gin.Context) {
 		// Vérifier que l'application appartient à un AppGroup privé géré
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't manage any groups",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't manage any groups")
 			return
 		}
 
@@ -428,21 +371,14 @@ func (h *GroupAdminHandler) DeleteApplication(c *gin.Context) {
 			Count(&count)
 
 		if count == 0 {
-			c.JSON(http.StatusForbidden, models.ErrorResponse{
-				Error:   "Forbidden",
-				Message: "You don't have access to this application",
-				Code:    http.StatusForbidden,
-			})
+			apierror.Respond(c, http.StatusForbidden, "You don't have access to this application")
 			return
 		}
 	}
 
 	if err := h.db.Delete(&application).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "Database error",
-			Message: err.Error(),
-			Code:    http.StatusInternalServerError,
-		})
+		log.Printf("group-admin: suppression de l'application %d impossible : %v", application.ID, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression de l'application")
 		return
 	}
 

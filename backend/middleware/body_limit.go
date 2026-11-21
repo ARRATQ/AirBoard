@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"airboard/models"
+	"airboard/apierror"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,11 +27,7 @@ func LimitRequestBody() gin.HandlerFunc {
 
 		limit := bodyLimitFor(c.GetHeader("Content-Type"))
 		if c.Request.ContentLength > limit {
-			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, models.ErrorResponse{
-				Error:   "Request Entity Too Large",
-				Message: "Requête trop volumineuse",
-				Code:    http.StatusRequestEntityTooLarge,
-			})
+			apierror.Abort(c, http.StatusRequestEntityTooLarge, "Requête trop volumineuse")
 			return
 		}
 

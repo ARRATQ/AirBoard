@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"airboard/apierror"
 	"airboard/models"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -22,7 +24,7 @@ func (h *NewsHandler) GetNewsTypes(c *gin.Context) {
 	}
 
 	if err := query.Order("\"order\" ASC, name ASC").Find(&types).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch types"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch types")
 		return
 	}
 
@@ -33,16 +35,16 @@ func (h *NewsHandler) GetNewsTypes(c *gin.Context) {
 func (h *NewsHandler) GetNewsType(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	var newsType models.NewsType
 	if err := h.db.First(&newsType, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Type not found"})
+			apierror.Respond(c, http.StatusNotFound, "Type not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch type"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch type")
 		}
 		return
 	}
@@ -54,7 +56,7 @@ func (h *NewsHandler) GetNewsType(c *gin.Context) {
 func (h *NewsHandler) CreateNewsType(c *gin.Context) {
 	var req models.NewsTypeRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -68,9 +70,9 @@ func (h *NewsHandler) CreateNewsType(c *gin.Context) {
 
 	if err := createKeepingFalse(h.db, c, &newsType, "is_active"); err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A type with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A type with this name already exists")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create type"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to create type")
 		}
 		return
 	}
@@ -82,23 +84,23 @@ func (h *NewsHandler) CreateNewsType(c *gin.Context) {
 func (h *NewsHandler) UpdateNewsType(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	var newsType models.NewsType
 	if err := h.db.First(&newsType, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Type not found"})
+			apierror.Respond(c, http.StatusNotFound, "Type not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch type"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch type")
 		}
 		return
 	}
 
 	var req models.NewsTypeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		apierror.InvalidBody(c, err)
 		return
 	}
 
@@ -110,10 +112,10 @@ func (h *NewsHandler) UpdateNewsType(c *gin.Context) {
 
 	if err := h.db.Save(&newsType).Error; err != nil {
 		if isUniqueViolation(err) {
-			c.JSON(http.StatusConflict, gin.H{"error": "A type with this name already exists"})
+			apierror.Respond(c, http.StatusConflict, "A type with this name already exists")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update type"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to update type")
 		return
 	}
 
@@ -124,16 +126,16 @@ func (h *NewsHandler) UpdateNewsType(c *gin.Context) {
 func (h *NewsHandler) DeleteNewsType(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		apierror.Respond(c, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	var newsType models.NewsType
 	if err := h.db.First(&newsType, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Type not found"})
+			apierror.Respond(c, http.StatusNotFound, "Type not found")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch type"})
+			apierror.Respond(c, http.StatusInternalServerError, "Failed to fetch type")
 		}
 		return
 	}
@@ -141,19 +143,17 @@ func (h *NewsHandler) DeleteNewsType(c *gin.Context) {
 	// Vérifier si des news utilisent ce type
 	var newsCount int64
 	if err := h.db.Model(&models.News{}).Where("type = ?", newsType.Slug).Count(&newsCount).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check associated news"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to check associated news")
 		return
 	}
 	if newsCount > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":      "Cannot delete type with associated news",
-			"news_count": newsCount,
-		})
+		apierror.Respond(c, http.StatusBadRequest,
+			fmt.Sprintf("Cannot delete type with associated news (%d)", newsCount))
 		return
 	}
 
 	if err := h.db.Delete(&newsType).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete type"})
+		apierror.Respond(c, http.StatusInternalServerError, "Failed to delete type")
 		return
 	}
 

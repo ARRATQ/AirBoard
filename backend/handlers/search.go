@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"airboard/apierror"
 	"airboard/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -82,11 +83,11 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 
 	// Validation de la requête
 	if len(q) < 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche doit contenir au moins 2 caractères"})
+		apierror.Respond(c, http.StatusBadRequest, "La recherche doit contenir au moins 2 caractères")
 		return
 	}
 	if len(q) > 100 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "La recherche ne peut pas dépasser 100 caractères"})
+		apierror.Respond(c, http.StatusBadRequest, "La recherche ne peut pas dépasser 100 caractères")
 		return
 	}
 
@@ -99,22 +100,8 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 	userRole := c.GetString("role")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Récupérer les groupes d'appartenance de l'utilisateur
-	var userGroupIDs []uint
-	h.db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &userGroupIDs)
-
-	// Combiner groupes d'appartenance + groupes administrés
-	allGroupIDs := make(map[uint]bool)
-	for _, id := range userGroupIDs {
-		allGroupIDs[id] = true
-	}
-	for _, id := range managedGroupIDs {
-		allGroupIDs[id] = true
-	}
-	var combinedGroupIDs []uint
-	for id := range allGroupIDs {
-		combinedGroupIDs = append(combinedGroupIDs, id)
-	}
+	// Groupes d'appartenance + groupes administrés
+	combinedGroupIDs := memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)
 
 	response := SearchResponse{
 		Applications:  []SearchResultApp{},
@@ -215,19 +202,7 @@ func (h *SearchHandler) searchNews(userID uint, userRole string, combinedGroupID
 		query = query.Where("news.is_published = ? AND (news.published_at IS NULL OR news.published_at <= ?)", true, now)
 
 		// Filtre de visibilité par groupes
-		if len(combinedGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)
-				OR EXISTS (
-					SELECT 1 FROM news_target_groups
-					WHERE news_target_groups.news_id = news.id
-					AND news_target_groups.group_id IN (?)
-				)
-			`, combinedGroupIDs)
-		} else {
-			// Pas de groupes : uniquement les news globales (sans target groups)
-			query = query.Where("NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id)")
-		}
+		query = query.Scopes(newsTargets.visibleTo(combinedGroupIDs))
 	}
 
 	query.Order("news.created_at DESC").Limit(10).Find(&rows)
@@ -269,18 +244,7 @@ func (h *SearchHandler) searchEvents(userID uint, userRole string, combinedGroup
 		query = query.Where("events.is_published = ? AND (events.published_at IS NULL OR events.published_at <= ?)", true, now)
 
 		// Filtre de visibilité par groupes
-		if len(combinedGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
-				OR EXISTS (
-					SELECT 1 FROM event_target_groups
-					WHERE event_target_groups.event_id = events.id
-					AND event_target_groups.group_id IN (?)
-				)
-			`, combinedGroupIDs)
-		} else {
-			query = query.Where("NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)")
-		}
+		query = query.Scopes(eventTargets.visibleTo(combinedGroupIDs))
 	}
 
 	query.Order("events.start_date DESC").Limit(10).Find(&results)
@@ -301,18 +265,7 @@ func (h *SearchHandler) searchPolls(userID uint, userRole string, combinedGroupI
 		// Admin voit tout
 	} else {
 		// Filtre de visibilité par groupes
-		if len(combinedGroupIDs) > 0 {
-			query = query.Where(`
-				NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)
-				OR EXISTS (
-					SELECT 1 FROM poll_target_groups
-					WHERE poll_target_groups.poll_id = polls.id
-					AND poll_target_groups.group_id IN (?)
-				)
-			`, combinedGroupIDs)
-		} else {
-			query = query.Where("NOT EXISTS (SELECT 1 FROM poll_target_groups WHERE poll_target_groups.poll_id = polls.id)")
-		}
+		query = query.Scopes(pollTargets.visibleTo(combinedGroupIDs))
 	}
 
 	query.Order("polls.created_at DESC").Limit(10).Find(&results)
