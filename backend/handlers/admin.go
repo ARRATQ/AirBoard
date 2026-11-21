@@ -11,6 +11,7 @@ import (
 	"airboard/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -115,7 +116,8 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 // @Router /admin/app-groups [post]
 func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	var appGroup models.AppGroup
-	if err := c.ShouldBindJSON(&appGroup); err != nil {
+	var flags resourceFlags
+	if err := c.ShouldBindBodyWith(&appGroup, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -123,30 +125,40 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 		})
 		return
 	}
+	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
-	// Pour les admins de groupe (utilisateurs qui administrent au moins un groupe), l'AppGroup est automatiquement privé et appartient au premier groupe administré
+	// Un admin de groupe crée une catégorie privée, rattachée au groupe propriétaire choisi
+	// parmi ceux qu'il administre. L'admin global choisit librement public ou privé.
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	isGroupAdmin := len(managedGroupIDs) > 0
+	isGroupAdmin := c.GetString("role") != "admin"
 
 	if isGroupAdmin {
-		if len(managedGroupIDs) == 0 {
+		ownerID, ok := resolveOwnerGroup(appGroup.OwnerGroupID, managedGroupIDs)
+		if !ok {
 			c.JSON(http.StatusForbidden, models.ErrorResponse{
 				Error:   "Forbidden",
-				Message: "Vous n'administrez aucun groupe",
+				Message: "Vous n'administrez pas le groupe propriétaire choisi",
 				Code:    http.StatusForbidden,
 			})
 			return
 		}
-
-		// Forcer IsPrivate = true et définir OwnerGroupID pour les admins de groupe
 		appGroup.IsPrivate = true
-		ownerID := managedGroupIDs[0]
 		appGroup.OwnerGroupID = &ownerID
+		flags.IsPrivate = nil
 	}
-	// Admin global peut créer des AppGroups publics ou privés selon les données fournies
 
 	// Créer l'AppGroup
 	if err := h.db.Create(&appGroup).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la création du groupe d'applications",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Create ignore les false des champs à valeur par défaut (is_active) : les appliquer ensuite
+	if err := h.applyFlags(&appGroup, flags, "is_active"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création du groupe d'applications",
@@ -210,7 +222,8 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 	}
 
 	var updateData models.AppGroup
-	if err := c.ShouldBindJSON(&updateData); err != nil {
+	var flags resourceFlags
+	if err := c.ShouldBindBodyWith(&updateData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -218,8 +231,33 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		})
 		return
 	}
+	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
-	if err := h.db.Model(&appGroup).Updates(updateData).Error; err != nil {
+	// Un admin de groupe garde sa catégorie privée et ne peut la confier qu'à un groupe qu'il administre
+	if c.GetString("role") != "admin" {
+		updateData.IsPrivate = true
+		flags.IsPrivate = nil
+		if updateData.OwnerGroupID != nil && !containsUint(middleware.GetManagedGroupIDs(c), *updateData.OwnerGroupID) {
+			c.JSON(http.StatusForbidden, models.ErrorResponse{
+				Error:   "Forbidden",
+				Message: "Vous n'administrez pas le groupe propriétaire choisi",
+				Code:    http.StatusForbidden,
+			})
+			return
+		}
+	}
+
+	// Updates(struct) ignore false et 0 : les cases à cocher et l'ordre sont appliqués à part
+	err = h.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&appGroup).Updates(updateData).Error; err != nil {
+			return err
+		}
+		if values := flagUpdates(flags, "is_active", "is_private", "order"); len(values) > 0 {
+			return tx.Model(&appGroup).Updates(values).Error
+		}
+		return nil
+	})
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la modification",
@@ -398,7 +436,8 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 // @Router /admin/applications [post]
 func (h *AdminHandler) CreateApplication(c *gin.Context) {
 	var application models.Application
-	if err := c.ShouldBindJSON(&application); err != nil {
+	var flags resourceFlags
+	if err := c.ShouldBindBodyWith(&application, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -406,6 +445,7 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 		})
 		return
 	}
+	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
 	// Auto-renseigner le créateur si non fourni
 	if application.CreatedByID == nil {
@@ -427,6 +467,16 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 	}
 
 	if err := h.db.Create(&application).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Internal Server Error",
+			Message: "Erreur lors de la création de l'application",
+			Code:    http.StatusInternalServerError,
+		})
+		return
+	}
+
+	// Create ignore les false des champs à valeur par défaut : une application créée inactive le reste
+	if err := h.applyFlags(&application, flags, "is_active", "open_in_new_tab"); err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la création de l'application",
@@ -506,7 +556,8 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 	}
 
 	var updateData models.Application
-	if err := c.ShouldBindJSON(&updateData); err != nil {
+	var flags resourceFlags
+	if err := c.ShouldBindBodyWith(&updateData, binding.JSON); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Bad Request",
 			Message: "Données invalides",
@@ -514,8 +565,30 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		})
 		return
 	}
+	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
-	if err := h.db.Model(&application).Updates(updateData).Error; err != nil {
+	// Déplacer l'application exige aussi le droit de gérer la catégorie d'arrivée
+	if updateData.AppGroupID != 0 && updateData.AppGroupID != application.AppGroupID &&
+		!middleware.CanManageAppGroupWithDB(c, updateData.AppGroupID, h.db) {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Error:   "Forbidden",
+			Message: "Vous ne pouvez pas déplacer cette application dans cette catégorie.",
+			Code:    http.StatusForbidden,
+		})
+		return
+	}
+
+	// Updates(struct) ignore false et 0 : les cases à cocher et l'ordre sont appliqués à part
+	err = h.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&application).Updates(updateData).Error; err != nil {
+			return err
+		}
+		if values := flagUpdates(flags, "is_active", "open_in_new_tab", "order"); len(values) > 0 {
+			return tx.Model(&application).Updates(values).Error
+		}
+		return nil
+	})
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
 			Error:   "Internal Server Error",
 			Message: "Erreur lors de la modification",

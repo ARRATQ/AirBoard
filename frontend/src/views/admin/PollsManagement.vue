@@ -6,10 +6,10 @@
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <Icon icon="mdi:poll" class="h-8 w-8 text-purple-600" />
-            {{ $t('polls.adminPollsManagement.title') }}
+            {{ $t(`${pageKeys}.title`) }}
           </h1>
           <p class="mt-1 text-gray-600 dark:text-gray-400">
-            {{ $t('polls.adminPollsManagement.subtitle') }}
+            {{ $t(`${pageKeys}.subtitle`) }}
           </p>
         </div>
         <button
@@ -22,14 +22,14 @@
       </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 gap-4 mb-8" :class="isGlobal ? 'md:grid-cols-4' : 'md:grid-cols-3'">
         <div class="card p-4">
           <div class="flex items-center gap-3">
             <div class="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
               <Icon icon="mdi:poll" class="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t('polls.adminPollsManagement.stats.total') }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ $t(`${pageKeys}.stats.total`) }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
             </div>
           </div>
@@ -59,7 +59,8 @@
           </div>
         </div>
 
-        <div class="card p-4">
+        <!-- Votes : uniquement en périmètre global (comme l'ancienne page admin) -->
+        <div v-if="isGlobal" class="card p-4">
           <div class="flex items-center gap-3">
             <div class="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
               <Icon icon="mdi:vote" class="h-6 w-6 text-blue-600" />
@@ -172,7 +173,13 @@
                 </span>
                 <span v-if="poll.target_groups && poll.target_groups.length > 0">
                   <Icon icon="mdi:account-group" class="inline h-4 w-4" />
-                  {{ poll.target_groups.length }} {{ $t('polls.adminPollsManagement.details.groups') }}
+                  <!-- Admin de groupe : noms de ses groupes ; admin global : nombre de groupes -->
+                  <template v-if="isGlobal">
+                    {{ poll.target_groups.length }} {{ $t('polls.adminPollsManagement.details.groups') }}
+                  </template>
+                  <template v-else>
+                    {{ poll.target_groups.map(g => g.name).join(', ') }}
+                  </template>
                 </span>
               </div>
             </div>
@@ -193,7 +200,7 @@
                 <Icon icon="mdi:pencil" class="h-5 w-5" />
               </button>
               <button
-                v-if="poll.is_active"
+                v-if="poll.is_active && canClose(poll)"
                 @click="closePoll(poll)"
                 class="p-2 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                 :title="$t('polls.adminPollsManagement.actions.close')"
@@ -219,7 +226,7 @@
           {{ $t('polls.adminPollsManagement.empty.title') }}
         </h3>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-          {{ $t('polls.adminPollsManagement.empty.description') }}
+          {{ $t(`${pageKeys}.empty.description`) }}
         </p>
         <button
           @click="openCreateModal"
@@ -243,19 +250,28 @@
 
 <script setup>
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import { pollsService, adminService } from '@/services/api'
+import { pollsService, adminService, groupAdminService } from '@/services/api'
 import PollEditor from '@/components/polls/PollEditor.vue'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
+import { useAuthStore } from '@/stores/auth'
+import { useManagementScope } from '@/composables/useManagementScope'
+import { GROUP_ADMIN } from '@/config/access'
 
 const router = useRouter()
 const { t } = useI18n()
 const { confirm: askConfirm } = useConfirm()
+const authStore = useAuthStore()
+// Admin global → tous les sondages (API admin) ; admin de groupe → ceux de ses groupes (API group-admin)
+const { isGlobal } = useManagementScope(GROUP_ADMIN)
+
+// Textes d'en-tête propres à chaque périmètre (« Gestion des sondages » / « Mes sondages »)
+const pageKeys = computed(() => (isGlobal.value ? 'polls.adminPollsManagement' : 'groupAdmin.pollsManagement'))
 
 const polls = ref([])
 const groups = ref([])
@@ -282,18 +298,21 @@ let searchTimeout = null
 const loadPolls = async () => {
   try {
     isLoading.value = true
-    const response = await pollsService.getPolls({
-      ...filters.value,
-      page: 1,
-      page_size: 100
-    })
+    const params = { ...filters.value, page: 1, page_size: 100 }
+    const response = isGlobal.value
+      ? await pollsService.getPolls(params)
+      : await pollsService.getPollsAsGroupAdmin(params)
 
-    polls.value = response.polls
+    const list = response.polls || []
+    polls.value = list
 
     // Calculer les stats
-    stats.value.total = response.total
-    stats.value.active = polls.value.filter(p => p.is_active).length
-    stats.value.closed = polls.value.filter(p => !p.is_active).length
+    stats.value = {
+      ...stats.value,
+      total: response.total ?? list.length,
+      active: list.filter(p => p.is_active).length,
+      closed: list.filter(p => !p.is_active).length
+    }
     // TODO: Charger les stats de votes depuis l'API analytics
   } catch (error) {
     console.error(t('polls.adminPollsManagement.messages.loadError'), error)
@@ -302,15 +321,23 @@ const loadPolls = async () => {
   }
 }
 
-// Charger les groupes
+// Charger les groupes ciblables : tous (admin global) ou ceux administrés (admin de groupe)
 const loadGroups = async () => {
   try {
-    const response = await adminService.getGroups()
-    groups.value = response.data || response
+    if (isGlobal.value) {
+      const response = await adminService.getGroups()
+      groups.value = response.data || response
+    } else {
+      const data = await groupAdminService.getManagedGroups()
+      groups.value = data || []
+    }
   } catch (error) {
     console.error('Error loading groups:', error)
   }
 }
+
+// Le backend n'autorise la fermeture qu'à l'admin global ou à l'auteur du sondage
+const canClose = (poll) => isGlobal.value || poll.author_id === authStore.user?.id
 
 // Debounce search
 const debounceSearch = () => {
@@ -355,7 +382,11 @@ const closePoll = async (poll) => {
   }
 
   try {
-    await pollsService.closePoll(poll.id)
+    if (isGlobal.value) {
+      await pollsService.closePoll(poll.id)
+    } else {
+      await pollsService.closePollAsGroupAdmin(poll.id)
+    }
     if (window.$toast) {
       window.$toast.success(t('polls.adminPollsManagement.messages.closeSuccess'))
     }
@@ -375,7 +406,11 @@ const confirmDelete = async (poll) => {
   }
 
   try {
-    await pollsService.deletePoll(poll.id)
+    if (isGlobal.value) {
+      await pollsService.deletePoll(poll.id)
+    } else {
+      await pollsService.deletePollAsGroupAdmin(poll.id)
+    }
     if (window.$toast) {
       window.$toast.success(t('polls.adminPollsManagement.messages.deleteSuccess'))
     }

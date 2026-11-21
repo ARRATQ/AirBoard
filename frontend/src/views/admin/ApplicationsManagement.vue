@@ -1,18 +1,33 @@
 <template>
   <div class="content-area">
-    <!-- Header -->
+    <!-- En-tête -->
     <PageHeader>
       <template #title>{{ $t('applications.title') }}</template>
-      <template #description>{{ $t('applications.subtitle') }}</template>
+      <template #description>
+        {{ isGlobal ? $t('applications.subtitle') : $t('groupAdmin.applicationsManagement.subtitle') }}
+      </template>
       <template #actions>
-        <button @click="openCreateModal" class="btn btn-primary">
+        <button @click="openCreateModal" class="btn btn-primary" :disabled="hasNoAppGroups">
           <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
           {{ $t('applications.new') }}
         </button>
       </template>
     </PageHeader>
 
-    <!-- Filters -->
+    <!-- Aucun groupe de ressources : impossible d'ajouter une ressource -->
+    <div v-if="hasNoAppGroups" class="mb-6 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
+      <div class="flex items-start">
+        <Icon icon="mdi:information" class="h-5 w-5 text-yellow-500 mr-3 mt-0.5" />
+        <div>
+          <h3 class="text-yellow-500 font-medium">{{ $t('groupAdmin.applicationsManagement.noAppGroups') }}</h3>
+          <p class="text-sm text-yellow-200 mt-1">
+            {{ $t('groupAdmin.applicationsManagement.noAppGroupsHelp') }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtres -->
     <div class="filters-container">
       <div class="search-container flex-1">
         <Icon icon="mdi:magnify" class="search-icon" />
@@ -36,7 +51,7 @@
       </select>
     </div>
 
-    <!-- Content -->
+    <!-- Contenu -->
     <div v-if="appStore.loading" class="flex items-center justify-center py-12">
       <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-gray-400" />
     </div>
@@ -59,7 +74,7 @@
               <p class="text-sm text-gray-400">{{ getAppGroupName(app.app_group_id) }}</p>
             </div>
           </div>
-          
+
           <div class="flex gap-2">
             <button @click="editApplication(app)" class="btn-ghost" :title="$t('common.edit')">
               <Icon icon="mdi:pencil" class="h-4 w-4" />
@@ -69,10 +84,10 @@
             </button>
           </div>
         </div>
-        
+
         <div class="card-content">
           <p v-if="app.description" class="text-sm mb-3">{{ app.description }}</p>
-          
+
           <div class="mb-3">
             <a
               :href="app.url"
@@ -84,7 +99,7 @@
               <Icon v-if="app.open_in_new_tab" icon="mdi:open-in-new" class="h-3 w-3 flex-shrink-0" />
             </a>
           </div>
-          
+
           <div class="flex items-center justify-between text-sm">
             <StatusBadge :tone="app.is_active ? 'ok' : 'neutral'">{{ app.is_active ? $t('common.active') : $t('common.inactive') }}</StatusBadge>
             <span class="text-gray-500">{{ $t('applications.order') }}: {{ app.order || 0 }}</span>
@@ -93,12 +108,12 @@
       </div>
     </div>
 
-    <!-- Empty States -->
+    <!-- États vides -->
     <div v-else-if="applications.length === 0" class="empty-state">
       <Icon icon="mdi:application" class="empty-state-icon" />
       <h3 class="empty-state-title">{{ $t('applications.emptyTitle') }}</h3>
       <p class="empty-state-description">{{ $t('applications.emptyText') }}</p>
-      <button @click="openCreateModal" class="btn btn-primary">
+      <button @click="openCreateModal" class="btn btn-primary" :disabled="hasNoAppGroups">
         <Icon icon="mdi:plus" class="h-4 w-4 mr-2" />
         {{ $t('applications.add') }}
       </button>
@@ -110,17 +125,18 @@
       <p class="empty-state-description">{{ $t('applications.noResultsText') }}</p>
     </div>
 
-    <!-- Application Modal -->
+    <!-- Modale ressource -->
     <ApplicationModal
       :show="showModal"
       :application="selectedApplication"
-      :appGroups="appGroups"
+      :app-groups="appGroups"
       :users="users"
+      :private-groups-only="!isGlobal"
       @close="closeModal"
       @submit="handleSubmit"
     />
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Confirmation de suppression -->
     <div v-if="showDeleteModal" class="modal-overlay">
       <div class="modal-container">
         <div class="modal-panel sm:max-w-lg sm:w-full">
@@ -137,10 +153,10 @@
               </div>
             </div>
           </div>
-          
+
           <div class="modal-footer">
             <button @click="closeDeleteModal" class="btn btn-secondary w-full sm:w-auto">
-              Cancel
+              {{ $t('common.cancel') }}
             </button>
             <button
               @click="deleteApplication"
@@ -148,7 +164,7 @@
               class="btn btn-danger w-full sm:w-auto"
             >
               <Icon v-if="deleteLoading" icon="mdi:loading" class="animate-spin h-4 w-4 mr-2" />
-              Delete
+              {{ $t('common.delete') }}
             </button>
           </div>
         </div>
@@ -162,15 +178,25 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import { adminService } from '@/services/api'
+import { useI18n } from 'vue-i18n'
+import { adminService, groupAdminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
+import { useManagementScope } from '@/composables/useManagementScope'
+import { GROUP_ADMIN } from '@/config/access'
 import ApplicationModal from '@/components/admin/ApplicationModal.vue'
 
+const { t } = useI18n()
 const appStore = useAppStore()
 
-// State
+// Admin global : toutes les ressources (API admin).
+// Admin de groupe : ressources des groupes de ressources privés de ses groupes (API group-admin).
+const { isGlobal } = useManagementScope(GROUP_ADMIN)
+const service = computed(() => (isGlobal.value ? adminService : groupAdminService))
+
+// État
 const applications = ref([])
 const appGroups = ref([])
+const appGroupsLoaded = ref(false)
 const users = ref([])
 const showModal = ref(false)
 const selectedApplication = ref(null)
@@ -181,52 +207,40 @@ const searchQuery = ref('')
 const groupFilter = ref('')
 const statusFilter = ref('')
 
-// Computed
+/** Les services renvoient soit un tableau, soit une enveloppe { data } */
+const toArray = (data) => (Array.isArray(data) ? data : (data?.data || []))
+
+// Calculs
+const hasNoAppGroups = computed(() => appGroupsLoaded.value && appGroups.value.length === 0)
+
 const filteredApplications = computed(() => {
-  let filtered = applications.value
+  const query = searchQuery.value.toLowerCase()
+  const groupId = groupFilter.value ? parseInt(groupFilter.value) : null
 
-  if (!Array.isArray(filtered)) {
-    return []
-  }
-
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(app => 
+  return applications.value
+    .filter(app => !query ||
       app.name.toLowerCase().includes(query) ||
       app.description?.toLowerCase().includes(query) ||
-      app.url.toLowerCase().includes(query)
-    )
-  }
-
-  // Filter by app group
-  if (groupFilter.value) {
-    filtered = filtered.filter(app => app.app_group_id === parseInt(groupFilter.value))
-  }
-
-  // Filter by status
-  if (statusFilter.value === 'active') {
-    filtered = filtered.filter(app => app.is_active)
-  } else if (statusFilter.value === 'inactive') {
-    filtered = filtered.filter(app => !app.is_active)
-  }
-
-  return filtered.sort((a, b) => (a.order || 0) - (b.order || 0))
+      app.url.toLowerCase().includes(query))
+    .filter(app => groupId === null || app.app_group_id === groupId)
+    .filter(app => {
+      if (statusFilter.value === 'active') return app.is_active
+      if (statusFilter.value === 'inactive') return !app.is_active
+      return true
+    })
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
 })
 
-// Methods
+// Chargements
 const loadApplications = async () => {
   try {
     appStore.setLoading(true)
-    // Request all applications by setting a high limit
-    const data = await adminService.getApplications({ limit: 1000 })
-    console.log('Raw applications API response:', data)
-    applications.value = Array.isArray(data) ? data : []
-    console.log('Applications loaded:', applications.value)
+    const data = await service.value.getApplications({ limit: 1000 })
+    applications.value = toArray(data)
   } catch (error) {
     console.error('Error loading applications:', error)
     applications.value = []
-    appStore.showError('Failed to load resources')
+    appStore.showError(t('adminShared.applications.loadError'))
   } finally {
     appStore.setLoading(false)
   }
@@ -234,18 +248,22 @@ const loadApplications = async () => {
 
 const loadAppGroups = async () => {
   try {
-    const data = await adminService.getAppGroups()
-    appGroups.value = Array.isArray(data) ? data : []
+    const data = await service.value.getAppGroups()
+    appGroups.value = toArray(data)
   } catch (error) {
     console.error('Error loading app groups:', error)
     appGroups.value = []
+  } finally {
+    appGroupsLoaded.value = true
   }
 }
 
+// Liste des utilisateurs pour le choix du créateur : endpoint réservé à l'admin global
 const loadUsers = async () => {
+  if (!isGlobal.value) return
   try {
-    const data = await adminService.getUsers({ limit: 500 })
-    users.value = Array.isArray(data) ? data : (data?.data || [])
+    const data = await adminService.getUsers()
+    users.value = toArray(data)
   } catch (error) {
     console.error('Error loading users:', error)
     users.value = []
@@ -254,16 +272,18 @@ const loadUsers = async () => {
 
 const getAppGroupName = (appGroupId) => {
   const group = appGroups.value.find(g => g.id === appGroupId)
-  return group ? group.name : 'No Group'
+  return group ? group.name : t('common.noGroup')
 }
 
+// Modale
 const openCreateModal = () => {
+  if (hasNoAppGroups.value) return
   selectedApplication.value = null
   showModal.value = true
 }
 
 const editApplication = (application) => {
-  selectedApplication.value = application
+  selectedApplication.value = { ...application }
   showModal.value = true
 }
 
@@ -285,43 +305,42 @@ const closeDeleteModal = () => {
 const handleSubmit = async (formData) => {
   try {
     appStore.setLoading(true)
-    
+
     if (formData.id) {
-      await adminService.updateApplication(formData.id, formData)
-      appStore.showSuccess('Resource updated successfully')
+      await service.value.updateApplication(formData.id, formData)
+      appStore.showSuccess(t('adminShared.applications.updated'))
     } else {
-      await adminService.createApplication(formData)
-      appStore.showSuccess('Resource created successfully')
+      await service.value.createApplication(formData)
+      appStore.showSuccess(t('adminShared.applications.created'))
     }
-    
+
     closeModal()
     await loadApplications()
   } catch (error) {
     console.error('Error saving application:', error)
-    appStore.showError('Failed to save resource')
+    appStore.showError(t('adminShared.applications.saveError'))
   } finally {
     appStore.setLoading(false)
   }
 }
 
 const deleteApplication = async () => {
-  if (!applicationToDelete.value || !applicationToDelete.value.id) return
-  
+  if (!applicationToDelete.value?.id) return
+
   try {
     deleteLoading.value = true
-    await adminService.deleteApplication(applicationToDelete.value.id)
-    appStore.showSuccess('Resource deleted successfully')
+    await service.value.deleteApplication(applicationToDelete.value.id)
+    appStore.showSuccess(t('adminShared.applications.deleted'))
     closeDeleteModal()
     await loadApplications()
   } catch (error) {
     console.error('Error deleting application:', error)
-    appStore.showError('Failed to delete resource')
+    appStore.showError(t('groupAdmin.applicationsManagement.deleteError'))
   } finally {
     deleteLoading.value = false
   }
 }
 
-// Lifecycle
 onMounted(async () => {
   await Promise.all([
     loadApplications(),

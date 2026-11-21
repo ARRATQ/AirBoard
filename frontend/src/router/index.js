@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { ADMIN, GROUP_ADMIN, CONTENT, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -24,13 +25,11 @@ const MediaManagement = () => import('@/views/admin/MediaManagement.vue')
 const NewsCategoriesManagement = () => import('@/views/admin/NewsCategoriesManagement.vue')
 const NewsTypesManagement = () => import('@/views/admin/NewsTypesManagement.vue')
 
+// Page parente à onglets (module + taxonomies)
+const SectionTabs = () => import('@/components/layout/SectionTabs.vue')
+
 // Group Admin views
-const GroupAdminDashboard = () => import('@/views/group-admin/GroupAdminDashboard.vue')
-const GroupAdminAppGroups = () => import('@/views/group-admin/AppGroupsManagement.vue')
-const GroupAdminApplications = () => import('@/views/group-admin/ApplicationsManagement.vue')
-const GroupAdminNews = () => import('@/views/group-admin/NewsManagement.vue')
-const GroupAdminNewsEditor = () => import('@/views/group-admin/NewsEditor.vue')
-const GroupAdminPolls = () => import('@/views/group-admin/PollsManagement.vue')
+const AdminOverview = () => import('@/views/admin/AdminOverview.vue')
 
 // News views (public)
 const NewsCenter = () => import('@/views/NewsCenter.vue')
@@ -51,16 +50,12 @@ const EventDetail = () => import('@/views/EventDetail.vue')
 const EventsManagement = () => import('@/views/admin/EventsManagement.vue')
 const EventEditor = () => import('@/views/admin/EventEditor.vue')
 
-// Events group admin views
-const GroupAdminEvents = () => import('@/views/group-admin/EventsManagement.vue')
-const GroupAdminEventEditor = () => import('@/views/group-admin/EventEditor.vue')
-
 // Comment moderation
 const CommentModeration = () => import('@/views/admin/CommentModeration.vue')
 
 // Trombinoscope
 const DirectoryPage = () => import('@/views/DirectoryPage.vue')
-const DirectoryManagement = () => import('@/views/group-admin/DirectoryManagement.vue')
+const DirectoryManagement = () => import('@/views/admin/DirectoryManagement.vue')
 
 // Search
 const SearchPage = () => import('@/views/SearchPage.vue')
@@ -84,14 +79,15 @@ const routes = [
     }
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
+    path: '/resources',
+    name: 'Resources',
     component: Dashboard,
     meta: {
       requiresAuth: true,
       title: 'Ressources'
     }
   },
+  { path: '/dashboard', redirect: '/resources' },
   {
     path: '/directory',
     name: 'Directory',
@@ -102,12 +98,12 @@ const routes = [
     }
   },
   {
-    path: '/group-admin/directory',
+    path: '/admin/directory',
     name: 'DirectoryManagement',
     component: DirectoryManagement,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Gestion du trombinoscope'
     }
   },
@@ -246,36 +242,62 @@ const routes = [
     }
   },
   {
+    // Vue d'ensemble, commune à l'admin et à l'admin de groupe
     path: '/admin',
-    redirect: '/admin/settings'
-  },
-  {
-    path: '/admin/app-groups',
-    name: 'AdminAppGroups',
-    component: AppGroupsManagement,
-    meta: { 
+    name: 'AdminOverview',
+    component: AdminOverview,
+    meta: {
       requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Groupes de ressources'
+      access: GROUP_ADMIN,
+      title: "Vue d'ensemble"
     }
   },
+  // Modules et leurs taxonomies, rangés en onglets (config/navigation.js : SECTION_TABS)
   {
-    path: '/admin/applications',
-    name: 'AdminApplications',
-    component: ApplicationsManagement,
-    meta: { 
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Ressources'
-    }
+    path: '/admin/news',
+    component: SectionTabs,
+    props: { section: 'news' },
+    meta: { requiresAuth: true, access: CONTENT },
+    children: [
+      { path: '', name: 'AdminNews', component: NewsManagement, meta: { title: 'Actualités' } },
+      { path: 'categories', name: 'AdminNewsCategories', component: NewsCategoriesManagement, meta: { access: ADMIN, title: 'Catégories d\'articles' } },
+      { path: 'types', name: 'AdminNewsTypes', component: NewsTypesManagement, meta: { access: ADMIN, title: 'Types d\'articles' } }
+    ]
   },
+  {
+    path: '/admin/suggestions',
+    component: SectionTabs,
+    props: { section: 'suggestions' },
+    meta: { requiresAuth: true, access: ADMIN },
+    children: [
+      { path: '', name: 'AdminSuggestions', component: SuggestionsManagement, meta: { title: 'Gestion suggestions' } },
+      { path: 'categories', name: 'AdminSuggestionCategories', component: SuggestionCategoriesManagement, meta: { title: 'Catégories de suggestions' } }
+    ]
+  },
+  {
+    path: '/admin/resources',
+    component: SectionTabs,
+    props: { section: 'resources' },
+    meta: { requiresAuth: true, access: GROUP_ADMIN },
+    children: [
+      { path: '', name: 'AdminApplications', component: ApplicationsManagement, meta: { title: 'Ressources' } },
+      { path: 'categories', name: 'AdminAppGroups', component: AppGroupsManagement, meta: { title: 'Catégories de ressources' } }
+    ]
+  },
+  // Anciennes adresses des taxonomies et des ressources
+  { path: '/admin/news-categories', redirect: '/admin/news/categories' },
+  { path: '/admin/news-types', redirect: '/admin/news/types' },
+  { path: '/admin/suggestion-categories', redirect: '/admin/suggestions/categories' },
+  { path: '/admin/app-groups', redirect: '/admin/resources/categories' },
+  { path: '/admin/applications', redirect: '/admin/resources' },
+  { path: '/group-admin/directory', redirect: '/admin/directory' },
   {
     path: '/admin/users',
     name: 'AdminUsers',
     component: UsersManagement,
     meta: { 
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Utilisateurs'
     }
   },
@@ -285,7 +307,7 @@ const routes = [
     component: GroupsManagement,
     meta: { 
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Groupes'
     }
   },
@@ -295,7 +317,7 @@ const routes = [
     component: () => import('@/views/admin/SettingsManagement.vue'),
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Paramètres'
     }
   },
@@ -305,7 +327,7 @@ const routes = [
     component: () => import('@/views/admin/OAuthSettings.vue'),
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'OAuth Configuration'
     }
   },
@@ -315,7 +337,7 @@ const routes = [
     component: () => import('@/views/admin/EmailSettings.vue'),
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Notifications Email'
     }
   },
@@ -325,7 +347,7 @@ const routes = [
     component: Analytics,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Analytics'
     }
   },
@@ -335,7 +357,7 @@ const routes = [
     component: () => import('@/views/admin/Reports.vue'),
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Reports'
     }
   },
@@ -345,7 +367,7 @@ const routes = [
     component: AnnouncementsManagement,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Announcements'
     }
   },
@@ -355,38 +377,8 @@ const routes = [
     component: ChatbotsManagement,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Chatbots IA'
-    }
-  },
-  {
-    path: '/admin/news',
-    name: 'AdminNews',
-    component: NewsManagement,
-    meta: {
-      requiresAuth: true,
-      requiresEditor: true,
-      title: 'News Hub'
-    }
-  },
-  {
-    path: '/admin/news-categories',
-    name: 'AdminNewsCategories',
-    component: NewsCategoriesManagement,
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Catégories d\'articles'
-    }
-  },
-  {
-    path: '/admin/news-types',
-    name: 'AdminNewsTypes',
-    component: NewsTypesManagement,
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Types d\'articles'
     }
   },
   {
@@ -395,7 +387,7 @@ const routes = [
     component: PollsManagement,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: GROUP_ADMIN,
       title: 'Sondages'
     }
   },
@@ -405,28 +397,8 @@ const routes = [
     component: GamificationSettings,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Gamification'
-    }
-  },
-  {
-    path: '/admin/suggestions',
-    name: 'AdminSuggestions',
-    component: SuggestionsManagement,
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Gestion suggestions'
-    }
-  },
-  {
-    path: '/admin/suggestion-categories',
-    name: 'AdminSuggestionCategories',
-    component: SuggestionCategoriesManagement,
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: true,
-      title: 'Categories suggestions'
     }
   },
   {
@@ -435,7 +407,7 @@ const routes = [
     component: MediaManagement,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Médias'
     }
   },
@@ -445,7 +417,7 @@ const routes = [
     component: NewsEditor,
     meta: {
       requiresAuth: true,
-      requiresEditor: true,
+      access: CONTENT,
       title: 'Edit Article'
     }
   },
@@ -455,7 +427,7 @@ const routes = [
     component: NewsEditor,
     meta: {
       requiresAuth: true,
-      requiresEditor: true,
+      access: CONTENT,
       title: 'Nouvel Article'
     }
   },
@@ -465,7 +437,7 @@ const routes = [
     component: EventsManagement,
     meta: {
       requiresAuth: true,
-      requiresEditor: true,
+      access: CONTENT,
       title: 'Gestion des Événements'
     }
   },
@@ -475,7 +447,7 @@ const routes = [
     component: EventEditor,
     meta: {
       requiresAuth: true,
-      requiresEditor: true,
+      access: CONTENT,
       title: 'Modifier l\'Événement'
     }
   },
@@ -485,7 +457,7 @@ const routes = [
     component: EventEditor,
     meta: {
       requiresAuth: true,
-      requiresEditor: true,
+      access: CONTENT,
       title: 'Nouvel Événement'
     }
   },
@@ -495,111 +467,22 @@ const routes = [
     component: CommentModeration,
     meta: {
       requiresAuth: true,
-      requiresAdmin: true,
+      access: ADMIN,
       title: 'Modération des Commentaires'
     }
   },
-  // Routes Group Admin
-  {
-    path: '/group-admin',
-    name: 'GroupAdminDashboard',
-    component: GroupAdminDashboard,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Administration de Groupe'
-    }
-  },
-  {
-    path: '/group-admin/app-groups',
-    name: 'GroupAdminAppGroups',
-    component: GroupAdminAppGroups,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Mes groupes de ressources'
-    }
-  },
-  {
-    path: '/group-admin/applications',
-    name: 'GroupAdminApplications',
-    component: GroupAdminApplications,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Mes ressources'
-    }
-  },
-  {
-    path: '/group-admin/news',
-    name: 'GroupAdminNews',
-    component: GroupAdminNews,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'News de Groupe'
-    }
-  },
-  {
-    path: '/group-admin/news/new',
-    name: 'GroupAdminNewsNew',
-    component: GroupAdminNewsEditor,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Nouvel Article de Groupe'
-    }
-  },
-  {
-    path: '/group-admin/news/:slug/edit',
-    name: 'GroupAdminNewsEdit',
-    component: GroupAdminNewsEditor,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Modifier l\'Article'
-    }
-  },
-  {
-    path: '/group-admin/events',
-    name: 'GroupAdminEvents',
-    component: GroupAdminEvents,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Événements de Groupe'
-    }
-  },
-  {
-    path: '/group-admin/events/new',
-    name: 'GroupAdminEventNew',
-    component: GroupAdminEventEditor,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Nouvel Événement de Groupe'
-    }
-  },
-  {
-    path: '/group-admin/events/:slug/edit',
-    name: 'GroupAdminEventEdit',
-    component: GroupAdminEventEditor,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Modifier l\'Événement'
-    }
-  },
-  {
-    path: '/group-admin/polls',
-    name: 'GroupAdminPolls',
-    component: GroupAdminPolls,
-    meta: {
-      requiresAuth: true,
-      requiresGroupAdmin: true,
-      title: 'Mes Sondages'
-    }
-  },
+  // Anciennes adresses de l'administration de groupe : mêmes pages que l'admin,
+  // limitées aux groupes administrés (voir useManagementScope)
+  { path: '/group-admin', redirect: '/admin' },
+  { path: '/group-admin/app-groups', redirect: '/admin/resources/categories' },
+  { path: '/group-admin/applications', redirect: '/admin/resources' },
+  { path: '/group-admin/news', redirect: '/admin/news' },
+  { path: '/group-admin/news/new', redirect: '/admin/news/new' },
+  { path: '/group-admin/news/:slug/edit', redirect: (to) => `/admin/news/${to.params.slug}/edit` },
+  { path: '/group-admin/events', redirect: '/admin/events' },
+  { path: '/group-admin/events/new', redirect: '/admin/events/new' },
+  { path: '/group-admin/events/:slug/edit', redirect: (to) => `/admin/events/${to.params.slug}/edit` },
+  { path: '/group-admin/polls', redirect: '/admin/polls' },
   {
     path: '/unauthorized',
     name: 'Unauthorized',
@@ -630,6 +513,23 @@ const router = createRouter({
   }
 })
 
+/**
+ * L'utilisateur atteint-il le niveau d'accès demandé ?
+ * Un admin de groupe tout juste nommé n'a pas encore ses groupes dans le profil
+ * en mémoire : on relit le profil une fois avant de refuser.
+ */
+async function hasAccess(authStore, access) {
+  if (canAccess(access, getRoles(authStore.user))) return true
+  if (access === ADMIN || authStore.user?.role === 'admin') return false
+  try {
+    await authStore.updateProfile()
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil:', error)
+    return false
+  }
+  return canAccess(access, getRoles(authStore.user))
+}
+
 // Guards de navigation
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
@@ -655,66 +555,16 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // Vérifier les droits admin
-  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+  // Vérifier le niveau d'accès de la page (voir config/access.js)
+  if (to.meta.access && !(await hasAccess(authStore, to.meta.access))) {
     next({ name: 'Unauthorized' })
     return
   }
 
-  // Vérifier les droits editor (admin ou editor)
-  if (to.meta.requiresEditor) {
-    const userRole = authStore.user?.role
-    if (userRole !== 'admin' && userRole !== 'editor') {
-      next({ name: 'Unauthorized' })
-      return
-    }
-  }
-
-  // Vérifier les droits group admin (admin ou utilisateur admin d'au moins un groupe)
-  if (to.meta.requiresGroupAdmin) {
-    const userRole = authStore.user?.role
-    // Vérifier admin_of_groups (tableau de groupes) OU managed_group_ids (tableau d'IDs)
-    const adminOfGroups = authStore.user?.admin_of_groups
-    const managedGroupIds = authStore.user?.managed_group_ids
-    const isAdminOfGroups = (adminOfGroups && Array.isArray(adminOfGroups) && adminOfGroups.length > 0) ||
-                            (managedGroupIds && Array.isArray(managedGroupIds) && managedGroupIds.length > 0)
-
-    console.log('🔐 Guard requiresGroupAdmin:', {
-      route: to.path,
-      userRole,
-      adminOfGroups,
-      managedGroupIds,
-      isAdminOfGroups
-    })
-
-    // Si l'utilisateur n'est pas admin et n'a pas de groupes administrés localement,
-    // rafraîchir le profil pour vérifier les permissions à jour
-    if (userRole !== 'admin' && !isAdminOfGroups) {
-      try {
-        await authStore.updateProfile()
-
-        // Re-vérifier les permissions avec les données fraîches
-        const updatedUserRole = authStore.user?.role
-        const updatedAdminOfGroups = authStore.user?.admin_of_groups
-        const updatedManagedGroupIds = authStore.user?.managed_group_ids
-        const updatedIsAdminOfGroups = (updatedAdminOfGroups && Array.isArray(updatedAdminOfGroups) && updatedAdminOfGroups.length > 0) ||
-                                       (updatedManagedGroupIds && Array.isArray(updatedManagedGroupIds) && updatedManagedGroupIds.length > 0)
-
-        if (updatedUserRole !== 'admin' && !updatedIsAdminOfGroups) {
-          next({ name: 'Unauthorized' })
-          return
-        }
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour du profil:', error)
-        next({ name: 'Unauthorized' })
-        return
-      }
-    }
-  }
-
   // Rediriger les utilisateurs connectés loin des pages d'auth
+  // Déjà connecté : même page d'arrivée qu'après la connexion (Login.vue)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'Dashboard' })
+    next({ name: 'Home' })
     return
   }
 

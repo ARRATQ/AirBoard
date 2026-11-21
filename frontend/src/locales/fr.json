@@ -36,7 +36,7 @@
     "dashboard": "Tableau de bord",
     "administration": "Administration",
     "overview": "Vue d'ensemble",
-    "appGroups": "Groupes de ressources",
+    "appGroups": "Catégories de ressources",
     "applications": "Ressources",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
@@ -86,7 +86,7 @@
     "active": "Actif",
     "inactive": "Inactif",
     "delete": "Supprimer",
-    "noGroup": "Aucun groupe",
+    "noGroup": "Sans catégorie",
     "close": "Fermer",
     "applicationsManagement": "Gestion des ressources",
     "contentManagement": "Gestion du contenu",
@@ -193,8 +193,8 @@
     "status_active": "Actifs seulement",
     "status_inactive": "Inactifs seulement",
     "users": "utilisateurs",
-    "appsLabel": "groupes de ressources",
-    "appsAccess": "Accès aux groupes de ressources :",
+    "appsLabel": "catégories de ressources",
+    "appsAccess": "Accès aux catégories de ressources :",
     "usersLabel": "Utilisateurs :",
     "noResultsTitle": "Aucun résultat",
     "noResultsText": "Aucun groupe ne correspond à vos critères de recherche.",
@@ -219,7 +219,7 @@
     "new": "Nouvelle ressource",
     "add": "Ajouter une ressource",
     "searchPlaceholder": "Rechercher une ressource...",
-    "filter_all_groups": "Tous les groupes",
+    "filter_all_groups": "Toutes les catégories",
     "noResultsTitle": "Aucun résultat",
     "noResultsText": "Aucune ressource ne correspond à vos critères de recherche.",
     "emptyTitle": "Aucune ressource",
@@ -332,8 +332,8 @@
     "confirmDeleteHeroMessage": "Voulez-vous vraiment supprimer ce message ?"
   },
   "appGroups": {
-    "subtitle": "Organisez vos ressources en groupes",
-    "new": "Nouveau groupe"
+    "subtitle": "Rangez vos ressources par catégorie",
+    "new": "Nouvelle catégorie"
   },
   "analytics": {
     "title": "Analytiques",
@@ -544,7 +544,13 @@
       "minutesAgo": "il y a {count} minute(s)",
       "hoursAgo": "il y a {count} heure(s)",
       "daysAgo": "il y a {count} jour(s)"
-    }
+    },
+    "subtitle": "Les outils et liens mis à votre disposition, rangés par catégorie.",
+    "emptyTitle": "Aucune ressource disponible",
+    "emptyAdmin": "Commencez par créer une catégorie de ressources, puis ajoutez-y des ressources.",
+    "emptyUser": "Contactez votre administrateur pour obtenir l'accès à des ressources.",
+    "createCategory": "Créer une catégorie",
+    "loadError": "Impossible de charger les ressources"
   },
   "events": {
     "center": {
@@ -746,11 +752,11 @@
     "title": "Administration de Groupe",
     "subtitle": "Gérez les ressources des groupes dont vous êtes administrateur",
     "managedGroups": "Groupes administrés",
-    "appGroups": "Groupes de ressources",
+    "appGroups": "Catégories de ressources",
     "applications": "Ressources",
     "news": "Articles de groupe",
     "dashboard": "Tableau de bord",
-    "myAppGroups": "Mes AppGroups",
+    "myAppGroups": "Mes catégories de ressources",
     "myApplications": "Mes Ressources",
     "myPolls": "Mes Sondages",
     "events": "Événements",
@@ -759,34 +765,34 @@
     "yourGroupsSubtitle": "Groupes dont vous êtes administrateur",
     "noManagedGroups": "Aucun groupe administré",
     "noManagedGroupsHelp": "Contactez un administrateur pour obtenir des droits d'administration de groupe",
-    "manageAppGroups": "Gérer les AppGroups",
-    "manageAppGroupsDesc": "Créer et organiser vos groupes de ressources",
+    "manageAppGroups": "Gérer les catégories de ressources",
+    "manageAppGroupsDesc": "Créer et organiser vos catégories de ressources",
     "manageApplications": "Gérer les Ressources",
     "manageApplicationsDesc": "Ajouter et configurer des ressources",
     "manageNews": "Gérer les News",
     "manageNewsDesc": "Publier des actualités pour vos groupes",
     "appGroupModal": {
       "title": {
-        "new": "Nouveau groupe",
-        "edit": "Modifier le groupe"
+        "new": "Nouvelle catégorie",
+        "edit": "Modifier la catégorie"
       },
       "subtitle": {
-        "new": "Créer un nouveau groupe pour organiser les ressources",
-        "edit": "Modifier les paramètres du groupe de ressources"
+        "new": "Créer une catégorie pour ranger les ressources",
+        "edit": "Modifier les paramètres de la catégorie de ressources"
       },
       "ownerGroup": "Groupe propriétaire",
       "group": "Groupe",
       "selectGroup": "Sélectionner un groupe",
-      "ownerGroupHelp": "Ce groupe de ressources sera privé et accessible uniquement par les membres de ce groupe.",
+      "ownerGroupHelp": "Cette catégorie de ressources sera privée et accessible uniquement par les membres de ce groupe.",
       "ownerGroupEditHelp": "Le groupe propriétaire ne peut pas être modifié.",
       "basicInfo": "Informations de base",
-      "groupName": "Nom du groupe",
+      "groupName": "Nom de la catégorie",
       "displayOrder": "Ordre d'affichage",
       "description": "Description",
-      "descriptionPlaceholder": "Décrivez ce groupe de ressources...",
+      "descriptionPlaceholder": "Décrivez cette catégorie de ressources...",
       "appearance": "Apparence",
       "preview": "Aperçu",
-      "previewName": "Nom du groupe",
+      "previewName": "Nom de la catégorie",
       "previewDescription": "Description...",
       "color": "Couleur",
       "icon": "Icône",
@@ -811,8 +817,8 @@
       },
       "basicInfo": "Informations de base",
       "applicationName": "Nom de la ressource",
-      "appGroup": "Groupe de ressources",
-      "selectGroup": "Sélectionner un groupe",
+      "appGroup": "Catégorie de ressources",
+      "selectGroup": "Sélectionner une catégorie",
       "applicationUrl": "URL de la ressource",
       "urlPlaceholder": "https://gitlab.example.com",
       "urlHelp": "URL complète vers la ressource (avec https://)",
@@ -831,21 +837,21 @@
       "cancel": "Annuler",
       "update": "Mettre à jour",
       "create": "Créer",
-      "noPrivateGroups": "Aucun groupe de ressources privé disponible. Créez d'abord un groupe de ressources privé.",
+      "noPrivateGroups": "Aucune catégorie de ressources privée disponible. Créez d'abord une catégorie de ressources privée.",
       "errors": {
         "nameRequired": "Le nom est requis",
         "urlRequired": "L'URL est requise",
         "invalidUrl": "Format d'URL invalide",
-        "appGroupRequired": "Le groupe de ressources est requis"
+        "appGroupRequired": "La catégorie de ressources est requise"
       }
     },
     "appGroupsManagement": {
-      "title": "Groupes de Ressources",
-      "subtitle": "Gérez les groupes de ressources de vos groupes administrés",
+      "title": "Catégories de ressources",
+      "subtitle": "Gérez les catégories de ressources de vos groupes administrés",
       "newGroup": "Nouveau Groupe",
       "noManagedGroups": "Aucun groupe administré",
-      "noManagedGroupsHelp": "Vous devez être administrateur d'au moins un groupe pour créer des groupes de ressources. Contactez un administrateur système pour obtenir des droits d'administration de groupe.",
-      "searchPlaceholder": "Rechercher des groupes...",
+      "noManagedGroupsHelp": "Vous devez être administrateur d'au moins un groupe pour créer des catégories de ressources. Contactez un administrateur système pour obtenir des droits d'administration de groupe.",
+      "searchPlaceholder": "Rechercher une catégorie...",
       "status": {
         "all": "Tous les statuts",
         "active": "Actifs uniquement",
@@ -863,26 +869,26 @@
       "order": "Ordre:",
       "ownerGroup": "Groupe:",
       "empty": {
-        "title": "Aucun groupe de ressources",
-        "description": "Créez votre premier groupe de ressources pour commencer.",
-        "createButton": "Créer un groupe"
+        "title": "Aucune catégorie de ressources",
+        "description": "Créez votre première catégorie de ressources pour commencer.",
+        "createButton": "Créer une catégorie"
       },
       "noResults": {
         "title": "Aucun résultat",
-        "description": "Aucun groupe ne correspond à vos critères de recherche."
+        "description": "Aucune catégorie ne correspond à vos critères de recherche."
       },
       "deleteConfirm": {
-        "title": "Supprimer le groupe",
+        "title": "Supprimer la catégorie",
         "message": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
       },
-      "deleteError": "Erreur lors de la suppression du groupe"
+      "deleteError": "Erreur lors de la suppression de la catégorie"
     },
     "applicationsManagement": {
       "title": "Ressources",
       "subtitle": "Gérez les ressources de vos groupes",
       "newApplication": "Nouvelle Ressource",
-      "noAppGroups": "Aucun groupe de ressources",
-      "noAppGroupsHelp": "Vous devez d'abord créer un groupe de ressources avant de pouvoir ajouter des ressources.",
+      "noAppGroups": "Aucune catégorie de ressources",
+      "noAppGroupsHelp": "Vous devez d'abord créer une catégorie de ressources avant de pouvoir ajouter des ressources.",
       "searchPlaceholder": "Rechercher des ressources...",
       "groupFilter": {
         "all": "Tous les groupes"
@@ -1238,14 +1244,14 @@
       "subtitle": "Vue d'ensemble de votre plateforme",
       "users": "Utilisateurs",
       "groups": "Groupes",
-      "appGroups": "Groupes de ressources",
+      "appGroups": "Catégories de ressources",
       "apps": "Ressources",
       "news": "Articles",
       "events": "Événements",
       "polls": "Sondages",
       "managedGroups": "Groupes gérés",
       "totalMembers": "Membres totaux",
-      "managedAppGroups": "Groupes de ressources gérés",
+      "managedAppGroups": "Catégories de ressources gérées",
       "managedApps": "Mes ressources",
       "managedNews": "Articles gérés",
       "managedPolls": "Sondages gérés",
@@ -1806,12 +1812,12 @@
       "managingTags": "Gérer les tags",
       "bestPractices": "Bonnes pratiques",
       "permissions": "Permissions",
-      "managingAppGroups": "Gérer les groupes de ressources",
+      "managingAppGroups": "Gérer les catégories de ressources",
       "managingApplications": "Gérer les ressources",
       "groupMembers": "Membres du groupe",
       "userManagement": "Gestion des utilisateurs",
       "groupManagement": "Gestion des groupes",
-      "appGroups": "Groupes de ressources",
+      "appGroups": "Catégories de ressources",
       "newsManagement": "Gestion des actualités",
       "eventsManagement": "Gestion des événements",
       "pollsManagement": "Gestion des sondages",
@@ -2128,5 +2134,97 @@
     "confirmDeleteMessage": "Supprimer ce message ?",
     "confirmClearHistory": "Voulez-vous vraiment effacer tout l'historique de cette conversation ?",
     "clearHistory": "Vider l'historique"
+  },
+  "adminShared": {
+    "applications": {
+      "loadError": "Impossible de charger les ressources",
+      "saveError": "Impossible d'enregistrer la ressource",
+      "created": "Ressource créée avec succès",
+      "updated": "Ressource mise à jour avec succès",
+      "deleted": "Ressource supprimée avec succès",
+      "creator": "Créateur",
+      "creatorNone": "— Non attribué —",
+      "creatorHelp": "Définit le créateur pour les rapports d'activité."
+    },
+    "appGroups": {
+      "private": "Privé",
+      "public": "Public",
+      "privateToggle": "Catégorie de ressources privée",
+      "privateToggleHelp": "Seuls les admins de son groupe propriétaire peuvent le gérer",
+      "ownerGroupManageHelp": "Les admins de ce groupe géreront cette catégorie de ressources",
+      "created": "Catégorie de ressources créée",
+      "updated": "Catégorie de ressources mise à jour",
+      "deleted": "Catégorie de ressources supprimée",
+      "saveError": "Échec de l'enregistrement de la catégorie de ressources",
+      "loadError": "Impossible de charger les catégories de ressources"
+    },
+    "news": {
+      "subtitle": "Gérez les articles d'actualité de toute l'organisation",
+      "createFirst": "Créez votre premier article.",
+      "loadError": "Échec du chargement des articles",
+      "deleteSuccess": "Article supprimé",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "pinned": "Article épinglé",
+      "unpinned": "Article désépinglé",
+      "pinError": "Échec de la mise à jour de l'épinglage",
+      "editorSubtitleNew": "Créez un nouvel article d'actualité",
+      "editorSubtitleEdit": "Mettez à jour votre article",
+      "newTagPlaceholder": "Nom du nouveau tag...",
+      "tagColor": "Couleur du tag",
+      "tagExists": "Ce tag existe déjà et a été ajouté",
+      "tagCreated": "Tag « {name} » créé",
+      "removeItem": "Retirer {name}",
+      "lockedGroup": "Groupe ciblé par un autre administrateur : vous ne pouvez pas le retirer"
+    }
+  },
+  "nav": {
+    "admin": {
+      "title": "Administration",
+      "overview": "Vue d'ensemble",
+      "content": "Contenu",
+      "community": "Communauté",
+      "resources": "Ressources",
+      "users": "Utilisateurs",
+      "system": "Système",
+      "news": "Actualités",
+      "events": "Événements",
+      "polls": "Sondages",
+      "announcements": "Annonces",
+      "media": "Médias",
+      "suggestions": "Suggestions",
+      "moderation": "Modération",
+      "gamification": "Gamification",
+      "directory": "Trombinoscope",
+      "groups": "Groupes",
+      "oauth": "Connexion OAuth",
+      "settings": "Réglages",
+      "email": "E-mail",
+      "analytics": "Statistiques",
+      "reports": "Rapports",
+      "chatbots": "Chatbots"
+    },
+    "tabs": {
+      "label": "Sections de la page",
+      "articles": "Articles",
+      "categories": "Catégories",
+      "types": "Types",
+      "suggestions": "Suggestions",
+      "resources": "Ressources"
+    },
+    "mainLabel": "Navigation principale"
+  },
+  "adminHome": {
+    "title": "Vue d'ensemble",
+    "subtitleAdmin": "Les chiffres clés, ce qui attend une action, et l'accès à chaque domaine.",
+    "subtitleGroup": "Vos groupes, leurs ressources et les pages que vous pouvez gérer.",
+    "keyFigures": "Chiffres clés",
+    "todo": "À traiter",
+    "nothingPending": "rien en attente",
+    "pendingComments": "Commentaires en attente de modération",
+    "newSuggestions": "Nouvelles suggestions",
+    "managedGroups": "Groupes administrés",
+    "resourceCategories": "Catégories de ressources",
+    "manage": "Gérer"
   }
 }

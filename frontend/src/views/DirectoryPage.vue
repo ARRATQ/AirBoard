@@ -46,7 +46,7 @@
             <Icon icon="mdi:unfold-less-horizontal" class="h-4 w-4 mr-1" /> {{ $t('directory.collapseAll') }}
           </button>
         </template>
-        <router-link v-if="canManage" to="/group-admin/directory" class="btn btn-secondary">
+        <router-link v-if="canManage" to="/admin/directory" class="btn btn-secondary">
           <Icon icon="mdi:cog-outline" class="h-4 w-4 mr-1" /> {{ $t('directory.manage') }}
         </router-link>
       </div>
@@ -297,7 +297,7 @@ const vacantCount = computed(() =>
 )
 
 const openPerson = (person) => { selectedPerson.value = person }
-const editPerson = (person) => router.push({ path: '/group-admin/directory', query: { person: person.id } })
+const editPerson = (person) => router.push({ path: '/admin/directory', query: { person: person.id } })
 
 onMounted(load)
 </script>
