@@ -367,7 +367,7 @@ func (h *HomeHandler) getTodayEvents(userID uint, role string) ([]models.Event, 
 		// Filter: events that are either public (no target groups) OR targeted to user's groups
 		query = query.Where(baseWhere, baseArgs...).
 			Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id
@@ -403,7 +403,7 @@ func (h *HomeHandler) getUpcomingEvents(userID uint, role string) ([]models.Even
 		// Filter: events that are either public (no target groups) OR targeted to user's groups
 		query = query.Where("is_published = ? AND start_date > ?", true, startOfTomorrow).
 			Where(`
-				(SELECT COUNT(*) FROM event_target_groups WHERE event_target_groups.event_id = events.id) = 0
+				NOT EXISTS (SELECT 1 FROM event_target_groups WHERE event_target_groups.event_id = events.id)
 				OR EXISTS (
 					SELECT 1 FROM event_target_groups
 					WHERE event_target_groups.event_id = events.id

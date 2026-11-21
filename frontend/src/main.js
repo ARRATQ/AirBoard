@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
-import i18n from '@/i18n'
+import i18n, { initI18n } from '@/i18n'
+import { setupIcons } from '@/plugins/icons'
 
 // Styles CSS
 import './assets/css/main.css'
@@ -17,6 +18,9 @@ import { useAppStore } from '@/stores/app'
 // Configuration de l'application
 const app = createApp(App)
 const pinia = createPinia()
+
+// Icônes embarquées (aucun appel à api.iconify.design)
+setupIcons()
 
 // Plugins
 app.use(pinia)
@@ -40,5 +44,5 @@ setupInterceptors(router, () => {
   authStore.logout()
 })
 
-// Montage de l'application
-app.mount('#app')
+// Montage de l'application, une fois la langue initiale chargée
+initI18n().finally(() => app.mount('#app'))

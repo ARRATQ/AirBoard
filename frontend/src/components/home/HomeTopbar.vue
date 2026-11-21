@@ -29,14 +29,13 @@
 
 <script setup>
 // Barre du haut de l'accueil : annonces, recherche, météo et date.
-// La météo (open-meteo + nominatim) reste isolée ici : la session « perf » la déplace dans un
-// composable useWeather, à brancher ici lors de la fusion.
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import AnnouncementPanel from '@/components/ui/AnnouncementPanel.vue'
 import { dateLocaleFor } from '@/utils/homeFormat'
+import { useWeather } from '@/composables/useWeather'
 
 defineProps({
   announcements: { type: Array, default: () => [] },
@@ -58,44 +57,8 @@ const dateLabel = computed(() =>
   new Date().toLocaleDateString(dateLocaleFor(locale.value), { weekday: 'short', day: 'numeric', month: 'short' }),
 )
 
-// ── Météo ────────────────────────────────────────────────────────────
-const weather = ref({ temp: null, icon: 'mdi:weather-cloudy', city: '' })
-
-const wmoIcon = (code) => {
-  if (code === 0) return 'mdi:weather-sunny'
-  if (code <= 2) return 'mdi:weather-partly-cloudy'
-  if (code <= 3) return 'mdi:weather-cloudy'
-  if (code <= 49) return 'mdi:weather-fog'
-  if (code <= 59) return 'mdi:weather-rainy'
-  if (code <= 69) return 'mdi:weather-snowy-rainy'
-  if (code <= 79) return 'mdi:weather-snowy'
-  if (code <= 82) return 'mdi:weather-pouring'
-  if (code <= 84) return 'mdi:weather-hail'
-  if (code <= 99) return 'mdi:weather-lightning-rainy'
-  return 'mdi:weather-cloudy'
-}
-
-const loadWeather = () => {
-  if (!navigator.geolocation) return
-  navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-    try {
-      const { latitude: lat, longitude: lon } = coords
-      const [meteo, geo] = await Promise.all([
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius`).then((r) => r.json()),
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`).then((r) => r.json()),
-      ])
-      weather.value = {
-        temp: Math.round(meteo.current_weather.temperature),
-        icon: wmoIcon(meteo.current_weather.weathercode),
-        city: geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.county || '',
-      }
-    } catch {
-      /* service météo indisponible : l'accueil s'affiche sans météo */
-    }
-  }, () => {
-    /* géolocalisation refusée : pas de météo */
-  })
-}
+// ── Météo (mise en cache, voir composables/useWeather.js) ────────────
+const { weather, loadWeather } = useWeather()
 
 onMounted(loadWeather)
 </script>

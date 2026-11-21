@@ -26,7 +26,7 @@ func NewCommentHandler(db *gorm.DB, gamification *services.GamificationService) 
 	}
 }
 
-// GetComments récupère tous les commentaires pour une entité (news, app, event, suggestion)
+// GetComments récupère une page des commentaires d'une entité (news, app, event, suggestion)
 func (h *CommentHandler) GetComments(c *gin.Context) {
 	entityType := c.Query("entity_type") // news, application, event, suggestion
 	entityIDStr := c.Query("entity_id")
@@ -110,12 +110,9 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 		return
 	}
 
-	// Récupérer les commentaires
-	var comments []models.Comment
-	query := h.DB.Where("entity_type = ? AND entity_id = ?", entityType, entityID).
-		Preload("User").
-		Preload("Moderator").
-		Order("created_at DESC")
+	// Récupérer les commentaires (paginés, plus récents d'abord)
+	page := parsePageParams(c, commentPageLimits)
+	query := h.DB.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ?", entityType, entityID)
 
 	// Si modération requise, ne montrer que les commentaires approuvés (sauf pour admin/editor/admin de groupe)
 	userRole, exists := c.Get("role")
@@ -130,18 +127,51 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 		query = query.Where("is_approved = ?", true)
 	}
 
-	if err := query.Find(&comments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des commentaires",
-			Code:    http.StatusInternalServerError,
-		})
+	comments, total, err := findCommentPage(query, page, "Moderator")
+	if err != nil {
+		respondCommentsError(c)
 		return
 	}
+	c.JSON(http.StatusOK, commentPageResponse(comments, total, page))
+}
 
-	c.JSON(http.StatusOK, gin.H{
-		"comments": comments,
-		"total":    len(comments),
+var commentPageLimits = pageLimits{Default: 20, Max: 100}
+
+// findCommentPage compte puis charge une page de commentaires, auteur et relations demandées
+// préchargés (après le comptage, qui n'en a pas besoin).
+func findCommentPage(query *gorm.DB, page pageParams, preloads ...string) ([]models.Comment, int64, error) {
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	query = query.Preload("User")
+	for _, relation := range preloads {
+		query = query.Preload(relation)
+	}
+	var comments []models.Comment
+	err := query.
+		Order("created_at DESC, id DESC").
+		Limit(page.Size).Offset(page.Offset()).
+		Find(&comments).Error
+	return comments, total, err
+}
+
+// commentPageResponse garde la clé `comments` lue par le front et ajoute la pagination.
+func commentPageResponse(comments []models.Comment, total int64, page pageParams) gin.H {
+	return gin.H{
+		"comments":    comments,
+		"total":       total,
+		"page":        page.Page,
+		"page_size":   page.Size,
+		"total_pages": page.TotalPages(total),
+	}
+}
+
+func respondCommentsError(c *gin.Context) {
+	c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+		Error:   "DATABASE_ERROR",
+		Message: "Erreur lors de la récupération des commentaires",
+		Code:    http.StatusInternalServerError,
 	})
 }
 
@@ -483,26 +513,18 @@ func (h *CommentHandler) ModerateComment(c *gin.Context) {
 	})
 }
 
-// GetPendingComments récupère tous les commentaires en attente de modération (admin/editor)
+// GetPendingComments récupère une page des commentaires en attente de modération (admin/editor)
 func (h *CommentHandler) GetPendingComments(c *gin.Context) {
-	var comments []models.Comment
-	if err := h.DB.Where("is_approved = ?", false).
-		Preload("User").
-		Order("created_at DESC").
-		Find(&comments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
-			Error:   "DATABASE_ERROR",
-			Message: "Erreur lors de la récupération des commentaires",
-			Code:    http.StatusInternalServerError,
-		})
+	page := parsePageParams(c, commentPageLimits)
+	query := h.DB.Model(&models.Comment{}).Where("is_approved = ?", false)
+	comments, total, err := findCommentPage(query, page)
+	if err != nil {
+		respondCommentsError(c)
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"comments": comments,
-		"total":    len(comments),
-		"targets":  loadCommentTargets(h.DB, comments),
-	})
+	response := commentPageResponse(comments, total, page)
+	response["targets"] = loadCommentTargets(h.DB, comments)
+	c.JSON(http.StatusOK, response)
 }
 
 // GetCommentSettings récupère les paramètres de commentaires

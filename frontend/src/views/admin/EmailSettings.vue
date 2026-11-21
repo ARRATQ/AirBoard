@@ -18,7 +18,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:email-cog" class="inline h-5 w-5 mr-2" />
+          <Icon icon="mdi:email-edit-outline" class="inline h-5 w-5 mr-2" />
           Configuration SMTP (Deprecated)
         </button>
         <button
@@ -67,7 +67,7 @@
         <div class="card">
           <div class="card-header flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <Icon icon="mdi:email-cog" class="h-6 w-6 text-primary-400" />
+              <Icon icon="mdi:email-edit-outline" class="h-6 w-6 text-primary-400" />
               <h3 class="card-title">{{ $t("email.smtpSettings") }}</h3>
             </div>
             <div class="flex items-center gap-2">

@@ -7,7 +7,7 @@
       :style="{ width: currentWidth }"
     >
       <!-- Image -->
-      <img
+      <img loading="lazy"
         :src="node.attrs.src"
         :alt="node.attrs.alt || ''"
         draggable="false"

@@ -65,18 +65,7 @@
       </table>
     </div>
 
-    <nav v-if="footer && !loading && total > 0" class="dt__pager" :aria-label="t('ui.table.range', { from, to, total })">
-      <span class="dt__range">{{ t('ui.table.range', { from, to, total }) }}</span>
-      <template v-if="pageCount > 1">
-        <button type="button" class="dt__page-btn" :disabled="page === 1" :aria-label="t('ui.table.prev')" @click="page -= 1">
-          <Icon icon="mdi:chevron-left" class="dt__chev" aria-hidden="true" />
-        </button>
-        <span class="dt__page">{{ page }} / {{ pageCount }}</span>
-        <button type="button" class="dt__page-btn" :disabled="page === pageCount" :aria-label="t('ui.table.next')" @click="page += 1">
-          <Icon icon="mdi:chevron-right" class="dt__chev" aria-hidden="true" />
-        </button>
-      </template>
-    </nav>
+    <PaginationBar v-if="footer && !remote && !loading" v-model:page="page" :page-size="pageSize" :total="total" />
   </div>
 </template>
 
@@ -85,6 +74,7 @@ import { computed, ref, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import EmptyState from './EmptyState.vue'
+import PaginationBar from './PaginationBar.vue'
 
 const props = defineProps({
   // [{ key, label, sortable?, align?: 'start'|'end'|'center', width?, hideSm? }]
@@ -101,13 +91,17 @@ const props = defineProps({
   emptyTitle: { type: String, default: '' },
   // false quand la page garde sa pagination serveur : évite un second compteur.
   footer: { type: Boolean, default: true },
+  // true quand le serveur cherche, trie et pagine : la recherche et le tri passent par
+  // v-model:query, v-model:sort-key et v-model:sort-dir, les lignes sont affichées telles quelles.
+  remote: { type: Boolean, default: false },
 })
 
 const { t } = useI18n()
 
-const query = ref('')
-const sortKey = ref('')
-const sortDir = ref('asc')
+// Modèles locaux tant que la page ne les lie pas (mode client).
+const query = defineModel('query', { type: String, default: '' })
+const sortKey = defineModel('sortKey', { type: String, default: '' })
+const sortDir = defineModel('sortDir', { type: String, default: 'asc' })
 const page = ref(1)
 
 // Insensible à la casse et aux accents.
@@ -116,7 +110,7 @@ const normalize = (value) =>
 
 const filtered = computed(() => {
   const q = normalize(query.value.trim())
-  if (!q) return props.rows
+  if (props.remote || !q) return props.rows
   const keys = props.searchKeys || props.columns.map(c => c.key)
   return props.rows.filter(row => keys.some(key => normalize(row[key]).includes(q)))
 })
@@ -130,7 +124,7 @@ const compare = (a, b) => {
 }
 
 const sorted = computed(() => {
-  if (!sortKey.value) return filtered.value
+  if (props.remote || !sortKey.value) return filtered.value
   const dir = sortDir.value === 'asc' ? 1 : -1
   return [...filtered.value].sort((x, y) => dir * compare(x[sortKey.value], y[sortKey.value]))
 })
@@ -138,9 +132,9 @@ const sorted = computed(() => {
 const total = computed(() => sorted.value.length)
 const pageCount = computed(() => Math.max(1, Math.ceil(total.value / props.pageSize)))
 const start = computed(() => (page.value - 1) * props.pageSize)
-const pageRows = computed(() => sorted.value.slice(start.value, start.value + props.pageSize))
-const from = computed(() => (total.value === 0 ? 0 : start.value + 1))
-const to = computed(() => Math.min(start.value + props.pageSize, total.value))
+const pageRows = computed(() =>
+  props.remote ? sorted.value : sorted.value.slice(start.value, start.value + props.pageSize),
+)
 
 watch(query, () => { page.value = 1 })
 watch(pageCount, (count) => { if (page.value > count) page.value = count })
@@ -293,48 +287,7 @@ const sortIcon = (key) => {
   animation: dt-spin 0.8s linear infinite;
 }
 
-.dt__pager {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 8px 12px;
-  border-block-start: 1px solid var(--line);
-  font-family: var(--f-num);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.dt__range { margin-inline-end: auto; }
-
-.dt__page-btn {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-s);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.dt__page-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.dt__page-btn:focus-visible {
-  outline: 2px solid var(--acc);
-  outline-offset: 2px;
-}
-
-.dt__chev {
-  width: 16px;
-  height: 16px;
-}
-
-[dir='rtl'] .dt__chev { transform: scaleX(-1); }
+/* Barre de pages : voir PaginationBar.vue */
 
 @keyframes dt-spin {
   to { transform: rotate(360deg); }

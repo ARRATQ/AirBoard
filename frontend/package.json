@@ -39,7 +39,6 @@
     "@tiptap/vue-3": "^3.10.7",
     "axios": "^1.5.0",
     "date-fns": "^4.1.0",
-    "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
@@ -50,6 +49,10 @@
     "vue-router": "^4.2.4"
   },
   "devDependencies": {
+    "@iconify-json/heroicons": "^1.2.3",
+    "@iconify-json/lucide": "^1.2.157",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify/utils": "^3.1.7",
     "@tailwindcss/forms": "^0.5.6",
     "@vitejs/plugin-vue": "^4.3.4",
     "@vue/test-utils": "^2.4.6",

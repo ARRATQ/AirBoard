@@ -48,7 +48,7 @@
           <li v-for="group in managedGroups" :key="group.id" class="overview-row">
             <span>{{ group.name }}</span>
             <span class="overview-row__meta">
-              {{ group.users?.length || 0 }} {{ $t('common.users') }}
+              {{ group.user_count ?? 0 }} {{ $t('common.users') }}
             </span>
           </li>
         </ul>
@@ -151,7 +151,7 @@ const settle = async (loaders) => {
 const loadAdmin = async () => {
   const data = await settle({
     stats: () => dashboardService.getDashboard().then((d) => d.stats),
-    pendingComments: () => commentsService.getPendingComments().then((d) => countOf(d, 'comments')),
+    pendingComments: () => commentsService.getPendingComments({ page_size: 1 }).then((d) => countOf(d, 'comments')),
     newSuggestions: () => suggestionsService
       .getAdminSuggestions({ status: 'new', page: 1, page_size: 1 })
       .then((d) => countOf(d, 'suggestions'))

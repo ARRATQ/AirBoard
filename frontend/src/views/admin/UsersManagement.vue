@@ -16,7 +16,7 @@
     </div>
 
     <EmptyState
-      v-if="!showDeleted && !appStore.loading && users.length === 0"
+      v-if="!showDeleted && !loadingUsers && users.length === 0 && !hasFilters"
       icon="mdi:account-multiple-outline"
       :title="$t('users.emptyTitle')"
       :description="$t('users.emptyText')"
@@ -30,12 +30,16 @@
       v-else
       :key="viewMode"
       :columns="columns"
+      v-model:query="searchQuery"
+      v-model:sort-key="sortKey"
+      v-model:sort-dir="sortOrder"
       :rows="rows"
-      :loading="!showDeleted && appStore.loading"
+      :remote="!showDeleted"
+      :loading="!showDeleted && loadingUsers"
       :search-keys="['fullName', 'username', 'email']"
       :search-placeholder="$t('users.searchPlaceholder')"
       :empty-title="$t('users.noResultsTitle')"
-      :page-size="25"
+      :page-size="pageSize"
     >
       <template v-if="!showDeleted" #toolbar>
         <label>
@@ -132,6 +136,7 @@
         </RowActions>
       </template>
     </DataTable>
+    <PaginationBar v-if="!showDeleted" v-model:page="page" :page-size="pageSize" :total="total" />
 
     <!-- User Modal -->
     <UserModal
@@ -151,7 +156,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import RowActions from '@/components/ui/RowActions.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
@@ -159,6 +164,7 @@ import { dateLocaleFor } from '@/utils/homeFormat'
 import { useAppStore } from '@/stores/app'
 import { useConfirm } from '@/composables/useConfirm'
 import UserModal from '@/components/admin/UserModal.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 
 const { t, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
@@ -173,6 +179,25 @@ const showModal = ref(false)
 const selectedUser = ref(null)
 const roleFilter = ref('')
 const statusFilter = ref('')
+const searchQuery = ref('')
+const sortBy = ref('username')
+const sortOrder = ref('asc')
+
+// Colonnes du tableau → colonnes de tri acceptées par GET /admin/users.
+const SORT_COLUMNS = { fullName: 'username', email: 'email', role: 'role', lastLogin: 'last_login', status: 'is_active' }
+const sortKey = computed({
+  get: () => Object.keys(SORT_COLUMNS).find(key => SORT_COLUMNS[key] === sortBy.value) || '',
+  set: (key) => { sortBy.value = SORT_COLUMNS[key] || 'username' },
+})
+
+// Pagination, recherche, filtres et tri sont faits par le serveur (GET /admin/users).
+const page = ref(1)
+const pageSize = 25
+const total = ref(0)
+const loadingUsers = ref(false)
+const SEARCH_DEBOUNCE_MS = 300
+
+const hasFilters = computed(() => Boolean(searchQuery.value.trim() || roleFilter.value || statusFilter.value))
 
 // Computed
 const viewOptions = computed(() => [
@@ -212,18 +237,9 @@ const toRow = (user) => ({
   raw: user,
 })
 
-// Lignes du tableau : filtres rôle et statut (actifs seulement) ; la recherche et le tri sont dans DataTable.
-const rows = computed(() => {
-  if (showDeleted.value) return deletedUsers.value.map(toRow)
-  return users.value
-    .filter(user => !roleFilter.value || user.role === roleFilter.value)
-    .filter(user => {
-      if (statusFilter.value === 'active') return user.is_active
-      if (statusFilter.value === 'inactive') return !user.is_active
-      return true
-    })
-    .map(toRow)
-})
+// Lignes du tableau : la page renvoyée par le serveur (déjà cherchée, filtrée et triée) ;
+// la corbeille, chargée en entier, est cherchée et triée par DataTable.
+const rows = computed(() => (showDeleted.value ? deletedUsers.value : users.value).map(toRow))
 
 // Methods
 const getUserInitials = (user) => {
@@ -267,19 +283,62 @@ const formatLastConnection = (lastLogin) => {
   }
 }
 
+let usersRequest = 0
+
 const loadUsers = async () => {
+  const request = ++usersRequest
+  loadingUsers.value = true
   try {
-    appStore.setLoading(true)
-    const data = await adminService.getUsers()
-    users.value = Array.isArray(data) ? data : []
+    const data = await adminService.getUsers({
+      page: page.value,
+      page_size: pageSize,
+      search: searchQuery.value.trim() || undefined,
+      role: roleFilter.value || undefined,
+      status: statusFilter.value || undefined,
+      sort: sortBy.value,
+      order: sortOrder.value,
+    })
+    if (request !== usersRequest) return // une recherche plus récente a déjà répondu
+    users.value = data.data || []
+    total.value = data.total || 0
+    // Page devenue vide (dernier utilisateur supprimé) : revenir à la dernière page existante
+    if (users.value.length === 0 && total.value > 0 && page.value > 1) {
+      page.value = Math.ceil(total.value / pageSize)
+    }
   } catch (error) {
+    if (request !== usersRequest) return
     console.error('Erreur lors du chargement des utilisateurs:', error)
     users.value = []
+    total.value = 0
     appStore.showError(t('users.toast.loadError'))
   } finally {
-    appStore.setLoading(false)
+    if (request === usersRequest) loadingUsers.value = false
   }
 }
+
+// Revenir en page 1 quand les critères changent ; la recherche attend la fin de la frappe.
+const reloadFromFirstPage = () => {
+  if (page.value !== 1) page.value = 1 // le watcher de page recharge
+  else loadUsers()
+}
+// Dans la corbeille, recherche et tri restent locaux : pas d'appel au serveur.
+let searchTimer = null
+watch(searchQuery, () => {
+  if (showDeleted.value) return
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(reloadFromFirstPage, SEARCH_DEBOUNCE_MS)
+})
+watch([roleFilter, statusFilter, sortBy, sortOrder], () => {
+  if (!showDeleted.value) reloadFromFirstPage()
+})
+// Changer d'onglet repart d'une recherche vide ; le retour aux actifs relit la page.
+watch(viewMode, () => {
+  clearTimeout(searchTimer)
+  searchQuery.value = ''
+  if (!showDeleted.value) reloadFromFirstPage()
+})
+watch(page, loadUsers)
+onBeforeUnmount(() => clearTimeout(searchTimer))
 
 const loadDeletedUsers = async () => {
   try {

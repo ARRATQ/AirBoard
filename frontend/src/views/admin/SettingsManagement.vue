@@ -245,7 +245,7 @@
 
                 <!-- Preview light -->
                 <div v-if="form.hero_image_url" class="relative rounded-lg overflow-hidden h-28 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                  <img
+                  <img loading="lazy"
                     :src="form.hero_image_url"
                     alt="Aperçu image thème clair"
                     class="w-full h-full object-cover"
@@ -300,7 +300,7 @@
 
                 <!-- Preview dark -->
                 <div v-if="form.hero_image_url_dark" class="relative rounded-lg overflow-hidden h-28 bg-gray-900 border border-gray-300 dark:border-gray-600">
-                  <img
+                  <img loading="lazy"
                     :src="form.hero_image_url_dark"
                     alt="Aperçu image thème sombre"
                     class="w-full h-full object-cover"

@@ -211,7 +211,8 @@ const loadAppGroups = async () => {
 const loadUsers = async () => {
   if (!isGlobal.value) return
   try {
-    const data = await adminService.getUsers()
+    // Liste paginée côté serveur (25 par défaut) : la liste du créateur prend la page maximale.
+    const data = await adminService.getUsers({ page_size: 500 })
     users.value = toArray(data)
   } catch (error) {
     console.error('Error loading users:', error)

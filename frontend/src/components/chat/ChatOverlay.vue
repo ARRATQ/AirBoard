@@ -128,7 +128,7 @@
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -173,7 +173,7 @@
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -196,7 +196,7 @@
                 @click="chatStore.openConversation('user', user)"
               >
                 <div class="relative flex-shrink-0">
-                  <img :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
+                  <img loading="lazy" :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=3b82f6&color=fff`" class="w-8 h-8 rounded-full object-cover" />
                   <span v-if="user.is_online" class="absolute bottom-0 right-0 w-2 h-2 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -228,7 +228,7 @@
                 <Icon icon="mdi:arrow-left" class="text-xl" />
               </button>
               <div class="relative flex-shrink-0">
-                <img
+                <img loading="lazy"
                   v-if="chatStore.activeConversation.type === 'user'"
                   :src="chatStore.activeConversation.avatar || `https://ui-avatars.com/api/?name=${chatStore.activeConversation.name}&background=3b82f6&color=fff`"
                   class="w-9 h-9 rounded-full object-cover"
@@ -300,7 +300,7 @@
 
               <div class="flex items-end gap-1.5 flex-nowrap" :class="msg.sender_id == myId ? 'flex-row-reverse' : 'flex-row'">
                 <!-- Avatar (messages reçus) -->
-                <img
+                <img loading="lazy"
                   v-if="msg.sender_id != myId"
                   :src="msg.sender?.avatar_url || `https://ui-avatars.com/api/?name=${msg.sender?.first_name}+${msg.sender?.last_name}&background=6366f1&color=fff&size=64`"
                   class="w-6 h-6 rounded-full object-cover flex-shrink-0 mb-0.5"

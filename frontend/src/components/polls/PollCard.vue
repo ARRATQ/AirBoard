@@ -7,7 +7,7 @@
           class="h-7 w-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0"
           :style="{ backgroundColor: poll.is_active ? '#8B5CF6' : '#10b981' }"
         >
-          <Icon :icon="poll.is_active ? 'mdi:poll' : 'mdi:poll-check'" class="h-4 w-4 text-white" />
+          <Icon :icon="poll.is_active ? 'mdi:poll' : 'mdi:checkbox-marked-circle-outline'" class="h-4 w-4 text-white" />
         </div>
         <div class="poll-info">
           <div class="flex items-center gap-2 flex-1 min-w-0">
