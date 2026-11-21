@@ -1,13 +1,13 @@
 <template>
-  <button
-    type="button"
+  <!-- Le nom porte l'action d'ouverture ; son ::after couvre toute la carte.
+       Les liens de contact restent hors du bouton (HTML valide) et passent au-dessus. -->
+  <article
     class="person-card"
     :class="{ 'person-card--inactive': !person.is_active }"
     :style="{ '--unit-color': primaryRole?.unit.color || 'var(--line)' }"
-    @click="$emit('open', person)"
   >
     <PersonAvatar :person="person" size="lg" class="person-card__avatar" />
-    <span class="person-card__name">{{ name }}</span>
+    <button type="button" class="person-card__name" @click="$emit('open', person)">{{ name }}</button>
     <span v-if="primaryRole" class="person-card__role">
       {{ primaryRole.position.title }}
       <span v-if="primaryRole.assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
@@ -23,15 +23,15 @@
       </span>
     </span>
 
-    <span class="person-card__contacts">
-      <a v-if="person.email" :href="`mailto:${person.email}`" :title="person.email" :aria-label="person.email" @click.stop>
+    <span v-if="person.email || person.phone" class="person-card__contacts">
+      <a v-if="person.email" :href="`mailto:${person.email}`" :title="person.email" :aria-label="person.email">
         <Icon icon="mdi:email-outline" class="h-4 w-4" aria-hidden="true" />
       </a>
-      <a v-if="person.phone" :href="`tel:${person.phone.replace(/\s+/g, '')}`" :title="person.phone" :aria-label="person.phone" @click.stop>
+      <a v-if="person.phone" :href="`tel:${person.phone.replace(/\s+/g, '')}`" :title="person.phone" :aria-label="person.phone">
         <Icon icon="mdi:phone-outline" class="h-4 w-4" aria-hidden="true" />
       </a>
     </span>
-  </button>
+  </article>
 </template>
 
 <script setup>
@@ -69,16 +69,33 @@ const cardFields = computed(() =>
   border-radius: 4px;
   background: var(--surface);
   color: var(--text);
-  font: inherit;
   text-align: center;
   cursor: pointer;
   transition: border-color 150ms ease;
 }
 .person-card:hover { border-inline-color: var(--muted); border-block-end-color: var(--muted); }
-.person-card:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+.person-card__name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+/* Zone cliquable étendue à toute la carte */
+.person-card__name::after {
+  content: '';
+  position: absolute;
+  inset: -3px -1px -1px;
+  border-radius: 4px;
+}
+.person-card__name:focus-visible { outline: none; }
+.person-card__name:focus-visible::after { outline: 2px solid var(--acc); outline-offset: 2px; }
 .person-card--inactive { opacity: 0.55; }
 .person-card__avatar { margin-bottom: 8px; }
-.person-card__name { font-weight: 600; font-size: 15px; line-height: 1.25; }
 .person-card__role {
   display: inline-flex;
   flex-wrap: wrap;
@@ -109,7 +126,7 @@ const cardFields = computed(() =>
   font-size: 12px;
   color: var(--muted);
 }
-.person-card__contacts { display: flex; gap: 6px; margin-top: 11px; }
+.person-card__contacts { position: relative; z-index: 1; display: flex; gap: 6px; margin-top: 11px; }
 .person-card__contacts a {
   display: inline-grid;
   place-items: center;
