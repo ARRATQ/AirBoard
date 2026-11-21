@@ -111,7 +111,7 @@
             <span class="text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login.noAccount') }} </span>
             <router-link
               to="/auth/register"
-              class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors duration-200"
+              class="ms-1 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors duration-200"
             >
               {{ t('auth.login.signUp') }}
             </router-link>
