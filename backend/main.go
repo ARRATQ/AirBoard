@@ -58,8 +58,10 @@ func main() {
 	log.Printf("📊 Dashboard: http://localhost:%s/health", cfg.Server.Port)
 	log.Printf("📚 Mode: %s", cfg.Server.Mode)
 
-	// Démarrer le serveur
-	router.Run(":" + cfg.Server.Port)
+	// Démarrer le serveur (arrêt propre sur SIGINT/SIGTERM)
+	if err := runServer(newHTTPServer(":"+cfg.Server.Port, router), db); err != nil {
+		log.Fatalf("Erreur du serveur HTTP: %v", err)
+	}
 }
 
 // Variable globale pour le service email (utilisée par les handlers)
