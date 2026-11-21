@@ -126,7 +126,13 @@
     "next": "Suivant",
     "enabled": "Activé",
     "disabled": "Désactivé",
-    "notConfigured": "Non configuré"
+    "notConfigured": "Non configuré",
+    "validation": {
+      "endBeforeStart": "La date de fin doit être postérieure à la date de début.",
+      "contentRequired": "Le contenu est obligatoire.",
+      "commentLengthRange": "La longueur maximale doit être comprise entre {min} et {max} caractères.",
+      "duplicateName": "Ce nom est déjà utilisé."
+    }
   },
   "calendar": {
     "title": "Calendrier des Événements",
@@ -952,7 +958,8 @@
       },
       "deleteConfirm": {
         "title": "Supprimer la catégorie",
-        "message": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible."
+        "message": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible.",
+        "messageWithResources": "Supprimer « {name} » supprimera aussi définitivement sa ressource. Cette action est irréversible. | Supprimer « {name} » supprimera aussi définitivement ses {count} ressources. Cette action est irréversible."
       },
       "deleteError": "Erreur lors de la suppression de la catégorie"
     },

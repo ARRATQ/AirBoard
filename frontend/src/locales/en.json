@@ -126,7 +126,13 @@
     "order": "Order",
     "open": "Open",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "validation": {
+      "endBeforeStart": "The end date must be after the start date.",
+      "contentRequired": "Content is required.",
+      "commentLengthRange": "The maximum length must be between {min} and {max} characters.",
+      "duplicateName": "This name is already in use."
+    }
   },
   "calendar": {
     "title": "Event Calendar",
@@ -784,7 +790,8 @@
       },
       "deleteConfirm": {
         "title": "Delete category",
-        "message": "Are you sure you want to delete \"{name}\"? This action is irreversible."
+        "message": "Are you sure you want to delete \"{name}\"? This action is irreversible.",
+        "messageWithResources": "Deleting \"{name}\" will also permanently delete its resource. This action is irreversible. | Deleting \"{name}\" will also permanently delete its {count} resources. This action is irreversible."
       },
       "deleteError": "Error while deleting the category"
     },

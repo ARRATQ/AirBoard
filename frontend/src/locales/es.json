@@ -126,7 +126,13 @@
     "next": "Siguiente",
     "enabled": "Activado",
     "disabled": "Desactivado",
-    "notConfigured": "No configurado"
+    "notConfigured": "No configurado",
+    "validation": {
+      "endBeforeStart": "La fecha de fin debe ser posterior a la fecha de inicio.",
+      "contentRequired": "El contenido es obligatorio.",
+      "commentLengthRange": "La longitud máxima debe estar entre {min} y {max} caracteres.",
+      "duplicateName": "Este nombre ya está en uso."
+    }
   },
   "calendar": {
     "title": "Calendario de Eventos",
@@ -709,7 +715,8 @@
       },
       "deleteConfirm": {
         "title": "Eliminar categoría",
-        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible."
+        "message": "¿Seguro que deseas eliminar \"{name}\"? Esta acción es irreversible.",
+        "messageWithResources": "Eliminar «{name}» también eliminará definitivamente su recurso. Esta acción es irreversible. | Eliminar «{name}» también eliminará definitivamente sus {count} recursos. Esta acción es irreversible."
       },
       "deleteError": "Error al eliminar la categoría"
     },

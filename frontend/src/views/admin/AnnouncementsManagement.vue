@@ -219,8 +219,11 @@ import { ref, computed, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { announcementsService } from '@/services/api'
+import { useAppStore } from '@/stores/app'
+import { isEndBeforeStart } from '@/utils/dateInput'
 
 const { t, locale } = useI18n()
+const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 
 const TYPES = ['info', 'warning', 'success', 'error']
@@ -289,6 +292,10 @@ const closeModal = () => {
 }
 
 const saveAnnouncement = async () => {
+  if (isEndBeforeStart(formData.value.start_date, formData.value.end_date)) {
+    appStore.showError(t('common.validation.endBeforeStart'))
+    return
+  }
   isSaving.value = true
   try {
     const data = {
