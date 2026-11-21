@@ -117,6 +117,13 @@ func TestScopeArguments(t *testing.T) {
 			[]interface{}{7, true, now},
 		},
 		{
+			// Le OR de la visibilité reste groupé : sinon il contournerait is_published
+			"publiées des groupes",
+			newsTargets.publishedVisibleTo([]uint{3}, now),
+			"(is_published = $2 AND (published_at IS NULL OR published_at <= $3) AND (NOT EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id) OR EXISTS (SELECT 1 FROM news_target_groups WHERE news_target_groups.news_id = news.id AND news_target_groups.group_id IN ($4))))",
+			[]interface{}{7, true, now, uint(3)},
+		},
+		{
 			"auteur ou publiées des groupes",
 			newsTargets.ownOrPublishedVisibleTo(5, []uint{3}, now),
 			"(author_id = $2 OR (is_published = $3 AND (published_at IS NULL OR published_at <= $4) AND (NOT EXISTS",
