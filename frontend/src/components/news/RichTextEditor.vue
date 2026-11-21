@@ -877,8 +877,16 @@ const handleFileUpload = (media) => {
 
 const insertFile = (media) => {
   if (editor.value) {
-    const fileLink = `📎 ${media.filename}`
-    editor.value.chain().focus().insertContent(`<p><a href="${media.url}" target="_blank" class="file-attachment">${fileLink}</a></p>`).run()
+    // Contenu structuré plutôt que du HTML concaténé : le nom du fichier
+    // reste du texte et ne peut pas injecter de balises.
+    editor.value.chain().focus().insertContent({
+      type: 'paragraph',
+      content: [{
+        type: 'text',
+        text: `📎 ${media.filename}`,
+        marks: [{ type: 'link', attrs: { href: media.url, target: '_blank', class: 'file-attachment' } }]
+      }]
+    }).run()
     showFileModal.value = false
   }
 }
