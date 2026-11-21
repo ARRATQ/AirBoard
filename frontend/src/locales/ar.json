@@ -713,7 +713,10 @@
       "searchPlaceholder": "البحث عن المقالات...",
       "allCategories": "جميع الفئات",
       "allTypes": "جميع الأنواع",
-      "noNews": "لا توجد مقالات متاحة"
+      "noNews": "لا توجد مقالات متاحة",
+      "tagsLabel": "الوسوم",
+      "allTags": "كل الوسوم ({count})",
+      "fewerTags": "وسوم أقل"
     },
     "detail": {
       "back": "رجوع",

@@ -799,7 +799,10 @@
       "searchPlaceholder": "Search articles...",
       "allCategories": "All categories",
       "allTypes": "All types",
-      "noNews": "No articles available"
+      "noNews": "No articles available",
+      "tagsLabel": "Tags",
+      "allTags": "All tags ({count})",
+      "fewerTags": "Fewer tags"
     },
     "detail": {
       "back": "Back",

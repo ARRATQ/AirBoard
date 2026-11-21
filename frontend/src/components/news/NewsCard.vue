@@ -1,138 +1,93 @@
 <template>
-  <!-- Carte cliquable : le bouton du titre s'étend sur toute la carte (pseudo-élément) -->
-  <div
-    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-  >
-    <div class="p-6">
-      <!-- Header with Type Badge and Priority -->
-      <div class="flex items-start justify-between mb-3">
-        <div class="flex items-center gap-2 flex-wrap">
-          <!-- Type Badge -->
-          <span
-            class="px-3 py-1 rounded-full text-xs font-medium"
-            :style="typeBadgeStyle"
-          >
-            {{ typeLabel }}
-          </span>
+  <!-- Carte cliquable : le bouton du titre s'étend sur toute la carte (pseudo-élément).
+       Cadre et liseré supérieur à la couleur du type, pour que chaque actualité se détache. -->
+  <article class="ncard" :style="{ '--tc': typeColor }">
+    <div class="ncard__head">
+      <span class="nbadge nbadge--type">{{ typeLabel }}</span>
 
-          <!-- Priority Badge -->
-          <span
-            v-if="news.priority === 'urgent'"
-            class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-          >
-            <Icon icon="mdi:alert" class="inline h-3 w-3 me-1" />
-            {{ $t('news.priority.urgent') }}
-          </span>
-          <span
-            v-else-if="news.priority === 'important'"
-            class="px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-          >
-            <Icon icon="mdi:star" class="inline h-3 w-3 me-1" />
-            {{ $t('news.priority.important') }}
-          </span>
+      <span v-if="news.priority === 'urgent'" class="nbadge nbadge--urgent">
+        <Icon icon="mdi:alert" aria-hidden="true" />
+        {{ $t('news.priority.urgent') }}
+      </span>
+      <span v-else-if="news.priority === 'important'" class="nbadge nbadge--important">
+        <Icon icon="mdi:star" aria-hidden="true" />
+        {{ $t('news.priority.important') }}
+      </span>
 
-          <!-- Visibility Badge -->
-          <span
-            v-if="!news.target_groups || news.target_groups.length === 0"
-            class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-          >
-            <Icon icon="mdi:earth" class="inline h-3 w-3 me-1" />
-            {{ $t('events.visibility.public') }}
-          </span>
-          <span
-            v-else
-            class="relative z-10 px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
-            :title="getGroupsTooltip(news.target_groups)"
-          >
-            <Icon icon="mdi:lock" class="inline h-3 w-3 me-1" />
-            {{ getVisibilityLabel(news.target_groups) }}
-          </span>
-        </div>
+      <span
+        class="ncard__audience"
+        :class="{ 'ncard__audience--groups': hasGroups }"
+        :title="getGroupsTooltip(news.target_groups)"
+      >
+        <Icon :icon="hasGroups ? 'mdi:lock' : 'mdi:earth'" aria-hidden="true" />
+        <span class="ncard__ellipsis">{{ getVisibilityLabel(news.target_groups) }}</span>
+      </span>
 
-        <!-- Category -->
-        <div v-if="news.category" class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-          <Icon :icon="news.category.icon || 'mdi:folder'" class="h-4 w-4" :style="{ color: news.category.color }" />
-          <span>{{ news.category.name }}</span>
-        </div>
-      </div>
-
-      <!-- Title -->
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-        <button
-          type="button"
-          class="btn-reset w-full text-start line-clamp-2 after:absolute after:inset-0 after:content-['']"
-          @click="handleClick"
-        >
-          {{ news.title }}
-        </button>
-      </h3>
-
-      <!-- Summary -->
-      <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-        {{ news.summary }}
-      </p>
-
-      <!-- Tags -->
-      <div v-if="news.tags && news.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
-        <span
-          v-for="tag in news.tags.slice(0, 5)"
-          :key="tag.id"
-          class="px-2 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-          :style="{ backgroundColor: tag.color + '20', color: tag.color }"
-        >
-          #{{ tag.name }}
-        </span>
-        <span
-          v-if="news.tags.length > 5"
-          class="px-2 py-1 rounded text-xs font-medium text-gray-500 dark:text-gray-400"
-        >
-          +{{ news.tags.length - 5 }}
-        </span>
-      </div>
-
-      <!-- Footer with Metadata and Reactions -->
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-        <!-- Author and Date -->
-        <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-          <div class="flex items-center gap-1">
-            <Icon icon="mdi:account" class="h-4 w-4" />
-            <span>{{ news.author?.full_name || news.author?.email }}</span>
-          </div>
-          <div class="flex items-center gap-1">
-            <Icon icon="mdi:calendar" class="h-4 w-4" />
-            <span>{{ formatDate(news.published_at || news.created_at) }}</span>
-          </div>
-        </div>
-
-        <!-- Reactions -->
-        <div class="flex items-center gap-3">
-          <!-- View Count + Reading time -->
-          <div class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-            <Icon icon="mdi:eye" class="h-4 w-4" />
-            <span>{{ news.view_count || 0 }}</span>
-          </div>
-          <div v-if="articleReadingTime" class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-            <Icon icon="mdi:clock-outline" class="h-4 w-4" />
-            <span>{{ articleReadingTime }}</span>
-          </div>
-
-          <!-- Reaction Counts -->
-          <div v-if="news.reactions && news.reactions.length > 0" class="flex items-center gap-2">
-            <button
-              v-for="reaction in aggregateReactions(news.reactions)"
-              :key="reaction.type"
-              type="button"
-              class="relative z-10 flex items-center gap-1 text-sm hover:scale-110 transition-transform"
-              @click.stop="handleReaction(reaction.type)"
-            >
-              <span class="text-lg">{{ getReactionEmoji(reaction.type) }}</span>
-              <span class="text-gray-600 dark:text-gray-400">{{ reaction.count }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <span v-if="news.category" class="ncard__category" :title="news.category.name">
+        <Icon :icon="news.category.icon || 'mdi:folder'" :style="{ color: news.category.color }" aria-hidden="true" />
+        <span class="ncard__ellipsis" dir="auto">{{ news.category.name }}</span>
+      </span>
     </div>
-  </div>
+
+    <h3 class="ncard__title">
+      <button
+        type="button"
+        class="btn-reset ncard__link after:absolute after:inset-0 after:content-['']"
+        @click="handleClick"
+      >
+        {{ news.title }}
+      </button>
+    </h3>
+
+    <p v-if="news.summary" class="ncard__summary">{{ news.summary }}</p>
+
+    <ul v-if="cardTags.shown.length" class="ncard__tags">
+      <li
+        v-for="tag in cardTags.shown"
+        :key="tag.id"
+        class="ntag"
+        :style="{ '--tg': tag.color || 'var(--muted)' }"
+        :title="tag.name"
+      >
+        <span class="ncard__ellipsis" dir="auto">{{ tag.name }}</span>
+      </li>
+      <li
+        v-if="cardTags.rest.length"
+        class="ntag ntag--more"
+        dir="ltr"
+        :title="cardTags.rest.map((tag) => tag.name).join(', ')"
+      >
+        +{{ cardTags.rest.length }}
+      </li>
+    </ul>
+
+    <div class="ncard__foot">
+      <span class="ncard__meta ncard__author" :title="authorName">
+        <Icon icon="mdi:account" aria-hidden="true" />
+        <span class="ncard__ellipsis" dir="auto">{{ authorName }}</span>
+      </span>
+      <span class="ncard__meta">
+        <Icon icon="mdi:calendar" aria-hidden="true" />
+        {{ formatDate(news.published_at || news.created_at) }}
+      </span>
+      <span class="ncard__meta">
+        <Icon icon="mdi:eye" aria-hidden="true" />
+        {{ news.view_count || 0 }}
+      </span>
+      <span v-if="articleReadingTime" class="ncard__meta">
+        <Icon icon="mdi:clock-outline" aria-hidden="true" />
+        {{ articleReadingTime }}
+      </span>
+      <span
+        v-for="reaction in aggregateReactions(news.reactions)"
+        :key="reaction.type"
+        class="ncard__meta"
+      >
+        <span aria-hidden="true">{{ getReactionEmoji(reaction.type) }}</span>
+        {{ reaction.count }}
+      </span>
+    </div>
+  </article>
 </template>
 
 <script setup>
@@ -142,6 +97,10 @@ import { useNewsTypesStore } from '@/stores/newsTypes'
 import { useI18n } from 'vue-i18n'
 import { readingMinutes } from '@/utils/readingTime'
 import { dateLocaleFor } from '@/utils/homeFormat'
+import { splitTags } from '@/utils/tagChips'
+
+// Étiquettes visibles sur une carte avant le « +N »
+const MAX_CARD_TAGS = 2
 
 const { t, locale } = useI18n()
 const typesStore = useNewsTypesStore()
@@ -175,20 +134,15 @@ const typeData = computed(() => {
   return typesStore.getTypeBySlug(props.news.type) || {}
 })
 
+const typeColor = computed(() => typeData.value.color || '#3B82F6')
+const hasGroups = computed(() => (props.news.target_groups?.length || 0) > 0)
+const authorName = computed(() => props.news.author?.full_name || props.news.author?.email || '')
+const cardTags = computed(() => splitTags(props.news.tags, MAX_CARD_TAGS))
+
 // Libellé du type : nom venant du store (types gérés en admin)
 const typeLabel = computed(() => {
   const type = typeData.value
   return type.name || props.news.type
-})
-
-// Compute badge style
-const typeBadgeStyle = computed(() => {
-  const color = typeData.value.color || '#3B82F6'
-  // Lighten the color for background
-  return {
-    backgroundColor: color + '20', // Add 20% opacity
-    color: color
-  }
 })
 
 const handleClick = () => {
@@ -231,11 +185,6 @@ const getReactionEmoji = (type) => {
   return emojis[type] || '👍'
 }
 
-const handleReaction = (type) => {
-  // This will be handled by the parent component or NewsDetail page
-  console.log('Reaction clicked:', type)
-}
-
 const getVisibilityLabel = (targetGroups) => {
   if (!targetGroups || targetGroups.length === 0) {
     return t('events.visibility.public')
@@ -254,3 +203,188 @@ const getGroupsTooltip = (targetGroups) => {
   return t('events.visibility.tooltip.groups', { groups: groupNames })
 }
 </script>
+
+<style scoped>
+.ncard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--tc);
+  border-radius: var(--r-l);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(var(--shadow-rgb) / 0.06);
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ncard:hover {
+  border-color: color-mix(in oklab, var(--tc) 45%, var(--line));
+  box-shadow: 0 4px 14px -6px rgb(var(--shadow-rgb) / 0.25);
+}
+
+.ncard:focus-within {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.ncard__link:focus-visible { outline: none; }
+
+.ncard__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nbadge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--r-s);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nbadge :deep(svg) { width: 12px; height: 12px; }
+
+.nbadge--type {
+  background: color-mix(in oklab, var(--tc) 15%, var(--surface));
+  color: color-mix(in oklab, var(--tc) 62%, var(--text));
+}
+
+.nbadge--urgent {
+  background: color-mix(in oklab, var(--bad) 14%, var(--surface));
+  color: var(--bad);
+}
+
+.nbadge--important {
+  background: color-mix(in oklab, var(--warn) 14%, var(--surface));
+  color: var(--warn);
+}
+
+.ncard__audience,
+.ncard__category,
+.ncard__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.ncard__audience :deep(svg),
+.ncard__category :deep(svg),
+.ncard__meta :deep(svg) { flex: none; width: 14px; height: 14px; }
+
+.ncard__audience { max-width: 12em; }
+
+/* La liste des groupes reste lisible au survol, au-dessus du lien étendu */
+.ncard__audience--groups { position: relative; z-index: 1; cursor: help; }
+
+.ncard__category { max-width: 14em; margin-inline-start: auto; }
+
+.ncard__ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ncard__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.ncard__link {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  text-align: start;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ncard__summary {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Étiquettes : une seule ligne, texte discret, pastille de couleur ; noms longs tronqués */
+.ncard__tags {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+.ntag {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 11em;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.ntag::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tg);
+  content: '';
+}
+
+.ntag--more {
+  flex: none;
+  font-family: var(--f-num);
+}
+
+.ntag--more::before { display: none; }
+
+.ncard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.ncard__author { flex: 1 1 8em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ncard { transition: none; }
+}
+</style>
