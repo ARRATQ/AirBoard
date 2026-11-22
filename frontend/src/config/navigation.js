@@ -1,4 +1,4 @@
-import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, canAccess, hasAnyPermission } from './access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, canAccess, hasAnyPermission } from './access'
 
 /**
  * Menu latéral, décrit une seule fois pour tous les rôles.
@@ -36,8 +36,8 @@ export const ADMIN_SECTIONS = [
     labelKey: 'nav.admin.content',
     icon: 'lucide:file-text',
     items: [
-      { to: '/admin/news', icon: 'lucide:newspaper', labelKey: 'nav.admin.news', access: CONTENT },
-      { to: '/admin/events', icon: 'lucide:calendar-cog', labelKey: 'nav.admin.events', access: CONTENT },
+      { to: '/admin/news', icon: 'lucide:newspaper', labelKey: 'nav.admin.news', access: NEWS },
+      { to: '/admin/events', icon: 'lucide:calendar-cog', labelKey: 'nav.admin.events', access: EVENTS },
       { to: '/admin/polls', icon: 'lucide:chart-column', labelKey: 'nav.admin.polls', access: GROUP_ADMIN },
       { to: '/admin/announcements', icon: 'lucide:megaphone', labelKey: 'nav.admin.announcements', access: ADMIN },
       { to: '/admin/media', icon: 'lucide:images', labelKey: 'nav.admin.media', access: ADMIN }
@@ -91,7 +91,7 @@ export const ADMIN_SECTIONS = [
  * Menu d'administration d'un utilisateur.
  *
  * - Admin global : vue d'ensemble puis domaines repliables (`grouped: true`).
- * - Admin de groupe ou éditeur : une liste courte des seules pages permises,
+ * - Admin de groupe ou titulaire de permissions : une liste courte des seules pages permises,
  *   sous un seul titre (`grouped: false`).
  * - Sinon : `null`, pas de bloc d'administration.
  *
@@ -127,7 +127,7 @@ export function buildAdminNav(roles) {
  */
 export const SECTION_TABS = {
   news: [
-    { to: '/admin/news', labelKey: 'nav.tabs.articles', access: CONTENT, exact: true },
+    { to: '/admin/news', labelKey: 'nav.tabs.articles', access: NEWS, exact: true },
     { to: '/admin/news/categories', labelKey: 'nav.tabs.categories', access: ADMIN },
     { to: '/admin/news/types', labelKey: 'nav.tabs.types', access: ADMIN }
   ],

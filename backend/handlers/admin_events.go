@@ -8,6 +8,7 @@ import (
 
 	"airboard/apierror"
 	"airboard/config"
+	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
 	"airboard/utils"
@@ -133,11 +134,10 @@ func (h *EventsHandler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions
+	// Vérification des permissions : gestion des événements sur tout le site, ou auteur
 	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
 
-	if userRole != "admin" && event.AuthorID != userID {
+	if !middleware.HasPermissionEverywhere(c, models.PermEventsManage) && event.AuthorID != userID {
 		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez modifier que vos propres événements")
 		return
 	}
@@ -236,11 +236,10 @@ func (h *EventsHandler) DeleteEvent(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions
+	// Vérification des permissions : gestion des événements sur tout le site, ou auteur
 	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
 
-	if userRole != "admin" && event.AuthorID != userID {
+	if !middleware.HasPermissionEverywhere(c, models.PermEventsManage) && event.AuthorID != userID {
 		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez supprimer que vos propres événements")
 		return
 	}

@@ -3125,6 +3125,14 @@
       "resources_manage": {
         "label": "Manage resources",
         "help": "Create, edit and delete resources and their categories."
+      },
+      "news_manage": {
+        "label": "Manage news",
+        "help": "Write, edit and delete articles, and create tags."
+      },
+      "events_manage": {
+        "label": "Manage events",
+        "help": "Create, edit and delete events."
       }
     },
     "members": {

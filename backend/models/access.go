@@ -15,6 +15,10 @@ const (
 const (
 	// PermResourcesManage : créer, modifier et supprimer les ressources et leurs catégories.
 	PermResourcesManage = "resources.manage"
+	// PermNewsManage : rédiger, modifier et supprimer les actualités (et créer des tags).
+	PermNewsManage = "news.manage"
+	// PermEventsManage : créer, modifier et supprimer les événements.
+	PermEventsManage = "events.manage"
 )
 
 // PermissionDef décrit une permission du catalogue et les portées qu'elle accepte.
@@ -27,6 +31,8 @@ type PermissionDef struct {
 // PermissionCatalog est la liste fermée des permissions que l'administrateur peut confier.
 var PermissionCatalog = []PermissionDef{
 	{Key: PermResourcesManage, Module: "resources", Scopes: []string{ScopeAll, ScopeGroups}},
+	{Key: PermNewsManage, Module: "news", Scopes: []string{ScopeAll, ScopeGroups}},
+	{Key: PermEventsManage, Module: "events", Scopes: []string{ScopeAll, ScopeGroups}},
 }
 
 // LookupPermission renvoie la définition d'une permission du catalogue.

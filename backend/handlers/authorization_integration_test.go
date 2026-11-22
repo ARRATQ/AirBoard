@@ -80,7 +80,10 @@ func newFixture(t *testing.T, tx *gorm.DB) fixture {
 	f.member = identity{id: member.ID, role: "user"}
 	f.outsider = identity{id: outsider.ID, role: "user"}
 	f.groupAdmin = identity{id: ga.ID, role: "user", managed: []uint{f.g2.ID}}
-	f.editor = identity{id: editor.ID, role: "editor"}
+	// Éditeur : actualités et événements sur tout le site (rôle « Éditeur », migration 00006)
+	f.editor = identity{id: editor.ID, role: "editor", perms: map[string]string{
+		models.PermNewsManage: models.ScopeAll, models.PermEventsManage: models.ScopeAll,
+	}}
 	f.adm = identity{id: admin.ID, role: "admin"}
 	return f
 }
@@ -152,6 +155,7 @@ func callJSON(t *testing.T, h gin.HandlerFunc, who identity, target string, para
 	c.Set("user_id", who.id)
 	c.Set("role", who.role)
 	c.Set("managed_group_ids", who.managed)
+	c.Set(middleware.CtxPermissions, who.perms)
 	h(c)
 	var body interface{}
 	_ = json.Unmarshal(w.Body.Bytes(), &body)
@@ -243,8 +247,10 @@ func TestTargetedContentVisibility(t *testing.T) {
 			{f.outsider, []string{"global"}, []string{"ev-global"}, []string{"poll-global"}},
 			// Admin de g2 en lecture publique : global + g2
 			{f.groupAdmin, []string{"global", "g2"}, []string{"ev-global", "ev-g2"}, []string{"poll-global", "poll-g2"}},
-			// Editor membre de g1 : news publiées de tous groupes + ses brouillons ; événements de ses groupes
-			{f.editor, []string{"global", "g1", "g2", "editor-draft"}, []string{"ev-global", "ev-g1"}, []string{"poll-global", "poll-g1"}},
+			// Éditeur (actualités et événements sur tout le site) : tout pour ces deux modules,
+			// brouillons compris, comme l'admin ; sondages : ceux de ses groupes
+			{f.editor, []string{"global", "g1", "g1-draft", "g2", "editor-draft"},
+				[]string{"ev-global", "ev-g1", "ev-g1-draft", "ev-g2"}, []string{"poll-global", "poll-g1"}},
 			// Admin : tout, brouillons et sondages inactifs compris
 			{f.adm, []string{"global", "g1", "g1-draft", "g2", "editor-draft"},
 				[]string{"ev-global", "ev-g1", "ev-g1-draft", "ev-g2"},

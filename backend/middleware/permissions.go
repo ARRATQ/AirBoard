@@ -58,6 +58,21 @@ func IsUnrestricted(c *gin.Context) bool {
 	return c.GetString("role") == "admin" || c.GetBool(ctxUnrestricted)
 }
 
+// HasPermissionEverywhere : l'utilisateur a la permission sur tout le site (l'admin l'a).
+func HasPermissionEverywhere(c *gin.Context, permission string) bool {
+	return PermissionScope(c, permission) == models.ScopeAll
+}
+
+// PermissionGroupIDs renvoie les groupes où l'utilisateur exerce la permission : ceux qu'il
+// administre encore (ancienne table group_admins) et, si la portée est « ses groupes », ceux
+// dont il est membre. Sans objet pour la portée « tout le site » (voir HasPermissionEverywhere).
+func PermissionGroupIDs(c *gin.Context, permission string) []uint {
+	if PermissionScope(c, permission) == models.ScopeGroups {
+		return mergeUintSets(GetManagedGroupIDs(c), memberGroupIDs(c))
+	}
+	return GetManagedGroupIDs(c)
+}
+
 func memberGroupIDs(c *gin.Context) []uint {
 	ids, _ := c.Get(CtxMemberGroupIDs)
 	if list, ok := ids.([]uint); ok {
@@ -81,7 +96,7 @@ func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 			c.Next()
 			return
 		case models.ScopeGroups:
-			groups := mergeUintSets(GetManagedGroupIDs(c), memberGroupIDs(c))
+			groups := PermissionGroupIDs(c, permission)
 			if len(groups) > 0 {
 				c.Set("managed_group_ids", groups)
 				c.Next()
@@ -96,6 +111,41 @@ func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 
 		apierror.Respond(c, http.StatusForbidden, "Permission requise")
 		c.Abort()
+	}
+}
+
+// RequireAnyPermission laisse passer l'admin, les anciens admins de groupe et qui a au moins
+// une des permissions, quelle qu'en soit la portée. Pour les routes sans notion de groupe
+// (envoi d'un média, par exemple) utiles à plusieurs modules.
+func (am *AuthMiddleware) RequireAnyPermission(permissions ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.GetString("role") == "admin" || len(GetManagedGroupIDs(c)) > 0 {
+			c.Next()
+			return
+		}
+		for _, p := range permissions {
+			if PermissionScope(c, p) != "" {
+				c.Next()
+				return
+			}
+		}
+		apierror.Respond(c, http.StatusForbidden, "Permission requise")
+		c.Abort()
+	}
+}
+
+// RequirePermissionParam applique RequirePermission à la permission nommée par le paramètre
+// de requête « permission » (resources.manage par défaut) : une même route sert plusieurs
+// modules, chacun avec ses propres groupes (liste des groupes gérés, par exemple).
+func (am *AuthMiddleware) RequirePermissionParam() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		permission := c.DefaultQuery("permission", models.PermResourcesManage)
+		if _, ok := models.LookupPermission(permission); !ok {
+			apierror.Respond(c, http.StatusBadRequest, "Permission inconnue")
+			c.Abort()
+			return
+		}
+		am.RequirePermission(permission)(c)
 	}
 }
 

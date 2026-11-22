@@ -848,8 +848,9 @@ export const groupAdminService = {
   },
 
   // Managed Groups
-  async getManagedGroups() {
-    const response = await api.get('/group-admin/managed-groups')
+  // Groupes où l'utilisateur exerce une permission (ressources par défaut côté serveur)
+  async getManagedGroups(permission) {
+    const response = await api.get('/group-admin/managed-groups', { params: permission ? { permission } : undefined })
     return response.data
   }
 }

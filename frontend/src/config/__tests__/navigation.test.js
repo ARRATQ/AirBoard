@@ -3,7 +3,8 @@ import { getRoles } from '../access'
 import { ADMIN_SECTIONS, buildAdminNav, visibleTabs } from '../navigation'
 
 const admin = getRoles({ role: 'admin' })
-const editor = getRoles({ role: 'editor' })
+// Éditeur migré : rôle « Éditeur » (actualités et événements partout)
+const editor = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all' } })
 const groupAdmin = getRoles({ role: 'user', managed_group_ids: [1] })
 const user = getRoles({ role: 'user' })
 
@@ -47,12 +48,21 @@ describe('buildAdminNav', () => {
   })
 
   it('ajoute les ressources à qui a la permission resources.manage', () => {
-    const editorWithRole = getRoles({ role: 'editor', permissions: { 'resources.manage': 'groups' } })
+    const editorWithRole = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all', 'resources.manage': 'groups' } })
     expect(allLinks(buildAdminNav(editorWithRole))).toEqual(['/admin/news', '/admin/events', '/admin/resources'])
     const userWithRole = getRoles({ role: 'user', permissions: { 'resources.manage': 'all' } })
     const nav = buildAdminNav(userWithRole)
     expect(allLinks(nav)).toEqual(['/admin/resources'])
     expect(nav.titleKey).toBe('nav.admin.title')
+  })
+
+  it("n'affiche rien à l'ancien rôle éditeur sans permission", () => {
+    expect(buildAdminNav(getRoles({ role: 'editor' }))).toBeNull()
+  })
+
+  it('donne les actualités seules à qui ne gère que les actualités', () => {
+    const newsOnly = getRoles({ role: 'user', permissions: { 'news.manage': 'groups' } })
+    expect(allLinks(buildAdminNav(newsOnly))).toEqual(['/admin/news'])
   })
 
   it("réserve la page Rôles à l'admin", () => {
