@@ -598,7 +598,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 	}
 
 	var users []models.User
-	if err := query.Preload("Groups").Preload("AdminOfGroups").
+	if err := query.Preload("Groups").Preload("AdminOfGroups").Preload("AccessRoles").
 		Order(userSortClause(c.Query("sort"), c.Query("order"))).
 		Limit(page.Size).Offset(page.Offset()).
 		Find(&users).Error; err != nil {
@@ -653,7 +653,7 @@ func filterUsers(query *gorm.DB, search, role, status string) *gorm.DB {
 		)
 	}
 	switch role {
-	case "admin", "editor", "user":
+	case "admin", "user":
 		query = query.Where("role = ?", role)
 	}
 	switch status {
@@ -692,6 +692,13 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 
 	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
+		return
+	}
+	if createData.Role == "" {
+		createData.Role = "user"
+	}
+	if !validUserRole(createData.Role) {
+		apierror.Respond(c, http.StatusBadRequest, msgInvalidUserRole)
 		return
 	}
 
@@ -774,6 +781,10 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
+		return
+	}
+	if updateData.Role != "" && !validUserRole(updateData.Role) {
+		apierror.Respond(c, http.StatusBadRequest, msgInvalidUserRole)
 		return
 	}
 
@@ -1442,4 +1453,13 @@ func (h *AdminHandler) AssignGroupAdmins(c *gin.Context) {
 	c.JSON(http.StatusOK, models.SuccessResponse{
 		Message: "Administrateurs de groupe assignés avec succès",
 	})
+}
+
+// msgInvalidUserRole : le rôle d'un compte est « admin » ou « user » ; les autres droits
+// passent par les rôles créés par l'administrateur (permissions).
+const msgInvalidUserRole = "Rôle invalide : admin ou user"
+
+// validUserRole : rôle de compte accepté.
+func validUserRole(role string) bool {
+	return role == "admin" || role == "user"
 }

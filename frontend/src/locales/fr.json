@@ -274,11 +274,9 @@
     "searchPlaceholder": "Rechercher un utilisateur...",
     "filter_all_roles": "Tous les rôles",
     "filter_admins": "Administrateurs",
-    "filter_editors": "Éditeurs",
     "filter_users": "Utilisateurs",
     "no_group": "Aucun groupe",
     "role_admin": "Administrateur",
-    "role_editor": "Éditeur",
     "role_user": "Utilisateur",
     "noResultsTitle": "Aucun résultat",
     "noResultsText": "Aucun utilisateur ne correspond à vos critères de recherche.",
@@ -344,9 +342,7 @@
     "activeAccountDesc": "L'utilisateur est autorisé à se connecter",
     "role": "Rôle",
     "roleUserDesc": "Accès aux ressources de ses groupes",
-    "roleEditorDesc": "Gère les actualités du News Hub",
     "roleAdminDesc": "Accès à toutes les fonctionnalités",
-    "groupAdminHint": "Pour déléguer l'administration d'un groupe, assignez l'utilisateur comme administrateur depuis la gestion des groupes.",
     "groups": "Groupes d'utilisateurs",
     "groupsHint": "Les groupes déterminent les ressources accessibles",
     "noGroups": "Aucun groupe disponible",
@@ -359,7 +355,12 @@
       "passwordRequired": "Le mot de passe est requis",
       "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères",
       "roleRequired": "Le rôle est requis"
-    }
+    },
+    "accessRoles": "Rôles attribués",
+    "accessRolesHint": "Chaque rôle ajoute des permissions (actualités, sondages, modération…). Les rôles se créent depuis la page Rôles.",
+    "accessRolesAdmin": "Un administrateur a déjà toutes les permissions : aucun rôle à attribuer.",
+    "accessRolesLoadError": "Impossible de charger les rôles.",
+    "noAccessRoles": "Aucun rôle créé pour l'instant."
   },
   "groupModal": {
     "titleEdit": "Modifier le groupe",
@@ -673,7 +674,6 @@
     "roles": {
       "admin": "Administrateur",
       "group_admin": "Admins de Groupe",
-      "editor": "Éditeur",
       "user": "Utilisateur"
     },
     "topContributors": "Top contributeurs",
@@ -3133,6 +3133,14 @@
       "events_manage": {
         "label": "Gérer les événements",
         "help": "Créer, modifier et supprimer les événements."
+      },
+      "polls_manage": {
+        "label": "Gérer les sondages",
+        "help": "Créer, modifier, clore et supprimer des sondages."
+      },
+      "comments_moderate": {
+        "label": "Modérer les commentaires",
+        "help": "Approuver, modifier ou supprimer les commentaires. S'applique à tout le site."
       }
     },
     "members": {

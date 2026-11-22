@@ -313,6 +313,7 @@
 </template>
 
 <script setup>
+import { ACCESS_PERMISSION, EVENTS, canManageItem } from '@/config/access'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -332,12 +333,8 @@ const { t } = useI18n()
 
 // Computed
 const event = computed(() => eventsStore.currentEvent)
-const canEdit = computed(() => {
-  const user = authStore.user
-  return user?.role === 'admin' ||
-         user?.role === 'editor' ||
-         (user?.admin_of_groups && user.admin_of_groups.length > 0)
-})
+// Même règle que le serveur (config/access.js : canManageItem)
+const canEdit = computed(() => canManageItem(authStore.user, ACCESS_PERMISSION[EVENTS], event.value))
 
 const isPastEvent = computed(() => {
   if (!event.value) return false

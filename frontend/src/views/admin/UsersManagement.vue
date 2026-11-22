@@ -47,7 +47,6 @@
           <select v-model="roleFilter" class="ui-select">
             <option value="">{{ $t('users.filter_all_roles') }}</option>
             <option value="admin">{{ $t('users.filter_admins') }}</option>
-            <option value="editor">{{ $t('users.filter_editors') }}</option>
             <option value="user">{{ $t('users.filter_users') }}</option>
           </select>
         </label>
@@ -221,9 +220,9 @@ const columns = computed(() => [
 ])
 
 const roleLabel = (role) =>
-  role === 'admin' ? t('users.role_admin') : role === 'editor' ? t('users.role_editor') : t('users.role_user')
+  role === 'admin' ? t('users.role_admin') : t('users.role_user')
 
-const roleTone = (role) => (role === 'admin' ? 'info' : role === 'editor' ? 'warn' : 'neutral')
+const roleTone = (role) => (role === 'admin' ? 'info' : 'neutral')
 
 const toRow = (user) => ({
   id: user.id,
@@ -389,17 +388,19 @@ const handleSubmit = async (formData) => {
   try {
     appStore.setLoading(true)
     
-    if (formData.id) {
-      // Update existing user - only send relevant fields
-      const { id, ...updateData } = formData
-      await adminService.updateUser(id, updateData)
-      appStore.showSuccess(t('users.toast.updated'))
+    // Les rôles attribués s'enregistrent à part, une fois le compte enregistré
+    const { id, access_role_ids: accessRoleIds, ...userData } = formData
+    let userId = id
+    if (id) {
+      await adminService.updateUser(id, userData)
     } else {
-      // Create new user - only send relevant fields  
-      const { id, ...createData } = formData
-      await adminService.createUser(createData)
-      appStore.showSuccess(t('users.toast.created'))
+      const created = await adminService.createUser(userData)
+      userId = created?.id
     }
+    if (userId && Array.isArray(accessRoleIds)) {
+      await adminService.setUserAccessRoles(userId, accessRoleIds)
+    }
+    appStore.showSuccess(t(id ? 'users.toast.updated' : 'users.toast.created'))
     
     closeModal()
     await loadUsers()

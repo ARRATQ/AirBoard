@@ -18,6 +18,7 @@
         <span v-if="pendingCount > 0" class="cm-tab__count">{{ pendingCount }}</span>
       </button>
       <button
+        v-if="isAdmin"
         type="button"
         role="tab"
         class="cm-tab"
@@ -98,7 +99,7 @@
     </template>
 
     <!-- Paramètres -->
-    <section v-if="activeTab === 'settings'" class="cm-settings">
+    <section v-if="isAdmin && activeTab === 'settings'" class="cm-settings">
       <h2 class="cm-settings__title">{{ $t('moderation.settings_title') }}</h2>
 
       <div v-for="toggle in toggles" :key="toggle.key" class="cm-row">
@@ -144,6 +145,7 @@ import { Icon } from '@iconify/vue'
 import { commentsService } from '@/services/api'
 import PaginationBar from '@/components/ui/PaginationBar.vue'
 import { useAppStore } from '@/stores/app'
+import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { dateLocaleFor } from '@/utils/homeFormat'
@@ -157,6 +159,9 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 const { t, te, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const appStore = useAppStore()
+// Les paramètres des commentaires restent à l'admin ; la modération suit la permission
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 const activeTab = ref('pending')
 const loading = ref(false)
@@ -322,7 +327,7 @@ watch(page, loadPendingComments)
 
 onMounted(() => {
   loadPendingComments()
-  loadSettings()
+  if (isAdmin.value) loadSettings()
 })
 </script>
 

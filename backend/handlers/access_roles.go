@@ -219,6 +219,89 @@ func (h *AccessRolesHandler) SetRoleMembers(c *gin.Context) {
 	c.JSON(http.StatusOK, models.SuccessResponse{Message: "Membres du rôle enregistrés"})
 }
 
+// GetUserRoles renvoie les rôles d'un compte (sans leurs permissions).
+func (h *AccessRolesHandler) GetUserRoles(c *gin.Context) {
+	userID, ok := h.findUserID(c)
+	if !ok {
+		return
+	}
+	roles := []models.AccessRole{}
+	if err := h.db.Table("access_roles").
+		Joins("JOIN user_access_roles ON user_access_roles.access_role_id = access_roles.id").
+		Where("user_access_roles.user_id = ?", userID).
+		Order("lower(access_roles.name)").
+		Find(&roles).Error; err != nil {
+		log.Printf("access-roles: rôles du compte %d illisibles : %v", userID, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des rôles")
+		return
+	}
+	c.JSON(http.StatusOK, roles)
+}
+
+// SetUserRoles remplace les rôles d'un compte.
+func (h *AccessRolesHandler) SetUserRoles(c *gin.Context) {
+	userID, ok := h.findUserID(c)
+	if !ok {
+		return
+	}
+	var req struct {
+		RoleIDs []uint `json:"role_ids"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apierror.Respond(c, http.StatusBadRequest, "Format de requête invalide")
+		return
+	}
+	ids := uniqueUint(req.RoleIDs)
+	if len(ids) > 0 {
+		var found int64
+		if err := h.db.Model(&models.AccessRole{}).Where("id IN ?", ids).Count(&found).Error; err != nil {
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification des rôles")
+			return
+		}
+		if found != int64(len(ids)) {
+			apierror.Respond(c, http.StatusBadRequest, "Certains rôles n'existent pas")
+			return
+		}
+	}
+	err := h.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec("DELETE FROM user_access_roles WHERE user_id = ?", userID).Error; err != nil {
+			return err
+		}
+		for _, id := range ids {
+			if err := tx.Exec("INSERT INTO user_access_roles (user_id, access_role_id) VALUES (?, ?)", userID, id).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Printf("access-roles: rôles du compte %d non enregistrés : %v", userID, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'enregistrement des rôles")
+		return
+	}
+	h.onChange()
+	c.JSON(http.StatusOK, models.SuccessResponse{Message: "Rôles enregistrés"})
+}
+
+// findUserID vérifie que le compte désigné par :id existe (non supprimé), ou répond 400/404.
+func (h *AccessRolesHandler) findUserID(c *gin.Context) (uint, bool) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || id == 0 {
+		apierror.Respond(c, http.StatusBadRequest, "ID invalide")
+		return 0, false
+	}
+	var count int64
+	if err := h.db.Model(&models.User{}).Where("id = ?", id).Count(&count).Error; err != nil {
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la lecture du compte")
+		return 0, false
+	}
+	if count == 0 {
+		apierror.Respond(c, http.StatusNotFound, "Utilisateur introuvable")
+		return 0, false
+	}
+	return uint(id), true
+}
+
 // findRole charge le rôle désigné par :id, ou répond 400/404.
 func (h *AccessRolesHandler) findRole(c *gin.Context) (models.AccessRole, bool) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)

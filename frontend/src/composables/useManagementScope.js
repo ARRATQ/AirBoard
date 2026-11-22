@@ -3,12 +3,12 @@ import { useAuthStore } from '@/stores/auth'
 import { getRoles, getScope } from '@/config/access'
 
 /**
- * Périmètre d'une page d'administration partagée entre admin global,
- * éditeur et admin de groupe.
+ * Périmètre d'une page d'administration : tout le site (admin, permission « tout le site »)
+ * ou les groupes de la personne.
  *
- * @param {'content'|'groupAdmin'} access niveau de la page (voir config/access.js)
+ * @param {string} access niveau de la page (voir config/access.js)
  * @returns {{
- *   roles: import('vue').ComputedRef<{ isAdmin: boolean, isEditor: boolean, isGroupAdmin: boolean }>,
+ *   roles: import('vue').ComputedRef<{ isAdmin: boolean, isGroupAdmin: boolean, permissions: Record<string, string> }>,
  *   scope: import('vue').ComputedRef<'global'|'group'>,
  *   isGlobal: import('vue').ComputedRef<boolean>,
  *   isAdmin: import('vue').ComputedRef<boolean>

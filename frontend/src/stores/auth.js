@@ -41,15 +41,6 @@ export const useAuthStore = defineStore('auth', () => {
     const hasManagedGroupIds = user.value?.managed_group_ids && user.value.managed_group_ids.length > 0
     return hasAdminOfGroups || hasManagedGroupIds
   })
-  const isEditor = computed(() => user.value?.role === 'editor')
-  const canManageContent = computed(() => {
-    const hasAdminOfGroups = user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
-    const hasManagedGroupIds = user.value?.managed_group_ids && user.value.managed_group_ids.length > 0
-    return user.value?.role === 'admin' ||
-      user.value?.role === 'editor' ||
-      hasAdminOfGroups ||
-      hasManagedGroupIds
-  })
   const managedGroupIds = computed(() => {
     // Récupérer les IDs des groupes administrés depuis admin_of_groups ou managed_group_ids
     if (user.value?.admin_of_groups && user.value.admin_of_groups.length > 0) {
@@ -313,8 +304,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
     isGroupAdmin,
-    isEditor,
-    canManageContent,
     managedGroupIds,
     userInitials,
     userDisplayName,

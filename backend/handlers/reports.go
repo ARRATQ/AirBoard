@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -128,7 +129,6 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 	}{
 		{"admin", roleFilter{roleValue: "admin"}},
 		{"group_admin", roleFilter{isGroupAdmin: true}},
-		{"editor", roleFilter{roleValue: "editor"}},
 		{"user", roleFilter{roleValue: "user"}},
 	}
 
@@ -239,7 +239,7 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Where("users.role = ? AND users.deleted_at IS NULL AND poll_votes.voted_at BETWEEN ? AND ?", role, from, to).
 				Count(&stat.PollVotes)
 
-			if role == "admin" || role == "editor" {
+			if role == "admin" {
 				// Applications créées dans la période
 				h.db.Model(&models.Application{}).
 					Joins("JOIN users ON users.id = applications.created_by_id").
@@ -421,6 +421,12 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 		groupAdminSet[id] = true
 	}
 
+	// Contributeurs (permission de rédaction) : leurs articles comptent dans le rapport
+	contributors, err := models.UsersWithAnyPermission(h.db, models.ContentPermissions)
+	if err != nil {
+		log.Printf("reports: contributeurs illisibles : %v", err)
+	}
+
 	// Toutes les métriques en ~9 requêtes, quel que soit le nombre d'utilisateurs
 	totals := h.userActivityTotals(from, to)
 
@@ -448,7 +454,7 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 		item.AppsCreated = totals.appsCreated[user.ID]
 		item.AppsCreatedTotal = totals.appsCreatedTotal[user.ID]
 
-		if user.Role == "admin" || user.Role == "editor" || item.IsGroupAdmin {
+		if user.Role == "admin" || contributors[user.ID] || item.IsGroupAdmin {
 			item.ArticlesPublished = totals.articles[user.ID]
 			item.ViewsGenerated = totals.views[user.ID]
 			item.ReactionsEarned = totals.earn[user.ID]
@@ -512,7 +518,9 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 	// Vérifier si cet utilisateur est admin de groupe
 	var gaCount int64
 	h.db.Table("group_admins").Where("user_id = ?", user.ID).Count(&gaCount)
+	// Contributeur : admin, permission de rédaction ou ancien admin de groupe
 	isGroupAdmin := gaCount > 0
+	isContributor := isGroupAdmin || models.IsContributor(h.db, user)
 
 	item := UserReportItem{
 		UserID:       user.ID,
@@ -544,7 +552,7 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 		Where("created_by_id = ? AND deleted_at IS NULL", user.ID).
 		Count(&item.AppsCreatedTotal)
 
-	if user.Role == "admin" || user.Role == "editor" || isGroupAdmin {
+	if isContributor {
 		h.db.Model(&models.News{}).
 			Where("author_id = ? AND is_published = true AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", user.ID, from, to).
 			Count(&item.ArticlesPublished)
@@ -575,7 +583,7 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 		h.db.Model(&models.Application{}).
 			Where("created_by_id = ? AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", user.ID, mStart, mEnd).
 			Count(&ma.AppsCreated)
-		if user.Role == "admin" || user.Role == "editor" || isGroupAdmin {
+		if isContributor {
 			h.db.Model(&models.News{}).
 				Where("author_id = ? AND is_published = true AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", user.ID, mStart, mEnd).
 				Count(&ma.ArticlesPublished)

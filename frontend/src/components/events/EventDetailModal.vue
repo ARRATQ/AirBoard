@@ -184,6 +184,7 @@
 </template>
 
 <script setup>
+import { ACCESS_PERMISSION, EVENTS, canManageItem } from '@/config/access'
 import { eventStatusTone } from '@/config/status'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { computed } from 'vue'
@@ -210,13 +211,8 @@ const { t, locale } = useI18n()
 const dateLocale = computed(() => dateLocaleFor(locale.value))
 
 // Computed
-const canEdit = computed(() => {
-  const userRole = authStore.user?.role
-  const userId = authStore.user?.id
-  return userRole === 'admin' ||
-         userRole === 'editor' ||
-         (authStore.user.admin_of_groups && authStore.user.admin_of_groups.length > 0 && props.event.author_id === userId)
-})
+// Même règle que le serveur (config/access.js : canManageItem)
+const canEdit = computed(() => canManageItem(authStore.user, ACCESS_PERMISSION[EVENTS], props.event))
 
 // Methods
 const formatDateRange = (startDate, endDate) => {

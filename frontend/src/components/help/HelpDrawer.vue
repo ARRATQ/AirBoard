@@ -179,6 +179,7 @@ import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import { getRoles, permissionScope } from '@/config/access'
 import { marked } from 'marked'
 
 const props = defineProps({
@@ -199,13 +200,17 @@ const selectedPage = ref(null)
 const expandedSections = ref([])
 const contentCache = ref({})
 
-// User role label for display
-const userRoleLabel = computed(() => {
-  const role = authStore.user?.role
-  if (role === 'admin') return t('users.role_admin')
-  if (role === 'editor') return t('users.role_editor')
-  return t('users.role_user')
+// Profil d'aide : admin, contributeur (permission de rédaction ou admin de groupe), utilisateur
+const CONTENT_PERMISSIONS = ['news.manage', 'events.manage', 'polls.manage']
+const guideRole = computed(() => {
+  const roles = getRoles(authStore.user)
+  if (roles.isAdmin) return 'admin'
+  if (roles.isGroupAdmin || CONTENT_PERMISSIONS.some(p => permissionScope(roles, p) !== '')) return 'editor'
+  return 'user'
 })
+
+// User role label for display
+const userRoleLabel = computed(() => (authStore.user?.role === 'admin' ? t('users.role_admin') : t('users.role_user')))
 
 // All guide definitions
 const allGuides = computed(() => [
@@ -240,7 +245,7 @@ const allGuides = computed(() => [
     id: 'editor',
     label: t('help.guides.editor'),
     icon: 'lucide:pencil',
-    roles: ['editor', 'admin'], // Only for editors and admins
+    roles: ['editor', 'admin'], // Contributeurs et admins
     sections: [
       {
         id: 'editor-basics',
@@ -342,10 +347,7 @@ const allGuides = computed(() => [
 ])
 
 // Filter guides based on user role
-const availableGuides = computed(() => {
-  const userRole = authStore.user?.role || 'user'
-  return allGuides.value.filter(guide => guide.roles.includes(userRole))
-})
+const availableGuides = computed(() => allGuides.value.filter(guide => guide.roles.includes(guideRole.value)))
 
 const currentGuide = computed(() => availableGuides.value.find(g => g.id === selectedGuide.value))
 
@@ -467,15 +469,7 @@ async function selectPage(item) {
 function initializeGuide() {
   if (availableGuides.value.length > 0) {
     // Select the most relevant guide for the user's role
-    const userRole = authStore.user?.role || 'user'
-
-    if (userRole === 'admin') {
-      selectedGuide.value = 'admin'
-    } else if (userRole === 'editor') {
-      selectedGuide.value = 'editor'
-    } else {
-      selectedGuide.value = 'user'
-    }
+    selectedGuide.value = guideRole.value
 
     // Expand first section
     if (currentGuide.value?.sections.length) {

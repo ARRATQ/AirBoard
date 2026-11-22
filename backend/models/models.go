@@ -39,6 +39,8 @@ type User struct {
 	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (chargés depuis group_admins)
 	// Permissions effectives {permission: portée}, union des rôles attribués (vide pour l'admin : il a tout)
 	Permissions map[string]string `json:"permissions,omitempty" gorm:"-"`
+	// Groupes couverts par la portée « ses groupes » (membre, hors groupe par défaut)
+	PermissionGroupIDs []uint `json:"permission_group_ids,omitempty" gorm:"-"`
 }
 
 // Group représente un groupe d'utilisateurs

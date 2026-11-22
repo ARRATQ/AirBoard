@@ -59,10 +59,9 @@ func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (user
 	if err != nil {
 		return userStatus{}, fmt.Errorf("lecture des permissions de %d: %w", userID, err)
 	}
-	memberGroupIDs := []uint{}
-	if err := am.db.WithContext(ctx).Table("user_groups").
-		Where("user_id = ?", userID).
-		Pluck("group_id", &memberGroupIDs).Error; err != nil {
+	// Groupes couverts par la portée « ses groupes » (hors groupe par défaut)
+	memberGroupIDs, err := models.PermissionGroupIDs(am.db.WithContext(ctx), userID)
+	if err != nil {
 		return userStatus{}, fmt.Errorf("lecture des groupes de %d: %w", userID, err)
 	}
 

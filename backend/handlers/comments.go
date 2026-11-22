@@ -84,16 +84,9 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 	page := parsePageParams(c, commentPageLimits)
 	query := h.DB.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ?", entityType, entityID)
 
-	// Si modération requise, ne montrer que les commentaires approuvés (sauf pour admin/editor/admin de groupe)
-	userRole, exists := c.Get("role")
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if settings.RequireModeration && exists {
-		role := userRole.(string)
-		// Admin, editor, et utilisateurs qui administrent au moins un groupe peuvent voir tous les commentaires
-		if role != "admin" && role != "editor" && len(managedGroupIDs) == 0 {
-			query = query.Where("is_approved = ?", true)
-		}
-	} else if settings.RequireModeration {
+	// Si modération requise, ne montrer que les commentaires approuvés, sauf aux modérateurs
+	// (admin compris) et aux anciens admins de groupe
+	if settings.RequireModeration && !canModerateComments(c) && len(middleware.GetManagedGroupIDs(c)) == 0 {
 		query = query.Where("is_approved = ?", true)
 	}
 
@@ -249,8 +242,6 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	userRole, _ := c.Get("role")
-
 	// Récupérer le commentaire
 	var comment models.Comment
 	if err := h.DB.First(&comment, commentID).Error; err != nil {
@@ -262,8 +253,8 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'utilisateur est l'auteur ou admin
-	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" {
+	// Vérifier que l'utilisateur est l'auteur ou modérateur
+	if comment.UserID != userID.(uint) && !canModerateComments(c) {
 		apierror.Respond(c, http.StatusForbidden, "Vous n'avez pas la permission de modifier ce commentaire")
 		return
 	}
@@ -298,7 +289,6 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	userRole, _ := c.Get("role")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	// Récupérer le commentaire
@@ -312,8 +302,8 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'utilisateur est l'auteur ou admin/editor/admin de groupe
-	if comment.UserID != userID.(uint) && userRole != "admin" && userRole != "editor" && len(managedGroupIDs) == 0 {
+	// Vérifier que l'utilisateur est l'auteur, modérateur ou ancien admin de groupe
+	if comment.UserID != userID.(uint) && !canModerateComments(c) && len(managedGroupIDs) == 0 {
 		apierror.Respond(c, http.StatusForbidden, "Vous n'avez pas la permission de supprimer ce commentaire")
 		return
 	}
@@ -472,4 +462,10 @@ func (h *CommentHandler) UpdateCommentSettings(c *gin.Context) {
 		Message: "Paramètres mis à jour avec succès",
 		Data:    settings,
 	})
+}
+
+// canModerateComments : l'utilisateur modère les commentaires (permission comments.moderate,
+// admin compris).
+func canModerateComments(c *gin.Context) bool {
+	return middleware.HasPermissionEverywhere(c, models.PermCommentsModerate)
 }

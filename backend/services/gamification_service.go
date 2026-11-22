@@ -418,8 +418,8 @@ func (s *GamificationService) UnlockAchievement(tx *gorm.DB, userID uint, code s
 			return err
 		}
 
-		// Vérifier si admin, editor ou s'il gère au moins un groupe
-		isContributor := user.Role == "admin" || user.Role == "editor"
+		// Contributeur : admin, permission de rédaction, ou gère au moins un groupe
+		isContributor := models.IsContributor(tx, user)
 		if !isContributor {
 			var groupAdminCount int64
 			tx.Table("group_admins").Where("user_id = ?", userID).Count(&groupAdminCount)

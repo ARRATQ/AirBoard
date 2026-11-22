@@ -24,7 +24,8 @@ type userStatus struct {
 	ManagedGroupIDs []uint
 	// Permissions effectives {permission: portée} issues des rôles attribués
 	Permissions map[string]string
-	// MemberGroupIDs : groupes dont l'utilisateur est membre (portée « ses groupes »)
+	// MemberGroupIDs : groupes couverts par la portée « ses groupes » : ceux dont
+	// l'utilisateur est membre, hors groupe par défaut (voir models.PermissionGroupIDs)
 	MemberGroupIDs []uint
 }
 

@@ -55,8 +55,8 @@ func resourcesRouter(t *testing.T, tx *gorm.DB, userID uint, role string, manage
 	if err != nil {
 		t.Fatalf("permissions : %v", err)
 	}
-	var members []uint
-	if err := tx.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &members).Error; err != nil {
+	members, err := models.PermissionGroupIDs(tx, userID)
+	if err != nil {
 		t.Fatalf("groupes : %v", err)
 	}
 	am := middleware.NewAuthMiddleware(&config.Config{}, tx)
