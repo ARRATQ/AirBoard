@@ -247,7 +247,7 @@ onMounted(async () => {
   justify-content: center;
   inline-size: 40px;
   block-size: 40px;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   color: var(--text);
   transition: background-color 150ms ease;
 }

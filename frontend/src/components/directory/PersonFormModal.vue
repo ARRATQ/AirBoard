@@ -303,7 +303,7 @@ useEscapeClose(showGallery, () => { showGallery.value = false })
   max-height: 14rem;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 0.6rem;
+  border-radius: var(--r-s);
   background: var(--bg-card);
   box-shadow: 0 12px 24px -12px rgba(var(--shadow-rgb, 15, 23, 42), 0.35);
 }

@@ -24,7 +24,7 @@ defineProps({
    grille ; la largeur est celle du bandeau lui-même, pas de la fenêtre. */
 .figures {
   container-type: inline-size;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   background: var(--board);
   overflow: hidden;
 }

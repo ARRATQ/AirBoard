@@ -351,7 +351,7 @@ onMounted(() => {
 .cm-tab__count {
   padding: 1px 6px;
   border: 1px solid var(--warn);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   color: var(--warn);
   font-family: var(--f-num);
   font-size: 10.5px;
@@ -404,7 +404,7 @@ onMounted(() => {
   max-width: 720px;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -433,7 +433,7 @@ onMounted(() => {
   width: 36px;
   height: 20px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 

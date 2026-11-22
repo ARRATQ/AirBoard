@@ -101,7 +101,7 @@
         class="card p-5 border border-gray-200 dark:border-gray-700"
       >
         <div class="flex items-start justify-between gap-4 flex-wrap">
-          <div class="flex-1 min-w-0">
+          <div class="flex-[1_1_16rem] min-w-0">
             <RouterLink :to="`/suggestions/${item.id}`" class="group">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                 {{ item.title }}
@@ -109,7 +109,7 @@
             </RouterLink>
 
             <div class="mt-2 flex items-center gap-2 flex-wrap text-xs">
-              <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+              <span class="tag">
                 {{ suggestionCategoryLabel(item, t, te) }}
               </span>
               <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
@@ -127,12 +127,12 @@
           </div>
 
           <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-            <span class="vote-chip vote-chip-up">
-              <Icon icon="mdi:thumb-up-outline" class="h-4 w-4" />
+            <span class="tag tag--ok">
+              <Icon icon="mdi:thumb-up-outline" aria-hidden="true" />
               {{ item.upvotes || 0 }}
             </span>
-            <span class="vote-chip vote-chip-down">
-              <Icon icon="mdi:thumb-down-outline" class="h-4 w-4" />
+            <span class="tag tag--bad">
+              <Icon icon="mdi:thumb-down-outline" aria-hidden="true" />
               {{ item.downvotes || 0 }}
             </span>
             <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
@@ -162,7 +162,7 @@
         </RouterLink>
 
         <div class="mt-2 flex items-center gap-2 flex-wrap text-xs">
-          <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          <span class="tag">
             {{ suggestionCategoryLabel(item, t, te) }}
           </span>
           <StatusBadge :tone="suggestionStatusTone(item.status)">{{ t(`suggestions.statuses.${item.status}`) }}</StatusBadge>
@@ -171,12 +171,12 @@
         <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line line-clamp-4 flex-1">{{ item.description }}</p>
 
         <div class="mt-4 flex items-center justify-between gap-2 text-sm text-gray-600 dark:text-gray-300">
-          <span class="vote-chip vote-chip-up">
-            <Icon icon="mdi:thumb-up-outline" class="h-4 w-4" />
+          <span class="tag tag--ok">
+            <Icon icon="mdi:thumb-up-outline" aria-hidden="true" />
             {{ item.upvotes || 0 }}
           </span>
-          <span class="vote-chip vote-chip-down">
-            <Icon icon="mdi:thumb-down-outline" class="h-4 w-4" />
+          <span class="tag tag--bad">
+            <Icon icon="mdi:thumb-down-outline" aria-hidden="true" />
             {{ item.downvotes || 0 }}
           </span>
           <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
@@ -515,18 +515,6 @@ useEscapeClose(showCreateModal, () => closeCreateModal())
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(8px);
-}
-
-.vote-chip {
-  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-semibold;
-}
-
-.vote-chip-up {
-  @apply border-green-200 text-green-700 bg-green-50 dark:border-green-800 dark:text-green-300 dark:bg-green-900/20;
-}
-
-.vote-chip-down {
-  @apply border-red-200 text-red-700 bg-red-50 dark:border-red-800 dark:text-red-300 dark:bg-red-900/20;
 }
 
 .suggestion-cta {

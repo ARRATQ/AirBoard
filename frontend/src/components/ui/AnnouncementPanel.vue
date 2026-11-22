@@ -129,7 +129,7 @@ onBeforeUnmount(stop)
   gap: 10px;
   height: 34px;
   padding-inline: 12px 4px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--board);
   color: var(--board-text);
   font-family: var(--f-num);
@@ -173,7 +173,7 @@ onBeforeUnmount(stop)
 .ann__btn:focus-visible {
   outline: 2px solid var(--board-hi);
   outline-offset: -2px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
 }
 
 .ann__line {
@@ -204,7 +204,7 @@ onBeforeUnmount(stop)
   width: 26px;
   height: 26px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--board-text);
   cursor: pointer;

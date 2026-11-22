@@ -37,9 +37,11 @@
   --board-ok:   #5ee08f;
   --board-bad:  #ff7b72;
 
+  /* Une seule rondeur pour tout ce qui a un contour : celle des étiquettes de statut.
+     --r-m et --r-l restent comme alias pour les composants qui les citent. */
   --r-s: 3px;
-  --r-m: 4px;
-  --r-l: 6px;
+  --r-m: var(--r-s);
+  --r-l: var(--r-s);
   --shadow-float: 0 12px 32px -8px rgb(0 0 0 / 0.22), 0 2px 6px rgb(0 0 0 / 0.08);
 
   --f-sans: 'IBM Plex Sans', 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -722,35 +724,43 @@ html {
   border-color: var(--border);
 }
 
-/* Badges */
-.badge {
-  @apply inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium;
+/* Étiquettes (tags) : un seul dessin pour toute l'application, celui des statuts de
+   suggestion — trait fin de la couleur du texte, coins à --r-s, petites capitales.
+   Ton : .tag--ok | --warn | --bad | --info | --acc ; couleur libre (type, catégorie) :
+   .tag--custom avec style="--tag-c: <couleur>". Les anciennes classes .badge, .badge-success,
+   .badge-secondary, .owner-group-badge et .dir-interim suivent le même dessin. */
+.tag,
+.badge,
+.dir-interim {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 2px 7px;
+  border: 1px solid currentColor;
+  border-radius: var(--r-s);
+  background: none;
+  color: var(--muted);
+  font-family: var(--f-num);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.badge-success {
-  @apply bg-green-100 text-green-800 border border-green-200;
-}
+:where(.tag, .badge) > :where(svg, .iconify) { flex: none; width: 12px; height: 12px; }
+.tag--ok, .badge-success { color: var(--ok); }
+.tag--warn, .dir-interim { color: var(--warn); }
+.tag--bad { color: var(--bad); }
+.tag--info, .owner-group-badge { color: var(--info); }
+.tag--acc { color: var(--acc-ink); }
+.tag--custom { color: color-mix(in oklab, var(--tag-c, var(--muted)) 78%, var(--text)); }
 
-.dark .badge-success {
-  @apply bg-green-900 text-green-200 border-green-700;
-}
-
-.badge-secondary {
-  @apply bg-gray-100 text-gray-700 border border-gray-200;
-}
-
-.dark .badge-secondary {
-  @apply bg-gray-700 text-gray-300 border-gray-600;
-}
-
-/* Owner Group Badge */
-.owner-group-badge {
-  @apply bg-blue-100 text-blue-800 border border-blue-200;
-}
-
-.dark .owner-group-badge {
-  @apply bg-blue-900/30 text-blue-300 border-blue-700;
-}
+/* L'espacement des lettres casse la liaison de l'arabe */
+[dir='rtl'] :where(.tag, .badge, .dir-interim) { letter-spacing: 0; }
 
 /* Empty states */
 .empty-state {
@@ -972,7 +982,7 @@ html {
 
 ::-webkit-scrollbar-thumb {
   background: var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -991,15 +1001,6 @@ html {
   }
 }
 
-/* Trombinoscope : badge « intérim » partagé (cartes, organigramme, fiches) */
-.dir-interim {
-  @apply inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wide;
-  color: #b45309;
-  background-color: rgba(245, 158, 11, 0.15);
-}
-.dark .dir-interim {
-  color: #fbbf24;
-}
 
 /* Select compact A+ des barres d'outils (DataTable, filtres d'admin). Chevron du plugin forms
    placé côté fin de ligne, y compris en arabe. */
@@ -1009,7 +1010,7 @@ html {
   padding-block: 0;
   padding-inline: 10px 32px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background-color: var(--surface);
   color: var(--text);
   font-size: 13px;

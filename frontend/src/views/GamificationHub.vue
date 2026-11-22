@@ -297,7 +297,7 @@ onMounted(fetchData)
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0 0 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -347,7 +347,7 @@ onMounted(fetchData)
   min-width: 0;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -397,14 +397,14 @@ onMounted(fetchData)
   display: block;
   height: 6px;
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 
 .xp-progress__fill {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--acc);
   transition: inline-size 600ms ease;
 }
@@ -420,12 +420,12 @@ onMounted(fetchData)
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   color: #fff;
   font-size: 15px;
 }
 
-.xp-swatch--sm { width: 18px; height: 18px; border-radius: 3px; font-size: 11px; }
+.xp-swatch--sm { width: 18px; height: 18px; border-radius: var(--r-s); font-size: 11px; }
 
 /* Activité */
 .xp-activity__list { margin: 0; padding: 0; list-style: none; }
@@ -470,7 +470,7 @@ onMounted(fetchData)
   align-items: flex-start;
   padding: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 .xp-badge__icon {
@@ -479,7 +479,7 @@ onMounted(fetchData)
   flex: none;
   width: 36px;
   height: 36px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   color: #fff;
   font-size: 19px;
 }
@@ -517,7 +517,7 @@ onMounted(fetchData)
 .xp-board__row:first-child { border-block-start: 0; }
 
 .xp-board__row.is-me {
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   box-shadow: inset 3px 0 0 var(--acc);
 }

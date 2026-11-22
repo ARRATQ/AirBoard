@@ -144,10 +144,10 @@
               <div class="flex items-start justify-between gap-4 mb-1">
                 <h4 class="text-base font-semibold text-gray-900 dark:text-white flex items-center flex-wrap gap-2">
                   {{ notification.title }}
-                  <span v-if="notification.priority === 2" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase tracking-wide">
+                  <span v-if="notification.priority === 2" class="tag tag--bad">
                     {{ $t('notifications.urgent') }}
                   </span>
-                  <span v-else-if="notification.priority === 1" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 uppercase tracking-wide">
+                  <span v-else-if="notification.priority === 1" class="tag tag--warn">
                     {{ $t('notifications.important') }}
                   </span>
                 </h4>
@@ -162,8 +162,8 @@
 
               <div class="flex items-center flex-wrap gap-3">
                 <span 
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium"
-                  :style="{ backgroundColor: notification.color + '20', color: notification.color }"
+                  class="tag tag--custom"
+                  :style="{ '--tag-c': notification.color }"
                 >
                   {{ $t(`notifications.types.${notification.type}`) }}
                 </span>

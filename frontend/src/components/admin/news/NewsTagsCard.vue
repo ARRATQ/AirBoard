@@ -14,7 +14,7 @@
         <span
           v-for="tagId in modelValue"
           :key="tagId"
-          class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-sm font-medium"
+          class="tag tag--acc"
         >
           <Icon icon="mdi:tag" class="h-3 w-3" />
           {{ tagName(tagId) }}
@@ -24,7 +24,7 @@
             :aria-label="$t('adminShared.news.removeItem', { name: tagName(tagId) })"
             @click="removeTag(tagId)"
           >
-            <Icon icon="mdi:close-circle" class="h-4 w-4" />
+            <Icon icon="mdi:close-circle" class="h-3.5 w-3.5" />
           </button>
         </span>
       </div>

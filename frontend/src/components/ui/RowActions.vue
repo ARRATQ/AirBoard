@@ -57,7 +57,7 @@ const { t } = useI18n()
   width: 30px;
   height: 30px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font-size: 17px;

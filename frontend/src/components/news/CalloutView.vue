@@ -65,7 +65,7 @@ const config = computed(() => types.find(type => type.value === props.node.attrs
 }
 
 .callout-block {
-  border-radius: 8px;
+  border-radius: var(--r-s);
   border-inline-start: 4px solid;
   padding: 12px 16px;
   margin: 0;

@@ -610,7 +610,7 @@ useEscapeClose(showViewModal, () => closeViewModal())
   gap: 1px;
   margin: 0 0 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--line);
   overflow: hidden;
 }
@@ -638,7 +638,7 @@ useEscapeClose(showViewModal, () => closeViewModal())
   padding-block: 7px;
   padding-inline: 30px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
@@ -663,7 +663,7 @@ useEscapeClose(showViewModal, () => closeViewModal())
   display: flex;
   flex-direction: column;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   overflow: hidden;
 }
@@ -719,7 +719,7 @@ useEscapeClose(showViewModal, () => closeViewModal())
   width: 30px;
   height: 30px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
@@ -734,7 +734,7 @@ useEscapeClose(showViewModal, () => closeViewModal())
 .mm-drop {
   padding: 32px;
   border: 2px dashed var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   text-align: center;
 }
 
@@ -742,14 +742,14 @@ useEscapeClose(showViewModal, () => closeViewModal())
 .mm-drop__icon { width: 56px; height: 56px; margin: 0 auto 12px; color: var(--muted); }
 .mm-drop__text { margin: 0 0 8px; color: var(--text); }
 .mm-drop__or { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
-.mm-selected { margin-block-start: 16px; padding: 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--sunken); }
+.mm-selected { margin-block-start: 16px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r-s); background: var(--sunken); }
 .mm-icon { color: var(--acc-ink); }
 .mm-icon-muted { color: var(--muted); }
 .mm-dim { font-size: 12px; color: var(--muted); }
 .mm-center { text-align: center; }
-.mm-bar { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }
+.mm-bar { height: 6px; border-radius: var(--r-s); background: var(--sunken); overflow: hidden; }
 .mm-bar__fill { height: 100%; background: var(--acc); transition: width 0.3s; }
-.mm-view-img { width: 100%; height: auto; border-radius: 4px; }
+.mm-view-img { width: 100%; height: auto; border-radius: var(--r-s); }
 .mm-link { color: var(--acc-ink); text-decoration: underline; overflow-wrap: anywhere; }
 
 @media (prefers-reduced-motion: reduce) {

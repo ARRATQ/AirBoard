@@ -202,7 +202,7 @@ onMounted(async () => {
   flex-direction: column;
   gap: 10px;
   padding: 14px 16px;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   background-color: var(--board);
   color: var(--board-text);
   transition: transform 120ms ease;
@@ -237,7 +237,7 @@ onMounted(async () => {
 .overview-panel {
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--r-s);
   background-color: var(--surface);
 }
 
@@ -301,7 +301,7 @@ a.overview-row:hover,
   gap: 10px;
   min-height: 34px;
   padding-inline: 8px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   font-size: 13.5px;
   color: var(--text);
 }

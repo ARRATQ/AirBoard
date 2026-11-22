@@ -226,7 +226,7 @@ onMounted(() => {
   height: 20px;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   cursor: pointer;
   transition: background-color 0.15s;

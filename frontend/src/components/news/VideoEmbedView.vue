@@ -64,7 +64,7 @@ defineProps({
 
 .video-embed-wrapper {
   position: relative;
-  border-radius: 10px;
+  border-radius: var(--r-s);
   overflow: hidden;
   aspect-ratio: 16 / 9;
   background: #000;
@@ -96,7 +96,7 @@ defineProps({
   color: #fff;
   font-size: 11px;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: var(--r-s);
   z-index: 2;
   pointer-events: none;
 }

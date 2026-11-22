@@ -131,7 +131,7 @@ const formatDate = (key) =>
 .wdc {
   container-type: inline-size;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -177,7 +177,7 @@ const formatDate = (key) =>
   height: 36px;
   padding-inline: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-family: var(--f-num);
@@ -200,7 +200,7 @@ const formatDate = (key) =>
   height: 32px;
   padding-inline: 8px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-size: 12.5px;

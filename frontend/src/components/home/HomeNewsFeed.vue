@@ -160,7 +160,7 @@ const authorOf = (a) => a.author?.username || a.author_name || ''
   margin-block-end: 6px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   overflow-x: auto;
   scrollbar-width: none;
@@ -174,7 +174,7 @@ const authorOf = (a) => a.author?.username || a.author_name || ''
   height: 28px;
   padding-inline: 10px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font: inherit;
@@ -202,7 +202,7 @@ const authorOf = (a) => a.author?.username || a.author_name || ''
 .feed__tab-count {
   min-width: 18px;
   padding: 0 5px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--fill);
   color: var(--on-fill);
   font-family: var(--f-num);
@@ -229,7 +229,7 @@ const authorOf = (a) => a.author?.username || a.author_name || ''
 .feed__row:focus-visible {
   outline: 2px solid var(--acc);
   outline-offset: -2px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 .feed__icon {
@@ -238,7 +238,7 @@ const authorOf = (a) => a.author?.username || a.author_name || ''
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: color-mix(in oklab, var(--c) 14%, var(--surface));
   color: color-mix(in oklab, var(--c) 85%, var(--text));
   font-size: 18px;

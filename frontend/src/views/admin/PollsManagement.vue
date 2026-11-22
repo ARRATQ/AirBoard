@@ -410,7 +410,7 @@ onMounted(() => {
   height: 32px;
   padding-inline: 30px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   font: inherit;
   font-size: 13px;

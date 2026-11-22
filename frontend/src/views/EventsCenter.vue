@@ -262,7 +262,7 @@ loadData()
   height: 30px;
   padding-inline: 10px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font: inherit;

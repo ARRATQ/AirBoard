@@ -86,7 +86,7 @@ onMounted(loadWeather)
   height: 34px;
   padding-inline: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--bg);
   color: var(--muted);
 }
@@ -117,7 +117,7 @@ onMounted(loadWeather)
   flex: none;
   padding: 1px 6px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   font-family: var(--f-num);
   font-size: 10.5px;
   color: var(--muted);

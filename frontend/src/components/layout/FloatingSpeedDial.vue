@@ -295,7 +295,7 @@ onUnmounted(() => {
   background: var(--bg-card);
   color: var(--text-primary);
   padding: 5px 12px;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;

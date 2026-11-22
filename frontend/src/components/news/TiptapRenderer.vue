@@ -242,7 +242,7 @@ const sanitizedContent = computed(() => {
 /* ── Callout blocks ──────────────────────────────── */
 .tiptap-content [data-callout-type] {
   border-inline-start: 4px solid;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   padding: 12px 16px;
   margin: 1rem 0;
 }
@@ -263,7 +263,7 @@ const sanitizedContent = computed(() => {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 10px;
+  border-radius: var(--r-s);
   overflow: hidden;
   margin: 1.5rem 0;
   background: #000;

@@ -543,7 +543,7 @@
                   <td class="py-3 px-4 text-center">
                     <span
                       :class="getStatusClass(log.status)"
-                      class="px-2 py-1 rounded text-xs font-medium"
+                      class="tag"
                     >
                       {{ getStatusText(log.status) }}
                     </span>
@@ -884,17 +884,8 @@ const getVariablesForType = (type) => {
 };
 
 const getStatusClass = (status) => {
-  const classes = {
-    completed:
-      "bg-green-100 dark:bg-green-800/50 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700",
-    sending:
-      "bg-yellow-100 dark:bg-yellow-800/50 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700",
-    failed:
-      "bg-red-100 dark:bg-red-800/50 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700",
-    pending:
-      "bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700",
-  };
-  return classes[status] || classes.pending;
+  const tones = { completed: "tag--ok", sending: "tag--warn", failed: "tag--bad", pending: "" };
+  return tones[status] ?? tones.pending;
 };
 
 const getStatusText = (status) => {

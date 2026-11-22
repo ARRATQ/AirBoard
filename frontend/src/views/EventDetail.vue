@@ -25,85 +25,85 @@
           <!-- All Day Badge -->
           <span
             v-if="event.is_all_day"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+            class="tag tag--info"
           >
-            <Icon icon="mdi:weather-sunny" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:weather-sunny" />
             {{ $t('events.badge.allDay') }}
           </span>
 
           <!-- Recurring Badge -->
           <span
             v-if="event.is_recurring"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            class="tag tag--ok"
           >
-            <Icon icon="mdi:repeat" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:repeat" />
             {{ $t('events.badge.recurring') }}
           </span>
 
           <!-- Past Event Badge -->
           <span
             v-if="isPastEvent"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+            class="tag"
           >
-            <Icon icon="mdi:history" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:history" />
             {{ $t('events.badge.past') }}
           </span>
 
           <!-- Priority Badge -->
           <span
             v-if="event.priority === 'urgent'"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+            class="tag tag--bad"
           >
-            <Icon icon="mdi:alert" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:alert" />
             {{ $t('events.priority.urgent') }}
           </span>
           <span
             v-else-if="event.priority === 'important'"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+            class="tag tag--warn"
           >
-            <Icon icon="mdi:star" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:star" />
             {{ $t('events.priority.important') }}
           </span>
 
           <!-- Status Badge -->
           <span
             v-if="!event.is_published"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+            class="tag tag--warn"
           >
-            <Icon icon="mdi:clock" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:clock" />
             {{ $t('events.status.draft') }}
           </span>
           <span
             v-else-if="event.published_at"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            class="tag tag--ok"
           >
-            <Icon icon="mdi:check-circle" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:check-circle" />
             {{ $t('events.status.published') }}
           </span>
 
           <!-- Visibility Badge -->
           <span
             v-if="!event.target_groups || event.target_groups.length === 0"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            class="tag tag--ok"
           >
-            <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:earth" />
             {{ $t('events.visibility.public') }}
           </span>
           <span
             v-else
-            class="px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+            class="tag tag--info"
             :title="getGroupsTooltip(event.target_groups)"
           >
-            <Icon icon="mdi:lock" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:lock" />
             {{ getVisibilityLabel(event.target_groups) }}
           </span>
 
           <!-- Category -->
           <span
             v-if="event.category"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+            class="tag"
           >
-            <Icon :icon="event.category.icon || 'mdi:folder'" class="inline h-4 w-4 me-1" :style="{ color: event.category.color }" />
+            <Icon :icon="event.category.icon || 'mdi:folder'" :style="{ color: event.category.color }" />
             {{ event.category.name }}
           </span>
         </div>
@@ -234,8 +234,8 @@
           <span
             v-for="tag in event.tags"
             :key="tag.id"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            :style="{ backgroundColor: tag.color + '20', color: tag.color }"
+            class="tag tag--custom"
+            :style="{ '--tag-c': tag.color }"
           >
             #{{ tag.name }}
           </span>

@@ -15,7 +15,7 @@
         />
         <span v-else class="w-5" />
         <span class="org-node__name">{{ unit.name }}</span>
-        <span v-if="unit.code" class="org-node__code">{{ unit.code }}</span>
+        <span v-if="unit.code" class="tag org-node__code">{{ unit.code }}</span>
         <span class="org-node__count" :title="$t('directory.peopleCount', { count: peopleCount })">
           <Icon icon="mdi:account-multiple-outline" class="h-3.5 w-3.5" /> {{ peopleCount }}
         </span>
@@ -105,7 +105,7 @@ const holders = (position) =>
 .org-node__card {
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--unit-color);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   overflow: hidden;
 }
@@ -128,15 +128,6 @@ const holders = (position) =>
 .org-node__chevron--open { transform: rotate(90deg); }
 [dir='rtl'] .org-node__chevron:not(.org-node__chevron--open) { transform: rotate(180deg); }
 .org-node__name { font-weight: 600; font-size: 15px; }
-.org-node__code {
-  padding: 1px 5px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  font-family: var(--f-num);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
 .org-node__count {
   margin-inline-start: auto;
   display: inline-flex;
@@ -155,7 +146,7 @@ const holders = (position) =>
 .org-pos {
   padding: 9px 11px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 .org-pos--head {
