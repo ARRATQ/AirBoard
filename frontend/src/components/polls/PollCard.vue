@@ -243,6 +243,9 @@ const toggleExpanded = () => {
       const card = document.querySelector(`[data-poll-id="${props.poll.id}"]`)
       if (card) {
         card.classList.add('is-expanded')
+        // Sur la page Sondages la carte ouverte passe sur toute une ligne : on la garde à l'écran
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        card.scrollIntoView?.({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
       }
     })
   } else {
@@ -728,6 +731,16 @@ const getWaitingMessage = () => {
   gap: 0.75rem;
 }
 
+/* Carte large (sondage ouvert sur toute la ligne) : options sur deux colonnes */
+.collapsible-content { container-type: inline-size; }
+
+@container (min-width: 720px) {
+  .poll-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .poll-option {
   display: flex;
   align-items: center;
@@ -779,6 +792,9 @@ const getWaitingMessage = () => {
 }
 
 .waiting-icon {
+  /* svg en bloc (preflight) : centré au-dessus du message */
+  display: block;
+  margin-inline: auto;
   font-size: 3rem;
   color: var(--text-muted);
   margin-bottom: 1rem;

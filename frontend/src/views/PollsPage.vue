@@ -256,8 +256,10 @@ onMounted(() => {
   grid-row: auto;
 }
 
-/* Expanded state for masonry layout */
+/* Ouvert, un sondage prend toute la largeur de la grille au lieu de rester dans sa colonne
+   de 300 px ; « dense » laisse les cartes fermées combler la place libérée. */
 .three-column-grid .poll-card.is-expanded {
+  grid-column: 1 / -1;
   /* Allow natural expansion in masonry layout */
   height: auto;
   min-height: 6rem;
