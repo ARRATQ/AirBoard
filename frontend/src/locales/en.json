@@ -2940,7 +2940,8 @@
       "email": "Email",
       "analytics": "Analytics",
       "reports": "Reports",
-      "chatbots": "Chatbots"
+      "chatbots": "Chatbots",
+      "roles": "Roles"
     },
     "tabs": {
       "label": "Page sections",
@@ -3097,6 +3098,49 @@
     "unauthorized": {
       "title": "Access denied",
       "message": "You don't have permission to open this page. Contact your administrator if you think this is a mistake."
+    }
+  },
+  "roles": {
+    "title": "Roles and permissions",
+    "subtitle": "The administrator has every right. Create roles, choose their permissions, then assign them.",
+    "create": "New role",
+    "adminRow": {
+      "name": "Administrator",
+      "text": "Every right, everywhere. This role can't be edited: assign it from a user's profile."
+    },
+    "empty": "No roles",
+    "emptyHelp": "Create a role to delegate part of the administration.",
+    "noPermission": "No permissions",
+    "form": {
+      "permissions": "Permissions",
+      "permissionsHelp": "Tick what this role allows, then choose where.",
+      "scope": "Scope"
+    },
+    "scope": {
+      "all": "Whole site",
+      "groups": "Their groups",
+      "groupsHelp": "Only in the groups the person belongs to."
+    },
+    "permissions": {
+      "resources_manage": {
+        "label": "Manage resources",
+        "help": "Create, edit and delete resources and their categories."
+      }
+    },
+    "members": {
+      "title": "Role members",
+      "manage": "Manage members",
+      "intro": "Ticked people get the permissions of this role.",
+      "loading": "Loading…",
+      "noUsers": "No users found",
+      "selected": "No member selected | 1 member selected | {count} members selected"
+    },
+    "deleteConfirm": "Delete the role \"{name}\"? Its members ({count}) will lose the permissions it gives.",
+    "errors": {
+      "load": "Could not load roles.",
+      "save": "Could not save the role.",
+      "delete": "Could not delete the role.",
+      "members": "Could not update the members."
     }
   }
 }

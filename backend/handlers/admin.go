@@ -60,7 +60,7 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 
 	// Vérifier si l'utilisateur est admin d'au moins un groupe
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if len(managedGroupIDs) > 0 {
+	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
 		// Group admin voit les AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
 		// Récupérer tous les AppGroups accessibles aux groupes administrés
@@ -126,7 +126,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	// Un admin de groupe crée une catégorie privée, rattachée au groupe propriétaire choisi
 	// parmi ceux qu'il administre. L'admin global choisit librement public ou privé.
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	isGroupAdmin := c.GetString("role") != "admin"
+	isGroupAdmin := !middleware.IsUnrestricted(c)
 
 	if isGroupAdmin {
 		ownerID, ok := resolveOwnerGroup(appGroup.OwnerGroupID, managedGroupIDs)
@@ -202,7 +202,7 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
 	// Un admin de groupe garde sa catégorie privée et ne peut la confier qu'à un groupe qu'il administre
-	if c.GetString("role") != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		updateData.IsPrivate = true
 		flags.IsPrivate = nil
 		if updateData.OwnerGroupID != nil && !containsUint(middleware.GetManagedGroupIDs(c), *updateData.OwnerGroupID) {
@@ -309,9 +309,8 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 	}
 
 	// Filtrage selon le rôle pour les admins de groupe
-	role := c.GetString("role")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if role != "admin" && len(managedGroupIDs) > 0 {
+	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
 		// Admin de groupe voit les applications des AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
 		if len(managedGroupIDs) > 0 {
@@ -542,9 +541,8 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 	}
 
 	// Vérification des permissions pour les admins de groupe
-	role := c.GetString("role")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if role != "admin" && len(managedGroupIDs) > 0 {
+	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
 		var application models.Application
 		if err := h.db.Preload("AppGroup").First(&application, id).Error; err != nil {
 			apierror.Respond(c, http.StatusNotFound, "Application non trouvée")

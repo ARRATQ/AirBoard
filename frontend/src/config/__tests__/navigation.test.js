@@ -45,6 +45,20 @@ describe('buildAdminNav', () => {
     expect(nav.overview).toBeNull()
     expect(allLinks(nav)).toEqual(['/admin/news', '/admin/events'])
   })
+
+  it('ajoute les ressources à qui a la permission resources.manage', () => {
+    const editorWithRole = getRoles({ role: 'editor', permissions: { 'resources.manage': 'groups' } })
+    expect(allLinks(buildAdminNav(editorWithRole))).toEqual(['/admin/news', '/admin/events', '/admin/resources'])
+    const userWithRole = getRoles({ role: 'user', permissions: { 'resources.manage': 'all' } })
+    const nav = buildAdminNav(userWithRole)
+    expect(allLinks(nav)).toEqual(['/admin/resources'])
+    expect(nav.titleKey).toBe('nav.admin.title')
+  })
+
+  it("réserve la page Rôles à l'admin", () => {
+    expect(allLinks(buildAdminNav(admin))).toContain('/admin/roles')
+    expect(allLinks(buildAdminNav(groupAdmin))).not.toContain('/admin/roles')
+  })
 })
 
 describe('visibleTabs', () => {

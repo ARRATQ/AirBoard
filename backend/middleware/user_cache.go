@@ -22,6 +22,10 @@ type userStatus struct {
 	Role            string
 	IsActive        bool
 	ManagedGroupIDs []uint
+	// Permissions effectives {permission: portée} issues des rôles attribués
+	Permissions map[string]string
+	// MemberGroupIDs : groupes dont l'utilisateur est membre (portée « ses groupes »)
+	MemberGroupIDs []uint
 }
 
 type userStatusLoader func(ctx context.Context, userID uint) (userStatus, error)
@@ -85,4 +89,11 @@ func (c *userStatusCache) evictExpiredLocked(now time.Time) {
 			delete(c.entries, id)
 		}
 	}
+}
+
+// Clear vide le cache : un rôle modifié ou réattribué s'applique à la requête suivante.
+func (c *userStatusCache) Clear() {
+	c.mu.Lock()
+	c.entries = make(map[uint]cachedUserStatus)
+	c.mu.Unlock()
 }

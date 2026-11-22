@@ -1,4 +1,4 @@
-import { ADMIN, GROUP_ADMIN, CONTENT, canAccess } from './access'
+import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, canAccess, hasAnyPermission } from './access'
 
 /**
  * Menu latéral, décrit une seule fois pour tous les rôles.
@@ -59,7 +59,7 @@ export const ADMIN_SECTIONS = [
     labelKey: 'nav.admin.resources',
     icon: 'lucide:layout-grid',
     items: [
-      { to: '/admin/resources', icon: 'lucide:layout-grid', labelKey: 'nav.admin.resources', access: GROUP_ADMIN }
+      { to: '/admin/resources', icon: 'lucide:layout-grid', labelKey: 'nav.admin.resources', access: RESOURCES }
     ]
   },
   {
@@ -69,6 +69,7 @@ export const ADMIN_SECTIONS = [
     items: [
       { to: '/admin/users', icon: 'lucide:users', labelKey: 'nav.admin.users', access: ADMIN },
       { to: '/admin/groups', icon: 'lucide:users', labelKey: 'nav.admin.groups', access: ADMIN },
+      { to: '/admin/roles', icon: 'lucide:shield-check', labelKey: 'nav.admin.roles', access: ADMIN },
       { to: '/admin/oauth', icon: 'lucide:shield-ellipsis', labelKey: 'nav.admin.oauth', access: ADMIN }
     ]
   },
@@ -112,7 +113,7 @@ export function buildAdminNav(roles) {
   }
 
   return {
-    titleKey: roles.isGroupAdmin ? 'groupAdmin.title' : 'nav.admin.content',
+    titleKey: roles.isGroupAdmin ? 'groupAdmin.title' : hasAnyPermission(roles) ? 'nav.admin.title' : 'nav.admin.content',
     grouped: false,
     overview,
     sections: [],
@@ -135,8 +136,8 @@ export const SECTION_TABS = {
     { to: '/admin/suggestions/categories', labelKey: 'nav.tabs.categories', access: ADMIN }
   ],
   resources: [
-    { to: '/admin/resources', labelKey: 'nav.tabs.resources', access: GROUP_ADMIN, exact: true },
-    { to: '/admin/resources/categories', labelKey: 'nav.tabs.categories', access: GROUP_ADMIN }
+    { to: '/admin/resources', labelKey: 'nav.tabs.resources', access: RESOURCES, exact: true },
+    { to: '/admin/resources/categories', labelKey: 'nav.tabs.categories', access: RESOURCES }
   ]
 }
 

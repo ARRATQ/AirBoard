@@ -113,7 +113,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { adminService, groupAdminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { GROUP_ADMIN } from '@/config/access'
+import { RESOURCES } from '@/config/access'
 import AppGroupModal from '@/components/admin/AppGroupModal.vue'
 
 const { t } = useI18n()
@@ -122,7 +122,7 @@ const { confirm: askConfirm } = useConfirm()
 
 // Admin global : tous les groupes de ressources (API admin) ;
 // admin de groupe : groupes de ressources privés de ses groupes (API group-admin)
-const { isGlobal } = useManagementScope(GROUP_ADMIN)
+const { isGlobal } = useManagementScope(RESOURCES)
 const service = computed(() => (isGlobal.value ? adminService : groupAdminService))
 
 // State

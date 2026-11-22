@@ -173,9 +173,9 @@ import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import IconInput from '@/components/ui/IconInput.vue'
-import { adminService } from '@/services/api'
+import { adminService, groupAdminService } from '@/services/api'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { GROUP_ADMIN } from '@/config/access'
+import { RESOURCES } from '@/config/access'
 
 const props = defineProps({
   show: {
@@ -198,7 +198,7 @@ const emit = defineEmits(['close', 'submit'])
 const { t } = useI18n()
 // Admin global : public/privé et n'importe quel groupe propriétaire ;
 // admin de groupe : toujours privé, propriétaire parmi ses groupes administrés
-const { isGlobal } = useManagementScope(GROUP_ADMIN)
+const { isGlobal, isAdmin } = useManagementScope(RESOURCES)
 
 const DEFAULT_COLOR = '#10b981'
 const DEFAULT_ICON = 'lucide:folder'
@@ -230,11 +230,12 @@ const ownerHelp = computed(() => {
   return isEdit.value ? `${help} ${t('groupAdmin.appGroupModal.ownerGroupEditHelp')}` : help
 })
 
-// Groupes d'utilisateurs pour le choix du propriétaire (admin global uniquement)
+// Groupes d'utilisateurs pour le choix du propriétaire (gestion de tout le site) : liste
+// complète pour l'admin, groupes gérés (tous) pour un rôle qui a la permission partout.
 const loadGroups = async () => {
   if (!isGlobal.value) return
   try {
-    const data = await adminService.getGroups()
+    const data = isAdmin.value ? await adminService.getGroups() : await groupAdminService.getManagedGroups()
     groups.value = data || []
   } catch (error) {
     console.error('Failed to load groups:', error)

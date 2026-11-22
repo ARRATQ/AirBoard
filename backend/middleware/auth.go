@@ -55,7 +55,29 @@ func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (user
 		return userStatus{}, fmt.Errorf("lecture des groupes administrés de %d: %w", userID, err)
 	}
 
-	return userStatus{Role: user.Role, IsActive: user.IsActive, ManagedGroupIDs: managedGroupIDs}, nil
+	permissions, err := LoadPermissions(am.db.WithContext(ctx), userID)
+	if err != nil {
+		return userStatus{}, fmt.Errorf("lecture des permissions de %d: %w", userID, err)
+	}
+	memberGroupIDs := []uint{}
+	if err := am.db.WithContext(ctx).Table("user_groups").
+		Where("user_id = ?", userID).
+		Pluck("group_id", &memberGroupIDs).Error; err != nil {
+		return userStatus{}, fmt.Errorf("lecture des groupes de %d: %w", userID, err)
+	}
+
+	return userStatus{
+		Role:            user.Role,
+		IsActive:        user.IsActive,
+		ManagedGroupIDs: managedGroupIDs,
+		Permissions:     permissions,
+		MemberGroupIDs:  memberGroupIDs,
+	}, nil
+}
+
+// InvalidateUserStatus oublie les droits mis en cache (après un changement de rôle).
+func (am *AuthMiddleware) InvalidateUserStatus() {
+	am.userCache.Clear()
 }
 
 // RequireAuth middleware pour vérifier l'authentification
@@ -110,6 +132,8 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("role", status.Role)
 		c.Set("email", claims.Email)
 		c.Set("managed_group_ids", status.ManagedGroupIDs)
+		c.Set(CtxPermissions, status.Permissions)
+		c.Set(CtxMemberGroupIDs, status.MemberGroupIDs)
 
 		c.Next()
 	}

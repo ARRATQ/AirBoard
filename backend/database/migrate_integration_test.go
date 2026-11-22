@@ -39,6 +39,7 @@ var persistedModels = []interface{}{
 	&models.XPTransaction{}, &models.GamificationRule{}, &models.HeroMessage{},
 	&models.Chatbot{}, &models.OrgUnit{}, &models.OrgPosition{}, &models.DirectoryPerson{},
 	&models.PositionAssignment{}, &models.DirectoryField{},
+	&models.AccessRole{}, &models.AccessRolePermission{},
 }
 
 func openMigrationTestDB(t *testing.T) *gorm.DB {
