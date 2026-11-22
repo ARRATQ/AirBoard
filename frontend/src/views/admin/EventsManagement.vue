@@ -168,7 +168,7 @@ import { eventsService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useConfirm } from '@/composables/useConfirm'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { CONTENT } from '@/config/access'
+import { EVENTS } from '@/config/access'
 
 // Taille de page : /admin/events (paramètre `limit`) et listes filtrées par rôle (`page_size`)
 const ADMIN_PAGE_SIZE = 10
@@ -178,7 +178,7 @@ const { t, locale } = useI18n()
 const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 // Admin et éditeur : tous les événements ; admin de groupe : ceux de ses groupes
-const { isGlobal, isAdmin } = useManagementScope(CONTENT)
+const { isGlobal, isAdmin } = useManagementScope(EVENTS)
 
 const eventsList = ref([])
 const categories = ref([])

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, getRoles, canAccess } from '@/config/access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -258,7 +258,7 @@ const routes = [
     path: '/admin/news',
     component: SectionTabs,
     props: { section: 'news' },
-    meta: { requiresAuth: true, access: CONTENT },
+    meta: { requiresAuth: true, access: NEWS },
     children: [
       { path: '', name: 'AdminNews', component: NewsManagement, meta: { title: 'Actualités' } },
       { path: 'categories', name: 'AdminNewsCategories', component: NewsCategoriesManagement, meta: { access: ADMIN, title: 'Catégories d\'articles' } },
@@ -424,7 +424,7 @@ const routes = [
     component: NewsEditor,
     meta: {
       requiresAuth: true,
-      access: CONTENT,
+      access: NEWS,
       title: 'Modifier l\'article'
     }
   },
@@ -434,7 +434,7 @@ const routes = [
     component: NewsEditor,
     meta: {
       requiresAuth: true,
-      access: CONTENT,
+      access: NEWS,
       title: 'Nouvel Article'
     }
   },
@@ -444,7 +444,7 @@ const routes = [
     component: EventsManagement,
     meta: {
       requiresAuth: true,
-      access: CONTENT,
+      access: EVENTS,
       title: 'Gestion des Événements'
     }
   },
@@ -454,7 +454,7 @@ const routes = [
     component: EventEditor,
     meta: {
       requiresAuth: true,
-      access: CONTENT,
+      access: EVENTS,
       title: 'Modifier l\'Événement'
     }
   },
@@ -464,7 +464,7 @@ const routes = [
     component: EventEditor,
     meta: {
       requiresAuth: true,
-      access: CONTENT,
+      access: EVENTS,
       title: 'Nouvel Événement'
     }
   },

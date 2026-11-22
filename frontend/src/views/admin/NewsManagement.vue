@@ -163,7 +163,7 @@ import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { newsService, groupAdminService } from '@/services/api'
-import { CONTENT } from '@/config/access'
+import { NEWS } from '@/config/access'
 import { useManagementScope } from '@/composables/useManagementScope'
 import { useConfirm } from '@/composables/useConfirm'
 
@@ -175,7 +175,7 @@ const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 
 // Admin et éditeur : toutes les actualités ; admin de groupe seul : celles de ses groupes
-const { isGlobal, isAdmin } = useManagementScope(CONTENT)
+const { isGlobal, isAdmin } = useManagementScope(NEWS)
 
 const isLoading = ref(false)
 const newsList = ref([])

@@ -397,7 +397,7 @@ import { getEventWriteService } from '@/components/admin/events/eventServices'
 import { adminService, eventsService, groupAdminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { CONTENT } from '@/config/access'
+import { EVENTS, ACCESS_PERMISSION } from '@/config/access'
 
 const LIST_PATH = '/admin/events'
 const DEFAULT_COLOR = '#6366f1'
@@ -408,7 +408,7 @@ const router = useRouter()
 const { t } = useI18n()
 const appStore = useAppStore()
 // Admin et éditeur : API globale ; admin de groupe : API /group-admin, groupes administrés
-const { isGlobal, isAdmin } = useManagementScope(CONTENT)
+const { isGlobal, isAdmin } = useManagementScope(EVENTS)
 
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
 const isSaving = ref(false)
@@ -538,7 +538,7 @@ const loadCategories = async () => {
 // L'éditeur n'a pas d'API listant les groupes (GET /admin/groups est réservé à l'admin).
 const fetchTargetGroups = async () => {
   if (!isGlobal.value) {
-    const data = await groupAdminService.getManagedGroups()
+    const data = await groupAdminService.getManagedGroups(ACCESS_PERMISSION[EVENTS])
     return Array.isArray(data) ? data : (data?.groups || data?.data || [])
   }
   if (isAdmin.value) {

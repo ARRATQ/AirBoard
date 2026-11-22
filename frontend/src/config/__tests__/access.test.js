@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, getRoles, canAccess, getScope, permissionScope } from '../access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, getRoles, canAccess, getScope, permissionScope } from '../access'
 
 const admin = getRoles({ role: 'admin' })
 const editor = getRoles({ role: 'editor' })
+// Éditeur migré : rôle « Éditeur » (actualités et événements partout, ressources de ses groupes)
+const migratedEditor = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all', 'resources.manage': 'groups' } })
 const groupAdmin = getRoles({ role: 'user', managed_group_ids: [3] })
-const editorAndGroupAdmin = getRoles({ role: 'editor', admin_of_groups: [{ id: 3 }] })
+const editorAndGroupAdmin = getRoles({ role: 'editor', admin_of_groups: [{ id: 3 }], permissions: { 'news.manage': 'all' } })
 const user = getRoles({ role: 'user', managed_group_ids: [] })
 
 describe('getRoles', () => {
@@ -37,11 +39,25 @@ describe('canAccess', () => {
     expect(canAccess(GROUP_ADMIN, user)).toBe(false)
   })
 
-  it("ouvre CONTENT à l'admin, l'éditeur et l'admin de groupe", () => {
-    expect(canAccess(CONTENT, admin)).toBe(true)
-    expect(canAccess(CONTENT, editor)).toBe(true)
-    expect(canAccess(CONTENT, groupAdmin)).toBe(true)
-    expect(canAccess(CONTENT, user)).toBe(false)
+  it("ouvre NEWS et EVENTS à qui a la permission, à l'admin et à l'admin de groupe", () => {
+    for (const level of [NEWS, EVENTS]) {
+      expect(canAccess(level, admin)).toBe(true)
+      expect(canAccess(level, migratedEditor)).toBe(true)
+      expect(canAccess(level, groupAdmin)).toBe(true)
+      expect(canAccess(level, user)).toBe(false)
+    }
+  })
+
+  it("ne donne plus rien à l'ancien rôle éditeur sans permission", () => {
+    expect(canAccess(NEWS, editor)).toBe(false)
+    expect(canAccess(EVENTS, editor)).toBe(false)
+  })
+
+  it('ouvre chaque module selon sa propre permission', () => {
+    const newsOnly = getRoles({ role: 'user', permissions: { 'news.manage': 'groups' } })
+    expect(canAccess(NEWS, newsOnly)).toBe(true)
+    expect(canAccess(EVENTS, newsOnly)).toBe(false)
+    expect(canAccess(RESOURCES, newsOnly)).toBe(false)
   })
 
   it('refuse un niveau inconnu', () => {
@@ -52,17 +68,19 @@ describe('canAccess', () => {
 describe('getScope', () => {
   it("donne le périmètre global à l'admin", () => {
     expect(getScope(GROUP_ADMIN, admin)).toBe('global')
-    expect(getScope(CONTENT, admin)).toBe('global')
+    expect(getScope(NEWS, admin)).toBe('global')
   })
 
-  it("donne le périmètre global à l'éditeur pour le contenu seulement", () => {
-    expect(getScope(CONTENT, editor)).toBe('global')
-    expect(getScope(CONTENT, editorAndGroupAdmin)).toBe('global')
+  it('donne le périmètre global selon la portée de chaque permission', () => {
+    expect(getScope(NEWS, migratedEditor)).toBe('global')
+    expect(getScope(EVENTS, migratedEditor)).toBe('global')
+    expect(getScope(RESOURCES, migratedEditor)).toBe('group')
+    expect(getScope(NEWS, editorAndGroupAdmin)).toBe('global')
     expect(getScope(GROUP_ADMIN, editorAndGroupAdmin)).toBe('group')
   })
 
   it("limite l'admin de groupe à ses groupes", () => {
-    expect(getScope(CONTENT, groupAdmin)).toBe('group')
+    expect(getScope(NEWS, groupAdmin)).toBe('group')
     expect(getScope(GROUP_ADMIN, groupAdmin)).toBe('group')
   })
 })

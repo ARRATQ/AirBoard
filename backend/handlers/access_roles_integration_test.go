@@ -24,14 +24,22 @@ import (
 	"gorm.io/gorm"
 )
 
-// grantRole crée un rôle avec une permission et l'attribue aux utilisateurs.
+// grantRole crée un rôle « gérer les ressources » et l'attribue aux utilisateurs.
 func grantRole(t *testing.T, tx *gorm.DB, name, scope string, userIDs ...uint) {
+	t.Helper()
+	grantPermissions(t, tx, name, map[string]string{models.PermResourcesManage: scope}, userIDs...)
+}
+
+// grantPermissions crée un rôle avec ces permissions (permission -> portée) et l'attribue.
+func grantPermissions(t *testing.T, tx *gorm.DB, name string, perms map[string]string, userIDs ...uint) {
 	t.Helper()
 	role := models.AccessRole{Name: name}
 	if err := tx.Omit("Permissions").Create(&role).Error; err != nil {
 		t.Fatalf("rôle %s : %v", name, err)
 	}
-	mustCreate(t, tx, &models.AccessRolePermission{RoleID: role.ID, Permission: models.PermResourcesManage, Scope: scope})
+	for perm, scope := range perms {
+		mustCreate(t, tx, &models.AccessRolePermission{RoleID: role.ID, Permission: perm, Scope: scope})
+	}
 	for _, id := range userIDs {
 		if err := tx.Exec("INSERT INTO user_access_roles (user_id, access_role_id) VALUES (?, ?)", id, role.ID).Error; err != nil {
 			t.Fatalf("attribution : %v", err)

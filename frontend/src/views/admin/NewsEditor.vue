@@ -255,7 +255,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useNewsTypesStore } from '@/stores/newsTypes'
 import { newsService, groupAdminService } from '@/services/api'
-import { CONTENT } from '@/config/access'
+import { NEWS, ACCESS_PERMISSION } from '@/config/access'
 import { useManagementScope } from '@/composables/useManagementScope'
 import RichTextEditor from '@/components/news/RichTextEditor.vue'
 import TypeSelect from '@/components/news/TypeSelect.vue'
@@ -274,7 +274,7 @@ const appStore = useAppStore()
 const typesStore = useNewsTypesStore()
 
 // Admin et éditeur : API éditeur ; admin de groupe seul : API group-admin + ciblage obligatoire
-const { isGlobal, isAdmin } = useManagementScope(CONTENT)
+const { isGlobal, isAdmin } = useManagementScope(NEWS)
 
 const isEditMode = computed(() => Boolean(route.params.slug && route.params.slug !== 'new'))
 const isSaving = ref(false)
@@ -368,7 +368,7 @@ const createTag = async ({ name, color }) => {
 
 const loadManagedGroups = async () => {
   try {
-    const data = await groupAdminService.getManagedGroups()
+    const data = await groupAdminService.getManagedGroups(ACCESS_PERMISSION[NEWS])
     managedGroups.value = Array.isArray(data) ? data : (data?.groups || data?.data || [])
   } catch (error) {
     console.error('Erreur au chargement des groupes administrés :', error)

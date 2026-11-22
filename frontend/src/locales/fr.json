@@ -3125,6 +3125,14 @@
       "resources_manage": {
         "label": "Gérer les ressources",
         "help": "Créer, modifier et supprimer les ressources et leurs catégories."
+      },
+      "news_manage": {
+        "label": "Gérer les actualités",
+        "help": "Rédiger, modifier et supprimer les articles, et créer des tags."
+      },
+      "events_manage": {
+        "label": "Gérer les événements",
+        "help": "Créer, modifier et supprimer les événements."
       }
     },
     "members": {

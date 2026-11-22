@@ -349,8 +349,57 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			resourcesScoped.POST("/applications", groupAdminHandler.CreateApplication)
 			resourcesScoped.PUT("/applications/:id", groupAdminHandler.UpdateApplication)
 			resourcesScoped.DELETE("/applications/:id", groupAdminHandler.DeleteApplication)
-			// Groupes que la personne gère (tous si elle n'a pas de restriction)
-			resourcesScoped.GET("/managed-groups", groupAdminHandler.GetManagedGroups)
+		}
+
+		// Groupes où la personne exerce une permission (?permission=news.manage…, ressources
+		// par défaut) : tous si elle l'a sur tout le site.
+		protected.GET("/group-admin/managed-groups", authMiddleware.RequirePermissionParam(), groupAdminHandler.GetManagedGroups)
+
+		// Envoi de médias (images des articles et des événements) : sans notion de groupe.
+		// Les éditeurs (ancien rôle) gardent l'accès tant que les sondages en dépendent.
+		mediaUpload := authMiddleware.RequireAnyPermission(models.PermNewsManage, models.PermEventsManage)
+		protected.POST("/editor/media/upload", authMiddleware.RequireEditorOr(mediaUpload), mediaHandler.UploadMedia)
+		protected.POST("/group-admin/media/upload", mediaUpload, mediaHandler.UploadMedia)
+
+		// Actualités : permission news.manage. Sur tout le site par /editor, limitée aux
+		// groupes de la personne par /group-admin.
+		newsEverywhere := protected.Group("/editor")
+		newsEverywhere.Use(authMiddleware.RequirePermissionEverywhere(models.PermNewsManage))
+		{
+			newsEverywhere.POST("/news", newsHandler.CreateNews)
+			newsEverywhere.PUT("/news/:id", newsHandler.UpdateNews)
+			newsEverywhere.DELETE("/news/:id", newsHandler.DeleteNews)
+			newsEverywhere.POST("/news/tags", newsHandler.CreateTag)
+			newsEverywhere.PUT("/news/tags/:id", newsHandler.UpdateTag)
+			newsEverywhere.DELETE("/news/tags/:id", newsHandler.DeleteTag)
+		}
+		newsScoped := protected.Group("/group-admin")
+		newsScoped.Use(authMiddleware.RequirePermission(models.PermNewsManage))
+		{
+			newsScoped.GET("/news", newsHandler.GetNews)
+			newsScoped.POST("/news", newsHandler.CreateNews)
+			newsScoped.PUT("/news/:id", newsHandler.UpdateNews)
+			newsScoped.DELETE("/news/:id", newsHandler.DeleteNews)
+		}
+		// Tags : créés en rédigeant un article ou un événement ; les modifier ou les supprimer
+		// (partagés par toute l'organisation) reste réservé à l'admin.
+		protected.POST("/group-admin/news/tags", authMiddleware.RequireAnyPermission(models.PermNewsManage, models.PermEventsManage), newsHandler.CreateTag)
+
+		// Événements : permission events.manage, sur le même modèle.
+		eventsEverywhere := protected.Group("/editor")
+		eventsEverywhere.Use(authMiddleware.RequirePermissionEverywhere(models.PermEventsManage))
+		{
+			eventsEverywhere.POST("/events", eventsHandler.CreateEvent)
+			eventsEverywhere.PUT("/events/:id", eventsHandler.UpdateEvent)
+			eventsEverywhere.DELETE("/events/:id", eventsHandler.DeleteEvent)
+		}
+		eventsScoped := protected.Group("/group-admin")
+		eventsScoped.Use(authMiddleware.RequirePermission(models.PermEventsManage))
+		{
+			eventsScoped.GET("/events", eventsHandler.GetEvents)
+			eventsScoped.POST("/events", eventsHandler.CreateEventGroupAdmin)
+			eventsScoped.PUT("/events/:id", eventsHandler.UpdateEventGroupAdmin)
+			eventsScoped.DELETE("/events/:id", eventsHandler.DeleteEventGroupAdmin)
 		}
 
 		admin := protected.Group("/admin")
@@ -538,28 +587,11 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			admin.DELETE("/directory/fields/:id", directoryHandler.DeleteField)
 		}
 
-		// Routes editor (admin et editor peuvent créer/modifier des news et événements)
+		// Routes editor (ancien rôle éditeur) : modération et sondages, en attendant de passer
+		// eux aussi aux permissions. Actualités et événements : voir plus haut.
 		editor := protected.Group("/editor")
 		editor.Use(authMiddleware.RequireEditor())
 		{
-			// Gestion des news
-			editor.POST("/news", newsHandler.CreateNews)
-			editor.PUT("/news/:id", newsHandler.UpdateNews)
-			editor.DELETE("/news/:id", newsHandler.DeleteNews)
-
-			// Gestion des tags (editors peuvent créer des tags)
-			editor.POST("/news/tags", newsHandler.CreateTag)
-			editor.PUT("/news/tags/:id", newsHandler.UpdateTag)
-			editor.DELETE("/news/tags/:id", newsHandler.DeleteTag)
-
-			// Upload de médias (editors, group_admins et admins peuvent uploader)
-			editor.POST("/media/upload", mediaHandler.UploadMedia)
-
-			// Gestion des événements
-			editor.POST("/events", eventsHandler.CreateEvent)
-			editor.PUT("/events/:id", eventsHandler.UpdateEvent)
-			editor.DELETE("/events/:id", eventsHandler.DeleteEvent)
-
 			// Modération des commentaires (editors peuvent aussi modérer)
 			editor.GET("/comments/pending", commentHandler.GetPendingComments)
 			editor.POST("/comments/moderate", commentHandler.ModerateComment)
@@ -578,19 +610,9 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 
 			// Applications (scoped)
 
-			// News (scoped)
-			groupAdmin.GET("/news", newsHandler.GetNews) // Liste des news avec filtrage automatique par rôle
-			groupAdmin.POST("/news", newsHandler.CreateNews)
-			groupAdmin.PUT("/news/:id", newsHandler.UpdateNews)
-			groupAdmin.DELETE("/news/:id", newsHandler.DeleteNews)
-
-			// Upload de médias
-			groupAdmin.POST("/media/upload", mediaHandler.UploadMedia)
-
-			// Tags : un admin de groupe peut en créer (en rédigeant un article ou un événement).
-			// Modifier ou supprimer un tag partagé est réservé aux admins globaux.
+			// Tags : modifier ou supprimer un tag partagé est réservé aux admins globaux
+			// (la création est ouverte plus haut, avec les permissions actualités/événements).
 			adminOnly := authMiddleware.RequireAdmin()
-			groupAdmin.POST("/news/tags", newsHandler.CreateTag)
 			groupAdmin.PUT("/news/tags/:id", adminOnly, newsHandler.UpdateTag)
 			groupAdmin.DELETE("/news/tags/:id", adminOnly, newsHandler.DeleteTag)
 
@@ -598,12 +620,6 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			groupAdmin.POST("/news/categories", adminOnly, newsHandler.CreateCategory)
 			groupAdmin.PUT("/news/categories/:id", adminOnly, newsHandler.UpdateCategory)
 			groupAdmin.DELETE("/news/categories/:id", adminOnly, newsHandler.DeleteCategory)
-
-			// Events (scoped)
-			groupAdmin.GET("/events", eventsHandler.GetEvents) // Liste des événements avec filtrage automatique par rôle
-			groupAdmin.POST("/events", eventsHandler.CreateEventGroupAdmin)
-			groupAdmin.PUT("/events/:id", eventsHandler.UpdateEventGroupAdmin)
-			groupAdmin.DELETE("/events/:id", eventsHandler.DeleteEventGroupAdmin)
 
 			// Polls (scoped - group admin peut gérer les sondages de ses groupes)
 			groupAdmin.GET("/polls", pollsHandler.GetPolls) // Liste des sondages avec filtrage automatique par rôle

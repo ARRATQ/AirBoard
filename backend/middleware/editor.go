@@ -33,3 +33,15 @@ func (m *AuthMiddleware) RequireEditor() gin.HandlerFunc {
 func (m *AuthMiddleware) RequireEditorOrAdmin() gin.HandlerFunc {
 	return m.RequireEditor()
 }
+
+// RequireEditorOr laisse passer l'ancien rôle éditeur, sinon délègue au contrôle donné.
+// Transitoire : tant que des modules (sondages, modération) dépendent encore de ce rôle.
+func (m *AuthMiddleware) RequireEditorOr(next gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.GetString("role") == "editor" {
+			c.Next()
+			return
+		}
+		next(c)
+	}
+}

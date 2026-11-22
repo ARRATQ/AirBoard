@@ -115,15 +115,14 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			"%"+sanitizedSearch+"%", "%"+sanitizedSearch+"%", "%"+sanitizedSearch+"%")
 	}
 
-	// Filtre published only et visibilité par groupes selon le rôle
-	userRole := c.GetString("role")
+	// Filtre published only et visibilité par groupes selon les droits
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	now := time.Now()
 
 	switch {
-	case userRole == "admin":
-		// Admin voit tout (publié + brouillons)
+	case middleware.HasPermissionEverywhere(c, models.PermEventsManage):
+		// Admin, ou gestion des événements sur tout le site : tout (publié + brouillons)
 	case len(managedGroupIDs) > 0:
 		// Administrateur de groupe. Interface /group-admin/events : les événements qu'il
 		// gère. Lecture publique : événements publiés globaux ou des groupes dont il est
@@ -134,9 +133,6 @@ func (h *EventsHandler) GetEvents(c *gin.Context) {
 			groupIDs := memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)
 			query = query.Scopes(eventTargets.publishedVisibleTo(groupIDs, now))
 		}
-	case userRole == "editor":
-		// Editor voit : ses propres brouillons + événements publiés selon ses groupes
-		query = query.Scopes(eventTargets.ownOrPublishedVisibleTo(userID, userGroupIDs(h.db, userID), now))
 	default:
 		// User régulier voit : événements publiés globaux + ceux ciblant ses groupes
 		query = query.Scopes(eventTargets.publishedVisibleTo(userGroupIDs(h.db, userID), now))
@@ -214,11 +210,10 @@ func (h *EventsHandler) GetCalendarView(c *gin.Context) {
 	// Appliquer filtres de visibilité selon rôle : l'admin voit tout ; un administrateur
 	// de groupe, les événements globaux et ceux des groupes dont il est membre ou
 	// administrateur ; un utilisateur, les événements globaux et ceux de ses groupes.
-	userRole := c.GetString("role")
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	if userRole != "admin" {
+	if !middleware.HasPermissionEverywhere(c, models.PermEventsManage) {
 		query = query.Scopes(eventTargets.visibleTo(memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)))
 	}
 
@@ -300,12 +295,11 @@ func (h *EventsHandler) GetEventBySlug(c *gin.Context) {
 		return
 	}
 
-	// Vérifier la visibilité selon le rôle
-	userRole := c.GetString("role")
+	// Vérifier la visibilité selon les droits
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	if userRole != "admin" {
+	if !middleware.HasPermissionEverywhere(c, models.PermEventsManage) {
 		// Vérifier si l'événement est publié
 		if !event.IsPublished {
 			// Seul l'auteur peut voir un brouillon

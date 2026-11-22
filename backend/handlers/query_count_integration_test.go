@@ -62,6 +62,8 @@ type identity struct {
 	id      uint
 	role    string
 	managed []uint
+	// perms : permissions des rôles, comme RequireAuth les pose (permission -> portée)
+	perms map[string]string
 }
 
 func loadIdentity(t *testing.T, db *gorm.DB, username, role string) identity {
