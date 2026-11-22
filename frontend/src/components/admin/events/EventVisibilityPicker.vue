@@ -32,43 +32,17 @@
 
       <!-- Groupes ciblés (événement non public) -->
       <div v-if="!isPublic" class="space-y-2">
-        <div
-          v-if="groupIds.length > 0"
-          class="flex flex-wrap gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-primary-200 dark:border-primary-700"
-        >
-          <span
-            v-for="groupId in groupIds"
-            :key="groupId"
-            class="tag tag--acc"
-          >
-            <Icon icon="lucide:users" class="h-3 w-3" />
-            {{ groupName(groupId) }}
-            <button
-              type="button"
-              class="ms-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-              :aria-label="t('common.delete')"
-              @click="removeGroup(groupId)"
-            >
-              <Icon icon="lucide:circle-x" class="h-3.5 w-3.5" />
-            </button>
-          </span>
-        </div>
-        <div
-          v-else
-          class="text-sm text-orange-500 dark:text-orange-400 italic p-3 bg-white dark:bg-gray-800 rounded-lg border border-orange-200 dark:border-orange-700"
-        >
+        <ComboSelect
+          :model-value="groupIds"
+          kind="group"
+          :options="groupOptions"
+          :label="t('events.editor.visibility')"
+          :placeholder="t('polls.editor.targetGroupsPlaceholder')"
+          @update:model-value="emit('update:groupIds', $event)"
+        />
+        <p v-if="groupIds.length === 0" class="text-sm text-orange-600 dark:text-orange-400" role="status">
           {{ t('groupAdmin.eventEditor.noGroupSelected') }}
-        </div>
-
-        <select
-          class="w-full px-3 py-2 border-2 border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
-          @change="addGroup"
-        >
-          <option value="">{{ t('groupAdmin.eventEditor.addGroup') }}</option>
-          <option v-for="group in selectableGroups" :key="group.id" :value="group.id">
-            {{ group.name }}
-          </option>
-        </select>
+        </p>
       </div>
     </div>
   </div>
@@ -78,6 +52,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
+import { groupOption } from '@/utils/comboFilter'
 
 const props = defineProps({
   // v-model:groupIds — identifiants des groupes ciblés
@@ -101,20 +77,5 @@ const emit = defineEmits(['update:groupIds', 'update:isPublic'])
 
 const { t } = useI18n()
 
-const selectableGroups = computed(() => props.groups.filter((group) => !props.groupIds.includes(group.id)))
-
-const groupName = (groupId) => props.groups.find((group) => group.id === groupId)?.name || ''
-
-const addGroup = (event) => {
-  const groupId = parseInt(event.target.value, 10)
-  if (groupId && !props.groupIds.includes(groupId)) {
-    emit('update:groupIds', [...props.groupIds, groupId])
-  }
-  // Remet le menu sur « + Ajouter un groupe »
-  event.target.value = ''
-}
-
-const removeGroup = (groupId) => {
-  emit('update:groupIds', props.groupIds.filter((id) => id !== groupId))
-}
+const groupOptions = computed(() => props.groups.map((group) => groupOption(group)))
 </script>

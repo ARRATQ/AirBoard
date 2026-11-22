@@ -1,6 +1,7 @@
 package models
 
 import (
+	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -74,8 +75,10 @@ type AccessRole struct {
 	Description string                 `json:"description"`
 	Permissions []AccessRolePermission `json:"permissions" gorm:"foreignKey:RoleID"`
 	UserCount   int64                  `json:"user_count" gorm:"-"`
-	CreatedAt   time.Time              `json:"created_at"`
-	UpdatedAt   time.Time              `json:"updated_at"`
+	// GroupIDs : groupes choisis pour ce rôle quand il est lu pour un compte (vide : ses groupes)
+	GroupIDs  []uint    `json:"group_ids,omitempty" gorm:"-"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // AccessRolePermission est une permission accordée par un rôle, avec sa portée.
@@ -153,15 +156,19 @@ func EveryoneGroupID(db *gorm.DB) (uint, error) {
 	return ids[0], nil
 }
 
-// PermissionGroupIDs renvoie les groupes couverts par une permission de portée « ses
-// groupes » : ceux dont le compte est membre, hors groupe par défaut. Ce groupe réunit tout
-// le monde : le viser revient à publier pour tout le site, ce que seule la portée « tout le
-// site » permet.
+// PermissionGroupIDs renvoie les groupes dont le compte est membre, hors groupe par défaut :
+// ceux que couvre la portée « ses groupes » d'un rôle attribué sans groupes choisis. Le groupe
+// par défaut réunit tout le monde : le viser revient à publier pour tout le site, ce que seule
+// la portée « tout le site » permet.
 func PermissionGroupIDs(db *gorm.DB, userID uint) ([]uint, error) {
 	everyone, err := EveryoneGroupID(db)
 	if err != nil {
 		return nil, err
 	}
+	return memberGroupsExcept(db, userID, everyone)
+}
+
+func memberGroupsExcept(db *gorm.DB, userID, everyone uint) ([]uint, error) {
 	ids := []uint{}
 	query := db.Table("user_groups").Where("user_id = ?", userID)
 	if everyone != 0 {
@@ -171,4 +178,103 @@ func PermissionGroupIDs(db *gorm.DB, userID uint) ([]uint, error) {
 		return nil, err
 	}
 	return ids, nil
+}
+
+// UserAccessRoleGroup : groupe choisi pour un rôle attribué à un compte. Un rôle attribué
+// sans groupe choisi couvre les groupes dont le compte est membre (PermissionGroupIDs).
+type UserAccessRoleGroup struct {
+	UserID       uint `gorm:"primaryKey"`
+	AccessRoleID uint `gorm:"primaryKey"`
+	GroupID      uint `gorm:"primaryKey"`
+}
+
+// TableName : nom de table fixé, indépendant des règles de pluriel de GORM.
+func (UserAccessRoleGroup) TableName() string { return "user_access_role_groups" }
+
+// AssignmentGroups renvoie, pour chaque rôle attribué au compte, les groupes choisis
+// (groupes supprimés et groupe par défaut exclus) ; un rôle absent n'a pas de groupe choisi.
+func AssignmentGroups(db *gorm.DB, userID uint) (map[uint][]uint, error) {
+	everyone, err := EveryoneGroupID(db)
+	if err != nil {
+		return nil, err
+	}
+	return assignmentGroupsExcept(db, userID, everyone)
+}
+
+func assignmentGroupsExcept(db *gorm.DB, userID, everyone uint) (map[uint][]uint, error) {
+	var rows []UserAccessRoleGroup
+	query := db.Table("user_access_role_groups uarg").
+		Select("uarg.user_id, uarg.access_role_id, uarg.group_id").
+		Joins("JOIN groups g ON g.id = uarg.group_id AND g.deleted_at IS NULL").
+		Where("uarg.user_id = ?", userID)
+	if everyone != 0 {
+		query = query.Where("uarg.group_id <> ?", everyone)
+	}
+	if err := query.Order("uarg.group_id").Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+	out := make(map[uint][]uint)
+	for _, r := range rows {
+		out[r.AccessRoleID] = append(out[r.AccessRoleID], r.GroupID)
+	}
+	return out, nil
+}
+
+// PermissionGroups renvoie, pour chaque permission que le compte exerce avec la portée « ses
+// groupes », les groupes couverts : l'union, sur les rôles qui la donnent, des groupes choisis
+// à l'attribution, ou des groupes dont il est membre si aucun n'a été choisi.
+func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
+	var rows []struct {
+		Permission   string
+		AccessRoleID uint
+	}
+	if err := db.Table("access_role_permissions arp").
+		Select("arp.permission, uar.access_role_id").
+		Joins("JOIN user_access_roles uar ON uar.access_role_id = arp.role_id").
+		Where("uar.user_id = ? AND arp.scope = ?", userID, ScopeGroups).
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+	out := map[string][]uint{}
+	if len(rows) == 0 {
+		return out, nil
+	}
+	everyone, err := EveryoneGroupID(db)
+	if err != nil {
+		return nil, err
+	}
+	chosen, err := assignmentGroupsExcept(db, userID, everyone)
+	if err != nil {
+		return nil, err
+	}
+	var members []uint
+	membersLoaded := false
+	sets := map[string]map[uint]bool{}
+	for _, r := range rows {
+		groups, ok := chosen[r.AccessRoleID]
+		if !ok {
+			if !membersLoaded {
+				if members, err = memberGroupsExcept(db, userID, everyone); err != nil {
+					return nil, err
+				}
+				membersLoaded = true
+			}
+			groups = members
+		}
+		if sets[r.Permission] == nil {
+			sets[r.Permission] = map[uint]bool{}
+		}
+		for _, id := range groups {
+			sets[r.Permission][id] = true
+		}
+	}
+	for perm, set := range sets {
+		ids := make([]uint, 0, len(set))
+		for id := range set {
+			ids = append(ids, id)
+		}
+		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+		out[perm] = ids
+	}
+	return out, nil
 }

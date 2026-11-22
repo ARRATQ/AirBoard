@@ -385,8 +385,9 @@ export const adminService = {
     return response.data
   },
 
-  async setUserAccessRoles(userId, roleIds) {
-    const response = await api.put(`/admin/users/${userId}/access-roles`, { role_ids: roleIds })
+  // assignments : [{ id, group_ids }] (group_ids vide : les groupes dont le compte est membre)
+  async setUserAccessRoles(userId, assignments) {
+    const response = await api.put(`/admin/users/${userId}/access-roles`, { roles: assignments })
     return response.data
   },
 

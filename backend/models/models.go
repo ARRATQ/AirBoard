@@ -37,8 +37,8 @@ type User struct {
 	// Champ calculé (non stocké en base)
 	// Permissions effectives {permission: portée}, union des rôles attribués (vide pour l'admin : il a tout)
 	Permissions map[string]string `json:"permissions,omitempty" gorm:"-"`
-	// Groupes couverts par la portée « ses groupes » (membre, hors groupe par défaut)
-	PermissionGroupIDs []uint `json:"permission_group_ids,omitempty" gorm:"-"`
+	// Groupes couverts par chaque permission de portée « ses groupes » {permission: groupes}
+	PermissionGroups map[string][]uint `json:"permission_groups,omitempty" gorm:"-"`
 }
 
 // Group représente un groupe d'utilisateurs
@@ -51,6 +51,8 @@ type Group struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	// IsDefault : groupe par défaut, qui réunit tout le monde (calculé, voir EveryoneGroupID)
+	IsDefault bool `json:"is_default,omitempty" gorm:"-"`
 
 	// Relations
 	Users     []User     `json:"users,omitempty" gorm:"many2many:user_groups;"`

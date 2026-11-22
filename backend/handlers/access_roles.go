@@ -199,12 +199,17 @@ func (h *AccessRolesHandler) SetRoleMembers(c *gin.Context) {
 			return
 		}
 	}
+	// Les membres conservés gardent leur attribution, et donc les groupes choisis pour elle
 	err := h.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("DELETE FROM user_access_roles WHERE access_role_id = ?", role.ID).Error; err != nil {
+		remove := tx.Where("access_role_id = ?", role.ID)
+		if len(ids) > 0 {
+			remove = remove.Where("user_id NOT IN ?", ids)
+		}
+		if err := remove.Delete(&userAccessRole{}).Error; err != nil {
 			return err
 		}
 		for _, id := range ids {
-			if err := tx.Exec("INSERT INTO user_access_roles (user_id, access_role_id) VALUES (?, ?)", id, role.ID).Error; err != nil {
+			if err := tx.Exec("INSERT INTO user_access_roles (user_id, access_role_id) VALUES (?, ?) ON CONFLICT DO NOTHING", id, role.ID).Error; err != nil {
 				return err
 			}
 		}
@@ -219,7 +224,23 @@ func (h *AccessRolesHandler) SetRoleMembers(c *gin.Context) {
 	c.JSON(http.StatusOK, models.SuccessResponse{Message: "Membres du rôle enregistrés"})
 }
 
-// GetUserRoles renvoie les rôles d'un compte (sans leurs permissions).
+// userAccessRole : attribution d'un rôle à un compte (table user_access_roles).
+type userAccessRole struct {
+	UserID       uint
+	AccessRoleID uint
+}
+
+func (userAccessRole) TableName() string { return "user_access_roles" }
+
+// roleAssignment : rôle attribué à un compte, avec les groupes choisis pour ses permissions de
+// portée « ses groupes » (aucun : les groupes dont le compte est membre).
+type roleAssignment struct {
+	ID       uint   `json:"id"`
+	GroupIDs []uint `json:"group_ids"`
+}
+
+// GetUserRoles renvoie les rôles d'un compte (sans leurs permissions), chacun avec les groupes
+// choisis à l'attribution (group_ids, absent : ses groupes).
 func (h *AccessRolesHandler) GetUserRoles(c *gin.Context) {
 	userID, ok := h.findUserID(c)
 	if !ok {
@@ -235,41 +256,51 @@ func (h *AccessRolesHandler) GetUserRoles(c *gin.Context) {
 		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des rôles")
 		return
 	}
+	groups, err := models.AssignmentGroups(h.db, userID)
+	if err != nil {
+		log.Printf("access-roles: groupes des rôles du compte %d illisibles : %v", userID, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des rôles")
+		return
+	}
+	for i := range roles {
+		roles[i].GroupIDs = groups[roles[i].ID]
+	}
 	c.JSON(http.StatusOK, roles)
 }
 
-// SetUserRoles remplace les rôles d'un compte.
+// SetUserRoles remplace les rôles d'un compte. Corps : {"roles": [{"id", "group_ids"}]}, ou
+// {"role_ids": [...]} pour des rôles sans groupe choisi.
 func (h *AccessRolesHandler) SetUserRoles(c *gin.Context) {
 	userID, ok := h.findUserID(c)
 	if !ok {
 		return
 	}
 	var req struct {
-		RoleIDs []uint `json:"role_ids"`
+		RoleIDs []uint           `json:"role_ids"`
+		Roles   []roleAssignment `json:"roles"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apierror.Respond(c, http.StatusBadRequest, "Format de requête invalide")
 		return
 	}
-	ids := uniqueUint(req.RoleIDs)
-	if len(ids) > 0 {
-		var found int64
-		if err := h.db.Model(&models.AccessRole{}).Where("id IN ?", ids).Count(&found).Error; err != nil {
-			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification des rôles")
-			return
-		}
-		if found != int64(len(ids)) {
-			apierror.Respond(c, http.StatusBadRequest, "Certains rôles n'existent pas")
-			return
-		}
+	assignments := normalizeAssignments(req.Roles, req.RoleIDs)
+	if !h.validateAssignments(c, assignments) {
+		return
 	}
 	err := h.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("DELETE FROM user_access_roles WHERE user_id = ?", userID).Error; err != nil {
+		// La suppression des attributions emporte leurs groupes (ON DELETE CASCADE)
+		if err := tx.Where("user_id = ?", userID).Delete(&userAccessRole{}).Error; err != nil {
 			return err
 		}
-		for _, id := range ids {
-			if err := tx.Exec("INSERT INTO user_access_roles (user_id, access_role_id) VALUES (?, ?)", userID, id).Error; err != nil {
+		for _, a := range assignments {
+			if err := tx.Create(&userAccessRole{UserID: userID, AccessRoleID: a.ID}).Error; err != nil {
 				return err
+			}
+			for _, g := range a.GroupIDs {
+				row := models.UserAccessRoleGroup{UserID: userID, AccessRoleID: a.ID, GroupID: g}
+				if err := tx.Create(&row).Error; err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -281,6 +312,77 @@ func (h *AccessRolesHandler) SetUserRoles(c *gin.Context) {
 	}
 	h.onChange()
 	c.JSON(http.StatusOK, models.SuccessResponse{Message: "Rôles enregistrés"})
+}
+
+// normalizeAssignments fusionne les deux formes du corps, sans rôle ni groupe en double.
+func normalizeAssignments(roles []roleAssignment, roleIDs []uint) []roleAssignment {
+	byRole := map[uint]int{}
+	out := []roleAssignment{}
+	add := func(id uint, groups []uint) {
+		if id == 0 {
+			return
+		}
+		if i, ok := byRole[id]; ok {
+			out[i].GroupIDs = uniqueUint(append(append([]uint{}, out[i].GroupIDs...), groups...))
+			return
+		}
+		byRole[id] = len(out)
+		out = append(out, roleAssignment{ID: id, GroupIDs: uniqueUint(groups)})
+	}
+	for _, r := range roles {
+		add(r.ID, r.GroupIDs)
+	}
+	for _, id := range roleIDs {
+		add(id, nil)
+	}
+	return out
+}
+
+// validateAssignments vérifie que les rôles et les groupes existent, et refuse le groupe par
+// défaut : il réunit tout le monde, ce que seule la portée « tout le site » couvre.
+func (h *AccessRolesHandler) validateAssignments(c *gin.Context, assignments []roleAssignment) bool {
+	roleIDs := []uint{}
+	groupIDs := []uint{}
+	for _, a := range assignments {
+		roleIDs = append(roleIDs, a.ID)
+		groupIDs = append(groupIDs, a.GroupIDs...)
+	}
+	groupIDs = uniqueUint(groupIDs)
+	if len(roleIDs) > 0 {
+		var found int64
+		if err := h.db.Model(&models.AccessRole{}).Where("id IN ?", roleIDs).Count(&found).Error; err != nil {
+			apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification des rôles")
+			return false
+		}
+		if found != int64(len(roleIDs)) {
+			apierror.Respond(c, http.StatusBadRequest, "Certains rôles n'existent pas")
+			return false
+		}
+	}
+	if len(groupIDs) == 0 {
+		return true
+	}
+	everyone, err := models.EveryoneGroupID(h.db)
+	if err != nil {
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification des groupes")
+		return false
+	}
+	for _, id := range groupIDs {
+		if id == everyone {
+			apierror.Respond(c, http.StatusBadRequest, "Le groupe par défaut réunit tout le monde : donnez plutôt la portée « tout le site »")
+			return false
+		}
+	}
+	var found int64
+	if err := h.db.Model(&models.Group{}).Where("id IN ?", groupIDs).Count(&found).Error; err != nil {
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la vérification des groupes")
+		return false
+	}
+	if found != int64(len(groupIDs)) {
+		apierror.Respond(c, http.StatusBadRequest, "Certains groupes n'existent pas")
+		return false
+	}
+	return true
 }
 
 // findUserID vérifie que le compte désigné par :id existe (non supprimé), ou répond 400/404.

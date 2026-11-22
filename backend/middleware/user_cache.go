@@ -23,9 +23,9 @@ type userStatus struct {
 	IsActive bool
 	// Permissions effectives {permission: portée} issues des rôles attribués
 	Permissions map[string]string
-	// MemberGroupIDs : groupes couverts par la portée « ses groupes » : ceux dont
-	// l'utilisateur est membre, hors groupe par défaut (voir models.PermissionGroupIDs)
-	MemberGroupIDs []uint
+	// PermissionGroups : pour chaque permission de portée « ses groupes », les groupes
+	// couverts (voir models.PermissionGroups)
+	PermissionGroups map[string][]uint
 }
 
 type userStatusLoader func(ctx context.Context, userID uint) (userStatus, error)

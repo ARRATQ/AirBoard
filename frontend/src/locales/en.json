@@ -358,7 +358,13 @@
     "accessRolesHint": "Each role adds permissions (news, polls, moderation…). Roles are created on the Roles page.",
     "accessRolesAdmin": "An administrator already has every permission: no role to assign.",
     "accessRolesLoadError": "Could not load roles.",
-    "noAccessRoles": "No roles created yet."
+    "noAccessRoles": "No roles created yet.",
+    "groupsPlaceholder": "Search for a group…",
+    "membersCount": "No members | 1 member | {n} members",
+    "roleGroups": "Groups covered by the {role} role",
+    "roleGroupsPlaceholder": "Their groups (default) — or choose…",
+    "roleGroupsChosen": "The role applies only to the chosen groups.",
+    "roleGroupsDefault": "No group chosen: the role applies to the groups this person belongs to (except the default group)."
   },
   "groupModal": {
     "titleEdit": "Edit group",
@@ -1220,7 +1226,6 @@
       "targetGroupsRequired": "*",
       "targetGroupsHelp": "Select the groups that will see this news",
       "noGroupSelected": "⚠️ No group selected - the article will be visible to no one",
-      "addGroup": "+ Add a group",
       "classification": "Classification",
       "categoryLabel": "Category",
       "noCategory": "No category",
@@ -1391,7 +1396,6 @@
       "publicEvent": "Public event",
       "publicEventHelp": "Visible to all users",
       "noGroupSelected": "Select at least one group or make the event public",
-      "addGroup": "+ Add a group",
       "classification": "Classification",
       "category": "Category",
       "noCategory": "No category",
@@ -2081,7 +2085,7 @@
       "startDate": "Start date (optional)",
       "endDate": "End date (optional)",
       "targetGroups": "Target groups (empty = global)",
-      "targetGroupsHelp": "Click on a group to select/deselect it. If no group is selected, the poll will be visible to everyone.",
+      "targetGroupsHelp": "Search, then choose the groups. If no group is chosen, the poll will be visible to everyone.",
       "noGroupsAvailable": "No groups available",
       "optionalLinks": "Links (optional)",
       "linkToArticle": "Link to article",
@@ -2103,7 +2107,8 @@
         "updateSuccess": "Poll updated successfully",
         "saveError": "Error while saving"
       },
-      "removeOption": "Remove option {index}"
+      "removeOption": "Remove option {index}",
+      "targetGroupsPlaceholder": "Search for a group to target…"
     },
     "detail": {
       "breadcrumb": "Polls",
@@ -3130,10 +3135,11 @@
     "members": {
       "title": "Role members",
       "manage": "Manage members",
-      "intro": "Ticked people get the permissions of this role.",
+      "intro": "The people chosen receive this role's permissions. To limit the role to certain groups for one person, open their user record.",
       "loading": "Loading…",
       "noUsers": "No users found",
-      "selected": "No member selected | 1 member selected | {count} members selected"
+      "selected": "No member selected | 1 member selected | {count} members selected",
+      "searchPlaceholder": "Search for a person (name, username, email)…"
     },
     "deleteConfirm": "Delete the role \"{name}\"? Its members ({count}) will lose the permissions it gives.",
     "errors": {
@@ -3142,5 +3148,13 @@
       "delete": "Could not delete the role.",
       "members": "Could not update the members."
     }
+  },
+  "combo": {
+    "remove": "Remove {name}",
+    "locked": "Cannot be removed",
+    "noMatch": "No results",
+    "noOption": "Nothing to suggest",
+    "selected": "{label}: selection",
+    "results": "No results | 1 result | {n} results"
   }
 }

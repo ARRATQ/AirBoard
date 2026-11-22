@@ -358,7 +358,13 @@
     "accessRolesHint": "Cada rol añade permisos (noticias, encuestas, moderación…). Los roles se crean en la página Roles.",
     "accessRolesAdmin": "Un administrador ya tiene todos los permisos: no hay roles que asignar.",
     "accessRolesLoadError": "No se pudieron cargar los roles.",
-    "noAccessRoles": "Todavía no se ha creado ningún rol."
+    "noAccessRoles": "Todavía no se ha creado ningún rol.",
+    "groupsPlaceholder": "Buscar un grupo…",
+    "membersCount": "Sin miembros | 1 miembro | {n} miembros",
+    "roleGroups": "Grupos cubiertos por el rol {role}",
+    "roleGroupsPlaceholder": "Sus grupos (por defecto) — o elija…",
+    "roleGroupsChosen": "El rol se aplica solo a los grupos elegidos.",
+    "roleGroupsDefault": "Ningún grupo elegido: el rol se aplica a los grupos de los que la persona es miembro (excepto el grupo por defecto)."
   },
   "groupModal": {
     "titleEdit": "Editar grupo",
@@ -1135,7 +1141,6 @@
       "targetGroupsRequired": "*",
       "targetGroupsHelp": "Selecciona los grupos que verán esta noticia",
       "noGroupSelected": "⚠️ No hay grupo seleccionado - el artículo no será visible para nadie",
-      "addGroup": "+ Añadir un grupo",
       "classification": "Clasificación",
       "categoryLabel": "Categoría",
       "noCategory": "Sin categoría",
@@ -1306,7 +1311,6 @@
       "publicEvent": "Evento público",
       "publicEventHelp": "Visible para todos los usuarios",
       "noGroupSelected": "Selecciona al menos un grupo o haz que el evento sea público",
-      "addGroup": "+ Añadir un grupo",
       "classification": "Clasificación",
       "category": "Categoría",
       "noCategory": "Sin categoría",
@@ -1786,7 +1790,7 @@
       "startDate": "Fecha de inicio (opcional)",
       "endDate": "Fecha de fin (opcional)",
       "targetGroups": "Grupos objetivo (vacío = global)",
-      "targetGroupsHelp": "Mantén Ctrl (Cmd en Mac) para seleccionar múltiples grupos. Si no se selecciona ningún grupo, la encuesta será visible para todos.",
+      "targetGroupsHelp": "Busque y elija los grupos. Si no se elige ningún grupo, la encuesta será visible para todos.",
       "optionalLinks": "Enlaces (opcional)",
       "linkToArticle": "Enlazar a artículo",
       "linkToAnnouncement": "Enlazar a anuncio",
@@ -1808,7 +1812,8 @@
       "noGroupsAvailable": "Ningún grupo disponible",
       "noArticleSelected": "-- Ningún artículo --",
       "noAnnouncementSelected": "-- Ningún anuncio --",
-      "removeOption": "Eliminar la opción {index}"
+      "removeOption": "Eliminar la opción {index}",
+      "targetGroupsPlaceholder": "Buscar un grupo destinatario…"
     },
     "detail": {
       "breadcrumb": "Encuestas",
@@ -3130,10 +3135,11 @@
     "members": {
       "title": "Miembros del rol",
       "manage": "Gestionar los miembros",
-      "intro": "Las personas marcadas reciben los permisos de este rol.",
+      "intro": "Las personas elegidas reciben los permisos de este rol. Para limitar el rol a ciertos grupos de una persona, abra su ficha de usuario.",
       "loading": "Cargando…",
       "noUsers": "No se encontró ningún usuario",
-      "selected": "Ningún miembro seleccionado | 1 miembro seleccionado | {count} miembros seleccionados"
+      "selected": "Ningún miembro seleccionado | 1 miembro seleccionado | {count} miembros seleccionados",
+      "searchPlaceholder": "Buscar a una persona (nombre, usuario, correo)…"
     },
     "deleteConfirm": "¿Eliminar el rol «{name}»? Sus miembros ({count}) perderán los permisos que otorga.",
     "errors": {
@@ -3142,5 +3148,13 @@
       "delete": "No se pudo eliminar el rol.",
       "members": "No se pudieron actualizar los miembros."
     }
+  },
+  "combo": {
+    "remove": "Quitar {name}",
+    "locked": "No se puede quitar",
+    "noMatch": "Sin resultados",
+    "noOption": "Nada que proponer",
+    "selected": "{label}: selección",
+    "results": "Sin resultados | 1 resultado | {n} resultados"
   }
 }

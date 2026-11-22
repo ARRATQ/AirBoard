@@ -11,52 +11,19 @@
         {{ $t('groupAdmin.newsEditor.targetGroupsHelp') }}
       </p>
 
-      <div
-        v-if="modelValue.length > 0"
-        class="flex flex-wrap gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-primary-200 dark:border-primary-700"
-      >
-        <span
-          v-for="groupId in modelValue"
-          :key="groupId"
-          class="tag tag--acc"
-        >
-          <Icon icon="lucide:users" class="h-3 w-3" />
-          {{ groupName(groupId) }}
-          <Icon
-            v-if="isLocked(groupId)"
-            icon="lucide:lock"
-            class="h-3.5 w-3.5 opacity-70"
-            :title="$t('adminShared.news.lockedGroup')"
-            :aria-label="$t('adminShared.news.lockedGroup')"
-          />
-          <button
-            v-else
-            type="button"
-            class="ms-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-            :aria-label="$t('adminShared.news.removeItem', { name: groupName(groupId) })"
-            @click="removeGroup(groupId)"
-          >
-            <Icon icon="lucide:circle-x" class="h-3.5 w-3.5" />
-          </button>
-        </span>
-      </div>
-      <div
-        v-else
-        class="text-sm text-red-500 dark:text-red-400 italic p-3 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-700"
-      >
+      <ComboSelect
+        :model-value="modelValue"
+        kind="group"
+        :options="groupOptions"
+        :labels="lockedOptions"
+        :locked-ids="lockedIds"
+        :label="$t('groupAdmin.newsEditor.targetGroups')"
+        :placeholder="$t('polls.editor.targetGroupsPlaceholder')"
+        @update:model-value="emit('update:modelValue', $event)"
+      />
+      <p v-if="modelValue.length === 0" class="text-sm text-red-500 dark:text-red-400" role="status">
         {{ $t('groupAdmin.newsEditor.noGroupSelected') }}
-      </div>
-
-      <select
-        class="w-full px-3 py-2 border-2 border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
-        :aria-label="$t('groupAdmin.newsEditor.addGroup')"
-        @change="addGroup"
-      >
-        <option value="">{{ $t('groupAdmin.newsEditor.addGroup') }}</option>
-        <option v-for="group in availableGroups" :key="group.id" :value="group.id">
-          {{ group.name }}
-        </option>
-      </select>
+      </p>
     </div>
   </div>
 </template>
@@ -64,6 +31,8 @@
 <script setup>
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
+import { groupOption } from '@/utils/comboFilter'
 
 const props = defineProps({
   // Identifiants des groupes ciblés
@@ -76,25 +45,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const availableGroups = computed(() =>
-  props.groups.filter((group) => !props.modelValue.includes(group.id))
-)
-
-const findGroup = (groupId) =>
-  props.groups.find((g) => g.id === groupId) || props.lockedGroups.find((g) => g.id === groupId)
-
-const groupName = (groupId) => findGroup(groupId)?.name || `#${groupId}`
-const isLocked = (groupId) => !props.groups.some((g) => g.id === groupId)
-
-const addGroup = (event) => {
-  const groupId = parseInt(event.target.value, 10)
-  if (groupId && !props.modelValue.includes(groupId)) {
-    emit('update:modelValue', [...props.modelValue, groupId])
-  }
-  event.target.value = ''
-}
-
-const removeGroup = (groupId) => {
-  emit('update:modelValue', props.modelValue.filter((id) => id !== groupId))
-}
+const groupOptions = computed(() => props.groups.map((group) => groupOption(group)))
+// Groupes déjà ciblés hors de ceux qu'on gère : affichés, mais non retirables
+const lockedOptions = computed(() => props.lockedGroups.map((group) => groupOption(group)))
+const lockedIds = computed(() => {
+  const managed = new Set(props.groups.map((g) => g.id))
+  return props.modelValue.filter((id) => !managed.has(id))
+})
 </script>

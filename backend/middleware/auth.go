@@ -53,17 +53,17 @@ func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (user
 	if err != nil {
 		return userStatus{}, fmt.Errorf("lecture des permissions de %d: %w", userID, err)
 	}
-	// Groupes couverts par la portée « ses groupes » (hors groupe par défaut)
-	memberGroupIDs, err := models.PermissionGroupIDs(am.db.WithContext(ctx), userID)
+	// Groupes couverts par chaque permission de portée « ses groupes »
+	permissionGroups, err := models.PermissionGroups(am.db.WithContext(ctx), userID)
 	if err != nil {
 		return userStatus{}, fmt.Errorf("lecture des groupes de %d: %w", userID, err)
 	}
 
 	return userStatus{
-		Role:           user.Role,
-		IsActive:       user.IsActive,
-		Permissions:    permissions,
-		MemberGroupIDs: memberGroupIDs,
+		Role:             user.Role,
+		IsActive:         user.IsActive,
+		Permissions:      permissions,
+		PermissionGroups: permissionGroups,
 	}, nil
 }
 
@@ -124,7 +124,7 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("role", status.Role)
 		c.Set("email", claims.Email)
 		c.Set(CtxPermissions, status.Permissions)
-		c.Set(CtxMemberGroupIDs, status.MemberGroupIDs)
+		c.Set(CtxPermissionGroups, status.PermissionGroups)
 
 		c.Next()
 	}

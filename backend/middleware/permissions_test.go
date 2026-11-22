@@ -14,7 +14,13 @@ import (
 func permContext(role string, managed []uint, perms map[string]string, members []uint) *gin.Context {
 	c, _ := contextFor(identity{role: role, managed: managed})
 	c.Set(CtxPermissions, perms)
-	c.Set(CtxMemberGroupIDs, members)
+	groups := map[string][]uint{}
+	for perm, scope := range perms {
+		if scope == models.ScopeGroups {
+			groups[perm] = members
+		}
+	}
+	c.Set(CtxPermissionGroups, groups)
 	return c
 }
 

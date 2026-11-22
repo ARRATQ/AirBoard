@@ -161,7 +161,7 @@ func callJSON(t *testing.T, h gin.HandlerFunc, who identity, target string, para
 	c.Set("role", who.role)
 	c.Set("managed_group_ids", who.managed)
 	c.Set(middleware.CtxPermissions, who.perms)
-	c.Set(middleware.CtxMemberGroupIDs, who.managed)
+	c.Set(middleware.CtxPermissionGroups, groupsForPerms(who.perms, who.managed))
 	h(c)
 	var body interface{}
 	_ = json.Unmarshal(w.Body.Bytes(), &body)

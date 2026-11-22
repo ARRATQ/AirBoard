@@ -153,6 +153,23 @@
                 <p v-if="errors.role" class="form-error">{{ errors.role }}</p>
               </div>
 
+              <div>
+                <div class="flex items-center justify-between gap-3 mb-2">
+                  <label class="form-label mb-0" for="user-groups">{{ t('userModal.groups') }}</label>
+                  <span class="text-xs text-gray-400">{{ t('userModal.groupsHint') }}</span>
+                </div>
+                <p v-if="groups.length === 0" class="text-sm text-gray-500 py-2">{{ t('userModal.noGroups') }}</p>
+                <ComboSelect
+                  v-else
+                  v-model="form.group_ids"
+                  input-id="user-groups"
+                  kind="group"
+                  :options="groupOptions"
+                  :label="t('userModal.groups')"
+                  :placeholder="t('userModal.groupsPlaceholder')"
+                />
+              </div>
+
               <!-- Rôles attribués (permissions) : sans objet pour un administrateur -->
               <fieldset>
                 <legend class="form-label">{{ t('userModal.accessRoles') }}</legend>
@@ -165,44 +182,43 @@
                   <p v-else-if="accessRoles.length === 0" class="text-sm text-gray-500 text-center py-4">
                     {{ t('userModal.noAccessRoles') }}
                   </p>
-                  <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pe-1">
-                    <label
+                  <ul v-else class="role-assign">
+                    <li
                       v-for="accessRole in accessRoles"
                       :key="accessRole.id"
-                      class="choice-card items-start py-2"
-                      :class="{ 'choice-card-active': form.access_role_ids.includes(accessRole.id) }"
+                      class="role-assign__item"
+                      :class="{ 'role-assign__item--on': isAssigned(accessRole.id) }"
                     >
-                      <input v-model="form.access_role_ids" :value="accessRole.id" type="checkbox" class="mt-0.5" />
-                      <span class="min-w-0">
-                        <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ accessRole.name }}</span>
-                        <span v-if="accessRole.description" class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{{ accessRole.description }}</span>
-                      </span>
-                    </label>
-                  </div>
+                      <label class="role-assign__head">
+                        <input
+                          type="checkbox"
+                          :checked="isAssigned(accessRole.id)"
+                          @change="toggleRole(accessRole.id, $event.target.checked)"
+                        />
+                        <span class="min-w-0">
+                          <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ accessRole.name }}</span>
+                          <span v-if="accessRole.description" class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{{ accessRole.description }}</span>
+                        </span>
+                      </label>
+                      <!-- Portée « ses groupes » : quels groupes ce rôle couvre pour ce compte -->
+                      <div v-if="isAssigned(accessRole.id) && hasGroupScope(accessRole)" class="role-assign__groups">
+                        <ComboSelect
+                          :model-value="groupsOf(accessRole.id)"
+                          kind="group"
+                          :options="roleGroupOptions"
+                          :label="t('userModal.roleGroups', { role: accessRole.name })"
+                          :placeholder="t('userModal.roleGroupsPlaceholder')"
+                          @update:model-value="setRoleGroups(accessRole.id, $event)"
+                        />
+                        <p class="role-assign__hint">
+                          <Icon :icon="groupsOf(accessRole.id).length ? 'lucide:target' : 'lucide:users'" aria-hidden="true" />
+                          {{ groupsOf(accessRole.id).length ? t('userModal.roleGroupsChosen') : t('userModal.roleGroupsDefault') }}
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
                 </template>
               </fieldset>
-
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="form-label mb-0">{{ t('userModal.groups') }}</span>
-                  <span class="text-xs text-gray-400">{{ t('userModal.groupsHint') }}</span>
-                </div>
-                <div v-if="groups.length === 0" class="text-sm text-gray-500 text-center py-6">
-                  {{ t('userModal.noGroups') }}
-                </div>
-                <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pe-1">
-                  <label
-                    v-for="group in groups"
-                    :key="group.id"
-                    class="choice-card py-2"
-                    :class="{ 'choice-card-active': form.group_ids.includes(group.id) }"
-                  >
-                    <input v-model="form.group_ids" :value="group.id" type="checkbox" />
-                    <span class="h-2.5 w-2.5 flex-shrink-0 rounded-full" :style="{ backgroundColor: group.color || '#6B7280' }"></span>
-                    <span class="text-sm text-gray-700 dark:text-gray-200 truncate">{{ group.name }}</span>
-                  </label>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -230,6 +246,8 @@ import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
+import { groupOption } from '@/utils/comboFilter'
 
 const props = defineProps({
   show: {
@@ -261,7 +279,8 @@ const form = reactive({
   last_name: '',
   role: 'user',
   group_ids: [],
-  access_role_ids: [],
+  // Rôles attribués : [{ id, group_ids }] (group_ids vide : les groupes dont le compte est membre)
+  access_roles: [],
   is_active: true
 })
 
@@ -297,7 +316,7 @@ const tabs = computed(() => [
     id: 'access',
     label: t('userModal.tabAccess'),
     icon: 'lucide:shield-user',
-    count: form.group_ids.length + (form.role === 'admin' ? 0 : form.access_role_ids.length),
+    count: form.group_ids.length + (form.role === 'admin' ? 0 : form.access_roles.length),
     hasError: !!errors.value.role
   }
 ])
@@ -337,11 +356,46 @@ watch(() => props.user, (newVal) => {
       last_name: newVal.last_name || '',
       role: accountRole(newVal.role),
       group_ids: newVal.groups?.map(g => g.id) || [],
-      access_role_ids: newVal.access_roles?.map(r => r.id) || [],
+      access_roles: assignmentsOf(newVal.access_roles),
       is_active: newVal.is_active ?? true
     })
   }
 }, { immediate: true })
+
+// Rôles d'un compte tels que le serveur les renvoie -> [{ id, group_ids }]
+const assignmentsOf = (list) =>
+  (Array.isArray(list) ? list : []).map((role) => ({ id: role.id, group_ids: Array.isArray(role.group_ids) ? [...role.group_ids] : [] }))
+
+// Les groupes choisis ne sont pas dans la liste des comptes : on relit les rôles du compte
+let assignmentsRequest = 0
+const loadAssignments = async (userId) => {
+  const request = ++assignmentsRequest
+  try {
+    const list = await adminService.getUserAccessRoles(userId)
+    if (request === assignmentsRequest && props.user?.id === userId) form.access_roles = assignmentsOf(list)
+  } catch (error) {
+    console.error('Erreur lors du chargement des rôles du compte:', error)
+  }
+}
+watch(() => (props.show ? props.user?.id : null), (id) => { if (id) loadAssignments(id) }, { immediate: true })
+
+const groupOptions = computed(() =>
+  groups.value.map((group) => groupOption(group, t('userModal.membersCount', group.users?.length || 0)))
+)
+// Le groupe par défaut réunit tout le monde : il ne se choisit pas pour un rôle limité
+const roleGroupOptions = computed(() => groupOptions.value.filter((option) => !groups.value.find((g) => g.id === option.id)?.is_default))
+
+const isAssigned = (roleId) => form.access_roles.some((a) => a.id === roleId)
+const groupsOf = (roleId) => form.access_roles.find((a) => a.id === roleId)?.group_ids || []
+const hasGroupScope = (role) => (role.permissions || []).some((p) => p.scope === 'groups')
+const toggleRole = (roleId, checked) => {
+  form.access_roles = checked
+    ? [...form.access_roles.filter((a) => a.id !== roleId), { id: roleId, group_ids: [] }]
+    : form.access_roles.filter((a) => a.id !== roleId)
+}
+const setRoleGroups = (roleId, groupIds) => {
+  form.access_roles = form.access_roles.map((a) => (a.id === roleId ? { ...a, group_ids: groupIds } : a))
+}
 
 // Rôle de compte : « admin » ou « user » (l'ancien « editor » n'existe plus)
 const accountRole = (role) => (role === 'admin' ? 'admin' : 'user')
@@ -356,7 +410,7 @@ const resetForm = () => {
       last_name: props.user.last_name || '',
       role: accountRole(props.user.role),
       group_ids: props.user.groups?.map(g => g.id) || [],
-      access_role_ids: props.user.access_roles?.map(r => r.id) || [],
+      access_roles: assignmentsOf(props.user.access_roles),
       is_active: props.user.is_active ?? true
     })
   } else {
@@ -368,7 +422,7 @@ const resetForm = () => {
       last_name: '',
       role: 'user',
       group_ids: [],
-      access_role_ids: [],
+      access_roles: [],
       is_active: true
     })
   }
@@ -422,7 +476,10 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     // Les rôles attribués ne concernent pas un administrateur (il a tout)
-    const formData = { ...form, access_role_ids: form.role === 'admin' ? [] : [...form.access_role_ids] }
+    const formData = {
+      ...form,
+      access_roles: form.role === 'admin' ? [] : form.access_roles.map((a) => ({ id: a.id, group_ids: [...a.group_ids] }))
+    }
     if (isEdit.value) {
       formData.id = props.user.id
       // Don't send password if it's empty in edit mode
@@ -445,3 +502,82 @@ const closeModal = () => {
 // Échap ferme la modale
 useEscapeClose(() => props.show, () => closeModal())
 </script>
+
+<style scoped>
+.role-assign {
+  display: grid;
+  gap: 8px;
+}
+
+.role-assign__item {
+  border: 1px solid var(--line);
+  border-radius: var(--r-s);
+  background-color: var(--surface);
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.role-assign__item:hover {
+  border-color: color-mix(in oklab, var(--acc) 50%, var(--line));
+}
+
+.role-assign__item--on {
+  border-color: var(--acc);
+  background-color: color-mix(in oklab, var(--acc) 5%, var(--surface));
+}
+
+.role-assign__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.role-assign__head input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--acc);
+  cursor: pointer;
+}
+
+.role-assign__head:has(input:focus-visible) {
+  outline: 2px solid var(--fill);
+  outline-offset: -2px;
+  border-radius: var(--r-s);
+}
+
+/* Groupes du rôle : rattachés à la carte, décalés sous son intitulé */
+.role-assign__groups {
+  margin-inline: 40px 12px;
+  padding-block: 2px 12px;
+}
+
+.role-assign__hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: var(--fs-small);
+}
+
+.role-assign__hint :deep(svg) {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+
+@media (max-width: 640px) {
+  .role-assign__groups {
+    margin-inline: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .role-assign__item {
+    transition: none;
+  }
+}
+</style>

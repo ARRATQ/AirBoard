@@ -1094,6 +1094,14 @@ func (h *AdminHandler) GetGroups(c *gin.Context) {
 		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des groupes")
 		return
 	}
+	// Le groupe par défaut ne se choisit pas pour un rôle limité à des groupes
+	if everyone, err := models.EveryoneGroupID(h.db); err != nil {
+		log.Printf("groupes : groupe par défaut illisible : %v", err)
+	} else {
+		for i := range groups {
+			groups[i].IsDefault = groups[i].ID == everyone
+		}
+	}
 
 	c.JSON(http.StatusOK, groups)
 }

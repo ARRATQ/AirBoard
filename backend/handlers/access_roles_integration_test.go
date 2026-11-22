@@ -55,7 +55,7 @@ func resourcesRouter(t *testing.T, tx *gorm.DB, userID uint, role string, manage
 	if err != nil {
 		t.Fatalf("permissions : %v", err)
 	}
-	members, err := models.PermissionGroupIDs(tx, userID)
+	members, err := models.PermissionGroups(tx, userID)
 	if err != nil {
 		t.Fatalf("groupes : %v", err)
 	}
@@ -69,7 +69,7 @@ func resourcesRouter(t *testing.T, tx *gorm.DB, userID uint, role string, manage
 		c.Set("role", role)
 		c.Set("managed_group_ids", managed)
 		c.Set(middleware.CtxPermissions, perms)
-		c.Set(middleware.CtxMemberGroupIDs, members)
+		c.Set(middleware.CtxPermissionGroups, members)
 	})
 	everywhere := r.Group("/admin", am.RequirePermissionEverywhere(models.PermResourcesManage))
 	everywhere.GET("/app-groups", admin.GetAppGroups)

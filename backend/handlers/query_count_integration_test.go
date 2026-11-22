@@ -104,7 +104,7 @@ func runHandlerAt(h gin.HandlerFunc, who identity, params gin.Params, target str
 	c.Set("role", who.role)
 	c.Set("managed_group_ids", who.managed)
 	c.Set(middleware.CtxPermissions, who.perms)
-	c.Set(middleware.CtxMemberGroupIDs, who.managed)
+	c.Set(middleware.CtxPermissionGroups, groupsForPerms(who.perms, who.managed))
 	h(c)
 	return w.Code
 }
@@ -375,4 +375,16 @@ func TestManagedGroupsUserCount(t *testing.T) {
 		}
 	}
 	t.Logf("%d groupes", len(groups))
+}
+
+// groupsForPerms : les mêmes groupes pour chaque permission de portée « ses groupes »
+// (contexte posé à la main par les tests, comme le ferait RequireAuth).
+func groupsForPerms(perms map[string]string, groups []uint) map[string][]uint {
+	out := map[string][]uint{}
+	for perm, scope := range perms {
+		if scope == models.ScopeGroups {
+			out[perm] = groups
+		}
+	}
+	return out
 }

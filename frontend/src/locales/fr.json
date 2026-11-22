@@ -358,7 +358,13 @@
     "accessRolesHint": "Chaque rôle ajoute des permissions (actualités, sondages, modération…). Les rôles se créent depuis la page Rôles.",
     "accessRolesAdmin": "Un administrateur a déjà toutes les permissions : aucun rôle à attribuer.",
     "accessRolesLoadError": "Impossible de charger les rôles.",
-    "noAccessRoles": "Aucun rôle créé pour l'instant."
+    "noAccessRoles": "Aucun rôle créé pour l'instant.",
+    "groupsPlaceholder": "Rechercher un groupe…",
+    "membersCount": "Aucun membre | 1 membre | {n} membres",
+    "roleGroups": "Groupes couverts par le rôle {role}",
+    "roleGroupsPlaceholder": "Ses groupes (par défaut) — ou choisissez…",
+    "roleGroupsChosen": "Le rôle s'applique seulement aux groupes choisis.",
+    "roleGroupsDefault": "Aucun groupe choisi : le rôle s'applique aux groupes dont la personne est membre (hors groupe par défaut)."
   },
   "groupModal": {
     "titleEdit": "Modifier le groupe",
@@ -1392,7 +1398,6 @@
       "targetGroupsRequired": "*",
       "targetGroupsHelp": "Sélectionnez les groupes qui verront cette actualité",
       "noGroupSelected": "⚠️ Aucun groupe sélectionné - l'article ne sera visible par personne",
-      "addGroup": "+ Ajouter un groupe",
       "classification": "Classification",
       "categoryLabel": "Catégorie",
       "noCategory": "Aucune catégorie",
@@ -1563,7 +1568,6 @@
       "publicEvent": "Événement public",
       "publicEventHelp": "Visible par tous les utilisateurs",
       "noGroupSelected": "Sélectionnez au moins un groupe ou rendez l'événement public",
-      "addGroup": "+ Ajouter un groupe",
       "classification": "Classification",
       "category": "Catégorie",
       "noCategory": "Aucune catégorie",
@@ -2043,7 +2047,7 @@
       "startDate": "Date de début (optionnel)",
       "endDate": "Date de fin (optionnel)",
       "targetGroups": "Groupes cibles (vide = global)",
-      "targetGroupsHelp": "Cliquez sur un groupe pour le sélectionner/désélectionner. Si aucun groupe n'est sélectionné, le sondage sera visible par tous.",
+      "targetGroupsHelp": "Recherchez puis choisissez les groupes. Si aucun groupe n'est choisi, le sondage sera visible par tous.",
       "noGroupsAvailable": "Aucun groupe disponible",
       "optionalLinks": "Liens (optionnel)",
       "linkToArticle": "Lier à un article",
@@ -2065,7 +2069,8 @@
         "updateSuccess": "Sondage modifié avec succès",
         "saveError": "Erreur lors de la sauvegarde"
       },
-      "removeOption": "Supprimer l'option {index}"
+      "removeOption": "Supprimer l'option {index}",
+      "targetGroupsPlaceholder": "Rechercher un groupe à cibler…"
     },
     "detail": {
       "breadcrumb": "Sondages",
@@ -3130,10 +3135,11 @@
     "members": {
       "title": "Membres du rôle",
       "manage": "Gérer les membres",
-      "intro": "Les personnes cochées reçoivent les permissions de ce rôle.",
+      "intro": "Les personnes choisies reçoivent les permissions de ce rôle. Pour limiter le rôle à certains groupes d'une personne, ouvrez sa fiche utilisateur.",
       "loading": "Chargement…",
       "noUsers": "Aucun utilisateur trouvé",
-      "selected": "Aucun membre sélectionné | 1 membre sélectionné | {count} membres sélectionnés"
+      "selected": "Aucun membre sélectionné | 1 membre sélectionné | {count} membres sélectionnés",
+      "searchPlaceholder": "Rechercher une personne (nom, identifiant, e-mail)…"
     },
     "deleteConfirm": "Supprimer le rôle « {name} » ? Ses membres ({count}) perdront les permissions qu'il donne.",
     "errors": {
@@ -3142,5 +3148,13 @@
       "delete": "Impossible de supprimer le rôle.",
       "members": "Impossible de mettre à jour les membres."
     }
+  },
+  "combo": {
+    "remove": "Retirer {name}",
+    "locked": "Ne peut pas être retiré",
+    "noMatch": "Aucun résultat",
+    "noOption": "Rien à proposer",
+    "selected": "{label} : sélection",
+    "results": "Aucun résultat | 1 résultat | {n} résultats"
   }
 }

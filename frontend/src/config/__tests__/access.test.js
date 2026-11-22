@@ -145,7 +145,7 @@ describe('canManageItem', () => {
   const g2 = { id: 2 }
   const common = { id: 3 }
   // Membre de g1 et de Common ; le serveur ne compte que g1 (hors groupe par défaut)
-  const member = { id: 7, role: 'user', groups: [g1, common], permission_group_ids: [1], permissions: { 'polls.manage': 'groups' } }
+  const member = { id: 7, role: 'user', groups: [g1, common], permission_groups: { 'polls.manage': [1] }, permissions: { 'polls.manage': 'groups', 'news.manage': 'groups' } }
 
   it('tout le site ou admin : tout', () => {
     expect(canManageItem({ id: 1, role: 'admin' }, 'polls.manage', { target_groups: [] })).toBe(true)
@@ -158,6 +158,13 @@ describe('canManageItem', () => {
     expect(canManageItem(member, 'polls.manage', { target_groups: [common] })).toBe(false)
     expect(canManageItem(member, 'polls.manage', { target_groups: [] })).toBe(false)
     expect(canManageItem(member, 'news.manage', { target_groups: [g1] })).toBe(false)
+  })
+
+  it('ses groupes : les groupes de chaque permission (choisis à l\'attribution du rôle)', () => {
+    const chosen = { id: 8, role: 'user', permissions: { 'news.manage': 'groups', 'polls.manage': 'groups' }, permission_groups: { 'news.manage': [2], 'polls.manage': [1] } }
+    expect(canManageItem(chosen, 'news.manage', { target_groups: [g2] })).toBe(true)
+    expect(canManageItem(chosen, 'news.manage', { target_groups: [g1] })).toBe(false)
+    expect(canManageItem(chosen, 'polls.manage', { target_groups: [g1] })).toBe(true)
   })
 
   it("auteur : toujours ; les anciens groupes administrés ne comptent plus", () => {
