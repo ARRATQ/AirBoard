@@ -180,14 +180,15 @@ import { useI18n } from 'vue-i18n'
 import { useConfirm } from '@/composables/useConfirm'
 import { useAuthStore } from '@/stores/auth'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { GROUP_ADMIN } from '@/config/access'
+import { POLLS, ACCESS_PERMISSION } from '@/config/access'
 
 const router = useRouter()
 const { t, locale } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 const authStore = useAuthStore()
-// Admin global → tous les sondages (API admin) ; admin de groupe → ceux de ses groupes (API group-admin)
-const { isGlobal } = useManagementScope(GROUP_ADMIN)
+// Périmètre affiché : tout le site (admin, permission « tout le site ») ou ses groupes.
+// API : admin pour l'admin ; sinon group-admin, qui applique la portée de la permission.
+const { isGlobal, isAdmin } = useManagementScope(POLLS)
 
 // Textes d'en-tête propres à chaque périmètre (« Gestion des sondages » / « Mes sondages »)
 const pageKeys = computed(() => (isGlobal.value ? 'polls.adminPollsManagement' : 'groupAdmin.pollsManagement'))
@@ -250,7 +251,7 @@ const loadPolls = async () => {
   try {
     isLoading.value = true
     const params = { ...filters.value, page: 1, page_size: 100 }
-    const response = isGlobal.value
+    const response = isAdmin.value
       ? await pollsService.getPolls(params)
       : await pollsService.getPollsAsGroupAdmin(params)
 
@@ -272,14 +273,15 @@ const loadPolls = async () => {
   }
 }
 
-// Charger les groupes ciblables : tous (admin global) ou ceux administrés (admin de groupe)
+// Charger les groupes ciblables : tous (admin) ou ceux où la personne gère les sondages
+// (tous si sa permission porte sur tout le site)
 const loadGroups = async () => {
   try {
-    if (isGlobal.value) {
+    if (isAdmin.value) {
       const response = await adminService.getGroups()
       groups.value = response.data || response
     } else {
-      const data = await groupAdminService.getManagedGroups()
+      const data = await groupAdminService.getManagedGroups(ACCESS_PERMISSION[POLLS])
       groups.value = data || []
     }
   } catch (error) {
@@ -287,8 +289,12 @@ const loadGroups = async () => {
   }
 }
 
-// Le backend n'autorise la fermeture qu'à l'admin global ou à l'auteur du sondage
-const canClose = (poll) => isGlobal.value || poll.author_id === authStore.user?.id
+// Même règle que le serveur : tout le site, auteur, ou sondage ciblant un de ses groupes
+const canClose = (poll) => {
+  if (isGlobal.value || poll.author_id === authStore.user?.id) return true
+  const ids = new Set(groups.value.map(g => g.id))
+  return (poll.target_groups || []).some(g => ids.has(g.id))
+}
 
 // Debounce search
 const debounceSearch = () => {
@@ -338,7 +344,7 @@ const closePoll = async (poll) => {
   }
 
   try {
-    if (isGlobal.value) {
+    if (isAdmin.value) {
       await pollsService.closePoll(poll.id)
     } else {
       await pollsService.closePollAsGroupAdmin(poll.id)
@@ -362,7 +368,7 @@ const confirmDelete = async (poll) => {
   }
 
   try {
-    if (isGlobal.value) {
+    if (isAdmin.value) {
       await pollsService.deletePoll(poll.id)
     } else {
       await pollsService.deletePollAsGroupAdmin(poll.id)

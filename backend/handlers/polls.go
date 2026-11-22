@@ -127,13 +127,15 @@ func (h *PollsHandler) GetPolls(c *gin.Context) {
 	// (les admins peuvent voir les sondages inactifs via l'interface d'administration)
 	isAdminInterface := strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls") ||
 		strings.HasPrefix(c.Request.URL.Path, "/api/v1/admin/polls")
-	if userRole != "admin" && !isAdminInterface && c.Query("status") == "" {
+	managesAll := middleware.HasPermissionEverywhere(c, models.PermPollsManage)
+	if !managesAll && !isAdminInterface && c.Query("status") == "" {
 		query = query.Where("is_active = ?", true)
 	}
 
 	switch {
-	case userRole == "admin" || isEntityFilter:
-		// Admin voit tout ; un filtre par entité renvoie seulement les sondages liés
+	case managesAll || isEntityFilter:
+		// Gestion des sondages sur tout le site (admin compris) : tout ; un filtre par
+		// entité renvoie seulement les sondages liés
 	case len(managedGroupIDs) > 0 && strings.HasPrefix(c.Request.URL.Path, "/api/v1/group-admin/polls"):
 		// Interface d'administration de groupe : seulement les sondages qu'il peut gérer
 		query = query.Scopes(pollTargets.manageableBy(userID, managedGroupIDs))
@@ -206,12 +208,11 @@ func (h *PollsHandler) GetPollByID(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions selon le rôle
-	userRole := c.GetString("role")
+	// Vérifier les droits de lecture
 	userID := c.GetUint("user_id")
 
-	if userRole == "admin" {
-		// Admin voit tout
+	if canManagePoll(c, poll) {
+		// Qui gère le sondage le voit, même inactif
 		c.JSON(http.StatusOK, poll)
 		return
 	}
@@ -248,7 +249,6 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 
 	// Récupérer l'ID de l'utilisateur connecté
 	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
 
 	// Validation : au moins 2 options, max 10
 	if len(req.Options) < 2 || len(req.Options) > 10 {
@@ -267,9 +267,9 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions pour les groupes cibles (admins de groupe non-global)
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
+	// Gestion limitée à ses groupes : il ne cible que ses groupes
+	managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermPollsManage)
+	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && len(req.TargetGroupIDs) > 0 {
 		for _, targetGroupID := range req.TargetGroupIDs {
 			canManage := false
 			for _, managedID := range managedGroupIDs {
@@ -387,33 +387,8 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
-	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
-	canEdit := false
-	if userRole == "admin" {
-		canEdit = true
-	} else if poll.AuthorID == userID {
-		// L'auteur peut modifier son propre sondage
-		canEdit = true
-	} else if len(managedGroupIDs) > 0 {
-		// Admin de groupe peut modifier les sondages ciblant ses groupes administrés
-		if len(poll.TargetGroups) > 0 {
-			for _, targetGroup := range poll.TargetGroups {
-				for _, managedID := range managedGroupIDs {
-					if targetGroup.ID == managedID {
-						canEdit = true
-						break
-					}
-				}
-				if canEdit {
-					break
-				}
-			}
-		}
-	}
+	// Droits : voir canManagePoll
+	canEdit := canManagePoll(c, poll)
 
 	if !canEdit {
 		apierror.Respond(c, http.StatusForbidden, "You don't have permission to edit this poll")
@@ -443,7 +418,9 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	}
 
 	// Vérifier les permissions pour les nouveaux groupes cibles (admins de groupe non-global)
-	if userRole != "admin" && len(managedGroupIDs) > 0 && len(req.TargetGroupIDs) > 0 {
+	// Gestion limitée à ses groupes : il ne cible que ses groupes
+	managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermPollsManage)
+	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && len(req.TargetGroupIDs) > 0 {
 		for _, targetGroupID := range req.TargetGroupIDs {
 			canManage := false
 			for _, managedID := range managedGroupIDs {
@@ -470,10 +447,8 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 	poll.NewsID = req.NewsID
 	poll.AnnouncementID = req.AnnouncementID
 
-	// Seul admin peut activer/désactiver
-	if userRole == "admin" || poll.AuthorID == userID {
-		poll.IsActive = req.IsActive
-	}
+	// Qui gère le sondage (vérifié plus haut) peut l'activer ou le désactiver
+	poll.IsActive = req.IsActive
 
 	// Sauvegarder le sondage et ses options dans une transaction. Les options gardées
 	// sont mises à jour sur place (leurs votes restent) au lieu d'être recréées ;
@@ -543,32 +518,8 @@ func (h *PollsHandler) DeletePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions
-	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
-	canDelete := false
-	if userRole == "admin" {
-		canDelete = true
-	} else if poll.AuthorID == userID {
-		canDelete = true
-	} else if len(managedGroupIDs) > 0 {
-		// Admin de groupe peut supprimer les sondages ciblant ses groupes administrés
-		if len(poll.TargetGroups) > 0 {
-			for _, targetGroup := range poll.TargetGroups {
-				for _, managedID := range managedGroupIDs {
-					if targetGroup.ID == managedID {
-						canDelete = true
-						break
-					}
-				}
-				if canDelete {
-					break
-				}
-			}
-		}
-	}
+	// Droits : voir canManagePoll
+	canDelete := canManagePoll(c, poll)
 
 	if !canDelete {
 		apierror.Respond(c, http.StatusForbidden, "You don't have permission to delete this poll")
@@ -588,7 +539,7 @@ func (h *PollsHandler) ClosePoll(c *gin.Context) {
 	id := c.Param("id")
 
 	var poll models.Poll
-	if err := h.db.First(&poll, id).Error; err != nil {
+	if err := h.db.Preload("TargetGroups").First(&poll, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			apierror.Respond(c, http.StatusNotFound, "Poll not found")
 		} else {
@@ -597,17 +548,14 @@ func (h *PollsHandler) ClosePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions (admin ou auteur)
-	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
-
-	if userRole != "admin" && poll.AuthorID != userID {
+	// Droits : voir canManagePoll
+	if !canManagePoll(c, poll) {
 		apierror.Respond(c, http.StatusForbidden, "You don't have permission to close this poll")
 		return
 	}
 
-	poll.IsActive = false
-	if err := h.db.Save(&poll).Error; err != nil {
+	// Mise à jour ciblée : ne touche pas aux groupes cibles chargés ci-dessus
+	if err := h.db.Model(&poll).Update("is_active", false).Error; err != nil {
 		apierror.Respond(c, http.StatusInternalServerError, "Failed to close poll")
 		return
 	}
@@ -781,7 +729,6 @@ func (h *PollsHandler) RemoveVote(c *gin.Context) {
 func (h *PollsHandler) GetPollResults(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetUint("user_id")
-	userRole := c.GetString("role")
 
 	var poll models.Poll
 	if err := h.db.Preload("Author").
@@ -793,8 +740,8 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 	}
 
 	// Vérifier que l'utilisateur a accès au sondage
-	hasAccess := userRole == "admin" || poll.AuthorID == userID ||
-		canSeeTargeted(h.db, userID, poll.TargetGroups)
+	managesPoll := canManagePoll(c, poll)
+	hasAccess := managesPoll || canSeeTargeted(h.db, userID, poll.TargetGroups)
 
 	if !hasAccess {
 		apierror.Respond(c, http.StatusForbidden, "You don't have access to this poll")
@@ -815,8 +762,8 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 		canSeeResults = true
 	}
 
-	// Admin et auteur peuvent toujours voir les résultats
-	if userRole == "admin" || poll.AuthorID == userID {
+	// Qui gère le sondage voit toujours les résultats
+	if managesPoll {
 		canSeeResults = true
 	}
 
@@ -855,9 +802,9 @@ func (h *PollsHandler) GetPollResults(c *gin.Context) {
 		userVoteIDs = append(userVoteIDs, vote.PollOptionID)
 	}
 
-	// Détails des votants (seulement si non anonyme ET admin/auteur)
+	// Détails des votants (seulement si non anonyme ET gestionnaire du sondage)
 	var voterDetails []models.PollVoterDetail
-	if !poll.IsAnonymous && (userRole == "admin" || poll.AuthorID == userID) {
+	if !poll.IsAnonymous && managesPoll {
 		var votes []models.PollVote
 		h.db.Preload("User").Where("poll_id = ?", poll.ID).Find(&votes)
 		for _, vote := range votes {
@@ -941,4 +888,19 @@ func (h *PollsHandler) hasAwardedPollVoteXP(userID uint, pollID uint) (bool, err
 	}
 
 	return count > 0, nil
+}
+
+// canManagePoll : l'utilisateur peut modifier, clore ou supprimer le sondage — gestion des
+// sondages sur tout le site (admin compris), auteur, ou sondage ciblant un groupe où il gère
+// les sondages. Un sondage sans groupe cible est global : seule la gestion sur tout le site
+// (ou l'auteur) y touche. poll.TargetGroups doit être chargé.
+func canManagePoll(c *gin.Context, poll models.Poll) bool {
+	if middleware.HasPermissionEverywhere(c, models.PermPollsManage) {
+		return true
+	}
+	if poll.AuthorID != 0 && poll.AuthorID == c.GetUint("user_id") {
+		return true
+	}
+	return len(poll.TargetGroups) > 0 &&
+		targetsAnyGroup(poll.TargetGroups, middleware.PermissionGroupIDs(c, models.PermPollsManage))
 }

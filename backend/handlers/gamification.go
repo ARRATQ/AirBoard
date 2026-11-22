@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"airboard/apierror"
+	"airboard/middleware"
 	"airboard/models"
 	"airboard/services"
 
@@ -103,9 +104,14 @@ func (h *GamificationHandler) GetAllAchievements(c *gin.Context) {
 	role := c.GetString("role")
 	managedGroupIDs, _ := c.Get("managed_group_ids")
 
-	// Un utilisateur est considéré comme "contributeur" s'il est admin, editor,
-	// ou s'il administre au moins un groupe.
-	isContributor := role == "admin" || role == "editor"
+	// Un utilisateur est considéré comme "contributeur" s'il est admin, s'il a une
+	// permission de rédaction (actualités, événements, sondages) ou s'il administre un groupe.
+	isContributor := role == "admin"
+	for _, p := range models.ContentPermissions {
+		if middleware.PermissionScope(c, p) != "" {
+			isContributor = true
+		}
+	}
 	if ids, ok := managedGroupIDs.([]uint); ok && len(ids) > 0 {
 		isContributor = true
 	}

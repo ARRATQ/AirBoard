@@ -79,7 +79,8 @@ import { useConfirm } from '@/composables/useConfirm'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
-import { pollsService, adminService } from '@/services/api'
+import { pollsService, adminService, groupAdminService } from '@/services/api'
+import { ACCESS_PERMISSION, POLLS, canManageItem } from '@/config/access'
 import PollCard from '@/components/polls/PollCard.vue'
 import PollEditor from '@/components/polls/PollEditor.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -98,26 +99,9 @@ const error = ref(null)
 const showEditor = ref(false)
 
 // Vérifier si l'utilisateur peut gérer ce sondage
-const canManage = computed(() => {
-  if (!poll.value) return false
-  const user = authStore.user
-
-  if (user.role === 'admin') return true
-  if (user.role === 'editor') return true
-
-  // Vérifier si l'utilisateur est admin d'au moins un groupe
-  if (user.admin_of_groups && user.admin_of_groups.length > 0) {
-    // Peut gérer si auteur ou si le sondage cible un de ses groupes
-    if (poll.value.author_id === user.id) return true
-
-    const managedGroupIds = user.managed_group_ids || []
-    const targetGroupIds = poll.value.target_groups?.map(g => g.id) || []
-
-    return targetGroupIds.some(id => managedGroupIds.includes(id))
-  }
-
-  return false
-})
+// (même règle que le serveur, config/access.js : canManageItem)
+const canManage = computed(() => !!poll.value && canManageItem(authStore.user, ACCESS_PERMISSION[POLLS], poll.value))
+const isAdmin = computed(() => authStore.user?.role === 'admin')
 
 // Charger le sondage
 const loadPoll = async () => {
@@ -136,8 +120,13 @@ const loadPoll = async () => {
 // Charger les groupes (pour l'éditeur)
 const loadGroups = async () => {
   try {
-    const response = await adminService.getGroups()
-    groups.value = response.data || response
+    // Groupes ciblables : tous pour l'admin, sinon ceux où l'on gère les sondages
+    if (isAdmin.value) {
+      const response = await adminService.getGroups()
+      groups.value = response.data || response
+    } else {
+      groups.value = (await groupAdminService.getManagedGroups(ACCESS_PERMISSION[POLLS])) || []
+    }
   } catch (err) {
     console.error('Error loading groups:', err)
   }
@@ -168,13 +157,9 @@ const confirmDelete = async () => {
   }
 
   try {
-    const user = authStore.user
-
-    if (user.role === 'admin') {
+    if (isAdmin.value) {
       await pollsService.deletePoll(poll.value.id)
-    } else if (user.role === 'editor') {
-      await pollsService.deletePollAsEditor(poll.value.id)
-    } else if (user.admin_of_groups && user.admin_of_groups.length > 0) {
+    } else {
       await pollsService.deletePollAsGroupAdmin(poll.value.id)
     }
 

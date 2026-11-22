@@ -9,15 +9,15 @@ import (
 // pour la compatibilité DB mais ne sont plus utilisés. L'envoi se fait via Microsoft Graph API.
 type SMTPConfig struct {
 	ID              uint       `json:"id" gorm:"primaryKey"`
-	Host            string     `json:"host,omitempty"`                   // Obsolète - conservé pour compatibilité
+	Host            string     `json:"host,omitempty"`                    // Obsolète - conservé pour compatibilité
 	Port            int        `json:"port,omitempty" gorm:"default:587"` // Obsolète - conservé pour compatibilité
-	Username        string     `json:"username,omitempty"`               // Obsolète - conservé pour compatibilité
-	Password        string     `json:"-" gorm:"type:text"`               // Obsolète - conservé pour compatibilité
+	Username        string     `json:"username,omitempty"`                // Obsolète - conservé pour compatibilité
+	Password        string     `json:"-" gorm:"type:text"`                // Obsolète - conservé pour compatibilité
 	FromEmail       string     `json:"from_email" gorm:"not null"`
 	FromName        string     `json:"from_name" gorm:"default:'Airboard'"`
-	UseTLS          bool       `json:"use_tls,omitempty"`                // Obsolète - conservé pour compatibilité
-	UseSTARTTLS     bool       `json:"use_starttls,omitempty"`           // Obsolète - conservé pour compatibilité
-	UseOAuth        bool       `json:"use_oauth" gorm:"default:true"`    // Toujours true maintenant
+	UseTLS          bool       `json:"use_tls,omitempty"`             // Obsolète - conservé pour compatibilité
+	UseSTARTTLS     bool       `json:"use_starttls,omitempty"`        // Obsolète - conservé pour compatibilité
+	UseOAuth        bool       `json:"use_oauth" gorm:"default:true"` // Toujours true maintenant
 	IsEnabled       bool       `json:"is_enabled" gorm:"default:false"`
 	LastTestedAt    *time.Time `json:"last_tested_at"`
 	LastTestSuccess bool       `json:"last_test_success" gorm:"default:false"`
@@ -30,35 +30,35 @@ type SMTPConfig struct {
 
 // EmailOAuthConfig stocke la configuration OAuth 2.0 pour l'authentification SMTP
 type EmailOAuthConfig struct {
-	ID               uint       `json:"id" gorm:"primaryKey"`
-	SMTPConfigID     uint       `json:"smtp_config_id" gorm:"uniqueIndex"` // One-to-one with SMTPConfig
-	Provider         string     `json:"provider" gorm:"default:'microsoft'"` // microsoft, google (future)
-	TenantID         string     `json:"tenant_id"`                          // Azure AD tenant ID
-	ClientID         string     `json:"client_id"`
-	ClientSecret     string     `json:"-" gorm:"type:text"`                 // Encrypted, never exposed
-	Scopes           string     `json:"scopes" gorm:"default:'https://graph.microsoft.com/.default'"`
-	AuthURL          string     `json:"auth_url" gorm:"default:'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize'"`
-	TokenURL         string     `json:"token_url" gorm:"default:'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'"`
+	ID           uint   `json:"id" gorm:"primaryKey"`
+	SMTPConfigID uint   `json:"smtp_config_id" gorm:"uniqueIndex"`   // One-to-one with SMTPConfig
+	Provider     string `json:"provider" gorm:"default:'microsoft'"` // microsoft, google (future)
+	TenantID     string `json:"tenant_id"`                           // Azure AD tenant ID
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"-" gorm:"type:text"` // Encrypted, never exposed
+	Scopes       string `json:"scopes" gorm:"default:'https://graph.microsoft.com/.default'"`
+	AuthURL      string `json:"auth_url" gorm:"default:'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize'"`
+	TokenURL     string `json:"token_url" gorm:"default:'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'"`
 
 	// Token storage (all encrypted)
-	AccessToken      string     `json:"-" gorm:"type:text"`                 // Current access token (encrypted)
-	RefreshToken     string     `json:"-" gorm:"type:text"`                 // Refresh token (encrypted)
-	TokenType        string     `json:"token_type" gorm:"default:'Bearer'"` // Usually "Bearer"
-	ExpiresAt        *time.Time `json:"expires_at"`                         // Token expiration time
+	AccessToken  string     `json:"-" gorm:"type:text"`                 // Current access token (encrypted)
+	RefreshToken string     `json:"-" gorm:"type:text"`                 // Refresh token (encrypted)
+	TokenType    string     `json:"token_type" gorm:"default:'Bearer'"` // Usually "Bearer"
+	ExpiresAt    *time.Time `json:"expires_at"`                         // Token expiration time
 
 	// Flow type: "client_credentials" or "refresh_token"
-	GrantType        string     `json:"grant_type" gorm:"default:'client_credentials'"`
+	GrantType string `json:"grant_type" gorm:"default:'client_credentials'"`
 
 	// Status tracking
 	IsEnabled        bool       `json:"is_enabled" gorm:"default:false"`
 	LastTokenRefresh *time.Time `json:"last_token_refresh"`
 	LastRefreshError string     `json:"last_refresh_error" gorm:"type:text"`
 
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// Relation
-	SMTPConfig       *SMTPConfig `json:"smtp_config,omitempty" gorm:"foreignKey:SMTPConfigID"`
+	SMTPConfig *SMTPConfig `json:"smtp_config,omitempty" gorm:"foreignKey:SMTPConfigID"`
 }
 
 // EmailTemplate stocke les templates d'email personnalisables

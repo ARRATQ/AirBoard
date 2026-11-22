@@ -371,7 +371,7 @@ import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { pollsService, newsService, announcementsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
-import { getRoles } from '@/config/access'
+import { getRoles, canAccess, POLLS } from '@/config/access'
 
 const props = defineProps({
   show: {
@@ -616,28 +616,23 @@ const handleSubmit = async () => {
       }))
     }
 
-    // Même règle de rôle que le menu et le routeur (config/access.js) ;
-    // sans rôle reconnu, on s'arrête au lieu d'annoncer un faux succès
-    const { isAdmin, isGroupAdmin, isEditor } = getRoles(authStore.user)
-    if (!isAdmin && !isGroupAdmin && !isEditor) {
-      throw new Error('Rôle insuffisant pour enregistrer un sondage')
+    // Même règle que le menu et le routeur (config/access.js) ; sans droit, on s'arrête
+    // au lieu d'annoncer un faux succès. L'admin passe par l'API admin, les autres par
+    // l'API group-admin, qui applique la portée de leur permission.
+    const roles = getRoles(authStore.user)
+    if (!canAccess(POLLS, roles)) {
+      throw new Error('Droits insuffisants pour enregistrer un sondage')
     }
 
     let result
     if (isEdit.value) {
-      if (isAdmin) {
-        result = await pollsService.updatePoll(props.poll.id, payload)
-      } else if (isGroupAdmin) {
-        result = await pollsService.updatePollAsGroupAdmin(props.poll.id, payload)
-      } else {
-        result = await pollsService.updatePollAsEditor(props.poll.id, payload)
-      }
-    } else if (isAdmin) {
-      result = await pollsService.createPoll(payload)
-    } else if (isGroupAdmin) {
-      result = await pollsService.createPollAsGroupAdmin(payload)
+      result = roles.isAdmin
+        ? await pollsService.updatePoll(props.poll.id, payload)
+        : await pollsService.updatePollAsGroupAdmin(props.poll.id, payload)
     } else {
-      result = await pollsService.createPollAsEditor(payload)
+      result = roles.isAdmin
+        ? await pollsService.createPoll(payload)
+        : await pollsService.createPollAsGroupAdmin(payload)
     }
 
     if (window.$toast) {

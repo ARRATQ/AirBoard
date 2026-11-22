@@ -387,6 +387,17 @@ export const adminService = {
     return response.data
   },
 
+  // Rôles d'un compte (remplace la liste)
+  async getUserAccessRoles(userId) {
+    const response = await api.get(`/admin/users/${userId}/access-roles`)
+    return response.data
+  },
+
+  async setUserAccessRoles(userId, roleIds) {
+    const response = await api.put(`/admin/users/${userId}/access-roles`, { role_ids: roleIds })
+    return response.data
+  },
+
   // App Settings
   async getAppSettings() {
     const response = await api.get('/admin/settings')
@@ -1169,12 +1180,12 @@ export const getCommentSettings = async () => {
 }
 
 export const getPendingComments = async (params = {}) => {
-  const response = await api.get('/admin/comments/pending', { params })
+  const response = await api.get('/editor/comments/pending', { params })
   return response.data
 }
 
 export const moderateComment = async (data) => {
-  const response = await api.post('/admin/comments/moderate', data)
+  const response = await api.post('/editor/comments/moderate', data)
   return response.data
 }
 
@@ -1275,11 +1286,6 @@ export const pollsService = {
     return response.data
   },
 
-  // Créer un sondage (editor)
-  async createPollAsEditor(data) {
-    const response = await api.post('/editor/polls', data)
-    return response.data
-  },
 
   // Créer un sondage (admin de groupe)
   async createPollAsGroupAdmin(data) {
@@ -1293,11 +1299,6 @@ export const pollsService = {
     return response.data
   },
 
-  // Mettre à jour un sondage (editor)
-  async updatePollAsEditor(id, data) {
-    const response = await api.put(`/editor/polls/${id}`, data)
-    return response.data
-  },
 
   // Mettre à jour un sondage (admin de groupe)
   async updatePollAsGroupAdmin(id, data) {
@@ -1311,11 +1312,6 @@ export const pollsService = {
     return response.data
   },
 
-  // Supprimer un sondage (editor)
-  async deletePollAsEditor(id) {
-    const response = await api.delete(`/editor/polls/${id}`)
-    return response.data
-  },
 
   // Supprimer un sondage (admin de groupe)
   async deletePollAsGroupAdmin(id) {
@@ -1462,12 +1458,12 @@ export const commentsService = {
   // Admin
   // params : page, page_size (max 100) ; réponse { comments, total, page, page_size, total_pages }
   async getPendingComments(params = {}) {
-    const response = await api.get('/admin/comments/pending', { params })
+    const response = await api.get('/editor/comments/pending', { params })
     return response.data
   },
 
   async moderateComment(data) {
-    const response = await api.post('/admin/comments/moderate', data)
+    const response = await api.post('/editor/comments/moderate', data)
     return response.data
   },
 

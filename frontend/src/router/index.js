@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, getRoles, canAccess } from '@/config/access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -394,7 +394,7 @@ const routes = [
     component: PollsManagement,
     meta: {
       requiresAuth: true,
-      access: GROUP_ADMIN,
+      access: POLLS,
       title: 'Sondages'
     }
   },
@@ -474,7 +474,7 @@ const routes = [
     component: CommentModeration,
     meta: {
       requiresAuth: true,
-      access: ADMIN,
+      access: MODERATION,
       title: 'Modération des Commentaires'
     }
   },

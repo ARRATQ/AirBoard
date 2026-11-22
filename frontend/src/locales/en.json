@@ -274,11 +274,9 @@
     "searchPlaceholder": "Search a user...",
     "filter_all_roles": "All roles",
     "filter_admins": "Administrators",
-    "filter_editors": "Editors",
     "filter_users": "Users",
     "no_group": "No group",
     "role_admin": "Administrator",
-    "role_editor": "Editor",
     "role_user": "User",
     "noResultsTitle": "No Results",
     "noResultsText": "No user matches your search criteria.",
@@ -344,9 +342,7 @@
     "activeAccountDesc": "The user is allowed to sign in",
     "role": "Role",
     "roleUserDesc": "Access to their groups' resources",
-    "roleEditorDesc": "Manages News Hub articles",
     "roleAdminDesc": "Access to all features",
-    "groupAdminHint": "To delegate a group's administration, make the user an administrator of that group from group management.",
     "groups": "User groups",
     "groupsHint": "Groups determine which resources are accessible",
     "noGroups": "No groups available",
@@ -359,7 +355,12 @@
       "passwordRequired": "Password is required",
       "passwordTooShort": "Password must be at least {min} characters long",
       "roleRequired": "Role is required"
-    }
+    },
+    "accessRoles": "Assigned roles",
+    "accessRolesHint": "Each role adds permissions (news, polls, moderation…). Roles are created on the Roles page.",
+    "accessRolesAdmin": "An administrator already has every permission: no role to assign.",
+    "accessRolesLoadError": "Could not load roles.",
+    "noAccessRoles": "No roles created yet."
   },
   "groupModal": {
     "titleEdit": "Edit group",
@@ -711,7 +712,6 @@
     "roles": {
       "admin": "Administrator",
       "group_admin": "Group Admins",
-      "editor": "Editor",
       "user": "User"
     },
     "topContributors": "Top contributors",
@@ -3133,6 +3133,14 @@
       "events_manage": {
         "label": "Manage events",
         "help": "Create, edit and delete events."
+      },
+      "polls_manage": {
+        "label": "Manage polls",
+        "help": "Create, edit, close and delete polls."
+      },
+      "comments_moderate": {
+        "label": "Moderate comments",
+        "help": "Approve, edit or delete comments. Applies to the whole site."
       }
     },
     "members": {

@@ -172,12 +172,11 @@
                   <span
                     :class="{
                       'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': user.role === 'admin',
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': user.role === 'editor',
-                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role !== 'admin' && user.role !== 'editor'
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': user.role !== 'admin'
                     }"
                     class="badge text-xs flex-shrink-0"
                   >
-                    {{ t(user.role === 'admin' ? 'users.role_admin' : user.role === 'editor' ? 'users.role_editor' : 'users.role_user') }}
+                    {{ t(user.role === 'admin' ? 'users.role_admin' : 'users.role_user') }}
                   </span>
                 </label>
               </div>

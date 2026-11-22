@@ -1,4 +1,4 @@
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, canAccess, hasAnyPermission } from './access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, canAccess, hasAnyPermission } from './access'
 
 /**
  * Menu latéral, décrit une seule fois pour tous les rôles.
@@ -38,7 +38,7 @@ export const ADMIN_SECTIONS = [
     items: [
       { to: '/admin/news', icon: 'lucide:newspaper', labelKey: 'nav.admin.news', access: NEWS },
       { to: '/admin/events', icon: 'lucide:calendar-cog', labelKey: 'nav.admin.events', access: EVENTS },
-      { to: '/admin/polls', icon: 'lucide:chart-column', labelKey: 'nav.admin.polls', access: GROUP_ADMIN },
+      { to: '/admin/polls', icon: 'lucide:chart-column', labelKey: 'nav.admin.polls', access: POLLS },
       { to: '/admin/announcements', icon: 'lucide:megaphone', labelKey: 'nav.admin.announcements', access: ADMIN },
       { to: '/admin/media', icon: 'lucide:images', labelKey: 'nav.admin.media', access: ADMIN }
     ]
@@ -49,7 +49,7 @@ export const ADMIN_SECTIONS = [
     icon: 'lucide:user-round',
     items: [
       { to: '/admin/suggestions', icon: 'lucide:lightbulb', labelKey: 'nav.admin.suggestions', access: ADMIN },
-      { to: '/admin/comments', icon: 'lucide:message-square-text', labelKey: 'nav.admin.moderation', access: ADMIN },
+      { to: '/admin/comments', icon: 'lucide:message-square-text', labelKey: 'nav.admin.moderation', access: MODERATION },
       { to: '/admin/gamification', icon: 'lucide:medal', labelKey: 'nav.admin.gamification', access: ADMIN },
       { to: '/admin/directory', icon: 'lucide:network', labelKey: 'nav.admin.directory', access: ADMIN }
     ]
@@ -95,7 +95,7 @@ export const ADMIN_SECTIONS = [
  *   sous un seul titre (`grouped: false`).
  * - Sinon : `null`, pas de bloc d'administration.
  *
- * @param {{ isAdmin: boolean, isEditor: boolean, isGroupAdmin: boolean }} roles
+ * @param {{ isAdmin: boolean, isGroupAdmin: boolean, permissions?: Record<string, string> }} roles
  * @returns {null | { titleKey: string, grouped: boolean, overview: object|null, sections: Array, items: Array }}
  */
 export function buildAdminNav(roles) {
@@ -143,7 +143,7 @@ export const SECTION_TABS = {
 
 /**
  * @param {keyof typeof SECTION_TABS} section
- * @param {{ isAdmin: boolean, isEditor: boolean, isGroupAdmin: boolean }} roles
+ * @param {{ isAdmin: boolean, isGroupAdmin: boolean, permissions?: Record<string, string> }} roles
  */
 export function visibleTabs(section, roles) {
   return (SECTION_TABS[section] || []).filter((tab) => canAccess(tab.access, roles))

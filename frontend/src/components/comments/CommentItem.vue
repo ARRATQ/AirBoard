@@ -71,6 +71,7 @@
 </template>
 
 <script setup>
+import { canModerateComments, getRoles } from '@/config/access'
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -88,31 +89,15 @@ defineEmits(['edit', 'delete'])
 const authStore = useAuthStore()
 const { t } = useI18n()
 
-const canEdit = computed(() => {
-  return authStore.user && (
-    authStore.user.id === props.comment.user_id ||
-    authStore.user.role === 'admin' ||
-    authStore.user.role === 'editor'
-  )
-})
-
-const canDelete = computed(() => {
-  return authStore.user && (
-    authStore.user.id === props.comment.user_id ||
-    authStore.user.role === 'admin' ||
-    authStore.user.role === 'editor' ||
-    (authStore.user.admin_of_groups && authStore.user.admin_of_groups.length > 0)
-  )
-})
+// Même règle que le serveur : auteur ou modérateur (admin compris) ; un ancien admin de
+// groupe peut aussi supprimer
+const isModerator = computed(() => canModerateComments(authStore.user))
+const canEdit = computed(() => !!authStore.user && (authStore.user.id === props.comment.user_id || isModerator.value))
+const canDelete = computed(() => canEdit.value || getRoles(authStore.user).isGroupAdmin)
 
 const canManage = computed(() => canEdit.value || canDelete.value)
 
-const showModerationBadges = computed(() => {
-  return authStore.user && (
-    authStore.user.role === 'admin' ||
-    authStore.user.role === 'editor'
-  )
-})
+const showModerationBadges = computed(() => isModerator.value)
 
 const getUserName = (user) => {
   if (!user) return t('comments.anonymous')

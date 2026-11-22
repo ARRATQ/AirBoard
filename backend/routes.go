@@ -355,10 +355,10 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 		// par défaut) : tous si elle l'a sur tout le site.
 		protected.GET("/group-admin/managed-groups", authMiddleware.RequirePermissionParam(), groupAdminHandler.GetManagedGroups)
 
-		// Envoi de médias (images des articles et des événements) : sans notion de groupe.
-		// Les éditeurs (ancien rôle) gardent l'accès tant que les sondages en dépendent.
-		mediaUpload := authMiddleware.RequireAnyPermission(models.PermNewsManage, models.PermEventsManage)
-		protected.POST("/editor/media/upload", authMiddleware.RequireEditorOr(mediaUpload), mediaHandler.UploadMedia)
+		// Envoi de médias (images des articles, des événements et des sondages) : sans notion
+		// de groupe.
+		mediaUpload := authMiddleware.RequireAnyPermission(models.PermNewsManage, models.PermEventsManage, models.PermPollsManage)
+		protected.POST("/editor/media/upload", mediaUpload, mediaHandler.UploadMedia)
 		protected.POST("/group-admin/media/upload", mediaUpload, mediaHandler.UploadMedia)
 
 		// Actualités : permission news.manage. Sur tout le site par /editor, limitée aux
@@ -412,6 +412,8 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			admin.PUT("/access-roles/:id", accessRolesHandler.UpdateRole)
 			admin.DELETE("/access-roles/:id", accessRolesHandler.DeleteRole)
 			admin.GET("/access-roles/:id/users", accessRolesHandler.GetRoleMembers)
+			admin.GET("/users/:id/access-roles", accessRolesHandler.GetUserRoles)
+			admin.PUT("/users/:id/access-roles", accessRolesHandler.SetUserRoles)
 			admin.PUT("/access-roles/:id/users", accessRolesHandler.SetRoleMembers)
 
 			// Gestion des groupes d'applications
@@ -587,19 +589,31 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			admin.DELETE("/directory/fields/:id", directoryHandler.DeleteField)
 		}
 
-		// Routes editor (ancien rôle éditeur) : modération et sondages, en attendant de passer
-		// eux aussi aux permissions. Actualités et événements : voir plus haut.
-		editor := protected.Group("/editor")
-		editor.Use(authMiddleware.RequireEditor())
+		// Sondages : permission polls.manage, sur tout le site par /editor, limitée aux groupes
+		// de la personne par /group-admin.
+		pollsEverywhere := protected.Group("/editor")
+		pollsEverywhere.Use(authMiddleware.RequirePermissionEverywhere(models.PermPollsManage))
 		{
-			// Modération des commentaires (editors peuvent aussi modérer)
-			editor.GET("/comments/pending", commentHandler.GetPendingComments)
-			editor.POST("/comments/moderate", commentHandler.ModerateComment)
+			pollsEverywhere.POST("/polls", pollsHandler.CreatePoll)
+			pollsEverywhere.PUT("/polls/:id", pollsHandler.UpdatePoll)
+			pollsEverywhere.DELETE("/polls/:id", pollsHandler.DeletePoll)
+		}
+		pollsScoped := protected.Group("/group-admin")
+		pollsScoped.Use(authMiddleware.RequirePermission(models.PermPollsManage))
+		{
+			pollsScoped.GET("/polls", pollsHandler.GetPolls)
+			pollsScoped.POST("/polls", pollsHandler.CreatePoll)
+			pollsScoped.PUT("/polls/:id", pollsHandler.UpdatePoll)
+			pollsScoped.DELETE("/polls/:id", pollsHandler.DeletePoll)
+			pollsScoped.POST("/polls/:id/close", pollsHandler.ClosePoll)
+		}
 
-			// Gestion des sondages (editors peuvent créer/modifier/supprimer des sondages)
-			editor.POST("/polls", pollsHandler.CreatePoll)
-			editor.PUT("/polls/:id", pollsHandler.UpdatePoll)
-			editor.DELETE("/polls/:id", pollsHandler.DeletePoll)
+		// Modération des commentaires : permission comments.moderate (sans notion de groupe)
+		moderation := protected.Group("/editor")
+		moderation.Use(authMiddleware.RequirePermissionEverywhere(models.PermCommentsModerate))
+		{
+			moderation.GET("/comments/pending", commentHandler.GetPendingComments)
+			moderation.POST("/comments/moderate", commentHandler.ModerateComment)
 		}
 
 		// Routes group-admin (gestion limitée au périmètre)
@@ -620,13 +634,6 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			groupAdmin.POST("/news/categories", adminOnly, newsHandler.CreateCategory)
 			groupAdmin.PUT("/news/categories/:id", adminOnly, newsHandler.UpdateCategory)
 			groupAdmin.DELETE("/news/categories/:id", adminOnly, newsHandler.DeleteCategory)
-
-			// Polls (scoped - group admin peut gérer les sondages de ses groupes)
-			groupAdmin.GET("/polls", pollsHandler.GetPolls) // Liste des sondages avec filtrage automatique par rôle
-			groupAdmin.POST("/polls", pollsHandler.CreatePoll)
-			groupAdmin.PUT("/polls/:id", pollsHandler.UpdatePoll)
-			groupAdmin.DELETE("/polls/:id", pollsHandler.DeletePoll)
-			groupAdmin.POST("/polls/:id/close", pollsHandler.ClosePoll)
 
 			// Info sur les groupes administrés
 

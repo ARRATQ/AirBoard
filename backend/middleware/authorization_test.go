@@ -72,8 +72,6 @@ func TestRoleGuards(t *testing.T) {
 	am := &AuthMiddleware{}
 	guards := map[string]gin.HandlerFunc{
 		"RequireAdmin":         am.RequireAdmin(),
-		"RequireEditor":        am.RequireEditor(),
-		"RequireEditorOrAdmin": am.RequireEditorOrAdmin(),
 		"RequireGroupAdmin":    am.RequireGroupAdmin(),
 	}
 	cases := []struct {
@@ -88,14 +86,6 @@ func TestRoleGuards(t *testing.T) {
 		{"RequireAdmin", "admin de groupe", groupAdmin, http.StatusForbidden, "forbidden"},
 		{"RequireAdmin", "anonyme", anonymous, http.StatusForbidden, "forbidden"},
 
-		{"RequireEditor", "admin", admin, http.StatusOK, ""},
-		{"RequireEditor", "editor", editor, http.StatusOK, ""},
-		{"RequireEditor", "utilisateur", plainUser, http.StatusForbidden, "forbidden"},
-		{"RequireEditor", "admin de groupe", groupAdmin, http.StatusForbidden, "forbidden"},
-		{"RequireEditor", "rôle non textuel", badRoleType, http.StatusForbidden, "forbidden"},
-		{"RequireEditor", "anonyme", anonymous, http.StatusUnauthorized, "unauthorized"},
-		{"RequireEditorOrAdmin", "editor", editor, http.StatusOK, ""},
-		{"RequireEditorOrAdmin", "utilisateur", plainUser, http.StatusForbidden, "forbidden"},
 
 		{"RequireGroupAdmin", "admin", admin, http.StatusOK, ""},
 		{"RequireGroupAdmin", "admin de groupe", groupAdmin, http.StatusOK, ""},

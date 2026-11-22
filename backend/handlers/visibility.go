@@ -123,6 +123,11 @@ func attachManagedGroups(db *gorm.DB, user *models.User) {
 		log.Printf("[Visibility] permissions de %d : %v", user.ID, err)
 	} else if len(perms) > 0 {
 		user.Permissions = perms
+		if ids, err := models.PermissionGroupIDs(db, user.ID); err != nil {
+			log.Printf("[Visibility] groupes couverts par les permissions de %d : %v", user.ID, err)
+		} else {
+			user.PermissionGroupIDs = ids
+		}
 	}
 	if len(user.AdminOfGroups) > 0 || len(user.ManagedGroupIDs) == 0 {
 		return

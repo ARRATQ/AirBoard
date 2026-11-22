@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, getRoles, canAccess, getScope, permissionScope } from '../access'
+import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess, getScope, permissionScope, canManageItem, canModerateComments } from '../access'
 
 const admin = getRoles({ role: 'admin' })
+// Ancien compte « editor » resté sans rôle : traité comme un utilisateur
 const editor = getRoles({ role: 'editor' })
 // Éditeur migré : rôle « Éditeur » (actualités et événements partout, ressources de ses groupes)
 const migratedEditor = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all', 'resources.manage': 'groups' } })
@@ -17,7 +18,7 @@ describe('getRoles', () => {
   })
 
   it('accepte un utilisateur absent', () => {
-    expect(getRoles(null)).toEqual({ isAdmin: false, isEditor: false, isGroupAdmin: false, permissions: {} })
+    expect(getRoles(null)).toEqual({ isAdmin: false, isGroupAdmin: false, permissions: {} })
   })
 })
 
@@ -115,5 +116,56 @@ describe('permissions des rôles', () => {
 
   it('ignore des permissions mal formées', () => {
     expect(getRoles({ role: 'user', permissions: 'resources.manage' }).permissions).toEqual({})
+  })
+})
+
+describe('sondages et modération', () => {
+  const pollsInGroups = getRoles({ role: 'user', permissions: { 'polls.manage': 'groups' } })
+  const moderator = getRoles({ role: 'user', permissions: { 'comments.moderate': 'all' } })
+
+  it('ouvre les sondages à la permission, à l\'admin et à l\'ancien admin de groupe', () => {
+    expect(canAccess(POLLS, pollsInGroups)).toBe(true)
+    expect(canAccess(POLLS, admin)).toBe(true)
+    expect(canAccess(POLLS, groupAdmin)).toBe(true)
+    expect(canAccess(POLLS, moderator)).toBe(false)
+    expect(canAccess(POLLS, user)).toBe(false)
+  })
+
+  it('réserve la modération à la permission (pas à l\'admin de groupe)', () => {
+    expect(canAccess(MODERATION, moderator)).toBe(true)
+    expect(canAccess(MODERATION, admin)).toBe(true)
+    expect(canAccess(MODERATION, groupAdmin)).toBe(false)
+    expect(canAccess(MODERATION, pollsInGroups)).toBe(false)
+    expect(canModerateComments({ role: 'user', permissions: { 'comments.moderate': 'all' } })).toBe(true)
+    expect(canModerateComments({ role: 'admin' })).toBe(true)
+    expect(canModerateComments({ role: 'user' })).toBe(false)
+    expect(canModerateComments(null)).toBe(false)
+  })
+})
+
+describe('canManageItem', () => {
+  const g1 = { id: 1 }
+  const g2 = { id: 2 }
+  const common = { id: 3 }
+  // Membre de g1 et de Common ; le serveur ne compte que g1 (hors groupe par défaut)
+  const member = { id: 7, role: 'user', groups: [g1, common], permission_group_ids: [1], permissions: { 'polls.manage': 'groups' } }
+
+  it('tout le site ou admin : tout', () => {
+    expect(canManageItem({ id: 1, role: 'admin' }, 'polls.manage', { target_groups: [] })).toBe(true)
+    expect(canManageItem({ id: 2, role: 'user', permissions: { 'polls.manage': 'all' } }, 'polls.manage', {})).toBe(true)
+  })
+
+  it('ses groupes : contenus ciblant un de ses groupes, pas les contenus globaux', () => {
+    expect(canManageItem(member, 'polls.manage', { target_groups: [g1] })).toBe(true)
+    expect(canManageItem(member, 'polls.manage', { target_groups: [g2] })).toBe(false)
+    expect(canManageItem(member, 'polls.manage', { target_groups: [common] })).toBe(false)
+    expect(canManageItem(member, 'polls.manage', { target_groups: [] })).toBe(false)
+    expect(canManageItem(member, 'news.manage', { target_groups: [g1] })).toBe(false)
+  })
+
+  it('auteur : toujours ; ancien admin de groupe : ses groupes administrés', () => {
+    expect(canManageItem({ id: 9, role: 'user' }, 'news.manage', { author_id: 9 })).toBe(true)
+    expect(canManageItem({ id: 9, role: 'user', managed_group_ids: [2] }, 'news.manage', { target_groups: [g2] })).toBe(true)
+    expect(canManageItem(null, 'news.manage', { author_id: 9 })).toBe(false)
   })
 })

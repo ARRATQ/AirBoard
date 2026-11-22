@@ -133,7 +133,7 @@
             <div v-show="activeTab === 'access'" class="space-y-5">
               <div>
                 <span class="form-label form-label-required">{{ t('userModal.role') }}</span>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <label
                     v-for="role in roles"
                     :key="role.value"
@@ -151,10 +151,36 @@
                   </label>
                 </div>
                 <p v-if="errors.role" class="form-error">{{ errors.role }}</p>
-                <p v-if="form.role === 'user'" class="text-xs text-gray-400 mt-2">
-                  {{ t('userModal.groupAdminHint') }}
-                </p>
               </div>
+
+              <!-- Rôles attribués (permissions) : sans objet pour un administrateur -->
+              <fieldset>
+                <legend class="form-label">{{ t('userModal.accessRoles') }}</legend>
+                <p v-if="form.role === 'admin'" class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('userModal.accessRolesAdmin') }}
+                </p>
+                <template v-else>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ t('userModal.accessRolesHint') }}</p>
+                  <p v-if="accessRolesError" class="form-error">{{ t('userModal.accessRolesLoadError') }}</p>
+                  <p v-else-if="accessRoles.length === 0" class="text-sm text-gray-500 text-center py-4">
+                    {{ t('userModal.noAccessRoles') }}
+                  </p>
+                  <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pe-1">
+                    <label
+                      v-for="accessRole in accessRoles"
+                      :key="accessRole.id"
+                      class="choice-card items-start py-2"
+                      :class="{ 'choice-card-active': form.access_role_ids.includes(accessRole.id) }"
+                    >
+                      <input v-model="form.access_role_ids" :value="accessRole.id" type="checkbox" class="mt-0.5" />
+                      <span class="min-w-0">
+                        <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ accessRole.name }}</span>
+                        <span v-if="accessRole.description" class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{{ accessRole.description }}</span>
+                      </span>
+                    </label>
+                  </div>
+                </template>
+              </fieldset>
 
               <div>
                 <div class="flex items-center justify-between mb-2">
@@ -235,8 +261,13 @@ const form = reactive({
   last_name: '',
   role: 'user',
   group_ids: [],
+  access_role_ids: [],
   is_active: true
 })
+
+// Rôles créés par l'administrateur (page Rôles)
+const accessRoles = ref([])
+const accessRolesError = ref(false)
 
 const isEdit = computed(() => !!props.user)
 
@@ -245,7 +276,6 @@ const showPassword = ref(false)
 
 const roles = computed(() => [
   { value: 'user', label: t('users.role_user'), icon: 'lucide:user', desc: t('userModal.roleUserDesc') },
-  { value: 'editor', label: t('users.role_editor'), icon: 'lucide:pencil', desc: t('userModal.roleEditorDesc') },
   { value: 'admin', label: t('users.role_admin'), icon: 'lucide:shield-check', desc: t('userModal.roleAdminDesc') }
 ])
 
@@ -267,7 +297,7 @@ const tabs = computed(() => [
     id: 'access',
     label: t('userModal.tabAccess'),
     icon: 'lucide:shield-user',
-    count: form.group_ids.length,
+    count: form.group_ids.length + (form.role === 'admin' ? 0 : form.access_role_ids.length),
     hasError: !!errors.value.role
   }
 ])
@@ -280,6 +310,13 @@ onMounted(async () => {
   } catch (error) {
     console.error('Erreur lors du chargement des groupes:', error)
     groups.value = []
+  }
+  try {
+    const list = await adminService.getAccessRoles()
+    accessRoles.value = Array.isArray(list) ? list : []
+  } catch (error) {
+    console.error('Erreur lors du chargement des rôles:', error)
+    accessRolesError.value = true
   }
 })
 
@@ -298,12 +335,16 @@ watch(() => props.user, (newVal) => {
       password: '',
       first_name: newVal.first_name || '',
       last_name: newVal.last_name || '',
-      role: newVal.role || 'user',
+      role: accountRole(newVal.role),
       group_ids: newVal.groups?.map(g => g.id) || [],
+      access_role_ids: newVal.access_roles?.map(r => r.id) || [],
       is_active: newVal.is_active ?? true
     })
   }
 }, { immediate: true })
+
+// Rôle de compte : « admin » ou « user » (l'ancien « editor » n'existe plus)
+const accountRole = (role) => (role === 'admin' ? 'admin' : 'user')
 
 const resetForm = () => {
   if (props.user) {
@@ -313,8 +354,9 @@ const resetForm = () => {
       password: '',
       first_name: props.user.first_name || '',
       last_name: props.user.last_name || '',
-      role: props.user.role || 'user',
+      role: accountRole(props.user.role),
       group_ids: props.user.groups?.map(g => g.id) || [],
+      access_role_ids: props.user.access_roles?.map(r => r.id) || [],
       is_active: props.user.is_active ?? true
     })
   } else {
@@ -326,6 +368,7 @@ const resetForm = () => {
       last_name: '',
       role: 'user',
       group_ids: [],
+      access_role_ids: [],
       is_active: true
     })
   }
@@ -378,7 +421,8 @@ const handleSubmit = async () => {
   
   loading.value = true
   try {
-    const formData = { ...form }
+    // Les rôles attribués ne concernent pas un administrateur (il a tout)
+    const formData = { ...form, access_role_ids: form.role === 'admin' ? [] : [...form.access_role_ids] }
     if (isEdit.value) {
       formData.id = props.user.id
       // Don't send password if it's empty in edit mode

@@ -187,6 +187,7 @@
 </template>
 
 <script setup>
+import { ACCESS_PERMISSION, NEWS, canManageItem } from '@/config/access'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
@@ -216,10 +217,8 @@ const articleReadingTime = computed(() => {
 })
 
 // Computed
-const canEdit = computed(() => {
-  const userRole = authStore.user?.role
-  return userRole === 'admin' || userRole === 'editor'
-})
+// Même règle que le serveur (config/access.js : canManageItem)
+const canEdit = computed(() => canManageItem(authStore.user, ACCESS_PERMISSION[NEWS], news.value))
 
 // Methods
 const fetchNews = async () => {

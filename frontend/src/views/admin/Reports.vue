@@ -151,7 +151,7 @@
             </div>
 
             <!-- Production metrics (editors/admins) -->
-            <div v-if="['admin', 'editor', 'group_admin'].includes(stat.role)" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div v-if="['admin', 'group_admin'].includes(stat.role)" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{{ $t('reports.production') }}</p>
               <div class="grid grid-cols-2 gap-1 text-xs mb-1">
                 <div class="text-center">
@@ -384,7 +384,6 @@
             <option value="">{{ $t('reports.allRoles') }}</option>
             <option value="admin">{{ $t('reports.roles.admin') }}</option>
             <option value="group_admin">{{ $t('reports.roles.group_admin') }}</option>
-            <option value="editor">{{ $t('reports.roles.editor') }}</option>
             <option value="user">{{ $t('reports.roles.user') }}</option>
           </select>
           <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
