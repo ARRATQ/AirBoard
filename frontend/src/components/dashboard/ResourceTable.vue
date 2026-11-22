@@ -26,7 +26,7 @@
         :aria-label="`${$t(favoritesStore.isFavorite(row.id) ? 'common.removeFromFavorites' : 'common.addToFavorites')} : ${row.name}`"
         @click="toggleFavorite(row)"
       >
-        <Icon :icon="favoritesStore.isFavorite(row.id) ? 'mdi:star' : 'mdi:star-outline'" aria-hidden="true" />
+        <Icon icon="lucide:star" :class="{ 'icon-fill': favoritesStore.isFavorite(row.id) }" aria-hidden="true" />
       </button>
     </template>
 
@@ -60,7 +60,7 @@
         :aria-label="`${$t('common.details')} : ${row.name}`"
         @click="$emit('show-details', row.raw)"
       >
-        <Icon icon="mdi:information-outline" aria-hidden="true" />
+        <Icon icon="lucide:info" aria-hidden="true" />
       </button>
     </template>
   </DataTable>

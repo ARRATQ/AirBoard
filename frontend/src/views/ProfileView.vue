@@ -7,7 +7,7 @@
       <template #actions>
         <div class="flex gap-3">
           <button type="button" @click="showPasswordModal = true" class="btn btn-secondary">
-            <Icon icon="mdi:key" class="h-4 w-4 me-2" />
+            <Icon icon="lucide:key" class="h-4 w-4 me-2" />
             {{ $t('profile.changePassword') }}
           </button>
         </div>
@@ -18,7 +18,7 @@
       <!-- Avatar Section -->
       <div class="card mb-6">
         <div class="section-header mb-4">
-          <Icon icon="mdi:account-circle" class="section-icon" />
+          <Icon icon="lucide:circle-user" class="section-icon" />
           <h4 class="section-title">{{ $t('profile.avatar') }}</h4>
         </div>
 
@@ -43,7 +43,7 @@
 
               <!-- Overlay on hover -->
               <span class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity rounded-full" aria-hidden="true">
-                <Icon icon="mdi:camera" class="h-8 w-8 text-white" />
+                <Icon icon="lucide:camera" class="h-8 w-8 text-white" />
               </span>
             </button>
 
@@ -56,7 +56,7 @@
               :title="$t('profile.deleteAvatar')"
               :aria-label="$t('profile.deleteAvatar')"
             >
-              <Icon icon="mdi:close" class="h-4 w-4" />
+              <Icon icon="lucide:x" class="h-4 w-4" />
             </button>
           </div>
 
@@ -71,7 +71,7 @@
 
             <div class="space-y-2">
               <button type="button" @click="triggerAvatarUpload" class="btn btn-secondary">
-                <Icon icon="mdi:upload" class="h-4 w-4 me-2" />
+                <Icon icon="lucide:upload" class="h-4 w-4 me-2" />
                 {{ $t('profile.uploadAvatar') }}
               </button>
 
@@ -83,8 +83,8 @@
             <!-- Upload preview actions -->
             <div v-if="avatarPreview" class="flex gap-2 mt-3">
               <button type="button" @click="uploadAvatar" :disabled="isUploading" class="btn btn-primary">
-                <Icon v-if="isUploading" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-                <Icon v-else icon="mdi:check" class="h-4 w-4 me-2" />
+                <Icon v-if="isUploading" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+                <Icon v-else icon="lucide:check" class="h-4 w-4 me-2" />
                 {{ isUploading ? $t('profile.uploading') : $t('common.save') }}
               </button>
               <button type="button" @click="cancelAvatarUpload" class="btn btn-secondary">
@@ -101,7 +101,7 @@
           <!-- Account Information (Read-only) -->
           <div>
             <div class="section-header mb-4">
-              <Icon icon="mdi:account-outline" class="section-icon" />
+              <Icon icon="lucide:user" class="section-icon" />
               <h4 class="section-title">{{ $t('profile.accountInfo') }}</h4>
             </div>
 
@@ -153,7 +153,7 @@
           <!-- Personal Information (Editable) -->
           <div>
             <div class="section-header mb-4">
-              <Icon icon="mdi:card-account-details-outline" class="section-icon" />
+              <Icon icon="lucide:id-card" class="section-icon" />
               <h4 class="section-title">{{ $t('profile.personalInfo') }}</h4>
             </div>
 
@@ -211,7 +211,7 @@
           <!-- Professional Information -->
           <div>
             <div class="section-header mb-4">
-              <Icon icon="mdi:briefcase-outline" class="section-icon" />
+              <Icon icon="lucide:briefcase" class="section-icon" />
               <h4 class="section-title">{{ $t('profile.professionalInfo') }}</h4>
             </div>
 
@@ -245,7 +245,7 @@
           <!-- Groups -->
           <div v-if="authStore.user?.groups?.length > 0">
             <div class="section-header mb-4">
-              <Icon icon="mdi:account-group-outline" class="section-icon" />
+              <Icon icon="lucide:users" class="section-icon" />
               <h4 class="section-title">{{ $t('profile.groups') }}</h4>
             </div>
 
@@ -268,8 +268,8 @@
               :disabled="isSaving"
               class="btn btn-primary"
             >
-              <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-              <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+              <Icon v-if="isSaving" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+              <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
               {{ isSaving ? $t('common.saving') : $t('common.save') }}
             </button>
           </div>
@@ -290,7 +290,7 @@
           <div class="modal-header">
             <h3 id="profile-password-title" class="modal-title">{{ $t('profile.changePassword') }}</h3>
             <button type="button" @click="showPasswordModal = false" class="modal-close" :aria-label="$t('common.close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -315,7 +315,7 @@
                   :aria-label="showCurrentPassword ? $t('profile.hidePassword') : $t('profile.showPassword')"
                   :aria-pressed="showCurrentPassword"
                 >
-                  <Icon :icon="showCurrentPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
+                  <Icon :icon="showCurrentPassword ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -341,7 +341,7 @@
                   :aria-label="showNewPassword ? $t('profile.hidePassword') : $t('profile.showPassword')"
                   :aria-pressed="showNewPassword"
                 >
-                  <Icon :icon="showNewPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
+                  <Icon :icon="showNewPassword ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
                 </button>
               </div>
               <p class="form-help">{{ $t('profile.passwordMinLength') }}</p>
@@ -373,7 +373,7 @@
                 :disabled="isChangingPassword || !isPasswordFormValid"
                 class="btn btn-primary"
               >
-                <Icon v-if="isChangingPassword" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+                <Icon v-if="isChangingPassword" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
                 {{ isChangingPassword ? $t('common.saving') : $t('profile.changePassword') }}
               </button>
             </div>
@@ -395,7 +395,7 @@
           <div class="modal-header">
             <h3 id="profile-delete-avatar-title" class="modal-title">{{ $t('profile.deleteAvatarTitle') }}</h3>
             <button type="button" @click="showDeleteAvatarModal = false" class="modal-close" :aria-label="$t('common.close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -413,7 +413,7 @@
               :disabled="isDeletingAvatar"
               class="btn btn-danger"
             >
-              <Icon v-if="isDeletingAvatar" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+              <Icon v-if="isDeletingAvatar" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
               {{ isDeletingAvatar ? $t('common.deleting') : $t('common.delete') }}
             </button>
           </div>

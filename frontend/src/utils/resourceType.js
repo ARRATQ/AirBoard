@@ -67,9 +67,9 @@ export const TYPE_META = {
   excel: { glyph: 'X', color: '#217346' },
   powerpoint: { glyph: 'P', color: '#c43e1c' },
   pdf: { glyph: 'PDF', color: '#b42318' },
-  folder: { icon: 'mdi:folder-outline', color: '#a16207' },
-  site: { icon: 'mdi:web', color: '#0369a1' },
-  link: { icon: 'mdi:link-variant', color: '#475569' },
+  folder: { icon: 'lucide:folder', color: '#a16207' },
+  site: { icon: 'lucide:globe', color: '#0369a1' },
+  link: { icon: 'lucide:link', color: '#475569' },
 }
 
 /** « Nouveau » pendant NEW_RESOURCE_DAYS jours après la création. */

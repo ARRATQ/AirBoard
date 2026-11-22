@@ -1,7 +1,7 @@
 <template>
   <ErrorPage
     code="403"
-    icon="mdi:lock"
+    icon="lucide:lock"
     tone="bad"
     :title="t('errors.unauthorized.title')"
     :message="t('errors.unauthorized.message')"

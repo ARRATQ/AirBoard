@@ -30,7 +30,7 @@
           :title="$t('comments.edit')"
           @click="$emit('edit', comment)"
         >
-          <Icon icon="mdi:pencil" class="h-5 w-5" />
+          <Icon icon="lucide:pencil" class="h-5 w-5" />
         </button>
         <button
           v-if="canDelete"
@@ -38,7 +38,7 @@
           :title="$t('comments.delete')"
           @click="$emit('delete', comment.id)"
         >
-          <Icon icon="mdi:delete" class="h-5 w-5" />
+          <Icon icon="lucide:trash-2" class="h-5 w-5" />
         </button>
       </div>
     </div>
@@ -55,14 +55,14 @@
           v-if="!comment.is_approved"
           class="tag tag--warn"
         >
-          <Icon icon="mdi:clock-outline" aria-hidden="true" />
+          <Icon icon="lucide:clock" aria-hidden="true" />
           {{ $t('comments.pending') }}
         </span>
         <span
           v-if="comment.is_flagged"
           class="tag tag--bad"
         >
-          <Icon icon="mdi:flag" aria-hidden="true" />
+          <Icon icon="lucide:flag" aria-hidden="true" />
           {{ $t('comments.flagged') }}
         </span>
       </div>

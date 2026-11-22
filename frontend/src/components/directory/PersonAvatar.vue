@@ -12,7 +12,7 @@
       loading="lazy"
       @error="photoFailed = true"
     />
-    <Icon v-else-if="!person" icon="mdi:account-question-outline" class="person-avatar__vacant-icon" />
+    <Icon v-else-if="!person" icon="lucide:circle-help" class="person-avatar__vacant-icon" />
     <span v-else class="person-avatar__initials">{{ letters }}</span>
   </span>
 </template>

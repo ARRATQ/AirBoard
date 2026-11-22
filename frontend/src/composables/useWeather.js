@@ -6,21 +6,21 @@ const WEATHER_KEY = 'airboard_weather'
 const CITY_KEY = 'airboard_weather_city'
 export const WEATHER_TTL_MS = 30 * 60 * 1000
 
-const EMPTY_WEATHER = { temp: null, icon: 'mdi:weather-cloudy', city: '' }
+const EMPTY_WEATHER = { temp: null, icon: 'lucide:cloud', city: '' }
 
 /** Code météo WMO → icône mdi. */
 export function wmoIcon(code) {
-  if (code === 0) return 'mdi:weather-sunny'
-  if (code <= 2) return 'mdi:weather-partly-cloudy'
-  if (code <= 3) return 'mdi:weather-cloudy'
-  if (code <= 49) return 'mdi:weather-fog'
-  if (code <= 59) return 'mdi:weather-rainy'
-  if (code <= 69) return 'mdi:weather-snowy-rainy'
-  if (code <= 79) return 'mdi:weather-snowy'
-  if (code <= 82) return 'mdi:weather-pouring'
-  if (code <= 84) return 'mdi:weather-hail'
-  if (code <= 99) return 'mdi:weather-lightning-rainy'
-  return 'mdi:weather-cloudy'
+  if (code === 0) return 'lucide:sun'
+  if (code <= 2) return 'lucide:cloud-sun'
+  if (code <= 3) return 'lucide:cloud'
+  if (code <= 49) return 'lucide:cloud-fog'
+  if (code <= 59) return 'lucide:cloud-rain'
+  if (code <= 69) return 'lucide:cloud-hail'
+  if (code <= 79) return 'lucide:cloud-snow'
+  if (code <= 82) return 'lucide:cloud-rain-wind'
+  if (code <= 84) return 'lucide:cloud-hail'
+  if (code <= 99) return 'lucide:cloud-lightning'
+  return 'lucide:cloud'
 }
 
 function readJSON(key) {

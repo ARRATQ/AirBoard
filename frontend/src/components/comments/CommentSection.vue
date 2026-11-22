@@ -31,7 +31,7 @@
                  transition-colors"
           @click="submitComment"
         >
-          <Icon v-if="isSubmitting" icon="mdi:loading" class="animate-spin h-5 w-5" />
+          <Icon v-if="isSubmitting" icon="lucide:loader-circle" class="animate-spin h-5 w-5" />
           <span v-else>{{ $t('comments.submit') }}</span>
         </button>
       </div>
@@ -39,7 +39,7 @@
 
     <!-- Message si commentaires désactivés -->
     <div v-else-if="!commentsEnabled" class="text-center py-8 text-gray-500 dark:text-gray-400">
-      <Icon icon="mdi:comment-off-outline" class="h-12 w-12 mx-auto mb-2" />
+      <Icon icon="lucide:message-square-off" class="h-12 w-12 mx-auto mb-2" />
       <p>{{ $t('comments.disabled') }}</p>
     </div>
 
@@ -57,7 +57,7 @@
 
     <!-- Message si aucun commentaire -->
     <div v-else-if="commentsEnabled" class="text-center py-8 text-gray-500 dark:text-gray-400">
-      <Icon icon="mdi:comment-outline" class="h-12 w-12 mx-auto mb-2" />
+      <Icon icon="lucide:message-square" class="h-12 w-12 mx-auto mb-2" />
       <p>{{ $t('comments.empty') }}</p>
     </div>
 

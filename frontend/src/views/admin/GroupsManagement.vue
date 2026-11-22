@@ -4,7 +4,7 @@
       <template #title>{{ $t('groups.title') }}</template>
       <template #description>{{ $t('groups.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreateModal">
           {{ $t('groups.newGroup') }}
         </BaseButton>
       </template>
@@ -12,11 +12,11 @@
 
     <EmptyState
       v-if="!appStore.loading && groups.length === 0"
-      icon="mdi:account-group-outline"
+      icon="lucide:users"
       :title="$t('groups.emptyTitle')"
       :description="$t('groups.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreateModal">
         {{ $t('groups.createGroup') }}
       </BaseButton>
     </EmptyState>
@@ -45,7 +45,7 @@
       <template #cell-name="{ row }">
         <span class="gm-name">
           <span class="gm-name__swatch" :style="{ backgroundColor: row.raw.color || undefined }">
-            <Icon icon="mdi:account-group" aria-hidden="true" />
+            <Icon icon="lucide:users" aria-hidden="true" />
           </span>
           <span class="gm-name__text">
             <span class="gm-name__title">{{ row.name }}</span>
@@ -86,7 +86,7 @@
             :title="$t('groupAdminsModal.manage')"
             @click="manageGroupAdmins(row.raw)"
           >
-            <Icon icon="mdi:shield-account-outline" aria-hidden="true" />
+            <Icon icon="lucide:shield-user" aria-hidden="true" />
           </button>
         </RowActions>
       </template>
@@ -112,7 +112,7 @@
                     class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
                     :style="{ backgroundColor: selectedGroupForAdmins?.color || '#6B7280' }"
                   >
-                    <Icon icon="mdi:shield-account" class="h-5 w-5" />
+                    <Icon icon="lucide:shield-user" class="h-5 w-5" />
                   </div>
                   <div class="min-w-0">
                     <h3 id="group-admins-modal-title" class="modal-title truncate">{{ $t('groupAdminsModal.title') }}</h3>
@@ -120,7 +120,7 @@
                   </div>
                 </div>
                 <button type="button" class="btn btn-ghost p-2" :aria-label="$t('common.close')" @click="closeGroupAdminsModal">
-                  <Icon icon="mdi:close" class="h-5 w-5" />
+                  <Icon icon="lucide:x" class="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -131,7 +131,7 @@
               </p>
 
               <div class="search-container">
-                <Icon icon="mdi:magnify" class="search-icon" />
+                <Icon icon="lucide:search" class="search-icon" />
                 <input
                   v-model="adminSearchQuery"
                   type="search"
@@ -141,7 +141,7 @@
               </div>
 
               <div v-if="loadingUsers" class="flex-1 flex justify-center items-center">
-                <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-gray-400" />
+                <Icon icon="lucide:loader-circle" class="h-6 w-6 animate-spin text-gray-400" />
               </div>
 
               <div v-else class="flex-1 min-h-0 overflow-y-auto pe-1 space-y-2">
@@ -188,8 +188,8 @@
               <div class="modal-footer-actions">
                 <button type="button" class="btn btn-secondary" @click="closeGroupAdminsModal">{{ $t('common.cancel') }}</button>
                 <button type="button" :disabled="savingAdmins" class="btn btn-primary" @click="saveGroupAdmins">
-                  <Icon v-if="savingAdmins" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+                  <Icon v-if="savingAdmins" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                  <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
                   {{ $t('common.save') }}
                 </button>
               </div>

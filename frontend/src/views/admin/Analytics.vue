@@ -6,7 +6,7 @@
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <div class="p-2 bg-primary-600 rounded-lg">
-              <Icon icon="mdi:chart-box" class="h-6 w-6 text-white" />
+              <Icon icon="lucide:chart-column-big" class="h-6 w-6 text-white" />
             </div>
             {{ $t('analytics.title') }}
           </h1>
@@ -16,7 +16,7 @@
         </div>
         <div class="flex items-center gap-3">
           <button @click="mockExport" class="btn-secondary flex items-center gap-2">
-            <Icon icon="mdi:download" class="h-4 w-4" />
+            <Icon icon="lucide:download" class="h-4 w-4" />
             {{ $t('analytics.exportData') }}
           </button>
         </div>
@@ -24,7 +24,7 @@
 
       <!-- Loading state -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-24">
-        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-primary-500" />
+        <Icon icon="lucide:loader-circle" class="h-12 w-12 animate-spin text-primary-500" />
         <p class="mt-4 text-gray-500 animate-pulse">{{ $t('analytics.loading') }}</p>
       </div>
 
@@ -39,13 +39,13 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('analytics.totalClicks') }}</p>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ analytics.total_clicks.toLocaleString() }}</h3>
                 <div v-if="analytics.clicks_growth !== 0" class="flex items-center mt-2 text-xs font-semibold" :class="analytics.clicks_growth > 0 ? 'text-green-500' : 'text-red-500'">
-                  <Icon :icon="analytics.clicks_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="me-1" />
+                  <Icon :icon="analytics.clicks_growth > 0 ? 'lucide:trending-up' : 'lucide:trending-down'" class="me-1" />
                   {{ Math.abs(analytics.clicks_growth).toFixed(1) }}% 
                   <span class="ms-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
                 </div>
               </div>
               <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:cursor-default-click" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <Icon icon="lucide:mouse-pointer-click" class="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </div>
@@ -57,13 +57,13 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ $t('analytics.uniqueUsers') }}</p>
                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ analytics.total_unique_users.toLocaleString() }}</h3>
                 <div v-if="analytics.users_growth !== 0" class="flex items-center mt-2 text-xs font-semibold" :class="analytics.users_growth > 0 ? 'text-green-500' : 'text-red-500'">
-                  <Icon :icon="analytics.users_growth > 0 ? 'mdi:trending-up' : 'mdi:trending-down'" class="me-1" />
+                  <Icon :icon="analytics.users_growth > 0 ? 'lucide:trending-up' : 'lucide:trending-down'" class="me-1" />
                   {{ Math.abs(analytics.users_growth).toFixed(1) }}%
                   <span class="ms-1 font-normal text-gray-400">{{ $t('analytics.vsPrevious') }}</span>
                 </div>
               </div>
               <div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-full group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:account-group" class="h-6 w-6 text-green-600 dark:text-green-400" />
+                <Icon icon="lucide:users" class="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
                 </div>
               </div>
               <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-full group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:lightning-bolt" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <Icon icon="lucide:zap" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
@@ -93,7 +93,7 @@
                 <p class="text-xs text-gray-400 mt-2 italic">{{ $t('analytics.distribution30d') }}</p>
               </div>
               <div class="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-full group-hover:scale-110 transition-transform">
-                <Icon icon="mdi:clock-fast" class="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                <Icon icon="lucide:timer" class="h-6 w-6 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </div>
@@ -105,7 +105,7 @@
           <div class="card p-6 lg:col-span-2">
             <div class="flex items-center justify-between mb-8">
               <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon icon="mdi:chart-line" class="text-primary-500" />
+                <Icon icon="lucide:chart-line" class="text-primary-500" />
                 {{ $t('analytics.dailyActivity') }}
               </h2>
               <div class="tag tag--acc">
@@ -155,7 +155,7 @@
           <!-- Hourly Distribution Heatmap -->
           <div class="card p-6">
             <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2">
-              <Icon icon="mdi:camera-timer" class="text-orange-500" />
+              <Icon icon="lucide:camera" class="text-orange-500" />
               {{ $t('analytics.hourlyActivity') }}
             </h2>
             
@@ -189,7 +189,7 @@
           <div class="card overflow-hidden">
             <div class="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
               <h2 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon icon="mdi:trophy" class="text-yellow-500" />
+                <Icon icon="lucide:trophy" class="text-yellow-500" />
                 {{ $t('analytics.topApplications') }}
               </h2>
               <span class="text-xs text-gray-400 font-medium">{{ $t('analytics.top10') }}</span>
@@ -199,7 +199,7 @@
                 <div v-for="(app, index) in analytics.top_applications" :key="app.application_id" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors border-b last:border-0 border-gray-100 dark:border-gray-800">
                   <span class="w-6 text-sm font-bold text-gray-400">#{{ index + 1 }}</span>
                   <div class="h-10 w-10 flex-shrink-0 rounded-xl flex items-center justify-center shadow-sm" :style="{ backgroundColor: app.color || '#6366f1' }">
-                    <Icon :icon="app.icon || 'mdi:application'" class="h-6 w-6 text-white" />
+                    <Icon :icon="app.icon || 'lucide:app-window'" class="h-6 w-6 text-white" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ app.application_name }}</h4>
@@ -224,7 +224,7 @@
           <div class="card overflow-hidden">
             <div class="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
               <h2 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon icon="mdi:account-star" class="text-green-500" />
+                <Icon icon="lucide:user-star" class="text-green-500" />
                 {{ $t('analytics.topUsers') }}
               </h2>
               <span class="text-xs text-gray-400 font-medium">{{ $t('analytics.top10') }}</span>
@@ -256,7 +256,7 @@
         <div v-if="newsStats" class="card p-8 border-t-4 border-t-red-500">
           <div class="flex items-center gap-4 mb-8">
             <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-              <Icon icon="mdi:newspaper" class="h-8 w-8 text-red-600" />
+              <Icon icon="lucide:newspaper" class="h-8 w-8 text-red-600" />
             </div>
             <div>
               <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none uppercase">{{ $t('analytics.newsStats.title') }}</h2>
@@ -299,10 +299,10 @@
                     <p class="text-sm font-bold text-gray-900 dark:text-white leading-tight group-hover:text-red-600 transition-colors line-clamp-2">{{ article.title }}</p>
                     <div class="flex gap-3 mt-3">
                       <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                        <Icon icon="mdi:eye" class="h-3 w-3" /> {{ article.view_count }}
+                        <Icon icon="lucide:eye" class="h-3 w-3" /> {{ article.view_count }}
                       </div>
                       <div class="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
-                        <Icon icon="mdi:heart" class="h-3 w-3 text-red-500" /> {{ article.reaction_count }}
+                        <Icon icon="lucide:heart" class="h-3 w-3 text-red-500" /> {{ article.reaction_count }}
                       </div>
                     </div>
                   </div>
@@ -316,7 +316,7 @@
       <!-- Empty State -->
       <div v-else class="empty-state bg-white dark:bg-gray-800 rounded-3xl p-12 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700">
         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-full mb-6">
-          <Icon icon="mdi:chart-scatter-plot" class="h-16 w-16 text-gray-300" />
+          <Icon icon="lucide:chart-scatter" class="h-16 w-16 text-gray-300" />
         </div>
         <h3 class="empty-state-title">{{ $t('analytics.noAnalytics') }}</h3>
         <p class="empty-state-description">{{ $t('analytics.noAnalyticsText') }}</p>

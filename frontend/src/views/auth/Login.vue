@@ -7,7 +7,7 @@
         <div class="text-center space-y-4">
           <div class="flex items-center justify-center">
             <div class="h-16 w-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
-              <Icon icon="mdi:view-dashboard" class="h-8 w-8 text-white" />
+              <Icon icon="lucide:layout-dashboard" class="h-8 w-8 text-white" />
             </div>
           </div>
           <div>
@@ -81,7 +81,7 @@
                 @click="showPassword = !showPassword"
                 class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
               >
-                <Icon :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
+                <Icon :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
               </button>
             </div>
             <p v-if="errors.password" class="mt-2 text-sm text-red-600 dark:text-red-400">{{ errors.password }}</p>
@@ -103,7 +103,7 @@
             :disabled="loading"
             class="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-5 w-5 me-2" />
+            <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-5 w-5 me-2" />
             <span>{{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}</span>
           </button>
 

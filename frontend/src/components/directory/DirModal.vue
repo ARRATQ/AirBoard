@@ -18,7 +18,7 @@
               <p v-if="subtitle" class="modal-subtitle">{{ subtitle }}</p>
             </div>
             <button type="button" class="btn-ghost rounded-full p-1" :aria-label="$t('common.close')" @click="$emit('close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -34,7 +34,7 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="$emit('close')">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="saving">
-                <Icon v-if="saving" icon="mdi:loading" class="animate-spin h-4 w-4 me-1" />
+                <Icon v-if="saving" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-1" />
                 {{ saving ? $t('common.saving') : submitLabel || $t('common.save') }}
               </button>
             </div>

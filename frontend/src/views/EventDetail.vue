@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="eventsStore.isLoading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
+      <Icon icon="lucide:loader-circle" class="h-8 w-8 animate-spin text-primary-500" />
     </div>
 
     <!-- Event Content -->
@@ -15,7 +15,7 @@
             @click="$router.back()"
             class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500"
           >
-            <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4" />
+            <Icon icon="lucide:arrow-left" class="rtl-flip h-4 w-4" />
             {{ $t('events.detail.back') }}
           </button>
         </div>
@@ -27,7 +27,7 @@
             v-if="event.is_all_day"
             class="tag tag--info"
           >
-            <Icon icon="mdi:weather-sunny" />
+            <Icon icon="lucide:sun" />
             {{ $t('events.badge.allDay') }}
           </span>
 
@@ -36,7 +36,7 @@
             v-if="event.is_recurring"
             class="tag tag--ok"
           >
-            <Icon icon="mdi:repeat" />
+            <Icon icon="lucide:repeat" />
             {{ $t('events.badge.recurring') }}
           </span>
 
@@ -45,7 +45,7 @@
             v-if="isPastEvent"
             class="tag"
           >
-            <Icon icon="mdi:history" />
+            <Icon icon="lucide:history" />
             {{ $t('events.badge.past') }}
           </span>
 
@@ -54,14 +54,14 @@
             v-if="event.priority === 'urgent'"
             class="tag tag--bad"
           >
-            <Icon icon="mdi:alert" />
+            <Icon icon="lucide:triangle-alert" />
             {{ $t('events.priority.urgent') }}
           </span>
           <span
             v-else-if="event.priority === 'important'"
             class="tag tag--warn"
           >
-            <Icon icon="mdi:star" />
+            <Icon icon="lucide:star" />
             {{ $t('events.priority.important') }}
           </span>
 
@@ -70,14 +70,14 @@
             v-if="!event.is_published"
             class="tag tag--warn"
           >
-            <Icon icon="mdi:clock" />
+            <Icon icon="lucide:clock" />
             {{ $t('events.status.draft') }}
           </span>
           <span
             v-else-if="event.published_at"
             class="tag tag--ok"
           >
-            <Icon icon="mdi:check-circle" />
+            <Icon icon="lucide:circle-check" />
             {{ $t('events.status.published') }}
           </span>
 
@@ -86,7 +86,7 @@
             v-if="!event.target_groups || event.target_groups.length === 0"
             class="tag tag--ok"
           >
-            <Icon icon="mdi:earth" />
+            <Icon icon="lucide:earth" />
             {{ $t('events.visibility.public') }}
           </span>
           <span
@@ -94,7 +94,7 @@
             class="tag tag--info"
             :title="getGroupsTooltip(event.target_groups)"
           >
-            <Icon icon="mdi:lock" />
+            <Icon icon="lucide:lock" />
             {{ getVisibilityLabel(event.target_groups) }}
           </span>
 
@@ -103,7 +103,7 @@
             v-if="event.category"
             class="tag"
           >
-            <Icon :icon="event.category.icon || 'mdi:folder'" :style="{ color: event.category.color }" />
+            <Icon :icon="event.category.icon || 'lucide:folder'" :style="{ color: event.category.color }" />
             {{ event.category.name }}
           </span>
         </div>
@@ -124,7 +124,7 @@
             <!-- Date -->
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:calendar" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                <Icon icon="lucide:calendar" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -139,7 +139,7 @@
             <!-- Time -->
             <div v-if="!event.is_all_day" class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:clock" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Icon icon="lucide:clock" class="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -154,7 +154,7 @@
             <!-- Location -->
             <div v-if="event.location" class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:map-marker" class="h-5 w-5 text-green-600 dark:text-green-400" />
+                <Icon icon="lucide:map-pin" class="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -169,7 +169,7 @@
             <!-- Timezone -->
             <div v-if="event.timezone" class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:earth" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                <Icon icon="lucide:earth" class="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -184,7 +184,7 @@
             <!-- Recurrence Pattern -->
             <div v-if="event.is_recurring && event.recurrence_rule" class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:repeat" class="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <Icon icon="lucide:repeat" class="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -199,7 +199,7 @@
             <!-- Views -->
             <div v-if="event.views" class="flex items-start gap-3">
               <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:eye" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <Icon icon="lucide:eye" class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -216,15 +216,15 @@
         <!-- Metadata -->
         <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-center gap-2">
-            <Icon icon="mdi:account" class="h-5 w-5" />
+            <Icon icon="lucide:user" class="h-5 w-5" />
             <span>{{ event.author?.first_name }} {{ event.author?.last_name }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <Icon icon="mdi:calendar" class="h-5 w-5" />
+            <Icon icon="lucide:calendar" class="h-5 w-5" />
             <span>{{ formatDate(event.created_at) }}</span>
           </div>
           <div v-if="event.published_at" class="flex items-center gap-2">
-            <Icon icon="mdi:check-circle" class="h-5 w-5" />
+            <Icon icon="lucide:circle-check" class="h-5 w-5" />
             <span>{{ $t('events.detail.published') }} {{ formatRelativeTime(event.published_at) }}</span>
           </div>
         </div>
@@ -263,7 +263,7 @@
             rel="noopener noreferrer"
             class="flex items-center gap-2 text-primary-600 hover:text-primary-500 dark:text-primary-400"
           >
-            <Icon icon="mdi:external-link" class="h-4 w-4" />
+            <Icon icon="lucide:external-link" class="h-4 w-4" />
             <span>{{ link.title || link.url }}</span>
           </a>
         </div>
@@ -275,7 +275,7 @@
           @click="editEvent"
           class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
         >
-          <Icon icon="mdi:pencil" class="h-5 w-5" />
+          <Icon icon="lucide:pencil" class="h-5 w-5" />
           {{ $t('events.detail.edit') }}
         </button>
       </div>
@@ -283,7 +283,7 @@
 
     <!-- Error State -->
     <div v-else class="text-center py-12">
-      <Icon icon="mdi:alert-circle" class="h-16 w-16 mx-auto text-red-500 mb-4" />
+      <Icon icon="lucide:circle-alert" class="h-16 w-16 mx-auto text-red-500 mb-4" />
       <p class="text-gray-600 dark:text-gray-400 text-lg">
         {{ $t('events.detail.notFound') }}
       </p>

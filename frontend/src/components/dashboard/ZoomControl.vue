@@ -30,11 +30,11 @@ const emit = defineEmits(['update:modelValue'])
 
 // « auto » d'abord : taille adaptée à l'écran ; puis les tailles fixes.
 const zoomLevels = computed(() => [
-  { value: 'auto', label: t('dashboard.zoom.auto'), icon: 'mdi:fit-to-screen-outline' },
-  { value: '75', label: t('dashboard.zoom.extraSmall'), icon: 'mdi:magnify-minus-outline' },
-  { value: '85', label: t('dashboard.zoom.small'), icon: 'mdi:magnify-minus' },
-  { value: '100', label: t('dashboard.zoom.normal'), icon: 'mdi:magnify' },
-  { value: '115', label: t('dashboard.zoom.large'), icon: 'mdi:magnify-plus' }
+  { value: 'auto', label: t('dashboard.zoom.auto'), icon: 'lucide:scan' },
+  { value: '75', label: t('dashboard.zoom.extraSmall'), icon: 'lucide:zoom-out' },
+  { value: '85', label: t('dashboard.zoom.small'), icon: 'lucide:zoom-out' },
+  { value: '100', label: t('dashboard.zoom.normal'), icon: 'lucide:search' },
+  { value: '115', label: t('dashboard.zoom.large'), icon: 'lucide:zoom-in' }
 ])
 
 const currentLevel = computed(() => {

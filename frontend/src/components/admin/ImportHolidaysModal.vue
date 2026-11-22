@@ -8,7 +8,7 @@
       <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
           <div class="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
-            <Icon icon="mdi:calendar-star" class="h-6 w-6 text-red-600 dark:text-red-400" />
+            <Icon icon="lucide:calendar-heart" class="h-6 w-6 text-red-600 dark:text-red-400" />
           </div>
           <div>
             <h2 id="import-holidays-modal-title" class="text-xl font-bold text-gray-900 dark:text-white">
@@ -25,7 +25,7 @@
           :aria-label="$t('common.close')"
           class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         >
-          <Icon icon="mdi:close" class="h-5 w-5 text-gray-500" />
+          <Icon icon="lucide:x" class="h-5 w-5 text-gray-500" />
         </button>
       </div>
 
@@ -48,7 +48,7 @@
               </option>
             </select>
             <div v-if="isLoadingCountries" class="absolute end-3 top-1/2 -translate-y-1/2">
-              <Icon icon="mdi:loading" class="h-5 w-5 animate-spin text-gray-400" />
+              <Icon icon="lucide:loader-circle" class="h-5 w-5 animate-spin text-gray-400" />
             </div>
           </div>
         </div>
@@ -85,8 +85,8 @@
             :disabled="!selectedCountry || isLoadingPreview"
             class="btn btn-secondary w-full"
           >
-            <Icon v-if="isLoadingPreview" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-            <Icon v-else icon="mdi:eye" class="h-4 w-4 me-2" />
+            <Icon v-if="isLoadingPreview" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+            <Icon v-else icon="lucide:eye" class="h-4 w-4 me-2" />
             {{ $t('events.holidays.preview') }}
           </button>
         </div>
@@ -123,7 +123,7 @@
         <!-- Error Message -->
         <div v-if="error" class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
-            <Icon icon="mdi:alert-circle" class="h-5 w-5" />
+            <Icon icon="lucide:circle-alert" class="h-5 w-5" />
             <span>{{ error }}</span>
           </div>
         </div>
@@ -131,7 +131,7 @@
         <!-- Success Message -->
         <div v-if="importResult" class="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
           <div class="flex items-center gap-2 text-green-600 dark:text-green-400 mb-2">
-            <Icon icon="mdi:check-circle" class="h-5 w-5" />
+            <Icon icon="lucide:circle-check" class="h-5 w-5" />
             <span class="font-medium">{{ $t('events.holidays.importSuccess', { count: importResult.imported }) }}</span>
           </div>
           <ul class="text-sm text-green-600 dark:text-green-400 ms-7 space-y-1">
@@ -151,8 +151,8 @@
           :disabled="!selectedCountry || isImporting"
           class="btn btn-primary"
         >
-          <Icon v-if="isImporting" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-          <Icon v-else icon="mdi:download" class="h-4 w-4 me-2" />
+          <Icon v-if="isImporting" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="lucide:download" class="h-4 w-4 me-2" />
           {{ $t('events.holidays.import') }}
         </button>
       </div>

@@ -4,13 +4,13 @@
       <template #title>{{ t('admin.newsCategories') }}</template>
       <template #description>{{ t('admin.newsCategoriesHelp') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </template>
     </PageHeader>
 
     <EmptyState
       v-if="!loading && categories.length === 0"
-      icon="mdi:tag-multiple-outline"
+      icon="lucide:tags"
       :title="t('admin.noCategory')"
     />
 
@@ -24,7 +24,7 @@
     >
       <template #cell-name="{ row }">
         <span class="nc-name">
-          <Icon :icon="row.raw.icon || 'mdi:tag'" class="nc-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
+          <Icon :icon="row.raw.icon || 'lucide:tag'" class="nc-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
           <span class="nc-name__text">
             <span class="nc-name__title">{{ row.name }}</span>
             <span v-if="row.description" class="nc-name__desc">{{ row.description }}</span>
@@ -63,7 +63,7 @@
             <h2 id="news-category-modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ editingId ? t('common.edit') : t('common.create') }}
             </h2>
-            <BaseButton variant="ghost" size="sm" icon="mdi:close" :aria-label="t('common.close')" @click="closeForm" />
+            <BaseButton variant="ghost" size="sm" icon="lucide:x" :aria-label="t('common.close')" @click="closeForm" />
           </div>
 
           <form class="p-5 space-y-4" @submit.prevent="saveCategory">
@@ -83,7 +83,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Icon -->
               <div>
-                <IconInput v-model="form.icon" :label="t('common.icon')" placeholder="mdi:tag" />
+                <IconInput v-model="form.icon" :label="t('common.icon')" placeholder="lucide:tag" />
               </div>
 
               <!-- Color -->
@@ -144,7 +144,7 @@ const editingId = ref(null)
 const form = ref({
   name: '',
   description: '',
-  icon: 'mdi:tag',
+  icon: 'lucide:tag',
   color: '#3B82F6',
   order: 0,
   is_active: true
@@ -169,7 +169,7 @@ const openCreate = () => {
   form.value = {
     name: '',
     description: '',
-    icon: 'mdi:tag',
+    icon: 'lucide:tag',
     color: '#3B82F6',
     order: 0,
     is_active: true
@@ -182,7 +182,7 @@ const openEdit = (category) => {
   form.value = {
     name: category.name,
     description: category.description || '',
-    icon: category.icon || 'mdi:tag',
+    icon: category.icon || 'lucide:tag',
     color: category.color || '#3B82F6',
     order: category.order || 0,
     is_active: category.is_active
@@ -198,7 +198,7 @@ const saveCategory = async () => {
   const payload = {
     name: form.value.name.trim(),
     description: form.value.description.trim(),
-    icon: form.value.icon.trim() || 'mdi:tag',
+    icon: form.value.icon.trim() || 'lucide:tag',
     color: form.value.color,
     order: Number(form.value.order) || 0,
     is_active: !!form.value.is_active
@@ -246,7 +246,7 @@ const toggleActive = async (category, isActive) => {
     await newsService.updateCategory(category.id, {
       name: category.name,
       description: category.description || '',
-      icon: category.icon || 'mdi:tag',
+      icon: category.icon || 'lucide:tag',
       color: category.color || '#3B82F6',
       order: category.order || 0,
       is_active: isActive

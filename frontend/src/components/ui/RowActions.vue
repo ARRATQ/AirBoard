@@ -9,7 +9,7 @@
       :title="t('common.edit')"
       @click="$emit('edit')"
     >
-      <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+      <Icon icon="lucide:pencil" aria-hidden="true" />
     </button>
     <button
       v-if="deletable"
@@ -19,7 +19,7 @@
       :title="t('common.delete')"
       @click="$emit('delete')"
     >
-      <Icon icon="mdi:trash-can-outline" aria-hidden="true" />
+      <Icon icon="lucide:trash-2" aria-hidden="true" />
     </button>
   </div>
 </template>

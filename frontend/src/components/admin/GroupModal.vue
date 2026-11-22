@@ -11,7 +11,7 @@
                   class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
                   :style="{ backgroundColor: form.color || '#6B7280' }"
                 >
-                  <Icon icon="mdi:account-group" class="h-5 w-5" />
+                  <Icon icon="lucide:users" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
                   <h3 id="group-modal-title" class="modal-title truncate">
@@ -23,7 +23,7 @@
                 </div>
               </div>
               <button type="button" class="btn btn-ghost p-2" :aria-label="t('common.close')" @click="closeModal">
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="lucide:x" class="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -118,7 +118,7 @@
             <div v-show="activeTab === 'access'" class="flex flex-col h-full gap-3">
               <div class="flex flex-wrap items-center gap-3">
                 <div class="search-container flex-1 min-w-[12rem]">
-                  <Icon icon="mdi:magnify" class="search-icon" />
+                  <Icon icon="lucide:search" class="search-icon" />
                   <input
                     v-model="appGroupSearch"
                     type="search"
@@ -134,7 +134,7 @@
               </div>
 
               <div v-if="appGroups.length === 0" class="empty-state flex-1 flex flex-col items-center justify-center text-center">
-                <Icon icon="mdi:folder-open-outline" class="h-12 w-12 text-gray-400 mb-2" />
+                <Icon icon="lucide:folder-open" class="h-12 w-12 text-gray-400 mb-2" />
                 <p class="text-sm text-gray-500">{{ t('groupModal.noAppGroups') }}</p>
                 <p class="text-xs text-gray-400">{{ t('groupModal.noAppGroupsHint') }}</p>
               </div>
@@ -152,12 +152,12 @@
                       class="h-8 w-8 flex-shrink-0 rounded-lg flex items-center justify-center"
                       :style="{ backgroundColor: appGroup.color || '#6B7280' }"
                     >
-                      <Icon :icon="appGroup.icon || 'mdi:folder'" class="h-4 w-4 text-white" />
+                      <Icon :icon="appGroup.icon || 'lucide:folder'" class="h-4 w-4 text-white" />
                     </span>
                     <span class="min-w-0 flex-1">
                       <span class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
                         <span class="truncate">{{ appGroup.name }}</span>
-                        <Icon v-if="appGroup.is_private" icon="mdi:lock" class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+                        <Icon v-if="appGroup.is_private" icon="lucide:lock" class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
                       </span>
                       <span class="block text-xs text-gray-500 dark:text-gray-400">
                         {{ t('groupModal.resourcesCount', appGroup.applications?.length || 0) }}
@@ -174,7 +174,7 @@
             <!-- Onglet : Membres (édition uniquement) -->
             <div v-if="isEdit" v-show="activeTab === 'members'" class="h-full">
               <div v-if="!form.users?.length" class="h-full flex flex-col items-center justify-center text-center">
-                <Icon icon="mdi:account-off-outline" class="h-12 w-12 text-gray-400 mb-2" />
+                <Icon icon="lucide:user-x" class="h-12 w-12 text-gray-400 mb-2" />
                 <p class="text-sm text-gray-500">{{ t('groupModal.noMembers') }}</p>
                 <p class="text-xs text-gray-400">{{ t('groupModal.noMembersHint') }}</p>
               </div>
@@ -208,8 +208,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'lucide:save' : 'lucide:plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? t('common.save') : t('groupModal.submitCreate') }}
               </button>
             </div>
@@ -264,11 +264,11 @@ const presetColors = ['#6B7280', '#d97757', '#ef4444', '#f59e0b', '#10b981', '#0
 
 const tabs = computed(() => {
   const list = [
-    { id: 'general', label: t('groupModal.tabGeneral'), icon: 'mdi:information-outline', hasError: !!errors.value.name },
-    { id: 'access', label: t('groupModal.tabAccess'), icon: 'mdi:shield-key-outline', count: form.app_group_ids.length }
+    { id: 'general', label: t('groupModal.tabGeneral'), icon: 'lucide:info', hasError: !!errors.value.name },
+    { id: 'access', label: t('groupModal.tabAccess'), icon: 'lucide:shield-ellipsis', count: form.app_group_ids.length }
   ]
   if (isEdit.value) {
-    list.push({ id: 'members', label: t('groupModal.tabMembers'), icon: 'mdi:account-multiple-outline', count: form.users?.length || 0 })
+    list.push({ id: 'members', label: t('groupModal.tabMembers'), icon: 'lucide:users', count: form.users?.length || 0 })
   }
   return list
 })

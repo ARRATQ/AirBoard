@@ -2,7 +2,7 @@
   <div class="card">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-        <Icon icon="mdi:newspaper" class="h-5 w-5 text-primary-500" />
+        <Icon icon="lucide:newspaper" class="h-5 w-5 text-primary-500" />
         {{ $t('news.widget.title') }}
         <span v-if="unreadCount > 0" class="ms-2 px-2 py-1 bg-red-500 text-white text-xs rounded-full">
           <span aria-hidden="true">{{ unreadCount }}</span>
@@ -14,13 +14,13 @@
         class="text-sm text-primary-500 hover:text-primary-600 font-medium flex items-center gap-1"
       >
         {{ $t('news.widget.viewAll') }}
-        <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
+        <Icon icon="lucide:arrow-right" class="rtl-flip h-4 w-4" />
       </router-link>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-8" role="status">
-      <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-primary-500" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="h-6 w-6 animate-spin text-primary-500" aria-hidden="true" />
       <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
@@ -57,7 +57,7 @@
             <!-- Pinned Icon -->
             <Icon
               v-if="news.is_pinned"
-              icon="mdi:pin"
+              icon="lucide:pin"
               class="h-4 w-4 text-yellow-500 flex-shrink-0"
             />
           </div>
@@ -82,18 +82,18 @@
         <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
           <div class="flex items-center gap-3">
             <span class="flex items-center gap-1">
-              <Icon icon="mdi:calendar" class="h-3 w-3" />
+              <Icon icon="lucide:calendar" class="h-3 w-3" />
               {{ formatDate(news.published_at || news.created_at) }}
             </span>
             <span v-if="news.category" class="flex items-center gap-1">
-              <Icon :icon="news.category.icon || 'mdi:folder'" class="h-3 w-3" :style="{ color: news.category.color }" />
+              <Icon :icon="news.category.icon || 'lucide:folder'" class="h-3 w-3" :style="{ color: news.category.color }" />
               {{ news.category.name }}
             </span>
           </div>
 
           <!-- Reactions count -->
           <div v-if="news.reactions && news.reactions.length > 0" class="flex items-center gap-1">
-            <Icon icon="mdi:heart" class="h-3 w-3" aria-hidden="true" />
+            <Icon icon="lucide:heart" class="h-3 w-3" aria-hidden="true" />
             <span aria-hidden="true">{{ news.reactions.length }}</span>
             <span class="sr-only">{{ $t('news.widget.reactionsCount', { count: news.reactions.length }, news.reactions.length) }}</span>
           </div>
@@ -103,7 +103,7 @@
 
     <!-- Empty State -->
     <div v-else class="text-center py-8">
-      <Icon icon="mdi:newspaper-variant-outline" class="h-12 w-12 mx-auto text-gray-400 mb-2" />
+      <Icon icon="lucide:newspaper" class="h-12 w-12 mx-auto text-gray-400 mb-2" />
       <p class="text-sm text-gray-600 dark:text-gray-400">
         {{ $t('news.widget.noNews') }}
       </p>

@@ -13,7 +13,7 @@
       :aria-expanded="showPanel"
     >
       <Icon
-        :icon="notificationStore.hasUnread ? 'mdi:bell-badge' : 'mdi:bell-outline'"
+        :icon="notificationStore.hasUnread ? 'lucide:bell-dot' : 'lucide:bell'"
         class="h-6 w-6 transition-transform group-hover:scale-110"
         :class="{ 
           'animate-shake text-yellow-500 dark:text-yellow-400': notificationStore.hasUnread,
@@ -66,13 +66,13 @@
         <!-- Notifications List -->
         <div class="flex-1 overflow-y-auto max-h-[380px] overscroll-contain">
           <div v-if="notificationStore.loading" class="flex flex-col items-center justify-center py-12 gap-2">
-            <Icon icon="mdi:loading" class="h-6 w-6 animate-spin text-primary-600 dark:text-primary-400" />
+            <Icon icon="lucide:loader-circle" class="h-6 w-6 animate-spin text-primary-600 dark:text-primary-400" />
             <span class="text-sm text-gray-600 dark:text-gray-400">{{ $t('common.loading') }}</span>
           </div>
 
           <div v-else-if="notificationStore.notifications.length === 0" class="flex flex-col items-center justify-center py-12 px-4 text-center">
             <div class="bg-gray-100 dark:bg-gray-700 rounded-full p-3 mb-3">
-              <Icon icon="mdi:bell-off-outline" class="h-6 w-6 text-gray-400 dark:text-gray-500" />
+              <Icon icon="lucide:bell-off" class="h-6 w-6 text-gray-400 dark:text-gray-500" />
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('notifications.noNotifications') }}</p>
           </div>
@@ -135,7 +135,7 @@
                 :title="$t('notifications.delete')"
                 :aria-label="$t('notifications.delete')"
               >
-                <Icon icon="mdi:close" class="h-4 w-4" />
+                <Icon icon="lucide:x" class="h-4 w-4" />
               </button>
 
               <!-- Unread Indicator Dot -->
@@ -156,7 +156,7 @@
             class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-primary-50 dark:hover:bg-gray-700 transition-colors"
           >
             {{ $t('notifications.viewAll') }}
-            <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
+            <Icon icon="lucide:arrow-right" class="rtl-flip h-4 w-4" />
           </button>
         </div>
       </div>

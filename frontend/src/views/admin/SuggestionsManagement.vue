@@ -16,7 +16,7 @@
     >
       <template #toolbar>
         <label class="sm-search">
-          <Icon icon="mdi:magnify" class="sm-search__icon" aria-hidden="true" />
+          <Icon icon="lucide:search" class="sm-search__icon" aria-hidden="true" />
           <input
             v-model="filters.search"
             type="search"
@@ -82,7 +82,7 @@
             :title="row.raw.is_archived ? t('suggestions.admin.activate') : t('suggestions.admin.archive')"
             @click="toggleArchive(row.raw)"
           >
-            <Icon :icon="row.raw.is_archived ? 'mdi:archive-arrow-up-outline' : 'mdi:archive-arrow-down-outline'" aria-hidden="true" />
+            <Icon :icon="row.raw.is_archived ? 'lucide:archive-arrow-up' : 'lucide:archive-arrow-down'" aria-hidden="true" />
           </button>
         </RowActions>
       </template>
@@ -90,7 +90,7 @@
 
     <nav v-if="pagination.total_pages > 1" class="sm-pager" :aria-label="t('ui.table.range', { from: 1, to: pagination.page_size, total: pagination.total })">
       <button type="button" class="sm-pager__btn" :disabled="pagination.page === 1" :aria-label="t('ui.table.prev')" @click="changePage(pagination.page - 1)">
-        <Icon icon="mdi:chevron-left" aria-hidden="true" />
+        <Icon icon="lucide:chevron-left" aria-hidden="true" />
       </button>
       <button
         v-for="page in visiblePages"
@@ -104,7 +104,7 @@
         {{ page }}
       </button>
       <button type="button" class="sm-pager__btn" :disabled="pagination.page === pagination.total_pages" :aria-label="t('ui.table.next')" @click="changePage(pagination.page + 1)">
-        <Icon icon="mdi:chevron-right" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" aria-hidden="true" />
       </button>
     </nav>
   </div>

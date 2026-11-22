@@ -4,10 +4,10 @@ import CalloutView from './CalloutView.vue'
 
 // labelKey : clé i18n, traduite là où le libellé est affiché (CalloutView, barre d'outils)
 export const CALLOUT_TYPES = [
-  { value: 'info',    labelKey: 'news.editor.callout.info',    icon: 'mdi:information',   color: '#3B82F6' },
-  { value: 'warning', labelKey: 'news.editor.callout.warning', icon: 'mdi:alert',          color: '#F59E0B' },
-  { value: 'success', labelKey: 'news.editor.callout.success', icon: 'mdi:check-circle',   color: '#22C55E' },
-  { value: 'danger',  labelKey: 'news.editor.callout.danger',  icon: 'mdi:alert-circle',   color: '#EF4444' },
+  { value: 'info',    labelKey: 'news.editor.callout.info',    icon: 'lucide:info',   color: '#3B82F6' },
+  { value: 'warning', labelKey: 'news.editor.callout.warning', icon: 'lucide:triangle-alert',          color: '#F59E0B' },
+  { value: 'success', labelKey: 'news.editor.callout.success', icon: 'lucide:circle-check',   color: '#22C55E' },
+  { value: 'danger',  labelKey: 'news.editor.callout.danger',  icon: 'lucide:circle-alert',   color: '#EF4444' },
 ]
 
 export const CalloutExtension = Node.create({

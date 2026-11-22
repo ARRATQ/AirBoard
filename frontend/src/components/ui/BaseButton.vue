@@ -7,7 +7,7 @@
     :disabled="tag === 'button' ? disabled || loading : undefined"
     :aria-busy="loading || undefined"
   >
-    <Icon v-if="loading" icon="mdi:loading" class="base-btn__icon base-btn__spin" aria-hidden="true" />
+    <Icon v-if="loading" icon="lucide:loader-circle" class="base-btn__icon base-btn__spin" aria-hidden="true" />
     <Icon v-else-if="icon" :icon="icon" class="base-btn__icon" :class="{ 'rtl-flip': isDirectional }" aria-hidden="true" />
     <slot />
   </component>

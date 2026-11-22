@@ -20,7 +20,7 @@
             :aria-label="t('ui.close')"
             @click="onClose"
           >
-            <Icon icon="mdi:close" aria-hidden="true" />
+            <Icon icon="lucide:x" aria-hidden="true" />
           </button>
         </header>
         <div class="base-modal__body">

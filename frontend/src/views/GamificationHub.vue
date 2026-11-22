@@ -3,16 +3,16 @@
     <PageHeader :title="t('gamification.title')" :description="t('gamification.subtitle')" />
 
     <div v-if="loading" class="xp-state" role="status">
-      <Icon icon="mdi:loading" class="xp-state__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="xp-state__spin" aria-hidden="true" />
       <span>{{ t('common.loading') }}</span>
     </div>
 
     <EmptyState
       v-else-if="loadError"
       :title="t('gamification.loadError')"
-      icon="mdi:alert-circle-outline"
+      icon="lucide:circle-alert"
     >
-      <BaseButton variant="secondary" size="sm" icon="mdi:refresh" @click="fetchData">
+      <BaseButton variant="secondary" size="sm" icon="lucide:refresh-cw" @click="fetchData">
         {{ t('common.retry') }}
       </BaseButton>
     </EmptyState>
@@ -67,7 +67,7 @@
                 :style="{ '--c': ua.achievement?.color || 'var(--acc-ink)' }"
                 :title="ua.achievement?.name"
               >
-                <Icon :icon="ua.achievement?.icon || 'mdi:medal'" aria-hidden="true" />
+                <Icon :icon="ua.achievement?.icon || 'lucide:medal'" aria-hidden="true" />
                 <span class="sr-only">{{ ua.achievement?.name }}</span>
               </li>
             </ul>
@@ -106,7 +106,7 @@
                 :style="isUnlocked(achievement.code) ? { '--c': achievement.color || 'var(--acc-ink)' } : undefined"
                 aria-hidden="true"
               >
-                <Icon :icon="isUnlocked(achievement.code) ? achievement.icon : 'mdi:lock-outline'" />
+                <Icon :icon="isUnlocked(achievement.code) ? achievement.icon : 'lucide:lock'" />
               </span>
               <div class="xp-badge__body">
                 <h3 class="xp-badge__name">{{ achievement.name }}</h3>
@@ -118,7 +118,7 @@
               </div>
             </li>
           </ul>
-          <EmptyState v-else compact :title="t('gamification.noBadges')" icon="mdi:shield-outline" />
+          <EmptyState v-else compact :title="t('gamification.noBadges')" icon="lucide:shield" />
         </section>
 
         <!-- Classement -->
@@ -191,20 +191,20 @@ const recentTransactions = ref([])
 const currentTab = ref('all')
 
 const ACTIVITY_ICONS = {
-  daily_login: 'mdi:calendar-check',
-  app_click: 'mdi:cursor-default-click-outline',
-  news_read: 'mdi:book-open-variant',
-  news_publish: 'mdi:newspaper-plus',
-  event_publish: 'mdi:calendar-star',
-  poll_vote: 'mdi:vote-outline',
-  poll_create: 'mdi:poll',
-  comment_create: 'mdi:comment-text-outline',
-  suggestion_create: 'mdi:lightbulb-on-outline',
-  suggestion_vote: 'mdi:thumb-up-outline',
-  suggestion_comment: 'mdi:comment-edit-outline',
-  achievement_unlock: 'mdi:medal',
-  chat_message: 'mdi:chat-processing-outline',
-  chatbot_use: 'mdi:robot-excited-outline',
+  daily_login: 'lucide:calendar-check',
+  app_click: 'lucide:mouse-pointer-click',
+  news_read: 'lucide:book-open',
+  news_publish: 'lucide:newspaper',
+  event_publish: 'lucide:calendar-heart',
+  poll_vote: 'lucide:vote',
+  poll_create: 'lucide:chart-column',
+  comment_create: 'lucide:message-square-text',
+  suggestion_create: 'lucide:lightbulb',
+  suggestion_vote: 'lucide:thumbs-up',
+  suggestion_comment: 'lucide:message-square-more',
+  achievement_unlock: 'lucide:medal',
+  chat_message: 'lucide:message-circle-more',
+  chatbot_use: 'lucide:bot',
 }
 
 const dateLocale = computed(() => dateLocaleFor(locale.value))
@@ -245,7 +245,7 @@ const unlockedDate = (code) => {
     : ''
 }
 
-const activityIcon = (reason) => ACTIVITY_ICONS[reason] || 'mdi:star-outline'
+const activityIcon = (reason) => ACTIVITY_ICONS[reason] || 'lucide:star'
 const activityLabel = (reason) =>
   t(ACTIVITY_ICONS[reason] ? `gamification.activity.${reason}` : 'gamification.activity.other')
 

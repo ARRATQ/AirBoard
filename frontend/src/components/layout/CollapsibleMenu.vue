@@ -18,7 +18,7 @@
       </div>
       <Icon
         v-if="!compact"
-        :icon="isOpen ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+        :icon="isOpen ? 'lucide:chevron-up' : 'lucide:chevron-down'"
         class="h-4 w-4 flex-shrink-0 transition-transform duration-200"
         aria-hidden="true"
       />
@@ -51,7 +51,7 @@ const props = defineProps({
   },
   icon: {
     type: String,
-    default: 'mdi:folder'
+    default: 'lucide:folder'
   },
   storageKey: {
     type: String,

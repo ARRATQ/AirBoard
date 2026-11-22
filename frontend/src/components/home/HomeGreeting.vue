@@ -6,11 +6,11 @@
 
     <nav v-if="activePoll || latestNewsGroup || nextEvent" class="greet__pills" :aria-label="$t('home.quickActions.title')">
       <router-link v-if="activePoll" :to="`/polls/${activePoll.id}`" class="greet__pill">
-        <Icon icon="mdi:poll" class="greet__pill-icon" aria-hidden="true" />
+        <Icon icon="lucide:chart-column" class="greet__pill-icon" aria-hidden="true" />
         {{ $t('home.vote') }}
       </router-link>
       <router-link v-if="latestNewsGroup" to="/news" class="greet__pill">
-        <Icon :icon="latestNewsGroup.type.icon || 'mdi:newspaper-variant-outline'" class="greet__pill-icon" aria-hidden="true" />
+        <Icon :icon="latestNewsGroup.type.icon || 'lucide:newspaper'" class="greet__pill-icon" aria-hidden="true" />
         {{ latestNewsGroup.type.name }}
       </router-link>
       <router-link v-if="nextEvent" :to="`/events/${nextEvent.slug}`" class="greet__pill">

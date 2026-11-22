@@ -27,7 +27,7 @@
       />
 
       <div v-if="!isUploading" class="upload-content">
-        <Icon icon="mdi:cloud-upload" class="upload-icon" aria-hidden="true" />
+        <Icon icon="lucide:cloud-upload" class="upload-icon" aria-hidden="true" />
         <p class="upload-text">
           {{ $t('media.dropFiles') }}
         </p>
@@ -40,7 +40,7 @@
       </div>
 
       <div v-else class="uploading-content">
-        <Icon icon="mdi:loading" class="animate-spin upload-icon" />
+        <Icon icon="lucide:loader-circle" class="animate-spin upload-icon" />
         <p class="upload-text">
           {{ $t('media.uploading') }} {{ uploadProgress }}%
         </p>
@@ -52,7 +52,7 @@
 
     <!-- Error message -->
     <div v-if="errorMessage" class="error-message" role="alert">
-      <Icon icon="mdi:alert-circle" class="h-5 w-5" aria-hidden="true" />
+      <Icon icon="lucide:circle-alert" class="h-5 w-5" aria-hidden="true" />
       <span>{{ errorMessage }}</span>
     </div>
 
@@ -76,17 +76,17 @@
         <div class="file-status">
           <Icon
             v-if="item.status === 'uploading'"
-            icon="mdi:loading"
+            icon="lucide:loader-circle"
             class="animate-spin text-primary-500"
           />
           <Icon
             v-else-if="item.status === 'success'"
-            icon="mdi:check-circle"
+            icon="lucide:circle-check"
             class="text-green-500"
           />
           <Icon
             v-else-if="item.status === 'error'"
-            icon="mdi:alert-circle"
+            icon="lucide:circle-alert"
             class="text-red-500"
           />
         </div>
@@ -229,13 +229,13 @@ const uploadFile = async (queueItem) => {
 }
 
 const getFileIcon = (mimeType) => {
-  if (mimeType.startsWith('image/')) return 'mdi:file-image'
-  if (mimeType === 'application/pdf') return 'mdi:file-pdf-box'
-  if (mimeType.includes('word') || mimeType.includes('document')) return 'mdi:file-word'
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'mdi:file-excel'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'mdi:file-powerpoint'
-  if (mimeType.includes('zip') || mimeType.includes('rar')) return 'mdi:folder-zip'
-  return 'mdi:file'
+  if (mimeType.startsWith('image/')) return 'lucide:file-image'
+  if (mimeType === 'application/pdf') return 'lucide:file-text'
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'lucide:file-text'
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'lucide:file-spreadsheet'
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'lucide:presentation'
+  if (mimeType.includes('zip') || mimeType.includes('rar')) return 'lucide:folder-archive'
+  return 'lucide:file'
 }
 
 const formatFileSize = (bytes) => {

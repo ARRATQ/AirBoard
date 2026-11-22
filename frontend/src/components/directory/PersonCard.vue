@@ -25,10 +25,10 @@
 
     <span v-if="person.email || person.phone" class="person-card__contacts">
       <a v-if="person.email" :href="`mailto:${person.email}`" :title="person.email" :aria-label="person.email">
-        <Icon icon="mdi:email-outline" class="h-4 w-4" aria-hidden="true" />
+        <Icon icon="lucide:mail" class="h-4 w-4" aria-hidden="true" />
       </a>
       <a v-if="person.phone" :href="`tel:${person.phone.replace(/\s+/g, '')}`" :title="person.phone" :aria-label="person.phone">
-        <Icon icon="mdi:phone-outline" class="h-4 w-4" aria-hidden="true" />
+        <Icon icon="lucide:phone" class="h-4 w-4" aria-hidden="true" />
       </a>
     </span>
   </article>

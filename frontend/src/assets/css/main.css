@@ -783,6 +783,9 @@ html {
 .tag--acc { color: var(--acc-ink); }
 .tag--custom { color: color-mix(in oklab, var(--tag-c, var(--muted)) 78%, var(--text)); }
 
+/* Icônes Lucide (trait fin) : état actif plein, ex. favori. */
+.icon-fill, .icon-fill * { fill: currentColor; }
+
 /* L'espacement des lettres casse la liaison de l'arabe */
 [dir='rtl'] :where(.tag, .badge, .dir-interim) { letter-spacing: 0; }
 

@@ -2,7 +2,7 @@
   <!-- Visibilité d'un événement : public, ou réservé à des groupes choisis parmi `groups` -->
   <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
     <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-      <Icon icon="mdi:account-group" class="h-5 w-5 text-primary-500" />
+      <Icon icon="lucide:users" class="h-5 w-5 text-primary-500" />
       {{ t('events.editor.visibility') }}
     </h3>
 
@@ -21,7 +21,7 @@
             @change="emit('update:isPublic', $event.target.checked)"
           />
           <span class="ms-3 text-sm font-medium text-gray-900 dark:text-white">
-            <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
+            <Icon icon="lucide:earth" class="inline h-4 w-4 me-1" />
             {{ t('groupAdmin.eventEditor.publicEvent') }}
           </span>
         </label>
@@ -41,7 +41,7 @@
             :key="groupId"
             class="tag tag--acc"
           >
-            <Icon icon="mdi:account-group" class="h-3 w-3" />
+            <Icon icon="lucide:users" class="h-3 w-3" />
             {{ groupName(groupId) }}
             <button
               type="button"
@@ -49,7 +49,7 @@
               :aria-label="t('common.delete')"
               @click="removeGroup(groupId)"
             >
-              <Icon icon="mdi:close-circle" class="h-3.5 w-3.5" />
+              <Icon icon="lucide:circle-x" class="h-3.5 w-3.5" />
             </button>
           </span>
         </div>

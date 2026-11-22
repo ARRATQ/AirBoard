@@ -12,7 +12,7 @@
         <span>{{ selectedType.name }}</span>
       </div>
       <div v-else class="text-gray-500">{{ $t('news.selectTypePlaceholder') }}</div>
-      <Icon icon="mdi:chevron-down" class="h-4 w-4" :class="{ 'rotate-180': isOpen }" />
+      <Icon icon="lucide:chevron-down" class="h-4 w-4" :class="{ 'rotate-180': isOpen }" />
     </button>
 
     <!-- Dropdown -->
@@ -39,7 +39,7 @@
         >
           <Icon :icon="type.icon" class="h-4 w-4" aria-hidden="true" :style="{ color: type.color }" />
           <span class="dark:text-white">{{ type.name }}</span>
-          <Icon v-if="modelValue === type.slug" icon="mdi:check" class="h-4 w-4 ms-auto" aria-hidden="true" :style="{ color: type.color }" />
+          <Icon v-if="modelValue === type.slug" icon="lucide:check" class="h-4 w-4 ms-auto" aria-hidden="true" :style="{ color: type.color }" />
         </button>
       </div>
     </transition>

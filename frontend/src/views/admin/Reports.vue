@@ -6,7 +6,7 @@
         <div>
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
             <div class="p-2 bg-indigo-600 rounded-lg">
-              <Icon icon="mdi:chart-timeline-variant" class="h-6 w-6 text-white" />
+              <Icon icon="lucide:chart-spline" class="h-6 w-6 text-white" />
             </div>
             {{ $t('reports.title') }}
           </h1>
@@ -19,7 +19,7 @@
           :disabled="isLoading"
           class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
         >
-          <Icon :icon="isLoading ? 'mdi:loading' : 'mdi:refresh'" :class="['h-4 w-4', isLoading && 'animate-spin']" />
+          <Icon :icon="isLoading ? 'lucide:loader-circle' : 'lucide:refresh-cw'" :class="['h-4 w-4', isLoading && 'animate-spin']" />
           {{ isLoading ? $t('common.loading') : $t('common.refresh') }}
         </button>
 
@@ -77,13 +77,13 @@
 
       <!-- Loading -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-24">
-        <Icon icon="mdi:loading" class="h-12 w-12 animate-spin text-indigo-500" />
+        <Icon icon="lucide:loader-circle" class="h-12 w-12 animate-spin text-indigo-500" />
         <p class="mt-4 text-gray-500 animate-pulse">{{ $t('common.loading') }}</p>
       </div>
 
       <!-- Error state -->
       <div v-else-if="loadError" class="flex flex-col items-center justify-center py-24 text-center">
-        <Icon icon="mdi:alert-circle-outline" class="h-12 w-12 text-red-400 mb-3" />
+        <Icon icon="lucide:circle-alert" class="h-12 w-12 text-red-400 mb-3" />
         <p class="text-gray-600 dark:text-gray-400 font-medium">{{ $t('common.feedback.loadError') }}</p>
         <p class="text-sm text-gray-400 mt-1">{{ loadError }}</p>
         <button @click="loadCurrentTab" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
@@ -258,42 +258,42 @@
                   <th class="px-5 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.group') }}</th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('member_count')">
-                      {{ $t('reports.members') }} <Icon :icon="groupSortField === 'member_count' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.members') }} <Icon :icon="groupSortField === 'member_count' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('engagement_rate')">
-                      {{ $t('reports.activeRate') }} <Icon :icon="groupSortField === 'engagement_rate' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.activeRate') }} <Icon :icon="groupSortField === 'engagement_rate' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('app_clicks')">
-                      {{ $t('reports.appClicks') }} <Icon :icon="groupSortField === 'app_clicks' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.appClicks') }} <Icon :icon="groupSortField === 'app_clicks' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('news_read')">
-                      {{ $t('reports.newsRead') }} <Icon :icon="groupSortField === 'news_read' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.newsRead') }} <Icon :icon="groupSortField === 'news_read' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('reactions_given')">
-                      {{ $t('reports.reactions') }} <Icon :icon="groupSortField === 'reactions_given' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.reactions') }} <Icon :icon="groupSortField === 'reactions_given' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('poll_votes')">
-                      {{ $t('reports.pollVotes') }} <Icon :icon="groupSortField === 'poll_votes' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.pollVotes') }} <Icon :icon="groupSortField === 'poll_votes' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-amber-500 uppercase tracking-wider hover:text-amber-600 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('apps_created')">
-                      {{ $t('reports.appsCreated') }} <Icon :icon="groupSortField === 'apps_created' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.appsCreated') }} <Icon :icon="groupSortField === 'apps_created' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-indigo-500 uppercase tracking-wider hover:text-indigo-600 select-none">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortGroupBy('articles_published')">
-                      {{ $t('reports.articles') }} <Icon :icon="groupSortField === 'articles_published' ? (groupSortDesc ? 'mdi:arrow-down' : 'mdi:arrow-up') : 'mdi:unfold-more-horizontal'" class="h-3 w-3 inline" />
+                      {{ $t('reports.articles') }} <Icon :icon="groupSortField === 'articles_published' ? (groupSortDesc ? 'lucide:arrow-down' : 'lucide:arrow-up') : 'lucide:chevrons-up-down'" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.topApps') }}</th>
@@ -355,7 +355,7 @@
                       :aria-label="$t('common.details')"
                       class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors"
                     >
-                      <Icon icon="mdi:eye" class="h-4 w-4" />
+                      <Icon icon="lucide:eye" class="h-4 w-4" />
                     </button>
                   </td>
                 </tr>
@@ -388,7 +388,7 @@
             <option value="user">{{ $t('reports.roles.user') }}</option>
           </select>
           <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Icon icon="mdi:account-group" class="h-4 w-4" />
+            <Icon icon="lucide:users" class="h-4 w-4" />
             {{ filteredUsers.length }} {{ $t('reports.usersFound') }}
           </div>
         </div>
@@ -404,27 +404,27 @@
                   <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.groups') }}</th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortBy('app_clicks')">
-                      {{ $t('reports.appClicks') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                      {{ $t('reports.appClicks') }} <Icon icon="lucide:chevrons-up-down" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortBy('news_read')">
-                      {{ $t('reports.newsRead') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                      {{ $t('reports.newsRead') }} <Icon icon="lucide:chevrons-up-down" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortBy('apps_created')">
-                      {{ $t('reports.appsCreated') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                      {{ $t('reports.appsCreated') }} <Icon icon="lucide:chevrons-up-down" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortBy('articles_published')">
-                      {{ $t('reports.articles') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                      {{ $t('reports.articles') }} <Icon icon="lucide:chevrons-up-down" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700">
                     <button type="button" class="btn-reset inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer" @click="sortBy('activity_score')">
-                      {{ $t('reports.score') }} <Icon icon="mdi:unfold-more-horizontal" class="h-3 w-3 inline" />
+                      {{ $t('reports.score') }} <Icon icon="lucide:chevrons-up-down" class="h-3 w-3 inline" />
                     </button>
                   </th>
                   <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('reports.lastLogin') }}</th>
@@ -484,7 +484,7 @@
                       :aria-label="$t('common.details')"
                       class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors"
                     >
-                      <Icon icon="mdi:eye" class="h-4 w-4" />
+                      <Icon icon="lucide:eye" class="h-4 w-4" />
                     </button>
                   </td>
                 </tr>
@@ -497,10 +497,10 @@
             <span>{{ (userPage - 1) * userPageSize + 1 }}-{{ Math.min(userPage * userPageSize, filteredUsers.length) }} / {{ filteredUsers.length }}</span>
             <div class="flex gap-1">
               <button @click="userPage--" :disabled="userPage === 1" :aria-label="$t('common.previous')" class="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30">
-                <Icon icon="mdi:chevron-left" class="rtl-flip h-4 w-4" />
+                <Icon icon="lucide:chevron-left" class="rtl-flip h-4 w-4" />
               </button>
               <button @click="userPage++" :disabled="userPage >= totalUserPages" :aria-label="$t('common.next')" class="px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30">
-                <Icon icon="mdi:chevron-right" class="rtl-flip h-4 w-4" />
+                <Icon icon="lucide:chevron-right" class="rtl-flip h-4 w-4" />
               </button>
             </div>
           </div>
@@ -526,13 +526,13 @@
             </div>
           </div>
           <button @click="groupDetail = null" :aria-label="$t('common.close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-            <Icon icon="mdi:close" class="h-5 w-5" />
+            <Icon icon="lucide:x" class="h-5 w-5" />
           </button>
         </div>
 
         <!-- Loading -->
         <div v-if="groupDetailLoading" class="flex items-center justify-center py-16">
-          <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-indigo-500" />
+          <Icon icon="lucide:loader-circle" class="h-8 w-8 animate-spin text-indigo-500" />
         </div>
 
         <div v-else class="p-6 space-y-6">
@@ -667,7 +667,7 @@
             </div>
           </div>
           <button @click="userDetail = null" :aria-label="$t('common.close')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-            <Icon icon="mdi:close" class="h-5 w-5" />
+            <Icon icon="lucide:x" class="h-5 w-5" />
           </button>
         </div>
 
@@ -773,14 +773,14 @@
               >
                 <div class="flex items-center gap-2">
                   <Icon
-                    :icon="article.is_published ? 'mdi:check-circle' : 'mdi:pencil'"
+                    :icon="article.is_published ? 'lucide:circle-check' : 'lucide:pencil'"
                     :class="['h-4 w-4', article.is_published ? 'text-green-500' : 'text-orange-400']"
                   />
                   <span class="text-gray-700 dark:text-gray-300 truncate max-w-[240px]">{{ article.title }}</span>
                 </div>
                 <div class="flex items-center gap-3 text-gray-400">
-                  <span class="flex items-center gap-1"><Icon icon="mdi:eye" class="h-3.5 w-3.5" />{{ article.view_count }}</span>
-                  <span class="flex items-center gap-1"><Icon icon="mdi:heart" class="h-3.5 w-3.5" />{{ article.reaction_count }}</span>
+                  <span class="flex items-center gap-1"><Icon icon="lucide:eye" class="h-3.5 w-3.5" />{{ article.view_count }}</span>
+                  <span class="flex items-center gap-1"><Icon icon="lucide:heart" class="h-3.5 w-3.5" />{{ article.reaction_count }}</span>
                 </div>
               </div>
             </div>
@@ -853,9 +853,9 @@ function applyCustomRange() {
 const activeTab = ref('roles')
 
 const tabs = computed(() => [
-  { key: 'roles', label: t('reports.tabRoles'), icon: 'mdi:badge-account' },
-  { key: 'groups', label: t('reports.tabGroups'), icon: 'mdi:account-group' },
-  { key: 'users', label: t('reports.tabUsers'), icon: 'mdi:account-details' },
+  { key: 'roles', label: t('reports.tabRoles'), icon: 'lucide:id-card' },
+  { key: 'groups', label: t('reports.tabGroups'), icon: 'lucide:users' },
+  { key: 'users', label: t('reports.tabUsers'), icon: 'lucide:contact' },
 ])
 
 watch(activeTab, () => loadCurrentTab())
@@ -894,10 +894,10 @@ async function loadCurrentTab() {
 // Role helpers
 // ========================
 const roleIcons = {
-  admin: 'mdi:shield-crown',
-  group_admin: 'mdi:shield-account',
-  editor: 'mdi:pencil-circle',
-  user: 'mdi:account',
+  admin: 'lucide:shield-check',
+  group_admin: 'lucide:shield-user',
+  editor: 'lucide:pencil',
+  user: 'lucide:user',
 }
 
 const roleColors = {

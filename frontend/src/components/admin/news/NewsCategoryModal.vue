@@ -28,7 +28,7 @@
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div class="col-span-2">
-          <IconInput :id="`${formId}-icon`" v-model="form.icon" :label="$t('events.editor.categoryIcon')" placeholder="mdi:folder" />
+          <IconInput :id="`${formId}-icon`" v-model="form.icon" :label="$t('events.editor.categoryIcon')" placeholder="lucide:folder" />
         </div>
         <div>
           <label :for="`${formId}-color`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -54,7 +54,7 @@
         :disabled="!form.name.trim() || isSaving"
         class="btn btn-primary"
       >
-        <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+        <Icon v-if="isSaving" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
         {{ isSaving ? $t('groupAdmin.newsEditor.actions.saving') : $t('common.create') }}
       </button>
     </template>
@@ -85,7 +85,7 @@ const formId = 'news-category-form'
 const emptyForm = () => ({
   name: '',
   description: '',
-  icon: 'mdi:folder',
+  icon: 'lucide:folder',
   color: '#3B82F6',
   order: 0,
   is_active: true

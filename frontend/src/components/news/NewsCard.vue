@@ -6,11 +6,11 @@
       <span class="tag tag--custom nbadge--type">{{ typeLabel }}</span>
 
       <span v-if="news.priority === 'urgent'" class="tag tag--bad">
-        <Icon icon="mdi:alert" aria-hidden="true" />
+        <Icon icon="lucide:triangle-alert" aria-hidden="true" />
         {{ $t('news.priority.urgent') }}
       </span>
       <span v-else-if="news.priority === 'important'" class="tag tag--warn">
-        <Icon icon="mdi:star" aria-hidden="true" />
+        <Icon icon="lucide:star" aria-hidden="true" />
         {{ $t('news.priority.important') }}
       </span>
 
@@ -19,12 +19,12 @@
         :class="{ 'ncard__audience--groups': hasGroups }"
         :title="getGroupsTooltip(news.target_groups)"
       >
-        <Icon :icon="hasGroups ? 'mdi:lock' : 'mdi:earth'" aria-hidden="true" />
+        <Icon :icon="hasGroups ? 'lucide:lock' : 'lucide:earth'" aria-hidden="true" />
         <span class="ncard__ellipsis">{{ getVisibilityLabel(news.target_groups) }}</span>
       </span>
 
       <span v-if="news.category" class="ncard__category" :title="news.category.name">
-        <Icon :icon="news.category.icon || 'mdi:folder'" :style="{ color: news.category.color }" aria-hidden="true" />
+        <Icon :icon="news.category.icon || 'lucide:folder'" :style="{ color: news.category.color }" aria-hidden="true" />
         <span class="ncard__ellipsis" dir="auto">{{ news.category.name }}</span>
       </span>
     </div>
@@ -63,19 +63,19 @@
 
     <div class="ncard__foot">
       <span class="ncard__meta ncard__author" :title="authorName">
-        <Icon icon="mdi:account" aria-hidden="true" />
+        <Icon icon="lucide:user" aria-hidden="true" />
         <span class="ncard__ellipsis" dir="auto">{{ authorName }}</span>
       </span>
       <span class="ncard__meta">
-        <Icon icon="mdi:calendar" aria-hidden="true" />
+        <Icon icon="lucide:calendar" aria-hidden="true" />
         {{ formatDate(news.published_at || news.created_at) }}
       </span>
       <span class="ncard__meta">
-        <Icon icon="mdi:eye" aria-hidden="true" />
+        <Icon icon="lucide:eye" aria-hidden="true" />
         {{ news.view_count || 0 }}
       </span>
       <span v-if="articleReadingTime" class="ncard__meta">
-        <Icon icon="mdi:clock-outline" aria-hidden="true" />
+        <Icon icon="lucide:clock" aria-hidden="true" />
         {{ articleReadingTime }}
       </span>
       <span
@@ -124,10 +124,10 @@ const typeData = computed(() => {
   if (!typesStore.types.length && !typesStore.loaded) {
     // If types not loaded yet, use defaults
     const defaults = {
-      article: { color: '#3B82F6', icon: 'mdi:text-box', name: t('news.types.article') },
-      tutorial: { color: '#10B981', icon: 'mdi:book-open-variant', name: t('news.types.tutorial') },
-      announcement: { color: '#8B5CF6', icon: 'mdi:bullhorn', name: t('news.types.announcement') },
-      faq: { color: '#F59E0B', icon: 'mdi:help-circle', name: t('news.types.faq') }
+      article: { color: '#3B82F6', icon: 'lucide:text', name: t('news.types.article') },
+      tutorial: { color: '#10B981', icon: 'lucide:book-open', name: t('news.types.tutorial') },
+      announcement: { color: '#8B5CF6', icon: 'lucide:megaphone', name: t('news.types.announcement') },
+      faq: { color: '#F59E0B', icon: 'lucide:circle-help', name: t('news.types.faq') }
     }
     return defaults[props.news.type] || defaults.article
   }

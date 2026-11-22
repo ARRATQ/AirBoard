@@ -8,10 +8,10 @@
         :aria-controls="`${domId}-body`"
         @click="$emit('toggle')"
       >
-        <Icon :icon="icon || 'mdi:folder-outline'" class="rgroup__icon" :style="{ color: iconColor }" aria-hidden="true" />
+        <Icon :icon="icon || 'lucide:folder'" class="rgroup__icon" :style="{ color: iconColor }" aria-hidden="true" />
         <span class="rgroup__name">{{ title }}</span>
         <span class="rgroup__count">{{ count }}</span>
-        <Icon icon="mdi:chevron-down" class="rgroup__chev" :class="{ 'rgroup__chev--up': !collapsed }" aria-hidden="true" />
+        <Icon icon="lucide:chevron-down" class="rgroup__chev" :class="{ 'rgroup__chev--up': !collapsed }" aria-hidden="true" />
       </button>
       <span v-if="isPrivate" class="tag rgroup__private">
         {{ $t('dashboard.privateBadge') }}<template v-if="ownerName"> · {{ ownerName }}</template>

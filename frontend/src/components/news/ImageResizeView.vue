@@ -93,9 +93,9 @@ const presets = [
 
 // Libellés traduits au rendu (clés i18n partagées avec la barre d'outils de l'éditeur)
 const alignOptions = [
-  { value: 'left', labelKey: 'news.editor.alignLeft', icon: 'mdi:format-align-left' },
-  { value: 'center', labelKey: 'news.editor.alignCenter', icon: 'mdi:format-align-center' },
-  { value: 'right', labelKey: 'news.editor.alignRight', icon: 'mdi:format-align-right' },
+  { value: 'left', labelKey: 'news.editor.alignLeft', icon: 'lucide:align-left' },
+  { value: 'center', labelKey: 'news.editor.alignCenter', icon: 'lucide:align-center' },
+  { value: 'right', labelKey: 'news.editor.alignRight', icon: 'lucide:align-right' },
 ]
 
 const currentWidth = computed(() => props.node.attrs.width || '100%')

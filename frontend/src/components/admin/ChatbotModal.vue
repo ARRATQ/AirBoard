@@ -12,7 +12,7 @@
         </h2>
         <button type="button" @click="$emit('close')" :aria-label="$t('common.close')"
           class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-          <Icon icon="mdi:close" class="h-5 w-5 text-gray-500" />
+          <Icon icon="lucide:x" class="h-5 w-5 text-gray-500" />
         </button>
       </div>
 
@@ -50,7 +50,7 @@
         <div class="grid grid-cols-2 gap-4">
           <!-- Icône -->
           <div>
-            <IconInput v-model="form.icon" :label="$t('chatbots.iconField')" placeholder="mdi:robot-outline" />
+            <IconInput v-model="form.icon" :label="$t('chatbots.iconField')" placeholder="lucide:bot" />
           </div>
 
           <!-- Couleur -->
@@ -78,7 +78,7 @@
             <div class="px-4 py-3 flex items-center gap-3"
               :style="{ background: 'linear-gradient(135deg, ' + form.color + 'dd, ' + form.color + ')' }">
               <div class="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
-                <Icon :icon="form.icon || 'mdi:robot-outline'" class="h-5 w-5 text-white" />
+                <Icon :icon="form.icon || 'lucide:bot'" class="h-5 w-5 text-white" />
               </div>
               <div>
                 <p class="font-semibold text-white text-sm leading-tight">
@@ -201,7 +201,7 @@ const defaultForm = () => ({
   name: '',
   description: '',
   webhook_url: '',
-  icon: 'mdi:robot-outline',
+  icon: 'lucide:bot',
   color: '#4f46e5',
   welcome_title: '',
   welcome_subtitle: '',
@@ -222,7 +222,7 @@ watch(
         name: val.name || '',
         description: val.description || '',
         webhook_url: val.webhook_url || '',
-        icon: val.icon || 'mdi:robot-outline',
+        icon: val.icon || 'lucide:bot',
         color: val.color || '#4f46e5',
         welcome_title: val.welcome_title || '',
         welcome_subtitle: val.welcome_subtitle || '',

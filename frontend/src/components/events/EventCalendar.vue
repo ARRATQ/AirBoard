@@ -6,18 +6,18 @@
         <SegmentedControl v-model="currentViewMode" :options="viewModes" :label="$t('calendar.title')" />
         <div class="cal__nav">
           <button type="button" class="cal__navbtn" :aria-label="$t('calendar.previous')" @click="navigate(-1)">
-            <Icon icon="mdi:chevron-left" class="cal__flip" aria-hidden="true" />
+            <Icon icon="lucide:chevron-left" class="cal__flip" aria-hidden="true" />
           </button>
           <button type="button" class="cal__navbtn cal__navbtn--text" @click="goToToday">{{ $t('calendar.today') }}</button>
           <button type="button" class="cal__navbtn" :aria-label="$t('calendar.next')" @click="navigate(1)">
-            <Icon icon="mdi:chevron-right" class="cal__flip" aria-hidden="true" />
+            <Icon icon="lucide:chevron-right" class="cal__flip" aria-hidden="true" />
           </button>
         </div>
       </div>
     </header>
 
     <div v-if="busy" class="cal__loading" role="status">
-      <Icon icon="mdi:loading" class="cal__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="cal__spin" aria-hidden="true" />
       <span class="sr-only">{{ $t('calendar.loading') }}</span>
     </div>
 
@@ -86,20 +86,20 @@
             <span class="cal__row-main">
               <span class="cal__row-title">{{ event.title }}</span>
               <span v-if="event.location" class="cal__row-place">
-                <Icon icon="mdi:map-marker-outline" aria-hidden="true" />{{ event.location }}
+                <Icon icon="lucide:map-pin" aria-hidden="true" />{{ event.location }}
               </span>
             </span>
             <StatusBadge v-if="statusTone(event)" :tone="statusTone(event)">{{ statusText(event) }}</StatusBadge>
           </button>
         </li>
       </ul>
-      <EmptyState v-else compact icon="mdi:calendar-blank-outline" :title="$t('calendar.noEventsForDay')" />
+      <EmptyState v-else compact icon="lucide:calendar" :title="$t('calendar.noEventsForDay')" />
     </div>
 
     <EmptyState
       v-if="!busy && events.length === 0 && currentViewMode !== 'day'"
       compact
-      icon="mdi:calendar-outline"
+      icon="lucide:calendar"
       :title="$t('calendar.noEvents')"
       :description="$t('calendar.noEventsHelp')"
     />
@@ -222,7 +222,7 @@ const dayLabel = (day) =>
 
 const statusTone = (event) => eventStatusTone(event.status)
 const statusText = (event) => (statusTone(event) ? t(`events.status.${event.status}`) : '')
-const statusIcon = (event) => ({ warn: 'mdi:help-circle-outline', bad: 'mdi:cancel' })[statusTone(event)] || ''
+const statusIcon = (event) => ({ warn: 'lucide:circle-help', bad: 'lucide:ban' })[statusTone(event)] || ''
 
 const chipClasses = (event) => ({
   'is-tentative': event.status === 'tentative',

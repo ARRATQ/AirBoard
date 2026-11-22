@@ -4,7 +4,7 @@
     <div v-else class="home-top__spacer" />
 
     <form class="home-top__search" role="search" @submit.prevent="goSearch">
-      <Icon icon="mdi:magnify" class="home-top__search-icon" aria-hidden="true" />
+      <Icon icon="lucide:search" class="home-top__search-icon" aria-hidden="true" />
       <input
         v-model="query"
         type="search"

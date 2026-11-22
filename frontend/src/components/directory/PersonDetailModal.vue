@@ -5,7 +5,7 @@
         <div v-focus-trap class="modal-panel modal-form w-full max-w-3xl" role="dialog" aria-modal="true" :aria-labelledby="titleId">
           <div class="person-detail__hero" :style="{ '--unit-color': roles[0]?.unit.color || 'var(--accent)' }">
             <button ref="closeBtn" type="button" class="person-detail__close" :aria-label="$t('common.close')" @click="$emit('close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
             <PersonAvatar :person="person" size="xl" />
             <div class="min-w-0">
@@ -24,17 +24,17 @@
                 <h3 class="person-detail__section">{{ $t('directory.contact') }}</h3>
                 <dl class="person-detail__list">
                   <div v-if="person.email">
-                    <dt><Icon icon="mdi:email-outline" /> {{ $t('directory.email') }}</dt>
+                    <dt><Icon icon="lucide:mail" /> {{ $t('directory.email') }}</dt>
                     <dd><a :href="`mailto:${person.email}`">{{ person.email }}</a></dd>
                   </div>
                   <div v-if="person.phone">
-                    <dt><Icon icon="mdi:phone-outline" /> {{ $t('directory.phone') }}</dt>
+                    <dt><Icon icon="lucide:phone" /> {{ $t('directory.phone') }}</dt>
                     <dd><a :href="`tel:${person.phone.replace(/\s+/g, '')}`">{{ person.phone }}</a></dd>
                   </div>
                   <div v-for="f in filledFields" :key="f.key">
                     <dt>
                       <Icon :icon="FIELD_TYPE_ICONS[f.type]" /> {{ f.label }}
-                      <Icon v-if="f.visibility === 'managers'" icon="mdi:lock-outline" class="text-amber-500" :title="$t('directory.fieldManagersOnly')" />
+                      <Icon v-if="f.visibility === 'managers'" icon="lucide:lock" class="text-amber-500" :title="$t('directory.fieldManagersOnly')" />
                     </dt>
                     <dd :class="{ 'whitespace-pre-line': f.type === 'textarea' }">
                       <a v-if="fieldHref(f, value(f))" :href="fieldHref(f, value(f))" target="_blank" rel="noopener noreferrer">
@@ -55,7 +55,7 @@
                 <ul v-else class="space-y-3">
                   <li v-for="r in roles" :key="r.assignment.id" class="person-detail__role" :style="{ borderColor: r.unit.color }">
                     <p class="font-semibold flex items-center gap-2 flex-wrap" style="color: var(--text-primary)">
-                      <Icon v-if="r.position.is_head" icon="mdi:star-four-points" class="text-amber-500" :title="$t('directory.head')" />
+                      <Icon v-if="r.position.is_head" icon="lucide:sparkle" class="text-amber-500" :title="$t('directory.head')" />
                       {{ r.position.title }}
                       <span v-if="r.assignment.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
                     </p>
@@ -77,7 +77,7 @@
             <span class="modal-footer-hint" />
             <div class="modal-footer-actions">
               <button v-if="canManage" type="button" class="btn btn-secondary" @click="$emit('edit', person)">
-                <Icon icon="mdi:pencil" class="h-4 w-4 me-1" /> {{ $t('common.edit') }}
+                <Icon icon="lucide:pencil" class="h-4 w-4 me-1" /> {{ $t('common.edit') }}
               </button>
               <button type="button" class="btn btn-primary" @click="$emit('close')">{{ $t('common.close') }}</button>
             </div>

@@ -33,7 +33,7 @@
     <template v-if="activeTab === 'pending'">
       <EmptyState
         v-if="!loading && pendingComments.length === 0"
-        icon="mdi:check-circle-outline"
+        icon="lucide:circle-check"
         :title="$t('moderation.no_pending')"
       />
 
@@ -80,7 +80,7 @@
               :title="$t('moderation.approve')"
               @click="moderateComment(row.raw.id, true, false)"
             >
-              <Icon icon="mdi:check" aria-hidden="true" />
+              <Icon icon="lucide:check" aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -89,7 +89,7 @@
               :title="$t('moderation.flag')"
               @click="moderateComment(row.raw.id, false, true)"
             >
-              <Icon icon="mdi:flag-outline" aria-hidden="true" />
+              <Icon icon="lucide:flag" aria-hidden="true" />
             </button>
           </RowActions>
         </template>

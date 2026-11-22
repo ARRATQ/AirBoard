@@ -4,7 +4,7 @@
       <template #title>{{ $t('users.title') }}</template>
       <template #description>{{ $t('users.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreateModal">
           {{ $t('users.new') }}
         </BaseButton>
       </template>
@@ -17,11 +17,11 @@
 
     <EmptyState
       v-if="!showDeleted && !loadingUsers && users.length === 0 && !hasFilters"
-      icon="mdi:account-multiple-outline"
+      icon="lucide:users"
       :title="$t('users.emptyTitle')"
       :description="$t('users.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreateModal">
         {{ $t('users.create') }}
       </BaseButton>
     </EmptyState>
@@ -110,7 +110,7 @@
             :title="$t('users.trashActions.restore')"
             @click="restoreUser(row.raw)"
           >
-            <Icon icon="mdi:restore" aria-hidden="true" />
+            <Icon icon="lucide:rotate-ccw" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -119,7 +119,7 @@
             :title="$t('users.trashActions.purge')"
             @click="confirmPermanentDelete(row.raw)"
           >
-            <Icon icon="mdi:delete-forever-outline" aria-hidden="true" />
+            <Icon icon="lucide:trash-2" aria-hidden="true" />
           </button>
         </div>
         <!-- Utilisateurs actifs -->
@@ -131,7 +131,7 @@
             :title="row.raw.is_active ? $t('users.deactivate') : $t('users.activate')"
             @click="toggleUserStatus(row.raw)"
           >
-            <Icon :icon="row.raw.is_active ? 'mdi:account-off-outline' : 'mdi:account-check-outline'" aria-hidden="true" />
+            <Icon :icon="row.raw.is_active ? 'lucide:user-x' : 'lucide:user-check'" aria-hidden="true" />
           </button>
         </RowActions>
       </template>
@@ -201,11 +201,11 @@ const hasFilters = computed(() => Boolean(searchQuery.value.trim() || roleFilter
 
 // Computed
 const viewOptions = computed(() => [
-  { value: 'active', label: t('users.viewActive'), icon: 'mdi:account-check-outline' },
+  { value: 'active', label: t('users.viewActive'), icon: 'lucide:user-check' },
   {
     value: 'deleted',
     label: t('users.viewTrash'),
-    icon: 'mdi:trash-can-outline',
+    icon: 'lucide:trash-2',
     count: deletedUsers.value.length > 0 ? deletedUsers.value.length : undefined,
   },
 ])

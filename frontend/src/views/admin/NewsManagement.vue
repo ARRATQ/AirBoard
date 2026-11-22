@@ -5,7 +5,7 @@
       <template #title>{{ isGlobal ? $t('news.center.title') : $t('groupAdmin.newsManagement.title') }}</template>
       <template #description>{{ isGlobal ? $t('adminShared.news.subtitle') : $t('groupAdmin.newsManagement.subtitle') }}</template>
       <template #actions>
-        <BaseButton tag="router-link" to="/admin/news/new" variant="primary" icon="mdi:plus">
+        <BaseButton tag="router-link" to="/admin/news/new" variant="primary" icon="lucide:plus">
           {{ $t('groupAdmin.newsManagement.newArticle') }}
         </BaseButton>
       </template>
@@ -13,7 +13,7 @@
 
     <!-- Rappel du périmètre pour l'admin de groupe -->
     <div v-if="!isGlobal" class="nw-callout" role="note">
-      <Icon icon="mdi:information-outline" class="nw-callout__icon" aria-hidden="true" />
+      <Icon icon="lucide:info" class="nw-callout__icon" aria-hidden="true" />
       <div>
         <p class="nw-callout__title">{{ $t('groupAdmin.newsManagement.infoTitle') }}</p>
         <p class="nw-callout__text">{{ $t('groupAdmin.newsManagement.infoDescription') }}</p>
@@ -23,11 +23,11 @@
     <!-- Aucune actualité et aucun filtre : invitation à en créer une -->
     <EmptyState
       v-if="!isLoading && newsList.length === 0 && !hasActiveFilters"
-      icon="mdi:newspaper-variant"
+      icon="lucide:newspaper"
       :title="$t('groupAdmin.newsManagement.empty.title')"
       :description="emptyMessage"
     >
-      <BaseButton tag="router-link" to="/admin/news/new" variant="primary" size="sm" icon="mdi:plus">
+      <BaseButton tag="router-link" to="/admin/news/new" variant="primary" size="sm" icon="lucide:plus">
         {{ $t('groupAdmin.newsManagement.empty.createButton') }}
       </BaseButton>
     </EmptyState>
@@ -45,7 +45,7 @@
       >
         <template #toolbar>
           <label class="nw-search">
-            <Icon icon="mdi:magnify" class="nw-search__icon" aria-hidden="true" />
+            <Icon icon="lucide:search" class="nw-search__icon" aria-hidden="true" />
             <input
               v-model="filters.search"
               type="search"
@@ -83,7 +83,7 @@
         <template #cell-title="{ row }">
           <span class="nw-title">
             <span class="nw-title__line">
-              <Icon v-if="row.raw.is_pinned" icon="mdi:pin" class="nw-title__pin" :title="$t('adminShared.news.pin')" />
+              <Icon v-if="row.raw.is_pinned" icon="lucide:pin" class="nw-title__pin" :title="$t('adminShared.news.pin')" />
               <button type="button" class="nw-title__link" @click="viewNews(row.raw)">{{ row.title }}</button>
               <StatusBadge v-if="row.priorityLabel" :tone="row.raw.priority === 'urgent' ? 'bad' : 'warn'">{{ row.priorityLabel }}</StatusBadge>
             </span>
@@ -122,7 +122,7 @@
               :title="$t('groupAdmin.newsManagement.actions.edit')"
               :aria-label="`${$t('groupAdmin.newsManagement.actions.edit')} : ${row.title}`"
             >
-              <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+              <Icon icon="lucide:pencil" aria-hidden="true" />
             </router-link>
             <!-- Épingler : endpoint réservé à l'admin global -->
             <button
@@ -133,7 +133,7 @@
               :aria-label="`${row.raw.is_pinned ? $t('adminShared.news.unpin') : $t('adminShared.news.pin')} : ${row.title}`"
               @click="togglePin(row.raw)"
             >
-              <Icon :icon="row.raw.is_pinned ? 'mdi:pin-off-outline' : 'mdi:pin-outline'" aria-hidden="true" />
+              <Icon :icon="row.raw.is_pinned ? 'lucide:pin-off' : 'lucide:pin'" aria-hidden="true" />
             </button>
           </RowActions>
         </template>
@@ -141,9 +141,9 @@
 
       <!-- Pagination serveur -->
       <nav v-if="pagination.total_pages > 1" class="nw-pager" :aria-label="$t('groupAdmin.newsManagement.pagination.page', { page: pagination.page, pages: pagination.total_pages })">
-        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-left" :disabled="pagination.page === 1" :aria-label="$t('ui.table.prev')" @click="changePage(pagination.page - 1)" />
+        <BaseButton variant="secondary" size="sm" icon="lucide:chevron-left" :disabled="pagination.page === 1" :aria-label="$t('ui.table.prev')" @click="changePage(pagination.page - 1)" />
         <span class="nw-mono">{{ $t('groupAdmin.newsManagement.pagination.page', { page: pagination.page, pages: pagination.total_pages }) }}</span>
-        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-right" :disabled="pagination.page === pagination.total_pages" :aria-label="$t('ui.table.next')" @click="changePage(pagination.page + 1)" />
+        <BaseButton variant="secondary" size="sm" icon="lucide:chevron-right" :disabled="pagination.page === pagination.total_pages" :aria-label="$t('ui.table.next')" @click="changePage(pagination.page + 1)" />
       </nav>
     </template>
   </div>

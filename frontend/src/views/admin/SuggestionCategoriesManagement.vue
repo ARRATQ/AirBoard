@@ -4,16 +4,16 @@
       <template #title>{{ t('suggestions.manageCategories') }}</template>
       <template #description>{{ t('suggestions.manageCategoriesHelp') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </template>
     </PageHeader>
 
     <EmptyState
       v-if="!loading && categories.length === 0"
-      icon="mdi:format-list-bulleted-square"
+      icon="lucide:list"
       :title="t('suggestions.noCategory')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
     </EmptyState>
 
     <DataTable
@@ -54,7 +54,7 @@
           <div class="sc-modal__head">
             <h2 id="suggestion-category-modal-title" class="sc-modal__title">{{ editingId ? t('common.edit') : t('common.create') }}</h2>
             <button type="button" class="row-actions__btn" :aria-label="t('common.close')" @click="closeForm">
-              <Icon icon="mdi:close" aria-hidden="true" />
+              <Icon icon="lucide:x" aria-hidden="true" />
             </button>
           </div>
 

@@ -6,7 +6,7 @@
 
     <div class="ii__row">
       <span class="ii__preview" aria-hidden="true">
-        <Icon :icon="isIconName(modelValue) ? modelValue : 'mdi:help-circle-outline'" />
+        <Icon :icon="isIconName(modelValue) ? modelValue : 'lucide:circle-help'" />
       </span>
       <input
         :id="id"
@@ -27,7 +27,7 @@
         :aria-controls="`${id}-panel`"
         @click="open = !open"
       >
-        <Icon :icon="open ? 'mdi:close' : 'mdi:magnify'" aria-hidden="true" />
+        <Icon :icon="open ? 'lucide:x' : 'lucide:search'" aria-hidden="true" />
         {{ open ? t('ui.iconInput.close') : t('ui.iconInput.browse') }}
       </button>
     </div>
@@ -112,9 +112,9 @@ const SEARCH_DELAY_MS = 300
 
 // Point de départ avant toute recherche, par usage du champ
 const SUGGESTIONS = {
-  general: ['lucide:house', 'lucide:settings', 'lucide:user', 'lucide:folder', 'lucide:file-text', 'lucide:chart-line', 'mdi:home', 'mdi:cog', 'mdi:account', 'mdi:folder'],
-  application: ['lucide:app-window', 'lucide:globe', 'lucide:database', 'lucide:server', 'lucide:cloud', 'lucide:mail', 'lucide:message-circle', 'lucide:calendar', 'lucide:wrench', 'mdi:application', 'mdi:web', 'mdi:git'],
-  group: ['lucide:folders', 'lucide:users', 'lucide:shield-check', 'lucide:code', 'lucide:chart-pie', 'lucide:briefcase', 'mdi:folder-multiple', 'mdi:account-group'],
+  general: ['lucide:house', 'lucide:settings', 'lucide:user', 'lucide:folder', 'lucide:file-text', 'lucide:chart-line', 'lucide:house', 'lucide:settings', 'lucide:user', 'lucide:folder'],
+  application: ['lucide:app-window', 'lucide:globe', 'lucide:database', 'lucide:server', 'lucide:cloud', 'lucide:mail', 'lucide:message-circle', 'lucide:calendar', 'lucide:wrench', 'lucide:app-window', 'lucide:globe', 'lucide:git-branch'],
+  group: ['lucide:folders', 'lucide:users', 'lucide:shield-check', 'lucide:code', 'lucide:chart-pie', 'lucide:briefcase', 'lucide:folders', 'lucide:users'],
   social: ['mdi:github', 'mdi:gitlab', 'mdi:slack', 'mdi:discord', 'mdi:microsoft-teams', 'mdi:google'],
 }
 

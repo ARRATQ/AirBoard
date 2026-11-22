@@ -15,27 +15,27 @@
             :style="{ backgroundColor: poll.is_active ? '#8B5CF6' : '#10b981' }"
             aria-hidden="true"
           >
-            <Icon :icon="poll.is_active ? 'mdi:poll' : 'mdi:checkbox-marked-circle-outline'" class="h-4 w-4 text-white" />
+            <Icon :icon="poll.is_active ? 'lucide:chart-column' : 'lucide:square-check'" class="h-4 w-4 text-white" />
           </span>
           <span class="poll-info">
             <span class="flex items-center gap-2 flex-1 min-w-0">
               <span class="poll-title">{{ poll.title }}</span>
               <!-- Indicateur de vote utilisateur -->
               <span v-if="hasVoted" class="voted-indicator-header">
-                <Icon icon="mdi:check-circle" class="voted-icon" aria-hidden="true" />
+                <Icon icon="lucide:circle-check" class="voted-icon" aria-hidden="true" />
                 <span class="sr-only">{{ t('polls.card.voted') }}</span>
               </span>
               <span class="poll-badges">
                 <span v-if="!poll.is_active" class="tag tag--bad">
-                  <Icon icon="mdi:lock" aria-hidden="true" />
+                  <Icon icon="lucide:lock" aria-hidden="true" />
                   <span>{{ t('polls.status.closed') }}</span>
                 </span>
                 <span v-else-if="isExpiringSoon" class="tag tag--warn">
-                  <Icon icon="mdi:clock-alert" aria-hidden="true" />
+                  <Icon icon="lucide:clock-alert" aria-hidden="true" />
                   <span>{{ t('polls.status.expiringSoon') }}</span>
                 </span>
                 <span v-if="poll.is_anonymous" class="tag tag--info">
-                  <Icon icon="mdi:incognito" aria-hidden="true" />
+                  <Icon icon="lucide:venetian-mask" aria-hidden="true" />
                   <span>{{ t('polls.status.anonymous') }}</span>
                 </span>
               </span>
@@ -45,7 +45,7 @@
 
         <!-- Chevron (décoratif : l'état est porté par aria-expanded) -->
         <span class="toggle-btn" :class="{ 'expanded': isExpanded }" aria-hidden="true">
-          <Icon icon="mdi:chevron-down" class="chevron-icon" />
+          <Icon icon="lucide:chevron-down" class="chevron-icon" />
         </span>
       </button>
     </h3>
@@ -56,15 +56,15 @@
         <!-- Informations sur le sondage (publicateur et date) -->
         <div class="poll-meta">
           <div class="meta-item">
-            <Icon icon="mdi:account" class="h-4 w-4" />
+            <Icon icon="lucide:user" class="h-4 w-4" />
             <span class="text-sm">{{ poll.author?.first_name }} {{ poll.author?.last_name }}</span>
           </div>
           <div class="meta-item">
-            <Icon icon="mdi:calendar" class="h-4 w-4" />
+            <Icon icon="lucide:calendar" class="h-4 w-4" />
             <span class="text-sm">{{ formatDate(poll.created_at) }}</span>
           </div>
           <div v-if="poll.end_date" class="meta-item">
-            <Icon icon="mdi:calendar-end" class="h-4 w-4" />
+            <Icon icon="lucide:calendar-check" class="h-4 w-4" />
             <span class="text-sm">{{ t('polls.status.until') }} {{ formatDate(poll.end_date) }}</span>
           </div>
         </div>
@@ -117,8 +117,8 @@
               :disabled="!canSubmitVote || isVoting"
               class="btn btn-primary vote-btn"
             >
-              <Icon v-if="isVoting" icon="mdi:loading" class="spin" />
-              <Icon v-else icon="mdi:vote" />
+              <Icon v-if="isVoting" icon="lucide:loader-circle" class="spin" />
+              <Icon v-else icon="lucide:vote" />
               {{ isVoting ? t('polls.voting.sending') : t('polls.voting.vote') }}
             </button>
           </div>
@@ -130,7 +130,7 @@
 
           <!-- Message d'attente (seulement si pas de formulaire de vote et pas de résultats) -->
           <div v-else-if="!canVote" class="poll-waiting">
-            <Icon icon="mdi:lock-clock" class="waiting-icon" />
+            <Icon icon="lucide:lock-keyhole" class="waiting-icon" />
             <p class="waiting-message">
               {{ getWaitingMessage() }}
             </p>
@@ -140,7 +140,7 @@
               @click="showResults = true"
               class="btn btn-secondary"
             >
-              <Icon icon="mdi:chart-bar" />
+              <Icon icon="lucide:chart-column" />
               {{ t('polls.voting.viewResults') }}
             </button>
           </div>
@@ -152,8 +152,8 @@
             :disabled="isRemovingVote"
             class="btn btn-danger-outline unvote-btn"
           >
-            <Icon v-if="isRemovingVote" icon="mdi:loading" class="spin" />
-            <Icon v-else icon="mdi:undo" />
+            <Icon v-if="isRemovingVote" icon="lucide:loader-circle" class="spin" />
+            <Icon v-else icon="lucide:undo-2" />
             {{ isRemovingVote ? t('polls.voting.removingVote') : t('polls.voting.removeVote') }}
           </button>
         </div>
@@ -161,7 +161,7 @@
         <!-- Actions -->
         <div v-if="canManage" class="poll-actions">
           <button type="button" @click="$emit('edit', poll)" class="btn btn-ghost btn-sm">
-            <Icon icon="mdi:pencil" />
+            <Icon icon="lucide:pencil" />
             {{ t('polls.actions.edit') }}
           </button>
           <button
@@ -170,11 +170,11 @@
             @click="$emit('close', poll)"
             class="btn btn-ghost btn-sm"
           >
-            <Icon icon="mdi:lock" />
+            <Icon icon="lucide:lock" />
             {{ t('polls.actions.close') }}
           </button>
           <button type="button" @click="$emit('delete', poll)" class="btn btn-ghost btn-sm text-danger">
-            <Icon icon="mdi:delete" />
+            <Icon icon="lucide:trash-2" />
             {{ t('polls.actions.delete') }}
           </button>
         </div>

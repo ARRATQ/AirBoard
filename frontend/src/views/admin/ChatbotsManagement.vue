@@ -4,7 +4,7 @@
       <template #title>{{ $t('chatbots.title') }}</template>
       <template #description>{{ $t('chatbots.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreateModal">
           {{ $t('chatbots.new') }}
         </BaseButton>
       </template>
@@ -12,11 +12,11 @@
 
     <EmptyState
       v-if="!isLoading && chatbots.length === 0"
-      icon="mdi:robot-outline"
+      icon="lucide:bot"
       :title="$t('chatbots.emptyTitle')"
       :description="$t('chatbots.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreateModal">
         {{ $t('chatbots.create') }}
       </BaseButton>
     </EmptyState>
@@ -31,7 +31,7 @@
     >
       <template #cell-name="{ row }">
         <span class="cb-name">
-          <Icon :icon="row.raw.icon || 'mdi:robot-outline'" class="cb-name__icon" aria-hidden="true" />
+          <Icon :icon="row.raw.icon || 'lucide:bot'" class="cb-name__icon" aria-hidden="true" />
           <span class="cb-name__text">
             <span class="cb-name__title">{{ row.name }}</span>
             <span v-if="row.description" class="cb-name__desc">{{ row.description }}</span>

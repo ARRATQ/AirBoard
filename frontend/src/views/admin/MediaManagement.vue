@@ -4,7 +4,7 @@
       <template #title>{{ $t('media.title') }}</template>
       <template #description>{{ $t('media.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
       </template>
     </PageHeader>
 
@@ -31,7 +31,7 @@
     <!-- Filtres -->
     <div class="mm-filters">
       <label class="mm-search">
-        <Icon icon="mdi:magnify" class="mm-search__icon" aria-hidden="true" />
+        <Icon icon="lucide:search" class="mm-search__icon" aria-hidden="true" />
         <input
           v-model="searchQuery"
           type="search"
@@ -56,7 +56,7 @@
 
     <!-- Contenu -->
     <div v-if="loading" class="mm-loading">
-      <Icon icon="mdi:loading" class="mm-spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="mm-spin" aria-hidden="true" />
       <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
@@ -85,19 +85,19 @@
 
         <div class="mm-card__actions">
           <button type="button" class="row-actions__btn" :title="$t('common.view')" :aria-label="`${$t('common.view')} : ${media.filename}`" @click="viewMedia(media)">
-            <Icon icon="mdi:eye-outline" aria-hidden="true" />
+            <Icon icon="lucide:eye" aria-hidden="true" />
           </button>
           <button type="button" class="row-actions__btn" :title="$t('media.copy_url')" :aria-label="`${$t('media.copy_url')} : ${media.filename}`" @click="copyUrl(media)">
-            <Icon icon="mdi:content-copy" aria-hidden="true" />
+            <Icon icon="lucide:copy" aria-hidden="true" />
           </button>
           <button type="button" class="row-actions__btn" :title="$t('common.download')" :aria-label="`${$t('common.download')} : ${media.filename}`" @click="downloadMedia(media)">
-            <Icon icon="mdi:download-outline" aria-hidden="true" />
+            <Icon icon="lucide:download" aria-hidden="true" />
           </button>
           <button type="button" class="row-actions__btn" :title="$t('common.edit')" :aria-label="`${$t('common.edit')} : ${media.filename}`" @click="editMedia(media)">
-            <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+            <Icon icon="lucide:pencil" aria-hidden="true" />
           </button>
           <button type="button" class="row-actions__btn row-actions__btn--danger" :title="$t('common.delete')" :aria-label="`${$t('common.delete')} : ${media.filename}`" @click="confirmDelete(media)">
-            <Icon icon="mdi:trash-can-outline" aria-hidden="true" />
+            <Icon icon="lucide:trash-2" aria-hidden="true" />
           </button>
         </div>
       </li>
@@ -105,16 +105,16 @@
 
     <EmptyState
       v-else-if="mediaList.length === 0"
-      icon="mdi:image-multiple"
+      icon="lucide:images"
       :title="$t('media.emptyTitle')"
       :description="$t('media.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
+      <BaseButton variant="primary" size="sm" icon="lucide:upload" @click="openUploadModal">{{ $t('media.upload') }}</BaseButton>
     </EmptyState>
 
     <EmptyState
       v-else
-      icon="mdi:magnify"
+      icon="lucide:search"
       :title="$t('media.noResultsTitle')"
       :description="$t('media.noResultsText')"
     />
@@ -122,11 +122,11 @@
     <!-- Pagination -->
     <nav v-if="totalPages > 1" class="mm-pager">
       <button type="button" class="mm-pager__btn" :disabled="currentPage === 1" :aria-label="$t('ui.table.prev')" @click="changePage(currentPage - 1)">
-        <Icon icon="mdi:chevron-left" aria-hidden="true" />
+        <Icon icon="lucide:chevron-left" aria-hidden="true" />
       </button>
       <span class="mm-pager__page">{{ $t('common.page') }} {{ currentPage }} {{ $t('common.of') }} {{ totalPages }}</span>
       <button type="button" class="mm-pager__btn" :disabled="currentPage === totalPages" :aria-label="$t('ui.table.next')" @click="changePage(currentPage + 1)">
-        <Icon icon="mdi:chevron-right" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" aria-hidden="true" />
       </button>
     </nav>
 
@@ -137,7 +137,7 @@
           <div class="modal-header">
             <h3 id="media-upload-modal-title" class="modal-title">{{ $t('media.upload_title') }}</h3>
             <button @click="closeUploadModal" class="row-actions__btn" :aria-label="$t('common.close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -148,7 +148,7 @@
               @drop.prevent="handleDrop"
               :class="['mm-drop', { 'mm-drop--on': isDragging }]"
             >
-              <Icon icon="mdi:cloud-upload" class="mm-drop__icon" />
+              <Icon icon="lucide:cloud-upload" class="mm-drop__icon" />
               <p class="mm-drop__text">{{ $t('media.drag_drop') }}</p>
               <p class="mm-drop__or">{{ $t('media.or') }}</p>
               <input
@@ -173,7 +173,7 @@
                   </div>
                 </div>
                 <button @click="selectedFile = null" class="row-actions__btn row-actions__btn--danger" :aria-label="$t('media.removeSelected')" :title="$t('media.removeSelected')">
-                  <Icon icon="mdi:close" class="h-5 w-5" />
+                  <Icon icon="lucide:x" class="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -198,7 +198,7 @@
               :disabled="!selectedFile || uploading"
               class="btn btn-primary w-full sm:w-auto"
             >
-              <Icon v-if="uploading" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+              <Icon v-if="uploading" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
               {{ uploading ? $t('media.uploading') : $t('media.upload') }}
             </button>
           </div>
@@ -213,7 +213,7 @@
           <div class="modal-header">
             <h3 id="media-edit-modal-title" class="modal-title">{{ $t('media.edit_title') }}</h3>
             <button @click="closeEditModal" class="row-actions__btn" :aria-label="$t('common.close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -238,7 +238,7 @@
               :disabled="updating"
               class="btn btn-primary w-full sm:w-auto"
             >
-              <Icon v-if="updating" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+              <Icon v-if="updating" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
               {{ updating ? $t('common.updating') : $t('common.update') }}
             </button>
           </div>
@@ -253,7 +253,7 @@
           <div class="modal-header">
             <h3 id="media-view-modal-title" class="modal-title">{{ viewingMedia?.filename }}</h3>
             <button @click="closeViewModal" class="row-actions__btn" :aria-label="$t('common.close')">
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 
@@ -552,15 +552,15 @@ const isImage = (mimeType) => {
 }
 
 const getFileIcon = (mimeType) => {
-  if (!mimeType) return 'mdi:file'
-  if (mimeType.startsWith('image/')) return 'mdi:image'
-  if (mimeType.startsWith('video/')) return 'mdi:video'
-  if (mimeType === 'application/pdf') return 'mdi:file-pdf-box'
-  if (mimeType.includes('word')) return 'mdi:file-word'
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'mdi:file-excel'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'mdi:file-powerpoint'
-  if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z') || mimeType.includes('tar') || mimeType.includes('gz')) return 'mdi:folder-zip'
-  return 'mdi:file'
+  if (!mimeType) return 'lucide:file'
+  if (mimeType.startsWith('image/')) return 'lucide:image'
+  if (mimeType.startsWith('video/')) return 'lucide:video'
+  if (mimeType === 'application/pdf') return 'lucide:file-text'
+  if (mimeType.includes('word')) return 'lucide:file-text'
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'lucide:file-spreadsheet'
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'lucide:presentation'
+  if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z') || mimeType.includes('tar') || mimeType.includes('gz')) return 'lucide:folder-archive'
+  return 'lucide:file'
 }
 
 const getMediaUrl = (url) => {

@@ -37,7 +37,7 @@
         </template>
 
         <template #cell-actions="{ row }">
-          <BaseButton variant="secondary" size="sm" icon="mdi:content-save-outline" @click="saveRule(row.raw)">
+          <BaseButton variant="secondary" size="sm" icon="lucide:save" @click="saveRule(row.raw)">
             {{ t('common.save') }}
           </BaseButton>
         </template>
@@ -48,11 +48,11 @@
     <section class="gm-section">
       <div class="gm-section__head">
         <h2 class="gm-section__title">{{ t('gamificationAdmin.badges') }}</h2>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </div>
 
-      <EmptyState v-if="badges.length === 0" icon="mdi:medal-outline" :title="t('gamificationAdmin.badges')">
-        <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+      <EmptyState v-if="badges.length === 0" icon="lucide:medal" :title="t('gamificationAdmin.badges')">
+        <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </EmptyState>
 
       <DataTable
@@ -65,7 +65,7 @@
         <template #cell-name="{ row }">
           <span class="gm-badge">
             <span class="gm-badge__icon" :style="{ '--c': row.raw.color || undefined }">
-              <Icon :icon="row.raw.icon || 'mdi:medal'" aria-hidden="true" />
+              <Icon :icon="row.raw.icon || 'lucide:medal'" aria-hidden="true" />
             </span>
             <span class="gm-badge__text">
               <span class="gm-badge__name">{{ row.name }}</span>
@@ -108,7 +108,7 @@
 
             <div>
               <IconInput id="gm-icon" v-model="form.icon" :label="t('gamificationAdmin.form.icon')" placeholder="lucide:medal" />
-              <p class="gm-hint">{{ t('gamificationAdmin.form.iconHint', { example: 'mdi:medal' }) }}</p>
+              <p class="gm-hint">{{ t('gamificationAdmin.form.iconHint', { example: 'lucide:medal' }) }}</p>
             </div>
 
             <div>
@@ -145,7 +145,7 @@
                 </div>
                 <div>
                   <p class="gm-preview__name">{{ form.name || t('gamificationAdmin.form.name') }}</p>
-                  <p class="gm-hint" dir="ltr">{{ form.icon || 'mdi:medal' }} · {{ form.color || '#FBBF24' }}</p>
+                  <p class="gm-hint" dir="ltr">{{ form.icon || 'lucide:medal' }} · {{ form.color || '#FBBF24' }}</p>
                 </div>
               </div>
             </div>
@@ -272,7 +272,7 @@ const labelFor = (group, code) => {
 const selectedReasonHelp = computed(() => helpFor('reasons', form.value.trigger_reason, 'gamificationAdmin.form.triggerHelp'))
 const selectedMetricHelp = computed(() => helpFor('metrics', form.value.metric, 'gamificationAdmin.form.metricHelp'))
 
-const safePreviewIcon = computed(() => form.value.icon?.trim() || 'mdi:medal')
+const safePreviewIcon = computed(() => form.value.icon?.trim() || 'lucide:medal')
 
 const badgePreviewStyle = computed(() => {
   const color = form.value.color?.trim() || '#FBBF24'
@@ -282,7 +282,7 @@ const form = ref({
   code: '',
   name: '',
   description: '',
-  icon: 'mdi:medal',
+  icon: 'lucide:medal',
   color: '#FBBF24',
   xp_reward: 0,
   category: 'user',
@@ -345,7 +345,7 @@ const saveRule = async (rule) => {
 
 const openCreate = () => {
   editingId.value = null
-  form.value = { code: '', name: '', description: '', icon: 'mdi:medal', color: '#FBBF24', xp_reward: 0, category: 'user', trigger_reason: '', metric: '', threshold: 0, is_active: true, is_secret: false }
+  form.value = { code: '', name: '', description: '', icon: 'lucide:medal', color: '#FBBF24', xp_reward: 0, category: 'user', trigger_reason: '', metric: '', threshold: 0, is_active: true, is_secret: false }
   showModal.value = true
 }
 

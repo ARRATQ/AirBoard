@@ -55,10 +55,10 @@
           <span v-if="members.length > MAX_AVATARS" class="ot-stack__more">+{{ members.length - MAX_AVATARS }}</span>
         </div>
         <span class="ot-card__count">
-          <Icon icon="mdi:account-multiple-outline" class="h-3.5 w-3.5" />
+          <Icon icon="lucide:users" class="h-3.5 w-3.5" />
           {{ peopleCount }}
           <template v-if="vacantCount">
-            · <Icon icon="mdi:account-question-outline" class="h-3.5 w-3.5" /> {{ vacantCount }}
+            · <Icon icon="lucide:circle-help" class="h-3.5 w-3.5" /> {{ vacantCount }}
           </template>
         </span>
       </footer>
@@ -73,7 +73,7 @@
       :title="open ? $t('directory.collapse') : $t('directory.expand')"
       @click="open = !open"
     >
-      <Icon :icon="open ? 'mdi:minus' : 'mdi:plus'" class="h-3 w-3" />
+      <Icon :icon="open ? 'lucide:minus' : 'lucide:plus'" class="h-3 w-3" />
       <span v-if="!open">{{ children.length }}</span>
     </button>
 

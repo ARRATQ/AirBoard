@@ -31,7 +31,7 @@
         @keydown.enter.prevent="deleteNode"
         @keydown.space.prevent="deleteNode"
       >
-        <Icon icon="mdi:close" class="h-4 w-4" aria-hidden="true" />
+        <Icon icon="lucide:x" class="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   </node-view-wrapper>

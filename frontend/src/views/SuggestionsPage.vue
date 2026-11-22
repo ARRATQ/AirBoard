@@ -12,7 +12,7 @@
               :aria-label="t('dashboard.viewModes.grid')"
               @click="viewMode = 'grid'"
             >
-              <Icon icon="mdi:view-grid" class="h-4 w-4" />
+              <Icon icon="lucide:layout-grid" class="h-4 w-4" />
               <span class="hidden sm:inline">{{ t('dashboard.viewModes.grid') }}</span>
             </button>
             <button
@@ -23,13 +23,13 @@
               :aria-label="t('dashboard.viewModes.list')"
               @click="viewMode = 'list'"
             >
-              <Icon icon="mdi:view-list" class="h-4 w-4" />
+              <Icon icon="lucide:list" class="h-4 w-4" />
               <span class="hidden sm:inline">{{ t('dashboard.viewModes.list') }}</span>
             </button>
           </div>
 
           <button class="suggestion-cta" type="button" @click="openCreateModal">
-            <Icon icon="mdi:plus-circle" class="h-5 w-5" />
+            <Icon icon="lucide:circle-plus" class="h-5 w-5" />
             {{ t('suggestions.newSuggestion') }}
           </button>
         </div>
@@ -40,7 +40,7 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div class="md:col-span-2">
           <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Icon icon="lucide:search" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               v-model="filters.search"
               type="text"
@@ -79,12 +79,12 @@
     </div>
 
     <div v-if="loading" class="loading-state">
-      <Icon icon="mdi:loading" class="animate-spin text-2xl text-amber-500" />
+      <Icon icon="lucide:loader-circle" class="animate-spin text-2xl text-amber-500" />
       <p>{{ t('suggestions.loading') }}</p>
     </div>
 
     <div v-else-if="suggestions.length === 0" class="empty-state">
-      <Icon icon="mdi:lightbulb-outline" class="text-5xl text-gray-400" />
+      <Icon icon="lucide:lightbulb" class="text-5xl text-gray-400" />
       <h3>{{ t('suggestions.emptyTitle') }}</h3>
       <p>{{ t('suggestions.emptyDescription') }}</p>
     </div>
@@ -121,23 +121,23 @@
             <p class="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line line-clamp-3">{{ item.description }}</p>
 
             <div v-if="item.poll" class="mt-3 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <Icon icon="mdi:poll" class="h-4 w-4" />
+              <Icon icon="lucide:chart-column" class="h-4 w-4" />
               <span>{{ t('suggestions.linkedPoll') }}: {{ item.poll.title }}</span>
             </div>
           </div>
 
           <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
             <span class="tag tag--ok">
-              <Icon icon="mdi:thumb-up-outline" aria-hidden="true" />
+              <Icon icon="lucide:thumbs-up" aria-hidden="true" />
               {{ item.upvotes || 0 }}
             </span>
             <span class="tag tag--bad">
-              <Icon icon="mdi:thumb-down-outline" aria-hidden="true" />
+              <Icon icon="lucide:thumbs-down" aria-hidden="true" />
               {{ item.downvotes || 0 }}
             </span>
             <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
               {{ t('suggestions.viewDetails') }}
-              <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
+              <Icon icon="lucide:arrow-right" class="rtl-flip h-4 w-4" />
             </RouterLink>
           </div>
         </div>
@@ -172,16 +172,16 @@
 
         <div class="mt-4 flex items-center justify-between gap-2 text-sm text-gray-600 dark:text-gray-300">
           <span class="tag tag--ok">
-            <Icon icon="mdi:thumb-up-outline" aria-hidden="true" />
+            <Icon icon="lucide:thumbs-up" aria-hidden="true" />
             {{ item.upvotes || 0 }}
           </span>
           <span class="tag tag--bad">
-            <Icon icon="mdi:thumb-down-outline" aria-hidden="true" />
+            <Icon icon="lucide:thumbs-down" aria-hidden="true" />
             {{ item.downvotes || 0 }}
           </span>
           <RouterLink :to="`/suggestions/${item.id}`" class="suggestion-detail-btn">
             {{ t('suggestions.viewDetails') }}
-            <Icon icon="mdi:arrow-right" class="rtl-flip h-4 w-4" />
+            <Icon icon="lucide:arrow-right" class="rtl-flip h-4 w-4" />
           </RouterLink>
         </div>
       </article>
@@ -189,13 +189,13 @@
 
     <div v-if="pagination.total_pages > 1" class="flex justify-center items-center gap-2">
       <button type="button" class="btn-secondary btn-sm" :disabled="pagination.page <= 1" @click="changePage(pagination.page - 1)">
-        <Icon class="rtl-flip" icon="mdi:chevron-left" />
+        <Icon class="rtl-flip" icon="lucide:chevron-left" />
         {{ t('polls.pagination.previous') }}
       </button>
       <span class="text-sm text-gray-600 dark:text-gray-400">{{ pagination.page }} / {{ pagination.total_pages }}</span>
       <button type="button" class="btn-secondary btn-sm" :disabled="pagination.page >= pagination.total_pages" @click="changePage(pagination.page + 1)">
         {{ t('polls.pagination.next') }}
-        <Icon class="rtl-flip" icon="mdi:chevron-right" />
+        <Icon class="rtl-flip" icon="lucide:chevron-right" />
       </button>
     </div>
 
@@ -215,7 +215,7 @@
           <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 id="suggestion-create-title" class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('suggestions.form.title') }}</h2>
             <button class="btn-ghost p-2" @click="closeCreateModal" type="button" :aria-label="t('common.close')">
-              <Icon icon="mdi:close" />
+              <Icon icon="lucide:x" />
             </button>
           </div>
 
@@ -275,8 +275,8 @@
               <div class="flex justify-end gap-2">
                 <button class="suggestion-cancel" type="button" @click="closeCreateModal">{{ t('common.cancel') }}</button>
                 <button class="suggestion-submit" type="submit" :disabled="submitting || !form.category_id">
-                  <Icon v-if="submitting" icon="mdi:loading" class="animate-spin" />
-                  <Icon v-else icon="mdi:send" />
+                  <Icon v-if="submitting" icon="lucide:loader-circle" class="animate-spin" />
+                  <Icon v-else icon="lucide:send" />
                   {{ t('suggestions.form.submit') }}
                 </button>
               </div>
