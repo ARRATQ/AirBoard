@@ -12,10 +12,10 @@
         <span class="poll-header-content">
           <span
             class="h-7 w-7 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0"
-            :style="{ backgroundColor: poll.is_active ? '#8B5CF6' : '#10b981' }"
+            :style="{ backgroundColor: isClosed ? '#10b981' : '#8B5CF6' }"
             aria-hidden="true"
           >
-            <Icon :icon="poll.is_active ? 'lucide:chart-column' : 'lucide:square-check'" class="h-4 w-4 text-white" />
+            <Icon :icon="isClosed ? 'lucide:square-check' : 'lucide:chart-column'" class="h-4 w-4 text-white" />
           </span>
           <span class="poll-info">
             <span class="flex items-center gap-2 flex-1 min-w-0">
@@ -26,7 +26,7 @@
                 <span class="sr-only">{{ t('polls.card.voted') }}</span>
               </span>
               <span class="poll-badges">
-                <span v-if="!poll.is_active" class="tag tag--bad">
+                <span v-if="isClosed" class="tag tag--bad">
                   <Icon icon="lucide:lock" aria-hidden="true" />
                   <span>{{ t('polls.status.closed') }}</span>
                 </span>
@@ -273,6 +273,10 @@ const canVote = computed(() => {
   return true
 })
 
+// Fermé par un admin, ou date de fin passée (le serveur refuse alors les votes)
+const hasEnded = computed(() => !!props.poll.end_date && isAfter(new Date(), new Date(props.poll.end_date)))
+const isClosed = computed(() => !props.poll.is_active || hasEnded.value)
+
 // Vérifier si le sondage expire bientôt (dans les 3 prochains jours)
 const isExpiringSoon = computed(() => {
   if (!props.poll.end_date || !props.poll.is_active) return false
@@ -432,6 +436,8 @@ const getWaitingMessage = () => {
     }
     return t('polls.voting.pollClosed')
   }
+
+  if (hasEnded.value) return t('polls.voting.pollClosed')
 
   if (hasVoted.value) {
     if (props.poll.show_results === 'after') {
