@@ -4,13 +4,13 @@
       <template #title>{{ t('admin.newsTypes') }}</template>
       <template #description>{{ t('admin.newsTypesHelp') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreate">{{ t('common.create') }}</BaseButton>
       </template>
     </PageHeader>
 
     <EmptyState
       v-if="!loading && types.length === 0"
-      icon="mdi:shape-outline"
+      icon="lucide:shapes"
       :title="t('admin.noType')"
     />
 
@@ -24,7 +24,7 @@
     >
       <template #cell-name="{ row }">
         <span class="nt-name">
-          <Icon :icon="row.raw.icon || 'mdi:shape'" class="nt-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
+          <Icon :icon="row.raw.icon || 'lucide:shapes'" class="nt-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
           <span class="nt-name__title">{{ row.name }}</span>
         </span>
       </template>
@@ -60,7 +60,7 @@
             <h2 id="news-type-modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ editingId ? t('common.edit') : t('common.create') }}
             </h2>
-            <BaseButton variant="ghost" size="sm" icon="mdi:close" :aria-label="t('common.close')" @click="closeForm" />
+            <BaseButton variant="ghost" size="sm" icon="lucide:x" :aria-label="t('common.close')" @click="closeForm" />
           </div>
 
           <form class="p-5 space-y-4" @submit.prevent="saveType">
@@ -74,13 +74,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Icon -->
               <div>
-                <label class="form-label">{{ t('common.icon') }}</label>
-                <div class="flex gap-2">
-                  <input v-model="form.icon" class="form-input flex-1" placeholder="mdi:shape" />
-                  <div class="flex items-center justify-center px-4 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
-                    <Icon :icon="form.icon || 'mdi:shape'" class="text-2xl" :style="{ color: form.color }" />
-                  </div>
-                </div>
+                <IconInput v-model="form.icon" :label="t('common.icon')" placeholder="lucide:shapes" />
               </div>
 
               <!-- Color -->
@@ -118,6 +112,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import PageHeader from '@/components/ui/PageHeader.vue'
@@ -141,7 +136,7 @@ const showModal = ref(false)
 const editingId = ref(null)
 const form = ref({
   name: '',
-  icon: 'mdi:shape',
+  icon: 'lucide:shapes',
   color: '#3B82F6',
   order: 0,
   is_active: true
@@ -167,7 +162,7 @@ const openCreate = () => {
   editingId.value = null
   form.value = {
     name: '',
-    icon: 'mdi:shape',
+    icon: 'lucide:shapes',
     color: '#3B82F6',
     order: 0,
     is_active: true
@@ -179,7 +174,7 @@ const openEdit = (type) => {
   editingId.value = type.id
   form.value = {
     name: type.name,
-    icon: type.icon || 'mdi:shape',
+    icon: type.icon || 'lucide:shapes',
     color: type.color || '#3B82F6',
     order: type.order || 0,
     is_active: type.is_active
@@ -194,7 +189,7 @@ const closeForm = () => {
 const saveType = async () => {
   const payload = {
     name: form.value.name.trim(),
-    icon: form.value.icon.trim() || 'mdi:shape',
+    icon: form.value.icon.trim() || 'lucide:shapes',
     color: form.value.color,
     order: Number(form.value.order) || 0,
     is_active: !!form.value.is_active
@@ -241,7 +236,7 @@ const toggleActive = async (type, isActive) => {
   try {
     await newsService.updateType(type.id, {
       name: type.name,
-      icon: type.icon || 'mdi:shape',
+      icon: type.icon || 'lucide:shapes',
       color: type.color || '#3B82F6',
       order: type.order || 0,
       is_active: isActive

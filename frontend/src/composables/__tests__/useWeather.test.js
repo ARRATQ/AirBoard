@@ -26,9 +26,9 @@ describe('useWeather', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('maps WMO codes to icons', () => {
-    expect(wmoIcon(0)).toBe('mdi:weather-sunny')
-    expect(wmoIcon(61)).toBe('mdi:weather-snowy-rainy')
-    expect(wmoIcon(120)).toBe('mdi:weather-cloudy')
+    expect(wmoIcon(0)).toBe('lucide:sun')
+    expect(wmoIcon(61)).toBe('lucide:cloud-hail')
+    expect(wmoIcon(120)).toBe('lucide:cloud')
   })
 
   it('fetches once, then serves the cache without geolocation or network', async () => {
@@ -36,7 +36,7 @@ describe('useWeather', () => {
     const first = useWeather()
     first.loadWeather()
     await flush()
-    expect(first.weather.value).toEqual({ temp: 21, icon: 'mdi:weather-sunny', city: 'Rabat' })
+    expect(first.weather.value).toEqual({ temp: 21, icon: 'lucide:sun', city: 'Rabat' })
     expect(fetchMock).toHaveBeenCalledTimes(2)
 
     const second = useWeather()

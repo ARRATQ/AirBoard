@@ -25,7 +25,7 @@
               {{ provider.is_enabled ? $t('common.enabled') : $t('common.disabled') }}
             </span>
             <button @click="editProvider(provider)" class="btn btn-secondary btn-sm">
-              <Icon icon="mdi:pencil" class="h-4 w-4 me-2" />
+              <Icon icon="lucide:pencil" class="h-4 w-4 me-2" />
               {{ $t('common.edit') }}
             </button>
           </div>
@@ -107,7 +107,7 @@
                     :aria-label="showSecret ? $t('email.oauth.hideSecret') : $t('email.oauth.showSecret')"
                     class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
                   >
-                    <Icon :icon="showSecret ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
+                    <Icon :icon="showSecret ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
                   </button>
                 </div>
                 <p class="form-help">{{ $t('oauth.clientSecretHelp') }}</p>
@@ -131,7 +131,7 @@
                     :aria-label="$t('oauth.copyRedirectUri')"
                     class="btn btn-secondary"
                   >
-                    <Icon icon="mdi:content-copy" class="h-4 w-4" />
+                    <Icon icon="lucide:copy" class="h-4 w-4" />
                   </button>
                 </div>
                 <p class="form-help">{{ $t('oauth.redirectUriHelp') }}</p>
@@ -145,7 +145,7 @@
                   :aria-expanded="showAdvanced"
                   class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
                 >
-                  <Icon :icon="showAdvanced ? 'mdi:chevron-down' : 'mdi:chevron-right'" class="rtl-flip h-5 w-5" />
+                  <Icon :icon="showAdvanced ? 'lucide:chevron-down' : 'lucide:chevron-right'" class="rtl-flip h-5 w-5" />
                   {{ $t('oauth.advancedSettings') }}
                 </button>
 
@@ -196,7 +196,7 @@
               <!-- Setup Instructions -->
               <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-500/30 rounded-lg p-4">
                 <div class="flex items-start gap-3">
-                  <Icon icon="mdi:information" class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <Icon icon="lucide:info" class="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <div class="text-sm text-gray-700 dark:text-gray-300">
                     <p class="font-medium text-gray-900 dark:text-white mb-2">{{ $t('oauth.setupInstructions') }}</p>
                     <div v-if="selectedProvider.provider_name === 'google'">
@@ -235,7 +235,7 @@
                 :disabled="loading"
                 class="btn btn-primary w-full sm:w-auto"
               >
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
                 {{ $t('common.save') }}
               </button>
             </div>

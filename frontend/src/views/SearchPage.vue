@@ -6,7 +6,7 @@
     <!-- Search Bar -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
       <div class="relative">
-        <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        <Icon icon="lucide:search" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
         <input
           ref="searchInput"
           v-model="searchQuery"
@@ -20,7 +20,7 @@
           @click="clearSearch"
           class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         >
-          <Icon icon="mdi:close" class="h-5 w-5" />
+          <Icon icon="lucide:x" class="h-5 w-5" />
         </button>
       </div>
 
@@ -47,7 +47,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 text-primary-500 animate-spin" />
+      <Icon icon="lucide:loader-circle" class="h-8 w-8 text-primary-500 animate-spin" />
     </div>
 
     <!-- Results -->
@@ -55,7 +55,7 @@
       <!-- Applications -->
       <div v-if="results.applications.length > 0 && (activeType === '' || activeType === 'app')">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Icon icon="mdi:application" class="h-5 w-5 text-indigo-500" />
+          <Icon icon="lucide:app-window" class="h-5 w-5 text-indigo-500" />
           {{ $t('search.types.applications') }}
           <span class="text-sm font-normal text-gray-500">({{ results.applications.length }})</span>
         </h2>
@@ -69,7 +69,7 @@
             class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow flex items-start gap-3 group"
           >
             <Icon
-              :icon="app.icon || 'mdi:application'"
+              :icon="app.icon || 'lucide:app-window'"
               class="h-8 w-8 flex-shrink-0"
               :style="{ color: app.color || '#6366f1' }"
             />
@@ -91,7 +91,7 @@
       <!-- News -->
       <div v-if="results.news.length > 0 && (activeType === '' || activeType === 'news')">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Icon icon="mdi:newspaper" class="h-5 w-5 text-blue-500" />
+          <Icon icon="lucide:newspaper" class="h-5 w-5 text-blue-500" />
           {{ $t('search.types.news') }}
           <span class="text-sm font-normal text-gray-500">({{ results.news.length }})</span>
         </h2>
@@ -120,7 +120,7 @@
       <!-- Events -->
       <div v-if="results.events.length > 0 && (activeType === '' || activeType === 'event')">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Icon icon="mdi:calendar" class="h-5 w-5 text-green-500" />
+          <Icon icon="lucide:calendar" class="h-5 w-5 text-green-500" />
           {{ $t('search.types.events') }}
           <span class="text-sm font-normal text-gray-500">({{ results.events.length }})</span>
         </h2>
@@ -136,11 +136,11 @@
             </h3>
             <div class="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
               <span class="flex items-center gap-1">
-                <Icon icon="mdi:calendar" class="h-3.5 w-3.5" />
+                <Icon icon="lucide:calendar" class="h-3.5 w-3.5" />
                 {{ formatDate(item.start_date) }}
               </span>
               <span v-if="item.location" class="flex items-center gap-1">
-                <Icon icon="mdi:map-marker" class="h-3.5 w-3.5" />
+                <Icon icon="lucide:map-pin" class="h-3.5 w-3.5" />
                 {{ item.location }}
               </span>
             </div>
@@ -151,7 +151,7 @@
       <!-- Polls -->
       <div v-if="results.polls.length > 0 && (activeType === '' || activeType === 'poll')">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Icon icon="mdi:poll" class="h-5 w-5 text-purple-500" />
+          <Icon icon="lucide:chart-column" class="h-5 w-5 text-purple-500" />
           {{ $t('search.types.polls') }}
           <span class="text-sm font-normal text-gray-500">({{ results.polls.length }})</span>
         </h2>
@@ -178,7 +178,7 @@
       <!-- Announcements -->
       <div v-if="results.announcements.length > 0 && (activeType === '' || activeType === 'announcement')">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <Icon icon="mdi:bullhorn" class="h-5 w-5 text-orange-500" />
+          <Icon icon="lucide:megaphone" class="h-5 w-5 text-orange-500" />
           {{ $t('search.types.announcements') }}
           <span class="text-sm font-normal text-gray-500">({{ results.announcements.length }})</span>
         </h2>
@@ -214,7 +214,7 @@
 
     <!-- No Results -->
     <div v-else-if="results && results.total_count === 0 && searchQuery.length >= 2" class="text-center py-16">
-      <Icon icon="mdi:magnify-close" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+      <Icon icon="lucide:search-x" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
         {{ $t('search.noResults') }}
       </h3>
@@ -225,7 +225,7 @@
 
     <!-- Initial State -->
     <div v-else-if="!loading && searchQuery.length < 2" class="text-center py-16">
-      <Icon icon="mdi:magnify" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+      <Icon icon="lucide:search" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
         {{ $t('search.initialHint') }}
       </h3>
@@ -257,12 +257,12 @@ const results = ref(null)
 let debounceTimer = null
 
 const tabs = computed(() => [
-  { value: '', label: t('search.tabs.all'), icon: 'mdi:magnify' },
-  { value: 'app', label: t('search.tabs.applications'), icon: 'mdi:application' },
-  { value: 'news', label: t('search.tabs.news'), icon: 'mdi:newspaper' },
-  { value: 'event', label: t('search.tabs.events'), icon: 'mdi:calendar' },
-  { value: 'poll', label: t('search.tabs.polls'), icon: 'mdi:poll' },
-  { value: 'announcement', label: t('search.tabs.announcements'), icon: 'mdi:bullhorn' },
+  { value: '', label: t('search.tabs.all'), icon: 'lucide:search' },
+  { value: 'app', label: t('search.tabs.applications'), icon: 'lucide:app-window' },
+  { value: 'news', label: t('search.tabs.news'), icon: 'lucide:newspaper' },
+  { value: 'event', label: t('search.tabs.events'), icon: 'lucide:calendar' },
+  { value: 'poll', label: t('search.tabs.polls'), icon: 'lucide:chart-column' },
+  { value: 'announcement', label: t('search.tabs.announcements'), icon: 'lucide:megaphone' },
 ])
 
 const getCountForType = (type) => {

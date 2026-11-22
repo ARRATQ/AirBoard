@@ -6,7 +6,7 @@
         {{ canAdmin ? $t('directory.manageHelpAdmin') : $t('directory.manageHelpGroupAdmin') }}
       </template>
       <template #actions>
-        <BaseButton :tag="RouterLink" to="/directory" variant="secondary" icon="mdi:eye-outline">
+        <BaseButton :tag="RouterLink" to="/directory" variant="secondary" icon="lucide:eye">
           {{ $t('directory.viewPublic') }}
         </BaseButton>
       </template>
@@ -30,7 +30,7 @@
     </nav>
 
     <div v-if="loading" class="dir-admin__state">
-      <Icon icon="mdi:loading" class="dir-admin__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="dir-admin__spin" aria-hidden="true" />
       <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
     <div v-else-if="error" class="dir-admin__state dir-admin__state--col">
@@ -42,12 +42,12 @@
     <section v-else-if="activeTab === 'structure'">
       <div class="dir-admin__bar">
         <p class="dir-admin__help">{{ $t('directory.structureHelp') }}</p>
-        <BaseButton v-if="canAdmin" variant="primary" icon="mdi:plus" @click="openUnit(null, null)">
+        <BaseButton v-if="canAdmin" variant="primary" icon="lucide:plus" @click="openUnit(null, null)">
           {{ $t('directory.newUnit') }}
         </BaseButton>
       </div>
 
-      <EmptyState v-if="!flatUnits.length" icon="mdi:sitemap-outline" :title="$t('directory.noUnits')" />
+      <EmptyState v-if="!flatUnits.length" icon="lucide:network" :title="$t('directory.noUnits')" />
 
       <ul class="dir-tree">
         <li
@@ -62,16 +62,16 @@
             <span v-if="unit.code" class="dir-mono">{{ unit.code }}</span>
             <div v-if="canAdmin" class="dir-unit__actions">
               <button type="button" class="dir-icon-btn" :title="$t('directory.newPosition')" :aria-label="$t('directory.newPosition')" @click="openPosition(null, unit.id)">
-                <Icon icon="mdi:briefcase-plus-outline" />
+                <Icon icon="lucide:briefcase-plus" />
               </button>
               <button type="button" class="dir-icon-btn" :title="$t('directory.newSubUnit')" :aria-label="$t('directory.newSubUnit')" @click="openUnit(null, unit.id)">
-                <Icon icon="mdi:file-tree-outline" />
+                <Icon icon="lucide:folder-tree" />
               </button>
               <button type="button" class="dir-icon-btn" :title="$t('common.edit')" :aria-label="$t('common.edit')" @click="openUnit(unit)">
-                <Icon icon="mdi:pencil-outline" />
+                <Icon icon="lucide:pencil" />
               </button>
               <button type="button" class="dir-icon-btn dir-icon-btn--danger" :title="$t('common.delete')" :aria-label="$t('common.delete')" @click="removeUnit(unit)">
-                <Icon icon="mdi:trash-can-outline" />
+                <Icon icon="lucide:trash-2" />
               </button>
             </div>
           </div>
@@ -81,14 +81,14 @@
           </p>
           <div v-for="position in sortedPositions(unit)" :key="position.id" class="dir-pos">
             <div class="dir-pos__title">
-              <Icon v-if="position.is_head" icon="mdi:star-four-points" class="dir-head" :title="$t('directory.head')" />
+              <Icon v-if="position.is_head" icon="lucide:sparkle" class="dir-head" :title="$t('directory.head')" />
               <span>{{ position.title }}</span>
               <template v-if="canAdmin">
                 <button type="button" class="dir-icon-btn dir-icon-btn--sm" :title="$t('common.edit')" :aria-label="$t('common.edit')" @click="openPosition(position)">
-                  <Icon icon="mdi:pencil-outline" />
+                  <Icon icon="lucide:pencil" />
                 </button>
                 <button type="button" class="dir-icon-btn dir-icon-btn--sm dir-icon-btn--danger" :title="$t('common.delete')" :aria-label="$t('common.delete')" @click="removePosition(position)">
-                  <Icon icon="mdi:trash-can-outline" />
+                  <Icon icon="lucide:trash-2" />
                 </button>
               </template>
             </div>
@@ -100,12 +100,12 @@
                 </button>
                 <span v-if="a.is_interim" class="dir-interim">{{ $t('directory.interim') }}</span>
                 <button type="button" class="dir-chip__remove" :aria-label="$t('directory.unassign')" @click="removeAssignment(a)">
-                  <Icon icon="mdi:close" class="h-3.5 w-3.5" />
+                  <Icon icon="lucide:x" class="h-3.5 w-3.5" />
                 </button>
               </span>
               <span v-if="!(position.assignments || []).length" class="dir-muted">{{ $t('directory.vacant') }}</span>
               <button type="button" class="dir-chip dir-chip--add" @click="openAssignment(position)">
-                <Icon icon="mdi:account-plus-outline" class="h-4 w-4" /> {{ $t('directory.assign') }}
+                <Icon icon="lucide:user-plus" class="h-4 w-4" /> {{ $t('directory.assign') }}
               </button>
             </div>
           </div>
@@ -115,8 +115,8 @@
 
     <!-- ====== PERSONNES ====== -->
     <section v-else-if="activeTab === 'people'">
-      <EmptyState v-if="!people.length" icon="mdi:account-multiple-outline" :title="$t('directory.noPeople')">
-        <BaseButton variant="primary" size="sm" icon="mdi:account-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
+      <EmptyState v-if="!people.length" icon="lucide:users" :title="$t('directory.noPeople')">
+        <BaseButton variant="primary" size="sm" icon="lucide:user-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
       </EmptyState>
 
       <DataTable
@@ -128,7 +128,7 @@
         :page-size="25"
       >
         <template #toolbar>
-          <BaseButton variant="primary" icon="mdi:account-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
+          <BaseButton variant="primary" icon="lucide:user-plus" @click="openPerson(null)">{{ $t('directory.newPerson') }}</BaseButton>
         </template>
 
         <template #cell-name="{ row }">
@@ -137,7 +137,7 @@
             <div>
               <p class="dir-person__name">{{ row.name }}</p>
               <p v-if="row.raw.user_id" class="dir-muted dir-person__link">
-                <Icon icon="mdi:link-variant" class="h-3 w-3" aria-hidden="true" /> {{ $t('directory.linked') }}
+                <Icon icon="lucide:link" class="h-3 w-3" aria-hidden="true" /> {{ $t('directory.linked') }}
               </p>
             </div>
           </div>
@@ -169,10 +169,10 @@
     <section v-else-if="activeTab === 'fields' && canAdmin">
       <div class="dir-admin__bar">
         <p class="dir-admin__help">{{ $t('directory.fieldsHelp') }}</p>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openField(null)">{{ $t('directory.newField') }}</BaseButton>
+        <BaseButton variant="primary" icon="lucide:plus" @click="openField(null)">{{ $t('directory.newField') }}</BaseButton>
       </div>
 
-      <EmptyState v-if="!fields.length" icon="mdi:form-select" :title="$t('directory.noCustomFields')" />
+      <EmptyState v-if="!fields.length" icon="lucide:square-chevron-down" :title="$t('directory.noCustomFields')" />
 
       <DataTable
         v-else
@@ -281,9 +281,9 @@ const {
 } = useDirectory()
 
 const tabs = [
-  { id: 'structure', icon: 'mdi:sitemap-outline', label: 'directory.tabStructure', count: () => units.value.length },
-  { id: 'people', icon: 'mdi:account-multiple-outline', label: 'directory.tabPeople', count: () => people.value.length },
-  { id: 'fields', icon: 'mdi:form-select', label: 'directory.tabFields', count: () => fields.value.length, adminOnly: true },
+  { id: 'structure', icon: 'lucide:network', label: 'directory.tabStructure', count: () => units.value.length },
+  { id: 'people', icon: 'lucide:users', label: 'directory.tabPeople', count: () => people.value.length },
+  { id: 'fields', icon: 'lucide:square-chevron-down', label: 'directory.tabFields', count: () => fields.value.length, adminOnly: true },
 ]
 const visibleTabs = computed(() => tabs.filter((tab) => !tab.adminOnly || canAdmin.value))
 

@@ -9,7 +9,7 @@
       >
         <Icon
           v-if="hasContent"
-          icon="mdi:chevron-right"
+          icon="lucide:chevron-right"
           class="org-node__chevron h-5 w-5"
           :class="{ 'org-node__chevron--open': open }"
         />
@@ -17,14 +17,14 @@
         <span class="org-node__name">{{ unit.name }}</span>
         <span v-if="unit.code" class="tag org-node__code">{{ unit.code }}</span>
         <span class="org-node__count" :title="$t('directory.peopleCount', { count: peopleCount })">
-          <Icon icon="mdi:account-multiple-outline" class="h-3.5 w-3.5" /> {{ peopleCount }}
+          <Icon icon="lucide:users" class="h-3.5 w-3.5" /> {{ peopleCount }}
         </span>
       </button>
 
       <div v-show="open" v-if="positions.length" class="org-node__positions">
         <div v-for="position in positions" :key="position.id" class="org-pos" :class="{ 'org-pos--head': position.is_head }">
           <p class="org-pos__title">
-            <Icon v-if="position.is_head" icon="mdi:star-four-points" class="org-pos__star h-3.5 w-3.5" aria-hidden="true" />
+            <Icon v-if="position.is_head" icon="lucide:sparkle" class="org-pos__star h-3.5 w-3.5" aria-hidden="true" />
             {{ position.title }}
           </p>
           <div class="org-pos__holders">

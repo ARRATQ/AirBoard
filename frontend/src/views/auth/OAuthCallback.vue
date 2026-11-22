@@ -8,7 +8,7 @@
       </div>
 
       <div v-else-if="error" class="error-state">
-        <Icon icon="mdi:alert-circle" class="error-icon" />
+        <Icon icon="lucide:circle-alert" class="error-icon" />
         <h2>{{ t('auth.oauthCallback.errorTitle') }}</h2>
         <p class="error-message">{{ error }}</p>
         <button type="button" @click="redirectToLogin" class="btn-primary">

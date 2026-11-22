@@ -11,7 +11,7 @@
                   class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
                   :style="{ backgroundColor: form.color }"
                 >
-                  <Icon :icon="form.icon || 'mdi:folder'" class="h-5 w-5" />
+                  <Icon :icon="form.icon || 'lucide:folder'" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
                   <h3 id="app-group-modal-title" class="modal-title truncate">
@@ -23,7 +23,7 @@
                 </div>
               </div>
               <button type="button" class="btn btn-ghost p-2" :aria-label="$t('common.close')" @click="closeModal">
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="lucide:x" class="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -33,7 +33,7 @@
             <!-- Colonne gauche -->
             <div class="space-y-4">
               <div class="section-header mb-0">
-                <Icon icon="mdi:information-outline" class="section-icon" />
+                <Icon icon="lucide:info" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.basicInfo') }}</h4>
               </div>
 
@@ -107,13 +107,13 @@
             <!-- Colonne droite -->
             <div class="space-y-4">
               <div class="section-header mb-0">
-                <Icon icon="mdi:palette-outline" class="section-icon" />
+                <Icon icon="lucide:palette" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.appGroupModal.appearance') }}</h4>
               </div>
 
               <div class="card p-3">
                 <div class="flex items-center gap-3">
-                  <Icon :icon="form.icon || 'mdi:folder'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
+                  <Icon :icon="form.icon || 'lucide:folder'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
                   <div class="min-w-0 flex-1">
                     <div class="font-medium text-gray-900 dark:text-white truncate">
                       {{ form.name || $t('groupAdmin.appGroupModal.previewName') }}
@@ -122,7 +122,7 @@
                       {{ form.description || $t('groupAdmin.appGroupModal.previewDescription') }}
                     </div>
                   </div>
-                  <Icon v-if="form.is_private" icon="mdi:lock" class="h-4 w-4 text-gray-400" />
+                  <Icon v-if="form.is_private" icon="lucide:lock" class="h-4 w-4 text-gray-400" />
                 </div>
               </div>
 
@@ -143,9 +143,8 @@
               <IconInput
                 v-model="form.icon"
                 :label="$t('groupAdmin.appGroupModal.icon')"
-                placeholder="mdi:folder, lucide:folder, heroicons:folder"
+                placeholder="lucide:folder, lucide:folder, heroicons:folder"
                 category="group"
-                :show-suggestions="true"
               />
             </div>
           </div>
@@ -156,8 +155,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ $t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'lucide:save' : 'lucide:plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? $t('groupAdmin.appGroupModal.update') : $t('groupAdmin.appGroupModal.create') }}
               </button>
             </div>
@@ -202,7 +201,7 @@ const { t } = useI18n()
 const { isGlobal } = useManagementScope(GROUP_ADMIN)
 
 const DEFAULT_COLOR = '#10b981'
-const DEFAULT_ICON = 'mdi:folder'
+const DEFAULT_ICON = 'lucide:folder'
 
 const loading = ref(false)
 const errors = ref({})

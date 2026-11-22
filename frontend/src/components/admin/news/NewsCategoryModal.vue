@@ -27,17 +27,8 @@
         ></textarea>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label :for="`${formId}-icon`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {{ $t('events.editor.categoryIcon') }}
-          </label>
-          <input
-            :id="`${formId}-icon`"
-            v-model="form.icon"
-            type="text"
-            placeholder="mdi:folder"
-            class="input"
-          />
+        <div class="col-span-2">
+          <IconInput :id="`${formId}-icon`" v-model="form.icon" :label="$t('events.editor.categoryIcon')" placeholder="lucide:folder" />
         </div>
         <div>
           <label :for="`${formId}-color`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -63,7 +54,7 @@
         :disabled="!form.name.trim() || isSaving"
         class="btn btn-primary"
       >
-        <Icon v-if="isSaving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
+        <Icon v-if="isSaving" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
         {{ isSaving ? $t('groupAdmin.newsEditor.actions.saving') : $t('common.create') }}
       </button>
     </template>
@@ -71,6 +62,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
@@ -93,7 +85,7 @@ const formId = 'news-category-form'
 const emptyForm = () => ({
   name: '',
   description: '',
-  icon: 'mdi:folder',
+  icon: 'lucide:folder',
   color: '#3B82F6',
   order: 0,
   is_active: true

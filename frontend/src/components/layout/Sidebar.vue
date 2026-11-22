@@ -6,7 +6,7 @@
       <div v-if="appStore.sidebarOpen" class="flex-1">
         <div class="flex items-center gap-3">
           <div class="h-8 w-8 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Icon :icon="appStore.appSettings?.app_icon || 'mdi:view-dashboard'" class="h-5 w-5 text-gray-900 dark:text-white" />
+            <Icon :icon="appStore.appSettings?.app_icon || 'lucide:layout-dashboard'" class="h-5 w-5 text-gray-900 dark:text-white" />
           </div>
           <div class="flex-1 min-w-0">
             <h1 class="sidebar-brand truncate">{{ appStore.appSettings?.app_name || 'Airboard' }}</h1>
@@ -21,7 +21,7 @@
                 class="relative inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors animate-pulse"
                 :title="$t('version.newVersionAvailable')"
               >
-                <Icon icon="mdi:update" class="h-3 w-3" />
+                <Icon icon="lucide:refresh-ccw" class="h-3 w-3" />
                 <span>{{ $t('version.update') }}</span>
               </button>
             </div>
@@ -39,7 +39,7 @@
         class="flex items-center justify-center w-full"
       >
         <div class="h-8 w-8 bg-white dark:bg-gray-800 rounded-lg flex items-center justify-center">
-          <Icon :icon="appStore.appSettings?.app_icon || 'mdi:view-dashboard'" class="h-5 w-5 text-gray-900 dark:text-white" />
+          <Icon :icon="appStore.appSettings?.app_icon || 'lucide:layout-dashboard'" class="h-5 w-5 text-gray-900 dark:text-white" />
         </div>
       </div>
     </div>
@@ -119,7 +119,7 @@
             :title="$t('common.toggleSidebar')"
             :aria-label="$t('common.toggleSidebar')"
           >
-            <Icon icon="mdi:menu-open" class="h-5 w-5" />
+            <Icon icon="lucide:panel-left-open" class="h-5 w-5" />
           </button>
         </div>
 
@@ -134,7 +134,7 @@
             :aria-label="$t('common.darkMode')"
           >
             <Icon
-              :icon="appStore.isDarkMode ? 'mdi:weather-night' : 'mdi:weather-sunny'"
+              :icon="appStore.isDarkMode ? 'lucide:moon' : 'lucide:sun'"
               class="h-5 w-5"
             />
           </button>
@@ -147,7 +147,7 @@
             :title="$t('help.title')"
             :aria-label="$t('help.title')"
           >
-            <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
+            <Icon icon="lucide:circle-help" class="h-5 w-5" />
           </button>
 
           <!-- Language selector - compact -->
@@ -176,7 +176,7 @@
           :title="$t('common.expandSidebar')"
           :aria-label="$t('common.expandSidebar')"
         >
-          <Icon icon="mdi:menu" class="h-5 w-5" />
+          <Icon icon="lucide:menu" class="h-5 w-5" />
         </button>
 
         <!-- Theme toggle -->
@@ -188,7 +188,7 @@
           :aria-label="$t('common.darkMode')"
         >
           <Icon
-            :icon="appStore.isDarkMode ? 'mdi:weather-night' : 'mdi:weather-sunny'"
+            :icon="appStore.isDarkMode ? 'lucide:moon' : 'lucide:sun'"
             class="h-5 w-5"
           />
         </button>
@@ -201,7 +201,7 @@
           :title="$t('help.title')"
           :aria-label="$t('help.title')"
         >
-          <Icon icon="mdi:help-circle-outline" class="h-5 w-5" />
+          <Icon icon="lucide:circle-help" class="h-5 w-5" />
         </button>
 
         <!-- Language selector - icon only -->
@@ -258,7 +258,7 @@
           </div>
           <Icon
             v-if="appStore.sidebarOpen"
-            :icon="showUserMenu ? 'mdi:chevron-up' : 'mdi:chevron-down'"
+            :icon="showUserMenu ? 'lucide:chevron-up' : 'lucide:chevron-down'"
             class="h-4 w-4 text-gray-400 flex-shrink-0"
           />
         </button>
@@ -281,7 +281,7 @@
               @click="showUserMenu = false"
               class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              <Icon icon="mdi:account-circle-outline" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+              <Icon icon="lucide:circle-user" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ $t('profile.title') }}</span>
             </router-link>
             <div class="border-t border-gray-200 dark:border-gray-700"></div>
@@ -290,7 +290,7 @@
               @click="handleLogout"
               class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
             >
-              <Icon icon="mdi:logout" class="h-5 w-5" />
+              <Icon icon="lucide:log-out" class="h-5 w-5" />
               <span class="text-sm">{{ $t('common.logout') }}</span>
             </button>
           </div>
@@ -317,7 +317,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                  <Icon icon="mdi:update" class="h-6 w-6 text-primary-600" />
+                  <Icon icon="lucide:refresh-ccw" class="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
                   <h3 id="sidebar-update-title" class="text-lg font-semibold text-white">{{ $t('version.newVersionAvailable') }}</h3>
@@ -330,7 +330,7 @@
                 class="text-white hover:text-gray-200 transition-colors"
                 :aria-label="$t('common.close')"
               >
-                <Icon icon="mdi:close" class="h-6 w-6" />
+                <Icon icon="lucide:x" class="h-6 w-6" />
               </button>
             </div>
           </div>
@@ -348,7 +348,7 @@
                     </p>
                   </div>
                 </div>
-                <Icon icon="mdi:arrow-right" class="rtl-flip h-8 w-8 text-gray-400" />
+                <Icon icon="lucide:arrow-right" class="rtl-flip h-8 w-8 text-gray-400" />
                 <div class="text-center">
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('version.newVersion') }}</p>
                   <div class="px-4 py-2 bg-green-100 dark:bg-green-900 rounded-lg">

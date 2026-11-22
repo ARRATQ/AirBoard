@@ -14,7 +14,7 @@
         @click="track"
       >
         {{ resource.name }}
-        <Icon v-if="resource.open_in_new_tab" icon="mdi:open-in-new" class="tile__ext" aria-hidden="true" />
+        <Icon v-if="resource.open_in_new_tab" icon="lucide:external-link" class="tile__ext" aria-hidden="true" />
         <span v-if="resource.open_in_new_tab" class="sr-only">({{ $t('dashboard.opensInNewTab') }})</span>
       </a>
       <small v-if="resource.description" class="tile__desc">{{ resource.description }}</small>
@@ -32,7 +32,7 @@
         :aria-label="`${$t('common.details')} : ${resource.name}`"
         @click="$emit('show-details', resource)"
       >
-        <Icon icon="mdi:information-outline" aria-hidden="true" />
+        <Icon icon="lucide:info" aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -42,7 +42,7 @@
         :aria-label="`${$t(favorite ? 'common.removeFromFavorites' : 'common.addToFavorites')} : ${resource.name}`"
         @click="$emit('toggle-favorite', resource)"
       >
-        <Icon :icon="favorite ? 'mdi:star' : 'mdi:star-outline'" aria-hidden="true" />
+        <Icon icon="lucide:star" :class="{ 'icon-fill': favorite }" aria-hidden="true" />
       </button>
     </div>
   </div>
@@ -70,7 +70,7 @@ const meta = computed(() => TYPE_META[type.value])
 const isNew = computed(() => isNewResource(props.resource))
 const note = computed(() => activeAdminNote(props.resource))
 
-const DEFAULT_ICON = 'mdi:application'
+const DEFAULT_ICON = 'lucide:app-window'
 const iconName = computed(() => {
   if (type.value === 'app') return props.resource.icon || DEFAULT_ICON
   // Dossier, site, lien : l'icône choisie par l'admin si elle n'est pas celle par défaut.

@@ -5,8 +5,8 @@
     <h1 :id="titleId" class="err__title">{{ title }}</h1>
     <p class="err__msg">{{ message }}</p>
     <div class="err__actions">
-      <BaseButton tag="router-link" to="/home" variant="primary" icon="mdi:home">{{ t('errors.backHome') }}</BaseButton>
-      <BaseButton icon="mdi:arrow-left" @click="router.back()">{{ t('errors.previousPage') }}</BaseButton>
+      <BaseButton tag="router-link" to="/home" variant="primary" icon="lucide:house">{{ t('errors.backHome') }}</BaseButton>
+      <BaseButton icon="lucide:arrow-left" @click="router.back()">{{ t('errors.previousPage') }}</BaseButton>
     </div>
   </main>
 </template>

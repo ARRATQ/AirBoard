@@ -3,11 +3,11 @@
     <span class="dt__range">{{ t('ui.table.range', { from, to, total }) }}</span>
     <template v-if="pageCount > 1">
       <button type="button" class="dt__page-btn" :disabled="page <= 1" :aria-label="t('ui.table.prev')" @click="go(page - 1)">
-        <Icon icon="mdi:chevron-left" class="dt__chev" aria-hidden="true" />
+        <Icon icon="lucide:chevron-left" class="dt__chev" aria-hidden="true" />
       </button>
       <span class="dt__page">{{ page }} / {{ pageCount }}</span>
       <button type="button" class="dt__page-btn" :disabled="page >= pageCount" :aria-label="t('ui.table.next')" @click="go(page + 1)">
-        <Icon icon="mdi:chevron-right" class="dt__chev" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" class="dt__chev" aria-hidden="true" />
       </button>
     </template>
   </nav>

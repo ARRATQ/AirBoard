@@ -7,11 +7,11 @@
       <template #actions>
         <div class="flex gap-3">
           <button @click="showPasswordModal = true" class="btn btn-secondary">
-            <Icon icon="mdi:key" class="h-4 w-4 me-2" />
+            <Icon icon="lucide:key" class="h-4 w-4 me-2" />
             {{ $t('settings.changePassword') }}
           </button>
           <button @click="resetSettings" class="btn btn-secondary">
-            <Icon icon="mdi:restore" class="h-4 w-4 me-2" />
+            <Icon icon="lucide:rotate-ccw" class="h-4 w-4 me-2" />
             {{ $t('settings.resetToDefault') }}
           </button>
         </div>
@@ -27,7 +27,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'general' ? 'border-primary-500 text-primary-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:cog" class="inline-block me-2 h-4 w-4" />
+          <Icon icon="lucide:settings" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.general') }}
         </button>
         <button 
@@ -35,7 +35,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'hero' ? 'border-green-500 text-green-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:format-quote-close" class="inline-block me-2 h-4 w-4" />
+          <Icon icon="lucide:quote" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.dynamicMessages') }}
         </button>
         <button 
@@ -43,7 +43,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'auth' ? 'border-purple-500 text-purple-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:shield-account" class="inline-block me-2 h-4 w-4" />
+          <Icon icon="lucide:shield-user" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.tabs.access') }}
         </button>
         <button
@@ -51,7 +51,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'apparence' ? 'border-orange-400 text-orange-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:palette" class="inline-block me-2 h-4 w-4" />
+          <Icon icon="lucide:palette" class="inline-block me-2 h-4 w-4" />
           {{ $t('settings.tabs.appearance') }}
         </button>
         <button
@@ -59,7 +59,7 @@
           class="px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap"
           :class="activeTab === 'danger' ? 'border-red-500 text-red-500' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
         >
-          <Icon icon="mdi:alert" class="inline-block me-2 h-4 w-4" />
+          <Icon icon="lucide:triangle-alert" class="inline-block me-2 h-4 w-4" />
           {{ $t('admin.dangerZone') }}
         </button>
       </div>
@@ -72,7 +72,7 @@
             <!-- Preview Section -->
             <div>
             <div class="section-header">
-              <Icon icon="mdi:eye-outline" class="section-icon" />
+              <Icon icon="lucide:eye" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.livePreview') }}</h4>
             </div>
             
@@ -80,7 +80,7 @@
               <!-- Header Preview -->
               <div class="flex items-center gap-3 mb-4">
                 <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                  <Icon :icon="form.app_icon || 'mdi:view-dashboard'" class="h-6 w-6 text-black" />
+                  <Icon :icon="form.app_icon || 'lucide:layout-dashboard'" class="h-6 w-6 text-black" />
                 </div>
                 <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ form.app_name || 'Airboard' }}</h1>
               </div>
@@ -95,7 +95,7 @@
                   <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
               <div class="flex items-center gap-3 mb-2">
                       <div class="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <Icon icon="mdi:git" class="h-4 w-4 text-white" />
+                        <Icon icon="lucide:git-branch" class="h-4 w-4 text-white" />
                       </div>
                       <div>
                         <h3 class="font-medium text-gray-900 dark:text-white text-sm">GitLab</h3>
@@ -107,7 +107,7 @@
                   <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     <div class="flex items-center gap-3 mb-2">
                       <div class="h-8 w-8 bg-green-500 rounded-lg flex items-center justify-center">
-                        <Icon icon="mdi:email" class="h-4 w-4 text-white" />
+                        <Icon icon="lucide:mail" class="h-4 w-4 text-white" />
                       </div>
                       <div>
                         <h3 class="font-medium text-gray-900 dark:text-white text-sm">{{ $t('settings.preview.sampleMail') }}</h3>
@@ -123,7 +123,7 @@
           <!-- App Information -->
           <div>
             <div class="section-header">
-              <Icon icon="mdi:information-outline" class="section-icon" />
+              <Icon icon="lucide:info" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.appInformation') }}</h4>
             </div>
             
@@ -145,9 +145,8 @@
               <IconInput
                 v-model="form.app_icon"
                 :label="$t('settings.appIcon')"
-                placeholder="mdi:view-dashboard, lucide:layout-dashboard"
+                placeholder="lucide:layout-dashboard, lucide:layout-dashboard"
                 category="general"
-                :show-suggestions="true"
                 required
               />
             </div>
@@ -156,7 +155,7 @@
           <!-- Dashboard Customization -->
           <div>
             <div class="section-header">
-              <Icon icon="mdi:view-dashboard-outline" class="section-icon" />
+              <Icon icon="lucide:layout-dashboard" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.homePageCustomization') }}</h4>
             </div>
 
@@ -195,7 +194,7 @@
           <!-- News Hub -->
           <div>
             <div class="section-header">
-              <Icon icon="mdi:newspaper-variant-outline" class="section-icon" />
+              <Icon icon="lucide:newspaper" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.newsFeed.title') }}</h4>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -229,7 +228,7 @@
           <!-- Hero Background Image -->
           <div>
             <div class="section-header">
-              <Icon icon="mdi:image-outline" class="section-icon" />
+              <Icon icon="lucide:image" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.heroImage.title') }}</h4>
             </div>
 
@@ -239,7 +238,7 @@
               <!-- Light theme image -->
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
-                  <Icon icon="mdi:white-balance-sunny" class="h-4 w-4 text-yellow-400" />
+                  <Icon icon="lucide:sun" class="h-4 w-4 text-yellow-400" />
                   <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.heroImage.lightTheme') }}</span>
                 </div>
 
@@ -259,7 +258,7 @@
                       :title="$t('settings.heroImage.removeLight')"
                       :aria-label="$t('settings.heroImage.removeLight')"
                     >
-                      <Icon icon="mdi:close" class="h-4 w-4" />
+                      <Icon icon="lucide:x" class="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -277,8 +276,8 @@
                       class="btn btn-secondary cursor-pointer flex items-center gap-2 whitespace-nowrap"
                       :class="{ 'opacity-60 pointer-events-none': heroImageUploading }"
                     >
-                      <Icon v-if="heroImageUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
-                      <Icon v-else icon="mdi:upload" class="h-4 w-4" />
+                      <Icon v-if="heroImageUploading" icon="lucide:loader-circle" class="animate-spin h-4 w-4" />
+                      <Icon v-else icon="lucide:upload" class="h-4 w-4" />
                       <span>{{ heroImageUploading ? $t('media.uploading') : $t('media.upload') }}</span>
                       <input
                         type="file"
@@ -294,7 +293,7 @@
               <!-- Dark theme image -->
               <div class="space-y-3">
                 <div class="flex items-center gap-2">
-                  <Icon icon="mdi:moon-waning-crescent" class="h-4 w-4 text-blue-400" />
+                  <Icon icon="lucide:moon" class="h-4 w-4 text-blue-400" />
                   <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.heroImage.darkTheme') }}</span>
                   <span class="text-xs text-gray-500">{{ $t('settings.heroImage.darkFallback') }}</span>
                 </div>
@@ -315,7 +314,7 @@
                       :title="$t('settings.heroImage.removeDark')"
                       :aria-label="$t('settings.heroImage.removeDark')"
                     >
-                      <Icon icon="mdi:close" class="h-4 w-4" />
+                      <Icon icon="lucide:x" class="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -333,8 +332,8 @@
                       class="btn btn-secondary cursor-pointer flex items-center gap-2 whitespace-nowrap"
                       :class="{ 'opacity-60 pointer-events-none': heroImageDarkUploading }"
                     >
-                      <Icon v-if="heroImageDarkUploading" icon="mdi:loading" class="animate-spin h-4 w-4" />
-                      <Icon v-else icon="mdi:upload" class="h-4 w-4" />
+                      <Icon v-if="heroImageDarkUploading" icon="lucide:loader-circle" class="animate-spin h-4 w-4" />
+                      <Icon v-else icon="lucide:upload" class="h-4 w-4" />
                       <span>{{ heroImageDarkUploading ? $t('media.uploading') : $t('media.upload') }}</span>
                       <input
                         type="file"
@@ -380,11 +379,11 @@
             <!-- Dynamic Hero Messages -->
             <div>
               <div class="section-header">
-                <Icon icon="mdi:format-quote-close" class="section-icon" />
+                <Icon icon="lucide:quote" class="section-icon" />
                 <div class="flex-1 flex items-center justify-between">
                   <h4 class="section-title">{{ $t('settings.heroMessages.title') }}</h4>
                   <button type="button" @click="openHeroModal()" class="btn btn-secondary btn-sm">
-                    <Icon icon="mdi:plus" class="h-4 w-4 me-1" />
+                    <Icon icon="lucide:plus" class="h-4 w-4 me-1" />
                     {{ $t('settings.heroMessages.add') }}
                   </button>
                 </div>
@@ -394,7 +393,7 @@
                 <p class="form-help mb-4">{{ $t('settings.heroMessages.help') }}</p>
                 
                 <div v-if="heroMessages.length === 0" class="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <Icon icon="mdi:format-quote-open" class="h-12 w-12 text-gray-600 mx-auto mb-2" />
+                  <Icon icon="lucide:quote" class="h-12 w-12 text-gray-600 mx-auto mb-2" />
                   <p class="text-gray-500 dark:text-gray-400">{{ $t('settings.heroMessages.empty') }}</p>
                 </div>
 
@@ -413,13 +412,13 @@
                           :class="hero.is_active ? 'text-green-500 hover:bg-green-500/10' : 'text-gray-500 hover:bg-gray-500/10'"
                           :title="hero.is_active ? $t('common.deactivate') : $t('common.activate')"
                           :aria-label="hero.is_active ? $t('common.deactivate') : $t('common.activate')">
-                          <Icon :icon="hero.is_active ? 'mdi:eye' : 'mdi:eye-off'" class="h-5 w-5" />
+                          <Icon :icon="hero.is_active ? 'lucide:eye' : 'lucide:eye-off'" class="h-5 w-5" />
                         </button>
                         <button type="button" @click="openHeroModal(hero)" class="p-1.5 text-primary-400 hover:bg-primary-500/10 rounded-lg transition-colors" :title="$t('common.edit')" :aria-label="$t('common.edit')">
-                          <Icon icon="mdi:pencil" class="h-5 w-5" />
+                          <Icon icon="lucide:pencil" class="h-5 w-5" />
                         </button>
                         <button type="button" @click="deleteHeroMessage(hero.id)" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" :title="$t('common.delete')" :aria-label="$t('common.delete')">
-                          <Icon icon="mdi:trash-can" class="h-5 w-5" />
+                          <Icon icon="lucide:trash-2" class="h-5 w-5" />
                         </button>
                       </div>
                     </div>
@@ -434,7 +433,7 @@
             <!-- Authentication Configuration -->
             <div>
             <div class="section-header">
-              <Icon icon="mdi:shield-account" class="section-icon" />
+              <Icon icon="lucide:shield-user" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.authConfiguration') }}</h4>
             </div>
 
@@ -461,7 +460,7 @@
           <!-- Default Group Configuration -->
           <div>
             <div class="section-header">
-              <Icon icon="mdi:account-group" class="section-icon" />
+              <Icon icon="lucide:users" class="section-icon" />
               <h4 class="section-title">{{ $t('settings.defaultGroupConfiguration') }}</h4>
             </div>
 
@@ -493,7 +492,7 @@
             <!-- Palettes prédéfinies + personnalisées -->
             <div>
               <div class="section-header mb-1">
-                <Icon icon="mdi:palette-outline" class="section-icon text-orange-400" />
+                <Icon icon="lucide:palette" class="section-icon text-orange-400" />
                 <h4 class="section-title">{{ $t('settings.palette.title') }}</h4>
               </div>
               <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
@@ -516,7 +515,7 @@
                     :style="{ background: `linear-gradient(135deg, ${palette.light.gradientFrom} 0%, ${palette.light.accent} 65%, ${palette.light.accentLight} 100%)` }">
                     <div v-if="appStore.currentPalette === palette.slug"
                       class="absolute top-2 end-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
-                      <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
+                      <Icon icon="lucide:check" class="h-3 w-3 text-gray-800" />
                     </div>
                   </div>
                   <div class="px-3 py-2 bg-gray-50 dark:bg-gray-800 flex items-center justify-between gap-2">
@@ -542,18 +541,18 @@
                     :style="{ background: `linear-gradient(135deg, ${darkenHex(cp.accent, 70)} 0%, ${cp.accent} 65%, ${lightenHex(cp.accent, 30)} 100%)` }">
                     <div v-if="appStore.currentPalette === cp.id"
                       class="absolute top-2 end-2 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-md">
-                      <Icon icon="mdi:check" class="h-3 w-3 text-gray-800" />
+                      <Icon icon="lucide:check" class="h-3 w-3 text-gray-800" />
                     </div>
                   </button>
                   <div class="px-2 py-1.5 bg-gray-50 dark:bg-gray-800 flex items-center gap-1">
                     <button type="button" class="btn-reset text-xs font-semibold text-gray-900 dark:text-white truncate flex-1 cursor-pointer text-start" @click="selectPalette(cp.id)">{{ cp.name }}</button>
                     <button type="button" @click.stop="openEditCustomPalette(cp)"
                       class="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none" :title="$t('common.edit')" :aria-label="$t('common.edit')">
-                      <Icon icon="mdi:pencil-outline" class="h-3 w-3" />
+                      <Icon icon="lucide:pencil" class="h-3 w-3" />
                     </button>
                     <button type="button" @click.stop="deleteCustomPalette(cp.id)"
                       class="p-1 text-gray-500 dark:text-gray-400 hover:text-red-400 transition-colors focus:outline-none" :title="$t('common.delete')" :aria-label="$t('common.delete')">
-                      <Icon icon="mdi:delete-outline" class="h-3 w-3" />
+                      <Icon icon="lucide:trash-2" class="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -564,7 +563,7 @@
                   @click="openAddCustomPalette"
                   class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 hover:scale-[1.02] transition-all duration-200 focus:outline-none min-h-[88px]"
                 >
-                  <Icon icon="mdi:plus-circle-outline" class="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                  <Icon icon="lucide:circle-plus" class="h-6 w-6 text-gray-500 dark:text-gray-400" />
                   <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $t('settings.palette.add') }}</span>
                 </button>
               </div>
@@ -573,7 +572,7 @@
             <!-- Éditeur de palette personnalisée -->
             <div v-if="customPaletteEditor.show" class="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-300 dark:border-gray-600 space-y-4">
               <h5 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Icon icon="mdi:palette-advanced" class="h-4 w-4 text-orange-400" />
+                <Icon icon="lucide:palette" class="h-4 w-4 text-orange-400" />
                 {{ customPaletteEditor.isNew ? $t('settings.palette.new') : $t('settings.palette.editTitle') }}
               </h5>
 
@@ -587,7 +586,7 @@
               <!-- Couleur d'accent -->
               <div>
                 <label class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mb-2">
-                  <Icon icon="mdi:eyedropper-variant" class="h-3 w-3" /> {{ $t('settings.palette.accent') }}
+                  <Icon icon="lucide:pipette" class="h-3 w-3" /> {{ $t('settings.palette.accent') }}
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.accent" @input="previewEditor"
@@ -607,12 +606,12 @@
                   <button type="button" @click="customPaletteEditor.auto_bg = true; previewEditor()"
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
                     :class="customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'">
-                    <Icon icon="mdi:auto-fix" class="h-3.5 w-3.5" /> {{ $t('settings.palette.auto') }}
+                    <Icon icon="lucide:wand-sparkles" class="h-3.5 w-3.5" /> {{ $t('settings.palette.auto') }}
                   </button>
                   <button type="button" @click="customPaletteEditor.auto_bg = false; previewEditor()"
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors focus:outline-none"
                     :class="!customPaletteEditor.auto_bg ? 'bg-orange-500/20 border border-orange-500/50 text-orange-700 dark:text-orange-300' : 'bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'">
-                    <Icon icon="mdi:eyedropper-variant" class="h-3.5 w-3.5" /> {{ $t('settings.palette.custom') }}
+                    <Icon icon="lucide:pipette" class="h-3.5 w-3.5" /> {{ $t('settings.palette.custom') }}
                   </button>
                 </div>
                 <p class="text-xs text-gray-500 mt-1.5">
@@ -623,7 +622,7 @@
               <!-- Couleur de fond (si personnalisé) -->
               <div v-if="!customPaletteEditor.auto_bg">
                 <label class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mb-2">
-                  <Icon icon="mdi:palette-swatch-outline" class="h-3 w-3" /> {{ $t('settings.palette.bgColor') }}
+                  <Icon icon="lucide:swatch-book" class="h-3 w-3" /> {{ $t('settings.palette.bgColor') }}
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.bg" @input="previewEditor"
@@ -640,7 +639,7 @@
               <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                 <button v-if="!customPaletteEditor.isNew" type="button" @click="deleteCurrentEditPalette"
                   class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors">
-                  <Icon icon="mdi:delete-outline" class="h-3.5 w-3.5" /> {{ $t('settings.palette.delete') }}
+                  <Icon icon="lucide:trash-2" class="h-3.5 w-3.5" /> {{ $t('settings.palette.delete') }}
                 </button>
                 <div v-else />
                 <div class="flex gap-2">
@@ -659,8 +658,8 @@
             <!-- Bouton sauvegarder pour l'onglet Apparence -->
             <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
               <button type="button" @click="saveApparence" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
                 {{ $t('settings.palette.save') }}
               </button>
             </div>
@@ -671,7 +670,7 @@
             <!-- Danger Zone -->
             <div>
             <div class="section-header">
-              <Icon icon="mdi:alert-circle" class="section-icon text-red-500" />
+              <Icon icon="lucide:circle-alert" class="section-icon text-red-500" />
               <h4 class="section-title text-red-600 dark:text-red-400">{{ $t('admin.dangerZone') }}</h4>
             </div>
 
@@ -680,7 +679,7 @@
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0">
                   <div class="h-12 w-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
-                    <Icon icon="mdi:database-refresh" class="h-6 w-6 text-red-600 dark:text-red-400" />
+                    <Icon icon="lucide:database-zap" class="h-6 w-6 text-red-600 dark:text-red-400" />
                   </div>
                 </div>
                 <div class="flex-1">
@@ -697,7 +696,7 @@
                     :disabled="isResetting"
                     class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
                   >
-                    <Icon icon="mdi:database-refresh" class="h-5 w-5" />
+                    <Icon icon="lucide:database-zap" class="h-5 w-5" />
                     <span v-if="!isResetting">{{ $t('admin.resetDatabaseButton') }}</span>
                     <span v-else>{{ $t('admin.resetDatabaseInProgress') }}</span>
                   </button>
@@ -714,7 +713,7 @@
               @click="loadSettings"
               class="btn btn-secondary"
             >
-              <Icon icon="mdi:refresh" class="h-4 w-4 me-2" />
+              <Icon icon="lucide:refresh-cw" class="h-4 w-4 me-2" />
               {{ $t('settings.reload') }}
             </button>
             <button
@@ -722,7 +721,7 @@
               :disabled="loading"
               class="btn btn-primary"
             >
-              <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+              <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
               {{ $t('settings.save') }}
             </button>
           </div>
@@ -737,7 +736,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon icon="mdi:key" class="h-6 w-6 text-green-500" />
+                <Icon icon="lucide:key" class="h-6 w-6 text-green-500" />
               </div>
               <div>
                 <h3 id="settings-password-modal-title" class="modal-title">{{ $t('settings.changePassword') }}</h3>
@@ -806,7 +805,7 @@
                 :disabled="passwordLoading"
                 class="btn btn-primary w-full sm:w-auto"
               >
-                <Icon v-if="passwordLoading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-if="passwordLoading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
                 {{ $t('settings.changePassword') }}
               </button>
             </div>
@@ -822,7 +821,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon icon="mdi:restore" class="h-6 w-6 text-yellow-500" />
+                <Icon icon="lucide:rotate-ccw" class="h-6 w-6 text-yellow-500" />
               </div>
               <div>
                 <h3 id="settings-reset-modal-title" class="modal-title">{{ $t('settings.resetTitle') }}</h3>
@@ -842,7 +841,7 @@
               :disabled="resetLoading"
               class="btn btn-danger w-full sm:w-auto"
             >
-              <Icon v-if="resetLoading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+              <Icon v-if="resetLoading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
               {{ $t('settings.resetButton') }}
             </button>
           </div>
@@ -858,7 +857,7 @@
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
                 <div class="h-12 w-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
-                  <Icon icon="mdi:alert" class="h-6 w-6 text-red-600 dark:text-red-400" />
+                  <Icon icon="lucide:triangle-alert" class="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
               </div>
               <div>
@@ -890,7 +889,7 @@
               :disabled="isResetting"
               class="btn btn-danger w-full sm:w-auto"
             >
-              <Icon v-if="isResetting" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
+              <Icon v-if="isResetting" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
               {{ isResetting ? $t('admin.resetInProgress') : $t('admin.confirmResetButton') }}
             </button>
           </div>
@@ -905,7 +904,7 @@
           <div class="modal-header">
             <div class="flex items-start gap-3">
               <div class="flex-shrink-0">
-                <Icon icon="mdi:format-quote-close" class="h-6 w-6 text-primary-500" />
+                <Icon icon="lucide:quote" class="h-6 w-6 text-primary-500" />
               </div>
               <div>
                 <h3 id="settings-hero-modal-title" class="modal-title">{{ editingHero ? $t('settings.heroMessages.editTitle') : $t('settings.heroMessages.add') }}</h3>
@@ -1054,15 +1053,15 @@ const customPaletteEditor = reactive({
 })
 
 const positions = [
-  { value: 'left top',     icon: 'mdi:arrow-top-left',     labelKey: 'settings.heroImage.positions.topLeft' },
-  { value: 'center top',   icon: 'mdi:arrow-up',           labelKey: 'settings.heroImage.positions.topCenter' },
-  { value: 'right top',    icon: 'mdi:arrow-top-right',    labelKey: 'settings.heroImage.positions.topRight' },
-  { value: 'left center',  icon: 'mdi:arrow-left',         labelKey: 'settings.heroImage.positions.middleLeft' },
-  { value: 'center center',icon: 'mdi:circle-small',       labelKey: 'settings.heroImage.positions.center' },
-  { value: 'right center', icon: 'mdi:arrow-right',        labelKey: 'settings.heroImage.positions.middleRight' },
-  { value: 'left bottom',  icon: 'mdi:arrow-bottom-left',  labelKey: 'settings.heroImage.positions.bottomLeft' },
-  { value: 'center bottom',icon: 'mdi:arrow-down',         labelKey: 'settings.heroImage.positions.bottomCenter' },
-  { value: 'right bottom', icon: 'mdi:arrow-bottom-right', labelKey: 'settings.heroImage.positions.bottomRight' },
+  { value: 'left top',     icon: 'lucide:arrow-up-left',     labelKey: 'settings.heroImage.positions.topLeft' },
+  { value: 'center top',   icon: 'lucide:arrow-up',           labelKey: 'settings.heroImage.positions.topCenter' },
+  { value: 'right top',    icon: 'lucide:arrow-up-right',    labelKey: 'settings.heroImage.positions.topRight' },
+  { value: 'left center',  icon: 'lucide:arrow-left',         labelKey: 'settings.heroImage.positions.middleLeft' },
+  { value: 'center center',icon: 'lucide:circle-small',       labelKey: 'settings.heroImage.positions.center' },
+  { value: 'right center', icon: 'lucide:arrow-right',        labelKey: 'settings.heroImage.positions.middleRight' },
+  { value: 'left bottom',  icon: 'lucide:arrow-down-left',  labelKey: 'settings.heroImage.positions.bottomLeft' },
+  { value: 'center bottom',icon: 'lucide:arrow-down',         labelKey: 'settings.heroImage.positions.bottomCenter' },
+  { value: 'right bottom', icon: 'lucide:arrow-down-right', labelKey: 'settings.heroImage.positions.bottomRight' },
 ]
 
 const groups = ref([])
@@ -1144,7 +1143,7 @@ const loadSettings = async () => {
 
     Object.assign(form, {
       app_name: data.app_name || 'Airboard',
-      app_icon: data.app_icon || 'mdi:view-dashboard',
+      app_icon: data.app_icon || 'lucide:layout-dashboard',
       dashboard_title: data.dashboard_title || t('settings.previewDashboardTitle'),
       welcome_message: data.welcome_message || t('settings.previewWelcome'),
       signup_enabled: data.signup_enabled !== undefined ? data.signup_enabled : true,

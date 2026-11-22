@@ -13,7 +13,7 @@
           :aria-label="t('common.close')"
           @click="emit('close')"
         >
-          <Icon icon="mdi:close" class="h-5 w-5" />
+          <Icon icon="lucide:x" class="h-5 w-5" />
         </button>
       </div>
       <div class="space-y-4">
@@ -28,13 +28,7 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryIcon') }}</label>
-          <input
-            v-model="newCategory.icon"
-            type="text"
-            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
-            placeholder="mdi:folder"
-          />
+          <IconInput v-model="newCategory.icon" :label="t('events.editor.categoryIcon')" placeholder="lucide:folder" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryColor') }}</label>
@@ -59,7 +53,7 @@
           class="px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
           @click="createCategory"
         >
-          <Icon :icon="isCreating ? 'mdi:loading' : 'mdi:plus'" class="h-4 w-4" :class="{ 'animate-spin': isCreating }" />
+          <Icon :icon="isCreating ? 'lucide:loader-circle' : 'lucide:plus'" class="h-4 w-4" :class="{ 'animate-spin': isCreating }" />
           {{ t('common.create') }}
         </button>
       </div>
@@ -68,6 +62,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { ref } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
@@ -75,7 +70,7 @@ import { Icon } from '@iconify/vue'
 import { adminEventsService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 
-const DEFAULT_CATEGORY = Object.freeze({ name: '', icon: 'mdi:calendar', color: '#6366f1' })
+const DEFAULT_CATEGORY = Object.freeze({ name: '', icon: 'lucide:calendar', color: '#6366f1' })
 const HTTP_CONFLICT = 409
 
 const props = defineProps({

@@ -13,7 +13,7 @@
         <!-- Search -->
         <div class="md:col-span-2">
           <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Icon icon="lucide:search" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               v-model="filters.search"
               type="text"
@@ -43,7 +43,7 @@
           <div v-if="typesStore.types.length > 0">
             <TypeSelect
               :model-value="filters.type || ''"
-              :types="[{ id: 'all', slug: '', name: $t('news.center.allTypes'), icon: 'mdi:filter', color: '#6B7280' }, ...typesStore.types]"
+              :types="[{ id: 'all', slug: '', name: $t('news.center.allTypes'), icon: 'lucide:funnel', color: '#6B7280' }, ...typesStore.types]"
               @update:model-value="filters.type = $event || null; fetchNews()"
             />
           </div>
@@ -92,7 +92,7 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
+      <Icon icon="lucide:loader-circle" class="h-8 w-8 animate-spin text-primary-500" />
     </div>
 
     <!-- News List - Grid View -->
@@ -121,7 +121,7 @@
       <div v-for="news in pinnedNews" :key="'pinned-' + news.id" class="relative">
         <div class="absolute -top-2 -start-2 z-10">
           <div class="bg-yellow-500 text-white rounded-full p-2 shadow-lg">
-            <Icon icon="mdi:pin" class="h-4 w-4" />
+            <Icon icon="lucide:pin" class="h-4 w-4" />
           </div>
         </div>
         <NewsCard :news="news" @click="viewNews(news)" />
@@ -152,7 +152,7 @@
 
     <!-- Empty State -->
     <div v-else class="text-center py-12">
-      <Icon icon="mdi:newspaper-variant-outline" class="h-16 w-16 mx-auto text-gray-400 mb-4" />
+      <Icon icon="lucide:newspaper" class="h-16 w-16 mx-auto text-gray-400 mb-4" />
       <p class="text-gray-600 dark:text-gray-400 text-lg">
         {{ $t('news.center.noNews') }}
       </p>
@@ -166,7 +166,7 @@
           :disabled="currentPage === 1"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" />
+          <Icon icon="lucide:chevron-left" class="rtl-flip h-5 w-5" />
         </button>
 
         <button
@@ -188,7 +188,7 @@
           :disabled="currentPage === totalPages"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" />
+          <Icon icon="lucide:chevron-right" class="rtl-flip h-5 w-5" />
         </button>
       </nav>
     </div>

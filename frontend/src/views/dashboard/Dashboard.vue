@@ -8,7 +8,7 @@
         <BaseButton
           v-if="dashboard?.app_groups?.length && viewMode !== 'table'"
           size="sm"
-          :icon="allGroupsCollapsed ? 'mdi:unfold-more-horizontal' : 'mdi:unfold-less-horizontal'"
+          :icon="allGroupsCollapsed ? 'lucide:chevrons-up-down' : 'lucide:chevrons-down-up'"
           @click="toggleAllGroups"
         >
           {{ allGroupsCollapsed ? $t('dashboard.expandAll') : $t('dashboard.collapseAll') }}
@@ -19,17 +19,17 @@
     <AnnouncementPanel v-if="activeAnnouncements.length" class="portal__announcements" :announcements="activeAnnouncements" />
 
     <div v-if="isLoading" class="portal__state" role="status">
-      <Icon icon="mdi:loading" class="portal__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="portal__spin" aria-hidden="true" />
       <span class="sr-only">{{ $t('common.loading') }}</span>
     </div>
 
     <EmptyState
       v-else-if="!dashboard?.app_groups?.length"
-      icon="mdi:application-outline"
+      icon="lucide:app-window"
       :title="$t('dashboard.emptyTitle')"
       :description="authStore.isAdmin ? $t('dashboard.emptyAdmin') : $t('dashboard.emptyUser')"
     >
-      <BaseButton v-if="authStore.isAdmin" tag="router-link" to="/admin/resources/categories" variant="primary" icon="mdi:plus">
+      <BaseButton v-if="authStore.isAdmin" tag="router-link" to="/admin/resources/categories" variant="primary" icon="lucide:plus">
         {{ $t('dashboard.createCategory') }}
       </BaseButton>
     </EmptyState>
@@ -44,7 +44,7 @@
         v-if="favoriteApps.length && viewMode !== 'table'"
         group-key="favorites"
         :title="$t('common.myFavorites')"
-        icon="mdi:star"
+        icon="lucide:star"
         color="#d99a00"
         :count="favoriteApps.length"
         :collapsed="collapsedGroups.has('favorites')"
@@ -60,7 +60,7 @@
         />
       </ResourceGroup>
 
-      <EmptyState v-if="!visibleCount" compact icon="mdi:filter-off-outline" :title="$t('dashboard.noneOfType')" />
+      <EmptyState v-if="!visibleCount" compact icon="lucide:funnel-x" :title="$t('dashboard.noneOfType')" />
       <ResourceTable v-else-if="viewMode === 'table'" :app-groups="visibleGroups" @show-details="openAppDetails" />
       <ResourceGroupsView
         v-else
@@ -140,9 +140,9 @@ watch(viewMode, (mode) => {
   }
 })
 const viewModes = computed(() => [
-  { value: 'list', label: t('dashboard.viewModes.grid'), icon: 'mdi:view-grid-outline' },
-  { value: 'grid', label: t('dashboard.viewModes.list'), icon: 'mdi:view-column-outline' },
-  { value: 'table', label: t('dashboard.viewModes.table'), icon: 'mdi:table' },
+  { value: 'list', label: t('dashboard.viewModes.grid'), icon: 'lucide:layout-grid' },
+  { value: 'grid', label: t('dashboard.viewModes.list'), icon: 'lucide:columns-3' },
+  { value: 'table', label: t('dashboard.viewModes.table'), icon: 'lucide:table' },
 ])
 
 // ── Filtre par type (dans l'URL) ─────────────────────────────────────

@@ -4,7 +4,7 @@
       <template #title>{{ isGlobal ? $t('common.appGroups') : $t('groupAdmin.appGroupsManagement.title') }}</template>
       <template #description>{{ isGlobal ? $t('appGroups.subtitle') : $t('groupAdmin.appGroupsManagement.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" :disabled="!canCreate" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" :disabled="!canCreate" @click="openCreateModal">
           {{ $t('appGroups.new') }}
         </BaseButton>
       </template>
@@ -12,7 +12,7 @@
 
     <!-- Admin de groupe sans groupe administré : création impossible -->
     <div v-if="showNoManagedGroups" class="ag-callout" role="note">
-      <Icon icon="mdi:information-outline" class="ag-callout__icon" aria-hidden="true" />
+      <Icon icon="lucide:info" class="ag-callout__icon" aria-hidden="true" />
       <div>
         <p class="ag-callout__title">{{ $t('groupAdmin.appGroupsManagement.noManagedGroups') }}</p>
         <p class="ag-callout__text">{{ $t('groupAdmin.appGroupsManagement.noManagedGroupsHelp') }}</p>
@@ -21,11 +21,11 @@
 
     <EmptyState
       v-if="!loading && appGroups.length === 0"
-      icon="mdi:folder-multiple-outline"
+      icon="lucide:folders"
       :title="$t('groupAdmin.appGroupsManagement.empty.title')"
       :description="$t('groupAdmin.appGroupsManagement.empty.description')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" :disabled="!canCreate" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" :disabled="!canCreate" @click="openCreateModal">
         {{ $t('groupAdmin.appGroupsManagement.empty.createButton') }}
       </BaseButton>
     </EmptyState>
@@ -53,7 +53,7 @@
 
       <template #cell-name="{ row }">
         <span class="ag-name">
-          <Icon :icon="row.raw.icon || 'mdi:folder-outline'" class="ag-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
+          <Icon :icon="row.raw.icon || 'lucide:folder'" class="ag-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
           <span class="ag-name__text">
             <span class="ag-name__title">{{ row.name }}</span>
             <span v-if="row.description" class="ag-name__desc">{{ row.description }}</span>

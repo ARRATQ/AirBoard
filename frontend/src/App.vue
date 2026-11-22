@@ -23,7 +23,7 @@
           :aria-label="$t('common.expandSidebar')"
           :aria-expanded="appStore.sidebarOpen"
         >
-          <Icon icon="mdi:menu" class="h-6 w-6" />
+          <Icon icon="lucide:menu" class="h-6 w-6" />
         </button>
       </div>
 

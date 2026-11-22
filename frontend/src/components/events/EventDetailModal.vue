@@ -16,13 +16,13 @@
           <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
             <!-- Date and time -->
             <div class="flex items-center gap-1">
-              <Icon icon="mdi:calendar" class="h-4 w-4" />
+              <Icon icon="lucide:calendar" class="h-4 w-4" />
               <span>{{ formatDateRange(event.start_date, event.end_date) }}</span>
             </div>
             
             <!-- Location -->
             <div v-if="event.location" class="flex items-center gap-1">
-              <Icon icon="mdi:map-marker" class="h-4 w-4" />
+              <Icon icon="lucide:map-pin" class="h-4 w-4" />
               <span>{{ event.location }}</span>
             </div>
           </div>
@@ -64,7 +64,7 @@
             {{ $t('events.detail.category') }}
           </h3>
           <div class="flex items-center gap-2">
-            <Icon :icon="event.category.icon || 'mdi:calendar'" class="h-4 w-4" :style="{ color: event.category.color }" />
+            <Icon :icon="event.category.icon || 'lucide:calendar'" class="h-4 w-4" :style="{ color: event.category.color }" />
             <span class="text-sm text-gray-700 dark:text-gray-300">
               {{ event.category.name }}
             </span>
@@ -85,9 +85,9 @@
               rel="noopener noreferrer"
               class="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
-              <Icon :icon="link.icon || 'mdi:link'" class="h-4 w-4" />
+              <Icon :icon="link.icon || 'lucide:link'" class="h-4 w-4" />
               <span>{{ link.title }}</span>
-              <Icon icon="mdi:external-link" class="h-3 w-3" aria-hidden="true" />
+              <Icon icon="lucide:external-link" class="h-3 w-3" aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -99,7 +99,7 @@
           </h3>
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-              <Icon icon="mdi:account" class="h-4 w-4 text-gray-600 dark:text-gray-300" />
+              <Icon icon="lucide:user" class="h-4 w-4 text-gray-600 dark:text-gray-300" />
             </div>
             <div>
               <p class="text-sm font-medium text-gray-900 dark:text-white">
@@ -119,7 +119,7 @@
           </h3>
           <div class="text-sm text-gray-700 dark:text-gray-300">
             <div class="flex items-center gap-1 mb-1">
-              <Icon icon="mdi:repeat" class="h-4 w-4" />
+              <Icon icon="lucide:repeat" class="h-4 w-4" />
               <span>{{ formatRecurrenceRule(event.recurrence_rule) }}</span>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -132,7 +132,7 @@
         <div v-if="!event.is_published" class="mb-6">
           <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
             <div class="flex items-center gap-2">
-              <Icon icon="mdi:eye-off" class="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <Icon icon="lucide:eye-off" class="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               <span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                 {{ $t('events.detail.draft') }}
               </span>
@@ -165,7 +165,7 @@
             @click="editEvent"
             class="px-3 py-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            <Icon icon="mdi:pencil" class="h-4 w-4 me-1 inline" aria-hidden="true" />
+            <Icon icon="lucide:pencil" class="h-4 w-4 me-1 inline" aria-hidden="true" />
             {{ $t('common.edit') }}
           </button>
           

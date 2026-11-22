@@ -2,7 +2,7 @@
   <div class="directory-page">
     <PageHeader :eyebrow="$t('directory.eyebrow')" :title="$t('directory.title')" :description="$t('directory.subtitle')">
       <template v-if="canManage" #actions>
-        <BaseButton tag="router-link" to="/admin/directory" size="sm" icon="mdi:cog-outline">{{ $t('directory.manage') }}</BaseButton>
+        <BaseButton tag="router-link" to="/admin/directory" size="sm" icon="lucide:settings">{{ $t('directory.manage') }}</BaseButton>
       </template>
     </PageHeader>
 
@@ -30,7 +30,7 @@
 
       <div class="directory-filters">
         <label class="directory-search">
-          <Icon icon="mdi:magnify" class="h-4 w-4 shrink-0" aria-hidden="true" />
+          <Icon icon="lucide:search" class="h-4 w-4 shrink-0" aria-hidden="true" />
           <input v-model="search" type="search" :aria-label="$t('directory.searchPlaceholder')" :placeholder="$t('directory.searchPlaceholder')" @input="onSearch" />
         </label>
         <select v-if="view === 'grid'" v-model="unitFilter" class="form-select directory-unit-select">
@@ -38,22 +38,22 @@
           <option v-for="u in flatUnits" :key="u.id" :value="u.id">{{ '\u00a0\u00a0'.repeat(u.depth) }}{{ u.name }}</option>
         </select>
         <template v-else>
-          <BaseButton size="sm" icon="mdi:unfold-more-horizontal" @click="toggleAll(true)">{{ $t('directory.expandAll') }}</BaseButton>
-          <BaseButton size="sm" icon="mdi:unfold-less-horizontal" @click="toggleAll(false)">{{ $t('directory.collapseAll') }}</BaseButton>
+          <BaseButton size="sm" icon="lucide:chevrons-up-down" @click="toggleAll(true)">{{ $t('directory.expandAll') }}</BaseButton>
+          <BaseButton size="sm" icon="lucide:chevrons-down-up" @click="toggleAll(false)">{{ $t('directory.collapseAll') }}</BaseButton>
         </template>
       </div>
     </div>
 
     <div v-if="loading" class="directory-state" role="status">
-      <Icon icon="mdi:loading" class="animate-spin h-8 w-8" />
+      <Icon icon="lucide:loader-circle" class="animate-spin h-8 w-8" />
     </div>
     <div v-else-if="error" class="directory-state">
-      <Icon icon="mdi:alert-circle-outline" class="h-8 w-8 text-red-500" />
+      <Icon icon="lucide:circle-alert" class="h-8 w-8 text-red-500" />
       <p>{{ error }}</p>
-      <BaseButton variant="secondary" size="sm" icon="mdi:refresh" @click="load">{{ $t('common.retry') }}</BaseButton>
+      <BaseButton variant="secondary" size="sm" icon="lucide:refresh-cw" @click="load">{{ $t('common.retry') }}</BaseButton>
     </div>
     <div v-else-if="!units.length && !people.length" class="directory-state">
-      <Icon icon="mdi:sitemap-outline" class="h-10 w-10" />
+      <Icon icon="lucide:network" class="h-10 w-10" />
       <p>{{ $t('directory.empty') }}</p>
     </div>
 
@@ -76,10 +76,10 @@
 
         <nav v-if="focusUnit" class="directory-crumbs" :aria-label="$t('directory.focusUnit')">
           <button type="button" class="directory-crumbs__item" @click="setFocus(null)">
-            <Icon icon="mdi:home-outline" class="h-4 w-4" /> {{ $t('directory.backToRoot') }}
+            <Icon icon="lucide:house" class="h-4 w-4" /> {{ $t('directory.backToRoot') }}
           </button>
           <template v-for="u in unitPath(focusUnit.id)" :key="u.id">
-            <Icon icon="mdi:chevron-right" class="h-4 w-4 directory-crumbs__sep" />
+            <Icon icon="lucide:chevron-right" class="h-4 w-4 directory-crumbs__sep" />
             <button
               type="button"
               class="directory-crumbs__item"
@@ -145,7 +145,7 @@
         />
       </div>
       <div v-else class="directory-state">
-        <Icon icon="mdi:account-search-outline" class="h-10 w-10" />
+        <Icon icon="lucide:user-search" class="h-10 w-10" />
         <p>{{ $t('directory.noResults') }}</p>
       </div>
     </template>
@@ -187,13 +187,13 @@ const {
 } = useDirectory()
 
 const tabs = [
-  { id: 'org', icon: 'mdi:sitemap-outline', label: 'directory.viewOrg' },
-  { id: 'grid', icon: 'mdi:view-grid-outline', label: 'directory.viewGrid' },
+  { id: 'org', icon: 'lucide:network', label: 'directory.viewOrg' },
+  { id: 'grid', icon: 'lucide:layout-grid', label: 'directory.viewGrid' },
 ]
 
 const layouts = [
-  { id: 'tree', icon: 'mdi:family-tree', label: 'directory.layoutTree' },
-  { id: 'list', icon: 'mdi:format-list-bulleted-type', label: 'directory.layoutList' },
+  { id: 'tree', icon: 'lucide:network', label: 'directory.layoutTree' },
+  { id: 'list', icon: 'lucide:list', label: 'directory.layoutList' },
 ]
 // L'arbre graphique est peu lisible sur petit écran : liste par défaut sous 768 px
 const MOBILE_BREAKPOINT = 768

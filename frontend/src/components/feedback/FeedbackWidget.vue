@@ -17,7 +17,7 @@
           :disabled="!isAuthenticated || isSubmitting"
           @click="toggleFeedback('positive')"
         >
-          <Icon icon="mdi:thumb-up" class="h-5 w-5" />
+          <Icon icon="lucide:thumbs-up" class="h-5 w-5" />
           <span class="text-sm font-medium">{{ stats.positive_count }}</span>
         </button>
 
@@ -32,7 +32,7 @@
           :disabled="!isAuthenticated || isSubmitting"
           @click="toggleFeedback('negative')"
         >
-          <Icon icon="mdi:thumb-down" class="h-5 w-5" />
+          <Icon icon="lucide:thumbs-down" class="h-5 w-5" />
           <span class="text-sm font-medium">{{ stats.negative_count }}</span>
         </button>
       </div>

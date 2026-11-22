@@ -1,18 +1,18 @@
 <template>
   <div class="content-area poll-page">
     <div v-if="loading" class="poll-page__state" role="status">
-      <Icon icon="mdi:loading" class="poll-page__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="poll-page__spin" aria-hidden="true" />
       <span>{{ t('polls.loading') }}</span>
     </div>
 
-    <EmptyState v-else-if="error" icon="mdi:alert-circle-outline" :title="t('polls.detail.notFound')" :description="error">
-      <BaseButton tag="router-link" to="/polls" icon="mdi:arrow-left">{{ t('polls.detail.backToPolls') }}</BaseButton>
+    <EmptyState v-else-if="error" icon="lucide:circle-alert" :title="t('polls.detail.notFound')" :description="error">
+      <BaseButton tag="router-link" to="/polls" icon="lucide:arrow-left">{{ t('polls.detail.backToPolls') }}</BaseButton>
     </EmptyState>
 
     <div v-else-if="poll" class="poll-page__body">
       <nav class="crumbs" :aria-label="t('polls.detail.breadcrumbText')">
         <router-link to="/polls" class="crumbs__link">{{ t('polls.detail.breadcrumbText') }}</router-link>
-        <Icon icon="mdi:chevron-right" class="crumbs__sep" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" class="crumbs__sep" aria-hidden="true" />
         <span class="crumbs__current" aria-current="page">{{ poll.title }}</span>
       </nav>
 
@@ -40,19 +40,19 @@
       <section v-if="poll.news" class="poll-info">
         <h2 class="poll-info__title">{{ t('polls.detail.linkedArticleTitle') }}</h2>
         <router-link :to="`/news/${poll.news.slug}`" class="poll-info__link">
-          <Icon icon="mdi:newspaper-variant-outline" class="poll-info__icon" aria-hidden="true" />
+          <Icon icon="lucide:newspaper" class="poll-info__icon" aria-hidden="true" />
           <span class="poll-info__text">
             <span class="poll-info__name">{{ poll.news.title }}</span>
             <span v-if="poll.news.summary" class="poll-info__summary">{{ poll.news.summary }}</span>
           </span>
-          <Icon icon="mdi:chevron-right" class="poll-info__arrow" aria-hidden="true" />
+          <Icon icon="lucide:chevron-right" class="poll-info__arrow" aria-hidden="true" />
         </router-link>
       </section>
 
       <section v-if="poll.announcement" class="poll-info">
         <h2 class="poll-info__title">{{ t('polls.detail.linkedAnnouncementTitle') }}</h2>
         <div class="poll-info__link poll-info__link--static">
-          <Icon icon="mdi:bullhorn-outline" class="poll-info__icon" aria-hidden="true" />
+          <Icon icon="lucide:megaphone" class="poll-info__icon" aria-hidden="true" />
           <span class="poll-info__text">
             <span class="poll-info__name">{{ poll.announcement.title }}</span>
             <span v-if="poll.announcement.content" class="poll-info__summary">{{ poll.announcement.content }}</span>

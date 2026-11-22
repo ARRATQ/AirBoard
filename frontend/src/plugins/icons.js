@@ -1,6 +1,8 @@
-// Icônes Iconify servies par l'application elle-même (voir vite-plugins/iconsPlugin.js) : celles écrites
-// dans le code arrivent avec leur module ; les autres (saisies en base) via des paquets à la demande.
-import { _api, setCustomIconsLoader } from '@iconify/vue'
+// Icônes Iconify : mdi, lucide et heroicons sont servies par l'application elle-même (voir
+// vite-plugins/iconsPlugin.js) ; les autres collections, choisies dans le sélecteur d'icônes,
+// viennent de l'API Iconify, et seulement d'elle (pas des hôtes de secours de la bibliothèque).
+import { _api, addAPIProvider, setCustomIconsLoader } from '@iconify/vue'
+import { ICONIFY_API } from '@/utils/iconifySearch'
 import { ICON_BUCKETS, ICON_PREFIXES, iconBucket } from '@/utils/iconBucket'
 import { placeholderIconSet } from '@/utils/iconPlaceholder'
 
@@ -28,14 +30,30 @@ async function loadFromShards(names, prefix) {
   )
 }
 
+/**
+ * Réponse locale : le pictogramme neutre pour chaque icône demandée.
+ * @param {string} url adresse que la bibliothèque voulait interroger
+ * @returns {Response}
+ */
+function placeholderResponse(url) {
+  const set = placeholderIconSet(url)
+  return set
+    ? new Response(JSON.stringify(set), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    : new Response(null, { status: 404 })
+}
+
 export function setupIcons() {
-  // Plus aucune requête vers api.iconify.design : une collection non embarquée reçoit un
-  // pictogramme neutre, servi localement.
-  _api.setFetch((url) => {
-    const set = placeholderIconSet(String(url))
-    return Promise.resolve(set
-      ? new Response(JSON.stringify(set), { status: 200, headers: { 'Content-Type': 'application/json' } })
-      : new Response(null, { status: 404 }))
+  addAPIProvider('', { resources: [ICONIFY_API] })
+
+  // Iconify hors d'atteinte (intranet coupé d'internet) : pictogramme neutre plutôt qu'un vide.
+  _api.setFetch(async (url, init) => {
+    try {
+      const response = await fetch(url, init)
+      if (response.ok) return response
+    } catch {
+      // réseau indisponible : repli ci-dessous
+    }
+    return placeholderResponse(String(url))
   })
 
   ICON_PREFIXES.forEach((prefix) => {

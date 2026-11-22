@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center gap-2">
-    <Icon icon="mdi:sort" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+    <Icon icon="lucide:arrow-up-down" class="h-5 w-5 text-gray-500 dark:text-gray-400" />
     <select
       :value="modelValue"
       @change="$emit('update:modelValue', $event.target.value)"

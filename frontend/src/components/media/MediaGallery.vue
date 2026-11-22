@@ -18,12 +18,12 @@
 
     <!-- Media grid -->
     <div v-if="loading" class="loading" role="status">
-      <Icon icon="mdi:loading" class="animate-spin h-8 w-8" />
+      <Icon icon="lucide:loader-circle" class="animate-spin h-8 w-8" />
       <p>{{ $t('media.loading') }}</p>
     </div>
 
     <div v-else-if="mediaList.length === 0" class="empty-state">
-      <Icon icon="mdi:image-off" class="h-16 w-16 text-gray-300" />
+      <Icon icon="lucide:image-off" class="h-16 w-16 text-gray-300" />
       <p>{{ $t('media.noMedia') }}</p>
     </div>
 
@@ -55,7 +55,7 @@
 
         <!-- Selected indicator -->
         <span v-if="selectedMediaId === media.id" class="selected-indicator">
-          <Icon icon="mdi:check-circle" class="h-6 w-6" aria-hidden="true" />
+          <Icon icon="lucide:circle-check" class="h-6 w-6" aria-hidden="true" />
         </span>
       </button>
     </div>
@@ -69,7 +69,7 @@
         :disabled="currentPage === 1"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" aria-hidden="true" />
+        <Icon icon="lucide:chevron-left" class="rtl-flip h-5 w-5" aria-hidden="true" />
       </button>
       <span class="pagination-info">
         {{ $t('media.pageOf', { page: currentPage, total: totalPages }) }}
@@ -81,7 +81,7 @@
         :disabled="currentPage === totalPages"
         class="pagination-button"
       >
-        <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" class="rtl-flip h-5 w-5" aria-hidden="true" />
       </button>
     </div>
 
@@ -111,10 +111,10 @@ const emit = defineEmits(['select', 'cancel'])
 
 // Libellés traduits au rendu (clés i18n)
 const filters = [
-  { labelKey: 'media.filter_all_types', value: '', icon: 'mdi:file-multiple' },
-  { labelKey: 'media.type_image', value: 'image', icon: 'mdi:image' },
-  { labelKey: 'media.type_document', value: 'document', icon: 'mdi:file-document' },
-  { labelKey: 'media.type_pdf', value: 'pdf', icon: 'mdi:file-pdf-box' },
+  { labelKey: 'media.filter_all_types', value: '', icon: 'lucide:file' },
+  { labelKey: 'media.type_image', value: 'image', icon: 'lucide:image' },
+  { labelKey: 'media.type_document', value: 'document', icon: 'lucide:file-text' },
+  { labelKey: 'media.type_pdf', value: 'pdf', icon: 'lucide:file-text' },
 ]
 
 const selectedFilter = ref('')
@@ -158,13 +158,13 @@ const insertSelected = () => {
 
 const getFileIcon = (media) => {
   const mimeType = media.mime_type
-  if (mimeType.startsWith('image/')) return 'mdi:file-image'
-  if (mimeType === 'application/pdf') return 'mdi:file-pdf-box'
-  if (mimeType.includes('word') || mimeType.includes('document')) return 'mdi:file-word'
-  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'mdi:file-excel'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'mdi:file-powerpoint'
-  if (mimeType.includes('zip') || mimeType.includes('rar')) return 'mdi:folder-zip'
-  return 'mdi:file'
+  if (mimeType.startsWith('image/')) return 'lucide:file-image'
+  if (mimeType === 'application/pdf') return 'lucide:file-text'
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'lucide:file-text'
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'lucide:file-spreadsheet'
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'lucide:presentation'
+  if (mimeType.includes('zip') || mimeType.includes('rar')) return 'lucide:folder-archive'
+  return 'lucide:file'
 }
 
 const formatFileSize = (bytes) => {

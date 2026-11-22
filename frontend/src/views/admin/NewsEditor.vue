@@ -5,7 +5,7 @@
       <template #description>{{ pageSubtitle }}</template>
       <template #actions>
         <router-link :to="LIST_ROUTE" class="btn btn-secondary">
-          <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4 me-2" />
+          <Icon icon="lucide:arrow-left" class="rtl-flip h-4 w-4 me-2" />
           {{ $t('groupAdmin.newsEditor.backToList') }}
         </router-link>
       </template>
@@ -18,7 +18,7 @@
           <div class="card">
             <div class="mb-3">
               <label for="news-title" class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
-                <Icon icon="mdi:format-title" class="h-5 w-5 text-primary-500" />
+                <Icon icon="lucide:heading" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.titleLabel') }} *
               </label>
               <input
@@ -35,7 +35,7 @@
           <div class="card">
             <div class="mb-3">
               <label for="news-summary" class="flex text-sm font-semibold text-gray-900 dark:text-white mb-2 items-center gap-2">
-                <Icon icon="mdi:text-short" class="h-5 w-5 text-primary-500" />
+                <Icon icon="lucide:text-cursor-input" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.summaryLabel') }}
               </label>
               <textarea
@@ -60,7 +60,7 @@
           <div class="card">
             <div class="mb-3">
               <p class="flex text-sm font-semibold text-gray-900 dark:text-white mb-3 items-center gap-2">
-                <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
+                <Icon icon="lucide:text" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.contentLabel') }} *
               </p>
               <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
@@ -80,7 +80,7 @@
           <!-- Publication -->
           <div class="card bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Icon icon="mdi:publish" class="h-5 w-5 text-primary-500" />
+              <Icon icon="lucide:upload" class="h-5 w-5 text-primary-500" />
               {{ $t('groupAdmin.newsEditor.publishSection') }}
             </h3>
 
@@ -100,7 +100,7 @@
 
               <div v-if="form.is_published">
                 <label for="news-published-at" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon icon="mdi:calendar-clock" class="h-4 w-4" />
+                  <Icon icon="lucide:calendar-clock" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.publishDate') }}
                 </label>
                 <input
@@ -113,7 +113,7 @@
 
               <div>
                 <label for="news-expires-at" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon icon="mdi:calendar-remove" class="h-4 w-4" />
+                  <Icon icon="lucide:calendar-x" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.expiryDate') }}
                   <span class="text-xs text-gray-500 dark:text-gray-400 ms-1">{{ $t('groupAdmin.newsEditor.expiryDateOptional') }}</span>
                 </label>
@@ -124,7 +124,7 @@
                   class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
-                  <Icon icon="mdi:information-outline" class="h-3 w-3" />
+                  <Icon icon="lucide:info" class="h-3 w-3" />
                   {{ $t('groupAdmin.newsEditor.expiryDateHelp') }}
                 </p>
               </div>
@@ -142,14 +142,14 @@
           <!-- Classification -->
           <div class="card">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-              <Icon icon="mdi:tag-multiple" class="h-5 w-5 text-primary-500" />
+              <Icon icon="lucide:tags" class="h-5 w-5 text-primary-500" />
               {{ $t('groupAdmin.newsEditor.classification') }}
             </h3>
 
             <div class="space-y-4">
               <div>
                 <label for="news-category" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon icon="mdi:folder" class="h-4 w-4" />
+                  <Icon icon="lucide:folder" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.categoryLabel') }}
                 </label>
                 <div class="flex gap-2">
@@ -172,14 +172,14 @@
                     :aria-label="$t('events.editor.addCategory')"
                     @click="showCategoryModal = true"
                   >
-                    <Icon icon="mdi:plus" class="h-4 w-4" />
+                    <Icon icon="lucide:plus" class="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
               <div>
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon icon="mdi:shape" class="h-4 w-4" />
+                  <Icon icon="lucide:shapes" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.typeLabel') }}
                 </p>
                 <TypeSelect v-model="form.type" :types="typesStore.types" />
@@ -187,7 +187,7 @@
 
               <div>
                 <label for="news-priority" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
-                  <Icon icon="mdi:flag" class="h-4 w-4" />
+                  <Icon icon="lucide:flag" class="h-4 w-4" />
                   {{ $t('groupAdmin.newsEditor.priorityLabel') }}
                 </label>
                 <select
@@ -213,8 +213,8 @@
                 :disabled="isSaving || missingTargetGroup"
                 class="w-full px-4 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
-                <Icon v-if="isSaving" icon="mdi:loading" class="h-5 w-5 animate-spin" />
-                <Icon v-else icon="mdi:content-save" class="h-5 w-5" />
+                <Icon v-if="isSaving" icon="lucide:loader-circle" class="h-5 w-5 animate-spin" />
+                <Icon v-else icon="lucide:save" class="h-5 w-5" />
                 <span>{{ submitLabel }}</span>
               </button>
 
@@ -226,7 +226,7 @@
                 :to="LIST_ROUTE"
                 class="w-full px-4 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="lucide:x" class="h-5 w-5" />
                 <span>{{ $t('groupAdmin.newsEditor.actions.cancel') }}</span>
               </router-link>
             </div>

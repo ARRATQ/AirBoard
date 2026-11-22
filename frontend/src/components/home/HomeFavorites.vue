@@ -2,7 +2,7 @@
   <section class="home-card" aria-labelledby="home-fav-title">
     <div class="home-card__head">
       <h2 id="home-fav-title" class="home-card__title">
-        <Icon icon="mdi:star" class="fav__star" aria-hidden="true" />
+        <Icon icon="lucide:star" class="fav__star" aria-hidden="true" />
         {{ $t('home.favorites.title') }}
       </h2>
       <router-link to="/resources" class="home-card__more">
@@ -18,7 +18,7 @@
           :target="app.open_in_new_tab ? '_blank' : undefined"
           rel="noopener noreferrer"
         >
-          <span class="fav__icon"><Icon :icon="app.icon || 'mdi:application'" aria-hidden="true" /></span>
+          <span class="fav__icon"><Icon :icon="app.icon || 'lucide:app-window'" aria-hidden="true" /></span>
           <span class="fav__name">{{ app.name }}</span>
         </a>
       </li>

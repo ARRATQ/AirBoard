@@ -23,7 +23,7 @@
             <p class="fcard__meta">
               <span v-if="typeOf(article).name" class="tag tag--custom fcard__type">{{ typeOf(article).name }}</span>
               <span v-if="article.category" class="fcard__cat">
-                <Icon :icon="article.category.icon || 'mdi:folder'" :style="{ color: article.category.color }" aria-hidden="true" />
+                <Icon :icon="article.category.icon || 'lucide:folder'" :style="{ color: article.category.color }" aria-hidden="true" />
                 <span dir="auto">{{ article.category.name }}</span>
               </span>
             </p>

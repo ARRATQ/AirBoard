@@ -6,7 +6,7 @@
         class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
         :class="getCategoryColor(event.category)"
       >
-        <Icon icon="mdi:calendar" class="h-5 w-5 text-white" />
+        <Icon icon="lucide:calendar" class="h-5 w-5 text-white" />
       </div>
 
       <!-- Event Content -->
@@ -42,17 +42,17 @@
         <!-- Date and Time -->
         <div class="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
           <div class="flex items-center gap-1">
-            <Icon icon="mdi:calendar" class="h-3 w-3" />
+            <Icon icon="lucide:calendar" class="h-3 w-3" />
             <span>{{ formatDate(event.start_date) }}</span>
           </div>
           
           <div v-if="!event.is_all_day" class="flex items-center gap-1">
-            <Icon icon="mdi:clock" class="h-3 w-3" />
+            <Icon icon="lucide:clock" class="h-3 w-3" />
             <span>{{ formatTime(event.start_date) }}</span>
           </div>
           
           <div v-if="event.location" class="flex items-center gap-1">
-            <Icon icon="mdi:map-marker" class="h-3 w-3" />
+            <Icon icon="lucide:map-pin" class="h-3 w-3" />
             <span class="line-clamp-1">{{ event.location }}</span>
           </div>
         </div>

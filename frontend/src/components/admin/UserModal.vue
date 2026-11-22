@@ -12,7 +12,7 @@
                   style="background-color: var(--accent)"
                 >
                   <span v-if="initials">{{ initials }}</span>
-                  <Icon v-else icon="mdi:account" class="h-5 w-5" />
+                  <Icon v-else icon="lucide:user" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
                   <h3 id="user-modal-title" class="modal-title truncate">
@@ -24,7 +24,7 @@
                 </div>
               </div>
               <button type="button" class="btn btn-ghost p-2" :aria-label="t('common.close')" @click="closeModal">
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="lucide:x" class="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -111,7 +111,7 @@
                       :aria-label="showPassword ? t('userModal.hidePassword') : t('userModal.showPassword')"
                       @click="showPassword = !showPassword"
                     >
-                      <Icon :icon="showPassword ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" class="h-4 w-4" />
+                      <Icon :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="h-4 w-4" />
                     </button>
                   </div>
                   <p v-if="errors.password" class="form-error">{{ errors.password }}</p>
@@ -186,8 +186,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ t('common.cancel') }}</button>
               <button type="submit" :disabled="loading" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:account-plus'" class="h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'lucide:save' : 'lucide:user-plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? t('common.save') : t('userModal.submitCreate') }}
               </button>
             </div>
@@ -244,9 +244,9 @@ const activeTab = ref('account')
 const showPassword = ref(false)
 
 const roles = computed(() => [
-  { value: 'user', label: t('users.role_user'), icon: 'mdi:account-outline', desc: t('userModal.roleUserDesc') },
-  { value: 'editor', label: t('users.role_editor'), icon: 'mdi:pencil-outline', desc: t('userModal.roleEditorDesc') },
-  { value: 'admin', label: t('users.role_admin'), icon: 'mdi:shield-crown-outline', desc: t('userModal.roleAdminDesc') }
+  { value: 'user', label: t('users.role_user'), icon: 'lucide:user', desc: t('userModal.roleUserDesc') },
+  { value: 'editor', label: t('users.role_editor'), icon: 'lucide:pencil', desc: t('userModal.roleEditorDesc') },
+  { value: 'admin', label: t('users.role_admin'), icon: 'lucide:shield-check', desc: t('userModal.roleAdminDesc') }
 ])
 
 const initials = computed(() => {
@@ -260,13 +260,13 @@ const tabs = computed(() => [
   {
     id: 'account',
     label: t('userModal.tabAccount'),
-    icon: 'mdi:card-account-details-outline',
+    icon: 'lucide:id-card',
     hasError: !!(errors.value.username || errors.value.email || errors.value.password)
   },
   {
     id: 'access',
     label: t('userModal.tabAccess'),
-    icon: 'mdi:shield-account-outline',
+    icon: 'lucide:shield-user',
     count: form.group_ids.length,
     hasError: !!errors.value.role
   }

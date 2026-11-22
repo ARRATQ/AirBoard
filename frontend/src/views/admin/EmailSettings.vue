@@ -18,7 +18,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:email-edit-outline" class="inline h-5 w-5 me-2" />
+          <Icon icon="lucide:mail" class="inline h-5 w-5 me-2" />
           {{ $t('email.tabs.smtpDeprecated') }}
         </button>
         <button
@@ -30,7 +30,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:shield-lock" class="inline h-5 w-5 me-2" />
+          <Icon icon="lucide:shield-lock" class="inline h-5 w-5 me-2" />
           OAuth 2.0
         </button>
         <button
@@ -42,7 +42,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:file-document-edit" class="inline h-5 w-5 me-2" />
+          <Icon icon="lucide:file-pen" class="inline h-5 w-5 me-2" />
           {{ $t('email.templates') }}
         </button>
         <button
@@ -54,7 +54,7 @@
               : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
           ]"
         >
-          <Icon icon="mdi:history" class="inline h-5 w-5 me-2" />
+          <Icon icon="lucide:history" class="inline h-5 w-5 me-2" />
           {{ $t('email.logs') }}
         </button>
       </nav>
@@ -67,7 +67,7 @@
         <div class="card">
           <div class="card-header flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <Icon icon="mdi:email-edit-outline" class="h-6 w-6 text-primary-400" />
+              <Icon icon="lucide:mail" class="h-6 w-6 text-primary-400" />
               <h3 class="card-title">{{ $t("email.smtpSettings") }}</h3>
             </div>
             <div class="flex items-center gap-2">
@@ -156,7 +156,7 @@
                     class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
                   >
                     <Icon
-                      :icon="showPassword ? 'mdi:eye-off' : 'mdi:eye'"
+                      :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'"
                       class="h-5 w-5"
                     />
                   </button>
@@ -226,8 +226,8 @@
                 <Icon
                   :icon="
                     smtpConfig.last_test_success
-                      ? 'mdi:check-circle'
-                      : 'mdi:alert-circle'
+                      ? 'lucide:circle-check'
+                      : 'lucide:circle-alert'
                   "
                   :class="
                     smtpConfig.last_test_success
@@ -265,10 +265,10 @@
               >
                 <Icon
                   v-if="savingSmtp"
-                  icon="mdi:loading"
+                  icon="lucide:loader-circle"
                   class="h-4 w-4 me-2 animate-spin"
                 />
-                <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+                <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
                 {{ $t("common.save") }}
               </button>
               <button
@@ -276,7 +276,7 @@
                 :disabled="!smtpConfig.id"
                 class="btn btn-secondary"
               >
-                <Icon icon="mdi:email-fast" class="h-4 w-4 me-2" />
+                <Icon icon="lucide:mail" class="h-4 w-4 me-2" />
                 {{ $t("email.testEmail") }}
               </button>
             </div>
@@ -296,7 +296,7 @@
           <div class="card-header">
             <div class="flex items-center gap-3">
               <Icon
-                icon="mdi:file-document-edit"
+                icon="lucide:file-pen"
                 class="h-6 w-6 text-purple-400"
               />
               <h3 class="card-title">{{ $t("email.templates") }}</h3>
@@ -374,7 +374,7 @@
               <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <div class="flex items-center gap-2 mb-3">
                   <Icon
-                    icon="mdi:code-braces"
+                    icon="lucide:braces"
                     class="h-5 w-5 text-yellow-400"
                   />
                   <span class="font-medium text-white">{{
@@ -407,7 +407,7 @@
                     @click="previewTemplate"
                     class="text-sm text-primary-400 dark:text-primary-300 hover:text-primary-300 dark:hover:text-primary-200 flex items-center gap-1"
                   >
-                    <Icon icon="mdi:eye" class="h-4 w-4" />
+                    <Icon icon="lucide:eye" class="h-4 w-4" />
                     {{ $t("email.preview") }}
                   </button>
                 </div>
@@ -430,14 +430,14 @@
                 >
                   <Icon
                     v-if="savingTemplate"
-                    icon="mdi:loading"
+                    icon="lucide:loader-circle"
                     class="h-4 w-4 me-2 animate-spin"
                   />
-                  <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+                  <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
                   {{ $t("common.save") }}
                 </button>
                 <button @click="resetTemplate" class="btn btn-secondary">
-                  <Icon icon="mdi:restore" class="h-4 w-4 me-2" />
+                  <Icon icon="lucide:rotate-ccw" class="h-4 w-4 me-2" />
                   {{ $t("email.resetTemplate") }}
                 </button>
               </div>
@@ -453,7 +453,7 @@
       <div class="card">
         <div class="card-header flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <Icon icon="mdi:history" class="h-6 w-6 text-orange-400" />
+            <Icon icon="lucide:history" class="h-6 w-6 text-orange-400" />
             <h3 class="card-title">{{ $t("email.logs") }}</h3>
           </div>
           <button
@@ -462,7 +462,7 @@
             :aria-label="$t('common.refresh')"
             class="btn btn-ghost btn-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
           >
-            <Icon icon="mdi:refresh" class="h-4 w-4" />
+            <Icon icon="lucide:refresh-cw" class="h-4 w-4" />
           </button>
         </div>
 
@@ -472,7 +472,7 @@
             class="text-center py-8 text-gray-400 dark:text-gray-500"
           >
             <Icon
-              icon="mdi:email-off"
+              icon="lucide:mail-x"
               class="h-12 w-12 mx-auto mb-3 opacity-50"
             />
             <p>{{ $t("email.noLogs") }}</p>
@@ -578,7 +578,7 @@
               :aria-label="$t('common.close')"
               class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
           <div class="p-6">
@@ -605,10 +605,10 @@
             >
               <Icon
                 v-if="sendingTest"
-                icon="mdi:loading"
+                icon="lucide:loader-circle"
                 class="h-4 w-4 me-2 animate-spin"
               />
-              <Icon v-else icon="mdi:send" class="h-4 w-4 me-2" />
+              <Icon v-else icon="lucide:send" class="h-4 w-4 me-2" />
               {{ $t("email.send") }}
             </button>
           </div>
@@ -638,7 +638,7 @@
               :aria-label="$t('common.close')"
               class="text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
           <div class="p-0 bg-white dark:bg-gray-800">
@@ -859,13 +859,13 @@ const copyVariable = (variable) => {
 
 const getTemplateIcon = (type) => {
   const icons = {
-    news: "mdi:newspaper",
-    application: "mdi:application",
-    event: "mdi:calendar",
-    announcement: "mdi:bullhorn",
-    chat_message: "mdi:chat",
+    news: "lucide:newspaper",
+    application: "lucide:app-window",
+    event: "lucide:calendar",
+    announcement: "lucide:megaphone",
+    chat_message: "lucide:message-circle",
   };
-  return icons[type] || "mdi:email";
+  return icons[type] || "lucide:mail";
 };
 
 const getTemplateName = (type) => {

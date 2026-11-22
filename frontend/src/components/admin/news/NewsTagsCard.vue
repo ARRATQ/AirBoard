@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-      <Icon icon="mdi:tag-multiple" class="h-5 w-5 text-primary-500" />
+      <Icon icon="lucide:tags" class="h-5 w-5 text-primary-500" />
       {{ $t('groupAdmin.newsEditor.tagsSection') }}
     </h3>
 
@@ -16,7 +16,7 @@
           :key="tagId"
           class="tag tag--acc"
         >
-          <Icon icon="mdi:tag" class="h-3 w-3" />
+          <Icon icon="lucide:tag" class="h-3 w-3" />
           {{ tagName(tagId) }}
           <button
             type="button"
@@ -24,7 +24,7 @@
             :aria-label="$t('adminShared.news.removeItem', { name: tagName(tagId) })"
             @click="removeTag(tagId)"
           >
-            <Icon icon="mdi:close-circle" class="h-3.5 w-3.5" />
+            <Icon icon="lucide:circle-x" class="h-3.5 w-3.5" />
           </button>
         </span>
       </div>
@@ -70,8 +70,8 @@
           class="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-1 text-sm font-medium disabled:cursor-not-allowed"
           @click="submitTag"
         >
-          <Icon v-if="isCreating" icon="mdi:loading" class="h-4 w-4 animate-spin" />
-          <Icon v-else icon="mdi:plus" class="h-4 w-4" />
+          <Icon v-if="isCreating" icon="lucide:loader-circle" class="h-4 w-4 animate-spin" />
+          <Icon v-else icon="lucide:plus" class="h-4 w-4" />
           <span>{{ $t('common.create') }}</span>
         </button>
       </div>

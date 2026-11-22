@@ -15,14 +15,14 @@
           <PersonAvatar :person="previewPerson" size="lg" />
           <div class="flex flex-wrap gap-2">
             <button type="button" class="btn btn-secondary text-xs" :disabled="uploading" @click="fileInput?.click()">
-              <Icon :icon="uploading ? 'mdi:loading' : 'mdi:upload'" class="h-4 w-4 me-1" :class="{ 'animate-spin': uploading }" />
+              <Icon :icon="uploading ? 'lucide:loader-circle' : 'lucide:upload'" class="h-4 w-4 me-1" :class="{ 'animate-spin': uploading }" />
               {{ $t('directory.uploadPhoto') }}
             </button>
             <button type="button" class="btn btn-secondary text-xs" @click="showGallery = true">
-              <Icon icon="mdi:image-multiple-outline" class="h-4 w-4 me-1" /> {{ $t('directory.pickFromLibrary') }}
+              <Icon icon="lucide:images" class="h-4 w-4 me-1" /> {{ $t('directory.pickFromLibrary') }}
             </button>
             <button v-if="form.photo_url" type="button" class="btn btn-ghost text-xs" @click="form.photo_url = ''">
-              <Icon icon="mdi:close" class="h-4 w-4 me-1" /> {{ $t('directory.removePhoto') }}
+              <Icon icon="lucide:x" class="h-4 w-4 me-1" /> {{ $t('directory.removePhoto') }}
             </button>
             <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFile" />
           </div>
@@ -52,7 +52,7 @@
           <span class="form-label">{{ $t('directory.linkedAccount') }}</span>
           <div v-if="form.user_id" class="flex items-center justify-between gap-2 rounded-lg border px-3 py-2" style="border-color: var(--border)">
             <span class="flex items-center gap-2 text-sm" style="color: var(--text-primary)">
-              <Icon icon="mdi:account-check-outline" class="h-4 w-4 text-green-500" />
+              <Icon icon="lucide:user-check" class="h-4 w-4 text-green-500" />
               {{ linkedUser ? `${linkedUser.first_name} ${linkedUser.last_name} (${linkedUser.username})` : $t('directory.linkedAccountId', { id: form.user_id }) }}
             </span>
             <button type="button" class="btn btn-ghost text-xs" @click="unlink">{{ $t('directory.unlink') }}</button>
@@ -91,7 +91,7 @@
         <div v-for="f in fields" :key="f.id" class="form-group">
           <label class="form-label flex items-center gap-1" :class="{ 'form-label-required': f.required }" :for="`cf-${f.key}`">
             {{ f.label }}
-            <Icon v-if="f.visibility === 'managers'" icon="mdi:lock-outline" class="h-3.5 w-3.5 text-amber-500" :title="$t('directory.fieldManagersOnly')" />
+            <Icon v-if="f.visibility === 'managers'" icon="lucide:lock" class="h-3.5 w-3.5 text-amber-500" :title="$t('directory.fieldManagersOnly')" />
           </label>
           <textarea
             v-if="f.type === 'textarea'"

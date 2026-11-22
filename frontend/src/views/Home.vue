@@ -5,13 +5,13 @@
     <div class="home__body">
       <div class="home__inner">
         <div v-if="isLoading" class="home__state" role="status">
-          <Icon icon="mdi:loading" class="home__spin" aria-hidden="true" />
+          <Icon icon="lucide:loader-circle" class="home__spin" aria-hidden="true" />
           <p>{{ $t('home.loading') }}</p>
         </div>
 
         <div v-else-if="error" class="home__state" role="alert">
-          <EmptyState icon="mdi:alert-circle-outline" :title="$t('home.error.title')" :description="$t('home.error.message')">
-            <BaseButton icon="mdi:refresh" @click="loadHomeData">{{ $t('common.retry') }}</BaseButton>
+          <EmptyState icon="lucide:circle-alert" :title="$t('home.error.title')" :description="$t('home.error.message')">
+            <BaseButton icon="lucide:refresh-cw" @click="loadHomeData">{{ $t('common.retry') }}</BaseButton>
           </EmptyState>
         </div>
 

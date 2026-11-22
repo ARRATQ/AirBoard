@@ -8,13 +8,13 @@ const AVATAR_COLORS = ['#2563EB', '#7C3AED', '#DB2777', '#EA580C', '#059669', '#
 export const FIELD_TYPES = ['text', 'textarea', 'email', 'phone', 'url', 'date', 'select']
 
 export const FIELD_TYPE_ICONS = {
-  text: 'mdi:form-textbox',
-  textarea: 'mdi:text-long',
-  email: 'mdi:email-outline',
-  phone: 'mdi:phone-outline',
-  url: 'mdi:link-variant',
-  date: 'mdi:calendar',
-  select: 'mdi:format-list-bulleted',
+  text: 'lucide:text-cursor-input',
+  textarea: 'lucide:text',
+  email: 'lucide:mail',
+  phone: 'lucide:phone',
+  url: 'lucide:link',
+  date: 'lucide:calendar',
+  select: 'lucide:list',
 }
 
 export function fullName(person) {

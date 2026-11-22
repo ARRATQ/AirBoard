@@ -4,7 +4,7 @@
       <template #title>{{ $t(`${pageKeys}.title`) }}</template>
       <template #description>{{ $t(`${pageKeys}.subtitle`) }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreateModal">
           {{ $t('polls.adminPollsManagement.newPoll') }}
         </BaseButton>
       </template>
@@ -34,11 +34,11 @@
     <!-- Aucun sondage et aucun filtre : invitation à en créer un -->
     <EmptyState
       v-if="!isLoading && polls.length === 0 && !hasActiveFilters"
-      icon="mdi:poll-box-outline"
+      icon="lucide:chart-column"
       :title="$t('polls.adminPollsManagement.empty.title')"
       :description="$t(`${pageKeys}.empty.description`)"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreateModal">
         {{ $t('polls.adminPollsManagement.empty.createButton') }}
       </BaseButton>
     </EmptyState>
@@ -56,7 +56,7 @@
     >
       <template #toolbar>
         <label class="pl-search">
-          <Icon icon="mdi:magnify" class="pl-search__icon" aria-hidden="true" />
+          <Icon icon="lucide:search" class="pl-search__icon" aria-hidden="true" />
           <input
             v-model="filters.search"
             type="search"
@@ -124,7 +124,7 @@
             :aria-label="`${$t('polls.adminPollsManagement.actions.viewResults')} : ${row.title}`"
             @click="viewResults(row.raw)"
           >
-            <Icon icon="mdi:chart-bar" aria-hidden="true" />
+            <Icon icon="lucide:chart-column" aria-hidden="true" />
           </button>
           <button
             v-if="row.raw.is_active && canClose(row.raw)"
@@ -134,7 +134,7 @@
             :aria-label="`${$t('polls.adminPollsManagement.actions.close')} : ${row.title}`"
             @click="closePoll(row.raw)"
           >
-            <Icon icon="mdi:lock-outline" aria-hidden="true" />
+            <Icon icon="lucide:lock" aria-hidden="true" />
           </button>
         </RowActions>
       </template>

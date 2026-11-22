@@ -18,7 +18,7 @@
       <!-- Visage utilisateur -->
       <transition name="co-face">
         <div v-if="faceMode === 'user'" key="user" class="absolute inset-0 flex flex-col items-center justify-center gap-0">
-          <Icon icon="mdi:account-circle" class="text-white" style="font-size: 28px; margin-top: 2px;" />
+          <Icon icon="lucide:circle-user" class="text-white" style="font-size: 28px; margin-top: 2px;" />
           <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;" aria-hidden="true">CHAT</span>
         </div>
       </transition>
@@ -26,7 +26,7 @@
       <!-- Visage IA -->
       <transition name="co-face">
         <div v-if="faceMode === 'ai'" key="ai" class="absolute inset-0 flex flex-col items-center justify-center">
-          <Icon icon="mdi:robot-happy-outline" class="text-white" style="font-size: 28px; margin-top: 2px;" />
+          <Icon icon="lucide:bot" class="text-white" style="font-size: 28px; margin-top: 2px;" />
           <span class="text-white/70 leading-none" style="font-size: 8px; letter-spacing: 0.04em;" aria-hidden="true">AI</span>
         </div>
       </transition>
@@ -57,7 +57,7 @@
       >
         <div class="flex items-center gap-2.5 min-w-0">
           <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:rgba(255,255,255,0.2)">
-            <Icon icon="mdi:chat" class="h-4 w-4 text-white" />
+            <Icon icon="lucide:message-circle" class="h-4 w-4 text-white" />
           </div>
           <div class="min-w-0">
             <h2 id="chat-overlay-title" class="font-semibold text-white text-sm leading-tight">{{ t('chat.title') }}</h2>
@@ -78,7 +78,7 @@
             :title="isFullscreen ? t('chatbots.exitFullscreen') : t('chatbots.fullscreen')"
             :aria-label="isFullscreen ? t('chatbots.exitFullscreen') : t('chatbots.fullscreen')"
           >
-            <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
+            <Icon :icon="isFullscreen ? 'lucide:minimize' : 'lucide:maximize'" class="h-4 w-4" />
           </button>
           <button
             class="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
@@ -90,7 +90,7 @@
             :title="t('common.close')"
             :aria-label="t('common.close')"
           >
-            <Icon icon="mdi:close" class="h-4 w-4" />
+            <Icon icon="lucide:x" class="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -108,7 +108,7 @@
           <!-- Search -->
           <div class="px-2.5 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0">
             <div class="relative">
-              <Icon icon="mdi:magnify" class="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <Icon icon="lucide:search" class="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input
                 v-model="searchQuery"
                 type="text"
@@ -117,7 +117,7 @@
                 class="w-full ps-8 pe-7 py-1.5 rounded-lg text-sm border-none outline-none bg-gray-100 dark:bg-gray-700/60 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400/30"
               >
               <button v-if="searchQuery" type="button" :aria-label="t('chat.clearSearch')" @click="searchQuery = ''" class="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <Icon icon="mdi:close-circle" class="text-xs" />
+                <Icon icon="lucide:circle-x" class="text-xs" />
               </button>
             </div>
           </div>
@@ -162,7 +162,7 @@
                 @click="chatStore.openConversation('group', group)"
               >
                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
-                  <Icon icon="mdi:account-group" class="h-4 w-4 text-white" />
+                  <Icon icon="lucide:users" class="h-4 w-4 text-white" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">{{ group.name }}</div>
@@ -225,7 +225,7 @@
               v-if="!hasUnreadUsers && filteredGroups.length === 0 && Object.keys(groupedUsers).length === 0 && otherUsers.length === 0"
               class="flex flex-col items-center justify-center py-10 text-gray-400"
             >
-              <Icon icon="mdi:account-search-outline" class="text-3xl opacity-30 mb-1" />
+              <Icon icon="lucide:user-search" class="text-3xl opacity-30 mb-1" />
               <p class="text-xs">{{ t('chat.noContacts') }}</p>
             </div>
           </div>
@@ -238,7 +238,7 @@
           <div class="flex items-center justify-between px-3 py-2 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0 bg-white dark:bg-gray-900">
             <div class="flex items-center gap-2 min-w-0">
               <button v-if="isMobile" type="button" :aria-label="t('chat.backToContacts')" @click="chatStore.closeConversation()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 me-0.5 flex-shrink-0 transition-colors">
-                <Icon icon="mdi:arrow-left" class="rtl-flip text-xl" />
+                <Icon icon="lucide:arrow-left" class="rtl-flip text-xl" />
               </button>
               <div class="relative flex-shrink-0">
                 <img loading="lazy"
@@ -248,7 +248,7 @@
                   class="w-9 h-9 rounded-full object-cover"
                 />
                 <div v-else class="w-9 h-9 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
-                  <Icon icon="mdi:account-group" class="h-5 w-5 text-white" />
+                  <Icon icon="lucide:users" class="h-5 w-5 text-white" />
                 </div>
                 <span v-if="chatStore.activeConversation.type === 'user' && chatStore.activeConversation.is_online" class="absolute bottom-0 end-0 w-2.5 h-2.5 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full" />
               </div>
@@ -263,18 +263,18 @@
             <!-- Menu ⋮ -->
             <div ref="menuRef" class="relative flex-shrink-0">
               <button type="button" :aria-label="t('chat.options')" aria-haspopup="true" :aria-expanded="showMenu" @click.stop="toggleMenu" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                <Icon icon="mdi:dots-vertical" class="text-lg" />
+                <Icon icon="lucide:ellipsis-vertical" class="text-lg" />
               </button>
               <transition name="co-menu-drop">
                 <div v-if="showMenu" class="absolute end-0 top-full mt-1.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl w-52 py-1.5 z-30">
                   <button type="button" :aria-pressed="notificationsEnabled" @click="toggleNotifications" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <Icon :icon="notificationsEnabled ? 'mdi:bell-ring-outline' : 'mdi:bell-off-outline'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" class="flex-shrink-0" />
+                    <Icon :icon="notificationsEnabled ? 'lucide:bell-ring' : 'lucide:bell-off'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" class="flex-shrink-0" />
                     <span class="flex-1 text-xs text-start">{{ t('chat.notificationSounds') }}</span>
                     <span class="tag" :class="{ 'tag--ok': notificationsEnabled }">{{ notificationsEnabled ? t('chat.soundOn') : t('chat.soundOff') }}</span>
                   </button>
                   <div class="border-t border-gray-100 dark:border-gray-700 my-1" />
                   <button type="button" @click="confirmClearHistory" class="w-full flex items-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                    <Icon icon="mdi:delete-sweep-outline" class="flex-shrink-0" />
+                    <Icon icon="lucide:trash" class="flex-shrink-0" />
                     <span class="text-xs">{{ t('chat.clearHistory') }}</span>
                   </button>
                 </div>
@@ -291,7 +291,7 @@
             <!-- Empty state -->
             <div v-if="currentMessages.length === 0" class="flex flex-col items-center justify-center py-10 text-gray-400">
               <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2">
-                <Icon icon="mdi:chat-outline" class="text-2xl opacity-40" />
+                <Icon icon="lucide:message-circle" class="text-2xl opacity-40" />
               </div>
               <p class="text-xs font-medium">{{ t('chat.conversationStart') }}</p>
               <p class="text-[11px] mt-0.5 opacity-60">{{ t('chat.firstMessageHint') }}</p>
@@ -335,7 +335,7 @@
                       :title="t('chat.deleteMessage')"
                       :aria-label="t('chat.deleteMessage')"
                     >
-                      <Icon icon="mdi:delete-outline" class="h-3 w-3" />
+                      <Icon icon="lucide:trash-2" class="h-3 w-3" />
                     </button>
                   </div>
                   <span class="text-[10px] text-gray-400 mt-0.5 block" :class="msg.sender_id == myId ? 'text-end' : 'text-start'">
@@ -372,7 +372,7 @@
                 :class="showEmojiPicker ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'text-gray-400 hover:text-primary-500 hover:bg-gray-100 dark:hover:bg-gray-800'"
                 :title="t('chat.insertEmoji')"
               >
-                <Icon icon="mdi:emoticon-outline" class="h-5 w-5" />
+                <Icon icon="lucide:smile" class="h-5 w-5" />
               </button>
 
               <input
@@ -394,7 +394,7 @@
                 :title="t('chat.send')"
                 :aria-label="t('chat.send')"
               >
-                <Icon icon="mdi:send" class="h-4 w-4" />
+                <Icon icon="lucide:send" class="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -407,7 +407,7 @@
           :style="{ background: 'var(--bg-page)' }"
         >
           <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3" style="background:linear-gradient(135deg,#dbeafe,#e0e7ff)">
-            <Icon icon="mdi:chat-outline" class="text-3xl text-primary-400" />
+            <Icon icon="lucide:message-circle" class="text-3xl text-primary-400" />
           </div>
           <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('chat.selectConversation') }}</p>
           <p class="text-xs mt-1 text-gray-400">{{ t('chat.selectConversationHint') }}</p>

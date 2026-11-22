@@ -26,7 +26,7 @@
                 class="btn-ghost p-2"
                 :aria-label="t('common.close')"
               >
-                <Icon icon="mdi:close" class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="lucide:x" class="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -38,7 +38,7 @@
             <!-- Informations de base -->
             <div>
               <div class="section-header">
-                <Icon icon="mdi:information-outline" class="section-icon" />
+                <Icon icon="lucide:info" class="section-icon" />
                 <h4 class="section-title">{{ t('polls.editor.basicInfo') }}</h4>
               </div>
 
@@ -76,7 +76,7 @@
             <!-- Options du sondage -->
             <div>
               <div class="section-header">
-                <Icon icon="mdi:format-list-checkbox" class="section-icon" />
+                <Icon icon="lucide:list-checks" class="section-icon" />
                 <h4 class="section-title">{{ t('polls.editor.responseOptions') }}</h4>
               </div>
 
@@ -106,7 +106,7 @@
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                     ]"
                   >
-                    <Icon :icon="option.is_other ? 'mdi:check-circle' : 'mdi:help-circle-outline'" class="inline h-4 w-4 me-1" aria-hidden="true" />
+                    <Icon :icon="option.is_other ? 'lucide:circle-check' : 'lucide:circle-help'" class="inline h-4 w-4 me-1" aria-hidden="true" />
                     {{ option.is_other ? t('polls.editor.optionIsOther') : t('polls.editor.markAsOther') }}
                   </button>
                   <button
@@ -117,7 +117,7 @@
                     :aria-label="t('polls.editor.removeOption', { index: index + 1 })"
                     :title="t('polls.editor.removeOption', { index: index + 1 })"
                   >
-                    <Icon icon="mdi:delete" class="h-5 w-5" aria-hidden="true" />
+                    <Icon icon="lucide:trash-2" class="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -127,7 +127,7 @@
                   @click="addOption"
                   class="poll-add-option-btn"
                 >
-                  <Icon icon="mdi:plus" />
+                  <Icon icon="lucide:plus" />
                   {{ t('polls.editor.addOption') }}
                 </button>
                 <p class="form-help">{{ t('polls.editor.otherHelp') }}</p>
@@ -141,7 +141,7 @@
             <!-- Type et paramètres -->
             <div>
               <div class="section-header">
-                <Icon icon="mdi:cog-outline" class="section-icon" />
+                <Icon icon="lucide:settings" class="section-icon" />
                 <h4 class="section-title">{{ t('polls.editor.typeAndSettings') }}</h4>
               </div>
 
@@ -210,7 +210,7 @@
             <!-- Période et ciblage -->
             <div>
               <div class="section-header">
-                <Icon icon="mdi:calendar-range" class="section-icon" />
+                <Icon icon="lucide:calendar-range" class="section-icon" />
                 <h4 class="section-title">{{ t('polls.editor.periodAndTargeting') }}</h4>
               </div>
 
@@ -259,7 +259,7 @@
                     ]"
                   >
                     <Icon
-                      :icon="form.target_group_ids.includes(group.id) ? 'mdi:check' : 'mdi:plus'"
+                      :icon="form.target_group_ids.includes(group.id) ? 'lucide:check' : 'lucide:plus'"
                       class="inline h-4 w-4 me-1"
                       aria-hidden="true"
                     />
@@ -278,7 +278,7 @@
             <!-- Liens optionnels -->
             <div v-if="showAdvanced">
               <div class="section-header">
-                <Icon icon="mdi:link-variant" class="section-icon" />
+                <Icon icon="lucide:link" class="section-icon" />
                 <h4 class="section-title">{{ t('polls.editor.optionalLinks') }}</h4>
               </div>
 
@@ -302,7 +302,7 @@
                     </option>
                   </select>
                   <p v-if="loadingNews" class="form-help text-gray-500">
-                    <Icon icon="mdi:loading" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
+                    <Icon icon="lucide:loader-circle" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
                   </p>
                 </div>
 
@@ -325,7 +325,7 @@
                     </option>
                   </select>
                   <p v-if="loadingAnnouncements" class="form-help text-gray-500">
-                    <Icon icon="mdi:loading" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
+                    <Icon icon="lucide:loader-circle" class="inline animate-spin" aria-hidden="true" /> {{ t('common.loading') }}
                   </p>
                 </div>
               </div>
@@ -337,7 +337,7 @@
               @click="showAdvanced = !showAdvanced"
               class="btn-ghost btn-sm"
             >
-              <Icon :icon="showAdvanced ? 'mdi:chevron-up' : 'mdi:chevron-down'" />
+              <Icon :icon="showAdvanced ? 'lucide:chevron-up' : 'lucide:chevron-down'" />
               {{ showAdvanced ? t('polls.editor.hideAdvanced') : t('polls.editor.showAdvanced') }} {{ t('polls.editor.advancedOptions') }}
             </button>
             </div>
@@ -351,8 +351,8 @@
                 {{ t('polls.editor.cancel') }}
               </button>
               <button type="submit" :disabled="loading" class="poll-submit-btn">
-                <Icon v-if="loading" icon="mdi:loading" class="spin" />
-                <Icon v-else icon="mdi:check" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="spin" />
+                <Icon v-else icon="lucide:check" />
                 {{ isEdit ? t('polls.editor.save') : t('polls.editor.create') }}
               </button>
             </div>

@@ -1,5 +1,5 @@
 <template>
-  <ErrorPage code="404" icon="mdi:compass-off" :title="t('errors.notFound.title')" :message="t('errors.notFound.message')" />
+  <ErrorPage code="404" icon="lucide:compass" :title="t('errors.notFound.title')" :message="t('errors.notFound.message')" />
 </template>
 
 <script setup>

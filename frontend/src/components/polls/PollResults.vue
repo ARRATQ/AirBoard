@@ -2,7 +2,7 @@
   <div class="poll-results">
     <!-- Chargement -->
     <div v-if="loading" class="results-loading">
-      <Icon icon="mdi:loading" class="spin loading-icon" />
+      <Icon icon="lucide:loader-circle" class="spin loading-icon" />
       <p>{{ t('polls.results.loading') }}</p>
     </div>
 
@@ -38,7 +38,7 @@
       <!-- Détails des votants (si non anonyme et autorisé) -->
       <div v-if="!compact && results.voter_details && results.voter_details.length > 0" class="voter-details">
         <h4 class="voter-details-title">
-          <Icon icon="mdi:account-details" />
+          <Icon icon="lucide:contact" />
           {{ t('polls.results.voterDetails') }}
         </h4>
         <div class="voter-list">
@@ -48,7 +48,7 @@
             class="voter-item"
           >
             <div class="voter-info">
-              <Icon icon="mdi:account-circle" />
+              <Icon icon="lucide:circle-user" />
               <span class="voter-name">
                 {{ voter.user.first_name }} {{ voter.user.last_name }}
               </span>
@@ -66,7 +66,7 @@
       <!-- Bouton pour voir les détails complets -->
       <div v-if="compact && !hideViewDetails" class="view-details">
         <button @click="$emit('view-details')" class="btn btn-secondary">
-          <Icon icon="mdi:chart-bar" />
+          <Icon icon="lucide:chart-column" />
           {{ t('polls.results.viewFullDetails') }}
         </button>
       </div>
@@ -74,10 +74,10 @@
 
     <!-- Erreur -->
     <div v-else-if="error" class="results-error">
-      <Icon icon="mdi:alert-circle" class="error-icon" />
+      <Icon icon="lucide:circle-alert" class="error-icon" />
       <p>{{ error }}</p>
       <button @click="loadResults" class="btn btn-primary btn-sm">
-        <Icon icon="mdi:refresh" />
+        <Icon icon="lucide:refresh-cw" />
         {{ t('polls.results.retry') }}
       </button>
     </div>

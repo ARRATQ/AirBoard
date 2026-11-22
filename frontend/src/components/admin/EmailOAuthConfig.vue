@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-header flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <Icon icon="mdi:shield-lock" class="h-6 w-6 text-green-400" />
+        <Icon icon="lucide:shield-lock" class="h-6 w-6 text-green-400" />
         <h3 class="card-title">{{ t('email.oauth.title') }}</h3>
       </div>
       <div class="flex items-center gap-2">
@@ -20,7 +20,7 @@
       <!-- Info Banner -->
       <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <div class="flex gap-3">
-          <Icon icon="mdi:information" class="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <Icon icon="lucide:info" class="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
           <div class="space-y-1 text-sm text-blue-800 dark:text-blue-300">
             <p class="font-medium">{{ t('email.oauth.bannerTitle') }}</p>
             <p class="text-blue-700 dark:text-blue-400">
@@ -52,7 +52,7 @@
               :aria-expanded="showHelp"
               class="ms-2 text-gray-400 hover:text-gray-300"
             >
-              <Icon icon="mdi:help-circle" class="h-4 w-4" />
+              <Icon icon="lucide:circle-help" class="h-4 w-4" />
             </button>
           </label>
           <input
@@ -98,7 +98,7 @@
               :aria-label="showSecret ? t('email.oauth.hideSecret') : t('email.oauth.showSecret')"
               class="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-300"
             >
-              <Icon :icon="showSecret ? 'mdi:eye-off' : 'mdi:eye'" class="h-5 w-5" />
+              <Icon :icon="showSecret ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
             </button>
           </div>
           <p class="mt-1 text-xs text-gray-400">
@@ -167,7 +167,7 @@
         <!-- Configuration Steps -->
         <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
           <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-            <Icon icon="mdi:help-circle" class="inline h-4 w-4 me-1" />
+            <Icon icon="lucide:circle-help" class="inline h-4 w-4 me-1" />
             {{ t('email.oauth.azureSetupTitle') }}
           </h4>
           <ol class="text-xs text-yellow-700 dark:text-yellow-400 space-y-1 list-decimal list-inside">
@@ -189,7 +189,7 @@
             rel="noopener noreferrer"
             class="inline-flex items-center gap-1 text-xs text-yellow-800 dark:text-yellow-300 hover:underline mt-2"
           >
-            <Icon icon="mdi:open-in-new" class="h-3 w-3" />
+            <Icon icon="lucide:external-link" class="h-3 w-3" />
             {{ t('email.oauth.openPortal') }}
           </a>
         </div>
@@ -197,7 +197,7 @@
         <!-- Common Issues -->
         <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <h4 class="text-sm font-medium text-red-800 dark:text-red-300 mb-2">
-            <Icon icon="mdi:alert-circle" class="inline h-4 w-4 me-1" />
+            <Icon icon="lucide:circle-alert" class="inline h-4 w-4 me-1" />
             {{ t('email.oauth.error535Title') }}
           </h4>
           <div class="text-xs text-red-700 dark:text-red-400 space-y-2">
@@ -220,8 +220,8 @@
       <!-- Actions -->
       <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button @click="saveOAuthConfig" :disabled="saving" class="btn btn-primary">
-          <Icon v-if="saving" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-          <Icon v-else icon="mdi:content-save" class="h-4 w-4 me-2" />
+          <Icon v-if="saving" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="lucide:save" class="h-4 w-4 me-2" />
           {{ t('common.save') }}
         </button>
         <button
@@ -229,7 +229,7 @@
           :disabled="!oauthConfig.id || !oauthConfig.is_enabled"
           class="btn btn-secondary"
         >
-          <Icon icon="mdi:email-fast" class="h-4 w-4 me-2" />
+          <Icon icon="lucide:mail" class="h-4 w-4 me-2" />
           {{ t('email.oauth.test') }}
         </button>
         <button
@@ -237,8 +237,8 @@
           :disabled="!oauthConfig.id || !oauthConfig.is_enabled || refreshing"
           class="btn btn-secondary"
         >
-          <Icon v-if="refreshing" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-          <Icon v-else icon="mdi:refresh" class="h-4 w-4 me-2" />
+          <Icon v-if="refreshing" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+          <Icon v-else icon="lucide:refresh-cw" class="h-4 w-4 me-2" />
           {{ t('email.oauth.refreshToken') }}
         </button>
       </div>
@@ -252,7 +252,7 @@
         <div class="modal-header">
           <h3 id="email-oauth-test-modal-title" class="modal-title">{{ t('email.oauth.testModalTitle') }}</h3>
           <button @click="showTestModal = false" class="modal-close" :aria-label="t('common.close')">
-            <Icon icon="mdi:close" class="h-5 w-5" />
+            <Icon icon="lucide:x" class="h-5 w-5" />
           </button>
         </div>
         <div class="modal-body">
@@ -272,8 +272,8 @@
             {{ t('common.cancel') }}
           </button>
           <button @click="testOAuth" :disabled="!testEmail || testing" class="btn btn-primary">
-            <Icon v-if="testing" icon="mdi:loading" class="h-4 w-4 me-2 animate-spin" />
-            <Icon v-else icon="mdi:send" class="h-4 w-4 me-2" />
+            <Icon v-if="testing" icon="lucide:loader-circle" class="h-4 w-4 me-2 animate-spin" />
+            <Icon v-else icon="lucide:send" class="h-4 w-4 me-2" />
             {{ t('email.send') }}
           </button>
         </div>

@@ -3,16 +3,16 @@
     <PageHeader :title="t('gamification.title')" :description="t('gamification.subtitle')" />
 
     <div v-if="loading" class="xp-state" role="status">
-      <Icon icon="mdi:loading" class="xp-state__spin" aria-hidden="true" />
+      <Icon icon="lucide:loader-circle" class="xp-state__spin" aria-hidden="true" />
       <span>{{ t('common.loading') }}</span>
     </div>
 
     <EmptyState
       v-else-if="loadError"
       :title="t('gamification.loadError')"
-      icon="mdi:alert-circle-outline"
+      icon="lucide:circle-alert"
     >
-      <BaseButton variant="secondary" size="sm" icon="mdi:refresh" @click="fetchData">
+      <BaseButton variant="secondary" size="sm" icon="lucide:refresh-cw" @click="fetchData">
         {{ t('common.retry') }}
       </BaseButton>
     </EmptyState>
@@ -64,10 +64,10 @@
                 v-for="ua in unlockedAchievements.slice(0, 6)"
                 :key="ua.id"
                 class="xp-swatch"
-                :style="{ background: ua.achievement?.color || 'var(--fill)' }"
+                :style="{ '--c': ua.achievement?.color || 'var(--acc-ink)' }"
                 :title="ua.achievement?.name"
               >
-                <Icon :icon="ua.achievement?.icon || 'mdi:medal'" aria-hidden="true" />
+                <Icon :icon="ua.achievement?.icon || 'lucide:medal'" aria-hidden="true" />
                 <span class="sr-only">{{ ua.achievement?.name }}</span>
               </li>
             </ul>
@@ -103,10 +103,10 @@
             >
               <span
                 class="xp-badge__icon"
-                :style="isUnlocked(achievement.code) ? { background: achievement.color || 'var(--fill)' } : undefined"
+                :style="isUnlocked(achievement.code) ? { '--c': achievement.color || 'var(--acc-ink)' } : undefined"
                 aria-hidden="true"
               >
-                <Icon :icon="isUnlocked(achievement.code) ? achievement.icon : 'mdi:lock-outline'" />
+                <Icon :icon="isUnlocked(achievement.code) ? achievement.icon : 'lucide:lock'" />
               </span>
               <div class="xp-badge__body">
                 <h3 class="xp-badge__name">{{ achievement.name }}</h3>
@@ -118,7 +118,7 @@
               </div>
             </li>
           </ul>
-          <EmptyState v-else compact :title="t('gamification.noBadges')" icon="mdi:shield-outline" />
+          <EmptyState v-else compact :title="t('gamification.noBadges')" icon="lucide:shield" />
         </section>
 
         <!-- Classement -->
@@ -144,7 +144,7 @@
                     v-for="badge in user.badges"
                     :key="badge.code"
                     class="xp-swatch xp-swatch--sm"
-                    :style="{ background: badge.color || 'var(--fill)' }"
+                    :style="{ '--c': badge.color || 'var(--acc-ink)' }"
                     :title="badge.name"
                   >
                     <Icon :icon="badge.icon" aria-hidden="true" />
@@ -191,20 +191,20 @@ const recentTransactions = ref([])
 const currentTab = ref('all')
 
 const ACTIVITY_ICONS = {
-  daily_login: 'mdi:calendar-check',
-  app_click: 'mdi:cursor-default-click-outline',
-  news_read: 'mdi:book-open-variant',
-  news_publish: 'mdi:newspaper-plus',
-  event_publish: 'mdi:calendar-star',
-  poll_vote: 'mdi:vote-outline',
-  poll_create: 'mdi:poll',
-  comment_create: 'mdi:comment-text-outline',
-  suggestion_create: 'mdi:lightbulb-on-outline',
-  suggestion_vote: 'mdi:thumb-up-outline',
-  suggestion_comment: 'mdi:comment-edit-outline',
-  achievement_unlock: 'mdi:medal',
-  chat_message: 'mdi:chat-processing-outline',
-  chatbot_use: 'mdi:robot-excited-outline',
+  daily_login: 'lucide:calendar-check',
+  app_click: 'lucide:mouse-pointer-click',
+  news_read: 'lucide:book-open',
+  news_publish: 'lucide:newspaper',
+  event_publish: 'lucide:calendar-heart',
+  poll_vote: 'lucide:vote',
+  poll_create: 'lucide:chart-column',
+  comment_create: 'lucide:message-square-text',
+  suggestion_create: 'lucide:lightbulb',
+  suggestion_vote: 'lucide:thumbs-up',
+  suggestion_comment: 'lucide:message-square-more',
+  achievement_unlock: 'lucide:medal',
+  chat_message: 'lucide:message-circle-more',
+  chatbot_use: 'lucide:bot',
 }
 
 const dateLocale = computed(() => dateLocaleFor(locale.value))
@@ -245,7 +245,7 @@ const unlockedDate = (code) => {
     : ''
 }
 
-const activityIcon = (reason) => ACTIVITY_ICONS[reason] || 'mdi:star-outline'
+const activityIcon = (reason) => ACTIVITY_ICONS[reason] || 'lucide:star'
 const activityLabel = (reason) =>
   t(ACTIVITY_ICONS[reason] ? `gamification.activity.${reason}` : 'gamification.activity.other')
 
@@ -420,12 +420,13 @@ onMounted(fetchData)
   place-items: center;
   width: 28px;
   height: 28px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  color: #fff;
+  color: color-mix(in oklab, var(--c, var(--acc-ink)) 78%, var(--text));
   font-size: 15px;
 }
 
-.xp-swatch--sm { width: 18px; height: 18px; border-radius: var(--r-s); font-size: 11px; }
+.xp-swatch--sm { width: 20px; height: 20px; font-size: 12px; }
 
 /* Activité */
 .xp-activity__list { margin: 0; padding: 0; list-style: none; }
@@ -479,13 +480,14 @@ onMounted(fetchData)
   flex: none;
   width: 36px;
   height: 36px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  color: #fff;
+  color: color-mix(in oklab, var(--c, var(--acc-ink)) 78%, var(--text));
   font-size: 19px;
 }
 
 .xp-badge.is-locked { border-style: dashed; }
-.xp-badge.is-locked .xp-badge__icon { background: var(--sunken); color: var(--muted); font-size: 16px; }
+.xp-badge.is-locked .xp-badge__icon { border-style: dashed; color: var(--muted); font-size: 16px; }
 .xp-badge.is-locked .xp-badge__name { color: var(--muted); }
 
 .xp-badge__body { min-width: 0; }

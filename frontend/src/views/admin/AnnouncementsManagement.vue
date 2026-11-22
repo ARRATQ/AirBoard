@@ -4,7 +4,7 @@
       <template #title>{{ $t('announcements.title') }}</template>
       <template #description>{{ $t('announcements.subtitle') }}</template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" @click="openCreateModal">
           {{ $t('announcements.new') }}
         </BaseButton>
       </template>
@@ -12,11 +12,11 @@
 
     <EmptyState
       v-if="!isLoading && announcements.length === 0"
-      icon="mdi:bullhorn-outline"
+      icon="lucide:megaphone"
       :title="$t('announcements.emptyTitle')"
       :description="$t('announcements.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" @click="openCreateModal">
         {{ $t('announcements.create') }}
       </BaseButton>
     </EmptyState>
@@ -92,7 +92,7 @@
               :aria-label="$t('common.close')"
               class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <Icon icon="mdi:close" class="h-5 w-5" />
+              <Icon icon="lucide:x" class="h-5 w-5" />
             </button>
           </div>
 

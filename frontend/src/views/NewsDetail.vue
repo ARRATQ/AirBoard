@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-12" role="status" :aria-label="$t('common.loading')">
-      <Icon icon="mdi:loading" class="h-8 w-8 animate-spin text-primary-500" />
+      <Icon icon="lucide:loader-circle" class="h-8 w-8 animate-spin text-primary-500" />
     </div>
 
     <!-- Article Content -->
@@ -15,7 +15,7 @@
             @click="$router.back()"
             class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500"
           >
-            <Icon icon="mdi:arrow-left" class="rtl-flip h-4 w-4" />
+            <Icon icon="lucide:arrow-left" class="rtl-flip h-4 w-4" />
             {{ $t('news.detail.back') }}
           </button>
         </div>
@@ -37,14 +37,14 @@
             v-if="news.priority === 'urgent'"
             class="tag tag--bad"
           >
-            <Icon icon="mdi:alert" />
+            <Icon icon="lucide:triangle-alert" />
             {{ $t('news.priority.urgent') }}
           </span>
           <span
             v-else-if="news.priority === 'important'"
             class="tag tag--warn"
           >
-            <Icon icon="mdi:star" />
+            <Icon icon="lucide:star" />
             {{ $t('news.priority.important') }}
           </span>
 
@@ -53,7 +53,7 @@
             v-if="news.is_pinned"
             class="tag tag--warn"
           >
-            <Icon icon="mdi:pin" />
+            <Icon icon="lucide:pin" />
             {{ $t('news.detail.pinned') }}
           </span>
 
@@ -62,7 +62,7 @@
             v-if="!news.target_groups || news.target_groups.length === 0"
             class="tag tag--ok"
           >
-            <Icon icon="mdi:earth" />
+            <Icon icon="lucide:earth" />
             {{ $t('events.visibility.public') }}
           </span>
           <span
@@ -70,7 +70,7 @@
             class="tag tag--info"
             :title="getGroupsTooltip(news.target_groups)"
           >
-            <Icon icon="mdi:lock" />
+            <Icon icon="lucide:lock" />
             {{ getVisibilityLabel(news.target_groups) }}
           </span>
 
@@ -79,7 +79,7 @@
             v-if="news.category"
             class="tag"
           >
-            <Icon :icon="news.category.icon || 'mdi:folder'" :style="{ color: news.category.color }" />
+            <Icon :icon="news.category.icon || 'lucide:folder'" :style="{ color: news.category.color }" />
             {{ news.category.name }}
           </span>
         </div>
@@ -97,19 +97,19 @@
         <!-- Metadata -->
         <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-center gap-2">
-            <Icon icon="mdi:account" class="h-5 w-5" />
+            <Icon icon="lucide:user" class="h-5 w-5" />
             <span>{{ news.author?.full_name || news.author?.email }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <Icon icon="mdi:calendar" class="h-5 w-5" />
+            <Icon icon="lucide:calendar" class="h-5 w-5" />
             <span>{{ formatDate(news.published_at || news.created_at) }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <Icon icon="mdi:eye" class="h-5 w-5" />
+            <Icon icon="lucide:eye" class="h-5 w-5" />
             <span>{{ news.view_count || 0 }} {{ $t('news.detail.views') }}</span>
           </div>
           <div v-if="articleReadingTime" class="flex items-center gap-2">
-            <Icon icon="mdi:clock-outline" class="h-5 w-5" />
+            <Icon icon="lucide:clock" class="h-5 w-5" />
             <span>{{ $t('news.detail.readingTime', { time: articleReadingTime }) }}</span>
           </div>
         </div>
@@ -137,7 +137,7 @@
       <!-- Linked Poll Section -->
       <div v-if="linkedPoll" class="p-8 border-t border-gray-200 dark:border-gray-700">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-          <Icon icon="mdi:poll" class="h-6 w-6 text-purple-600" />
+          <Icon icon="lucide:chart-column" class="h-6 w-6 text-purple-600" />
           {{ $t('news.detail.linkedPoll') }}
         </h3>
         <PollCard :poll="linkedPoll" @vote-success="handleVoteSuccess" />
@@ -149,7 +149,7 @@
           @click="editNews"
           class="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
         >
-          <Icon icon="mdi:pencil" class="h-5 w-5" />
+          <Icon icon="lucide:pencil" class="h-5 w-5" />
           {{ $t('news.detail.edit') }}
         </button>
       </div>
@@ -157,7 +157,7 @@
 
     <!-- Error State -->
     <div v-else class="text-center py-12">
-      <Icon icon="mdi:alert-circle" class="h-16 w-16 mx-auto text-red-500 mb-4" />
+      <Icon icon="lucide:circle-alert" class="h-16 w-16 mx-auto text-red-500 mb-4" />
       <p class="text-gray-600 dark:text-gray-400 text-lg">
         {{ $t('news.detail.notFound') }}
       </p>

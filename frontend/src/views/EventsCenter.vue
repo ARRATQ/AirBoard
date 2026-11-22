@@ -43,12 +43,12 @@
       </h2>
 
       <div v-if="isLoading" class="agenda__state" role="status">
-        <Icon icon="mdi:loading" class="agenda__spin" aria-hidden="true" />
+        <Icon icon="lucide:loader-circle" class="agenda__spin" aria-hidden="true" />
         <span class="sr-only">{{ $t('agenda.loading') }}</span>
       </div>
 
-      <EmptyState v-else-if="!listRows.length" icon="mdi:calendar-outline" :title="$t('agenda.noEventsFound')">
-        <BaseButton size="sm" icon="mdi:refresh" @click="loadData">{{ $t('agenda.reload') }}</BaseButton>
+      <EmptyState v-else-if="!listRows.length" icon="lucide:calendar" :title="$t('agenda.noEventsFound')">
+        <BaseButton size="sm" icon="lucide:refresh-cw" @click="loadData">{{ $t('agenda.reload') }}</BaseButton>
       </EmptyState>
 
       <BoardTable v-else :columns="listColumns" :rows="listRows" :caption="$t('events.center.title')" min-width="760px">
@@ -114,8 +114,8 @@ const selectedCategoryId = ref(null)
 const showOnlyHolidays = ref(false)
 
 const views = computed(() => [
-  { value: 'calendar', label: t('agenda.calendar'), icon: 'mdi:calendar-month-outline' },
-  { value: 'list', label: t('agenda.list'), icon: 'mdi:format-list-bulleted' },
+  { value: 'calendar', label: t('agenda.calendar'), icon: 'lucide:calendar-days' },
+  { value: 'list', label: t('agenda.list'), icon: 'lucide:list' },
 ])
 
 const categories = computed(() => eventsStore.categories || [])

@@ -20,7 +20,7 @@ import { useAppStore } from '@/stores/app'
 const app = createApp(App)
 const pinia = createPinia()
 
-// Icônes embarquées (aucun appel à api.iconify.design)
+// Icônes : mdi, lucide et heroicons embarquées ; autres collections via l'API Iconify
 setupIcons()
 
 // Plugins

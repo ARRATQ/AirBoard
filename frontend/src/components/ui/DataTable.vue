@@ -2,7 +2,7 @@
   <div class="dt">
     <div v-if="searchable || $slots.toolbar" class="dt__toolbar">
       <label v-if="searchable" class="dt__search">
-        <Icon icon="mdi:magnify" class="dt__search-icon" aria-hidden="true" />
+        <Icon icon="lucide:search" class="dt__search-icon" aria-hidden="true" />
         <input
           v-model="query"
           type="search"
@@ -43,7 +43,7 @@
         <tbody>
           <tr v-if="loading">
             <td :colspan="columns.length" class="dt__state">
-              <Icon icon="mdi:loading" class="dt__spin" aria-hidden="true" />
+              <Icon icon="lucide:loader-circle" class="dt__spin" aria-hidden="true" />
               <span class="sr-only">{{ t('common.loading') }}</span>
             </td>
           </tr>
@@ -154,8 +154,8 @@ const ariaSort = (key) => {
 }
 
 const sortIcon = (key) => {
-  if (sortKey.value !== key) return 'mdi:unfold-more-horizontal'
-  return sortDir.value === 'asc' ? 'mdi:chevron-up' : 'mdi:chevron-down'
+  if (sortKey.value !== key) return 'lucide:chevrons-up-down'
+  return sortDir.value === 'asc' ? 'lucide:chevron-up' : 'lucide:chevron-down'
 }
 </script>
 

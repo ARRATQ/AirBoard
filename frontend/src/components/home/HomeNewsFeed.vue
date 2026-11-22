@@ -23,7 +23,7 @@
         @click="selectTab(tab.key)"
         @keydown="onTabKey"
       >
-        <Icon :icon="tab.icon || 'mdi:newspaper'" class="feed__tab-icon" aria-hidden="true" />
+        <Icon :icon="tab.icon || 'lucide:newspaper'" class="feed__tab-icon" aria-hidden="true" />
         {{ tab.label }}
         <span v-if="tab.newCount > 0" class="feed__tab-count">{{ tab.newCount }}</span>
       </button>
@@ -39,7 +39,7 @@
         <li v-for="article in items" :key="article.id">
           <router-link :to="`/news/${article.slug}`" class="feed__row" :style="{ '--c': colorOf(article) }">
             <span class="feed__icon">
-              <Icon :icon="article.news_type?.icon || activeGroup?.type.icon || article.category?.icon || 'mdi:newspaper'" aria-hidden="true" />
+              <Icon :icon="article.news_type?.icon || activeGroup?.type.icon || article.category?.icon || 'lucide:newspaper'" aria-hidden="true" />
             </span>
             <span class="feed__body">
               <span class="feed__title">{{ article.title }}</span>
@@ -51,11 +51,11 @@
                 </time>
               </span>
             </span>
-            <Icon icon="mdi:chevron-right" class="feed__chev" aria-hidden="true" />
+            <Icon icon="lucide:chevron-right" class="feed__chev" aria-hidden="true" />
           </router-link>
         </li>
       </ul>
-      <EmptyState v-else compact icon="mdi:newspaper-variant-outline" :title="$t('home.noNews')" />
+      <EmptyState v-else compact icon="lucide:newspaper" :title="$t('home.noNews')" />
     </div>
   </section>
 </template>

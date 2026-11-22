@@ -23,7 +23,7 @@
           <div class="sm:flex sm:items-start justify-between">
             <div class="flex items-center gap-4">
               <Icon
-                :icon="app.icon || 'mdi:application'"
+                :icon="app.icon || 'lucide:app-window'"
                 class="h-10 w-10 flex-shrink-0"
                 :style="{ color: app.color || '#6366f1' }"
               />
@@ -44,7 +44,7 @@
               @click="$emit('close')"
               class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
             >
-              <Icon icon="mdi:close" class="h-6 w-6" />
+              <Icon icon="lucide:x" class="h-6 w-6" />
             </button>
           </div>
         </div>
@@ -58,7 +58,7 @@
               :target="app.open_in_new_tab ? '_blank' : '_self'"
               class="flex-1 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-              <Icon icon="mdi:open-in-new" class="me-2 h-5 w-5" aria-hidden="true" />
+              <Icon icon="lucide:external-link" class="me-2 h-5 w-5" aria-hidden="true" />
               {{ $t('common.open') }}
             </a>
             <button
@@ -68,9 +68,9 @@
               class="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
               <Icon
-                :icon="isFavorite ? 'mdi:star' : 'mdi:star-outline'"
+                icon="lucide:star"
                 class="me-2 h-5 w-5"
-                :class="isFavorite ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-500'"
+                :class="isFavorite ? 'icon-fill text-yellow-500' : 'text-gray-400 dark:text-gray-500'"
               />
               {{ isFavorite ? $t('common.removeFromFavorites') : $t('common.addToFavorites') }}
             </button>

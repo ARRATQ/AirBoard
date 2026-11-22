@@ -13,7 +13,7 @@
           :title="t('news.editor.bold')"
           :aria-label="t('news.editor.bold')"
         >
-          <Icon icon="mdi:format-bold" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:bold" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -24,7 +24,7 @@
           :title="t('news.editor.italic')"
           :aria-label="t('news.editor.italic')"
         >
-          <Icon icon="mdi:format-italic" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:italic" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -35,7 +35,7 @@
           :title="t('news.editor.underline')"
           :aria-label="t('news.editor.underline')"
         >
-          <Icon icon="mdi:format-underline" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:underline" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -46,7 +46,7 @@
           :title="t('news.editor.strike')"
           :aria-label="t('news.editor.strike')"
         >
-          <Icon icon="mdi:format-strikethrough" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:strikethrough" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -57,7 +57,7 @@
           :title="t('news.editor.inlineCode')"
           :aria-label="t('news.editor.inlineCode')"
         >
-          <Icon icon="mdi:code-tags" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:code" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -74,7 +74,7 @@
             :aria-expanded="showColorPicker"
             @click="toggleColorPicker"
           >
-            <Icon icon="mdi:format-color-text" class="h-5 w-5" aria-hidden="true" />
+            <Icon icon="lucide:baseline" class="h-5 w-5" aria-hidden="true" />
             <span class="color-swatch" :style="{ background: activeTextColor }"></span>
           </button>
           <div v-if="showColorPicker" class="color-dropdown" @mouseleave="closeColorPicker">
@@ -91,7 +91,7 @@
               ></button>
             </div>
             <button type="button" class="color-remove-btn" @click="removeTextColor">
-              <Icon icon="mdi:format-color-reset" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
+              <Icon icon="lucide:remove-formatting" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
             </button>
           </div>
         </div>
@@ -107,7 +107,7 @@
             :aria-expanded="showHighlightPicker"
             @click="toggleHighlightPicker"
           >
-            <Icon icon="mdi:marker" class="h-5 w-5" aria-hidden="true" />
+            <Icon icon="lucide:highlighter" class="h-5 w-5" aria-hidden="true" />
             <span class="color-swatch" :style="{ background: activeHighlightColor }"></span>
           </button>
           <div v-if="showHighlightPicker" class="color-dropdown" @mouseleave="closeHighlightPicker">
@@ -124,7 +124,7 @@
               ></button>
             </div>
             <button type="button" class="color-remove-btn" @click="removeHighlight">
-              <Icon icon="mdi:format-color-reset" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
+              <Icon icon="lucide:remove-formatting" class="h-4 w-4" aria-hidden="true" /> {{ t('common.clear') }}
             </button>
           </div>
         </div>
@@ -141,7 +141,7 @@
           :title="t('news.editor.heading1')"
           :aria-label="t('news.editor.heading1')"
         >
-          <Icon icon="mdi:format-header-1" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:heading-1" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -152,7 +152,7 @@
           :title="t('news.editor.heading2')"
           :aria-label="t('news.editor.heading2')"
         >
-          <Icon icon="mdi:format-header-2" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:heading-2" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -163,7 +163,7 @@
           :title="t('news.editor.heading3')"
           :aria-label="t('news.editor.heading3')"
         >
-          <Icon icon="mdi:format-header-3" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:heading-3" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -178,7 +178,7 @@
           :title="t('news.editor.alignLeft')"
           :aria-label="t('news.editor.alignLeft')"
         >
-          <Icon icon="mdi:format-align-left" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:align-left" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -189,7 +189,7 @@
           :title="t('news.editor.alignCenter')"
           :aria-label="t('news.editor.alignCenter')"
         >
-          <Icon icon="mdi:format-align-center" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:align-center" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -200,7 +200,7 @@
           :title="t('news.editor.alignRight')"
           :aria-label="t('news.editor.alignRight')"
         >
-          <Icon icon="mdi:format-align-right" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:align-right" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -211,7 +211,7 @@
           :title="t('news.editor.alignJustify')"
           :aria-label="t('news.editor.alignJustify')"
         >
-          <Icon icon="mdi:format-align-justify" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:align-justify" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -226,7 +226,7 @@
           :title="t('news.editor.bulletList')"
           :aria-label="t('news.editor.bulletList')"
         >
-          <Icon icon="mdi:format-list-bulleted" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:list" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -237,7 +237,7 @@
           :title="t('news.editor.orderedList')"
           :aria-label="t('news.editor.orderedList')"
         >
-          <Icon icon="mdi:format-list-numbered" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:list-ordered" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -252,7 +252,7 @@
           :title="t('news.editor.codeBlock')"
           :aria-label="t('news.editor.codeBlock')"
         >
-          <Icon icon="mdi:code-braces" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:braces" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -263,7 +263,7 @@
           :title="t('news.editor.blockquote')"
           :aria-label="t('news.editor.blockquote')"
         >
-          <Icon icon="mdi:format-quote-close" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:quote" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -272,7 +272,7 @@
           :title="t('news.editor.horizontalRule')"
           :aria-label="t('news.editor.horizontalRule')"
         >
-          <Icon icon="mdi:minus" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:minus" class="h-5 w-5" aria-hidden="true" />
         </button>
 
         <!-- Callout -->
@@ -287,7 +287,7 @@
             :class="{ 'is-active': editor.isActive('callout') }"
             class="toolbar-button"
           >
-            <Icon icon="mdi:message-alert-outline" class="h-5 w-5" aria-hidden="true" />
+            <Icon icon="lucide:message-square-warning" class="h-5 w-5" aria-hidden="true" />
           </button>
           <div v-if="showCalloutMenu" class="callout-type-dropdown" @mouseleave="closeCalloutMenu">
             <button
@@ -317,36 +317,36 @@
             :class="{ 'is-active': editor.isActive('table') }"
             class="toolbar-button"
           >
-            <Icon icon="mdi:table" class="h-5 w-5" aria-hidden="true" />
+            <Icon icon="lucide:table" class="h-5 w-5" aria-hidden="true" />
           </button>
           <div v-if="showTableMenu" class="table-dropdown" @mouseleave="closeTableMenu">
             <button type="button" class="table-menu-item" @click="insertTable">
-              <Icon icon="mdi:table-plus" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.insertTable') }}
+              <Icon icon="lucide:table" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.insertTable') }}
             </button>
             <template v-if="editor.isActive('table')">
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnBefore().run()">
-                <Icon icon="mdi:table-column-plus-before" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnBefore') }}
+                <Icon icon="lucide:between-vertical-start" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnBefore') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addColumnAfter().run()">
-                <Icon icon="mdi:table-column-plus-after" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnAfter') }}
+                <Icon icon="lucide:between-vertical-end" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addColumnAfter') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteColumn().run()">
-                <Icon icon="mdi:table-column-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteColumn') }}
+                <Icon icon="lucide:between-vertical-start" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteColumn') }}
               </button>
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowBefore().run()">
-                <Icon icon="mdi:table-row-plus-before" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowBefore') }}
+                <Icon icon="lucide:between-horizontal-start" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowBefore') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().addRowAfter().run()">
-                <Icon icon="mdi:table-row-plus-after" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowAfter') }}
+                <Icon icon="lucide:between-horizontal-end" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.addRowAfter') }}
               </button>
               <button type="button" class="table-menu-item" @click="editor.chain().focus().deleteRow().run()">
-                <Icon icon="mdi:table-row-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteRow') }}
+                <Icon icon="lucide:between-horizontal-start" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteRow') }}
               </button>
               <hr class="table-menu-divider" />
               <button type="button" class="table-menu-item table-menu-danger" @click="editor.chain().focus().deleteTable().run()">
-                <Icon icon="mdi:table-remove" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteTable') }}
+                <Icon icon="lucide:table-2" class="h-4 w-4" aria-hidden="true" /> {{ t('news.editor.deleteTable') }}
               </button>
             </template>
           </div>
@@ -364,7 +364,7 @@
           :title="t('news.editor.addLink')"
           :aria-label="t('news.editor.addLink')"
         >
-          <Icon icon="mdi:link-variant" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:link" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           v-if="editor.isActive('link')"
@@ -374,7 +374,7 @@
           :title="t('news.editor.removeLink')"
           :aria-label="t('news.editor.removeLink')"
         >
-          <Icon icon="mdi:link-variant-off" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:unlink" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -387,7 +387,7 @@
           :title="t('news.editor.insertImage')"
           :aria-label="t('news.editor.insertImage')"
         >
-          <Icon icon="mdi:image-plus" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:image-plus" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -396,7 +396,7 @@
           :title="t('news.editor.attachFile')"
           :aria-label="t('news.editor.attachFile')"
         >
-          <Icon icon="mdi:file-plus" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:file-plus" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -405,7 +405,7 @@
           :title="t('news.editor.embedVideo')"
           :aria-label="t('news.editor.embedVideo')"
         >
-          <Icon icon="mdi:video-plus" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:video" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -419,7 +419,7 @@
           :title="t('news.editor.undo')"
           :aria-label="t('news.editor.undo')"
         >
-          <Icon icon="mdi:undo" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:undo-2" class="h-5 w-5" aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -429,7 +429,7 @@
           :title="t('news.editor.redo')"
           :aria-label="t('news.editor.redo')"
         >
-          <Icon icon="mdi:redo" class="h-5 w-5" aria-hidden="true" />
+          <Icon icon="lucide:redo-2" class="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -450,7 +450,7 @@
           <div class="modal-header">
             <h3 :id="`${uid}-media-title`" class="modal-title">{{ t('news.editor.insertImage') }}</h3>
             <button type="button" :aria-label="t('common.close')" @click="showMediaModal = false" class="modal-close">
-              <Icon icon="mdi:close" class="h-6 w-6" aria-hidden="true" />
+              <Icon icon="lucide:x" class="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div class="modal-body">
@@ -462,7 +462,7 @@
                 :class="{ 'active': mediaTab === 'upload' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:upload" class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="lucide:upload" class="h-5 w-5" aria-hidden="true" />
                 {{ t('media.upload') }}
               </button>
               <button
@@ -472,7 +472,7 @@
                 :class="{ 'active': mediaTab === 'gallery' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:image-multiple" class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="lucide:images" class="h-5 w-5" aria-hidden="true" />
                 {{ t('directory.pickFromLibrary') }}
               </button>
             </div>
@@ -509,7 +509,7 @@
           <div class="modal-header">
             <h3 :id="`${uid}-file-title`" class="modal-title">{{ t('news.editor.attachFile') }}</h3>
             <button type="button" :aria-label="t('common.close')" @click="showFileModal = false" class="modal-close">
-              <Icon icon="mdi:close" class="h-6 w-6" aria-hidden="true" />
+              <Icon icon="lucide:x" class="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
           <div class="modal-body">
@@ -521,7 +521,7 @@
                 :class="{ 'active': fileTab === 'upload' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:upload" class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="lucide:upload" class="h-5 w-5" aria-hidden="true" />
                 {{ t('media.upload') }}
               </button>
               <button
@@ -531,7 +531,7 @@
                 :class="{ 'active': fileTab === 'gallery' }"
                 class="tab-button"
               >
-                <Icon icon="mdi:file-multiple" class="h-5 w-5" aria-hidden="true" />
+                <Icon icon="lucide:file" class="h-5 w-5" aria-hidden="true" />
                 {{ t('directory.pickFromLibrary') }}
               </button>
             </div>

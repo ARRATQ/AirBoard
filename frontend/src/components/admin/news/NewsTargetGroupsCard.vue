@@ -2,7 +2,7 @@
   <!-- Ciblage par groupe : obligatoire pour l'admin de groupe (au moins un de ses groupes) -->
   <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
     <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-      <Icon icon="mdi:account-group" class="h-5 w-5 text-primary-500" />
+      <Icon icon="lucide:users" class="h-5 w-5 text-primary-500" />
       {{ $t('groupAdmin.newsEditor.targetGroups') }} {{ $t('groupAdmin.newsEditor.targetGroupsRequired') }}
     </h3>
 
@@ -20,11 +20,11 @@
           :key="groupId"
           class="tag tag--acc"
         >
-          <Icon icon="mdi:account-group" class="h-3 w-3" />
+          <Icon icon="lucide:users" class="h-3 w-3" />
           {{ groupName(groupId) }}
           <Icon
             v-if="isLocked(groupId)"
-            icon="mdi:lock-outline"
+            icon="lucide:lock"
             class="h-3.5 w-3.5 opacity-70"
             :title="$t('adminShared.news.lockedGroup')"
             :aria-label="$t('adminShared.news.lockedGroup')"
@@ -36,7 +36,7 @@
             :aria-label="$t('adminShared.news.removeItem', { name: groupName(groupId) })"
             @click="removeGroup(groupId)"
           >
-            <Icon icon="mdi:close-circle" class="h-3.5 w-3.5" />
+            <Icon icon="lucide:circle-x" class="h-3.5 w-3.5" />
           </button>
         </span>
       </div>

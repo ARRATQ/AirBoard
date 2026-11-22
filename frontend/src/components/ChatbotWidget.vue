@@ -31,7 +31,7 @@
             :style="{ background: `linear-gradient(135deg, ${selectedBot.color || '#7c3aed'}, ${selectedBot.color || '#4f46e5'})` }"
           >
             <div class="flex items-center gap-2 min-w-0">
-              <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="h-5 w-5 text-white flex-shrink-0" />
+              <Icon :icon="selectedBot.icon || 'lucide:bot'" class="h-5 w-5 text-white flex-shrink-0" />
               <div class="min-w-0">
                 <p id="chatbot-panel-title" class="font-semibold text-white text-sm leading-tight truncate">
                   {{ selectedBot.welcome_title || selectedBot.name }}
@@ -50,7 +50,7 @@
                 :title="$t('chatbots.switchBot')"
                 :aria-label="$t('chatbots.switchBot')"
               >
-                <Icon icon="mdi:swap-horizontal" class="h-4 w-4" />
+                <Icon icon="lucide:arrow-left-right" class="h-4 w-4" />
               </button>
               <button
                 type="button"
@@ -59,10 +59,10 @@
                 :title="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
                 :aria-label="isFullscreen ? $t('chatbots.exitFullscreen') : $t('chatbots.fullscreen')"
               >
-                <Icon :icon="isFullscreen ? 'mdi:fullscreen-exit' : 'mdi:fullscreen'" class="h-4 w-4" />
+                <Icon :icon="isFullscreen ? 'lucide:minimize' : 'lucide:maximize'" class="h-4 w-4" />
               </button>
               <button type="button" @click="chatOpen = false" class="chatbot-panel-btn" :title="$t('common.close')" :aria-label="$t('common.close')">
-                <Icon icon="mdi:close" class="h-4 w-4" />
+                <Icon icon="lucide:x" class="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -98,7 +98,7 @@
             @click="dismissBubble"
           >
             <span class="chatbot-bubble-close" aria-hidden="true">
-              <Icon icon="mdi:close" class="h-3 w-3" />
+              <Icon icon="lucide:x" class="h-3 w-3" />
             </span>
             <span class="block font-semibold text-sm text-gray-900 dark:text-white leading-tight">
               {{ selectedBot.welcome_title || selectedBot.name }}
@@ -120,7 +120,7 @@
           }"
         >
           <div class="chatbot-avatar-shine" />
-          <Icon :icon="selectedBot.icon || 'mdi:robot-outline'" class="chatbot-avatar-icon" />
+          <Icon :icon="selectedBot.icon || 'lucide:bot'" class="chatbot-avatar-icon" />
         </div>
 
         <!-- Nom du bot -->
@@ -145,7 +145,7 @@
             class="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
             :style="{ background: (bot.color || '#4f46e5') + '22', border: '1px solid ' + (bot.color || '#4f46e5') }"
           >
-            <Icon :icon="bot.icon || 'mdi:robot-outline'" class="h-4 w-4" :style="{ color: bot.color || '#4f46e5' }" />
+            <Icon :icon="bot.icon || 'lucide:bot'" class="h-4 w-4" :style="{ color: bot.color || '#4f46e5' }" />
           </div>
           <div class="text-start">
             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ bot.name }}</p>
@@ -170,7 +170,7 @@
       :aria-expanded="chatOpen"
     >
       <Icon
-        :icon="chatOpen ? 'mdi:close' : (selectedBot ? selectedBot.icon || 'mdi:robot-outline' : 'mdi:robot-outline')"
+        :icon="chatOpen ? 'lucide:x' : (selectedBot ? selectedBot.icon || 'lucide:bot' : 'lucide:bot')"
         class="h-6 w-6 text-white transition-transform duration-200"
       />
     </button>

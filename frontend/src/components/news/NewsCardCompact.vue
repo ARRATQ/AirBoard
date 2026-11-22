@@ -22,7 +22,7 @@
         ></span>
         <Icon
           v-if="news.is_pinned"
-          icon="mdi:pin"
+          icon="lucide:pin"
           class="h-3 w-3 text-yellow-500"
           role="img"
           :title="t('news.detail.pinned')"
@@ -48,22 +48,22 @@
 
         <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
           <span class="flex items-center gap-1">
-            <Icon icon="mdi:calendar" class="h-3 w-3" />
+            <Icon icon="lucide:calendar" class="h-3 w-3" />
             {{ formatDate(news.published_at || news.created_at) }}
           </span>
 
           <span v-if="news.category" class="flex items-center gap-1">
-            <Icon :icon="news.category.icon || 'mdi:folder'" class="h-3 w-3" :style="{ color: news.category.color }" />
+            <Icon :icon="news.category.icon || 'lucide:folder'" class="h-3 w-3" :style="{ color: news.category.color }" />
             {{ news.category.name }}
           </span>
 
           <span class="flex items-center gap-1 ms-auto">
-            <Icon icon="mdi:eye" class="h-3 w-3" />
+            <Icon icon="lucide:eye" class="h-3 w-3" />
             {{ news.views || 0 }}
           </span>
 
           <span v-if="news.reactions && news.reactions.length > 0" class="flex items-center gap-1">
-            <Icon icon="mdi:heart" class="h-3 w-3" />
+            <Icon icon="lucide:heart" class="h-3 w-3" />
             {{ news.reactions.length }}
           </span>
         </div>

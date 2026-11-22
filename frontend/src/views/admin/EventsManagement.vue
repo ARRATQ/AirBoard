@@ -6,10 +6,10 @@
       <template #description>{{ isGlobal ? $t('events.admin.subtitle') : $t('groupAdmin.eventsManagement.subtitle') }}</template>
       <template #actions>
         <!-- Import des jours fériés : routes /admin/events/holidays/* réservées à l'admin global -->
-        <BaseButton v-if="isAdmin" variant="secondary" icon="mdi:calendar-star" @click="showImportHolidaysModal = true">
+        <BaseButton v-if="isAdmin" variant="secondary" icon="lucide:calendar-heart" @click="showImportHolidaysModal = true">
           {{ $t('events.holidays.importButton') }}
         </BaseButton>
-        <BaseButton tag="router-link" to="/admin/events/new" variant="primary" icon="mdi:plus">
+        <BaseButton tag="router-link" to="/admin/events/new" variant="primary" icon="lucide:plus">
           {{ $t('events.admin.newEvent') }}
         </BaseButton>
       </template>
@@ -17,7 +17,7 @@
 
     <!-- Rappel du périmètre pour l'admin de groupe -->
     <div v-if="!isGlobal" class="ev-callout" role="note">
-      <Icon icon="mdi:information-outline" class="ev-callout__icon" aria-hidden="true" />
+      <Icon icon="lucide:info" class="ev-callout__icon" aria-hidden="true" />
       <div>
         <p class="ev-callout__title">{{ $t('groupAdmin.eventsManagement.infoTitle') }}</p>
         <p class="ev-callout__text">{{ $t('groupAdmin.eventsManagement.infoDescription') }}</p>
@@ -27,11 +27,11 @@
     <!-- Aucun événement et aucun filtre : invitation à en créer un -->
     <EmptyState
       v-if="!isLoading && eventsList.length === 0 && !hasActiveFilters"
-      icon="mdi:calendar"
+      icon="lucide:calendar"
       :title="$t('events.admin.noEvents')"
       :description="emptyDescription"
     >
-      <BaseButton tag="router-link" to="/admin/events/new" variant="primary" size="sm" icon="mdi:plus">
+      <BaseButton tag="router-link" to="/admin/events/new" variant="primary" size="sm" icon="lucide:plus">
         {{ $t('events.admin.createEvent') }}
       </BaseButton>
     </EmptyState>
@@ -49,7 +49,7 @@
       >
         <template #toolbar>
           <label class="ev-search">
-            <Icon icon="mdi:magnify" class="ev-search__icon" aria-hidden="true" />
+            <Icon icon="lucide:search" class="ev-search__icon" aria-hidden="true" />
             <input
               v-model="filters.search"
               type="search"
@@ -88,8 +88,8 @@
         <template #cell-title="{ row }">
           <span class="ev-title">
             <span class="ev-title__line">
-              <Icon v-if="row.raw.is_recurring" icon="mdi:repeat" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.recurring')" />
-              <Icon v-if="row.raw.is_all_day" icon="mdi:weather-sunny" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.allDay')" />
+              <Icon v-if="row.raw.is_recurring" icon="lucide:repeat" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.recurring')" />
+              <Icon v-if="row.raw.is_all_day" icon="lucide:sun" class="ev-title__flag" :title="$t('groupAdmin.eventsManagement.indicators.allDay')" />
               <router-link
                 v-if="row.raw.slug"
                 :to="{ name: 'EventDetail', params: { slug: row.raw.slug } }"
@@ -118,7 +118,7 @@
               :title="$t('events.admin.edit')"
               :aria-label="`${$t('events.admin.edit')} : ${row.title}`"
             >
-              <Icon icon="mdi:pencil-outline" aria-hidden="true" />
+              <Icon icon="lucide:pencil" aria-hidden="true" />
             </router-link>
             <button
               type="button"
@@ -127,7 +127,7 @@
               :aria-label="`${row.raw.is_published ? $t('events.admin.unpublish') : $t('events.admin.publish')} : ${row.title}`"
               @click="togglePublish(row.raw)"
             >
-              <Icon :icon="row.raw.is_published ? 'mdi:eye-off-outline' : 'mdi:eye-outline'" aria-hidden="true" />
+              <Icon :icon="row.raw.is_published ? 'lucide:eye-off' : 'lucide:eye'" aria-hidden="true" />
             </button>
           </RowActions>
         </template>
@@ -135,9 +135,9 @@
 
       <!-- Pagination serveur -->
       <nav v-if="pagination.pages > 1" class="ev-pager" :aria-label="$t('events.admin.pageInfo', { page: pagination.page, pages: pagination.pages })">
-        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-left" :disabled="pagination.page === 1" :aria-label="$t('ui.table.prev')" @click="changePage(pagination.page - 1)" />
+        <BaseButton variant="secondary" size="sm" icon="lucide:chevron-left" :disabled="pagination.page === 1" :aria-label="$t('ui.table.prev')" @click="changePage(pagination.page - 1)" />
         <span class="ev-mono">{{ $t('events.admin.pageInfo', { page: pagination.page, pages: pagination.pages }) }}</span>
-        <BaseButton variant="secondary" size="sm" icon="mdi:chevron-right" :disabled="pagination.page === pagination.pages" :aria-label="$t('ui.table.next')" @click="changePage(pagination.page + 1)" />
+        <BaseButton variant="secondary" size="sm" icon="lucide:chevron-right" :disabled="pagination.page === pagination.pages" :aria-label="$t('ui.table.next')" @click="changePage(pagination.page + 1)" />
       </nav>
     </template>
 

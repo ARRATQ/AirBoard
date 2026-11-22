@@ -7,7 +7,7 @@
         {{ isGlobal ? $t('applications.subtitle') : $t('groupAdmin.applicationsManagement.subtitle') }}
       </template>
       <template #actions>
-        <BaseButton variant="primary" icon="mdi:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
+        <BaseButton variant="primary" icon="lucide:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
           {{ $t('applications.new') }}
         </BaseButton>
       </template>
@@ -15,7 +15,7 @@
 
     <!-- Aucun groupe de ressources : impossible d'ajouter une ressource -->
     <div v-if="hasNoAppGroups" class="am-callout" role="note">
-      <Icon icon="mdi:information-outline" class="am-callout__icon" aria-hidden="true" />
+      <Icon icon="lucide:info" class="am-callout__icon" aria-hidden="true" />
       <div>
         <p class="am-callout__title">{{ $t('groupAdmin.applicationsManagement.noAppGroups') }}</p>
         <p class="am-callout__text">{{ $t('groupAdmin.applicationsManagement.noAppGroupsHelp') }}</p>
@@ -25,11 +25,11 @@
     <!-- Aucune ressource : invitation à en créer une -->
     <EmptyState
       v-if="!appStore.loading && applications.length === 0"
-      icon="mdi:application-outline"
+      icon="lucide:app-window"
       :title="$t('applications.emptyTitle')"
       :description="$t('applications.emptyText')"
     >
-      <BaseButton variant="primary" size="sm" icon="mdi:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
+      <BaseButton variant="primary" size="sm" icon="lucide:plus" :disabled="hasNoAppGroups" @click="openCreateModal">
         {{ $t('applications.add') }}
       </BaseButton>
     </EmptyState>
@@ -64,7 +64,7 @@
 
       <template #cell-name="{ row }">
         <span class="am-name">
-          <Icon :icon="row.raw.icon || 'mdi:application-outline'" class="am-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
+          <Icon :icon="row.raw.icon || 'lucide:app-window'" class="am-name__icon" :style="{ color: row.raw.color || undefined }" aria-hidden="true" />
           <span class="am-name__text">
             <span class="am-name__title">{{ row.name }}</span>
             <a :href="row.url" target="_blank" rel="noopener noreferrer" class="am-name__url" dir="ltr">{{ row.url }}</a>

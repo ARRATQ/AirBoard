@@ -41,17 +41,17 @@ const viewModes = [
   {
     value: 'grid',
     labelKey: 'dashboard.viewModes.grid',
-    icon: 'mdi:view-grid'
+    icon: 'lucide:layout-grid'
   },
   {
     value: 'list',
     labelKey: 'dashboard.viewModes.list',
-    icon: 'mdi:view-list'
+    icon: 'lucide:list'
   },
   {
     value: 'compact',
     labelKey: 'news.viewModes.compact',
-    icon: 'mdi:view-compact'
+    icon: 'lucide:rows-4'
   }
 ]
 </script>

@@ -30,11 +30,11 @@
 
     <span v-if="announcements.length > 1" class="ann__nav">
       <button type="button" class="ann__btn" :aria-label="$t('home.announcements.prev')" @click="prev">
-        <Icon icon="mdi:chevron-left" class="ann__chev" aria-hidden="true" />
+        <Icon icon="lucide:chevron-left" class="ann__chev" aria-hidden="true" />
       </button>
       <span class="ann__count">{{ index + 1 }}/{{ announcements.length }}</span>
       <button type="button" class="ann__btn" :aria-label="$t('home.announcements.next')" @click="next">
-        <Icon icon="mdi:chevron-right" class="ann__chev" aria-hidden="true" />
+        <Icon icon="lucide:chevron-right" class="ann__chev" aria-hidden="true" />
       </button>
       <button
         v-if="!motionReduced"
@@ -44,7 +44,7 @@
         :aria-pressed="userPaused"
         @click="togglePause"
       >
-        <Icon :icon="userPaused ? 'mdi:play' : 'mdi:pause'" class="ann__chev ann__chev--fixed" aria-hidden="true" />
+        <Icon :icon="userPaused ? 'lucide:play' : 'lucide:pause'" class="ann__chev ann__chev--fixed" aria-hidden="true" />
       </button>
     </span>
 
@@ -69,10 +69,10 @@ const props = defineProps({
 
 const ROTATE_MS = 5000
 const ICONS = {
-  info: 'mdi:information-outline',
-  warning: 'mdi:alert-outline',
-  success: 'mdi:check-circle-outline',
-  error: 'mdi:alert-circle-outline',
+  info: 'lucide:info',
+  warning: 'lucide:triangle-alert',
+  success: 'lucide:circle-check',
+  error: 'lucide:circle-alert',
 }
 
 const index = ref(0)

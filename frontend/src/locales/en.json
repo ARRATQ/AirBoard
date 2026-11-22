@@ -2816,30 +2816,23 @@
       "info": "Information"
     },
     "iconInput": {
-      "placeholder": "e.g. mdi:home, lucide:settings, heroicons:user",
-      "popular": "Popular suggestions:",
-      "help": "Use the \"collection:name\" format with mdi, lucide or heroicons (e.g. mdi:home, lucide:user, heroicons:cog). Search on iconify.design",
-      "suggestions": {
-        "user": "User",
-        "folder": "Folder",
-        "document": "Document",
-        "chart": "Chart",
-        "application": "Application",
-        "web": "Web",
-        "database": "Database",
-        "server": "Server",
-        "cloud": "Cloud",
-        "email": "Email",
-        "chat": "Chat",
-        "calendar": "Calendar",
-        "tools": "Tools",
-        "groups": "Groups",
-        "team": "Team",
-        "security": "Security",
-        "development": "Development",
-        "analytics": "Analytics",
-        "business": "Business"
-      }
+      "placeholder": "e.g. lucide:house, mdi:home",
+      "popular": "Suggestions",
+      "browse": "Browse",
+      "close": "Close",
+      "searchLabel": "Search for an icon",
+      "searchPlaceholder": "Search (home, user, mail…)",
+      "styleLabel": "Icon style",
+      "styles": {
+        "all": "All",
+        "line": "Thin line",
+        "solid": "Solid"
+      },
+      "loading": "Searching…",
+      "noResults": "No icon found.",
+      "searchError": "The Iconify catalogue cannot be reached. You can type the name by hand.",
+      "invalid": "Expected format: collection:name (e.g. lucide:house).",
+      "source": "Iconify catalogue — over 200,000 free icons."
     }
   },
   "chat": {

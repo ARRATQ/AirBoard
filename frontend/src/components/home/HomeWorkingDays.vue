@@ -7,7 +7,7 @@
     </template>
     <template #note>
       <p v-if="loadFailed" class="wd__note" role="status">
-        <Icon icon="mdi:alert-circle-outline" aria-hidden="true" />
+        <Icon icon="lucide:circle-alert" aria-hidden="true" />
         {{ $t('home.workingDays.holidaysUnavailable') }}
       </p>
     </template>

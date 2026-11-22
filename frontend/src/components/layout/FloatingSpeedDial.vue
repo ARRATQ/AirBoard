@@ -32,7 +32,7 @@
       >
         <span class="speed-dial-label">{{ $t('chatbots.assistants') }}</span>
         <span class="speed-dial-btn speed-dial-btn--indigo" aria-hidden="true">
-          <Icon icon="mdi:robot-outline" class="h-5 w-5 text-white" />
+          <Icon icon="lucide:bot" class="h-5 w-5 text-white" />
         </span>
       </button>
 
@@ -45,7 +45,7 @@
       >
         <span class="speed-dial-label">{{ $t('chat.title') }}</span>
         <span class="speed-dial-btn speed-dial-btn--blue">
-          <Icon icon="mdi:chat" class="h-5 w-5 text-white" aria-hidden="true" />
+          <Icon icon="lucide:message-circle" class="h-5 w-5 text-white" aria-hidden="true" />
           <span v-if="totalUnread > 0" class="speed-dial-badge">
             <span class="sr-only">{{ $t('chat.unreadCount', { count: totalUnread }, totalUnread) }}</span>
             <span aria-hidden="true">{{ totalUnread > 99 ? '99+' : totalUnread }}</span>
@@ -82,14 +82,14 @@
         <!-- Icône fermer -->
         <transition name="sd-face">
           <div v-if="dialOpen" key="close" class="sd-face-slot">
-            <Icon icon="mdi:close" class="h-6 w-6 text-white" />
+            <Icon icon="lucide:x" class="h-6 w-6 text-white" />
           </div>
         </transition>
 
         <!-- Visage utilisateur -->
         <transition name="sd-face">
           <div v-if="!dialOpen && faceMode === 'user'" key="user" class="sd-face-slot">
-            <Icon icon="mdi:account-circle" class="text-white" style="font-size: 26px; margin-top: 2px;" />
+            <Icon icon="lucide:circle-user" class="text-white" style="font-size: 26px; margin-top: 2px;" />
             <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;" aria-hidden="true">CHAT</span>
           </div>
         </transition>
@@ -97,7 +97,7 @@
         <!-- Visage IA -->
         <transition name="sd-face">
           <div v-if="!dialOpen && faceMode === 'ai'" key="ai" class="sd-face-slot">
-            <Icon icon="mdi:robot-happy-outline" class="text-white" style="font-size: 26px; margin-top: 2px;" />
+            <Icon icon="lucide:bot" class="text-white" style="font-size: 26px; margin-top: 2px;" />
             <span style="font-size: 7px; color: rgba(255,255,255,0.7); letter-spacing: 0.05em;" aria-hidden="true">AI</span>
           </div>
         </transition>

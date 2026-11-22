@@ -15,18 +15,18 @@
 
     <div class="ot-controls" @pointerdown.stop>
       <button type="button" class="ot-control" :title="$t('directory.zoomIn')" :aria-label="$t('directory.zoomIn')" @click="zoomBy(1.2)">
-        <Icon icon="mdi:plus" class="h-4 w-4" />
+        <Icon icon="lucide:plus" class="h-4 w-4" />
       </button>
       <span class="ot-zoom-level">{{ Math.round(scale * 100) }}%</span>
       <button type="button" class="ot-control" :title="$t('directory.zoomOut')" :aria-label="$t('directory.zoomOut')" @click="zoomBy(1 / 1.2)">
-        <Icon icon="mdi:minus" class="h-4 w-4" />
+        <Icon icon="lucide:minus" class="h-4 w-4" />
       </button>
       <span class="ot-controls__sep" />
       <button type="button" class="ot-control" :title="$t('directory.fitToScreen')" :aria-label="$t('directory.fitToScreen')" @click="fit">
-        <Icon icon="mdi:fit-to-screen-outline" class="h-4 w-4" />
+        <Icon icon="lucide:scan" class="h-4 w-4" />
       </button>
       <button type="button" class="ot-control" :title="$t('directory.actualSize')" :aria-label="$t('directory.actualSize')" @click="resetTop">
-        <Icon icon="mdi:magnify-scan" class="h-4 w-4" />
+        <Icon icon="lucide:scan-search" class="h-4 w-4" />
       </button>
     </div>
     <p class="ot-hint">{{ $t('directory.panHint') }}</p>

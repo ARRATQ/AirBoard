@@ -21,7 +21,7 @@
             :aria-label="$t('common.close')"
             @click="$emit('close')"
           >
-            <Icon icon="mdi:close" class="h-6 w-6" />
+            <Icon icon="lucide:x" class="h-6 w-6" />
           </button>
         </div>
 

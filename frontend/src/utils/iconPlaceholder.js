@@ -1,7 +1,7 @@
-// Icône saisie en base dans une collection non embarquée (autre que mdi, lucide, heroicons) :
-// plutôt qu'un vide, on affiche un pictogramme neutre, sans aucune requête vers api.iconify.design.
+// Icône d'une collection non embarquée (autre que mdi, lucide, heroicons) quand l'API Iconify
+// est hors d'atteinte : plutôt qu'un vide, on affiche un pictogramme neutre, servi localement.
 
-/** Corps SVG de mdi:shape-outline (24 × 24). */
+/** Corps SVG de lucide:shapes (24 × 24). */
 export const PLACEHOLDER_BODY =
   '<path fill="currentColor" d="M11 13.5v8H3v-8zm-2 2H5v4h4zM12 2l5.5 9h-11zm0 3.86L10.08 9h3.84zM17.5 13c2.5 0 4.5 2 4.5 4.5S20 22 17.5 22S13 20 13 17.5s2-4.5 4.5-4.5m0 2a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5"/>'
 

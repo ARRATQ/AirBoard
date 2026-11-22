@@ -23,7 +23,7 @@
           :aria-label="t('ui.toast.close')"
           @click="appStore.removeNotification(notification.id)"
         >
-          <Icon icon="mdi:close" aria-hidden="true" />
+          <Icon icon="lucide:x" aria-hidden="true" />
         </button>
       </li>
     </TransitionGroup>
@@ -40,10 +40,10 @@ const appStore = useAppStore()
 const { t } = useI18n()
 
 const ICONS = {
-  success: 'mdi:check-circle-outline',
-  error: 'mdi:alert-circle-outline',
-  warning: 'mdi:alert-outline',
-  info: 'mdi:information-outline',
+  success: 'lucide:circle-check',
+  error: 'lucide:circle-alert',
+  warning: 'lucide:triangle-alert',
+  info: 'lucide:info',
 }
 
 const toneOf = (type) => (ICONS[type] ? type : 'info')

@@ -9,7 +9,7 @@
         <!-- Search -->
         <div class="md:col-span-2">
           <div class="relative">
-            <Icon icon="mdi:magnify" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Icon icon="lucide:search" class="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
               v-model="filters.search"
               type="text"
@@ -50,13 +50,13 @@
 
     <!-- Chargement -->
     <div v-if="loading" class="loading-state">
-      <Icon icon="mdi:loading" class="spin loading-icon" />
+      <Icon icon="lucide:loader-circle" class="spin loading-icon" />
       <p>{{ t('polls.loading') }}</p>
     </div>
 
     <!-- Liste vide -->
     <div v-else-if="polls.length === 0" class="empty-state">
-      <Icon icon="mdi:poll-box-outline" class="empty-icon" />
+      <Icon icon="lucide:chart-column" class="empty-icon" />
       <h3>{{ t('polls.empty.title') }}</h3>
       <p>{{ t('polls.empty.description') }}</p>
     </div>
@@ -83,7 +83,7 @@
           :disabled="pagination.page === 1"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-left" class="rtl-flip h-5 w-5" />
+          <Icon icon="lucide:chevron-left" class="rtl-flip h-5 w-5" />
         </button>
 
         <button
@@ -105,7 +105,7 @@
           :disabled="pagination.page === pagination.total_pages"
           class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Icon icon="mdi:chevron-right" class="rtl-flip h-5 w-5" />
+          <Icon icon="lucide:chevron-right" class="rtl-flip h-5 w-5" />
         </button>
       </nav>
     </div>

@@ -2,7 +2,7 @@
   <div class="w-full p-6 space-y-6">
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <RouterLink to="/suggestions" class="suggestion-back-btn">
-        <Icon class="rtl-flip" icon="mdi:arrow-left" />
+        <Icon class="rtl-flip" icon="lucide:arrow-left" />
         {{ t('suggestions.backToList') }}
       </RouterLink>
 
@@ -19,12 +19,12 @@
     </div>
 
     <div v-if="loading" class="loading-state">
-      <Icon icon="mdi:loading" class="animate-spin text-2xl text-amber-500" />
+      <Icon icon="lucide:loader-circle" class="animate-spin text-2xl text-amber-500" />
       <p>{{ t('suggestions.loading') }}</p>
     </div>
 
     <div v-else-if="!suggestion" class="empty-state">
-      <Icon icon="mdi:lightbulb-off-outline" class="text-5xl text-gray-400" />
+      <Icon icon="lucide:lightbulb-off" class="text-5xl text-gray-400" />
       <h3>{{ t('suggestions.notFound') }}</h3>
     </div>
 
@@ -45,7 +45,7 @@
         <p class="mt-5 text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">{{ suggestion.description }}</p>
 
         <div v-if="suggestion.poll" class="mt-4 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-          <Icon icon="mdi:poll" class="h-4 w-4" />
+          <Icon icon="lucide:chart-column" class="h-4 w-4" />
           <span>{{ t('suggestions.linkedPoll') }}: {{ suggestion.poll.title }}</span>
         </div>
 
@@ -55,7 +55,7 @@
             :class="suggestion.user_vote === 'up' ? 'vote-button-active-up' : 'vote-button-up'"
             @click="handleVote('up')"
           >
-            <Icon icon="mdi:thumb-up" class="h-4 w-4" />
+            <Icon icon="lucide:thumbs-up" class="h-4 w-4" />
             <span>{{ t('suggestions.voteFor') }}</span>
             <span class="vote-count">{{ suggestion.upvotes || 0 }}</span>
           </button>
@@ -65,7 +65,7 @@
             :class="suggestion.user_vote === 'down' ? 'vote-button-active-down' : 'vote-button-down'"
             @click="handleVote('down')"
           >
-            <Icon icon="mdi:thumb-down" class="h-4 w-4" />
+            <Icon icon="lucide:thumbs-down" class="h-4 w-4" />
             <span>{{ t('suggestions.voteAgainst') }}</span>
             <span class="vote-count">{{ suggestion.downvotes || 0 }}</span>
           </button>

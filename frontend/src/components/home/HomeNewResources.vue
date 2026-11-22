@@ -16,7 +16,7 @@
           :target="app.open_in_new_tab ? '_blank' : undefined"
           rel="noopener noreferrer"
         >
-          <span class="nr__icon"><Icon :icon="app.icon || 'mdi:application'" aria-hidden="true" /></span>
+          <span class="nr__icon"><Icon :icon="app.icon || 'lucide:app-window'" aria-hidden="true" /></span>
           <span class="nr__body">
             <span class="nr__name" dir="auto">{{ app.name }}</span>
             <span class="nr__meta">

@@ -27,7 +27,7 @@
           <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600 flex-shrink-0">
             <div class="flex items-center gap-3">
               <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                <Icon icon="mdi:help-circle" class="h-6 w-6 text-primary-600" />
+                <Icon icon="lucide:circle-help" class="h-6 w-6 text-primary-600" />
               </div>
               <div>
                 <h2 id="help-drawer-title" class="text-lg font-semibold text-white">{{ $t('help.title') }}</h2>
@@ -40,7 +40,7 @@
               class="text-white hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-white/10"
               :aria-label="$t('common.close')"
             >
-              <Icon icon="mdi:close" class="h-6 w-6" />
+              <Icon icon="lucide:x" class="h-6 w-6" />
             </button>
           </div>
 
@@ -80,7 +80,7 @@
                   >
                     <span>{{ section.title }}</span>
                     <Icon
-                      :icon="expandedSections.includes(section.id) ? 'mdi:chevron-down' : 'mdi:chevron-right'"
+                      :icon="expandedSections.includes(section.id) ? 'lucide:chevron-down' : 'lucide:chevron-right'"
                       class="rtl-flip h-4 w-4"
                     />
                   </button>
@@ -111,7 +111,7 @@
             <div class="flex-1 overflow-y-auto">
               <div v-if="loading" class="flex items-center justify-center h-full">
                 <div class="text-center">
-                  <Icon icon="mdi:loading" class="h-8 w-8 text-primary-500 animate-spin mx-auto mb-2" />
+                  <Icon icon="lucide:loader-circle" class="h-8 w-8 text-primary-500 animate-spin mx-auto mb-2" />
                   <p class="text-gray-500 dark:text-gray-400">{{ $t('help.loading') }}</p>
                 </div>
               </div>
@@ -124,7 +124,7 @@
                   <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <Icon :icon="currentGuide?.icon" class="h-4 w-4" />
                     <span>{{ currentGuide?.label }}</span>
-                    <Icon icon="mdi:chevron-right" class="rtl-flip h-4 w-4" />
+                    <Icon icon="lucide:chevron-right" class="rtl-flip h-4 w-4" />
                     <span>{{ selectedPage.section }}</span>
                   </div>
                 </div>
@@ -137,7 +137,7 @@
               </div>
               <div v-else class="flex items-center justify-center h-full">
                 <div class="text-center p-8">
-                  <Icon icon="mdi:book-open-page-variant" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                  <Icon icon="lucide:book-open-text" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                   <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {{ $t('help.selectTopic') }}
                   </h3>
@@ -154,7 +154,7 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <Icon icon="mdi:account" class="h-4 w-4" />
+                  <Icon icon="lucide:user" class="h-4 w-4" />
                   <span>{{ $t('help.yourRole') }}: <strong class="text-gray-700 dark:text-gray-300">{{ userRoleLabel }}</strong></span>
                 </div>
               </div>
@@ -212,7 +212,7 @@ const allGuides = computed(() => [
   {
     id: 'user',
     label: t('help.guides.user'),
-    icon: 'mdi:account',
+    icon: 'lucide:user',
     roles: ['user', 'editor', 'admin'], // Available to all
     sections: [
       {
@@ -239,7 +239,7 @@ const allGuides = computed(() => [
   {
     id: 'editor',
     label: t('help.guides.editor'),
-    icon: 'mdi:pencil',
+    icon: 'lucide:pencil',
     roles: ['editor', 'admin'], // Only for editors and admins
     sections: [
       {
@@ -264,7 +264,7 @@ const allGuides = computed(() => [
   {
     id: 'group-admin',
     label: t('help.guides.groupAdmin'),
-    icon: 'mdi:shield-account',
+    icon: 'lucide:shield-user',
     roles: ['admin'], // Only for admins (or users with managed groups)
     sections: [
       {
@@ -290,7 +290,7 @@ const allGuides = computed(() => [
   {
     id: 'admin',
     label: t('help.guides.admin'),
-    icon: 'mdi:shield-crown',
+    icon: 'lucide:shield-check',
     roles: ['admin'], // Only for admins
     sections: [
       {

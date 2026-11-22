@@ -11,7 +11,7 @@
                   class="h-10 w-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white shadow-sm"
                   :style="{ backgroundColor: form.color }"
                 >
-                  <Icon :icon="form.icon || 'mdi:application'" class="h-5 w-5" />
+                  <Icon :icon="form.icon || 'lucide:app-window'" class="h-5 w-5" />
                 </div>
                 <div class="min-w-0">
                   <h3 id="application-modal-title" class="modal-title truncate">
@@ -23,7 +23,7 @@
                 </div>
               </div>
               <button type="button" class="btn btn-ghost p-2" :aria-label="$t('common.close')" @click="closeModal">
-                <Icon icon="mdi:close" class="h-5 w-5" />
+                <Icon icon="lucide:x" class="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -33,7 +33,7 @@
             <!-- Colonne gauche -->
             <div class="space-y-4">
               <div class="section-header mb-0">
-                <Icon icon="mdi:information-outline" class="section-icon" />
+                <Icon icon="lucide:info" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.applicationModal.basicInfo') }}</h4>
               </div>
 
@@ -60,7 +60,7 @@
               <div class="form-group mb-0">
                 <label for="url" class="form-label form-label-required">{{ $t('groupAdmin.applicationModal.applicationUrl') }}</label>
                 <div class="relative">
-                  <Icon icon="mdi:link-variant" class="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Icon icon="lucide:link" class="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     id="url"
                     v-model="form.url"
@@ -149,13 +149,13 @@
             <!-- Colonne droite -->
             <div class="space-y-4">
               <div class="section-header mb-0">
-                <Icon icon="mdi:palette-outline" class="section-icon" />
+                <Icon icon="lucide:palette" class="section-icon" />
                 <h4 class="section-title">{{ $t('groupAdmin.applicationModal.appearance') }}</h4>
               </div>
 
               <div class="card p-3">
                 <div class="flex items-center gap-3">
-                  <Icon :icon="form.icon || 'mdi:application'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
+                  <Icon :icon="form.icon || 'lucide:app-window'" class="h-9 w-9 flex-shrink-0" :style="{ color: form.color }" />
                   <div class="min-w-0 flex-1">
                     <div class="font-medium text-gray-900 dark:text-white truncate">
                       {{ form.name || $t('groupAdmin.applicationModal.previewName') }}
@@ -164,7 +164,7 @@
                       {{ form.url || $t('groupAdmin.applicationModal.previewUrl') }}
                     </div>
                   </div>
-                  <Icon v-if="form.open_in_new_tab" icon="mdi:open-in-new" class="h-4 w-4 text-gray-400" />
+                  <Icon v-if="form.open_in_new_tab" icon="lucide:external-link" class="h-4 w-4 text-gray-400" />
                 </div>
               </div>
 
@@ -191,9 +191,8 @@
               <IconInput
                 v-model="form.icon"
                 :label="$t('groupAdmin.applicationModal.icon')"
-                placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
+                placeholder="lucide:app-window, lucide:app-window, heroicons:squares-2x2"
                 category="application"
-                :show-suggestions="true"
               />
             </div>
           </div>
@@ -204,8 +203,8 @@
             <div class="modal-footer-actions">
               <button type="button" class="btn btn-secondary" @click="closeModal">{{ $t('common.cancel') }}</button>
               <button type="submit" :disabled="loading || availableAppGroups.length === 0" class="btn btn-primary">
-                <Icon v-if="loading" icon="mdi:loading" class="animate-spin h-4 w-4 me-2" />
-                <Icon v-else :icon="isEdit ? 'mdi:content-save' : 'mdi:plus'" class="h-4 w-4 me-2" />
+                <Icon v-if="loading" icon="lucide:loader-circle" class="animate-spin h-4 w-4 me-2" />
+                <Icon v-else :icon="isEdit ? 'lucide:save' : 'lucide:plus'" class="h-4 w-4 me-2" />
                 {{ isEdit ? $t('groupAdmin.applicationModal.update') : $t('groupAdmin.applicationModal.create') }}
               </button>
             </div>
@@ -253,7 +252,7 @@ const emit = defineEmits(['close', 'submit'])
 const { t } = useI18n()
 
 const DEFAULT_COLOR = '#6366f1'
-const DEFAULT_ICON = 'mdi:application'
+const DEFAULT_ICON = 'lucide:app-window'
 
 const loading = ref(false)
 const errors = ref({})

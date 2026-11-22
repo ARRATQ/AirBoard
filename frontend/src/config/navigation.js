@@ -9,21 +9,21 @@ import { ADMIN, GROUP_ADMIN, CONTENT, canAccess } from './access'
 
 /** Espace utilisateur : visible par tous, jamais filtré */
 export const USER_NAV = [
-  { to: '/home', icon: 'mdi:home', labelKey: 'common.home' },
-  { to: '/resources', icon: 'mdi:application', labelKey: 'common.applications' },
-  { to: '/news', icon: 'mdi:newspaper', labelKey: 'common.newsHub' },
-  { to: '/events', icon: 'mdi:calendar', labelKey: 'common.events' },
-  { to: '/polls', icon: 'mdi:poll', labelKey: 'common.polls' },
-  { to: '/suggestions', icon: 'mdi:lightbulb-on-outline', labelKey: 'common.suggestions' },
-  { to: '/gamification', icon: 'mdi:medal', labelKey: 'common.gamification' },
-  { to: '/directory', icon: 'mdi:account-group-outline', labelKey: 'directory.title' },
-  { to: '/search', icon: 'mdi:magnify', labelKey: 'search.title' }
+  { to: '/home', icon: 'lucide:house', labelKey: 'common.home' },
+  { to: '/resources', icon: 'lucide:app-window', labelKey: 'common.applications' },
+  { to: '/news', icon: 'lucide:newspaper', labelKey: 'common.newsHub' },
+  { to: '/events', icon: 'lucide:calendar', labelKey: 'common.events' },
+  { to: '/polls', icon: 'lucide:chart-column', labelKey: 'common.polls' },
+  { to: '/suggestions', icon: 'lucide:lightbulb', labelKey: 'common.suggestions' },
+  { to: '/gamification', icon: 'lucide:medal', labelKey: 'common.gamification' },
+  { to: '/directory', icon: 'lucide:users', labelKey: 'directory.title' },
+  { to: '/search', icon: 'lucide:search', labelKey: 'search.title' }
 ]
 
 /** Page d'accueil de l'administration */
 export const ADMIN_OVERVIEW = {
   to: '/admin',
-  icon: 'mdi:view-dashboard-outline',
+  icon: 'lucide:layout-dashboard',
   labelKey: 'nav.admin.overview',
   access: GROUP_ADMIN,
   exact: true
@@ -34,54 +34,54 @@ export const ADMIN_SECTIONS = [
   {
     id: 'content',
     labelKey: 'nav.admin.content',
-    icon: 'mdi:file-document-multiple',
+    icon: 'lucide:file-text',
     items: [
-      { to: '/admin/news', icon: 'mdi:newspaper', labelKey: 'nav.admin.news', access: CONTENT },
-      { to: '/admin/events', icon: 'mdi:calendar-edit', labelKey: 'nav.admin.events', access: CONTENT },
-      { to: '/admin/polls', icon: 'mdi:poll', labelKey: 'nav.admin.polls', access: GROUP_ADMIN },
-      { to: '/admin/announcements', icon: 'mdi:bullhorn', labelKey: 'nav.admin.announcements', access: ADMIN },
-      { to: '/admin/media', icon: 'mdi:image-multiple', labelKey: 'nav.admin.media', access: ADMIN }
+      { to: '/admin/news', icon: 'lucide:newspaper', labelKey: 'nav.admin.news', access: CONTENT },
+      { to: '/admin/events', icon: 'lucide:calendar-cog', labelKey: 'nav.admin.events', access: CONTENT },
+      { to: '/admin/polls', icon: 'lucide:chart-column', labelKey: 'nav.admin.polls', access: GROUP_ADMIN },
+      { to: '/admin/announcements', icon: 'lucide:megaphone', labelKey: 'nav.admin.announcements', access: ADMIN },
+      { to: '/admin/media', icon: 'lucide:images', labelKey: 'nav.admin.media', access: ADMIN }
     ]
   },
   {
     id: 'community',
     labelKey: 'nav.admin.community',
-    icon: 'mdi:account-voice',
+    icon: 'lucide:user-round',
     items: [
-      { to: '/admin/suggestions', icon: 'mdi:lightbulb-on-outline', labelKey: 'nav.admin.suggestions', access: ADMIN },
-      { to: '/admin/comments', icon: 'mdi:comment-text-outline', labelKey: 'nav.admin.moderation', access: ADMIN },
-      { to: '/admin/gamification', icon: 'mdi:medal-outline', labelKey: 'nav.admin.gamification', access: ADMIN },
-      { to: '/admin/directory', icon: 'mdi:sitemap-outline', labelKey: 'nav.admin.directory', access: ADMIN }
+      { to: '/admin/suggestions', icon: 'lucide:lightbulb', labelKey: 'nav.admin.suggestions', access: ADMIN },
+      { to: '/admin/comments', icon: 'lucide:message-square-text', labelKey: 'nav.admin.moderation', access: ADMIN },
+      { to: '/admin/gamification', icon: 'lucide:medal', labelKey: 'nav.admin.gamification', access: ADMIN },
+      { to: '/admin/directory', icon: 'lucide:network', labelKey: 'nav.admin.directory', access: ADMIN }
     ]
   },
   {
     id: 'resources',
     labelKey: 'nav.admin.resources',
-    icon: 'mdi:apps-box',
+    icon: 'lucide:layout-grid',
     items: [
-      { to: '/admin/resources', icon: 'mdi:apps', labelKey: 'nav.admin.resources', access: GROUP_ADMIN }
+      { to: '/admin/resources', icon: 'lucide:layout-grid', labelKey: 'nav.admin.resources', access: GROUP_ADMIN }
     ]
   },
   {
     id: 'users',
     labelKey: 'nav.admin.users',
-    icon: 'mdi:account-multiple',
+    icon: 'lucide:users',
     items: [
-      { to: '/admin/users', icon: 'mdi:account-multiple', labelKey: 'nav.admin.users', access: ADMIN },
-      { to: '/admin/groups', icon: 'mdi:account-group', labelKey: 'nav.admin.groups', access: ADMIN },
-      { to: '/admin/oauth', icon: 'mdi:shield-key', labelKey: 'nav.admin.oauth', access: ADMIN }
+      { to: '/admin/users', icon: 'lucide:users', labelKey: 'nav.admin.users', access: ADMIN },
+      { to: '/admin/groups', icon: 'lucide:users', labelKey: 'nav.admin.groups', access: ADMIN },
+      { to: '/admin/oauth', icon: 'lucide:shield-ellipsis', labelKey: 'nav.admin.oauth', access: ADMIN }
     ]
   },
   {
     id: 'system',
     labelKey: 'nav.admin.system',
-    icon: 'mdi:cog',
+    icon: 'lucide:settings',
     items: [
-      { to: '/admin/settings', icon: 'mdi:cog', labelKey: 'nav.admin.settings', access: ADMIN },
-      { to: '/admin/email', icon: 'mdi:email-outline', labelKey: 'nav.admin.email', access: ADMIN },
-      { to: '/admin/analytics', icon: 'mdi:chart-line', labelKey: 'nav.admin.analytics', access: ADMIN },
-      { to: '/admin/reports', icon: 'mdi:chart-timeline-variant', labelKey: 'nav.admin.reports', access: ADMIN },
-      { to: '/admin/chatbots', icon: 'mdi:robot-outline', labelKey: 'nav.admin.chatbots', access: ADMIN }
+      { to: '/admin/settings', icon: 'lucide:settings', labelKey: 'nav.admin.settings', access: ADMIN },
+      { to: '/admin/email', icon: 'lucide:mail', labelKey: 'nav.admin.email', access: ADMIN },
+      { to: '/admin/analytics', icon: 'lucide:chart-line', labelKey: 'nav.admin.analytics', access: ADMIN },
+      { to: '/admin/reports', icon: 'lucide:chart-spline', labelKey: 'nav.admin.reports', access: ADMIN },
+      { to: '/admin/chatbots', icon: 'lucide:bot', labelKey: 'nav.admin.chatbots', access: ADMIN }
     ]
   }
 ]
