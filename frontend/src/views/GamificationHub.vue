@@ -64,7 +64,7 @@
                 v-for="ua in unlockedAchievements.slice(0, 6)"
                 :key="ua.id"
                 class="xp-swatch"
-                :style="{ background: ua.achievement?.color || 'var(--fill)' }"
+                :style="{ '--c': ua.achievement?.color || 'var(--acc-ink)' }"
                 :title="ua.achievement?.name"
               >
                 <Icon :icon="ua.achievement?.icon || 'mdi:medal'" aria-hidden="true" />
@@ -103,7 +103,7 @@
             >
               <span
                 class="xp-badge__icon"
-                :style="isUnlocked(achievement.code) ? { background: achievement.color || 'var(--fill)' } : undefined"
+                :style="isUnlocked(achievement.code) ? { '--c': achievement.color || 'var(--acc-ink)' } : undefined"
                 aria-hidden="true"
               >
                 <Icon :icon="isUnlocked(achievement.code) ? achievement.icon : 'mdi:lock-outline'" />
@@ -144,7 +144,7 @@
                     v-for="badge in user.badges"
                     :key="badge.code"
                     class="xp-swatch xp-swatch--sm"
-                    :style="{ background: badge.color || 'var(--fill)' }"
+                    :style="{ '--c': badge.color || 'var(--acc-ink)' }"
                     :title="badge.name"
                   >
                     <Icon :icon="badge.icon" aria-hidden="true" />
@@ -420,12 +420,13 @@ onMounted(fetchData)
   place-items: center;
   width: 28px;
   height: 28px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  color: #fff;
+  color: color-mix(in oklab, var(--c, var(--acc-ink)) 78%, var(--text));
   font-size: 15px;
 }
 
-.xp-swatch--sm { width: 18px; height: 18px; border-radius: var(--r-s); font-size: 11px; }
+.xp-swatch--sm { width: 20px; height: 20px; font-size: 12px; }
 
 /* Activité */
 .xp-activity__list { margin: 0; padding: 0; list-style: none; }
@@ -479,13 +480,14 @@ onMounted(fetchData)
   flex: none;
   width: 36px;
   height: 36px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  color: #fff;
+  color: color-mix(in oklab, var(--c, var(--acc-ink)) 78%, var(--text));
   font-size: 19px;
 }
 
 .xp-badge.is-locked { border-style: dashed; }
-.xp-badge.is-locked .xp-badge__icon { background: var(--sunken); color: var(--muted); font-size: 16px; }
+.xp-badge.is-locked .xp-badge__icon { border-style: dashed; color: var(--muted); font-size: 16px; }
 .xp-badge.is-locked .xp-badge__name { color: var(--muted); }
 
 .xp-badge__body { min-width: 0; }

@@ -28,13 +28,7 @@
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryIcon') }}</label>
-          <input
-            v-model="newCategory.icon"
-            type="text"
-            class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
-            placeholder="mdi:folder"
-          />
+          <IconInput v-model="newCategory.icon" :label="t('events.editor.categoryIcon')" placeholder="mdi:folder" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ t('events.editor.categoryColor') }}</label>
@@ -68,6 +62,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { ref } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'

@@ -1,5 +1,5 @@
-// Icône saisie en base dans une collection non embarquée (autre que mdi, lucide, heroicons) :
-// plutôt qu'un vide, on affiche un pictogramme neutre, sans aucune requête vers api.iconify.design.
+// Icône d'une collection non embarquée (autre que mdi, lucide, heroicons) quand l'API Iconify
+// est hors d'atteinte : plutôt qu'un vide, on affiche un pictogramme neutre, servi localement.
 
 /** Corps SVG de mdi:shape-outline (24 × 24). */
 export const PLACEHOLDER_BODY =

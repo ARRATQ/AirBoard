@@ -83,13 +83,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Icon -->
               <div>
-                <label class="form-label">{{ t('common.icon') }}</label>
-                <div class="flex gap-2">
-                  <input v-model="form.icon" class="form-input flex-1" placeholder="mdi:tag" />
-                  <div class="flex items-center justify-center px-4 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
-                    <Icon :icon="form.icon || 'mdi:tag'" class="text-2xl" :style="{ color: form.color }" />
-                  </div>
-                </div>
+                <IconInput v-model="form.icon" :label="t('common.icon')" placeholder="mdi:tag" />
               </div>
 
               <!-- Color -->
@@ -127,6 +121,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import PageHeader from '@/components/ui/PageHeader.vue'

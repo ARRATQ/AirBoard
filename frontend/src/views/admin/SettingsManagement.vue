@@ -147,7 +147,6 @@
                 :label="$t('settings.appIcon')"
                 placeholder="mdi:view-dashboard, lucide:layout-dashboard"
                 category="general"
-                :show-suggestions="true"
                 required
               />
             </div>

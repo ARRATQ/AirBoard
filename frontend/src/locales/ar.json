@@ -2419,30 +2419,23 @@
       "info": "معلومة"
     },
     "iconInput": {
-      "placeholder": "مثال: mdi:home، lucide:settings، heroicons:user",
-      "popular": "اقتراحات شائعة:",
-      "help": "استخدم الصيغة «collection:name» مع mdi أو lucide أو heroicons (مثال: mdi:home، lucide:user، heroicons:cog). ابحث في iconify.design",
-      "suggestions": {
-        "user": "مستخدم",
-        "folder": "مجلد",
-        "document": "مستند",
-        "chart": "رسم بياني",
-        "application": "تطبيق",
-        "web": "ويب",
-        "database": "قاعدة بيانات",
-        "server": "خادم",
-        "cloud": "سحابة",
-        "email": "بريد إلكتروني",
-        "chat": "دردشة",
-        "calendar": "تقويم",
-        "tools": "أدوات",
-        "groups": "مجموعات",
-        "team": "فريق",
-        "security": "أمان",
-        "development": "تطوير",
-        "analytics": "تحليلات",
-        "business": "أعمال"
-      }
+      "placeholder": "مثال: lucide:house، mdi:home",
+      "popular": "اقتراحات",
+      "browse": "تصفّح",
+      "close": "إغلاق",
+      "searchLabel": "البحث عن أيقونة",
+      "searchPlaceholder": "ابحث (بالإنجليزية: home، user، mail…)",
+      "styleLabel": "نمط الأيقونات",
+      "styles": {
+        "all": "الكل",
+        "line": "خط رفيع",
+        "solid": "ممتلئ"
+      },
+      "loading": "جارٍ البحث…",
+      "noResults": "لم يتم العثور على أي أيقونة.",
+      "searchError": "تعذّر الوصول إلى كتالوج Iconify. يمكنك كتابة الاسم يدويًا.",
+      "invalid": "الصيغة المتوقعة: المجموعة:الاسم (مثال: lucide:house).",
+      "source": "كتالوج Iconify: أكثر من 200 000 أيقونة مجانية."
     }
   },
   "chat": {

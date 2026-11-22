@@ -193,7 +193,6 @@
                 :label="$t('groupAdmin.applicationModal.icon')"
                 placeholder="mdi:application, lucide:app-window, heroicons:squares-2x2"
                 category="application"
-                :show-suggestions="true"
               />
             </div>
           </div>

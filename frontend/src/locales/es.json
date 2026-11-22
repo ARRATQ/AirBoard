@@ -2419,30 +2419,23 @@
       "info": "Información"
     },
     "iconInput": {
-      "placeholder": "Ej.: mdi:home, lucide:settings, heroicons:user",
-      "popular": "Sugerencias populares:",
-      "help": "Use el formato «colección:nombre» con mdi, lucide o heroicons (ej.: mdi:home, lucide:user, heroicons:cog). Busque en iconify.design",
-      "suggestions": {
-        "user": "Usuario",
-        "folder": "Carpeta",
-        "document": "Documento",
-        "chart": "Gráfico",
-        "application": "Aplicación",
-        "web": "Web",
-        "database": "Base de datos",
-        "server": "Servidor",
-        "cloud": "Nube",
-        "email": "Correo",
-        "chat": "Chat",
-        "calendar": "Calendario",
-        "tools": "Herramientas",
-        "groups": "Grupos",
-        "team": "Equipo",
-        "security": "Seguridad",
-        "development": "Desarrollo",
-        "analytics": "Analítica",
-        "business": "Negocio"
-      }
+      "placeholder": "p. ej. lucide:house, mdi:home",
+      "popular": "Sugerencias",
+      "browse": "Explorar",
+      "close": "Cerrar",
+      "searchLabel": "Buscar un icono",
+      "searchPlaceholder": "Buscar (en inglés: home, user, mail…)",
+      "styleLabel": "Estilo de los iconos",
+      "styles": {
+        "all": "Todos",
+        "line": "Trazo fino",
+        "solid": "Relleno"
+      },
+      "loading": "Buscando…",
+      "noResults": "No se encontró ningún icono.",
+      "searchError": "No se puede acceder al catálogo Iconify. Puede escribir el nombre a mano.",
+      "invalid": "Formato esperado: colección:nombre (p. ej. lucide:house).",
+      "source": "Catálogo Iconify: más de 200 000 iconos libres."
     }
   },
   "chat": {

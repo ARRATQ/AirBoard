@@ -2778,30 +2778,23 @@
       "info": "Information"
     },
     "iconInput": {
-      "placeholder": "Ex. : mdi:home, lucide:settings, heroicons:user",
-      "popular": "Suggestions populaires :",
-      "help": "Utilisez le format « collection:nom » avec mdi, lucide ou heroicons (ex. : mdi:home, lucide:user, heroicons:cog). Recherchez sur iconify.design",
-      "suggestions": {
-        "user": "Utilisateur",
-        "folder": "Dossier",
-        "document": "Document",
-        "chart": "Graphique",
-        "application": "Application",
-        "web": "Web",
-        "database": "Base de données",
-        "server": "Serveur",
-        "cloud": "Cloud",
-        "email": "E-mail",
-        "chat": "Messagerie",
-        "calendar": "Calendrier",
-        "tools": "Outils",
-        "groups": "Groupes",
-        "team": "Équipe",
-        "security": "Sécurité",
-        "development": "Développement",
-        "analytics": "Analytique",
-        "business": "Business"
-      }
+      "placeholder": "ex. lucide:house, mdi:home",
+      "popular": "Suggestions",
+      "browse": "Parcourir",
+      "close": "Fermer",
+      "searchLabel": "Rechercher une icône",
+      "searchPlaceholder": "Rechercher (en anglais : home, user, mail…)",
+      "styleLabel": "Style des icônes",
+      "styles": {
+        "all": "Tous",
+        "line": "Trait fin",
+        "solid": "Plein"
+      },
+      "loading": "Recherche…",
+      "noResults": "Aucune icône trouvée.",
+      "searchError": "Le catalogue Iconify est injoignable. Vous pouvez saisir le nom à la main.",
+      "invalid": "Format attendu : collection:nom (ex. lucide:house).",
+      "source": "Catalogue Iconify — plus de 200 000 icônes libres."
     }
   },
   "chat": {

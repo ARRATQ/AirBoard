@@ -50,17 +50,7 @@
         <div class="grid grid-cols-2 gap-4">
           <!-- Icône -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ $t('chatbots.iconField') }}
-            </label>
-            <div class="flex items-center gap-2">
-              <div class="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                :style="{ background: form.color + '22', border: '1px solid ' + form.color }">
-                <Icon :icon="form.icon || 'mdi:robot-outline'" class="h-5 w-5" :style="{ color: form.color }" />
-              </div>
-              <input v-model="form.icon" type="text" placeholder="mdi:robot-outline"
-                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 font-mono text-xs" />
-            </div>
+            <IconInput v-model="form.icon" :label="$t('chatbots.iconField')" placeholder="mdi:robot-outline" />
           </div>
 
           <!-- Couleur -->
@@ -186,6 +176,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { ref, watch } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'

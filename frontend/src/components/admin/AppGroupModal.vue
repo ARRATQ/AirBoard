@@ -145,7 +145,6 @@
                 :label="$t('groupAdmin.appGroupModal.icon')"
                 placeholder="mdi:folder, lucide:folder, heroicons:folder"
                 category="group"
-                :show-suggestions="true"
               />
             </div>
           </div>

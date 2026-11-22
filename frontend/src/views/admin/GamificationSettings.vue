@@ -64,7 +64,7 @@
       >
         <template #cell-name="{ row }">
           <span class="gm-badge">
-            <span class="gm-badge__icon" :style="{ backgroundColor: row.raw.color || undefined }">
+            <span class="gm-badge__icon" :style="{ '--c': row.raw.color || undefined }">
               <Icon :icon="row.raw.icon || 'mdi:medal'" aria-hidden="true" />
             </span>
             <span class="gm-badge__text">
@@ -107,8 +107,7 @@
             </div>
 
             <div>
-              <label for="gm-icon" class="form-label">{{ t('gamificationAdmin.form.icon') }}</label>
-              <input id="gm-icon" v-model="form.icon" class="form-input" placeholder="mdi:medal" dir="ltr" />
+              <IconInput id="gm-icon" v-model="form.icon" :label="t('gamificationAdmin.form.icon')" placeholder="lucide:medal" />
               <p class="gm-hint">{{ t('gamificationAdmin.form.iconHint', { example: 'mdi:medal' }) }}</p>
             </div>
 
@@ -207,6 +206,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useEscapeClose } from '@/composables/useEscapeClose'
 import { useI18n } from 'vue-i18n'
@@ -276,7 +276,7 @@ const safePreviewIcon = computed(() => form.value.icon?.trim() || 'mdi:medal')
 
 const badgePreviewStyle = computed(() => {
   const color = form.value.color?.trim() || '#FBBF24'
-  return { backgroundColor: color }
+  return { '--c': color }
 })
 const form = ref({
   code: '',
@@ -424,9 +424,9 @@ useEscapeClose(showModal, () => closeModal())
   flex: none;
   width: 30px;
   height: 30px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  background: var(--acc);
-  color: var(--acc-ink);
+  color: color-mix(in oklab, var(--c, var(--acc-ink)) 78%, var(--text));
   font-size: 18px;
 }
 
@@ -488,7 +488,15 @@ useEscapeClose(showModal, () => closeModal())
   background: var(--sunken);
 }
 
-.gm-preview__badge { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-s); color: #fff; }
+.gm-preview__badge {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid currentColor;
+  border-radius: var(--r-s);
+  color: color-mix(in oklab, var(--c) 78%, var(--text));
+}
 .gm-preview__icon { width: 24px; height: 24px; }
 .gm-preview__name { margin: 0; font-weight: 600; color: var(--text); }
 

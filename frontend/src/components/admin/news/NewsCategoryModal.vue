@@ -27,17 +27,8 @@
         ></textarea>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label :for="`${formId}-icon`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {{ $t('events.editor.categoryIcon') }}
-          </label>
-          <input
-            :id="`${formId}-icon`"
-            v-model="form.icon"
-            type="text"
-            placeholder="mdi:folder"
-            class="input"
-          />
+        <div class="col-span-2">
+          <IconInput :id="`${formId}-icon`" v-model="form.icon" :label="$t('events.editor.categoryIcon')" placeholder="mdi:folder" />
         </div>
         <div>
           <label :for="`${formId}-color`" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -71,6 +62,7 @@
 </template>
 
 <script setup>
+import IconInput from '@/components/ui/IconInput.vue'
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'

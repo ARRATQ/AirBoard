@@ -194,9 +194,9 @@ const formatNumber = (n) => Number(n || 0).toLocaleString(dateLocaleFor(locale.v
   place-items: center;
   width: 30px;
   height: 30px;
+  border: 1px solid currentColor;
   border-radius: var(--r-s);
-  background: color-mix(in oklab, var(--c) 14%, var(--surface));
-  color: color-mix(in oklab, var(--c) 85%, var(--text));
+  color: color-mix(in oklab, var(--c) 78%, var(--text));
 }
 
 .xp__badge-icon { width: 17px; height: 17px; }
