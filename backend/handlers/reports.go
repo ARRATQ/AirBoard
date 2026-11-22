@@ -116,11 +116,11 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 	from, to := parsePeriod(c)
 
 	// Helper : construit les conditions WHERE selon le type de rôle
-	// Pour "group_admin", on identifie les utilisateurs via la table group_admins (junction),
-	// pas via le champ role des utilisateurs.
+	// Pour "contributor", on identifie les utilisateurs par leurs rôles attribués (permission
+	// de rédaction), pas via le champ role des utilisateurs.
 	type roleFilter struct {
-		isGroupAdmin bool
-		roleValue    string
+		isContributor bool
+		roleValue     string
 	}
 
 	buildFilters := []struct {
@@ -128,7 +128,7 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 		filter roleFilter
 	}{
 		{"admin", roleFilter{roleValue: "admin"}},
-		{"group_admin", roleFilter{isGroupAdmin: true}},
+		{"contributor", roleFilter{isContributor: true}},
 		{"user", roleFilter{roleValue: "user"}},
 	}
 
@@ -139,10 +139,10 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 		stat.Role = rf.key
 
 		// Sous-requête ou condition selon le type de filtre
-		gaSubQ := h.db.Table("group_admins").Select("DISTINCT user_id")
+		gaSubQ := contributorsSubQuery(h.db)
 
-		if rf.filter.isGroupAdmin {
-			// Admins de groupe : identifiés par leur présence dans group_admins
+		if rf.filter.isContributor {
+			// Contributeurs : un de leurs rôles leur donne une permission de rédaction
 			h.db.Table("users").
 				Where("id IN (?) AND deleted_at IS NULL", gaSubQ).
 				Count(&stat.MemberCount)
@@ -185,7 +185,7 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Where("created_by_id IN (?) AND deleted_at IS NULL", gaSubQ).
 				Count(&stat.AppsCreatedTotal)
 
-			// Production : articles publiés par les admins de groupe
+			// Production : articles publiés par les contributeurs
 			h.db.Model(&models.News{}).
 				Where("author_id IN (?) AND is_published = true AND created_at BETWEEN ? AND ? AND deleted_at IS NULL", gaSubQ, from, to).
 				Count(&stat.ArticlesPublished)
@@ -199,7 +199,7 @@ func (h *ReportsHandler) GetRoleReport(c *gin.Context) {
 				Where("news.author_id IN (?) AND news.deleted_at IS NULL AND news_reactions.created_at BETWEEN ? AND ?", gaSubQ, from, to).
 				Count(&stat.TotalReactionsEarned)
 
-			stat.TopContributors = h.topContributorsByScore(from, to, "u.id IN (SELECT DISTINCT user_id FROM group_admins)")
+			stat.TopContributors = h.topContributorsByScore(from, to, "u.id IN (?)", contributorsSubQuery(h.db))
 		} else {
 			role := rf.filter.roleValue
 			h.db.Model(&models.User{}).Where("role = ? AND deleted_at IS NULL", role).Count(&stat.MemberCount)
@@ -369,7 +369,7 @@ type UserReportItem struct {
 	Email             string     `json:"email"`
 	Role              string     `json:"role"`
 	Groups            []string   `json:"groups"`
-	IsGroupAdmin      bool       `json:"is_group_admin"`
+	IsContributor     bool       `json:"is_contributor"`
 	MemberSince       time.Time  `json:"member_since"`
 	LastLogin         *time.Time `json:"last_login"`
 	AppClicks         int64      `json:"app_clicks"`
@@ -398,8 +398,8 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 	groupIDFilter := c.Query("group_id")
 
 	query := h.db.Model(&models.User{}).Where("users.deleted_at IS NULL AND users.is_active = true")
-	if roleFilter == "group_admin" {
-		query = query.Where("users.id IN (SELECT DISTINCT user_id FROM group_admins)")
+	if roleFilter == "contributor" {
+		query = query.Where("users.id IN (?)", contributorsSubQuery(h.db))
 	} else if roleFilter != "" {
 		query = query.Where("users.role = ?", roleFilter)
 	}
@@ -413,14 +413,6 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 
 	result := make([]UserReportItem, 0, len(users))
 
-	// Pré-calculer les IDs des admins de groupe (table group_admins)
-	var groupAdminIDs []uint
-	h.db.Table("group_admins").Distinct("user_id").Pluck("user_id", &groupAdminIDs)
-	groupAdminSet := map[uint]bool{}
-	for _, id := range groupAdminIDs {
-		groupAdminSet[id] = true
-	}
-
 	// Contributeurs (permission de rédaction) : leurs articles comptent dans le rapport
 	contributors, err := models.UsersWithAnyPermission(h.db, models.ContentPermissions)
 	if err != nil {
@@ -432,16 +424,16 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 
 	for _, user := range users {
 		item := UserReportItem{
-			UserID:       user.ID,
-			Username:     user.Username,
-			FirstName:    user.FirstName,
-			LastName:     user.LastName,
-			Email:        user.Email,
-			Role:         user.Role,
-			IsGroupAdmin: groupAdminSet[user.ID],
-			MemberSince:  user.CreatedAt,
-			LastLogin:    user.LastLogin,
-			Groups:       []string{},
+			UserID:        user.ID,
+			Username:      user.Username,
+			FirstName:     user.FirstName,
+			LastName:      user.LastName,
+			Email:         user.Email,
+			Role:          user.Role,
+			IsContributor: contributors[user.ID],
+			MemberSince:   user.CreatedAt,
+			LastLogin:     user.LastLogin,
+			Groups:        []string{},
 		}
 		for _, g := range user.Groups {
 			item.Groups = append(item.Groups, g.Name)
@@ -454,7 +446,7 @@ func (h *ReportsHandler) GetUserReport(c *gin.Context) {
 		item.AppsCreated = totals.appsCreated[user.ID]
 		item.AppsCreatedTotal = totals.appsCreatedTotal[user.ID]
 
-		if user.Role == "admin" || contributors[user.ID] || item.IsGroupAdmin {
+		if user.Role == "admin" || item.IsContributor {
 			item.ArticlesPublished = totals.articles[user.ID]
 			item.ViewsGenerated = totals.views[user.ID]
 			item.ReactionsEarned = totals.earn[user.ID]
@@ -515,24 +507,20 @@ func (h *ReportsHandler) GetUserDetailReport(c *gin.Context) {
 		return
 	}
 
-	// Vérifier si cet utilisateur est admin de groupe
-	var gaCount int64
-	h.db.Table("group_admins").Where("user_id = ?", user.ID).Count(&gaCount)
-	// Contributeur : admin, permission de rédaction ou ancien admin de groupe
-	isGroupAdmin := gaCount > 0
-	isContributor := isGroupAdmin || models.IsContributor(h.db, user)
+	// Contributeur : admin ou permission de rédaction
+	isContributor := models.IsContributor(h.db, user)
 
 	item := UserReportItem{
-		UserID:       user.ID,
-		Username:     user.Username,
-		FirstName:    user.FirstName,
-		LastName:     user.LastName,
-		Email:        user.Email,
-		Role:         user.Role,
-		IsGroupAdmin: isGroupAdmin,
-		MemberSince:  user.CreatedAt,
-		LastLogin:    user.LastLogin,
-		Groups:       []string{},
+		UserID:        user.ID,
+		Username:      user.Username,
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		Email:         user.Email,
+		Role:          user.Role,
+		IsContributor: isContributor,
+		MemberSince:   user.CreatedAt,
+		LastLogin:     user.LastLogin,
+		Groups:        []string{},
 	}
 	for _, g := range user.Groups {
 		item.Groups = append(item.Groups, g.Name)
@@ -778,4 +766,13 @@ func (h *ReportsHandler) GetGroupDetailReport(c *gin.Context) {
 		Group:           stat,
 		MonthlyActivity: monthly,
 	})
+}
+
+// contributorsSubQuery : comptes dont un rôle donne une permission de rédaction
+// (actualités, événements, sondages).
+func contributorsSubQuery(db *gorm.DB) *gorm.DB {
+	return db.Table("user_access_roles").
+		Select("DISTINCT user_access_roles.user_id").
+		Joins("JOIN access_role_permissions ON access_role_permissions.role_id = user_access_roles.access_role_id").
+		Where("access_role_permissions.permission IN ?", models.ContentPermissions)
 }

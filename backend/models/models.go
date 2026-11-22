@@ -30,13 +30,11 @@ type User struct {
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relations
-	Groups        []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
-	Favorites     []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
-	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"`   // Groupes administrés (utilisateurs qui peuvent gérer ces groupes)
-	AccessRoles   []AccessRole  `json:"access_roles,omitempty" gorm:"many2many:user_access_roles;"` // Rôles attribués par l'administrateur
+	Groups      []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
+	Favorites   []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
+	AccessRoles []AccessRole  `json:"access_roles,omitempty" gorm:"many2many:user_access_roles;"` // Rôles attribués par l'administrateur
 
 	// Champ calculé (non stocké en base)
-	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (chargés depuis group_admins)
 	// Permissions effectives {permission: portée}, union des rôles attribués (vide pour l'admin : il a tout)
 	Permissions map[string]string `json:"permissions,omitempty" gorm:"-"`
 	// Groupes couverts par la portée « ses groupes » (membre, hors groupe par défaut)
@@ -108,11 +106,10 @@ type Application struct {
 
 // JWT Claims structure
 type Claims struct {
-	UserID          uint   `json:"user_id"`
-	Username        string `json:"username"`
-	Role            string `json:"role"`
-	Email           string `json:"email"`
-	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty"` // IDs des groupes administrés (chargés depuis group_admins)
+	UserID   uint   `json:"user_id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	Email    string `json:"email"`
 }
 
 // Request/Response structures

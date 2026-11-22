@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess } from '@/config/access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -243,13 +243,13 @@ const routes = [
     }
   },
   {
-    // Vue d'ensemble, commune à l'admin et à l'admin de groupe
+    // Vue d'ensemble, commune à l'admin et aux titulaires de permissions
     path: '/admin',
     name: 'AdminOverview',
     component: AdminOverview,
     meta: {
       requiresAuth: true,
-      access: GROUP_ADMIN,
+      access: MANAGEMENT,
       title: "Vue d'ensemble"
     }
   },
@@ -522,7 +522,7 @@ const router = createRouter({
 
 /**
  * L'utilisateur atteint-il le niveau d'accès demandé ?
- * Un admin de groupe tout juste nommé n'a pas encore ses groupes dans le profil
+ * Un rôle tout juste attribué n'est pas encore dans le profil
  * en mémoire : on relit le profil une fois avant de refuser.
  */
 async function hasAccess(authStore, access) {

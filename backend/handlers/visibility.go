@@ -103,44 +103,28 @@ func userGroupIDs(db *gorm.DB, userID uint) []uint {
 	return ids
 }
 
-// adminGroupIDs renvoie les groupes administrés par l'utilisateur, lus en base
-// (hors requête HTTP ; sinon middleware.GetManagedGroupIDs).
-func adminGroupIDs(db *gorm.DB, userID uint) []uint {
-	var ids []uint
-	if err := db.Table("group_admins").Where("user_id = ?", userID).Pluck("group_id", &ids).Error; err != nil {
-		log.Printf("[Visibility] groupes administrés par %d : %v", userID, err)
-	}
-	return ids
-}
-
-// attachManagedGroups renseigne les groupes administrés d'un utilisateur renvoyé
-// au frontend : ManagedGroupIDs, et AdminOfGroups s'il n'a pas été préchargé.
-func attachManagedGroups(db *gorm.DB, user *models.User) {
-	user.ManagedGroupIDs = adminGroupIDs(db, user.ID)
-	// Permissions des rôles attribués : l'interface affiche les menus correspondants
-	// (le serveur les vérifie à chaque requête, voir middleware.RequirePermission).
-	if perms, err := middleware.LoadPermissions(db, user.ID); err != nil {
+// attachPermissions renseigne, pour un utilisateur renvoyé au frontend, les permissions de
+// ses rôles et les groupes couverts par la portée « ses groupes » : l'interface affiche les
+// menus correspondants (le serveur les vérifie à chaque requête, voir middleware.RequirePermission).
+func attachPermissions(db *gorm.DB, user *models.User) {
+	perms, err := middleware.LoadPermissions(db, user.ID)
+	if err != nil {
 		log.Printf("[Visibility] permissions de %d : %v", user.ID, err)
-	} else if len(perms) > 0 {
-		user.Permissions = perms
-		if ids, err := models.PermissionGroupIDs(db, user.ID); err != nil {
-			log.Printf("[Visibility] groupes couverts par les permissions de %d : %v", user.ID, err)
-		} else {
-			user.PermissionGroupIDs = ids
-		}
-	}
-	if len(user.AdminOfGroups) > 0 || len(user.ManagedGroupIDs) == 0 {
 		return
 	}
-	var groups []models.Group
-	if err := db.Where("id IN ?", user.ManagedGroupIDs).Find(&groups).Error; err != nil {
-		log.Printf("[Visibility] groupes administrés de %d : %v", user.ID, err)
+	if len(perms) == 0 {
+		return
 	}
-	user.AdminOfGroups = groups
+	user.Permissions = perms
+	if ids, err := models.PermissionGroupIDs(db, user.ID); err != nil {
+		log.Printf("[Visibility] groupes couverts par les permissions de %d : %v", user.ID, err)
+	} else {
+		user.PermissionGroupIDs = ids
+	}
 }
 
-// memberOrManagedGroupIDs : groupes dont l'utilisateur est membre, plus ceux
-// qu'il administre.
+// memberOrManagedGroupIDs : groupes dont l'utilisateur est membre, plus les groupes de la
+// requête (RequirePermission), qui en font déjà partie.
 func memberOrManagedGroupIDs(db *gorm.DB, userID uint, managedGroupIDs []uint) []uint {
 	return mergeGroupIDs(userGroupIDs(db, userID), managedGroupIDs)
 }
@@ -183,14 +167,13 @@ func groupIDsOf(groups []models.Group) []uint {
 	return ids
 }
 
-// canSeeTargeted : contenu global, ou ciblant un groupe dont l'utilisateur est
-// membre ou administrateur (groupes administrés lus en base). Aucune requête
-// pour un contenu global.
+// canSeeTargeted : contenu global, ou ciblant un groupe dont l'utilisateur est membre.
+// Aucune requête pour un contenu global.
 func canSeeTargeted(db *gorm.DB, userID uint, targets []models.Group) bool {
 	if len(targets) == 0 {
 		return true
 	}
-	return targetsAnyGroup(targets, mergeGroupIDs(userGroupIDs(db, userID), adminGroupIDs(db, userID)))
+	return targetsAnyGroup(targets, userGroupIDs(db, userID))
 }
 
 // targetsAnyGroup indique si un des groupes cibles figure dans groupIDs.

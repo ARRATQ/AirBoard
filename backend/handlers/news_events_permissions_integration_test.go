@@ -72,7 +72,7 @@ func contentRouter(t *testing.T, tx *gorm.DB, who identity) *gin.Engine {
 func TestNewsEventsByPermission(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tx := rollbackTx(t)
-	f := newFixture(t, tx) // f.member est membre de g1 ; f.groupAdmin administre g2 (ancienne table)
+	f := newFixture(t, tx) // f.member est membre de g1 ; f.groupAdmin est éditeur de g2 (ancien admin de groupe converti)
 	g1, g2 := []models.Group{f.g1}, []models.Group{f.g2}
 
 	grantPermissions(t, tx, f.tag+"-redaction-groupes", map[string]string{
@@ -165,7 +165,7 @@ func TestNewsEventsByPermission(t *testing.T) {
 		}
 	})
 
-	t.Run("ancien admin de groupe : inchangé", func(t *testing.T) {
+	t.Run("éditeur de groupe (ancien admin converti) : son groupe", func(t *testing.T) {
 		if code := status(legacy, http.MethodPost, "/group-admin/news", draft("ga-g2", f.g2.ID)); code != http.StatusCreated {
 			t.Errorf("article ciblant g2 : %d, attendu 201", code)
 		}

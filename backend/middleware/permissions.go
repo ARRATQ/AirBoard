@@ -15,6 +15,8 @@ const (
 	CtxPermissions    = "permissions"
 	CtxMemberGroupIDs = "member_group_ids"
 	ctxUnrestricted   = "permission_unrestricted"
+	// ctxManagedGroupIDs : groupes où la requête agit (RequirePermission, portée « ses groupes »)
+	ctxManagedGroupIDs = "managed_group_ids"
 )
 
 // LoadPermissions lit les permissions effectives d'un utilisateur : l'union des permissions
@@ -63,14 +65,25 @@ func HasPermissionEverywhere(c *gin.Context, permission string) bool {
 	return PermissionScope(c, permission) == models.ScopeAll
 }
 
-// PermissionGroupIDs renvoie les groupes où l'utilisateur exerce la permission : ceux qu'il
-// administre encore (ancienne table group_admins) et, si la portée est « ses groupes », ceux
-// dont il est membre. Sans objet pour la portée « tout le site » (voir HasPermissionEverywhere).
+// PermissionGroupIDs renvoie les groupes où l'utilisateur exerce la permission de portée
+// « ses groupes » : ceux dont il est membre, hors groupe par défaut. Vide sans la permission ;
+// sans objet pour la portée « tout le site » (voir HasPermissionEverywhere).
 func PermissionGroupIDs(c *gin.Context, permission string) []uint {
 	if PermissionScope(c, permission) == models.ScopeGroups {
-		return mergeUintSets(GetManagedGroupIDs(c), memberGroupIDs(c))
+		return memberGroupIDs(c)
 	}
-	return GetManagedGroupIDs(c)
+	return []uint{}
+}
+
+// GetManagedGroupIDs renvoie les groupes de la requête posés par RequirePermission (portée
+// « ses groupes ») ; vide ailleurs.
+func GetManagedGroupIDs(c *gin.Context) []uint {
+	if ids, ok := c.Get(ctxManagedGroupIDs); ok {
+		if list, ok := ids.([]uint); ok {
+			return list
+		}
+	}
+	return []uint{}
 }
 
 func memberGroupIDs(c *gin.Context) []uint {
@@ -83,11 +96,8 @@ func memberGroupIDs(c *gin.Context) []uint {
 
 // RequirePermission laisse passer l'admin et les utilisateurs qui ont la permission.
 //   - Portée « tout le site » : la requête est marquée sans restriction (IsUnrestricted).
-//   - Portée « ses groupes » : les groupes gérés de la requête (GetManagedGroupIDs) deviennent
-//     les groupes dont l'utilisateur est membre, ajoutés aux groupes qu'il administre encore
-//     (ancienne table group_admins, gardée pendant la transition).
-//
-// Les anciens admins de groupe passent toujours, avec leurs groupes administrés.
+//   - Portée « ses groupes » : les groupes de la requête (GetManagedGroupIDs) sont ceux dont
+//     l'utilisateur est membre, hors groupe par défaut ; sans aucun, il n'a rien à gérer.
 func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch PermissionScope(c, permission) {
@@ -98,15 +108,10 @@ func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 		case models.ScopeGroups:
 			groups := PermissionGroupIDs(c, permission)
 			if len(groups) > 0 {
-				c.Set("managed_group_ids", groups)
+				c.Set(ctxManagedGroupIDs, groups)
 				c.Next()
 				return
 			}
-		}
-
-		if len(GetManagedGroupIDs(c)) > 0 {
-			c.Next()
-			return
 		}
 
 		apierror.Respond(c, http.StatusForbidden, "Permission requise")
@@ -114,12 +119,11 @@ func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 	}
 }
 
-// RequireAnyPermission laisse passer l'admin, les anciens admins de groupe et qui a au moins
-// une des permissions, quelle qu'en soit la portée. Pour les routes sans notion de groupe
+// RequireAnyPermission laisse passer l'admin et qui a au moins une des permissions, quelle qu'en soit la portée. Pour les routes sans notion de groupe
 // (envoi d'un média, par exemple) utiles à plusieurs modules.
 func (am *AuthMiddleware) RequireAnyPermission(permissions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetString("role") == "admin" || len(GetManagedGroupIDs(c)) > 0 {
+		if c.GetString("role") == "admin" {
 			c.Next()
 			return
 		}
@@ -161,20 +165,4 @@ func (am *AuthMiddleware) RequirePermissionEverywhere(permission string) gin.Han
 		c.Set(ctxUnrestricted, true)
 		c.Next()
 	}
-}
-
-// mergeUintSets renvoie l'union dédoublonnée des deux listes, dans l'ordre d'apparition.
-func mergeUintSets(a, b []uint) []uint {
-	seen := make(map[uint]struct{}, len(a)+len(b))
-	out := make([]uint, 0, len(a)+len(b))
-	for _, list := range [][]uint{a, b} {
-		for _, id := range list {
-			if _, dup := seen[id]; dup {
-				continue
-			}
-			seen[id] = struct{}{}
-			out = append(out, id)
-		}
-	}
-	return out
 }

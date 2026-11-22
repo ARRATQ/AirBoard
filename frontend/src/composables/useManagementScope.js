@@ -8,7 +8,7 @@ import { getRoles, getScope } from '@/config/access'
  *
  * @param {string} access niveau de la page (voir config/access.js)
  * @returns {{
- *   roles: import('vue').ComputedRef<{ isAdmin: boolean, isGroupAdmin: boolean, permissions: Record<string, string> }>,
+ *   roles: import('vue').ComputedRef<{ isAdmin: boolean, permissions: Record<string, string> }>,
  *   scope: import('vue').ComputedRef<'global'|'group'>,
  *   isGlobal: import('vue').ComputedRef<boolean>,
  *   isAdmin: import('vue').ComputedRef<boolean>

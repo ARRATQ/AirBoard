@@ -34,14 +34,6 @@ type HomeStats struct {
 	TotalEvents    int64 `json:"total_events,omitempty"`
 	TotalPolls     int64 `json:"total_polls,omitempty"`
 
-	// Group admin stats
-	ManagedGroupsCount    int64 `json:"managed_groups_count,omitempty"`
-	TotalMembersCount     int64 `json:"total_members_count,omitempty"`
-	ManagedAppGroupsCount int64 `json:"managed_app_groups_count,omitempty"`
-	ManagedAppsCount      int64 `json:"managed_apps_count,omitempty"`
-	ManagedNewsCount      int64 `json:"managed_news_count,omitempty"`
-	ManagedPollsCount     int64 `json:"managed_polls_count,omitempty"`
-
 	// Regular user stats
 	TotalAccessibleApps   int64 `json:"total_accessible_apps,omitempty"`
 	TotalAccessibleEvents int64 `json:"total_accessible_events,omitempty"`
@@ -81,7 +73,6 @@ type HomeResponse struct {
 	Stats            *HomeStats            `json:"stats"`
 	Gamification     *GamificationSummary  `json:"gamification,omitempty"`
 	UserRole         string                `json:"user_role"`
-	ManagedGroupIDs  []uint                `json:"managed_group_ids,omitempty"`
 	AppSettings      *models.AppSettings   `json:"app_settings,omitempty"`
 	HeroMessages     []models.HeroMessage  `json:"hero_messages,omitempty"`
 	PendingItems     *PendingItems         `json:"pending_items,omitempty"`
@@ -96,14 +87,9 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 	}
 
 	role, _ := c.Get("role")
-	managedGroupIDs, _ := c.Get("managed_group_ids")
 
 	response := HomeResponse{
 		UserRole: role.(string),
-	}
-
-	if managedGroupIDs != nil {
-		response.ManagedGroupIDs = managedGroupIDs.([]uint)
 	}
 
 	// Load settings upfront (needed for newsPerTab before goroutines start)
@@ -238,7 +224,7 @@ func (h *HomeHandler) GetHomeData(c *gin.Context) {
 		defer wg.Done()
 		userIDVal := userID.(uint)
 		roleVal := role.(string)
-		stats := h.getStats(roleVal, response.ManagedGroupIDs, groups)
+		stats := h.getStats(roleVal, groups)
 		log.Printf("[Home] GetHomeData: userID=%d, role=%s, stats=%+v", userIDVal, roleVal, stats)
 		mu.Lock()
 		response.Stats = stats
@@ -327,14 +313,13 @@ func (h *HomeHandler) getNewApps(userID uint, role string) ([]models.Application
 		return apps, err
 	}
 
-	// Users/Group Admins see apps in their groups + managed groups + public apps
+	// Les autres voient les applications de leurs groupes et les applications publiques
 	err := h.db.Distinct("applications.*").
 		Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 		Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
 		Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id").
-		Joins("LEFT JOIN group_admins ON group_app_groups.group_id = group_admins.group_id AND group_admins.user_id = ?", userID).
-		Where("applications.is_active = ? AND (app_groups.is_private = ? OR user_groups.user_id = ? OR group_admins.user_id = ?)",
-			true, false, userID, userID).
+		Where("applications.is_active = ? AND (app_groups.is_private = ? OR user_groups.user_id = ?)",
+			true, false, userID).
 		Preload("AppGroup").
 		Order("applications.created_at DESC").
 		Limit(5).
@@ -346,7 +331,7 @@ func (h *HomeHandler) getNewApps(userID uint, role string) ([]models.Application
 // par les chargements parallèles de l'accueil (vides pour un admin, qui voit tout).
 type viewerGroups struct {
 	member []uint // groupes dont il est membre
-	all    []uint // groupes dont il est membre ou administrateur
+	all    []uint // groupes qui lui ouvrent un contenu (aujourd'hui : les mêmes)
 }
 
 func (h *HomeHandler) loadViewerGroups(userID uint, role string) viewerGroups {
@@ -354,7 +339,7 @@ func (h *HomeHandler) loadViewerGroups(userID uint, role string) viewerGroups {
 		return viewerGroups{}
 	}
 	member := userGroupIDs(h.db, userID)
-	return viewerGroups{member: member, all: mergeGroupIDs(member, adminGroupIDs(h.db, userID))}
+	return viewerGroups{member: member, all: member}
 }
 
 // Helper: Get today's events (events starting today only)
@@ -628,7 +613,7 @@ func (h *HomeHandler) getHeroMessagesWithCache() ([]models.HeroMessage, error) {
 }
 
 // Helper: Get stats based on role
-func (h *HomeHandler) getStats(role string, managedGroupIDs []uint, groups viewerGroups) *HomeStats {
+func (h *HomeHandler) getStats(role string, groups viewerGroups) *HomeStats {
 	stats := &HomeStats{}
 
 	if role == "admin" {
@@ -652,36 +637,6 @@ func (h *HomeHandler) getStats(role string, managedGroupIDs []uint, groups viewe
 
 		// Count all polls
 		h.db.Model(&models.Poll{}).Count(&stats.TotalPolls)
-	} else if len(managedGroupIDs) > 0 {
-		stats.ManagedGroupsCount = int64(len(managedGroupIDs))
-
-		// Count total members in managed groups (distinct users)
-		h.db.Model(&models.User{}).
-			Joins("JOIN user_groups ON users.id = user_groups.user_id").
-			Where("user_groups.group_id IN ? AND users.is_active = ?", managedGroupIDs, true).
-			Distinct("users.id").
-			Count(&stats.TotalMembersCount)
-
-		// Count private app groups owned by managed groups
-		h.db.Model(&models.AppGroup{}).
-			Where("is_private = ? AND owner_group_id IN ?", true, managedGroupIDs).
-			Count(&stats.ManagedAppGroupsCount)
-
-		// Count apps in managed private app groups
-		h.db.Model(&models.Application{}).
-			Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
-			Where("app_groups.owner_group_id IN ? AND applications.is_active = ?", managedGroupIDs, true).
-			Count(&stats.ManagedAppsCount)
-
-		// Count published news (group admins can manage all news)
-		h.db.Model(&models.News{}).Where("is_published = ?", true).Count(&stats.ManagedNewsCount)
-
-		// Count polls accessible to managed groups
-		h.db.Model(&models.Poll{}).
-			Joins("JOIN poll_target_groups ON polls.id = poll_target_groups.poll_id").
-			Where("poll_target_groups.group_id IN ?", managedGroupIDs).
-			Distinct("polls.id").
-			Count(&stats.ManagedPollsCount)
 	} else {
 		// Regular user stats
 		userGroupIDs := groups.member
@@ -841,9 +796,8 @@ func (h *HomeHandler) getPendingItems(userID uint, role string, groups viewerGro
 			Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 			Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
 			Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id AND user_groups.user_id = ?", userID).
-			Joins("LEFT JOIN group_admins ON group_app_groups.group_id = group_admins.group_id AND group_admins.user_id = ?", userID).
-			Where("applications.is_active = ? AND applications.created_at >= ? AND (app_groups.is_private = ? OR user_groups.user_id = ? OR group_admins.user_id = ?)",
-				true, sevenDaysAgo, false, userID, userID).
+			Where("applications.is_active = ? AND applications.created_at >= ? AND (app_groups.is_private = ? OR user_groups.user_id = ?)",
+				true, sevenDaysAgo, false, userID).
 			Count(&pending.NewAppsCount)
 	}
 

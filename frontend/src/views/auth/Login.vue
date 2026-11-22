@@ -271,19 +271,7 @@ const handleOAuthCallback = async (code, state, nonce) => {
     // Nonce pris uniquement du sessionStorage, jamais de l'URL
     const response = await oauthService.handleCallback(provider, code, state, savedNonce)
 
-    // Enrichir l'objet user avec managed_group_ids du JWT si absent
     const userData = { ...response.user }
-    if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
-      try {
-        const payload = response.token.split('.')[1]
-        const decoded = JSON.parse(atob(payload))
-        userData.managed_group_ids = decoded.managed_group_ids || []
-        console.log('🔑 managed_group_ids extrait du JWT:', userData.managed_group_ids)
-      } catch (e) {
-        console.warn('Erreur décodage JWT:', e)
-        userData.managed_group_ids = []
-      }
-    }
 
     // Sauvegarder les tokens
     authStore.setToken(response.token)

@@ -200,12 +200,12 @@ const selectedPage = ref(null)
 const expandedSections = ref([])
 const contentCache = ref({})
 
-// Profil d'aide : admin, contributeur (permission de rédaction ou admin de groupe), utilisateur
+// Profil d'aide : admin, contributeur (permission de rédaction), utilisateur
 const CONTENT_PERMISSIONS = ['news.manage', 'events.manage', 'polls.manage']
 const guideRole = computed(() => {
   const roles = getRoles(authStore.user)
   if (roles.isAdmin) return 'admin'
-  if (roles.isGroupAdmin || CONTENT_PERMISSIONS.some(p => permissionScope(roles, p) !== '')) return 'editor'
+  if (CONTENT_PERMISSIONS.some(p => permissionScope(roles, p) !== '')) return 'editor'
   return 'user'
 })
 

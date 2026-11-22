@@ -51,8 +51,8 @@ func (h *DashboardHandler) GetDashboard(c *gin.Context) {
 		appGroups = h.withApplications(allAppGroups)
 	} else {
 		uid := c.GetUint("user_id")
-		// Groupes d'appartenance + groupes administrés (lus en base)
-		combinedGroupIDs := mergeGroupIDs(userGroupIDs(h.db, uid), adminGroupIDs(h.db, uid))
+		// Groupes d'appartenance (lus en base)
+		combinedGroupIDs := userGroupIDs(h.db, uid)
 
 		if len(combinedGroupIDs) > 0 {
 			// Récupérer les AppGroups accessibles via les groupes combinés

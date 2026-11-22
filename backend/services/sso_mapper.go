@@ -38,7 +38,7 @@ func (m *SSOMapper) SyncUser(info *SSOUserInfo) (*models.User, error) {
 	var user models.User
 
 	// Chercher l'utilisateur par email
-	result := m.db.Preload("Groups").Preload("AdminOfGroups").Where("email = ?", info.Email).First(&user)
+	result := m.db.Preload("Groups").Where("email = ?", info.Email).First(&user)
 
 	isNewUser := result.Error == gorm.ErrRecordNotFound
 
@@ -88,7 +88,7 @@ func (m *SSOMapper) SyncUser(info *SSOUserInfo) (*models.User, error) {
 	}
 
 	// Recharger l'utilisateur avec les groupes et les groupes administrés
-	if err := m.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID).Error; err != nil {
+	if err := m.db.Preload("Groups").First(&user, user.ID).Error; err != nil {
 		return nil, err
 	}
 

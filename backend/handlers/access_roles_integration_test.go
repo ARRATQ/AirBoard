@@ -103,7 +103,7 @@ func send(t *testing.T, r *gin.Engine, method, path string, body interface{}) (i
 func TestResourcesByPermission(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	tx := rollbackTx(t)
-	f := newFixture(t, tx) // f.editor est membre de g1 ; f.groupAdmin administre g2 (ancienne table)
+	f := newFixture(t, tx) // f.editor est membre de g1 ; f.groupAdmin est éditeur de g2 (ancien admin de groupe converti)
 
 	grantRole(t, tx, f.tag+"-éditeurs", models.ScopeGroups, f.editor.id)
 	grantRole(t, tx, f.tag+"-partout", models.ScopeAll, f.member.id)
@@ -168,7 +168,7 @@ func TestResourcesByPermission(t *testing.T) {
 		}
 	})
 
-	t.Run("ancien admin de groupe : inchangé", func(t *testing.T) {
+	t.Run("éditeur de groupe (ancien admin converti) : son groupe", func(t *testing.T) {
 		code, obj, _ := send(t, legacy, http.MethodPost, "/group-admin/app-groups", map[string]interface{}{"name": f.tag + "-cat-legacy", "owner_group_id": f.g2.ID})
 		if code != http.StatusCreated && code != http.StatusOK {
 			t.Fatalf("création : %d %v", code, obj)

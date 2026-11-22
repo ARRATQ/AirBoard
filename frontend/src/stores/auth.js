@@ -34,36 +34,6 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value.username
   })
 
-  const isGroupAdmin = computed(() => {
-    // Un utilisateur est group admin s'il administre au moins un groupe (indépendamment de son rôle)
-    // Vérifier admin_of_groups (tableau de groupes) OU managed_group_ids (tableau d'IDs)
-    const hasAdminOfGroups = user.value?.admin_of_groups && user.value.admin_of_groups.length > 0
-    const hasManagedGroupIds = user.value?.managed_group_ids && user.value.managed_group_ids.length > 0
-    return hasAdminOfGroups || hasManagedGroupIds
-  })
-  const managedGroupIds = computed(() => {
-    // Récupérer les IDs des groupes administrés depuis admin_of_groups ou managed_group_ids
-    if (user.value?.admin_of_groups && user.value.admin_of_groups.length > 0) {
-      return user.value.admin_of_groups.map(g => g.id)
-    }
-    if (user.value?.managed_group_ids && user.value.managed_group_ids.length > 0) {
-      return user.value.managed_group_ids
-    }
-    return []
-  })
-
-  // Helper pour décoder le JWT et extraire managed_group_ids
-  const extractManagedGroupIdsFromToken = (jwtToken) => {
-    try {
-      const payload = jwtToken.split('.')[1]
-      const decoded = JSON.parse(atob(payload))
-      return decoded.managed_group_ids || []
-    } catch (e) {
-      console.warn('Erreur décodage JWT:', e)
-      return []
-    }
-  }
-
   // Actions
   const login = async (credentials) => {
     try {
@@ -74,23 +44,13 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = response.token
       refreshToken.value = response.refresh_token
 
-      // Enrichir l'objet user avec managed_group_ids du JWT si absent
       const userData = { ...response.user }
-      console.log('🔍 user avant enrichissement:', userData.managed_group_ids)
-      if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
-        userData.managed_group_ids = extractManagedGroupIdsFromToken(response.token)
-        console.log('🔑 managed_group_ids extrait du JWT:', userData.managed_group_ids)
-      }
       user.value = userData
 
       // Persistance locale
       localStorage.setItem('airboard_token', response.token)
       localStorage.setItem('airboard_refresh_token', response.refresh_token)
       localStorage.setItem('airboard_user', JSON.stringify(userData))
-
-      // Forcer la mise à jour des intercepteurs
-      console.log('🔐 Token stocké:', response.token.substring(0, 20) + '...')
-      console.log('👤 User final avec managed_group_ids:', userData.managed_group_ids)
 
       return response
     } catch (error) {
@@ -147,12 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
         token.value = storedToken
         refreshToken.value = storedRefreshToken
 
-        // Enrichir l'objet user avec managed_group_ids du JWT si absent
-        const userData = JSON.parse(storedUser)
-        if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
-          userData.managed_group_ids = extractManagedGroupIdsFromToken(storedToken)
-        }
-        user.value = userData
+        user.value = JSON.parse(storedUser)
         return true
       }
     } catch (error) {
@@ -165,14 +120,6 @@ export const useAuthStore = defineStore('auth', () => {
   const updateProfile = async () => {
     try {
       const profile = await authService.getProfile()
-
-      // Enrichir avec managed_group_ids du JWT si absent
-      if (!profile.managed_group_ids || profile.managed_group_ids.length === 0) {
-        const storedToken = localStorage.getItem('airboard_token')
-        if (storedToken) {
-          profile.managed_group_ids = extractManagedGroupIdsFromToken(storedToken)
-        }
-      }
 
       user.value = profile
       localStorage.setItem('airboard_user', JSON.stringify(profile))
@@ -261,11 +208,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = response.token
       refreshToken.value = response.refresh_token
 
-      // Enrichir l'objet user avec managed_group_ids du JWT si absent
       const userData = { ...response.user }
-      if (!userData.managed_group_ids || userData.managed_group_ids.length === 0) {
-        userData.managed_group_ids = extractManagedGroupIdsFromToken(response.token)
-      }
       user.value = userData
 
       // Persistance locale
@@ -303,8 +246,6 @@ export const useAuthStore = defineStore('auth', () => {
     // Getters
     isAuthenticated,
     isAdmin,
-    isGroupAdmin,
-    managedGroupIds,
     userInitials,
     userDisplayName,
 

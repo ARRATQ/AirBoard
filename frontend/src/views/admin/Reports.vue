@@ -110,7 +110,7 @@
                 </div>
                 <div>
                   <span class="font-semibold text-gray-700 dark:text-gray-300 capitalize">{{ $t('reports.roles.' + stat.role) }}</span>
-                  <p v-if="stat.role === 'group_admin'" class="text-xs text-gray-400 mt-0.5">{{ $t('reports.groupAdminNote') }}</p>
+                  <p v-if="stat.role === 'contributor'" class="text-xs text-gray-400 mt-0.5">{{ $t('reports.contributorNote') }}</p>
                 </div>
               </div>
               <span class="text-xs text-gray-400">{{ stat.member_count }} {{ $t('reports.members') }}</span>
@@ -151,7 +151,7 @@
             </div>
 
             <!-- Production metrics (editors/admins) -->
-            <div v-if="['admin', 'group_admin'].includes(stat.role)" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div v-if="['admin', 'contributor'].includes(stat.role)" class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{{ $t('reports.production') }}</p>
               <div class="grid grid-cols-2 gap-1 text-xs mb-1">
                 <div class="text-center">
@@ -383,7 +383,7 @@
           >
             <option value="">{{ $t('reports.allRoles') }}</option>
             <option value="admin">{{ $t('reports.roles.admin') }}</option>
-            <option value="group_admin">{{ $t('reports.roles.group_admin') }}</option>
+            <option value="contributor">{{ $t('reports.roles.contributor') }}</option>
             <option value="user">{{ $t('reports.roles.user') }}</option>
           </select>
           <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -894,15 +894,13 @@ async function loadCurrentTab() {
 // ========================
 const roleIcons = {
   admin: 'lucide:shield-check',
-  group_admin: 'lucide:shield-user',
-  editor: 'lucide:pencil',
+  contributor: 'lucide:pencil',
   user: 'lucide:user',
 }
 
 const roleColors = {
   admin: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400', bar: 'bg-red-500', badge: 'tag--bad' },
-  group_admin: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', bar: 'bg-orange-500', badge: 'tag--warn' },
-  editor: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400', bar: 'bg-purple-500', badge: 'tag--acc' },
+  contributor: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400', bar: 'bg-purple-500', badge: 'tag--acc' },
   user: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', bar: 'bg-blue-500', badge: 'tag--info' },
 }
 

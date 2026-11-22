@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// permContext prépare un contexte comme RequireAuth le laisse : rôle, groupes administrés
-// (ancienne table), permissions des rôles et groupes dont l'utilisateur est membre.
+// permContext prépare un contexte comme RequireAuth le laisse : rôle, permissions des rôles et
+// groupes dont l'utilisateur est membre (managed : groupes déjà posés, ignorés désormais).
 func permContext(role string, managed []uint, perms map[string]string, members []uint) *gin.Context {
 	c, _ := contextFor(identity{role: role, managed: managed})
 	c.Set(CtxPermissions, perms)
@@ -34,9 +34,8 @@ func TestRequirePermission(t *testing.T) {
 		{"admin", "admin", nil, nil, nil, true, true, []uint{}},
 		{"permission sur tout le site", "user", nil, map[string]string{perm: models.ScopeAll}, []uint{4}, true, true, []uint{}},
 		{"permission limitée à ses groupes", "user", nil, map[string]string{perm: models.ScopeGroups}, []uint{4, 5}, true, false, []uint{4, 5}},
-		{"ses groupes + groupes encore administrés", "user", []uint{9, 4}, map[string]string{perm: models.ScopeGroups}, []uint{4, 5}, true, false, []uint{9, 4, 5}},
 		{"limitée à ses groupes mais membre d'aucun", "user", nil, map[string]string{perm: models.ScopeGroups}, nil, false, false, nil},
-		{"ancien admin de groupe sans rôle", "user", []uint{7}, nil, nil, true, false, []uint{7}},
+		{"ancien admin de groupe sans rôle : plus rien", "user", []uint{7}, nil, nil, false, false, nil},
 		{"autre permission seulement", "user", nil, map[string]string{"news.manage": models.ScopeAll}, []uint{4}, false, false, nil},
 		{"aucun droit", "editor", nil, nil, []uint{4}, false, false, nil},
 	}
@@ -99,12 +98,5 @@ func TestMergePermissionKeepsWidestScope(t *testing.T) {
 	models.MergePermission(perms, "p", models.ScopeGroups)
 	if perms["p"] != models.ScopeAll {
 		t.Fatalf("portée = %q, attendu %q", perms["p"], models.ScopeAll)
-	}
-}
-
-func TestMergeUintSets(t *testing.T) {
-	got := mergeUintSets([]uint{3, 1}, []uint{1, 2, 3, 4})
-	if want := []uint{3, 1, 2, 4}; !reflect.DeepEqual(got, want) {
-		t.Fatalf("union = %v, attendu %v", got, want)
 	}
 }

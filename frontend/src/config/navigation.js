@@ -1,4 +1,4 @@
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, canAccess, hasAnyPermission } from './access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, canAccess } from './access'
 
 /**
  * Menu latéral, décrit une seule fois pour tous les rôles.
@@ -25,7 +25,7 @@ export const ADMIN_OVERVIEW = {
   to: '/admin',
   icon: 'lucide:layout-dashboard',
   labelKey: 'nav.admin.overview',
-  access: GROUP_ADMIN,
+  access: MANAGEMENT,
   exact: true
 }
 
@@ -91,11 +91,11 @@ export const ADMIN_SECTIONS = [
  * Menu d'administration d'un utilisateur.
  *
  * - Admin global : vue d'ensemble puis domaines repliables (`grouped: true`).
- * - Admin de groupe ou titulaire de permissions : une liste courte des seules pages permises,
+ * - Titulaire de permissions : une liste courte des seules pages permises,
  *   sous un seul titre (`grouped: false`).
  * - Sinon : `null`, pas de bloc d'administration.
  *
- * @param {{ isAdmin: boolean, isGroupAdmin: boolean, permissions?: Record<string, string> }} roles
+ * @param {{ isAdmin: boolean, permissions?: Record<string, string> }} roles
  * @returns {null | { titleKey: string, grouped: boolean, overview: object|null, sections: Array, items: Array }}
  */
 export function buildAdminNav(roles) {
@@ -113,7 +113,7 @@ export function buildAdminNav(roles) {
   }
 
   return {
-    titleKey: roles.isGroupAdmin ? 'groupAdmin.title' : hasAnyPermission(roles) ? 'nav.admin.title' : 'nav.admin.content',
+    titleKey: 'nav.admin.title',
     grouped: false,
     overview,
     sections: [],
@@ -143,7 +143,7 @@ export const SECTION_TABS = {
 
 /**
  * @param {keyof typeof SECTION_TABS} section
- * @param {{ isAdmin: boolean, isGroupAdmin: boolean, permissions?: Record<string, string> }} roles
+ * @param {{ isAdmin: boolean, permissions?: Record<string, string> }} roles
  */
 export function visibleTabs(section, roles) {
   return (SECTION_TABS[section] || []).filter((tab) => canAccess(tab.access, roles))

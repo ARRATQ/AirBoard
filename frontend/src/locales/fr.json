@@ -247,8 +247,6 @@
     "loadError": "Erreur lors du chargement des groupes",
     "saveError": "Erreur lors de la sauvegarde du groupe",
     "deleteError": "Erreur lors de la suppression du groupe",
-    "adminsSaved": "Administrateurs du groupe mis à jour.",
-    "adminsLoadError": "Impossible de charger les utilisateurs du groupe.",
     "membersCount": "{count} utilisateur | {count} utilisateur | {count} utilisateurs"
   },
   "applications": {
@@ -392,14 +390,6 @@
     "errors": {
       "nameRequired": "Le nom est requis"
     }
-  },
-  "groupAdminsModal": {
-    "manage": "Gérer les administrateurs",
-    "manageFor": "Gérer les administrateurs : {name}",
-    "title": "Administrateurs du groupe",
-    "intro": "Sélectionnez les utilisateurs qui pourront administrer ce groupe et ses ressources.",
-    "noUsers": "Aucun utilisateur trouvé",
-    "selectedCount": "aucun administrateur sélectionné | 1 administrateur sélectionné | {count} administrateurs sélectionnés"
   },
   "settings": {
     "general": "Général",
@@ -670,16 +660,16 @@
     "never": "Jamais",
     "monthlyActivity": "Activité mensuelle (12 mois)",
     "articlesAuthored": "Articles rédigés",
-    "groupAdminNote": "Utilisateurs désignés admins de groupe",
     "roles": {
       "admin": "Administrateur",
-      "group_admin": "Admins de Groupe",
-      "user": "Utilisateur"
+      "user": "Utilisateur",
+      "contributor": "Contributeurs"
     },
     "topContributors": "Top contributeurs",
     "score": "Score",
     "scoreFormula": "* Score = clics sur les ressources ×1 + articles lus ×2 + réactions ×1 + votes aux sondages ×1 + ressources créées ×5 + articles publiés ×10",
-    "unknownError": "Erreur inconnue"
+    "unknownError": "Erreur inconnue",
+    "contributorNote": "Comptes dont un rôle donne la main sur les actualités, les événements ou les sondages."
   },
   "announcements": {
     "title": "Annonces",
@@ -1648,12 +1638,6 @@
       "news": "Articles",
       "events": "Événements",
       "polls": "Sondages",
-      "managedGroups": "Groupes gérés",
-      "totalMembers": "Membres totaux",
-      "managedAppGroups": "Catégories de ressources gérées",
-      "managedApps": "Mes ressources",
-      "managedNews": "Articles gérés",
-      "managedPolls": "Sondages gérés",
       "accessibleApps": "Ressources disponibles",
       "accessibleEvents": "Événements disponibles"
     },

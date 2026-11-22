@@ -191,7 +191,7 @@ onMounted(async () => {
   observeContentWidth()
 
   if (hasStoredAuth) {
-    // Profil (admin_of_groups peut changer sans reconnexion), palette et réglages admin
+    // Profil (rôles et permissions peuvent changer sans reconnexion), palette et réglages admin
     // partent en parallèle : aucun ne dépend des autres.
     await Promise.all([
       authStore.updateProfile().catch((error) => {

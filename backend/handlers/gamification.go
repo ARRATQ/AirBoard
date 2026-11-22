@@ -102,18 +102,14 @@ func (h *GamificationHandler) GetMyAchievements(c *gin.Context) {
 // GetAllAchievements récupère tous les badges configurés
 func (h *GamificationHandler) GetAllAchievements(c *gin.Context) {
 	role := c.GetString("role")
-	managedGroupIDs, _ := c.Get("managed_group_ids")
 
-	// Un utilisateur est considéré comme "contributeur" s'il est admin, s'il a une
-	// permission de rédaction (actualités, événements, sondages) ou s'il administre un groupe.
+	// Un utilisateur est considéré comme "contributeur" s'il est admin ou s'il a une
+	// permission de rédaction (actualités, événements, sondages).
 	isContributor := role == "admin"
 	for _, p := range models.ContentPermissions {
 		if middleware.PermissionScope(c, p) != "" {
 			isContributor = true
 		}
-	}
-	if ids, ok := managedGroupIDs.([]uint); ok && len(ids) > 0 {
-		isContributor = true
 	}
 
 	var achievements []models.Achievement

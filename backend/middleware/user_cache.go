@@ -19,9 +19,8 @@ var errUserUnavailable = errors.New("utilisateur introuvable")
 
 // userStatus est l'état d'autorisation d'un utilisateur, relu en base.
 type userStatus struct {
-	Role            string
-	IsActive        bool
-	ManagedGroupIDs []uint
+	Role     string
+	IsActive bool
 	// Permissions effectives {permission: portée} issues des rôles attribués
 	Permissions map[string]string
 	// MemberGroupIDs : groupes couverts par la portée « ses groupes » : ceux dont
