@@ -267,7 +267,7 @@ onMounted(() => {
 .poll-info {
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -289,7 +289,7 @@ onMounted(() => {
   gap: 6px;
   padding: 4px 10px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   font-size: 12.5px;
   color: var(--text);
 }
@@ -302,7 +302,7 @@ onMounted(() => {
   gap: 12px;
   padding: 10px 12px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   color: var(--text);
 }
 

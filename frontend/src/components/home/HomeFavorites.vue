@@ -54,7 +54,7 @@ defineProps({
   min-height: 44px;
   padding: 6px 8px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   color: var(--text);
   transition: border-color 120ms ease;
 }
@@ -72,7 +72,7 @@ defineProps({
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: color-mix(in oklab, var(--c) 14%, var(--surface));
   color: color-mix(in oklab, var(--c) 85%, var(--text));
   font-size: 17px;

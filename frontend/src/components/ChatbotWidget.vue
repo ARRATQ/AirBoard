@@ -436,7 +436,7 @@ defineExpose({
   inset-inline-end: 0;
   width: 380px;
   height: 520px;
-  border-radius: 12px;
+  border-radius: var(--r-s);
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   display: flex;
@@ -702,7 +702,7 @@ defineExpose({
   inset-inline-end: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-s);
   padding: 0.5rem;
   min-width: 16rem;
   box-shadow: 0 10px 25px rgba(var(--shadow-rgb), 0.15);
@@ -714,7 +714,7 @@ defineExpose({
   gap: 0.625rem;
   width: 100%;
   padding: 0.5rem 0.625rem;
-  border-radius: 0.5rem;
+  border-radius: var(--r-s);
   transition: background 0.15s;
   cursor: pointer;
   border: none;
@@ -760,7 +760,7 @@ defineExpose({
     bottom: 80px !important;
     height: 72vh !important;
     max-height: 520px;
-    border-radius: 12px !important;
+    border-radius: var(--r-s) !important;
   }
 
   /* Fullscreen reste intact */

@@ -449,13 +449,13 @@
                     </div>
                   </td>
                   <td class="px-4 py-3">
-                    <span :class="['text-xs px-2 py-0.5 rounded-full font-medium', roleColors[user.role]?.badge]">
+                    <span :class="['tag', roleColors[user.role]?.badge]">
                       {{ $t('reports.roles.' + user.role) }}
                     </span>
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex flex-wrap gap-1">
-                      <span v-for="g in (user.groups || []).slice(0, 2)" :key="g" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded">{{ g }}</span>
+                      <span v-for="g in (user.groups || []).slice(0, 2)" :key="g" class="tag">{{ g }}</span>
                       <span v-if="(user.groups || []).length > 2" class="text-xs text-gray-400">+{{ user.groups.length - 2 }}</span>
                     </div>
                   </td>
@@ -901,10 +901,10 @@ const roleIcons = {
 }
 
 const roleColors = {
-  admin: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400', bar: 'bg-red-500', badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-  group_admin: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', bar: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  editor: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400', bar: 'bg-purple-500', badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  user: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', bar: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+  admin: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400', bar: 'bg-red-500', badge: 'tag--bad' },
+  group_admin: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', bar: 'bg-orange-500', badge: 'tag--warn' },
+  editor: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400', bar: 'bg-purple-500', badge: 'tag--acc' },
+  user: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', bar: 'bg-blue-500', badge: 'tag--info' },
 }
 
 // ========================

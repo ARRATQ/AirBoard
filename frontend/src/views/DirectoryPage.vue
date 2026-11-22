@@ -310,7 +310,7 @@ onMounted(load)
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0 0 4px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -357,7 +357,7 @@ onMounted(load)
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 
@@ -367,7 +367,7 @@ onMounted(load)
   gap: 6px;
   height: 30px;
   padding-inline: 12px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   font-size: 13px;
   color: var(--muted);
 }
@@ -383,17 +383,17 @@ onMounted(load)
   align-items: center;
   gap: 8px;
   min-width: min(100%, 18rem);
-  height: 34px;
+  height: var(--ctl-h);
   padding-inline: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--muted);
 }
 
 .directory-search:focus-within { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
 .directory-search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--text); font-size: 13px; }
-.directory-unit-select { width: auto; max-width: 16rem; height: 34px; padding-block: 0; padding-inline: 10px 32px; border-radius: 4px; font-size: 13px; }
+.directory-unit-select { width: auto; max-width: 16rem; height: var(--ctl-h); padding-block: 0; padding-inline: 10px 32px; border-radius: var(--r-s); font-size: 13px; }
 /* Chevron natif du select (plugin forms) côté fin de ligne en arabe. */
 [dir='rtl'] .directory-unit-select { padding-inline: 32px 10px; background-position: left 0.5rem center; }
 
@@ -408,7 +408,7 @@ onMounted(load)
   display: inline-flex;
   gap: 2px;
   padding: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   border: 1px solid var(--line);
   background: var(--sunken);
 }
@@ -417,7 +417,7 @@ onMounted(load)
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.7rem;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   font-size: 12.5px;
   color: var(--muted);
   transition: background-color 150ms ease, color 150ms ease;
@@ -438,7 +438,7 @@ onMounted(load)
   align-items: center;
   gap: 0.3rem;
   padding: 0.25rem 0.45rem;
-  border-radius: 0.4rem;
+  border-radius: var(--r-s);
   color: var(--text-muted);
 }
 .directory-crumbs__item:hover { background: var(--hover); color: var(--text-primary); }

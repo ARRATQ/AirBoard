@@ -84,7 +84,7 @@
           <span
             v-for="group in row.raw.groups"
             :key="group.id"
-            class="um-chip"
+            class="tag um-chip"
             :style="group.color ? { borderColor: group.color, color: group.color } : undefined"
           >{{ group.name }}</span>
         </span>
@@ -476,7 +476,7 @@ onMounted(() => {
   width: 30px;
   height: 30px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   font-family: var(--f-num);
   font-size: 11px;
@@ -492,13 +492,6 @@ onMounted(() => {
 
 .um-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 
-.um-chip {
-  padding: 1px 7px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  font-size: 11.5px;
-  color: var(--muted);
-}
 
 .um-mono {
   font-family: var(--f-num);

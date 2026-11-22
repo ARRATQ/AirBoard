@@ -155,7 +155,7 @@ const redirectToLogin = () => {
 
 .callback-container {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--r-s);
   padding: 3rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 450px;
@@ -227,7 +227,7 @@ const redirectToLogin = () => {
   color: white;
   border: none;
   padding: 0.75rem 2rem;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;

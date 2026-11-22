@@ -30,7 +30,7 @@
           <div class="form-group">
             <label class="form-label" for="unit-color">{{ $t('directory.color') }}</label>
             <div class="flex items-center gap-2">
-              <input id="unit-color" v-model="form.color" type="color" class="h-10 w-12 cursor-pointer rounded border" style="border-color: var(--border)" />
+              <input id="unit-color" v-model="form.color" type="color" class="h-8 w-10 cursor-pointer rounded border" style="border-color: var(--border)" />
               <input v-model="form.color" class="form-input" maxlength="20" aria-label="hex" />
             </div>
           </div>

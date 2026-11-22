@@ -53,7 +53,7 @@
                 {{ voter.user.first_name }} {{ voter.user.last_name }}
               </span>
             </div>
-            <span class="voter-choice">
+            <span class="tag voter-choice">
               {{ getOptionText(voter.poll_option_id) }}
             </span>
             <span class="voter-date">
@@ -175,7 +175,7 @@ watch(() => props.poll.id, () => {
   text-align: center;
   padding: 2rem;
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: var(--r-s);
 }
 
 :is(.dark .results-loading),
@@ -205,7 +205,7 @@ watch(() => props.poll.id, () => {
 .result-option {
   padding: 0.5rem;
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   transition: all 0.3s;
 }
 
@@ -222,7 +222,7 @@ watch(() => props.poll.id, () => {
   background: rgba(59, 130, 246, 0.08);
   border: none;
   border-inline-start: 4px solid #3B82F6;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 :is(.dark .result-option.leading-option) {
@@ -257,7 +257,7 @@ watch(() => props.poll.id, () => {
   background: rgba(59, 130, 246, 0.08);
   border: none;
   border-inline-start: 4px solid #3B82F6;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 :is(.dark .result-option.user-choice.leading-option) {
@@ -363,7 +363,7 @@ watch(() => props.poll.id, () => {
   margin-top: 2rem;
   padding: 1.5rem;
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: var(--r-s);
 }
 
 :is(.dark .voter-details) {
@@ -402,7 +402,7 @@ watch(() => props.poll.id, () => {
   gap: 0.375rem 1rem;
   padding: 0.75rem 1rem;
   background: white;
-  border-radius: 6px;
+  border-radius: var(--r-s);
 }
 
 :is(.dark .voter-item) {
@@ -434,18 +434,7 @@ watch(() => props.poll.id, () => {
   color: #ffffff;
 }
 
-.voter-choice {
-  color: #6b7280;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.75rem;
-  background: #e5e7eb;
-  border-radius: 9999px;
-}
-
-:is(.dark .voter-choice) {
-  background: #6b7280;
-  color: #d1d5db;
-}
+.voter-choice { display: inline-block; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; }
 
 .voter-date {
   color: #9ca3af;
@@ -460,7 +449,7 @@ watch(() => props.poll.id, () => {
 
 .btn {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;

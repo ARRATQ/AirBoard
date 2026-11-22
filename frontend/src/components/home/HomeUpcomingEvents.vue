@@ -65,7 +65,7 @@ const time = (v) => new Date(v).toLocaleTimeString(loc.value, { hour: '2-digit',
 .up__row:focus-visible {
   outline: 2px solid var(--acc);
   outline-offset: -2px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 .up__date {

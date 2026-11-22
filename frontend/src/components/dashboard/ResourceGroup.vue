@@ -13,7 +13,7 @@
         <span class="rgroup__count">{{ count }}</span>
         <Icon icon="mdi:chevron-down" class="rgroup__chev" :class="{ 'rgroup__chev--up': !collapsed }" aria-hidden="true" />
       </button>
-      <span v-if="isPrivate" class="rgroup__private">
+      <span v-if="isPrivate" class="tag rgroup__private">
         {{ $t('dashboard.privateBadge') }}<template v-if="ownerName"> · {{ ownerName }}</template>
       </span>
     </h2>
@@ -124,7 +124,7 @@ const groupColor = computed(() => props.color || 'var(--acc)')
   min-width: 22px;
   padding: 1px 7px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-s);
   background: var(--surface);
   font-family: var(--f-num);
   font-size: 11.5px;
@@ -147,17 +147,6 @@ const groupColor = computed(() => props.color || 'var(--acc)')
   .rgroup__chev { transition: none; }
 }
 
-.rgroup__private {
-  padding: 1px 6px;
-  border: 1px dashed var(--line);
-  border-radius: var(--r-s);
-  background: var(--surface);
-  font-family: var(--f-num);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
 
 .rgroup__body { padding: 12px; }
 

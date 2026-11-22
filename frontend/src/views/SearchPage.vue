@@ -31,7 +31,7 @@
           :key="tab.value"
           @click="setTypeFilter(tab.value)"
           :class="[
-            'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+            'px-3 py-1.5 rounded text-sm font-medium transition-colors',
             activeType === tab.value
               ? 'bg-primary-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
@@ -191,12 +191,12 @@
             <div class="flex items-center gap-2">
               <span
                 :class="{
-                  'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': item.type === 'info',
-                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': item.type === 'warning',
-                  'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': item.type === 'success',
-                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': item.type === 'error',
+                  'tag--info': item.type === 'info',
+                  'tag--warn': item.type === 'warning',
+                  'tag--ok': item.type === 'success',
+                  'tag--bad': item.type === 'error',
                 }"
-                class="px-2 py-0.5 text-[10px] font-medium rounded-full"
+                class="tag"
               >
                 {{ item.type }}
               </span>

@@ -38,7 +38,7 @@
           </h3>
           <span
             :class="[
-              'px-2 py-0.5 rounded text-xs font-medium flex-shrink-0',
+              'tag',
               getTypeBadgeClass(news.type)
             ]"
           >
@@ -86,14 +86,10 @@ defineProps({
   }
 })
 
+// Ton de l'étiquette (.tag, main.css) selon le type historique de l'actualité
 const getTypeBadgeClass = (type) => {
-  const classes = {
-    article: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    tutorial: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-    announcement: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-    faq: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-  }
-  return classes[type] || classes.article
+  const tones = { article: 'tag--info', tutorial: 'tag--ok', announcement: 'tag--acc', faq: 'tag--warn' }
+  return tones[type] || tones.article
 }
 
 const formatDate = (dateString) => {

@@ -21,7 +21,7 @@
           />
           <div class="fcard__body">
             <p class="fcard__meta">
-              <span v-if="typeOf(article).name" class="fcard__type">{{ typeOf(article).name }}</span>
+              <span v-if="typeOf(article).name" class="tag tag--custom fcard__type">{{ typeOf(article).name }}</span>
               <span v-if="article.category" class="fcard__cat">
                 <Icon :icon="article.category.icon || 'mdi:folder'" :style="{ color: article.category.color }" aria-hidden="true" />
                 <span dir="auto">{{ article.category.name }}</span>
@@ -137,16 +137,7 @@ const minutesOf = (article) => {
   color: var(--muted);
 }
 
-.fcard__type {
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--r-s);
-  background: color-mix(in oklab, var(--tc) 15%, var(--surface));
-  color: color-mix(in oklab, var(--tc) 62%, var(--text));
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 20px;
-}
+.fcard__type { --tag-c: var(--tc); }
 
 .fcard__cat { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
 .fcard__cat :deep(svg) { flex: none; width: 14px; height: 14px; }

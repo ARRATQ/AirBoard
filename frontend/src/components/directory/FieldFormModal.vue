@@ -150,7 +150,7 @@ const submit = async () => {
   gap: 0.5rem;
   padding: 0.5rem 0.65rem;
   border: 1px solid var(--border);
-  border-radius: 0.55rem;
+  border-radius: var(--r-s);
   font-size: 0.85rem;
   color: var(--text-primary);
   cursor: pointer;

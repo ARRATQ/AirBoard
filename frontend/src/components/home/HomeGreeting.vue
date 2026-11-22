@@ -99,7 +99,7 @@ const shortDate = (value) =>
   height: 30px;
   padding-inline: 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-size: 12.5px;

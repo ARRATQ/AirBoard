@@ -24,7 +24,7 @@
               <time :datetime="app.created_at">{{ relativeDay(app.created_at, dateLocale) }}</time>
             </span>
           </span>
-          <span v-if="isNewResource(app)" class="nr__badge">{{ $t('home.newApps.newBadge') }}</span>
+          <span v-if="isNewResource(app)" class="tag tag--acc">{{ $t('home.newApps.newBadge') }}</span>
         </a>
       </li>
     </ul>
@@ -68,7 +68,7 @@ const dateLocale = computed(() => dateLocaleFor(locale.value))
 .nr__row:focus-visible {
   outline: 2px solid var(--acc);
   outline-offset: -2px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 .nr__icon {
@@ -105,17 +105,6 @@ const dateLocale = computed(() => dateLocaleFor(locale.value))
 
 .nr__meta time { flex: none; }
 
-.nr__badge {
-  flex: none;
-  height: 18px;
-  padding: 0 6px;
-  border-radius: var(--r-s);
-  background: color-mix(in oklab, var(--acc) 14%, var(--surface));
-  color: var(--acc-ink);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-}
 
 .nr__empty { margin: 0; padding: 8px 4px; font-size: 13px; color: var(--muted); }
 </style>

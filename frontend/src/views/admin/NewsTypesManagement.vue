@@ -87,7 +87,7 @@
               <div>
                 <label class="form-label">{{ t('common.color') }}</label>
                 <div class="flex gap-2">
-                  <input v-model="form.color" type="color" class="form-input w-16 h-10 p-1" />
+                  <input v-model="form.color" type="color" class="form-input w-16 h-8 p-1" />
                   <input v-model="form.color" class="form-input flex-1" placeholder="#3B82F6" />
                 </div>
               </div>

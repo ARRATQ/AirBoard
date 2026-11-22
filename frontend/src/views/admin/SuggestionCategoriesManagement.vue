@@ -272,7 +272,7 @@ useEscapeClose(showModal, () => closeForm())
   width: 100%;
   max-width: 640px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
 }

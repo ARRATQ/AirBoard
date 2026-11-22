@@ -32,13 +32,13 @@
         <div class="flex items-center gap-2 ms-4">
           <span 
             v-if="event.is_all_day"
-            class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full"
+            class="tag tag--info"
           >
             {{ $t('events.types.allDay') }}
           </span>
           <span 
             :class="getPriorityClass(event.priority)"
-            class="px-2 py-1 text-xs font-medium rounded-full"
+            class="tag"
           >
             {{ $t(`events.priority.${event.priority}`) }}
           </span>
@@ -288,13 +288,8 @@ const formatRecurrenceRule = (ruleJson) => {
 }
 
 const getPriorityClass = (priority) => {
-  const classes = {
-    'urgent': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    'high': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-    'normal': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    'low': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-  }
-  return classes[priority] || classes.normal
+  const tones = { urgent: 'tag--bad', high: 'tag--warn', normal: 'tag--info', low: '' }
+  return tones[priority] ?? tones.normal
 }
 
 const editEvent = () => {

@@ -193,7 +193,7 @@ defineExpose({ fit, centerOn, resetTop })
   height: clamp(32rem, calc(100vh - 16rem), 60rem);
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -220,7 +220,7 @@ defineExpose({ fit, centerOn, resetTop })
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   cursor: default;
 }
@@ -230,7 +230,7 @@ defineExpose({ fit, centerOn, resetTop })
   width: 30px;
   height: 30px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--text);
   cursor: pointer;

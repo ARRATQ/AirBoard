@@ -61,8 +61,8 @@ const isActive = (tab) => isPathActive(route.path, tab.to, { exact: tab.exact })
   font-weight: 500;
   color: var(--text-muted);
   border-block-end: 2px solid transparent;
-  border-start-start-radius: 4px;
-  border-start-end-radius: 4px;
+  border-start-start-radius: var(--r-s);
+  border-start-end-radius: var(--r-s);
   transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
 }
 

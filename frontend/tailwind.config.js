@@ -41,14 +41,16 @@ export default {
         sans: ['var(--f-body)'],
         mono: ['var(--f-num)'],
       },
-      // Direction A+ : 3 px (badges), 4 px (boutons, champs), 6 px (cartes, panneaux).
+      // Une seule rondeur pour tout ce qui a un contour (cartes, champs, boutons, étiquettes) :
+      // --r-s, 3 px, celle des étiquettes de statut. « full » reste pour les pastilles et avatars.
       borderRadius: {
-        sm: '3px',
-        DEFAULT: '4px',
-        md: '4px',
-        lg: '6px',
-        xl: '6px',
-        '2xl': '6px',
+        sm: 'var(--r-s)',
+        DEFAULT: 'var(--r-s)',
+        md: 'var(--r-s)',
+        lg: 'var(--r-s)',
+        xl: 'var(--r-s)',
+        '2xl': 'var(--r-s)',
+        '3xl': 'var(--r-s)',
       },
       // Pas d'ombre sur les cartes ; une seule ombre pour les éléments flottants.
       boxShadow: {

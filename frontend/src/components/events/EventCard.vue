@@ -17,8 +17,8 @@
       <!-- Category Badge -->
       <div v-if="event.category" class="flex items-center justify-between mb-2">
         <span
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-          :class="getCategoryClass(event.category)"
+          class="tag tag--custom"
+          :style="{ '--tag-c': getCategoryTagColor(event.category) }"
         >
           {{ event.category.name }}
         </span>
@@ -27,19 +27,19 @@
         <div class="flex gap-1">
           <span
             v-if="event.is_all_day"
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+            class="tag tag--info"
           >
             {{ t('events.badge.allDay') }}
           </span>
           <span
             v-if="event.is_recurring"
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+            class="tag tag--ok"
           >
             {{ t('events.badge.recurring') }}
           </span>
           <span
             v-if="isPastEvent"
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+            class="tag"
           >
             {{ t('events.badge.past') }}
           </span>
@@ -109,7 +109,7 @@
           <!-- Published Status -->
           <span
             v-if="!event.is_published"
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+            class="tag tag--warn"
           >
             {{ t('events.status.draft') }}
           </span>
@@ -259,20 +259,13 @@ const stripHtml = (html) => {
   return doc.body.textContent || doc.body.innerText || ''
 }
 
-const getCategoryClass = (category) => {
-  const colors = {
-    blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    green: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    yellow: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    red: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-    indigo: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-    pink: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-    gray: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-  }
-  
-  return colors[category.color] || colors.gray
+// Couleur de l'étiquette de catégorie (.tag--custom) : nom de couleur historique ou hex
+const CATEGORY_COLORS = {
+  blue: '#2563eb', green: '#16a34a', yellow: '#ca8a04', red: '#dc2626',
+  purple: '#9333ea', indigo: '#4f46e5', pink: '#db2777', gray: 'var(--muted)',
 }
+const getCategoryTagColor = (category) =>
+  CATEGORY_COLORS[category.color] || (/^#[0-9a-f]{3,8}$/i.test(category.color || '') ? category.color : CATEGORY_COLORS.gray)
 
 // Navigation method
 const viewEvent = () => {

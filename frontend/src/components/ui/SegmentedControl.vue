@@ -39,7 +39,7 @@ defineEmits(['update:modelValue'])
   gap: 2px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   overflow-x: auto;
   scrollbar-width: none;
@@ -53,7 +53,7 @@ defineEmits(['update:modelValue'])
   height: 28px;
   padding-inline: 10px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font: inherit;

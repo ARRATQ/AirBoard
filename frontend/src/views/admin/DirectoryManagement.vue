@@ -418,7 +418,7 @@ onMounted(async () => {
 .dir-admin__tab-count {
   padding: 0 6px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   font-family: var(--f-num);
   font-size: 10.5px;
   color: var(--muted);
@@ -449,7 +449,7 @@ onMounted(async () => {
 .dir-unit {
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--unit-color);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -471,7 +471,7 @@ onMounted(async () => {
   padding: 2px 6px 2px 2px;
   padding-inline: 2px 6px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   font-size: 12.5px;
   color: var(--text);
@@ -479,8 +479,7 @@ onMounted(async () => {
 
 .dir-chip__name { background: none; border: 0; color: inherit; cursor: pointer; }
 .dir-chip__name:hover { text-decoration: underline; }
-.dir-interim { font-family: var(--f-num); font-size: 10.5px; color: var(--warn); text-transform: uppercase; }
-.dir-chip__remove { display: inline-flex; padding: 2px; border: 0; border-radius: 3px; background: none; color: var(--muted); cursor: pointer; }
+.dir-chip__remove { display: inline-flex; padding: 2px; border: 0; border-radius: var(--r-s); background: none; color: var(--muted); cursor: pointer; }
 .dir-chip__remove:hover { color: var(--bad); background: var(--surface); }
 .dir-chip--add { padding: 3px 9px; border-style: dashed; background: transparent; color: var(--acc-ink); cursor: pointer; }
 .dir-chip--add:hover { border-color: var(--acc); }
@@ -492,7 +491,7 @@ onMounted(async () => {
   width: 30px;
   height: 30px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font-size: 17px;

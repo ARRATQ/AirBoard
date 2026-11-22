@@ -33,7 +33,7 @@
         <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{{ suggestion.title }}</h1>
 
         <div class="mt-3 flex items-center gap-2 flex-wrap text-xs">
-          <span class="px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          <span class="tag">
             {{ suggestionCategoryLabel(suggestion, t, te) }}
           </span>
           <StatusBadge :tone="suggestionStatusTone(suggestion.status)">{{ t(`suggestions.statuses.${suggestion.status}`) }}</StatusBadge>
@@ -189,7 +189,7 @@ onMounted(loadSuggestion)
 }
 
 .vote-count {
-  @apply inline-flex items-center justify-center min-w-[22px] h-6 px-2 rounded-full text-xs font-bold bg-white/70 dark:bg-black/20;
+  @apply inline-flex items-center justify-center min-w-[22px] h-6 px-2 rounded text-xs font-bold bg-white/70 dark:bg-black/20;
 }
 
 .suggestion-back-btn {

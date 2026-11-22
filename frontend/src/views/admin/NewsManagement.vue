@@ -348,7 +348,7 @@ onMounted(() => {
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--acc);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 .nw-callout__icon { flex: none; width: 18px; height: 18px; margin-block-start: 1px; color: var(--acc-ink); }
@@ -362,7 +362,7 @@ onMounted(() => {
   height: 32px;
   padding-inline: 30px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   font: inherit;
   font-size: 13px;

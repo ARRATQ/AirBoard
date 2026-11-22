@@ -304,7 +304,7 @@ onMounted(async () => {
   padding-block: 7px;
   padding-inline: 30px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
@@ -321,7 +321,7 @@ onMounted(async () => {
   height: 30px;
   padding-inline: 8px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-family: var(--f-num);

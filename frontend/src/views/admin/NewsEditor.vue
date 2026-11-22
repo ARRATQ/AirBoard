@@ -27,7 +27,7 @@
                 type="text"
                 required
                 :placeholder="$t('groupAdmin.newsEditor.titlePlaceholder')"
-                class="w-full px-4 py-3 text-lg font-medium border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
+                class="w-full px-3 py-1.5 text-lg font-medium border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
               />
             </div>
           </div>
@@ -44,7 +44,7 @@
                 rows="3"
                 :maxlength="SUMMARY_MAX"
                 :placeholder="$t('groupAdmin.newsEditor.summaryPlaceholder')"
-                class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white resize-none transition-colors"
+                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white resize-none transition-colors"
               ></textarea>
               <div class="flex justify-between items-center mt-2">
                 <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -63,7 +63,7 @@
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
                 {{ $t('groupAdmin.newsEditor.contentLabel') }} *
               </p>
-              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg">
+              <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
                 <!-- L'admin de groupe téléverse ses médias via l'API group-admin -->
                 <RichTextEditor
                   v-model="form.content"
@@ -85,7 +85,7 @@
             </h3>
 
             <div class="space-y-4">
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border-2 border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600">
                 <label class="flex items-center cursor-pointer">
                   <input
                     v-model="form.is_published"
@@ -107,7 +107,7 @@
                   id="news-published-at"
                   v-model="form.published_at"
                   type="datetime-local"
-                  class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
               </div>
 
@@ -121,7 +121,7 @@
                   id="news-expires-at"
                   v-model="form.expires_at"
                   type="datetime-local"
-                  class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5 flex items-center gap-1">
                   <Icon icon="mdi:information-outline" class="h-3 w-3" />
@@ -156,7 +156,7 @@
                   <select
                     id="news-category"
                     v-model="form.category_id"
-                    class="flex-1 min-w-0 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                    class="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                   >
                     <option :value="null">{{ $t('groupAdmin.newsEditor.noCategory') }}</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -193,7 +193,7 @@
                 <select
                   id="news-priority"
                   v-model="form.priority"
-                  class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 >
                   <option v-for="priority in PRIORITIES" :key="priority" :value="priority">
                     {{ $t(`groupAdmin.newsEditor.priorities.${priority}`) }}
@@ -211,7 +211,7 @@
               <button
                 type="submit"
                 :disabled="isSaving || missingTargetGroup"
-                class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                class="w-full px-4 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 <Icon v-if="isSaving" icon="mdi:loading" class="h-5 w-5 animate-spin" />
                 <Icon v-else icon="mdi:content-save" class="h-5 w-5" />
@@ -224,7 +224,7 @@
 
               <router-link
                 :to="LIST_ROUTE"
-                class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                class="w-full px-4 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 <Icon icon="mdi:close" class="h-5 w-5" />
                 <span>{{ $t('groupAdmin.newsEditor.actions.cancel') }}</span>

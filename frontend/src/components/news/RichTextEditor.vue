@@ -1191,7 +1191,7 @@ useEscapeClose(showFileModal, () => { showFileModal.value = false })
 
 /* Highlight mark */
 .editor-content :deep(.ProseMirror mark) {
-  border-radius: 3px;
+  border-radius: var(--r-s);
   padding: 0 2px;
 }
 

@@ -115,7 +115,7 @@
                   </span>
 
                   <span v-if="notification.priority === 2" class="flex items-center gap-2 mb-0.5">
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 uppercase tracking-wide">
+                    <span class="tag tag--bad">
                       {{ $t('notifications.urgent') }}
                     </span>
                   </span>
@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 0.5rem;
+  border-radius: var(--r-s);
   transition: all 0.2s;
   cursor: pointer;
   border: none;

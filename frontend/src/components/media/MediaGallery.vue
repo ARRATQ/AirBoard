@@ -228,7 +228,7 @@ export default {
 
 .media-item {
   @apply block w-full text-start;
-  @apply relative cursor-pointer rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden transition-all;
+  @apply relative cursor-pointer rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden transition-all;
   @apply hover:border-primary-500 hover:shadow-lg;
 }
 

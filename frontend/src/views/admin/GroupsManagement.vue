@@ -63,7 +63,7 @@
           <span
             v-for="appGroup in row.raw.app_groups"
             :key="appGroup.id"
-            class="gm-chip"
+            class="tag gm-chip"
             :style="appGroup.color ? { borderColor: appGroup.color, color: appGroup.color } : undefined"
           >
             <Icon v-if="appGroup.icon" :icon="appGroup.icon" class="gm-chip__icon" aria-hidden="true" />
@@ -468,7 +468,7 @@ useEscapeClose(showGroupAdminsModal, () => closeGroupAdminsModal())
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--acc);
   color: var(--acc-on, #fff);
   font-size: 16px;
@@ -492,16 +492,6 @@ useEscapeClose(showGroupAdminsModal, () => closeGroupAdminsModal())
 
 .gm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 
-.gm-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 7px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  font-size: 11.5px;
-  color: var(--muted);
-}
 
 .gm-chip__icon { width: 12px; height: 12px; }
 

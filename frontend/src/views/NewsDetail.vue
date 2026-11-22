@@ -25,7 +25,7 @@
           <!-- Type Badge -->
           <span
             :class="[
-              'px-3 py-1 rounded-full text-sm font-medium',
+              'tag',
               getTypeBadgeClass(news.type)
             ]"
           >
@@ -35,51 +35,51 @@
           <!-- Priority Badge -->
           <span
             v-if="news.priority === 'urgent'"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+            class="tag tag--bad"
           >
-            <Icon icon="mdi:alert" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:alert" />
             {{ $t('news.priority.urgent') }}
           </span>
           <span
             v-else-if="news.priority === 'important'"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+            class="tag tag--warn"
           >
-            <Icon icon="mdi:star" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:star" />
             {{ $t('news.priority.important') }}
           </span>
 
           <!-- Pinned Badge -->
           <span
             v-if="news.is_pinned"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+            class="tag tag--warn"
           >
-            <Icon icon="mdi:pin" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:pin" />
             {{ $t('news.detail.pinned') }}
           </span>
 
           <!-- Visibility Badge -->
           <span
             v-if="!news.target_groups || news.target_groups.length === 0"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            class="tag tag--ok"
           >
-            <Icon icon="mdi:earth" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:earth" />
             {{ $t('events.visibility.public') }}
           </span>
           <span
             v-else
-            class="px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+            class="tag tag--info"
             :title="getGroupsTooltip(news.target_groups)"
           >
-            <Icon icon="mdi:lock" class="inline h-4 w-4 me-1" />
+            <Icon icon="mdi:lock" />
             {{ getVisibilityLabel(news.target_groups) }}
           </span>
 
           <!-- Category -->
           <span
             v-if="news.category"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+            class="tag"
           >
-            <Icon :icon="news.category.icon || 'mdi:folder'" class="inline h-4 w-4 me-1" :style="{ color: news.category.color }" />
+            <Icon :icon="news.category.icon || 'mdi:folder'" :style="{ color: news.category.color }" />
             {{ news.category.name }}
           </span>
         </div>
@@ -119,8 +119,8 @@
           <span
             v-for="tag in news.tags"
             :key="tag.id"
-            class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            :style="{ backgroundColor: tag.color + '20', color: tag.color }"
+            class="tag tag--custom"
+            :style="{ '--tag-c': tag.color }"
           >
             #{{ tag.name }}
           </span>
@@ -266,14 +266,10 @@ const handleVoteSuccess = async () => {
   await fetchLinkedPoll()
 }
 
+// Ton de l'étiquette (.tag, main.css) selon le type historique de l'actualité
 const getTypeBadgeClass = (type) => {
-  const classes = {
-    article: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    tutorial: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-    announcement: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-    faq: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-  }
-  return classes[type] || classes.article
+  const tones = { article: 'tag--info', tutorial: 'tag--ok', announcement: 'tag--acc', faq: 'tag--warn' }
+  return tones[type] || tones.article
 }
 
 const formatDate = (dateString) => {

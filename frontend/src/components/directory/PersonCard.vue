@@ -66,7 +66,7 @@ const cardFields = computed(() =>
   padding: 18px 14px 14px;
   border: 1px solid var(--line);
   border-block-start: 3px solid var(--unit-color);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   text-align: center;
@@ -90,7 +90,7 @@ const cardFields = computed(() =>
   content: '';
   position: absolute;
   inset: -3px -1px -1px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 .person-card__name:focus-visible { outline: none; }
 .person-card__name:focus-visible::after { outline: 2px solid var(--acc); outline-offset: 2px; }
@@ -133,7 +133,7 @@ const cardFields = computed(() =>
   width: 30px;
   height: 30px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   color: var(--muted);
   transition: color 150ms ease, border-color 150ms ease;
 }

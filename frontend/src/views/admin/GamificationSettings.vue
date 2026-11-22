@@ -424,7 +424,7 @@ useEscapeClose(showModal, () => closeModal())
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--acc);
   color: var(--acc-ink);
   font-size: 18px;
@@ -452,7 +452,7 @@ useEscapeClose(showModal, () => closeModal())
   padding: 18px;
   overflow-y: auto;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
 }
@@ -470,12 +470,12 @@ useEscapeClose(showModal, () => closeModal())
   height: 40px;
   padding: 3px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   cursor: pointer;
 }
 
-.gm-preset { width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; }
+.gm-preset { width: 22px; height: 22px; padding: 0; border: 1px solid var(--line); border-radius: var(--r-s); cursor: pointer; }
 .gm-preset:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 
 .gm-preview {
@@ -484,11 +484,11 @@ useEscapeClose(showModal, () => closeModal())
   gap: 12px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 
-.gm-preview__badge { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 4px; color: #fff; }
+.gm-preview__badge { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--r-s); color: #fff; }
 .gm-preview__icon { width: 24px; height: 24px; }
 .gm-preview__name { margin: 0; font-weight: 600; color: var(--text); }
 

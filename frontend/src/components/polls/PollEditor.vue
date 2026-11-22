@@ -252,7 +252,7 @@
                     :aria-pressed="form.target_group_ids.includes(group.id)"
                     @click="toggleGroup(group.id)"
                     :class="[
-                      'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+                      'px-3 py-1.5 rounded text-sm font-medium transition-colors',
                       form.target_group_ids.includes(group.id)
                         ? 'bg-purple-600 text-white hover:bg-purple-700'
                         : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'

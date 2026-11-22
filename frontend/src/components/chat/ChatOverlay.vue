@@ -270,7 +270,7 @@
                   <button type="button" :aria-pressed="notificationsEnabled" @click="toggleNotifications" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <Icon :icon="notificationsEnabled ? 'mdi:bell-ring-outline' : 'mdi:bell-off-outline'" :class="notificationsEnabled ? 'text-green-500' : 'text-gray-400'" class="flex-shrink-0" />
                     <span class="flex-1 text-xs text-start">{{ t('chat.notificationSounds') }}</span>
-                    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md" :class="notificationsEnabled ? 'bg-green-50 text-green-600 dark:bg-green-900/20' : 'bg-gray-100 text-gray-500 dark:bg-gray-700'">{{ notificationsEnabled ? t('chat.soundOn') : t('chat.soundOff') }}</span>
+                    <span class="tag" :class="{ 'tag--ok': notificationsEnabled }">{{ notificationsEnabled ? t('chat.soundOn') : t('chat.soundOff') }}</span>
                   </button>
                   <div class="border-t border-gray-100 dark:border-gray-700 my-1" />
                   <button type="button" @click="confirmClearHistory" class="w-full flex items-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
@@ -382,7 +382,7 @@
                 type="text"
                 :placeholder="t('chat.messagePlaceholder')"
                 :aria-label="t('chat.messagePlaceholder')"
-                class="flex-1 min-w-0 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
+                class="flex-1 min-w-0 border border-gray-200 dark:border-gray-700 rounded px-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 focus:bg-white dark:focus:bg-gray-800 transition-all"
               >
 
               <button
@@ -596,7 +596,7 @@ watch(activeConversation, (val) => { if (val) scrollToBottom(); });
   height: 520px;
   max-width: calc(100vw - 32px);
   max-height: calc(100vh - 110px);
-  border-radius: 16px;
+  border-radius: var(--r-s);
   overflow: hidden;
   z-index: 9999;
   transition: width 0.25s ease, height 0.25s ease, border-radius 0.25s ease;
@@ -673,7 +673,7 @@ watch(activeConversation, (val) => { if (val) scrollToBottom(); });
   opacity: 0;
   background: rgba(255,255,255,0.15);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   padding: 2px;
   cursor: pointer;
   color: inherit;

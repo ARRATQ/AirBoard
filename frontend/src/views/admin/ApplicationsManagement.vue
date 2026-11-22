@@ -300,7 +300,7 @@ onMounted(async () => {
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--warn);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 

@@ -47,7 +47,7 @@
             :id="`${formId}-color`"
             v-model="form.color"
             type="color"
-            class="input h-10"
+            class="input h-8"
           />
         </div>
       </div>

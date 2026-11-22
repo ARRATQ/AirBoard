@@ -135,11 +135,11 @@ async function toggleFavorite(row) {
 
 <style scoped>
 .rt__select {
-  height: 34px;
+  height: var(--ctl-h);
   padding-block: 0;
   padding-inline: 10px 32px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background-color: var(--surface);
   color: var(--text);
   font-size: 13px;
@@ -191,7 +191,7 @@ async function toggleFavorite(row) {
   width: 28px;
   height: 28px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font-size: 17px;

@@ -3,13 +3,13 @@
        Cadre et liseré supérieur à la couleur du type, pour que chaque actualité se détache. -->
   <article class="ncard" :style="{ '--tc': typeColor }">
     <div class="ncard__head">
-      <span class="nbadge nbadge--type">{{ typeLabel }}</span>
+      <span class="tag tag--custom nbadge--type">{{ typeLabel }}</span>
 
-      <span v-if="news.priority === 'urgent'" class="nbadge nbadge--urgent">
+      <span v-if="news.priority === 'urgent'" class="tag tag--bad">
         <Icon icon="mdi:alert" aria-hidden="true" />
         {{ $t('news.priority.urgent') }}
       </span>
-      <span v-else-if="news.priority === 'important'" class="nbadge nbadge--important">
+      <span v-else-if="news.priority === 'important'" class="tag tag--warn">
         <Icon icon="mdi:star" aria-hidden="true" />
         {{ $t('news.priority.important') }}
       </span>
@@ -45,15 +45,15 @@
       <li
         v-for="tag in cardTags.shown"
         :key="tag.id"
-        class="ntag"
-        :style="{ '--tg': tag.color || 'var(--muted)' }"
+        class="tag tag--custom ntag"
+        :style="{ '--tag-c': tag.color || 'var(--muted)' }"
         :title="tag.name"
       >
         <span class="ncard__ellipsis" dir="auto">{{ tag.name }}</span>
       </li>
       <li
         v-if="cardTags.rest.length"
-        class="ntag ntag--more"
+        class="tag ntag ntag--more"
         dir="ltr"
         :title="cardTags.rest.map((tag) => tag.name).join(', ')"
       >
@@ -242,36 +242,7 @@ const getGroupsTooltip = (targetGroups) => {
   min-width: 0;
 }
 
-.nbadge {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 3px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--r-s);
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.nbadge :deep(svg) { width: 12px; height: 12px; }
-
-.nbadge--type {
-  background: color-mix(in oklab, var(--tc) 15%, var(--surface));
-  color: color-mix(in oklab, var(--tc) 62%, var(--text));
-}
-
-.nbadge--urgent {
-  background: color-mix(in oklab, var(--bad) 14%, var(--surface));
-  color: var(--bad);
-}
-
-.nbadge--important {
-  background: color-mix(in oklab, var(--warn) 14%, var(--surface));
-  color: var(--warn);
-}
+.nbadge--type { --tag-c: var(--tc); }
 
 .ncard__audience,
 .ncard__category,
@@ -341,36 +312,8 @@ const getGroupsTooltip = (targetGroups) => {
   list-style: none;
 }
 
-.ntag {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  max-width: 11em;
-  height: 20px;
-  padding: 0 6px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-s);
-  font-size: 11.5px;
-  color: var(--muted);
-}
-
-.ntag::before {
-  flex: none;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--tg);
-  content: '';
-}
-
-.ntag--more {
-  flex: none;
-  font-family: var(--f-num);
-}
-
-.ntag--more::before { display: none; }
+.ntag { min-width: 0; max-width: 11em; }
+.ntag--more { flex: none; }
 
 .ncard__foot {
   display: flex;

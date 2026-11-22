@@ -176,14 +176,14 @@ onBeforeUnmount(() => {
 .image-view-selected {
   outline: 2px solid #3B82F6;
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: var(--r-s);
 }
 
 .image-view-img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   pointer-events: none;
 }
 
@@ -199,7 +199,7 @@ onBeforeUnmount(() => {
   padding: 4px 8px;
   background: rgba(15, 23, 42, 0.88);
   backdrop-filter: blur(6px);
-  border-radius: 20px;
+  border-radius: var(--r-s);
   z-index: 10;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.65);
   background: transparent;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--r-s);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.65);
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-s);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -274,7 +274,7 @@ onBeforeUnmount(() => {
   height: 44px;
   background: #3B82F6;
   border: 2px solid #fff;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   cursor: ew-resize;
   z-index: 10;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);

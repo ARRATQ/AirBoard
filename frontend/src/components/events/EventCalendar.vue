@@ -267,7 +267,7 @@ defineExpose({
 .cal {
   position: relative;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
 }
 
@@ -299,7 +299,7 @@ defineExpose({
   height: 32px;
   padding-inline: 6px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font-size: 18px;
@@ -378,7 +378,7 @@ defineExpose({
   height: 24px;
   padding-inline: 4px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--text);
   font-family: var(--f-num);
@@ -493,7 +493,7 @@ defineExpose({
   margin-block-end: 4px;
   padding: 2px 4px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--text);
   cursor: pointer;
@@ -546,7 +546,7 @@ defineExpose({
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--ev);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   color: var(--text);
   font: inherit;

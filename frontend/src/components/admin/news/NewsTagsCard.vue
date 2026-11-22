@@ -14,7 +14,7 @@
         <span
           v-for="tagId in modelValue"
           :key="tagId"
-          class="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300 rounded-full text-sm font-medium"
+          class="tag tag--acc"
         >
           <Icon icon="mdi:tag" class="h-3 w-3" />
           {{ tagName(tagId) }}
@@ -24,7 +24,7 @@
             :aria-label="$t('adminShared.news.removeItem', { name: tagName(tagId) })"
             @click="removeTag(tagId)"
           >
-            <Icon icon="mdi:close-circle" class="h-4 w-4" />
+            <Icon icon="mdi:close-circle" class="h-3.5 w-3.5" />
           </button>
         </span>
       </div>
@@ -37,7 +37,7 @@
 
       <!-- Ajout d'un tag existant -->
       <select
-        class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+        class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
         :aria-label="$t('groupAdmin.newsEditor.addTag')"
         @change="addTag"
       >
@@ -54,7 +54,7 @@
           type="text"
           :placeholder="$t('adminShared.news.newTagPlaceholder')"
           :aria-label="$t('adminShared.news.newTagPlaceholder')"
-          class="flex-1 min-w-0 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+          class="flex-1 min-w-0 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
           @keydown.enter.prevent="submitTag"
         />
         <input
@@ -62,12 +62,12 @@
           type="color"
           :title="$t('adminShared.news.tagColor')"
           :aria-label="$t('adminShared.news.tagColor')"
-          class="h-10 w-10 flex-shrink-0 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer"
+          class="h-8 w-8 flex-shrink-0 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
         />
         <button
           type="button"
           :disabled="!newTagName.trim() || isCreating"
-          class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-1 text-sm font-medium disabled:cursor-not-allowed"
+          class="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-1 text-sm font-medium disabled:cursor-not-allowed"
           @click="submitTag"
         >
           <Icon v-if="isCreating" icon="mdi:loading" class="h-4 w-4 animate-spin" />

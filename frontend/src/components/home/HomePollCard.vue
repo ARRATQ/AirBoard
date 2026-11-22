@@ -97,7 +97,7 @@ const status = computed(() => {
   display: block;
   height: 5px;
   margin-block-start: 4px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   box-shadow: inset 0 0 0 1px var(--line);
   overflow: hidden;
@@ -106,7 +106,7 @@ const status = computed(() => {
 .poll__fill {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: color-mix(in oklab, var(--muted) 45%, transparent);
 }
 

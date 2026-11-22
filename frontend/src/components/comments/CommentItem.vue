@@ -53,16 +53,16 @@
       <div v-if="showModerationBadges" class="flex items-center gap-2 mt-2">
         <span
           v-if="!comment.is_approved"
-          class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+          class="tag tag--warn"
         >
-          <Icon icon="mdi:clock-outline" class="inline h-3 w-3 me-1" />
+          <Icon icon="mdi:clock-outline" aria-hidden="true" />
           {{ $t('comments.pending') }}
         </span>
         <span
           v-if="comment.is_flagged"
-          class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+          class="tag tag--bad"
         >
-          <Icon icon="mdi:flag" class="inline h-3 w-3 me-1" />
+          <Icon icon="mdi:flag" aria-hidden="true" />
           {{ $t('comments.flagged') }}
         </span>
       </div>

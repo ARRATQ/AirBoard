@@ -108,7 +108,7 @@
                 <Icon icon="mdi:chart-line" class="text-primary-500" />
                 {{ $t('analytics.dailyActivity') }}
               </h2>
-              <div class="bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full text-xs font-medium text-primary-600 dark:text-primary-400">
+              <div class="tag tag--acc">
                 {{ $t('analytics.actionTracking') }}
               </div>
             </div>

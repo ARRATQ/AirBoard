@@ -253,8 +253,8 @@
               <span
                 v-for="group in authStore.user.groups"
                 :key="group.id"
-                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                :style="{ backgroundColor: group.color + '20', color: group.color }"
+                class="tag tag--custom"
+                :style="{ '--tag-c': group.color }"
               >
                 {{ group.name }}
               </span>

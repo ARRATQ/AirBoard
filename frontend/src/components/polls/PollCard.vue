@@ -26,17 +26,17 @@
                 <span class="sr-only">{{ t('polls.card.voted') }}</span>
               </span>
               <span class="poll-badges">
-                <span v-if="!poll.is_active" class="badge badge-closed">
-                  <Icon icon="mdi:lock" class="h-3 w-3" aria-hidden="true" />
-                  <span class="badge-text">{{ t('polls.status.closed') }}</span>
+                <span v-if="!poll.is_active" class="tag tag--bad">
+                  <Icon icon="mdi:lock" aria-hidden="true" />
+                  <span>{{ t('polls.status.closed') }}</span>
                 </span>
-                <span v-else-if="isExpiringSoon" class="badge badge-warning">
-                  <Icon icon="mdi:clock-alert" class="h-3 w-3" aria-hidden="true" />
-                  <span class="badge-text">{{ t('polls.status.expiringSoon') }}</span>
+                <span v-else-if="isExpiringSoon" class="tag tag--warn">
+                  <Icon icon="mdi:clock-alert" aria-hidden="true" />
+                  <span>{{ t('polls.status.expiringSoon') }}</span>
                 </span>
-                <span v-if="poll.is_anonymous" class="badge badge-anonymous">
-                  <Icon icon="mdi:incognito" class="h-3 w-3" aria-hidden="true" />
-                  <span class="badge-text">{{ t('polls.status.anonymous') }}</span>
+                <span v-if="poll.is_anonymous" class="tag tag--info">
+                  <Icon icon="mdi:incognito" aria-hidden="true" />
+                  <span>{{ t('polls.status.anonymous') }}</span>
                 </span>
               </span>
             </span>
@@ -446,7 +446,7 @@ const getWaitingMessage = () => {
 .poll-card {
   background-color: var(--bg-card);
   border: 2px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-s);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -600,66 +600,12 @@ const getWaitingMessage = () => {
   align-items: center;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  white-space: nowrap;
-  height: auto;
-}
-
-.badge svg {
-  width: 0.875rem;
-  height: 0.875rem;
-  stroke-width: 2;
-  flex-shrink: 0;
-}
-
-.badge-text {
-  font-size: inherit;
-  line-height: 1;
-}
-
-.badge-closed {
-  background: rgb(239 68 68);
-  color: white;
-}
-
-:is(.dark .badge-closed) {
-  background: rgb(220 38 38);
-  color: white;
-}
-
-.badge-warning {
-  background: rgb(245 158 11);
-  color: white;
-}
-
-:is(.dark .badge-warning) {
-  background: rgb(217 119 6);
-  color: white;
-}
-
-.badge-anonymous {
-  background: rgb(224 231 255);
-  color: rgb(99 102 241);
-}
-
-:is(.dark .badge-anonymous) {
-  background: rgb(49 46 129);
-  color: rgb(165 180 252);
-}
-
 /* Bouton de toggle */
 .toggle-btn {
   background: none;
   border: none;
   padding: 0.5rem;
-  border-radius: 0.375rem;
+  border-radius: var(--r-s);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -708,7 +654,7 @@ const getWaitingMessage = () => {
   margin-bottom: 1rem;
   padding: 0.75rem;
   background-color: var(--bg-surface);
-  border-radius: 0.5rem;
+  border-radius: var(--r-s);
   border: 1px solid var(--border);
 }
 
@@ -788,7 +734,7 @@ const getWaitingMessage = () => {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   border: 2px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--r-s);
   cursor: pointer;
   transition: all 0.2s;
   background: var(--bg-card);
@@ -829,7 +775,7 @@ const getWaitingMessage = () => {
   text-align: center;
   padding: 2rem;
   background: var(--bg-surface);
-  border-radius: 8px;
+  border-radius: var(--r-s);
 }
 
 .waiting-icon {
@@ -853,7 +799,7 @@ const getWaitingMessage = () => {
 
 .btn {
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--r-s);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;

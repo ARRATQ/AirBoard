@@ -93,7 +93,7 @@ const track = () => {
   min-width: 0;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   transition: border-color 120ms ease;
 }
@@ -107,7 +107,7 @@ const track = () => {
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: color-mix(in oklab, var(--c) 14%, var(--surface));
   color: color-mix(in oklab, var(--c) 85%, var(--text));
   font-size: 19px;
@@ -140,7 +140,7 @@ const track = () => {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 4px;
+  border-radius: var(--r-s);
 }
 
 .tile__link:focus-visible { outline: none; }
@@ -207,7 +207,7 @@ const track = () => {
   width: 24px;
   height: 24px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   color: var(--muted);
   font-size: 16px;

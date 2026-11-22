@@ -94,7 +94,7 @@ const formatNumber = (n) => Number(n || 0).toLocaleString(dateLocaleFor(locale.v
   width: 54px;
   height: 54px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--sunken);
 }
 
@@ -134,7 +134,7 @@ const formatNumber = (n) => Number(n || 0).toLocaleString(dateLocaleFor(locale.v
 .xp__bar {
   height: 6px;
   margin-block: 6px 5px;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--sunken);
   box-shadow: inset 0 0 0 1px var(--line);
   overflow: hidden;
@@ -143,7 +143,7 @@ const formatNumber = (n) => Number(n || 0).toLocaleString(dateLocaleFor(locale.v
 .xp__bar-fill {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--fill);
 }
 
@@ -194,7 +194,7 @@ const formatNumber = (n) => Number(n || 0).toLocaleString(dateLocaleFor(locale.v
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: color-mix(in oklab, var(--c) 14%, var(--surface));
   color: color-mix(in oklab, var(--c) 85%, var(--text));
 }

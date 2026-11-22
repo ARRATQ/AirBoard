@@ -11,7 +11,7 @@
         <button type="button" class="ot-card__name" :title="$t('directory.focusUnit')" @click="$emit('focus', unit.id)">
           {{ unit.name }}
         </button>
-        <span v-if="unit.code" class="ot-card__code">{{ unit.code }}</span>
+        <span v-if="unit.code" class="tag ot-card__code">{{ unit.code }}</span>
       </header>
 
       <!-- Responsable mis en avant -->
@@ -165,8 +165,8 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
 .ot-node:only-child { padding-top: 0; }
 .ot-node:first-child::before,
 .ot-node:last-child::after { border: 0 none; }
-.ot-node:last-child::before { border-inline-end: 1px solid var(--ot-wire); border-start-end-radius: 4px; }
-.ot-node:first-child::after { border-start-start-radius: 4px; }
+.ot-node:last-child::before { border-inline-end: 1px solid var(--ot-wire); border-start-end-radius: var(--r-s); }
+.ot-node:first-child::after { border-start-start-radius: var(--r-s); }
 .ot-children {
   position: relative;
   display: flex;
@@ -192,7 +192,7 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
   width: 15.5rem;
   border: 1px solid var(--line);
   border-block-start: 3px solid var(--unit-color);
-  border-radius: 4px;
+  border-radius: var(--r-s);
   background: var(--surface);
   overflow: hidden;
   transition: border-color 150ms ease;
@@ -222,16 +222,6 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
 .ot-card--root .ot-card__name { font-size: 15.5px; }
 .ot-card__name:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ot-card__name:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; border-radius: 2px; }
-.ot-card__code {
-  flex-shrink: 0;
-  padding: 1px 5px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  font-family: var(--f-num);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
 .ot-card__head-person {
   display: flex;
   justify-content: center;
@@ -246,7 +236,7 @@ const peopleCount = computed(() => props.countPeople(props.unit.id))
   min-width: 0;
   padding: 6px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: none;
   font: inherit;
   text-align: center;
@@ -306,7 +296,7 @@ button.ot-lead:focus-visible { outline: 2px solid var(--acc); outline-offset: 1p
   margin-top: -11px;
   padding: 2px 7px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--r-s);
   background: var(--surface);
   font-family: var(--f-num);
   font-size: 11px;
