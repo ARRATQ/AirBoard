@@ -7,7 +7,7 @@
       :aria-pressed="modelValue === mode.value"
       @click="$emit('update:modelValue', mode.value)"
       :class="[
-        'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200',
+        'flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200',
         modelValue === mode.value
           ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'

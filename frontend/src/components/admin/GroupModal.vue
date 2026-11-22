@@ -72,7 +72,7 @@
                       id="color"
                       v-model="form.color"
                       type="color"
-                      class="h-10 w-12 flex-shrink-0 rounded-lg border cursor-pointer p-1"
+                      class="h-8 w-10 flex-shrink-0 rounded-lg border cursor-pointer p-0.5"
                       style="border-color: var(--border); background-color: var(--bg-card)"
                     />
                     <input v-model="form.color" type="text" class="form-input font-mono" placeholder="#6B7280" />

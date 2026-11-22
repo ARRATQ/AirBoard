@@ -5,7 +5,7 @@
       type="button"
       :aria-expanded="isOpen"
       @click="isOpen = !isOpen"
-      class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm text-start flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+      class="w-full px-3 py-[5px] border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm text-start flex items-center justify-between hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
     >
       <div v-if="selectedType" class="flex items-center gap-2">
         <Icon :icon="selectedType.icon" class="h-4 w-4" :style="{ color: selectedType.color }" />

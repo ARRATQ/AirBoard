@@ -135,7 +135,7 @@ async function toggleFavorite(row) {
 
 <style scoped>
 .rt__select {
-  height: 34px;
+  height: var(--ctl-h);
   padding-block: 0;
   padding-inline: 10px 32px;
   border: 1px solid var(--line);

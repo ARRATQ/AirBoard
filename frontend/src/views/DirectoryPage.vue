@@ -383,7 +383,7 @@ onMounted(load)
   align-items: center;
   gap: 8px;
   min-width: min(100%, 18rem);
-  height: 34px;
+  height: var(--ctl-h);
   padding-inline: 10px;
   border: 1px solid var(--line);
   border-radius: var(--r-s);
@@ -393,7 +393,7 @@ onMounted(load)
 
 .directory-search:focus-within { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
 .directory-search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: var(--text); font-size: 13px; }
-.directory-unit-select { width: auto; max-width: 16rem; height: 34px; padding-block: 0; padding-inline: 10px 32px; border-radius: var(--r-s); font-size: 13px; }
+.directory-unit-select { width: auto; max-width: 16rem; height: var(--ctl-h); padding-block: 0; padding-inline: 10px 32px; border-radius: var(--r-s); font-size: 13px; }
 /* Chevron natif du select (plugin forms) côté fin de ligne en arabe. */
 [dir='rtl'] .directory-unit-select { padding-inline: 32px 10px; background-position: left 0.5rem center; }
 

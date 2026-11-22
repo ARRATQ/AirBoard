@@ -174,7 +174,7 @@ const formatDate = (key) =>
 }
 
 .wdc__input {
-  height: 36px;
+  height: var(--ctl-h);
   padding-inline: 10px;
   border: 1px solid var(--line);
   border-radius: var(--r-s);

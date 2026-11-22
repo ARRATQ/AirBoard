@@ -29,7 +29,7 @@
                 type="text"
                 required
                 :placeholder="t('events.editor.titlePlaceholder')"
-                class="w-full px-4 py-3 text-lg font-medium border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
+                class="w-full px-3 py-1.5 text-lg font-medium border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white transition-colors"
               />
             </div>
           </div>
@@ -41,7 +41,7 @@
                 <Icon icon="mdi:text-box" class="h-5 w-5 text-primary-500" />
                 {{ t('events.editor.description') }} *
               </label>
-              <div class="border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              <div class="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                 <RichTextEditor
                   v-model="form.description"
                   :placeholder="t('events.editor.descriptionPlaceholder')"
@@ -69,7 +69,7 @@
                     v-model="form.start_date"
                     type="datetime-local"
                     required
-                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
 
@@ -81,13 +81,13 @@
                   <input
                     v-model="form.end_date"
                     type="datetime-local"
-                    class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
               </div>
 
               <!-- All Day Toggle -->
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-600">
                 <label class="flex items-center cursor-pointer">
                   <input
                     v-model="form.is_all_day"
@@ -117,7 +117,7 @@
                 v-model="form.location"
                 type="text"
                 :placeholder="t('events.editor.locationPlaceholder')"
-                class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@
               </label>
 
               <!-- Recurring Toggle -->
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-gray-200 dark:border-gray-700 mb-4">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-600 mb-4">
                 <label class="flex items-center cursor-pointer">
                   <input
                     v-model="form.is_recurring"
@@ -154,7 +154,7 @@
                     </label>
                     <select
                       v-model="recurrencePattern.type"
-                      class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                      class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                     >
                       <option value="daily">{{ t('events.recurrence.daily') }}</option>
                       <option value="weekly">{{ t('events.recurrence.weekly') }}</option>
@@ -172,7 +172,7 @@
                       v-model.number="recurrencePattern.interval"
                       type="number"
                       min="1"
-                      class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                      class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                     />
                   </div>
                 </div>
@@ -185,7 +185,7 @@
                   <input
                     v-model="form.recurrence_end"
                     type="date"
-                    class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
               </div>
@@ -210,13 +210,13 @@
                     v-model="link.title"
                     type="text"
                     :placeholder="t('events.editor.linkTitlePlaceholder')"
-                    class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    class="flex-1 px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                   />
                   <input
                     v-model="link.url"
                     type="url"
                     :placeholder="t('events.editor.linkUrlPlaceholder')"
-                    class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    class="flex-1 px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
                   />
                   <button
                     type="button"
@@ -230,7 +230,7 @@
                 <button
                   type="button"
                   @click="addLink"
-                  class="w-full px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary-500 dark:hover:border-primary-400 transition-colors flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
+                  class="w-full px-3 py-[5px] border border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-primary-500 dark:hover:border-primary-400 transition-colors flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
                 >
                   <Icon icon="mdi:plus" class="h-5 w-5" />
                   {{ t('events.editor.addLink') }}
@@ -251,7 +251,7 @@
 
             <div class="space-y-4">
               <!-- Status -->
-              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border-2 border-gray-200 dark:border-gray-700">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600">
                 <label class="flex items-center cursor-pointer">
                   <input
                     v-model="form.is_published"
@@ -273,7 +273,7 @@
                 <input
                   v-model="form.published_at"
                   type="datetime-local"
-                  class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
+                  class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm"
                 />
               </div>
             </div>
@@ -301,7 +301,7 @@
                   {{ t('events.editor.category') }}
                 </label>
                 <div class="flex gap-2">
-                  <select v-model="form.category_id" class="flex-1 px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
+                  <select v-model="form.category_id" class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
                     <option :value="null">{{ t('events.editor.noCategory') }}</option>
                     <option v-for="cat in categories" :key="cat.id" :value="cat.id">
                       {{ cat.name }}
@@ -326,7 +326,7 @@
                   <Icon icon="mdi:flag" class="h-4 w-4" />
                   {{ t('events.editor.priority') }}
                 </label>
-                <select v-model="form.priority" class="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
+                <select v-model="form.priority" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white text-sm">
                   <option value="normal">⚪ {{ t('events.priority.normal') }}</option>
                   <option value="important">🟠 {{ t('events.priority.important') }}</option>
                   <option value="urgent">🔴 {{ t('events.priority.urgent') }}</option>
@@ -342,7 +342,7 @@
                 <input
                   v-model="form.color"
                   type="color"
-                  class="w-full h-10 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  class="w-full h-8 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
             </div>
@@ -354,7 +354,7 @@
               <button
                 type="submit"
                 :disabled="isSaving"
-                class="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                class="w-full px-4 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:scale-100 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 <Icon v-if="isSaving" icon="mdi:loading" class="h-5 w-5 animate-spin" />
                 <Icon v-else icon="mdi:content-save" class="h-5 w-5" />
@@ -363,7 +363,7 @@
 
               <router-link
                 :to="LIST_PATH"
-                class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                class="w-full px-4 py-1.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 <Icon icon="mdi:close" class="h-5 w-5" />
                 <span>{{ t('common.cancel') }}</span>

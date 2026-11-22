@@ -83,7 +83,7 @@ onMounted(loadWeather)
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: var(--ctl-h);
   padding-inline: 10px;
   border: 1px solid var(--line);
   border-radius: var(--r-s);

@@ -591,7 +591,7 @@
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.accent" @input="previewEditor"
-                    class="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 dark:border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
+                    class="w-8 h-8 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
                   <input type="text" v-model="customPaletteEditor.accent" @input="onEditorAccentHexInput"
                     pattern="^#[0-9A-Fa-f]{6}$" placeholder="#5c6ef8"
                     class="w-28 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm font-mono focus:outline-none focus:border-orange-400" />
@@ -627,7 +627,7 @@
                 </label>
                 <div class="flex items-center gap-3">
                   <input type="color" v-model="customPaletteEditor.bg" @input="previewEditor"
-                    class="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-300 dark:border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
+                    class="w-8 h-8 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600 p-0.5 bg-transparent flex-shrink-0" />
                   <input type="text" v-model="customPaletteEditor.bg" @input="onEditorBgHexInput"
                     pattern="^#[0-9A-Fa-f]{6}$" placeholder="#f0f1ff"
                     class="w-28 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm font-mono focus:outline-none focus:border-orange-400" />

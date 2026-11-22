@@ -6,7 +6,7 @@
           <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1" role="group" :aria-label="t('dashboard.viewModes.label')">
             <button
               type="button"
-              class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
+              class="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200"
               :class="viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
               :aria-pressed="viewMode === 'grid'"
               :aria-label="t('dashboard.viewModes.grid')"
@@ -17,7 +17,7 @@
             </button>
             <button
               type="button"
-              class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200"
+              class="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-all duration-200"
               :class="viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
               :aria-pressed="viewMode === 'list'"
               :aria-label="t('dashboard.viewModes.list')"
@@ -518,7 +518,9 @@ useEscapeClose(showCreateModal, () => closeCreateModal())
 }
 
 .suggestion-cta {
-  @apply inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-white;
+  @apply inline-flex items-center gap-2 px-3 rounded font-semibold text-white;
+  min-height: var(--ctl-h);
+  font-size: var(--ctl-fs);
   @apply bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm;
   @apply hover:from-amber-600 hover:to-orange-600 hover:shadow-md;
   @apply focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2;
@@ -545,7 +547,9 @@ useEscapeClose(showCreateModal, () => closeCreateModal())
 }
 
 .suggestion-detail-btn {
-  @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold;
+  @apply inline-flex items-center gap-1.5 px-3 rounded font-semibold;
+  min-height: var(--ctl-h);
+  font-size: var(--ctl-fs);
   @apply border border-amber-200 text-amber-700 bg-amber-50;
   @apply hover:bg-amber-100 hover:border-amber-300;
   @apply dark:border-amber-800 dark:text-amber-300 dark:bg-amber-900/20 dark:hover:bg-amber-900/35;
