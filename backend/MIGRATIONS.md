@@ -16,6 +16,7 @@ GORM ne crée plus rien : `AutoMigrate` n'est plus appelé.
 | `00002_soft_delete_unique_indexes.sql` | Index uniques partiels (`WHERE deleted_at IS NULL`) sur noms et slugs, suppression des anciens index complets, unicité des votes et avis. |
 | `00003_performance_indexes.sql` | Index de performance (clés étrangères, tables de jointure, lectures/réactions). |
 | `00004_icones_lucide.sql` | Icônes en base passées de mdi à Lucide (table de correspondance, logos de marque inchangés), nouvelles valeurs par défaut. Anciennes valeurs gardées dans `icon_lucide_backup` pour `Down`. |
+| `00005_roles_permissions.sql` | Rôles personnalisés : `access_roles`, `access_role_permissions` (permission du catalogue `models/access.go`, portée `all` ou `groups`), `user_access_roles`. Rôle « Éditeur » (`resources.manage` sur ses groupes) attribué aux comptes `role = 'editor'`. |
 
 ## Ajouter une migration
 

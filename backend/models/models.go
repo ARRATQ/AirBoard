@@ -32,10 +32,13 @@ type User struct {
 	// Relations
 	Groups        []Group       `json:"groups,omitempty" gorm:"many2many:user_groups;"`
 	Favorites     []Application `json:"favorites,omitempty" gorm:"many2many:user_favorites;"`
-	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"` // Groupes administrés (utilisateurs qui peuvent gérer ces groupes)
+	AdminOfGroups []Group       `json:"admin_of_groups,omitempty" gorm:"many2many:group_admins;"`   // Groupes administrés (utilisateurs qui peuvent gérer ces groupes)
+	AccessRoles   []AccessRole  `json:"access_roles,omitempty" gorm:"many2many:user_access_roles;"` // Rôles attribués par l'administrateur
 
 	// Champ calculé (non stocké en base)
 	ManagedGroupIDs []uint `json:"managed_group_ids,omitempty" gorm:"-"` // IDs des groupes administrés (chargés depuis group_admins)
+	// Permissions effectives {permission: portée}, union des rôles attribués (vide pour l'admin : il a tout)
+	Permissions map[string]string `json:"permissions,omitempty" gorm:"-"`
 }
 
 // Group représente un groupe d'utilisateurs

@@ -46,7 +46,7 @@ func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
 	page := parsePageParams(c, groupAdminPageLimits)
 	query := h.db.Model(&models.AppGroup{})
 
-	if c.GetString("role") != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
 			c.JSON(http.StatusOK, page.Response([]models.AppGroup{}, 0))
@@ -84,7 +84,7 @@ type managedGroup struct {
 // global), avec leur nombre de membres.
 func (h *GroupAdminHandler) GetManagedGroups(c *gin.Context) {
 	query := h.db.Where("is_active = ?", true)
-	if c.GetString("role") != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
 			c.JSON(http.StatusOK, []managedGroup{})
@@ -143,7 +143,7 @@ func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 	page := parsePageParams(c, groupAdminPageLimits)
 	query := h.db.Model(&models.Application{})
 
-	if c.GetString("role") != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
 			c.JSON(http.StatusOK, page.Response([]models.Application{}, 0))
@@ -190,8 +190,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 		return
 	}
 
-	role := c.GetString("role")
-	if role != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		// Vérifier que l'AppGroup est privé et appartient aux groupes administrés
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
@@ -278,8 +277,7 @@ func (h *GroupAdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	role := c.GetString("role")
-	if role != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		// Vérifier que l'application actuelle et le nouveau AppGroup sont accessibles
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
@@ -354,8 +352,7 @@ func (h *GroupAdminHandler) DeleteApplication(c *gin.Context) {
 		return
 	}
 
-	role := c.GetString("role")
-	if role != "admin" {
+	if !middleware.IsUnrestricted(c) {
 		// Vérifier que l'application appartient à un AppGroup privé géré
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {

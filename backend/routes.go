@@ -11,6 +11,7 @@ import (
 	"airboard/config"
 	"airboard/handlers"
 	"airboard/middleware"
+	"airboard/models"
 	"airboard/services"
 	"airboard/services/chat"
 
@@ -33,6 +34,7 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 	dashboardHandler := handlers.NewDashboardHandler(db)
 	adminHandler := handlers.NewAdminHandler(db, cfg, gamificationService)
 	groupAdminHandler := handlers.NewGroupAdminHandler(db)
+	accessRolesHandler := handlers.NewAccessRolesHandler(db, authMiddleware.InvalidateUserStatus)
 	settingsHandler := handlers.NewSettingsHandler(db)
 	oauthHandler := handlers.NewOAuthHandler(db, authMiddleware, gamificationService)
 	favoritesHandler := handlers.NewFavoritesHandler(db)
@@ -321,20 +323,51 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 		protected.GET("/ws", chatHandler.ServeWS)
 
 		// Routes admin
+		// Ressources et catégories de ressources : permission resources.manage.
+		// /admin : permission sur tout le site ; /group-admin : limitée aux groupes de la personne
+		// (les anciens admins de groupe y gardent leurs groupes administrés).
+		resourcesAdmin := protected.Group("/admin")
+		resourcesAdmin.Use(authMiddleware.RequirePermissionEverywhere(models.PermResourcesManage))
+		{
+			resourcesAdmin.GET("/app-groups", adminHandler.GetAppGroups)
+			resourcesAdmin.POST("/app-groups", adminHandler.CreateAppGroup)
+			resourcesAdmin.PUT("/app-groups/:id", adminHandler.UpdateAppGroup)
+			resourcesAdmin.DELETE("/app-groups/:id", adminHandler.DeleteAppGroup)
+			resourcesAdmin.GET("/applications", adminHandler.GetApplications)
+			resourcesAdmin.POST("/applications", adminHandler.CreateApplication)
+			resourcesAdmin.PUT("/applications/:id", adminHandler.UpdateApplication)
+			resourcesAdmin.DELETE("/applications/:id", adminHandler.DeleteApplication)
+		}
+		resourcesScoped := protected.Group("/group-admin")
+		resourcesScoped.Use(authMiddleware.RequirePermission(models.PermResourcesManage))
+		{
+			resourcesScoped.GET("/app-groups", groupAdminHandler.GetAppGroups)
+			resourcesScoped.POST("/app-groups", adminHandler.CreateAppGroup)
+			resourcesScoped.PUT("/app-groups/:id", adminHandler.UpdateAppGroup)
+			resourcesScoped.DELETE("/app-groups/:id", adminHandler.DeleteAppGroup)
+			resourcesScoped.GET("/applications", groupAdminHandler.GetApplications)
+			resourcesScoped.POST("/applications", groupAdminHandler.CreateApplication)
+			resourcesScoped.PUT("/applications/:id", groupAdminHandler.UpdateApplication)
+			resourcesScoped.DELETE("/applications/:id", groupAdminHandler.DeleteApplication)
+			// Groupes que la personne gère (tous si elle n'a pas de restriction)
+			resourcesScoped.GET("/managed-groups", groupAdminHandler.GetManagedGroups)
+		}
+
 		admin := protected.Group("/admin")
 		admin.Use(authMiddleware.RequireAdmin())
 		{
+			// Rôles et permissions (réservé à l'administrateur : attribuer des droits en est un)
+			admin.GET("/permissions", accessRolesHandler.GetPermissionCatalog)
+			admin.GET("/access-roles", accessRolesHandler.GetRoles)
+			admin.POST("/access-roles", accessRolesHandler.CreateRole)
+			admin.PUT("/access-roles/:id", accessRolesHandler.UpdateRole)
+			admin.DELETE("/access-roles/:id", accessRolesHandler.DeleteRole)
+			admin.GET("/access-roles/:id/users", accessRolesHandler.GetRoleMembers)
+			admin.PUT("/access-roles/:id/users", accessRolesHandler.SetRoleMembers)
+
 			// Gestion des groupes d'applications
-			admin.GET("/app-groups", adminHandler.GetAppGroups)
-			admin.POST("/app-groups", adminHandler.CreateAppGroup)
-			admin.PUT("/app-groups/:id", adminHandler.UpdateAppGroup)
-			admin.DELETE("/app-groups/:id", adminHandler.DeleteAppGroup)
 
 			// Gestion des applications
-			admin.GET("/applications", adminHandler.GetApplications)
-			admin.POST("/applications", adminHandler.CreateApplication)
-			admin.PUT("/applications/:id", adminHandler.UpdateApplication)
-			admin.DELETE("/applications/:id", adminHandler.DeleteApplication)
 
 			// Gestion des utilisateurs
 			admin.GET("/users", adminHandler.GetUsers)
@@ -542,16 +575,8 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 		groupAdmin.Use(authMiddleware.RequireGroupAdmin())
 		{
 			// AppGroups (scoped)
-			groupAdmin.GET("/app-groups", groupAdminHandler.GetAppGroups)
-			groupAdmin.POST("/app-groups", adminHandler.CreateAppGroup)
-			groupAdmin.PUT("/app-groups/:id", adminHandler.UpdateAppGroup)
-			groupAdmin.DELETE("/app-groups/:id", adminHandler.DeleteAppGroup)
 
 			// Applications (scoped)
-			groupAdmin.GET("/applications", groupAdminHandler.GetApplications)
-			groupAdmin.POST("/applications", groupAdminHandler.CreateApplication)
-			groupAdmin.PUT("/applications/:id", groupAdminHandler.UpdateApplication)
-			groupAdmin.DELETE("/applications/:id", groupAdminHandler.DeleteApplication)
 
 			// News (scoped)
 			groupAdmin.GET("/news", newsHandler.GetNews) // Liste des news avec filtrage automatique par rôle
@@ -588,7 +613,6 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			groupAdmin.POST("/polls/:id/close", pollsHandler.ClosePoll)
 
 			// Info sur les groupes administrés
-			groupAdmin.GET("/managed-groups", groupAdminHandler.GetManagedGroups)
 
 			// Trombinoscope : personnes et affectations, réservées aux admins globaux
 			// (l'annuaire est partagé par toute l'organisation, sans notion de groupe)

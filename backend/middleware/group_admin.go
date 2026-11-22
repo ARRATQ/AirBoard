@@ -107,9 +107,8 @@ func GetManagedGroupIDs(c *gin.Context) []uint {
 // - ET l'AppGroup est lié à l'un des groupes qu'il administre (via group_app_groups)
 // Les AppGroups publics (IsPrivate = false) ne peuvent être administrés que par l'admin global
 func CanManageAppGroupWithDB(c *gin.Context, appGroupID uint, db interface{}) bool {
-	role := c.GetString("role")
-	if role == "admin" {
-		return true // Admin global peut tout gérer
+	if IsUnrestricted(c) {
+		return true // Admin, ou permission « ressources » sur tout le site
 	}
 
 	managedGroupIDs := GetManagedGroupIDs(c)

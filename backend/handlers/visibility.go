@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"airboard/middleware"
 	"airboard/models"
 
 	"gorm.io/gorm"
@@ -116,6 +117,13 @@ func adminGroupIDs(db *gorm.DB, userID uint) []uint {
 // au frontend : ManagedGroupIDs, et AdminOfGroups s'il n'a pas été préchargé.
 func attachManagedGroups(db *gorm.DB, user *models.User) {
 	user.ManagedGroupIDs = adminGroupIDs(db, user.ID)
+	// Permissions des rôles attribués : l'interface affiche les menus correspondants
+	// (le serveur les vérifie à chaque requête, voir middleware.RequirePermission).
+	if perms, err := middleware.LoadPermissions(db, user.ID); err != nil {
+		log.Printf("[Visibility] permissions de %d : %v", user.ID, err)
+	} else if len(perms) > 0 {
+		user.Permissions = perms
+	}
 	if len(user.AdminOfGroups) > 0 || len(user.ManagedGroupIDs) == 0 {
 		return
 	}
