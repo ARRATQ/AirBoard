@@ -77,7 +77,7 @@ func (h *ChatbotHandler) CreateChatbot(c *gin.Context) {
 	}
 	icon := req.Icon
 	if icon == "" {
-		icon = "mdi:robot-outline"
+		icon = "lucide:bot"
 	}
 	color := req.Color
 	if color == "" {

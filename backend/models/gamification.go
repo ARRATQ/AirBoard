@@ -28,7 +28,7 @@ type Achievement struct {
 	Code          string         `json:"code" gorm:"uniqueIndex"` // ex: "early_bird", "explorer"
 	Name          string         `json:"name" gorm:"not null"`
 	Description   string         `json:"description"`
-	Icon          string         `json:"icon" gorm:"default:'mdi:medal'"`
+	Icon          string         `json:"icon" gorm:"default:'lucide:medal'"`
 	Color         string         `json:"color" gorm:"default:'#FBBF24'"`
 	XPReward      int64          `json:"xp_reward" gorm:"default:0"`
 	Category      string         `json:"category" gorm:"default:'user'"` // user, contributor

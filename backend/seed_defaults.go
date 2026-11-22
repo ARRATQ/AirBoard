@@ -93,7 +93,7 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 			Name:        "Réunions",
 			Slug:        "reunions",
 			Description: "Réunions et assemblées",
-			Icon:        "mdi:account-group",
+			Icon:        "lucide:users",
 			Color:       "#3B82F6", // Bleu
 			Order:       1,
 			IsActive:    true,
@@ -112,7 +112,7 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 			Name:        "Formations",
 			Slug:        "formations",
 			Description: "Formations et ateliers",
-			Icon:        "mdi:school",
+			Icon:        "lucide:graduation-cap",
 			Color:       "#F59E0B", // Orange
 			Order:       2,
 			IsActive:    true,
@@ -131,7 +131,7 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 			Name:        "Événements Sociaux",
 			Slug:        "evenements-sociaux",
 			Description: "Événements sociaux et célébrations",
-			Icon:        "mdi:party-popper",
+			Icon:        "lucide:party-popper",
 			Color:       "#10B981", // Vert
 			Order:       3,
 			IsActive:    true,
@@ -150,7 +150,7 @@ func createDefaultOAuthProviders(db *gorm.DB, cfg *config.Config, adminUser mode
 			Name:        "Jours Fériés",
 			Slug:        "jours-feries",
 			Description: "Jours fériés et congés",
-			Icon:        "mdi:palm-tree",
+			Icon:        "lucide:tree-palm",
 			Color:       "#EF4444", // Rouge
 			Order:       4,
 			IsActive:    true,

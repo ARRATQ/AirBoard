@@ -16,11 +16,11 @@ type News struct {
 	ID          uint       `json:"id" gorm:"primaryKey"`
 	Slug        string     `json:"slug" gorm:"not null"`
 	Title       string     `json:"title" gorm:"not null"`
-	Summary     string     `json:"summary" gorm:"type:varchar(300)"` // Résumé court (max 300 chars)
-	Content     string     `json:"content" gorm:"type:text"`         // Contenu riche (JSON Tiptap)
-	CoverImage  string     `json:"cover_image"`                      // URL de l'image de couverture (pour plus tard)
+	Summary     string     `json:"summary" gorm:"type:varchar(300)"`    // Résumé court (max 300 chars)
+	Content     string     `json:"content" gorm:"type:text"`            // Contenu riche (JSON Tiptap)
+	CoverImage  string     `json:"cover_image"`                         // URL de l'image de couverture (pour plus tard)
 	Type        string     `json:"type" gorm:"default:'article';index"` // article, tutorial, announcement, faq - kept for backward compatibility
-	Priority    string     `json:"priority" gorm:"default:'normal'"` // urgent, important, normal
+	Priority    string     `json:"priority" gorm:"default:'normal'"`    // urgent, important, normal
 	IsPinned    bool       `json:"is_pinned" gorm:"default:false"`
 	IsPublished bool       `json:"is_published" gorm:"default:false"`
 	PublishedAt *time.Time `json:"published_at"`
@@ -61,9 +61,9 @@ type NewsCategory struct {
 	Name        string         `json:"name" gorm:"not null"`
 	Slug        string         `json:"slug" gorm:"not null"`
 	Description string         `json:"description"`
-	Icon        string         `json:"icon" gorm:"default:'mdi:newspaper'"` // Icône Iconify
-	Color       string         `json:"color" gorm:"default:'#3B82F6'"`      // Couleur hex
-	Order       int            `json:"order" gorm:"default:0"`              // Ordre d'affichage
+	Icon        string         `json:"icon" gorm:"default:'lucide:newspaper'"` // Icône Iconify
+	Color       string         `json:"color" gorm:"default:'#3B82F6'"`         // Couleur hex
+	Order       int            `json:"order" gorm:"default:0"`                 // Ordre d'affichage
 	IsActive    bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
@@ -77,7 +77,7 @@ type NewsType struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Name      string         `json:"name" gorm:"not null"`
 	Slug      string         `json:"slug" gorm:"not null"`
-	Icon      string         `json:"icon" gorm:"default:'mdi:newspaper'"`
+	Icon      string         `json:"icon" gorm:"default:'lucide:newspaper'"`
 	Color     string         `json:"color" gorm:"default:'#3B82F6'"`
 	Order     int            `json:"order" gorm:"default:0"`
 	IsActive  bool           `json:"is_active" gorm:"default:true"`

@@ -32,7 +32,7 @@ func (h *SettingsHandler) GetAppSettings(c *gin.Context) {
 			// Créer les paramètres par défaut s'ils n'existent pas
 			settings = models.AppSettings{
 				AppName:         "Airboard",
-				AppIcon:         "mdi:view-dashboard",
+				AppIcon:         "lucide:layout-dashboard",
 				DashboardTitle:  "Dashboard",
 				WelcomeMessage:  "Welcome to your application portal",
 				HomePageMessage: "Discover your personalized workspace",
@@ -157,7 +157,7 @@ func (h *SettingsHandler) ResetAppSettings(c *gin.Context) {
 
 	// Remettre aux valeurs par défaut
 	settings.AppName = "Airboard"
-	settings.AppIcon = "mdi:view-dashboard"
+	settings.AppIcon = "lucide:layout-dashboard"
 	settings.DashboardTitle = "Dashboard"
 	settings.WelcomeMessage = "Welcome to your application portal"
 	settings.HomePageMessage = "Discover your personalized workspace"
@@ -206,7 +206,7 @@ func (h *SettingsHandler) GetPublicSettings(c *gin.Context) {
 				"custom_accent_color": "#d97757",
 				"custom_palettes":     "[]",
 				"app_name":            "Airboard",
-				"app_icon":            "mdi:view-dashboard",
+				"app_icon":            "lucide:layout-dashboard",
 			})
 			return
 		}

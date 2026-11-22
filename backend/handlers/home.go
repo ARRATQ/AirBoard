@@ -577,7 +577,7 @@ func (h *HomeHandler) getAppSettingsWithCache() (*models.AppSettings, error) {
 			// Return default settings if none exist
 			settings = models.AppSettings{
 				AppName:         "Airboard",
-				AppIcon:         "mdi:view-dashboard",
+				AppIcon:         "lucide:layout-dashboard",
 				DashboardTitle:  "Dashboard",
 				WelcomeMessage:  "Welcome to your application portal",
 				HomePageMessage: "Discover your personalized workspace",
