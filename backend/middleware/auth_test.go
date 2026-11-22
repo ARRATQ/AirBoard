@@ -117,7 +117,7 @@ func TestVerifyRefreshToken(t *testing.T) {
 func TestUserStatusCache(t *testing.T) {
 	now := time.Date(2026, 11, 19, 12, 0, 0, 0, time.UTC)
 	calls := 0
-	current := userStatus{Role: "admin", IsActive: true, ManagedGroupIDs: []uint{3}}
+	current := userStatus{Role: "admin", IsActive: true, MemberGroupIDs: []uint{3}}
 
 	cache := newUserStatusCache(time.Minute, func(_ context.Context, userID uint) (userStatus, error) {
 		calls++

@@ -71,8 +71,7 @@ var (
 func TestRoleGuards(t *testing.T) {
 	am := &AuthMiddleware{}
 	guards := map[string]gin.HandlerFunc{
-		"RequireAdmin":         am.RequireAdmin(),
-		"RequireGroupAdmin":    am.RequireGroupAdmin(),
+		"RequireAdmin": am.RequireAdmin(),
 	}
 	cases := []struct {
 		guard  string
@@ -85,17 +84,6 @@ func TestRoleGuards(t *testing.T) {
 		{"RequireAdmin", "editor", editor, http.StatusForbidden, "forbidden"},
 		{"RequireAdmin", "admin de groupe", groupAdmin, http.StatusForbidden, "forbidden"},
 		{"RequireAdmin", "anonyme", anonymous, http.StatusForbidden, "forbidden"},
-
-
-		{"RequireGroupAdmin", "admin", admin, http.StatusOK, ""},
-		{"RequireGroupAdmin", "admin de groupe", groupAdmin, http.StatusOK, ""},
-		{"RequireGroupAdmin", "utilisateur sans groupe géré", plainUser, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "editor sans groupe géré", editor, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "banni qui gère un groupe", banned, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "rôle vide", emptyRole, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "rôle non textuel", badRoleType, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "groupes gérés mal typés", badManaged, http.StatusForbidden, "forbidden"},
-		{"RequireGroupAdmin", "anonyme", anonymous, http.StatusUnauthorized, "unauthorized"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.guard+"/"+tc.name, func(t *testing.T) {
@@ -104,28 +92,6 @@ func TestRoleGuards(t *testing.T) {
 				t.Errorf("statut %d, passé %v, code %q ; attendu %d, %q", status, passed, code, tc.status, tc.code)
 			}
 		})
-	}
-}
-
-func TestCanManageGroup(t *testing.T) {
-	cases := []struct {
-		name  string
-		who   identity
-		group uint
-		want  bool
-	}{
-		{"admin : tout groupe", admin, 99, true},
-		{"admin de groupe : son groupe", groupAdmin, 7, true},
-		{"admin de groupe : autre groupe", groupAdmin, 4, false},
-		{"utilisateur", plainUser, 3, false},
-		{"sans groupes gérés dans le contexte", editor, 3, false},
-		{"groupes gérés mal typés", badManaged, 3, false},
-	}
-	for _, tc := range cases {
-		c, _ := contextFor(tc.who)
-		if got := CanManageGroup(c, tc.group); got != tc.want {
-			t.Errorf("%s : %v, attendu %v", tc.name, got, tc.want)
-		}
 	}
 }
 

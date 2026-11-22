@@ -324,8 +324,7 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 
 		// Routes admin
 		// Ressources et catégories de ressources : permission resources.manage.
-		// /admin : permission sur tout le site ; /group-admin : limitée aux groupes de la personne
-		// (les anciens admins de groupe y gardent leurs groupes administrés).
+		// /admin : permission sur tout le site ; /group-admin : limitée aux groupes de la personne.
 		resourcesAdmin := protected.Group("/admin")
 		resourcesAdmin.Use(authMiddleware.RequirePermissionEverywhere(models.PermResourcesManage))
 		{
@@ -434,10 +433,6 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			admin.POST("/groups", adminHandler.CreateGroup)
 			admin.PUT("/groups/:id", adminHandler.UpdateGroup)
 			admin.DELETE("/groups/:id", adminHandler.DeleteGroup)
-
-			// Gestion des group admins (admin uniquement)
-			admin.GET("/groups/:id/admins", adminHandler.GetGroupAdmins)
-			admin.PUT("/groups/:id/admins", adminHandler.AssignGroupAdmins)
 
 			// Gestion des paramètres de l'application
 			admin.GET("/settings", settingsHandler.GetAppSettings)
@@ -616,36 +611,23 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 			moderation.POST("/comments/moderate", commentHandler.ModerateComment)
 		}
 
-		// Routes group-admin (gestion limitée au périmètre)
-		groupAdmin := protected.Group("/group-admin")
-		groupAdmin.Use(authMiddleware.RequireGroupAdmin())
+		// Taxonomies et trombinoscope partagés par toute l'organisation : admin uniquement
+		// (chemins /group-admin gardés pour l'interface)
+		adminShared := protected.Group("/group-admin")
+		adminShared.Use(authMiddleware.RequireAdmin())
 		{
-			// AppGroups (scoped)
-
-			// Applications (scoped)
-
-			// Tags : modifier ou supprimer un tag partagé est réservé aux admins globaux
-			// (la création est ouverte plus haut, avec les permissions actualités/événements).
-			adminOnly := authMiddleware.RequireAdmin()
-			groupAdmin.PUT("/news/tags/:id", adminOnly, newsHandler.UpdateTag)
-			groupAdmin.DELETE("/news/tags/:id", adminOnly, newsHandler.DeleteTag)
-
-			// Catégories : partagées par toute l'organisation, réservées aux admins globaux
-			groupAdmin.POST("/news/categories", adminOnly, newsHandler.CreateCategory)
-			groupAdmin.PUT("/news/categories/:id", adminOnly, newsHandler.UpdateCategory)
-			groupAdmin.DELETE("/news/categories/:id", adminOnly, newsHandler.DeleteCategory)
-
-			// Info sur les groupes administrés
-
-			// Trombinoscope : personnes et affectations, réservées aux admins globaux
-			// (l'annuaire est partagé par toute l'organisation, sans notion de groupe)
-			groupAdmin.GET("/directory/users", adminOnly, directoryHandler.SearchUsers)
-			groupAdmin.POST("/directory/people", adminOnly, directoryHandler.CreatePerson)
-			groupAdmin.PUT("/directory/people/:id", adminOnly, directoryHandler.UpdatePerson)
-			groupAdmin.DELETE("/directory/people/:id", adminOnly, directoryHandler.DeletePerson)
-			groupAdmin.POST("/directory/assignments", adminOnly, directoryHandler.CreateAssignment)
-			groupAdmin.PUT("/directory/assignments/:id", adminOnly, directoryHandler.UpdateAssignment)
-			groupAdmin.DELETE("/directory/assignments/:id", adminOnly, directoryHandler.DeleteAssignment)
+			adminShared.PUT("/news/tags/:id", newsHandler.UpdateTag)
+			adminShared.DELETE("/news/tags/:id", newsHandler.DeleteTag)
+			adminShared.POST("/news/categories", newsHandler.CreateCategory)
+			adminShared.PUT("/news/categories/:id", newsHandler.UpdateCategory)
+			adminShared.DELETE("/news/categories/:id", newsHandler.DeleteCategory)
+			adminShared.GET("/directory/users", directoryHandler.SearchUsers)
+			adminShared.POST("/directory/people", directoryHandler.CreatePerson)
+			adminShared.PUT("/directory/people/:id", directoryHandler.UpdatePerson)
+			adminShared.DELETE("/directory/people/:id", directoryHandler.DeletePerson)
+			adminShared.POST("/directory/assignments", directoryHandler.CreateAssignment)
+			adminShared.PUT("/directory/assignments/:id", directoryHandler.UpdateAssignment)
+			adminShared.DELETE("/directory/assignments/:id", directoryHandler.DeleteAssignment)
 		}
 	}
 

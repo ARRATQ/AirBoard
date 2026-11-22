@@ -341,15 +341,7 @@ export const adminService = {
     return response.data
   },
 
-  async getGroupAdmins(groupId) {
-    const response = await api.get(`/admin/groups/${groupId}/admins`)
-    return response.data
-  },
 
-  async assignGroupAdmins(groupId, userIds) {
-    const response = await api.put(`/admin/groups/${groupId}/admins`, { user_ids: userIds })
-    return response.data
-  },
 
   // Rôles et permissions
   async getPermissionCatalog() {

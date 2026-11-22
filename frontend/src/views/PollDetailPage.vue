@@ -183,11 +183,9 @@ const confirmClose = async () => {
   }
 
   try {
-    const user = authStore.user
-
-    if (user.role === 'admin') {
+    if (isAdmin.value) {
       await pollsService.closePoll(poll.value.id)
-    } else if (user.admin_of_groups && user.admin_of_groups.length > 0) {
+    } else {
       await pollsService.closePollAsGroupAdmin(poll.value.id)
     }
 

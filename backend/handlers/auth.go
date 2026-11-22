@@ -76,7 +76,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Rechercher l'utilisateur avec ses relations
 	var user models.User
-	userErr := h.db.Preload("Groups").Preload("AdminOfGroups").Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
+	userErr := h.db.Preload("Groups").Where("username = ? OR email = ?", req.Username, req.Username).First(&user).Error
 
 	// Le compteur suit le compte réel (nom ou email donnent la même clé), sinon la saisie
 	clientIP := c.ClientIP()
@@ -163,7 +163,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Groupes administrés (nécessaires au frontend)
-	attachManagedGroups(h.db, &user)
+	attachPermissions(h.db, &user)
 
 	// Masquer le mot de passe
 	user.Password = ""
@@ -298,7 +298,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Recharger l'utilisateur avec ses relations
-	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+	h.db.Preload("Groups").First(&user, user.ID)
 
 	// Générer les tokens
 	token, err := h.authMiddleware.GenerateToken(&user)
@@ -359,7 +359,7 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 
 	// Récupérer l'utilisateur avec ses relations
 	var user models.User
-	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, claims.UserID).Error; err != nil {
+	if err := h.db.Preload("Groups").First(&user, claims.UserID).Error; err != nil {
 		apierror.Respond(c, http.StatusUnauthorized, "Utilisateur non trouvé")
 		return
 	}
@@ -409,13 +409,13 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, userID).Error; err != nil {
+	if err := h.db.Preload("Groups").First(&user, userID).Error; err != nil {
 		apierror.Respond(c, http.StatusNotFound, "Utilisateur non trouvé")
 		return
 	}
 
 	// Groupes administrés (nécessaires au frontend)
-	attachManagedGroups(h.db, &user)
+	attachPermissions(h.db, &user)
 
 	// Masquer le mot de passe
 	user.Password = ""
@@ -558,13 +558,13 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 
 	// Recharger l'utilisateur avec les groupes et les groupes administrés
 	var user models.User
-	if err := h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, ssoUser.ID).Error; err != nil {
+	if err := h.db.Preload("Groups").First(&user, ssoUser.ID).Error; err != nil {
 		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des informations utilisateur")
 		return
 	}
 
 	// Groupes administrés (nécessaires au frontend)
-	attachManagedGroups(h.db, &user)
+	attachPermissions(h.db, &user)
 
 	// Gamification XP (Daily Login)
 	ssoTimezone := c.Query("timezone")
@@ -629,7 +629,7 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	// Recharger l'utilisateur avec ses relations
-	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+	h.db.Preload("Groups").First(&user, user.ID)
 
 	// Masquer le mot de passe
 	user.Password = ""
@@ -719,7 +719,7 @@ func (h *AuthHandler) UploadAvatar(c *gin.Context) {
 	}
 
 	// Recharger l'utilisateur avec ses relations
-	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+	h.db.Preload("Groups").First(&user, user.ID)
 
 	// Masquer le mot de passe
 	user.Password = ""
@@ -794,7 +794,7 @@ func (h *AuthHandler) DeleteAvatar(c *gin.Context) {
 	}
 
 	// Recharger l'utilisateur avec ses relations
-	h.db.Preload("Groups").Preload("AdminOfGroups").First(&user, user.ID)
+	h.db.Preload("Groups").First(&user, user.ID)
 
 	// Masquer le mot de passe
 	user.Password = ""

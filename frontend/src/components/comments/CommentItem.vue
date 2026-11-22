@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { canModerateComments, getRoles } from '@/config/access'
+import { canModerateComments } from '@/config/access'
 import { computed } from 'vue'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '@/stores/auth'
@@ -89,11 +89,10 @@ defineEmits(['edit', 'delete'])
 const authStore = useAuthStore()
 const { t } = useI18n()
 
-// Même règle que le serveur : auteur ou modérateur (admin compris) ; un ancien admin de
-// groupe peut aussi supprimer
+// Même règle que le serveur : auteur ou modérateur (admin compris)
 const isModerator = computed(() => canModerateComments(authStore.user))
 const canEdit = computed(() => !!authStore.user && (authStore.user.id === props.comment.user_id || isModerator.value))
-const canDelete = computed(() => canEdit.value || getRoles(authStore.user).isGroupAdmin)
+const canDelete = computed(() => canEdit.value)
 
 const canManage = computed(() => canEdit.value || canDelete.value)
 

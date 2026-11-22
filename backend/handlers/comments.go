@@ -85,8 +85,8 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 	query := h.DB.Model(&models.Comment{}).Where("entity_type = ? AND entity_id = ?", entityType, entityID)
 
 	// Si modération requise, ne montrer que les commentaires approuvés, sauf aux modérateurs
-	// (admin compris) et aux anciens admins de groupe
-	if settings.RequireModeration && !canModerateComments(c) && len(middleware.GetManagedGroupIDs(c)) == 0 {
+	// (admin compris)
+	if settings.RequireModeration && !canModerateComments(c) {
 		query = query.Where("is_approved = ?", true)
 	}
 
@@ -289,8 +289,6 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	managedGroupIDs := middleware.GetManagedGroupIDs(c)
-
 	// Récupérer le commentaire
 	var comment models.Comment
 	if err := h.DB.First(&comment, commentID).Error; err != nil {
@@ -302,8 +300,8 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	// Vérifier que l'utilisateur est l'auteur, modérateur ou ancien admin de groupe
-	if comment.UserID != userID.(uint) && !canModerateComments(c) && len(managedGroupIDs) == 0 {
+	// Vérifier que l'utilisateur est l'auteur ou modérateur
+	if comment.UserID != userID.(uint) && !canModerateComments(c) {
 		apierror.Respond(c, http.StatusForbidden, "Vous n'avez pas la permission de supprimer ce commentaire")
 		return
 	}

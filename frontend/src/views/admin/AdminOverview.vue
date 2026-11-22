@@ -1,13 +1,13 @@
 <template>
   <div class="content-area">
     <PageHeader
-      :eyebrow="$t(isAdmin ? 'nav.admin.title' : 'groupAdmin.title')"
+      :eyebrow="$t('nav.admin.title')"
       :title="$t('adminHome.title')"
       :description="$t(isAdmin ? 'adminHome.subtitleAdmin' : 'adminHome.subtitleGroup')"
     />
 
     <!-- Chiffres clés -->
-    <section class="overview-kpis" :aria-label="$t('adminHome.keyFigures')">
+    <section v-if="kpis.length" class="overview-kpis" :aria-label="$t('adminHome.keyFigures')">
       <router-link
         v-for="kpi in kpis"
         :key="kpi.key"
@@ -38,8 +38,8 @@
         </ul>
       </section>
 
-      <!-- Groupes administrés (admin de groupe) -->
-      <section v-else class="overview-panel overview-panel--wide" aria-labelledby="overview-groups">
+      <!-- Groupes où la personne gère les ressources (portée « ses groupes ») -->
+      <section v-else-if="managesResources" class="overview-panel overview-panel--wide" aria-labelledby="overview-groups">
         <h2 id="overview-groups" class="overview-panel__title">{{ $t('groupAdmin.yourGroups') }}</h2>
         <p v-if="!loading && managedGroups.length === 0" class="overview-panel__empty">
           {{ $t('groupAdmin.noManagedGroups') }}
@@ -84,7 +84,7 @@ import { Icon } from '@iconify/vue'
 import PageHeader from '@/components/ui/PageHeader.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import FlapDigits from '@/components/ui/FlapDigits.vue'
-import { GROUP_ADMIN } from '@/config/access'
+import { MANAGEMENT, RESOURCES, ACCESS_PERMISSION, canAccess } from '@/config/access'
 import { buildAdminNav } from '@/config/navigation'
 import { useManagementScope } from '@/composables/useManagementScope'
 import {
@@ -94,7 +94,9 @@ import {
   groupAdminService
 } from '@/services/api'
 
-const { roles, isAdmin } = useManagementScope(GROUP_ADMIN)
+const { roles, isAdmin } = useManagementScope(MANAGEMENT)
+// Chiffres des ressources : seulement pour qui les gère
+const managesResources = computed(() => canAccess(RESOURCES, roles.value))
 
 const loading = ref(true)
 const counts = ref({})
@@ -120,6 +122,7 @@ const kpis = computed(() => {
       ...shared
     ]
   }
+  if (!managesResources.value) return []
   return [
     { key: 'groups', labelKey: 'adminHome.managedGroups', to: '/admin', value: c.groups ?? null },
     ...shared
@@ -166,9 +169,11 @@ const loadAdmin = async () => {
   }
 }
 
-const loadGroupAdmin = async () => {
+// Titulaire de permissions : ses groupes et ressources, s'il gère les ressources
+const loadScoped = async () => {
+  if (!managesResources.value) return
   const data = await settle({
-    groups: () => groupAdminService.getManagedGroups(),
+    groups: () => groupAdminService.getManagedGroups(ACCESS_PERMISSION[RESOURCES]),
     categories: () => groupAdminService.getAppGroups().then((d) => countOf(d, 'app_groups')),
     resources: () => groupAdminService.getApplications().then((d) => countOf(d, 'applications'))
   })
@@ -182,7 +187,7 @@ const loadGroupAdmin = async () => {
 
 onMounted(async () => {
   try {
-    await (isAdmin.value ? loadAdmin() : loadGroupAdmin())
+    await (isAdmin.value ? loadAdmin() : loadScoped())
   } finally {
     loading.value = false
   }

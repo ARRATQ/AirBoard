@@ -247,8 +247,6 @@
     "loadError": "Error while loading groups",
     "saveError": "Error while saving group",
     "deleteError": "Error while deleting group",
-    "adminsSaved": "Group admins updated.",
-    "adminsLoadError": "Could not load the group users.",
     "membersCount": "{count} users | {count} user | {count} users"
   },
   "applications": {
@@ -392,14 +390,6 @@
     "errors": {
       "nameRequired": "Name is required"
     }
-  },
-  "groupAdminsModal": {
-    "manage": "Manage administrators",
-    "manageFor": "Manage administrators: {name}",
-    "title": "Group administrators",
-    "intro": "Select the users who will be able to manage this group and its resources.",
-    "noUsers": "No users found",
-    "selectedCount": "no administrators selected | 1 administrator selected | {count} administrators selected"
   },
   "settings": {
     "general": "General",
@@ -708,16 +698,16 @@
     "never": "Never",
     "monthlyActivity": "Monthly activity (12 months)",
     "articlesAuthored": "Authored articles",
-    "groupAdminNote": "Users designated as group administrators",
     "roles": {
       "admin": "Administrator",
-      "group_admin": "Group Admins",
-      "user": "User"
+      "user": "User",
+      "contributor": "Contributors"
     },
     "topContributors": "Top contributors",
     "score": "Score",
     "scoreFormula": "* Score = resource clicks ×1 + articles read ×2 + reactions ×1 + poll votes ×1 + resources created ×5 + articles published ×10",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "contributorNote": "Accounts whose role lets them manage news, events or polls."
   },
   "announcements": {
     "title": "Announcements",
@@ -1686,12 +1676,6 @@
       "news": "Articles",
       "events": "Events",
       "polls": "Polls",
-      "managedGroups": "Managed groups",
-      "totalMembers": "Total members",
-      "managedAppGroups": "Managed resource categories",
-      "managedApps": "My resources",
-      "managedNews": "Managed articles",
-      "managedPolls": "Managed polls",
       "accessibleApps": "Available resources",
       "accessibleEvents": "Available events"
     },

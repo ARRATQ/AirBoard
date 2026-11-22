@@ -70,16 +70,21 @@ func newFixture(t *testing.T, tx *gorm.DB) fixture {
 	}
 	member := user("member", "user", f.g1)
 	outsider := user("outsider", "user")
-	ga := user("ga", "user")
+	ga := user("ga", "user", f.g2)
 	editor := user("editor", "editor", f.g1)
 	admin := user("admin", "admin")
-	if err := tx.Exec("INSERT INTO group_admins (group_id, user_id) VALUES (?, ?)", f.g2.ID, ga.ID).Error; err != nil {
-		t.Fatalf("group_admins: %v", err)
+	// Ancien admin de g2, converti par la migration 00008 : membre de g2, rôle « Éditeur de
+	// groupe » (ressources, actualités, événements, sondages limités à ses groupes)
+	groupEditorPerms := map[string]string{
+		models.PermResourcesManage: models.ScopeGroups, models.PermNewsManage: models.ScopeGroups,
+		models.PermEventsManage: models.ScopeGroups, models.PermPollsManage: models.ScopeGroups,
 	}
+	grantPermissions(t, tx, f.tag+"-editeur-groupe", groupEditorPerms, ga.ID)
 
 	f.member = identity{id: member.ID, role: "user"}
 	f.outsider = identity{id: outsider.ID, role: "user"}
-	f.groupAdmin = identity{id: ga.ID, role: "user", managed: []uint{f.g2.ID}}
+	// managed : groupes que RequirePermission pose pour ses requêtes /group-admin
+	f.groupAdmin = identity{id: ga.ID, role: "user", managed: []uint{f.g2.ID}, perms: groupEditorPerms}
 	// Éditeur : actualités et événements sur tout le site (rôle « Éditeur », migration 00006)
 	f.editor = identity{id: editor.ID, role: "editor", perms: map[string]string{
 		models.PermNewsManage: models.ScopeAll, models.PermEventsManage: models.ScopeAll,
@@ -156,6 +161,7 @@ func callJSON(t *testing.T, h gin.HandlerFunc, who identity, target string, para
 	c.Set("role", who.role)
 	c.Set("managed_group_ids", who.managed)
 	c.Set(middleware.CtxPermissions, who.perms)
+	c.Set(middleware.CtxMemberGroupIDs, who.managed)
 	h(c)
 	var body interface{}
 	_ = json.Unmarshal(w.Body.Bytes(), &body)

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"airboard/config"
+	"airboard/middleware"
 	"airboard/models"
 
 	"github.com/gin-gonic/gin"
@@ -78,9 +79,16 @@ func loadIdentity(t *testing.T, db *gorm.DB, username, role string) identity {
 	if err := q.First(&u).Error; err != nil {
 		t.Fatalf("utilisateur %q/%q introuvable: %v", username, role, err)
 	}
-	var managed []uint
-	db.Table("group_admins").Where("user_id = ?", u.ID).Pluck("group_id", &managed)
-	return identity{id: u.ID, role: u.Role, managed: managed}
+	// Groupes de la portée « ses groupes » (ceux que RequirePermission poserait)
+	managed, err := models.PermissionGroupIDs(db, u.ID)
+	if err != nil {
+		t.Fatalf("groupes de %q : %v", u.Username, err)
+	}
+	perms, err := middleware.LoadPermissions(db, u.ID)
+	if err != nil {
+		t.Fatalf("permissions de %q : %v", u.Username, err)
+	}
+	return identity{id: u.ID, role: u.Role, managed: managed, perms: perms}
 }
 
 func runHandler(h gin.HandlerFunc, who identity, params gin.Params) int {
@@ -95,6 +103,8 @@ func runHandlerAt(h gin.HandlerFunc, who identity, params gin.Params, target str
 	c.Set("user_id", who.id)
 	c.Set("role", who.role)
 	c.Set("managed_group_ids", who.managed)
+	c.Set(middleware.CtxPermissions, who.perms)
+	c.Set(middleware.CtxMemberGroupIDs, who.managed)
 	h(c)
 	return w.Code
 }
@@ -296,10 +306,14 @@ func TestGroupAdminListsPagination(t *testing.T) {
 	h := NewGroupAdminHandler(db)
 
 	who := []identity{admin}
+	// Un compte qui gère les ressources limitées à ses groupes, s'il y en a un
 	var groupAdminID uint
-	db.Table("group_admins").Joins("JOIN users ON users.id = group_admins.user_id").
-		Where("users.role <> ? AND users.deleted_at IS NULL", "admin").
-		Limit(1).Pluck("group_admins.user_id", &groupAdminID)
+	db.Table("user_access_roles").
+		Joins("JOIN access_role_permissions arp ON arp.role_id = user_access_roles.access_role_id").
+		Joins("JOIN users ON users.id = user_access_roles.user_id").
+		Where("arp.permission = ? AND arp.scope = ? AND users.role <> ? AND users.deleted_at IS NULL",
+			models.PermResourcesManage, models.ScopeGroups, "admin").
+		Limit(1).Pluck("user_access_roles.user_id", &groupAdminID)
 	if groupAdminID != 0 {
 		var u models.User
 		db.First(&u, groupAdminID)

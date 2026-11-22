@@ -1,24 +1,22 @@
 import { describe, it, expect } from 'vitest'
-import { ADMIN, GROUP_ADMIN, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess, getScope, permissionScope, canManageItem, canModerateComments } from '../access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess, getScope, permissionScope, canManageItem, canModerateComments } from '../access'
 
 const admin = getRoles({ role: 'admin' })
 // Ancien compte « editor » resté sans rôle : traité comme un utilisateur
 const editor = getRoles({ role: 'editor' })
 // Éditeur migré : rôle « Éditeur » (actualités et événements partout, ressources de ses groupes)
 const migratedEditor = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all', 'resources.manage': 'groups' } })
-const groupAdmin = getRoles({ role: 'user', managed_group_ids: [3] })
-const editorAndGroupAdmin = getRoles({ role: 'editor', admin_of_groups: [{ id: 3 }], permissions: { 'news.manage': 'all' } })
-const user = getRoles({ role: 'user', managed_group_ids: [] })
+// Ancien admin de groupe converti (migration 00008) : rôle « Éditeur de groupe »
+const groupAdmin = getRoles({ role: 'user', permissions: { 'resources.manage': 'groups', 'news.manage': 'groups', 'events.manage': 'groups', 'polls.manage': 'groups' } })
+const user = getRoles({ role: 'user' })
 
 describe('getRoles', () => {
-  it('reconnaît un admin de groupe par admin_of_groups ou managed_group_ids', () => {
-    expect(getRoles({ role: 'user', admin_of_groups: [{ id: 1 }] }).isGroupAdmin).toBe(true)
-    expect(groupAdmin.isGroupAdmin).toBe(true)
-    expect(user.isGroupAdmin).toBe(false)
+  it("ignore les anciens champs d'admin de groupe", () => {
+    expect(getRoles({ role: 'user', admin_of_groups: [{ id: 1 }], managed_group_ids: [1] })).toEqual({ isAdmin: false, permissions: {} })
   })
 
   it('accepte un utilisateur absent', () => {
-    expect(getRoles(null)).toEqual({ isAdmin: false, isGroupAdmin: false, permissions: {} })
+    expect(getRoles(null)).toEqual({ isAdmin: false, permissions: {} })
   })
 })
 
@@ -33,14 +31,15 @@ describe('canAccess', () => {
     expect(canAccess(ADMIN, groupAdmin)).toBe(false)
   })
 
-  it("ouvre GROUP_ADMIN à l'admin global et à l'admin de groupe", () => {
-    expect(canAccess(GROUP_ADMIN, admin)).toBe(true)
-    expect(canAccess(GROUP_ADMIN, groupAdmin)).toBe(true)
-    expect(canAccess(GROUP_ADMIN, editor)).toBe(false)
-    expect(canAccess(GROUP_ADMIN, user)).toBe(false)
+  it("ouvre MANAGEMENT à l'admin et à qui a au moins une permission", () => {
+    expect(canAccess(MANAGEMENT, admin)).toBe(true)
+    expect(canAccess(MANAGEMENT, groupAdmin)).toBe(true)
+    expect(canAccess(MANAGEMENT, migratedEditor)).toBe(true)
+    expect(canAccess(MANAGEMENT, editor)).toBe(false)
+    expect(canAccess(MANAGEMENT, user)).toBe(false)
   })
 
-  it("ouvre NEWS et EVENTS à qui a la permission, à l'admin et à l'admin de groupe", () => {
+  it("ouvre NEWS et EVENTS à qui a la permission et à l'admin", () => {
     for (const level of [NEWS, EVENTS]) {
       expect(canAccess(level, admin)).toBe(true)
       expect(canAccess(level, migratedEditor)).toBe(true)
@@ -68,7 +67,7 @@ describe('canAccess', () => {
 
 describe('getScope', () => {
   it("donne le périmètre global à l'admin", () => {
-    expect(getScope(GROUP_ADMIN, admin)).toBe('global')
+    expect(getScope(MANAGEMENT, admin)).toBe('global')
     expect(getScope(NEWS, admin)).toBe('global')
   })
 
@@ -76,13 +75,11 @@ describe('getScope', () => {
     expect(getScope(NEWS, migratedEditor)).toBe('global')
     expect(getScope(EVENTS, migratedEditor)).toBe('global')
     expect(getScope(RESOURCES, migratedEditor)).toBe('group')
-    expect(getScope(NEWS, editorAndGroupAdmin)).toBe('global')
-    expect(getScope(GROUP_ADMIN, editorAndGroupAdmin)).toBe('group')
   })
 
-  it("limite l'admin de groupe à ses groupes", () => {
+  it("limite l'éditeur de groupe à ses groupes", () => {
     expect(getScope(NEWS, groupAdmin)).toBe('group')
-    expect(getScope(GROUP_ADMIN, groupAdmin)).toBe('group')
+    expect(getScope(MANAGEMENT, groupAdmin)).toBe('group')
   })
 })
 
@@ -98,7 +95,7 @@ describe('permissions des rôles', () => {
     expect(permissionScope(admin, 'resources.manage')).toBe('all')
   })
 
-  it('ouvre les ressources à qui a la permission, ou à un ancien admin de groupe', () => {
+  it('ouvre les ressources à qui a la permission, y compris un éditeur de groupe', () => {
     expect(canAccess(RESOURCES, inGroups)).toBe(true)
     expect(canAccess(RESOURCES, everywhere)).toBe(true)
     expect(canAccess(RESOURCES, groupAdmin)).toBe(true)
@@ -123,7 +120,7 @@ describe('sondages et modération', () => {
   const pollsInGroups = getRoles({ role: 'user', permissions: { 'polls.manage': 'groups' } })
   const moderator = getRoles({ role: 'user', permissions: { 'comments.moderate': 'all' } })
 
-  it('ouvre les sondages à la permission, à l\'admin et à l\'ancien admin de groupe', () => {
+  it('ouvre les sondages à la permission, à l\'admin et à l\'éditeur de groupe', () => {
     expect(canAccess(POLLS, pollsInGroups)).toBe(true)
     expect(canAccess(POLLS, admin)).toBe(true)
     expect(canAccess(POLLS, groupAdmin)).toBe(true)
@@ -131,7 +128,7 @@ describe('sondages et modération', () => {
     expect(canAccess(POLLS, user)).toBe(false)
   })
 
-  it('réserve la modération à la permission (pas à l\'admin de groupe)', () => {
+  it('réserve la modération à la permission (pas à l\'éditeur de groupe)', () => {
     expect(canAccess(MODERATION, moderator)).toBe(true)
     expect(canAccess(MODERATION, admin)).toBe(true)
     expect(canAccess(MODERATION, groupAdmin)).toBe(false)
@@ -163,9 +160,9 @@ describe('canManageItem', () => {
     expect(canManageItem(member, 'news.manage', { target_groups: [g1] })).toBe(false)
   })
 
-  it('auteur : toujours ; ancien admin de groupe : ses groupes administrés', () => {
+  it("auteur : toujours ; les anciens groupes administrés ne comptent plus", () => {
     expect(canManageItem({ id: 9, role: 'user' }, 'news.manage', { author_id: 9 })).toBe(true)
-    expect(canManageItem({ id: 9, role: 'user', managed_group_ids: [2] }, 'news.manage', { target_groups: [g2] })).toBe(true)
+    expect(canManageItem({ id: 9, role: 'user', managed_group_ids: [2], admin_of_groups: [g2] }, 'news.manage', { target_groups: [g2] })).toBe(false)
     expect(canManageItem(null, 'news.manage', { author_id: 9 })).toBe(false)
   })
 })

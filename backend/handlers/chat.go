@@ -186,16 +186,9 @@ func (h *ChatHandler) ClearConversation(c *gin.Context) {
 	groupID, _ := strconv.Atoi(c.Query("group_id"))
 
 	if groupID > 0 {
-		// Usually only admins can clear a group chat? Or anyone?
-		// For safety, let's say only group admins.
-		// Check if user is admin of group
-		var count int64
-		h.db.Table("group_admins").Where("user_id = ? AND group_id = ?", userID, groupID).Count(&count)
-		if count == 0 {
-			// Also allow if user is global admin?
-			// Let's keep it simple: Only group admin or system admin.
-			// Currently strict: Group Admin.
-			apierror.Respond(c, http.StatusForbidden, "Only group admins can clear group chat")
+		// Vider la discussion d'un groupe : réservé à l'administrateur
+		if c.GetString("role") != "admin" {
+			apierror.Respond(c, http.StatusForbidden, "Only administrators can clear group chat")
 			return
 		}
 

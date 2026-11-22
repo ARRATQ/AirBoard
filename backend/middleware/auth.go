@@ -35,7 +35,8 @@ func NewAuthMiddleware(cfg *config.Config, db *gorm.DB) *AuthMiddleware {
 	return am
 }
 
-// loadUserStatus relit en base le rôle, l'état actif et les groupes administrés.
+// loadUserStatus relit en base le rôle, l'état actif, les permissions et les groupes
+// couverts par la portée « ses groupes ».
 func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (userStatus, error) {
 	var user models.User
 	err := am.db.WithContext(ctx).
@@ -46,13 +47,6 @@ func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (user
 	}
 	if err != nil {
 		return userStatus{}, fmt.Errorf("lecture de l'utilisateur %d: %w", userID, err)
-	}
-
-	managedGroupIDs := []uint{}
-	if err := am.db.WithContext(ctx).Table("group_admins").
-		Where("user_id = ?", userID).
-		Pluck("group_id", &managedGroupIDs).Error; err != nil {
-		return userStatus{}, fmt.Errorf("lecture des groupes administrés de %d: %w", userID, err)
 	}
 
 	permissions, err := LoadPermissions(am.db.WithContext(ctx), userID)
@@ -66,11 +60,10 @@ func (am *AuthMiddleware) loadUserStatus(ctx context.Context, userID uint) (user
 	}
 
 	return userStatus{
-		Role:            user.Role,
-		IsActive:        user.IsActive,
-		ManagedGroupIDs: managedGroupIDs,
-		Permissions:     permissions,
-		MemberGroupIDs:  memberGroupIDs,
+		Role:           user.Role,
+		IsActive:       user.IsActive,
+		Permissions:    permissions,
+		MemberGroupIDs: memberGroupIDs,
 	}, nil
 }
 
@@ -130,7 +123,6 @@ func (am *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 		c.Set("username", claims.Username)
 		c.Set("role", status.Role)
 		c.Set("email", claims.Email)
-		c.Set("managed_group_ids", status.ManagedGroupIDs)
 		c.Set(CtxPermissions, status.Permissions)
 		c.Set(CtxMemberGroupIDs, status.MemberGroupIDs)
 
@@ -153,21 +145,14 @@ func (am *AuthMiddleware) RequireAdmin() gin.HandlerFunc {
 
 // GenerateToken génère un token JWT
 func (am *AuthMiddleware) GenerateToken(user *models.User) (string, error) {
-	// Charger les groupes administrés pour tous les utilisateurs
-	var managedGroupIDs []uint
-	am.db.Table("group_admins").
-		Where("user_id = ?", user.ID).
-		Pluck("group_id", &managedGroupIDs)
-
 	claims := jwt.MapClaims{
-		"user_id":           user.ID,
-		"username":          user.Username,
-		"role":              user.Role,
-		"email":             user.Email,
-		"managed_group_ids": managedGroupIDs,
-		"exp":               time.Now().Add(time.Hour * time.Duration(am.config.JWT.TokenExpirationHours)).Unix(),
-		"iat":               time.Now().Unix(),
-		"type":              tokenTypeAccess,
+		"user_id":  user.ID,
+		"username": user.Username,
+		"role":     user.Role,
+		"email":    user.Email,
+		"exp":      time.Now().Add(time.Hour * time.Duration(am.config.JWT.TokenExpirationHours)).Unix(),
+		"iat":      time.Now().Unix(),
+		"type":     tokenTypeAccess,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -176,21 +161,14 @@ func (am *AuthMiddleware) GenerateToken(user *models.User) (string, error) {
 
 // GenerateRefreshToken génère un refresh token
 func (am *AuthMiddleware) GenerateRefreshToken(user *models.User) (string, error) {
-	// Charger les groupes administrés pour tous les utilisateurs
-	var managedGroupIDs []uint
-	am.db.Table("group_admins").
-		Where("user_id = ?", user.ID).
-		Pluck("group_id", &managedGroupIDs)
-
 	claims := jwt.MapClaims{
-		"user_id":           user.ID,
-		"username":          user.Username,
-		"role":              user.Role,
-		"email":             user.Email,
-		"managed_group_ids": managedGroupIDs,
-		"exp":               time.Now().Add(time.Hour * 24 * time.Duration(am.config.JWT.RefreshExpirationDays)).Unix(),
-		"iat":               time.Now().Unix(),
-		"type":              tokenTypeRefresh,
+		"user_id":  user.ID,
+		"username": user.Username,
+		"role":     user.Role,
+		"email":    user.Email,
+		"exp":      time.Now().Add(time.Hour * 24 * time.Duration(am.config.JWT.RefreshExpirationDays)).Unix(),
+		"iat":      time.Now().Unix(),
+		"type":     tokenTypeRefresh,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -258,24 +236,14 @@ func claimsToUser(claims jwt.MapClaims) (*models.Claims, error) {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
 
-	managedGroupIDs := []uint{}
-	if mgids, ok := claims["managed_group_ids"].([]interface{}); ok {
-		for _, id := range mgids {
-			if idFloat, ok := id.(float64); ok {
-				managedGroupIDs = append(managedGroupIDs, uint(idFloat))
-			}
-		}
-	}
-
 	username, _ := claims["username"].(string)
 	role, _ := claims["role"].(string)
 	email, _ := claims["email"].(string)
 
 	return &models.Claims{
-		UserID:          uint(rawID),
-		Username:        username,
-		Role:            role,
-		Email:           email,
-		ManagedGroupIDs: managedGroupIDs,
+		UserID:   uint(rawID),
+		Username: username,
+		Role:     role,
+		Email:    email,
 	}, nil
 }

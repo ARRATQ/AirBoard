@@ -598,7 +598,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 	}
 
 	var users []models.User
-	if err := query.Preload("Groups").Preload("AdminOfGroups").Preload("AccessRoles").
+	if err := query.Preload("Groups").Preload("AccessRoles").
 		Order(userSortClause(c.Query("sort"), c.Query("order"))).
 		Limit(page.Size).Offset(page.Offset()).
 		Find(&users).Error; err != nil {
@@ -955,7 +955,7 @@ func (h *AdminHandler) PermanentlyDeleteUser(c *gin.Context) {
 		// 1. Supprimer les associations many-to-many directement dans les tables de jointure :
 		// Association(...).Clear() en mode Unscoped produit un SQL invalide sur user_favorites.
 		txUnscoped := tx.Unscoped()
-		for _, joinTable := range []string{"user_groups", "user_favorites", "group_admins"} {
+		for _, joinTable := range []string{"user_groups", "user_favorites", "user_access_roles"} {
 			// joinTable vient de la liste constante ci-dessus, jamais d'une entrée utilisateur
 			if err := tx.Exec("DELETE FROM "+joinTable+" WHERE user_id = ?", user.ID).Error; err != nil {
 				return err
@@ -1321,7 +1321,6 @@ func (h *AdminHandler) ResetDatabase(c *gin.Context) {
 		"user_favorites",
 		"user_groups",
 		"group_app_groups",
-		"group_admins",
 		"news_tags",
 
 		// Tables dépendantes (analytics, reactions, etc.)
@@ -1377,81 +1376,6 @@ func (h *AdminHandler) ResetDatabase(c *gin.Context) {
 		Data: map[string]interface{}{
 			"note": "Les données de démonstration seront recréées au prochain démarrage du serveur",
 		},
-	})
-}
-
-// ============ GESTION DES GROUP ADMINS ============
-
-// GetGroupAdmins récupère les admins d'un groupe
-func (h *AdminHandler) GetGroupAdmins(c *gin.Context) {
-	groupID := c.Param("id")
-
-	// Charger le groupe avec ses admins
-	var group models.Group
-	if err := h.db.Preload("Users", "users.id IN (SELECT user_id FROM group_admins WHERE group_id = ?)", groupID).First(&group, groupID).Error; err != nil {
-		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
-		return
-	}
-
-	// Récupérer les utilisateurs qui sont admins de ce groupe
-	var adminUsers []models.User
-	h.db.Table("users").
-		Select("users.*").
-		Joins("JOIN group_admins ON users.id = group_admins.user_id").
-		Where("group_admins.group_id = ?", groupID).
-		Find(&adminUsers)
-
-	// Masquer les mots de passe
-	for i := range adminUsers {
-		adminUsers[i].Password = ""
-	}
-
-	c.JSON(http.StatusOK, adminUsers)
-}
-
-// AssignGroupAdmins assigne des utilisateurs comme admins d'un groupe
-func (h *AdminHandler) AssignGroupAdmins(c *gin.Context) {
-	groupID := c.Param("id")
-
-	var request struct {
-		UserIDs []uint `json:"user_ids"`
-	}
-
-	if err := c.ShouldBindJSON(&request); err != nil {
-		apierror.Respond(c, http.StatusBadRequest, "Format de requête invalide")
-		return
-	}
-
-	// Charger le groupe
-	var group models.Group
-	if err := h.db.First(&group, groupID).Error; err != nil {
-		apierror.Respond(c, http.StatusNotFound, "Groupe non trouvé")
-		return
-	}
-
-	// Charger les utilisateurs à assigner
-	var users []models.User
-	if len(request.UserIDs) > 0 {
-		if err := h.db.Where("id IN ?", request.UserIDs).Find(&users).Error; err != nil {
-			apierror.Respond(c, http.StatusBadRequest, "Certains utilisateurs n'ont pas été trouvés")
-			return
-		}
-	}
-
-	// Utiliser l'association GORM pour remplacer les admins
-	// D'abord, supprimer toutes les associations existantes pour ce groupe
-	h.db.Exec("DELETE FROM group_admins WHERE group_id = ?", groupID)
-
-	// Puis ajouter les nouvelles associations
-	if len(users) > 0 {
-		for _, user := range users {
-			// Utiliser Replace sur l'association AdminOfGroups de chaque utilisateur
-			h.db.Model(&user).Association("AdminOfGroups").Append(&group)
-		}
-	}
-
-	c.JSON(http.StatusOK, models.SuccessResponse{
-		Message: "Administrateurs de groupe assignés avec succès",
 	})
 }
 

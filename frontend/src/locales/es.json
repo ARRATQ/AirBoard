@@ -247,8 +247,6 @@
     "loadError": "Error al cargar los grupos",
     "saveError": "Error al guardar el grupo",
     "deleteError": "Error al eliminar el grupo",
-    "adminsSaved": "Administradores del grupo actualizados.",
-    "adminsLoadError": "No se pudieron cargar los usuarios del grupo.",
     "membersCount": "{count} usuarios | {count} usuario | {count} usuarios"
   },
   "applications": {
@@ -392,14 +390,6 @@
     "errors": {
       "nameRequired": "El nombre es obligatorio"
     }
-  },
-  "groupAdminsModal": {
-    "manage": "Gestionar los administradores",
-    "manageFor": "Gestionar los administradores: {name}",
-    "title": "Administradores del grupo",
-    "intro": "Seleccione los usuarios que podrán administrar este grupo y sus recursos.",
-    "noUsers": "No se encontró ningún usuario",
-    "selectedCount": "ningún administrador seleccionado | 1 administrador seleccionado | {count} administradores seleccionados"
   },
   "settings": {
     "general": "General",
@@ -1364,12 +1354,6 @@
       "news": "Artículos",
       "events": "Eventos",
       "polls": "Encuestas",
-      "managedGroups": "Grupos gestionados",
-      "totalMembers": "Miembros totales",
-      "managedAppGroups": "Categorías de recursos gestionadas",
-      "managedApps": "Mis recursos",
-      "managedNews": "Artículos gestionados",
-      "managedPolls": "Encuestas gestionadas",
       "accessibleApps": "Recursos disponibles",
       "accessibleEvents": "Eventos disponibles",
       "subtitle": "Visión general de su plataforma"
@@ -2606,16 +2590,16 @@
     "never": "Nunca",
     "monthlyActivity": "Actividad mensual (12 meses)",
     "articlesAuthored": "Artículos redactados",
-    "groupAdminNote": "Usuarios designados administradores de grupo",
     "roles": {
       "admin": "Administrador",
-      "group_admin": "Administradores de grupo",
-      "user": "Usuario"
+      "user": "Usuario",
+      "contributor": "Colaboradores"
     },
     "topContributors": "Principales contribuciones",
     "score": "Puntuación",
     "scoreFormula": "* Puntuación = clics en recursos ×1 + artículos leídos ×2 + reacciones ×1 + votos en encuestas ×1 + recursos creados ×5 + artículos publicados ×10",
-    "unknownError": "Error desconocido"
+    "unknownError": "Error desconocido",
+    "contributorNote": "Cuentas cuyo rol les permite gestionar noticias, eventos o encuestas."
   },
   "events": {
     "center": {

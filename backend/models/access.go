@@ -123,7 +123,6 @@ func UsersWithAnyPermission(db *gorm.DB, permissions []string, userIDs ...uint) 
 }
 
 // IsContributor : admin, ou compte qu'un rôle dote d'une permission de rédaction.
-// (Les anciens admins de groupe sont vérifiés à part, par la table group_admins.)
 func IsContributor(db *gorm.DB, user User) bool {
 	if user.Role == "admin" {
 		return true

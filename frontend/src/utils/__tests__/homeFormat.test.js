@@ -19,32 +19,20 @@ describe('keyFigures', () => {
     total_polls: 2,
     total_accessible_apps: 9,
     total_accessible_events: 6,
-    managed_groups_count: 2,
-    total_members_count: 30,
-    managed_app_groups_count: 1,
-    managed_apps_count: 8,
-    managed_news_count: 4,
-    managed_polls_count: 1,
   }
 
   it('returns nothing without stats', () => {
-    expect(keyFigures(undefined, 'user', [])).toEqual([])
+    expect(keyFigures(undefined, 'user')).toEqual([])
   })
 
   it('gives the admin the seven platform figures', () => {
-    const figures = keyFigures(stats, 'admin', [])
+    const figures = keyFigures(stats, 'admin')
     expect(figures.map((f) => f.value)).toEqual([12, 3, 4, 20, 7, 5, 2])
     expect(figures[0]).toMatchObject({ labelKey: 'home.stats.users', to: '/admin/users' })
   })
 
-  it('gives a group admin the managed figures', () => {
-    const figures = keyFigures(stats, 'user', [1])
-    expect(figures.map((f) => f.value)).toEqual([2, 30, 1, 8, 4, 1, 9])
-    expect(figures.at(-1)).toMatchObject({ labelKey: 'home.stats.accessibleApps', to: '/resources' })
-  })
-
   it('gives a user four figures and replaces missing values with 0', () => {
-    const figures = keyFigures({ total_news: 3 }, 'user', [])
+    const figures = keyFigures({ total_news: 3 }, 'user')
     expect(figures.map((f) => [f.labelKey, f.value])).toEqual([
       ['home.stats.apps', 0],
       ['home.stats.news', 3],

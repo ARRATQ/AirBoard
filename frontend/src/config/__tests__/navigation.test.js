@@ -5,7 +5,8 @@ import { ADMIN_SECTIONS, buildAdminNav, visibleTabs } from '../navigation'
 const admin = getRoles({ role: 'admin' })
 // Éditeur migré : rôle « Éditeur » (actualités et événements partout)
 const editor = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all' } })
-const groupAdmin = getRoles({ role: 'user', managed_group_ids: [1] })
+// Ancien admin de groupe converti : rôle « Éditeur de groupe »
+const groupAdmin = getRoles({ role: 'user', permissions: { 'resources.manage': 'groups', 'news.manage': 'groups', 'events.manage': 'groups', 'polls.manage': 'groups' } })
 const user = getRoles({ role: 'user' })
 
 const allLinks = (nav) => [
@@ -34,25 +35,25 @@ describe('buildAdminNav', () => {
     expect(allLinks(buildAdminNav(admin))).toEqual(['/admin', ...declared])
   })
 
-  it("donne à l'admin de groupe une liste courte de ses pages", () => {
+  it("donne à l'éditeur de groupe une liste courte de ses pages", () => {
     const nav = buildAdminNav(groupAdmin)
     expect(nav.grouped).toBe(false)
-    expect(nav.titleKey).toBe('groupAdmin.title')
+    expect(nav.titleKey).toBe('nav.admin.title')
     expect(allLinks(nav)).toEqual(['/admin', '/admin/news', '/admin/events', '/admin/polls', '/admin/resources'])
   })
 
   it("donne à l'éditeur les actualités et les événements", () => {
     const nav = buildAdminNav(editor)
-    expect(nav.overview).toBeNull()
-    expect(allLinks(nav)).toEqual(['/admin/news', '/admin/events'])
+    expect(nav.overview?.to).toBe('/admin')
+    expect(allLinks(nav)).toEqual(['/admin', '/admin/news', '/admin/events'])
   })
 
   it('ajoute les ressources à qui a la permission resources.manage', () => {
     const editorWithRole = getRoles({ role: 'editor', permissions: { 'news.manage': 'all', 'events.manage': 'all', 'resources.manage': 'groups' } })
-    expect(allLinks(buildAdminNav(editorWithRole))).toEqual(['/admin/news', '/admin/events', '/admin/resources'])
+    expect(allLinks(buildAdminNav(editorWithRole))).toEqual(['/admin', '/admin/news', '/admin/events', '/admin/resources'])
     const userWithRole = getRoles({ role: 'user', permissions: { 'resources.manage': 'all' } })
     const nav = buildAdminNav(userWithRole)
-    expect(allLinks(nav)).toEqual(['/admin/resources'])
+    expect(allLinks(nav)).toEqual(['/admin', '/admin/resources'])
     expect(nav.titleKey).toBe('nav.admin.title')
   })
 
@@ -62,7 +63,7 @@ describe('buildAdminNav', () => {
 
   it('donne les actualités seules à qui ne gère que les actualités', () => {
     const newsOnly = getRoles({ role: 'user', permissions: { 'news.manage': 'groups' } })
-    expect(allLinks(buildAdminNav(newsOnly))).toEqual(['/admin/news'])
+    expect(allLinks(buildAdminNav(newsOnly))).toEqual(['/admin', '/admin/news'])
   })
 
   it("réserve la page Rôles à l'admin", () => {
@@ -80,7 +81,7 @@ describe('visibleTabs', () => {
     expect(visibleTabs('news', editor).map((t) => t.to)).toEqual(['/admin/news'])
   })
 
-  it("montre les catégories de ressources à l'admin de groupe", () => {
+  it("montre les catégories de ressources à l'éditeur de groupe", () => {
     expect(visibleTabs('resources', groupAdmin)).toHaveLength(2)
   })
 

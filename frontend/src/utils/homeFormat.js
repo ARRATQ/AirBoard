@@ -14,10 +14,9 @@ const figure = (key, labelKey, value, to) => ({ key, labelKey, value: value ?? 0
  * Chiffres clés du bandeau, selon le rôle.
  * @param {object|undefined} stats  homeData.stats
  * @param {string} role             homeData.user_role
- * @param {number[]} managedGroupIds homeData.managed_group_ids
  * @returns {{ key: string, labelKey: string, value: number, to: string }[]}
  */
-export function keyFigures(stats, role, managedGroupIds) {
+export function keyFigures(stats, role) {
   if (!stats) return []
 
   if (role === 'admin') {
@@ -29,18 +28,6 @@ export function keyFigures(stats, role, managedGroupIds) {
       figure('news', 'home.stats.news', stats.total_news, '/admin/news'),
       figure('events', 'home.stats.events', stats.total_events, '/admin/events'),
       figure('polls', 'home.stats.polls', stats.total_polls, '/admin/polls'),
-    ]
-  }
-
-  if (managedGroupIds?.length) {
-    return [
-      figure('managedGroups', 'home.stats.managedGroups', stats.managed_groups_count, '/admin'),
-      figure('members', 'home.stats.totalMembers', stats.total_members_count, '/admin'),
-      figure('appGroups', 'home.stats.managedAppGroups', stats.managed_app_groups_count, '/admin/resources/categories'),
-      figure('apps', 'home.stats.managedApps', stats.managed_apps_count, '/admin/resources'),
-      figure('news', 'home.stats.managedNews', stats.managed_news_count, '/admin/news'),
-      figure('polls', 'home.stats.managedPolls', stats.managed_polls_count, '/admin/polls'),
-      figure('accessibleApps', 'home.stats.accessibleApps', stats.total_accessible_apps, '/resources'),
     ]
   }
 

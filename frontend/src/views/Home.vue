@@ -109,7 +109,7 @@ const agenda = computed(() =>
   agendaAhead(homeData.value.today_events, homeData.value.upcoming_events, AGENDA_COUNT),
 )
 const figures = computed(() =>
-  keyFigures(homeData.value.stats, homeData.value.user_role, homeData.value.managed_group_ids),
+  keyFigures(homeData.value.stats, homeData.value.user_role),
 )
 
 async function loadHomeData() {
