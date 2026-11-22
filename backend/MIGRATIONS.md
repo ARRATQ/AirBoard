@@ -15,6 +15,7 @@ GORM ne crée plus rien : `AutoMigrate` n'est plus appelé.
 | `00001_baseline.sql` | Le schéma qu'AutoMigrate construisait à partir des modèles. |
 | `00002_soft_delete_unique_indexes.sql` | Index uniques partiels (`WHERE deleted_at IS NULL`) sur noms et slugs, suppression des anciens index complets, unicité des votes et avis. |
 | `00003_performance_indexes.sql` | Index de performance (clés étrangères, tables de jointure, lectures/réactions). |
+| `00004_icones_lucide.sql` | Icônes en base passées de mdi à Lucide (table de correspondance, logos de marque inchangés), nouvelles valeurs par défaut. Anciennes valeurs gardées dans `icon_lucide_backup` pour `Down`. |
 
 ## Ajouter une migration
 

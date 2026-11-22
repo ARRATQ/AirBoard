@@ -59,8 +59,8 @@ type AppGroup struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
 	Name        string         `json:"name" gorm:"unique;not null"`
 	Description string         `json:"description"`
-	Color       string         `json:"color" gorm:"default:'#10B981'"`   // Couleur pour l'affichage
-	Icon        string         `json:"icon" gorm:"default:'mdi:folder'"` // Icône Iconify
+	Color       string         `json:"color" gorm:"default:'#10B981'"`      // Couleur pour l'affichage
+	Icon        string         `json:"icon" gorm:"default:'lucide:folder'"` // Icône Iconify
 	Order       int            `json:"order" gorm:"default:0"`
 	IsActive    bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt   time.Time      `json:"created_at"`
@@ -81,8 +81,8 @@ type Application struct {
 	Name         string `json:"name" gorm:"not null"`
 	Description  string `json:"description"`
 	URL          string `json:"url" gorm:"not null"`
-	Icon         string `json:"icon" gorm:"default:'mdi:application'"` // Icône Iconify
-	Color        string `json:"color" gorm:"default:'#6366F1'"`        // Couleur pour l'affichage
+	Icon         string `json:"icon" gorm:"default:'lucide:app-window'"` // Icône Iconify
+	Color        string `json:"color" gorm:"default:'#6366F1'"`          // Couleur pour l'affichage
 	Order        int    `json:"order" gorm:"default:0"`
 	IsActive     bool   `json:"is_active" gorm:"default:true"`
 	OpenInNewTab bool   `json:"open_in_new_tab" gorm:"default:true"`
@@ -217,7 +217,7 @@ func (m *Media) MediaType() string {
 type AppSettings struct {
 	ID                uint      `json:"id" gorm:"primaryKey"`
 	AppName           string    `json:"app_name" gorm:"default:'Airboard'"`
-	AppIcon           string    `json:"app_icon" gorm:"default:'mdi:view-dashboard'"`
+	AppIcon           string    `json:"app_icon" gorm:"default:'lucide:layout-dashboard'"`
 	DashboardTitle    string    `json:"dashboard_title" gorm:"default:'Dashboard'"`
 	WelcomeMessage    string    `json:"welcome_message" gorm:"default:'Welcome to your application portal'"`     // Message pour la page Dashboard
 	HomePageMessage   string    `json:"home_page_message" gorm:"default:'Discover your personalized workspace'"` // Message pour la page d'accueil
@@ -273,7 +273,7 @@ type OAuthProvider struct {
 	ID           uint      `json:"id" gorm:"primaryKey"`
 	ProviderName string    `json:"provider_name" gorm:"unique;not null"` // google, microsoft
 	DisplayName  string    `json:"display_name" gorm:"not null"`         // "Google", "Microsoft"
-	Icon         string    `json:"icon" gorm:"default:'mdi:login'"`      // Icône Iconify
+	Icon         string    `json:"icon" gorm:"default:'lucide:log-in'"`  // Icône Iconify
 	IsEnabled    bool      `json:"is_enabled" gorm:"default:false"`
 	ClientID     string    `json:"client_id"`
 	ClientSecret string    `json:"-"` // Ne jamais exposer dans le JSON
@@ -402,8 +402,8 @@ type Notification struct {
 	Category  string         `json:"category"`             // login, role_change, access_granted, access_revoked, new_article, etc.
 	Title     string         `json:"title" gorm:"not null"`
 	Message   string         `json:"message" gorm:"type:text"`
-	Icon      string         `json:"icon" gorm:"default:'mdi:bell'"` // Icône Iconify
-	Color     string         `json:"color" gorm:"default:'#3B82F6'"` // Couleur pour l'affichage
+	Icon      string         `json:"icon" gorm:"default:'lucide:bell'"` // Icône Iconify
+	Color     string         `json:"color" gorm:"default:'#3B82F6'"`    // Couleur pour l'affichage
 	IsRead    bool           `json:"is_read" gorm:"default:false;index"`
 	Priority  int            `json:"priority" gorm:"default:0"` // 0=normal, 1=important, 2=urgent
 	ActionURL string         `json:"action_url"`                // URL de redirection au clic
@@ -461,7 +461,7 @@ type Chatbot struct {
 	Name            string         `json:"name" gorm:"not null"`
 	Description     string         `json:"description"`
 	WebhookURL      string         `json:"webhook_url" gorm:"not null"`
-	Icon            string         `json:"icon" gorm:"default:'mdi:robot-outline'"`
+	Icon            string         `json:"icon" gorm:"default:'lucide:bot'"`
 	Color           string         `json:"color" gorm:"default:'#4f46e5'"`         // Couleur principale du widget
 	WelcomeTitle    string         `json:"welcome_title"`                          // Titre de l'écran d'accueil
 	WelcomeSubtitle string         `json:"welcome_subtitle"`                       // Sous-titre de l'écran d'accueil

@@ -327,7 +327,7 @@ func (h *GamificationHandler) CreateAchievement(c *gin.Context) {
 	}
 
 	if achievement.Icon == "" {
-		achievement.Icon = "mdi:medal"
+		achievement.Icon = "lucide:medal"
 	}
 	if achievement.Color == "" {
 		achievement.Color = "#FBBF24"
@@ -376,7 +376,7 @@ func (h *GamificationHandler) UpdateAchievement(c *gin.Context) {
 	}
 
 	if achievement.Icon == "" {
-		achievement.Icon = "mdi:medal"
+		achievement.Icon = "lucide:medal"
 	}
 	if achievement.Color == "" {
 		achievement.Color = "#FBBF24"

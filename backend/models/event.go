@@ -69,9 +69,9 @@ type EventCategory struct {
 	Name        string         `json:"name" gorm:"size:100;not null"`
 	Slug        string         `json:"slug" gorm:"size:100;not null"`
 	Description string         `json:"description" gorm:"size:500"`
-	Icon        string         `json:"icon" gorm:"size:100;default:'mdi:calendar'"` // Icône Iconify
-	Color       string         `json:"color" gorm:"size:20;default:'#3B82F6'"`      // Couleur hex
-	Order       int            `json:"order" gorm:"default:0"`                      // Ordre d'affichage
+	Icon        string         `json:"icon" gorm:"size:100;default:'lucide:calendar'"` // Icône Iconify
+	Color       string         `json:"color" gorm:"size:20;default:'#3B82F6'"`         // Couleur hex
+	Order       int            `json:"order" gorm:"default:0"`                         // Ordre d'affichage
 	IsActive    bool           `json:"is_active" gorm:"default:true"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`

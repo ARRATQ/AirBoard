@@ -177,10 +177,10 @@ func ensureDefaultSuggestionCategories(db *gorm.DB) {
 
 func ensureDefaultNewsTypes(db *gorm.DB) {
 	defaults := []models.NewsType{
-		{Name: "Article", Slug: "article", Icon: "mdi:text-box", Color: "#3B82F6", Order: 1, IsActive: true},
-		{Name: "Tutorial", Slug: "tutorial", Icon: "mdi:book-open-variant", Color: "#10B981", Order: 2, IsActive: true},
-		{Name: "Announcement", Slug: "announcement", Icon: "mdi:bullhorn", Color: "#8B5CF6", Order: 3, IsActive: true},
-		{Name: "FAQ", Slug: "faq", Icon: "mdi:help-circle", Color: "#F59E0B", Order: 4, IsActive: true},
+		{Name: "Article", Slug: "article", Icon: "lucide:text", Color: "#3B82F6", Order: 1, IsActive: true},
+		{Name: "Tutorial", Slug: "tutorial", Icon: "lucide:book-open", Color: "#10B981", Order: 2, IsActive: true},
+		{Name: "Announcement", Slug: "announcement", Icon: "lucide:megaphone", Color: "#8B5CF6", Order: 3, IsActive: true},
+		{Name: "FAQ", Slug: "faq", Icon: "lucide:circle-help", Color: "#F59E0B", Order: 4, IsActive: true},
 	}
 	if _, err := insertMissing(db, defaults); err != nil {
 		log.Printf("Avertissement: impossible de créer les types d'articles par défaut: %v", err)
