@@ -2543,7 +2543,8 @@
       "email": "Correo",
       "analytics": "Estadísticas",
       "reports": "Informes",
-      "chatbots": "Chatbots"
+      "chatbots": "Chatbots",
+      "roles": "Roles"
     },
     "tabs": {
       "label": "Secciones de la página",
@@ -3097,6 +3098,49 @@
     "unauthorized": {
       "title": "Acceso no autorizado",
       "message": "No tienes permiso para abrir esta página. Contacta con tu administrador si crees que se trata de un error."
+    }
+  },
+  "roles": {
+    "title": "Roles y permisos",
+    "subtitle": "El administrador tiene todos los derechos. Cree roles, elija sus permisos y asígnelos.",
+    "create": "Nuevo rol",
+    "adminRow": {
+      "name": "Administrador",
+      "text": "Todos los derechos, en todas partes. Este rol no se edita: se asigna desde la ficha de un usuario."
+    },
+    "empty": "Ningún rol",
+    "emptyHelp": "Cree un rol para delegar parte de la administración.",
+    "noPermission": "Ningún permiso",
+    "form": {
+      "permissions": "Permisos",
+      "permissionsHelp": "Marque lo que permite este rol y elija dónde.",
+      "scope": "Alcance"
+    },
+    "scope": {
+      "all": "Todo el sitio",
+      "groups": "Sus grupos",
+      "groupsHelp": "Solo en los grupos de los que la persona es miembro."
+    },
+    "permissions": {
+      "resources_manage": {
+        "label": "Gestionar los recursos",
+        "help": "Crear, modificar y eliminar los recursos y sus categorías."
+      }
+    },
+    "members": {
+      "title": "Miembros del rol",
+      "manage": "Gestionar los miembros",
+      "intro": "Las personas marcadas reciben los permisos de este rol.",
+      "loading": "Cargando…",
+      "noUsers": "No se encontró ningún usuario",
+      "selected": "Ningún miembro seleccionado | 1 miembro seleccionado | {count} miembros seleccionados"
+    },
+    "deleteConfirm": "¿Eliminar el rol «{name}»? Sus miembros ({count}) perderán los permisos que otorga.",
+    "errors": {
+      "load": "No se pudieron cargar los roles.",
+      "save": "No se pudo guardar el rol.",
+      "delete": "No se pudo eliminar el rol.",
+      "members": "No se pudieron actualizar los miembros."
     }
   }
 }

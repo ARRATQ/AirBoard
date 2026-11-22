@@ -119,7 +119,7 @@ import { useI18n } from 'vue-i18n'
 import { adminService, groupAdminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useManagementScope } from '@/composables/useManagementScope'
-import { GROUP_ADMIN } from '@/config/access'
+import { RESOURCES } from '@/config/access'
 import ApplicationModal from '@/components/admin/ApplicationModal.vue'
 
 const { t } = useI18n()
@@ -128,7 +128,7 @@ const { confirm: askConfirm } = useConfirm()
 
 // Admin global : toutes les ressources (API admin).
 // Admin de groupe : ressources des groupes de ressources privés de ses groupes (API group-admin).
-const { isGlobal } = useManagementScope(GROUP_ADMIN)
+const { isGlobal, isAdmin } = useManagementScope(RESOURCES)
 const service = computed(() => (isGlobal.value ? adminService : groupAdminService))
 
 // État
@@ -209,7 +209,7 @@ const loadAppGroups = async () => {
 
 // Liste des utilisateurs pour le choix du créateur : endpoint réservé à l'admin global
 const loadUsers = async () => {
-  if (!isGlobal.value) return
+  if (!isAdmin.value) return
   try {
     // Liste paginée côté serveur (25 par défaut) : la liste du créateur prend la page maximale.
     const data = await adminService.getUsers({ page_size: 500 })

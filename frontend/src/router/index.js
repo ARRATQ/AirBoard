@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ADMIN, GROUP_ADMIN, CONTENT, getRoles, canAccess } from '@/config/access'
+import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -13,6 +13,7 @@ const AppGroupsManagement = () => import('@/views/admin/AppGroupsManagement.vue'
 const ApplicationsManagement = () => import('@/views/admin/ApplicationsManagement.vue')
 const UsersManagement = () => import('@/views/admin/UsersManagement.vue')
 const GroupsManagement = () => import('@/views/admin/GroupsManagement.vue')
+const RolesManagement = () => import('@/views/admin/RolesManagement.vue')
 const Analytics = () => import('@/views/admin/Analytics.vue')
 const AnnouncementsManagement = () => import('@/views/admin/AnnouncementsManagement.vue')
 const ChatbotsManagement = () => import('@/views/admin/ChatbotsManagement.vue')
@@ -278,7 +279,7 @@ const routes = [
     path: '/admin/resources',
     component: SectionTabs,
     props: { section: 'resources' },
-    meta: { requiresAuth: true, access: GROUP_ADMIN },
+    meta: { requiresAuth: true, access: RESOURCES },
     children: [
       { path: '', name: 'AdminApplications', component: ApplicationsManagement, meta: { title: 'Ressources' } },
       { path: 'categories', name: 'AdminAppGroups', component: AppGroupsManagement, meta: { title: 'Catégories de ressources' } }
@@ -310,6 +311,12 @@ const routes = [
       access: ADMIN,
       title: 'Groupes'
     }
+  },
+  {
+    path: '/admin/roles',
+    name: 'AdminRoles',
+    component: RolesManagement,
+    meta: { requiresAuth: true, access: ADMIN, title: 'Rôles' }
   },
   {
     path: '/admin/settings',

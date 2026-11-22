@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ADMIN, GROUP_ADMIN, CONTENT, getRoles, canAccess, getScope } from '../access'
+import { ADMIN, GROUP_ADMIN, CONTENT, RESOURCES, getRoles, canAccess, getScope, permissionScope } from '../access'
 
 const admin = getRoles({ role: 'admin' })
 const editor = getRoles({ role: 'editor' })
@@ -15,7 +15,7 @@ describe('getRoles', () => {
   })
 
   it('accepte un utilisateur absent', () => {
-    expect(getRoles(null)).toEqual({ isAdmin: false, isEditor: false, isGroupAdmin: false })
+    expect(getRoles(null)).toEqual({ isAdmin: false, isEditor: false, isGroupAdmin: false, permissions: {} })
   })
 })
 
@@ -64,5 +64,38 @@ describe('getScope', () => {
   it("limite l'admin de groupe à ses groupes", () => {
     expect(getScope(CONTENT, groupAdmin)).toBe('group')
     expect(getScope(GROUP_ADMIN, groupAdmin)).toBe('group')
+  })
+})
+
+describe('permissions des rôles', () => {
+  const inGroups = getRoles({ role: 'user', permissions: { 'resources.manage': 'groups' } })
+  const everywhere = getRoles({ role: 'editor', permissions: { 'resources.manage': 'all' } })
+  const other = getRoles({ role: 'user', permissions: { 'news.manage': 'all' } })
+
+  it('lit la portée de la permission ; admin : partout', () => {
+    expect(permissionScope(inGroups, 'resources.manage')).toBe('groups')
+    expect(permissionScope(everywhere, 'resources.manage')).toBe('all')
+    expect(permissionScope(user, 'resources.manage')).toBe('')
+    expect(permissionScope(admin, 'resources.manage')).toBe('all')
+  })
+
+  it('ouvre les ressources à qui a la permission, ou à un ancien admin de groupe', () => {
+    expect(canAccess(RESOURCES, inGroups)).toBe(true)
+    expect(canAccess(RESOURCES, everywhere)).toBe(true)
+    expect(canAccess(RESOURCES, groupAdmin)).toBe(true)
+    expect(canAccess(RESOURCES, other)).toBe(false)
+    expect(canAccess(RESOURCES, editor)).toBe(false)
+    expect(canAccess(RESOURCES, user)).toBe(false)
+  })
+
+  it('périmètre global seulement avec la portée « tout le site »', () => {
+    expect(getScope(RESOURCES, everywhere)).toBe('global')
+    expect(getScope(RESOURCES, inGroups)).toBe('group')
+    expect(getScope(RESOURCES, groupAdmin)).toBe('group')
+    expect(getScope(RESOURCES, admin)).toBe('global')
+  })
+
+  it('ignore des permissions mal formées', () => {
+    expect(getRoles({ role: 'user', permissions: 'resources.manage' }).permissions).toEqual({})
   })
 })

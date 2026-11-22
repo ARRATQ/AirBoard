@@ -2902,7 +2902,8 @@
       "email": "E-mail",
       "analytics": "Statistiques",
       "reports": "Rapports",
-      "chatbots": "Chatbots"
+      "chatbots": "Chatbots",
+      "roles": "Rôles"
     },
     "tabs": {
       "label": "Sections de la page",
@@ -3097,6 +3098,49 @@
     "unauthorized": {
       "title": "Accès non autorisé",
       "message": "Vous n'avez pas les droits nécessaires pour ouvrir cette page. Contactez votre administrateur si vous pensez qu'il s'agit d'une erreur."
+    }
+  },
+  "roles": {
+    "title": "Rôles et permissions",
+    "subtitle": "L'administrateur a tous les droits. Créez des rôles, choisissez leurs permissions, puis attribuez-les.",
+    "create": "Nouveau rôle",
+    "adminRow": {
+      "name": "Administrateur",
+      "text": "Tous les droits, partout. Ce rôle ne se modifie pas : il s'attribue depuis la fiche d'un utilisateur."
+    },
+    "empty": "Aucun rôle",
+    "emptyHelp": "Créez un rôle pour confier une partie de l'administration.",
+    "noPermission": "Aucune permission",
+    "form": {
+      "permissions": "Permissions",
+      "permissionsHelp": "Cochez ce que ce rôle permet, puis choisissez où.",
+      "scope": "Portée"
+    },
+    "scope": {
+      "all": "Tout le site",
+      "groups": "Ses groupes",
+      "groupsHelp": "Seulement dans les groupes dont la personne est membre."
+    },
+    "permissions": {
+      "resources_manage": {
+        "label": "Gérer les ressources",
+        "help": "Créer, modifier et supprimer les ressources et leurs catégories."
+      }
+    },
+    "members": {
+      "title": "Membres du rôle",
+      "manage": "Gérer les membres",
+      "intro": "Les personnes cochées reçoivent les permissions de ce rôle.",
+      "loading": "Chargement…",
+      "noUsers": "Aucun utilisateur trouvé",
+      "selected": "Aucun membre sélectionné | 1 membre sélectionné | {count} membres sélectionnés"
+    },
+    "deleteConfirm": "Supprimer le rôle « {name} » ? Ses membres ({count}) perdront les permissions qu'il donne.",
+    "errors": {
+      "load": "Impossible de charger les rôles.",
+      "save": "Impossible d'enregistrer le rôle.",
+      "delete": "Impossible de supprimer le rôle.",
+      "members": "Impossible de mettre à jour les membres."
     }
   }
 }

@@ -351,6 +351,42 @@ export const adminService = {
     return response.data
   },
 
+  // Rôles et permissions
+  async getPermissionCatalog() {
+    const response = await api.get('/admin/permissions')
+    return response.data
+  },
+
+  async getAccessRoles() {
+    const response = await api.get('/admin/access-roles')
+    return response.data
+  },
+
+  async createAccessRole(data) {
+    const response = await api.post('/admin/access-roles', data)
+    return response.data
+  },
+
+  async updateAccessRole(id, data) {
+    const response = await api.put(`/admin/access-roles/${id}`, data)
+    return response.data
+  },
+
+  async deleteAccessRole(id) {
+    const response = await api.delete(`/admin/access-roles/${id}`)
+    return response.data
+  },
+
+  async getAccessRoleMembers(id) {
+    const response = await api.get(`/admin/access-roles/${id}/users`)
+    return response.data
+  },
+
+  async setAccessRoleMembers(id, userIds) {
+    const response = await api.put(`/admin/access-roles/${id}/users`, { user_ids: userIds })
+    return response.data
+  },
+
   // App Settings
   async getAppSettings() {
     const response = await api.get('/admin/settings')
