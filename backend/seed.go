@@ -38,6 +38,7 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 	ensureDefaultSuggestionCategories(quiet)
 	ensureDefaultNewsTypes(quiet)
 	ensureChatMessageTemplate(quiet)
+	ensureEmailTemplatesDesign(quiet)
 	seedGamification(services.NewGamificationService(quiet))
 	return nil
 }
@@ -241,6 +242,28 @@ func ensureChatMessageTemplate(db *gorm.DB) {
 			}
 			return
 		}
+	}
+}
+
+// ensureEmailTemplatesDesign passe au design A+ les modèles d'email jamais modifiés ; ceux que
+// l'admin a personnalisés restent tels quels (Réglages → Email → Réinitialiser pour en changer).
+func ensureEmailTemplatesDesign(db *gorm.DB) {
+	var templates []models.EmailTemplate
+	if err := db.Find(&templates).Error; err != nil {
+		log.Printf("Avertissement: modèles d'email illisibles: %v", err)
+		return
+	}
+	for _, t := range templates {
+		upgraded, changed := models.UpgradeLegacyEmailTemplate(t)
+		if !changed {
+			continue
+		}
+		if err := db.Model(&models.EmailTemplate{}).Where("id = ?", t.ID).
+			Updates(map[string]interface{}{"html_body": upgraded.HTMLBody, "name": upgraded.Name, "subject": upgraded.Subject}).Error; err != nil {
+			log.Printf("Avertissement: modèle d'email %s non mis à jour: %v", t.Type, err)
+			continue
+		}
+		log.Printf("✅ Modèle d'email %s passé au nouveau design", t.Type)
 	}
 }
 

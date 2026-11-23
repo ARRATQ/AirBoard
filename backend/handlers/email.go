@@ -279,11 +279,11 @@ func (h *EmailHandler) GetTemplateVariables(c *gin.Context) {
 			{"name": "{{.PublishedAt}}", "description": "Date de publication"},
 		},
 		"application": {
-			{"name": "{{.Name}}", "description": "Nom de l'application"},
-			{"name": "{{.Description}}", "description": "Description de l'application"},
-			{"name": "{{.URL}}", "description": "URL de l'application"},
-			{"name": "{{.AppGroup}}", "description": "Catégorie de l'application"},
-			{"name": "{{.AppName}}", "description": "Nom de l'application Airboard"},
+			{"name": "{{.Name}}", "description": "Nom de la ressource"},
+			{"name": "{{.Description}}", "description": "Description de la ressource"},
+			{"name": "{{.URL}}", "description": "Lien de la ressource"},
+			{"name": "{{.AppGroup}}", "description": "Catégorie de la ressource"},
+			{"name": "{{.AppName}}", "description": "Nom du portail"},
 		},
 		"event": {
 			{"name": "{{.Title}}", "description": "Titre de l'événement"},
@@ -308,6 +308,19 @@ func (h *EmailHandler) GetTemplateVariables(c *gin.Context) {
 			{"name": "{{.AppName}}", "description": "Nom de l'application"},
 		},
 	}
+
+	// Variables communes à tous les modèles : identité visuelle du portail
+	for templateType := range variables {
+		variables[templateType] = append(variables[templateType],
+			map[string]string{"name": "{{.Accent}}", "description": "Couleur de la palette (Réglages → Apparence)"},
+			map[string]string{"name": "{{.Ink}}", "description": "Couleur des boutons, lisible avec du texte blanc"},
+			map[string]string{"name": "{{.PortalURL}}", "description": "Adresse du portail"},
+		)
+	}
+	variables["announcement"] = append(variables["announcement"],
+		map[string]string{"name": "{{.TypeLabel}}", "description": "Libellé du type (Information, Avertissement, Succès, Erreur)"},
+		map[string]string{"name": "{{.TypeColor}}", "description": "Couleur du type"},
+	)
 
 	c.JSON(http.StatusOK, variables)
 }

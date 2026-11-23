@@ -19,6 +19,23 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Opens on the guide for the current page; links inside a guide open the page and close the help.
   Mobile: a topic picker replaces the side list.
 
+### ✨ Email Notifications
+
+- **Emails follow the new design**: the five notification emails (news, new resource, event,
+  announcement, chat message) use the portal's look: IBM Plex type, dark header strip with the
+  section name, detail rows, buttons and links in the palette chosen in Settings → Appearance
+  (built-in, custom colour or custom palette; button colour darkened when needed for readable
+  white text). They adapt to dark mode in mail apps that support it, and to phone screens.
+- **Announcements show their type** (Information, Warning, Success, Error) with its status colour,
+  also in the subject line. New template variables: `{{.Accent}}`, `{{.Ink}}`, `{{.PortalURL}}`,
+  and `{{.TypeLabel}}` / `{{.TypeColor}}` for announcements.
+- **Automatic upgrade**: at startup, templates still identical to the old defaults switch to the new
+  design. Templates edited by an admin are left untouched; reset them from Settings → Email to get
+  the new design.
+- **Fix: "Open the conversation" link** in chat emails led to a "page not found". `/chat` now opens
+  the home page with the chat panel open (after sign-in if needed), including for emails already
+  sent.
+
 ### ✨ Roles & Permissions
 
 - **Custom roles** (Admin → Roles): the admin builds roles from a fixed permission catalogue
