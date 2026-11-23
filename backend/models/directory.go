@@ -33,7 +33,7 @@ const (
 // Visibilité des champs dynamiques
 const (
 	DirectoryVisibilityAll      = "all"      // tous les utilisateurs connectés
-	DirectoryVisibilityManagers = "managers" // admins et admins de groupe uniquement
+	DirectoryVisibilityManagers = "managers" // administrateurs uniquement
 )
 
 // StringMap est une map clé/valeur stockée en JSONB

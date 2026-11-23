@@ -218,11 +218,16 @@ func (h *NewsHandler) GetNewsBySlug(c *gin.Context) {
 	c.JSON(http.StatusOK, news)
 }
 
-// CreateNews - Créer une news (admin/editor uniquement)
+// CreateNews - Créer une news (permission news.manage). Avec une gestion limitée à ses
+// groupes, l'article cible au moins un de ses groupes.
 func (h *NewsHandler) CreateNews(c *gin.Context) {
 	var req models.NewsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apierror.InvalidBody(c, err)
+		return
+	}
+	if !middleware.HasPermissionEverywhere(c, models.PermNewsManage) && len(req.TargetGroupIDs) == 0 {
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
 		return
 	}
 
@@ -264,7 +269,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 		h.db.Model(&news).Association("Tags").Replace(tags)
 	}
 
-	// Associer les groupes cibles avec vérification pour group_admin
+	// Associer les groupes cibles ; gestion limitée à ses groupes : seulement les siens
 	if len(req.TargetGroupIDs) > 0 {
 		managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermNewsManage)
 
@@ -279,7 +284,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 					}
 				}
 				if !canManage {
-					apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+					apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 					// Supprimer la news créée
 					h.db.Delete(&news)
 					return
@@ -378,6 +383,12 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		return
 	}
 
+	// Groupes cibles vérifiés avant toute écriture (nil : inchangés)
+	targetIDs, ok := h.updatedNewsTargets(c, news.ID, req.TargetGroupIDs)
+	if !ok {
+		return
+	}
+
 	// Mise à jour des champs
 	news.Title = req.Title
 	news.Summary = req.Summary
@@ -417,27 +428,8 @@ func (h *NewsHandler) UpdateNews(c *gin.Context) {
 		h.db.Model(&news).Association("Tags").Replace(tags)
 	}
 
-	// Mettre à jour les groupes cibles avec vérification pour les admins de groupe
-	if req.TargetGroupIDs != nil {
-		targetIDs := req.TargetGroupIDs
-		// Gestion limitée à ses groupes : il ne gère que ses groupes, et les cibles
-		// posées par d'autres sur des groupes qu'il ne gère pas restent.
-		if !middleware.HasPermissionEverywhere(c, models.PermNewsManage) {
-			managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermNewsManage)
-			var current models.News
-			h.db.Preload("TargetGroups").First(&current, news.ID)
-			existing := make([]uint, 0, len(current.TargetGroups))
-			for _, group := range current.TargetGroups {
-				existing = append(existing, group.ID)
-			}
-			merged, ok := mergeGroupAdminTargets(existing, req.TargetGroupIDs, managedGroupIDs)
-			if !ok {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
-				return
-			}
-			targetIDs = merged
-		}
-
+	// Mettre à jour les groupes cibles
+	if targetIDs != nil {
 		var groups []models.Group
 		if len(targetIDs) > 0 {
 			h.db.Where("id IN ?", targetIDs).Find(&groups)
@@ -765,11 +757,31 @@ func (h *NewsHandler) GetAnalytics(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-// mergeGroupAdminTargets calcule les groupes cibles d'une actualité modifiée par un
-// admin de groupe. Il peut cibler ses groupes ; il peut aussi renvoyer une cible déjà
-// présente sur un groupe qu'il n'administre pas, mais pas en ajouter une. Les cibles
-// existantes hors de ses groupes sont toujours conservées. ok vaut false si la demande
-// ajoute un groupe qu'il n'administre pas.
+// updatedNewsTargets calcule les groupes cibles demandés par une modification (nil :
+// inchangés). Avec une gestion limitée à ses groupes, voir mergeGroupAdminTargets, et
+// l'article garde au moins un groupe cible. Répond et renvoie false si la demande est refusée.
+func (h *NewsHandler) updatedNewsTargets(c *gin.Context, newsID uint, requested []uint) ([]uint, bool) {
+	if requested == nil || middleware.HasPermissionEverywhere(c, models.PermNewsManage) {
+		return requested, true
+	}
+	existing := groupIDsOf(h.newsTargetGroups(newsID))
+	merged, ok := mergeGroupAdminTargets(existing, requested, middleware.PermissionGroupIDs(c, models.PermNewsManage))
+	if !ok {
+		apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
+		return nil, false
+	}
+	if len(merged) == 0 {
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
+		return nil, false
+	}
+	return merged, true
+}
+
+// mergeGroupAdminTargets calcule les groupes cibles d'une actualité modifiée avec une
+// gestion limitée à ses groupes. La personne peut cibler ses groupes ; elle peut aussi
+// renvoyer une cible déjà présente sur un groupe qu'elle ne gère pas, mais pas en ajouter
+// une. Les cibles existantes hors de ses groupes sont toujours conservées. ok vaut false
+// si la demande ajoute un groupe qu'elle ne gère pas.
 func mergeGroupAdminTargets(existing, requested, managed []uint) ([]uint, bool) {
 	isManaged := make(map[uint]bool, len(managed))
 	for _, id := range managed {
@@ -804,7 +816,7 @@ func mergeGroupAdminTargets(existing, requested, managed []uint) ([]uint, bool) 
 
 // canManageNews : l'utilisateur peut modifier ou supprimer l'article — gestion des actualités
 // sur tout le site (admin compris), auteur, ou article ciblant un groupe où il gère les
-// actualités (portée « ses groupes » ou ancien admin de groupe). Un article sans groupe
+// actualités (portée « ses groupes »). Un article sans groupe
 // cible est global : seule la gestion sur tout le site (ou l'auteur) y touche.
 func canManageNews(c *gin.Context, authorID uint, targets []models.Group) bool {
 	if middleware.HasPermissionEverywhere(c, models.PermNewsManage) {

@@ -6,6 +6,37 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [Unreleased]
+
+### ✨ Roles & Permissions
+
+- **Custom roles** (Admin → Roles): the admin builds roles from a fixed permission catalogue
+  (`resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`),
+  each scoped to the whole site or to groups. A user can hold several roles; rights add up.
+- **Groups chosen per assignment**: when giving a role to someone, the admin can pick the groups
+  it applies to. With none chosen, it covers the person's own groups, except the default group.
+- **Search-as-you-type pickers** replace long checkbox lists for groups and people (user form,
+  role members, poll, news and event targeting).
+
+### 💥 Breaking Changes
+
+- The `editor` account role and **group admins** are gone. Migrations convert them: former
+  editors get an « Éditeur » role, former group admins an « Éditeur de groupe » role limited to
+  their groups (migrations `00005`–`00009`).
+
+### 🐛 Bug Fixes
+
+- A person who manages news, events or polls only for their groups can no longer publish
+  site-wide content: every article, event and poll they write targets at least one of their
+  groups (checked by the server and the forms; no more public events for them).
+
+### 🔧 Changes
+
+- The in-app help drawer is hidden for now: its pages (`docs/`, outside the repository) are
+  incomplete and still describe group admins.
+
+---
+
 ## [2.0.1] - 2026-02-25
 
 ### ✨ Enhancements

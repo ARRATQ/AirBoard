@@ -50,7 +50,7 @@
                     <option v-for="group in availableAppGroups" :key="group.id" :value="group.id">{{ group.name }}</option>
                   </select>
                   <p v-if="errors.app_group_id" class="form-error">{{ errors.app_group_id }}</p>
-                  <!-- Admin de groupe : seuls les groupes de ressources privés de ses groupes sont proposés -->
+                  <!-- Limitée à ses groupes : seuls les groupes de ressources privés de ses groupes sont proposés -->
                   <p v-if="privateGroupsOnly && availableAppGroups.length === 0" class="form-help text-yellow-500">
                     {{ $t('groupAdmin.applicationModal.noPrivateGroups') }}
                   </p>
@@ -241,7 +241,7 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  // Admin de groupe : ne proposer que les groupes de ressources privés
+  // Limitée à ses groupes : ne proposer que les groupes de ressources privés
   privateGroupsOnly: {
     type: Boolean,
     default: false

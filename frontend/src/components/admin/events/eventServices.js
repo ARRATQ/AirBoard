@@ -8,8 +8,8 @@ import {
 /**
  * Service d'écriture des événements selon le rôle (droits vérifiés dans backend/main.go) :
  * - admin global : /admin/events ;
- * - éditeur : /editor/events (create, update, delete) ;
- * - admin de groupe : /group-admin/events (limité à ses groupes).
+ * - permission sur tout le site : /editor/events (create, update, delete) ;
+ * - permission limitée à ses groupes : /group-admin/events.
  *
  * @param {boolean} isAdmin
  * @param {boolean} isGlobal

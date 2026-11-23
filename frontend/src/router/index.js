@@ -29,7 +29,7 @@ const NewsTypesManagement = () => import('@/views/admin/NewsTypesManagement.vue'
 // Page parente à onglets (module + taxonomies)
 const SectionTabs = () => import('@/components/layout/SectionTabs.vue')
 
-// Group Admin views
+// Pages de gestion
 const AdminOverview = () => import('@/views/admin/AdminOverview.vue')
 
 // News views (public)
@@ -479,7 +479,7 @@ const routes = [
     }
   },
   // Anciennes adresses de l'administration de groupe : mêmes pages que l'admin,
-  // limitées aux groupes administrés (voir useManagementScope)
+  // limitées à ses groupes (voir useManagementScope)
   { path: '/group-admin', redirect: '/admin' },
   { path: '/group-admin/app-groups', redirect: '/admin/resources/categories' },
   { path: '/group-admin/applications', redirect: '/admin/resources' },

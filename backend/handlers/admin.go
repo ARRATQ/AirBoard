@@ -58,12 +58,11 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 	// Filtrage selon le rôle
 	query := h.db.Model(&models.AppGroup{})
 
-	// Vérifier si l'utilisateur est admin d'au moins un groupe
+	// Gestion limitée à ses groupes : catégories publiques et privées de ses groupes
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
-		// Group admin voit les AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
-		// Récupérer tous les AppGroups accessibles aux groupes administrés
+		// AppGroups accessibles à ses groupes
 		query = query.Where(`
 			(
 				-- AppGroups publics
@@ -71,7 +70,7 @@ func (h *AdminHandler) GetAppGroups(c *gin.Context) {
 			)
 			OR
 			(
-				-- AppGroups privés appartant aux groupes administrés
+				-- AppGroups privés de ses groupes
 				is_private = true AND owner_group_id IN ?
 			)
 		`, managedGroupIDs)
@@ -123,15 +122,15 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
-	// Un admin de groupe crée une catégorie privée, rattachée au groupe propriétaire choisi
-	// parmi ceux qu'il administre. L'admin global choisit librement public ou privé.
+	// Gestion limitée à ses groupes : catégorie privée, rattachée au groupe propriétaire choisi
+	// parmi ses groupes. Sur tout le site, le choix public ou privé est libre.
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	isGroupAdmin := !middleware.IsUnrestricted(c)
 
 	if isGroupAdmin {
 		ownerID, ok := resolveOwnerGroup(appGroup.OwnerGroupID, managedGroupIDs)
 		if !ok {
-			apierror.Respond(c, http.StatusForbidden, "Vous n'administrez pas le groupe propriétaire choisi")
+			apierror.Respond(c, http.StatusForbidden, "Le groupe propriétaire choisi ne fait pas partie de vos groupes")
 			return
 		}
 		appGroup.IsPrivate = true
@@ -151,7 +150,7 @@ func (h *AdminHandler) CreateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Pour les admins de groupe, lier automatiquement l'AppGroup à leurs groupes administrés via group_app_groups
+	// Gestion limitée à ses groupes : lier l'AppGroup à ses groupes via group_app_groups
 	if isGroupAdmin {
 		for _, groupID := range managedGroupIDs {
 			h.db.Exec("INSERT INTO group_app_groups (group_id, app_group_id) VALUES (?, ?)", groupID, appGroup.ID)
@@ -186,10 +185,9 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour les admins de groupe
-	// Un admin de groupe peut modifier un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
+	// Gestion limitée à ses groupes : seulement un AppGroup privé de ses groupes
 	if !middleware.CanManageAppGroupWithDB(c, appGroup.ID, h.db) {
-		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas modifier ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être modifiés.")
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas modifier cette catégorie : seules les catégories privées de vos groupes peuvent l'être.")
 		return
 	}
 
@@ -201,12 +199,12 @@ func (h *AdminHandler) UpdateAppGroup(c *gin.Context) {
 	}
 	_ = c.ShouldBindBodyWith(&flags, binding.JSON)
 
-	// Un admin de groupe garde sa catégorie privée et ne peut la confier qu'à un groupe qu'il administre
+	// Gestion limitée à ses groupes : la catégorie reste privée et ne passe qu'à un de ses groupes
 	if !middleware.IsUnrestricted(c) {
 		updateData.IsPrivate = true
 		flags.IsPrivate = nil
 		if updateData.OwnerGroupID != nil && !containsUint(middleware.GetManagedGroupIDs(c), *updateData.OwnerGroupID) {
-			apierror.Respond(c, http.StatusForbidden, "Vous n'administrez pas le groupe propriétaire choisi")
+			apierror.Respond(c, http.StatusForbidden, "Le groupe propriétaire choisi ne fait pas partie de vos groupes")
 			return
 		}
 	}
@@ -245,10 +243,9 @@ func (h *AdminHandler) DeleteAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour les admins de groupe
-	// Un admin de groupe peut supprimer un AppGroup seulement si c'est un AppGroup privé appartenant à son groupe
+	// Gestion limitée à ses groupes : seulement un AppGroup privé de ses groupes
 	if !middleware.CanManageAppGroupWithDB(c, uint(id), h.db) {
-		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas supprimer ce groupe d'applications. Seuls les AppGroups privés appartenant à votre groupe peuvent être supprimés.")
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas supprimer cette catégorie : seules les catégories privées de vos groupes peuvent l'être.")
 		return
 	}
 
@@ -308,13 +305,12 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 		query = query.Where("app_group_id = ?", appGroupID)
 	}
 
-	// Filtrage selon le rôle pour les admins de groupe
+	// Gestion limitée à ses groupes
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
-		// Admin de groupe voit les applications des AppGroups des groupes qu'il administre
 		// (même logique que le dashboard pour la cohérence)
 		if len(managedGroupIDs) > 0 {
-			// Récupérer toutes les applications dans les AppGroups accessibles aux groupes administrés
+			// Applications des AppGroups accessibles à ses groupes
 			query = query.Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 				Where(`
 					(
@@ -323,12 +319,12 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 					)
 					OR
 					(
-						-- Applications dans des AppGroups privés appartant aux groupes administrés
+						-- Applications des AppGroups privés de ses groupes
 						app_groups.is_private = true AND app_groups.owner_group_id IN ?
 					)
 				`, managedGroupIDs)
 		} else {
-			// Aucun groupe administré = aucune application visible
+			// Aucun groupe : aucune application
 			query = query.Where("1 = 0")
 		}
 	}
@@ -389,10 +385,9 @@ func (h *AdminHandler) CreateApplication(c *gin.Context) {
 		}
 	}
 
-	// Vérification des permissions pour les admins de groupe
-	// Un admin de groupe peut créer une application seulement dans un AppGroup privé qu'il possède
+	// Gestion limitée à ses groupes : seulement dans un AppGroup privé de ses groupes
 	if !middleware.CanManageAppGroupWithDB(c, application.AppGroupID, h.db) {
-		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas créer d'application dans cet AppGroup. Seuls les AppGroups privés appartenant à votre groupe sont autorisés.")
+		apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez pas créer de ressource dans cette catégorie : seules les catégories privées de vos groupes sont permises.")
 		return
 	}
 
@@ -449,8 +444,7 @@ func (h *AdminHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour les admins de groupe
-	// Un admin de groupe peut modifier une application seulement si elle est dans un AppGroup privé qu'il possède
+	// Gestion limitée à ses groupes : seulement une application d'un AppGroup privé de ses groupes
 	if application.AppGroup == nil {
 		apierror.Respond(c, http.StatusInternalServerError, "AppGroup introuvable pour cette application")
 		return
@@ -540,7 +534,7 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 		return
 	}
 
-	// Vérification des permissions pour les admins de groupe
+	// Gestion limitée à ses groupes
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 	if !middleware.IsUnrestricted(c) && len(managedGroupIDs) > 0 {
 		var application models.Application
@@ -549,7 +543,7 @@ func (h *AdminHandler) DeleteApplication(c *gin.Context) {
 			return
 		}
 
-		// Vérifier que l'application appartient à un AppGroup privé que l'admin de groupe possède
+		// L'application doit appartenir à un AppGroup privé de ses groupes
 		if application.AppGroup == nil {
 			apierror.Respond(c, http.StatusInternalServerError, "AppGroup introuvable pour cette application")
 			return

@@ -319,7 +319,7 @@ export const useEventsStore = defineStore('events', () => {
     }
   }
 
-  // Group Admin Actions
+  // Gestion limitée à ses groupes
   const fetchGroupAdminEvents = async (params = {}) => {
     try {
       isLoading.value = true
@@ -493,7 +493,7 @@ export const useEventsStore = defineStore('events', () => {
     updateCategory,
     deleteCategory,
     
-    // Group Admin Actions
+    // Gestion limitée à ses groupes
     fetchGroupAdminEvents,
     createGroupAdminEvent,
     updateGroupAdminEvent,

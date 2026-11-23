@@ -17,7 +17,8 @@ pour un utilisateur comme pour un administrateur.
   Authentik est désactivé en prod (`SSO_ENABLED=false`).
 - Prod sur Coolify avec `JWT_SECRET` défini.
 - Catégories d'actualités, modification/suppression de tags et annuaire (personnes, affectations) :
-  **admins globaux seuls** (2026-11-19). Les admins de groupe gardent la **création** de tags.
+  **admins globaux seuls** (2026-11-19). Créer un tag reste ouvert à qui gère les actualités ou les
+  événements.
 
 ## Déjà fait
 
@@ -397,6 +398,23 @@ visuelle. Ensuite :
 - **Point 6 fait.** Tests table-driven des gardes de rôle, `CanManage*`, `canManageDirectory`, SQL
   de visibilité (sans base), et tests d'intégration (tag `integration`) sur le ciblage, le périmètre
   admin de groupe et le verrouillage de connexion.
+
+## Chantier 8 — Rôles et permissions ✅ fait (PR #17 à #22)
+
+- Un rôle `admin` intouchable, plus des rôles créés par l'admin à partir d'un catalogue fixe
+  (`models/access.go`) : ressources, actualités, événements, sondages, modération. Chaque
+  permission vaut sur tout le site ou sur des groupes ; plusieurs rôles s'additionnent.
+- Fin du rôle de compte `editor` (#19) et des admins de groupe (#20, migration `00008` vers un
+  rôle « Éditeur de groupe »).
+- Groupes choisis à l'attribution d'un rôle (#21, table `user_access_role_groups`) ; sans choix,
+  les groupes de la personne hors groupe par défaut. Sélecteurs à saisie semi-automatique
+  (`ui/ComboSelect`) au lieu des listes à cocher.
+- Nettoyage (#22) : textes, commentaires et README alignés sur ce modèle ; une actualité, un
+  événement ou un sondage écrit avec une gestion limitée à ses groupes cible au moins un de ses
+  groupes (serveur et formulaires). Aide intégrée masquée (`HELP_ENABLED` dans `Sidebar.vue`)
+  tant que ses pages ne sont pas refaites.
+- Les chemins d'API `/editor` (permission sur tout le site) et `/group-admin` (limitée à ses
+  groupes) gardent leurs noms historiques.
 
 ---
 

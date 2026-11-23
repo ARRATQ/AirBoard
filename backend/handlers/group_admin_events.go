@@ -13,8 +13,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateEventGroupAdmin - Créer un événement (Group Admin)
-// Peut créer des événements publics OU ciblant uniquement ses groupes gérés
+// CreateEventGroupAdmin - Créer un événement (events.manage limitée à ses groupes)
+// L'événement cible au moins un de ses groupes, et seulement eux (pas d'événement public).
 func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -26,8 +26,11 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
+	if !h.scopedEventHasTarget(c, req.TargetGroupIDs) {
+		return
+	}
 
-	// Récupérer les groupes gérés par ce group admin
+	// Groupes couverts par sa permission
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	// Validation : si des groupes cibles sont spécifiés, ils doivent être dans les groupes gérés
@@ -41,7 +44,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}
@@ -115,7 +118,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	c.JSON(http.StatusCreated, event)
 }
 
-// UpdateEventGroupAdmin - Modifier un événement (Group Admin)
+// UpdateEventGroupAdmin - Modifier un événement (events.manage limitée à ses groupes)
 // Peut modifier ses propres événements OU événements ciblant ses groupes gérés
 func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	identifier := c.Param("id")
@@ -141,7 +144,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Vérifier si le group admin peut gérer cet événement
+	// La personne peut-elle gérer cet événement ?
 	canManage := false
 
 	// 1. Si c'est son propre événement
@@ -177,6 +180,10 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
+	// Les groupes cibles sont toujours remplacés : une liste vide rendrait l'événement public
+	if !h.scopedEventHasTarget(c, req.TargetGroupIDs) {
+		return
+	}
 
 	// Validation : si des groupes cibles sont spécifiés, ils doivent être dans les groupes gérés
 	if len(req.TargetGroupIDs) > 0 {
@@ -189,7 +196,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}
@@ -257,7 +264,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, event)
 }
 
-// DeleteEventGroupAdmin - Supprimer un événement (Group Admin)
+// DeleteEventGroupAdmin - Supprimer un événement (events.manage limitée à ses groupes)
 // Peut supprimer ses propres événements OU événements ciblant ses groupes gérés
 func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	identifier := c.Param("id")
@@ -283,7 +290,7 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Vérifier si le group admin peut gérer cet événement
+	// La personne peut-elle gérer cet événement ?
 	canManage := false
 
 	// 1. Si c'est son propre événement
@@ -316,4 +323,14 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé avec succès"})
+}
+
+// scopedEventHasTarget : avec une gestion des événements limitée à ses groupes, l'événement
+// cible au moins un groupe (un événement sans cible est public). Répond 400 sinon.
+func (h *EventsHandler) scopedEventHasTarget(c *gin.Context, targets []uint) bool {
+	if len(targets) > 0 || middleware.HasPermissionEverywhere(c, models.PermEventsManage) {
+		return true
+	}
+	apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
+	return false
 }

@@ -100,7 +100,7 @@ func (h *SearchHandler) GlobalSearch(c *gin.Context) {
 	userRole := c.GetString("role")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Groupes d'appartenance + groupes administrés
+	// Groupes d'appartenance + groupes couverts par la permission de la route
 	combinedGroupIDs := memberOrManagedGroupIDs(h.db, userID, managedGroupIDs)
 
 	response := SearchResponse{

@@ -52,8 +52,7 @@ In a modern professional environment, organizations need more than just a link d
 - **Analytics Dashboard** - Track application usage, user engagement, and content performance
 - **Announcement System** - Broadcast important messages to teams instantly
 - **User Favorites** - Personalized experience with favorite apps and content
-- **Delegated Management** - Group Admin role for managing private app groups
-- **Role-Based Management** - Granular permissions for Admins, Group Admins, Editors, and Users
+- **Roles & Permissions** - Custom roles built from a permission catalogue, each scoped to the whole site or to chosen groups
 - **Multi-Language Support** - Available in French, English, Spanish, and Arabic
 - **SSO Integration** - Seamless authentication with Authentik, Microsoft 365, LDAP, and more
 - **Docker-Ready** - Deploy in minutes with full containerization
@@ -98,32 +97,36 @@ Airboard transforms how organizations manage digital resources, internal communi
 
 ### User Management & Permissions
 
-- **Role System**
-  - **Admin**: Full system access
-  - **Group Admin**: Delegated management of private groups and applications
-  - **Editor**: Create and manage articles
-  - **User**: Access to assigned applications
+- **Accounts**
+  - **Admin**: Full system access, including users, roles and settings
+  - **User**: Access to assigned applications, plus whatever their roles grant
 
 - **User Management**
   - Complete CRUD operations
-  - Group and role assignment
+  - Group and role assignment (with the groups each role applies to)
   - User favorites management
   - Customizable user profiles
 
 - **Group Management**
   - Create and organize groups
   - Public and private groups
-  - Assign Group Admins
   - Granular access control
 
-### Group Admin System (Delegation)
+### Roles & Permissions
 
-- **Delegated Management**
-  - Group Admins can manage their assigned groups
-  - Create private application groups
-  - Manage applications within their groups
-  - Create and modify articles
-  - No access to users or global settings
+- **Custom Roles** (Admin → Roles)
+  - The admin creates roles and fills them from a fixed permission catalogue:
+    `resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`
+  - Each permission is scoped either to the **whole site** or to **groups**
+  - A user can hold several roles; their rights add up
+  - Assigning roles stays admin-only
+
+- **Group Scope**
+  - When assigning a role, the admin can choose the groups it applies to
+  - With no group chosen, the role covers the groups the user belongs to,
+    except the default group everyone is in
+  - Group-scoped editors manage the private application groups, articles,
+    events and polls of those groups only; no access to users or global settings
 
 - **Private Application Groups**
   - Visible only to assigned groups
@@ -189,7 +192,7 @@ Airboard transforms how organizations manage digital resources, internal communi
   - Link polls to news articles or announcements
 
 - **Poll Management**
-  - Create and edit polls (Admin & Group Admin)
+  - Create and edit polls (Admin, or `polls.manage` permission)
   - Real-time results visualization
   - Result visibility control (always, after voting, after closing)
   - Vote tracking and analytics
@@ -1050,17 +1053,19 @@ backend/
 │   ├── users.go               # User CRUD
 │   ├── groups.go              # Group CRUD
 │   ├── applications.go        # Application CRUD
-│   ├── group_admin.go         # Group Admin endpoints
+│   ├── access_roles.go        # Roles, permissions, assignments
+│   ├── group_admin.go         # Group-scoped resource endpoints
 │   ├── analytics.go           # Analytics
 │   ├── announcements.go       # Announcements
 │   ├── news.go                # News & reactions
 │   └── news_categories.go     # Categories & tags
 ├── middleware/
 │   ├── auth.go                # JWT validation
-│   ├── group_admin.go         # Group Admin permissions
+│   ├── permissions.go         # Permission middlewares
+│   ├── group_admin.go         # Group-scoped resource checks
 │   ├── cors.go                # CORS headers
 │   ├── sso.go                 # SSO header detection
-│   └── editor.go              # Editor middleware
+│   └── user_cache.go          # Account status, roles and permissions cache
 ├── models/
 │   ├── models.go              # User, Group, App, Analytics
 │   └── news.go                # News, Category, Tag, Reaction
@@ -1071,8 +1076,7 @@ backend/
 **Key patterns:**
 - **SSO Flow**: Nginx forward headers → SSO middleware → auto-provision → JWT
 - **Auth**: JWT with refresh tokens
-- **Authorization**: Role middlewares (`RequireAuth`, `RequireAdmin`, `RequireGroupAdmin`, `RequireEditor`)
-- **Group Admin**: Delegated management with permission checks
+- **Authorization**: `RequireAdmin`, and permission middlewares (`RequirePermission`, `RequirePermissionEverywhere`, `RequireAnyPermission`) fed by the user's roles
 - **Database**: GORM with auto-migrations
 - **Routes**: Grouped under `/api/v1/`
 
@@ -1093,14 +1097,12 @@ frontend/src/
 ├── views/
 │   ├── dashboard/             # Dashboard, Analytics
 │   ├── admin/                 # Admin pages
-│   ├── group-admin/           # Group Admin pages
 │   ├── auth/                  # Login, OAuth callback
 │   ├── NewsCenter.vue         # News hub
 │   └── NewsDetail.vue         # Article detail
 ├── components/
 │   ├── layout/                # Sidebar, Navbar
 │   ├── admin/                 # Admin modals
-│   ├── group-admin/           # Group Admin modals
 │   ├── news/                  # News components
 │   │   ├── RichTextEditor.vue
 │   │   ├── TiptapRenderer.vue
@@ -1125,8 +1127,9 @@ frontend/src/
 
 **Main models:**
 
-- **User** - Users with role, SSO, managed groups
-- **Group** - User groups with admins
+- **User** - Users with account role (admin/user), SSO
+- **Group** - User groups
+- **AccessRole** - Custom roles and their scoped permissions
 - **AppGroup** - App categories (public/private)
 - **Application** - Individual applications
 - **News** - Articles with JSON content (Tiptap)
@@ -1140,8 +1143,7 @@ frontend/src/
 
 ```
 User ←→ Groups (many-to-many)
-User ←→ ManagedGroups (many-to-many, Group Admins)
-Group ←→ Admins (many-to-many, Group Admins)
+User ←→ AccessRoles (many-to-many, with chosen groups per assignment)
 Group ←→ AppGroups (many-to-many)
 AppGroup → OwnerGroup (belongs-to, for private groups)
 Application → AppGroup (belongs-to)
@@ -1177,8 +1179,8 @@ Airboard implements OWASP security best practices:
 
 #### 1. Broken Access Control
 - JWT verification on all protected endpoints
-- Role middlewares (`RequireAdmin`, `RequireGroupAdmin`, `RequireEditor`)
-- Ownership validation for Group Admins
+- Admin and permission middlewares (`RequireAdmin`, `RequirePermission`…)
+- Group-scope validation for group-scoped permissions
 - No direct access to other groups' resources
 
 #### 2. Cryptographic Failures
@@ -1196,7 +1198,7 @@ Airboard implements OWASP security best practices:
 #### 4. Insecure Design
 - Layered architecture (handlers → services → models)
 - Separation of concerns
-- Least privilege principle (Group Admins)
+- Least privilege principle (permissions scoped to groups)
 - Systematic server-side validation
 
 #### 5. Security Misconfiguration
@@ -1296,19 +1298,21 @@ Authorization: Bearer <jwt_token>
 | POST | `/auth/refresh` | Refresh JWT | No |
 | GET | `/auth/sso/auto-login` | SSO auto-login | Headers |
 
-#### Group Admin
+#### Group-scoped management
+
+Routes under `/editor` require the permission on the whole site; routes under `/group-admin` accept a group-scoped permission and are limited to the person's groups.
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/group-admin/app-groups` | Managed app groups | Group Admin |
-| GET | `/group-admin/managed-groups` | Managed groups | Group Admin |
-| GET | `/group-admin/applications` | Apps in managed groups | Group Admin |
-| POST | `/group-admin/applications` | Create application | Group Admin |
-| PUT | `/group-admin/applications/:id` | Update application | Group Admin |
-| DELETE | `/group-admin/applications/:id` | Delete application | Group Admin |
-| POST | `/group-admin/news` | Create article | Group Admin |
-| PUT | `/group-admin/news/:id` | Update article | Group Admin |
-| DELETE | `/group-admin/news/:id` | Delete article | Group Admin |
+| GET | `/group-admin/app-groups` | Managed app groups | `resources.manage` |
+| GET | `/group-admin/managed-groups?permission=…` | Groups where a permission applies | Permission |
+| GET | `/group-admin/applications` | Apps in managed groups | `resources.manage` |
+| POST | `/group-admin/applications` | Create application | `resources.manage` |
+| PUT | `/group-admin/applications/:id` | Update application | `resources.manage` |
+| DELETE | `/group-admin/applications/:id` | Delete application | `resources.manage` |
+| POST | `/group-admin/news` | Create article | `news.manage` |
+| PUT | `/group-admin/news/:id` | Update article | `news.manage` |
+| DELETE | `/group-admin/news/:id` | Delete article | `news.manage` |
 
 #### Admin - Users
 
@@ -1357,9 +1361,9 @@ Authorization: Bearer <jwt_token>
 | GET | `/news/:id/reactions` | Article reactions | User |
 | POST | `/news/:id/react` | Add reaction | User |
 | DELETE | `/news/:id/react` | Remove reaction | User |
-| POST | `/editor/news` | Create article | Editor |
-| PUT | `/editor/news/:id` | Update article | Editor |
-| DELETE | `/editor/news/:id` | Delete article | Editor |
+| POST | `/editor/news` | Create article | `news.manage` (site) |
+| PUT | `/editor/news/:id` | Update article | `news.manage` (site) |
+| DELETE | `/editor/news/:id` | Delete article | `news.manage` (site) |
 | POST | `/admin/news/:id/pin` | Pin article | Admin |
 
 #### Analytics
@@ -1394,9 +1398,9 @@ Authorization: Bearer <jwt_token>
 | DELETE | `/admin/polls/:id` | Delete poll | Admin |
 | POST | `/admin/polls/:id/close` | Close poll | Admin |
 | GET | `/admin/polls/stats` | Poll statistics | Admin |
-| POST | `/group-admin/polls` | Create poll | Group Admin |
-| PUT | `/group-admin/polls/:id` | Update poll | Group Admin |
-| DELETE | `/group-admin/polls/:id` | Delete poll | Group Admin |
+| POST | `/group-admin/polls` | Create poll | `polls.manage` |
+| PUT | `/group-admin/polls/:id` | Update poll | `polls.manage` |
+| DELETE | `/group-admin/polls/:id` | Delete poll | `polls.manage` |
 
 #### Notifications
 
@@ -1422,7 +1426,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   -d '{"username":"admin","password":"admin123"}'
 ```
 
-**Create Application (Group Admin):**
+**Create Application (group-scoped `resources.manage`):**
 ```bash
 curl -X POST http://localhost:8080/api/v1/group-admin/applications \
   -H "Authorization: Bearer <token>" \
@@ -1620,7 +1624,7 @@ docker-compose up -d
   - First login and configuration
   - Daily usage
   - Administration
-  - Group Admin management
+  - Roles and permissions
   - Best practices
 
 ### Technical Documentation
@@ -1708,7 +1712,7 @@ Open a Pull Request on GitHub with:
 |---------|--------|
 | JWT Auth | Complete |
 | Authentik SSO | Complete |
-| Group Admin Role | Complete |
+| Custom Roles & Permissions | Complete |
 | Private/Public Groups | Complete |
 | OAuth2 (Google/MS) | Complete |
 | News Hub | Complete |

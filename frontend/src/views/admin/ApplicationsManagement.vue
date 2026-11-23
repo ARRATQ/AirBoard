@@ -127,7 +127,7 @@ const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 
 // Admin global : toutes les ressources (API admin).
-// Admin de groupe : ressources des groupes de ressources privés de ses groupes (API group-admin).
+// Limitée à ses groupes : ressources des groupes de ressources privés de ses groupes (API group-admin).
 const { isGlobal, isAdmin } = useManagementScope(RESOURCES)
 const service = computed(() => (isGlobal.value ? adminService : groupAdminService))
 

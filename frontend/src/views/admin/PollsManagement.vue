@@ -236,7 +236,7 @@ const rows = computed(() =>
     dateLabel: formatDate(poll.created_at),
     untilLabel: poll.end_date ? formatDate(poll.end_date) : '',
     optionCount: poll.options?.length || 0,
-    // Admin de groupe : noms de ses groupes ; admin global : nombre de groupes
+    // Gestion limitée à ses groupes : noms de ses groupes ; sinon : nombre de groupes
     groupNames: poll.target_groups?.length
       ? (isGlobal.value ? t('polls.adminPollsManagement.details.groups', { count: poll.target_groups.length }) : poll.target_groups.map(g => g.name).join(', '))
       : '',

@@ -971,9 +971,6 @@
     "noneOfType": "No resource of this type."
   },
   "groupAdmin": {
-    "title": "Group Administration",
-    "subtitle": "Manage the resources of groups you administrate",
-    "managedGroups": "Managed Groups",
     "appGroups": "Resource categories",
     "applications": "Resources",
     "news": "Group News",
@@ -984,9 +981,7 @@
     "events": "Events",
     "groupNews": "Group News",
     "yourGroups": "Your Groups",
-    "yourGroupsSubtitle": "Groups you administrate",
-    "noManagedGroups": "No managed groups",
-    "noManagedGroupsHelp": "Contact an administrator to obtain group administration rights",
+    "noManagedGroups": "No group for your role",
     "manageAppGroups": "Manage resource categories",
     "manageAppGroupsDesc": "Create and organize your resource categories",
     "manageApplications": "Manage Resources",
@@ -1069,10 +1064,10 @@
     },
     "appGroupsManagement": {
       "title": "Resource categories",
-      "subtitle": "Manage resource categories of your managed groups",
+      "subtitle": "Manage the resource categories of your groups",
       "newGroup": "New Group",
-      "noManagedGroups": "No managed groups",
-      "noManagedGroupsHelp": "You must be administrator of at least one group to create resource categories. Contact a system administrator to obtain group administration rights.",
+      "noManagedGroups": "No group for your role",
+      "noManagedGroupsHelp": "Your role lets you manage the resources of your groups, but no group is linked to it. Ask an administrator to add you to a group or to choose the groups for your role.",
       "searchPlaceholder": "Search categories...",
       "status": {
         "all": "All statuses",
@@ -1151,7 +1146,7 @@
       "subtitle": "Manage news for your groups",
       "newArticle": "New Article",
       "infoTitle": "Group news management",
-      "infoDescription": "As a Group Admin, you can create targeted news for your managed groups. This news will only be visible to members of the groups you select.",
+      "infoDescription": "Your role lets you publish news for specific groups. Each article targets at least one of these groups and is visible only to their members.",
       "searchPlaceholder": "Search articles...",
       "categoryFilter": {
         "all": "All categories"
@@ -1290,7 +1285,7 @@
       "subtitle": "Manage events for your groups",
       "newEvent": "New Event",
       "infoTitle": "Group events management",
-      "infoDescription": "As a Group Admin, you can create events for your managed groups. Public events will be visible to everyone, while targeted events will only be visible to members of the selected groups.",
+      "infoDescription": "Your role lets you create events for specific groups. Each event targets at least one of these groups and is visible only to their members.",
       "searchPlaceholder": "Search events...",
       "categoryFilter": {
         "all": "All categories"
@@ -1411,7 +1406,9 @@
       "loadError": "Failed to load event",
       "saveError": "Failed to save event",
       "createSuccess": "Event created successfully",
-      "updateSuccess": "Event updated successfully"
+      "updateSuccess": "Event updated successfully",
+      "targetGroupsScopedHelp": "Choose at least one of your groups: only their members will see the event.",
+      "groupRequired": "Choose at least one target group"
     }
   },
   "events": {
@@ -2100,7 +2097,8 @@
       "save": "Save",
       "validation": {
         "titleRequired": "Title is required",
-        "minOptionsRequired": "Poll must have at least 2 options"
+        "minOptionsRequired": "Poll must have at least 2 options",
+        "groupRequired": "Choose at least one target group"
       },
       "messages": {
         "createSuccess": "Poll created successfully",
@@ -2108,7 +2106,9 @@
         "saveError": "Error while saving"
       },
       "removeOption": "Remove option {index}",
-      "targetGroupsPlaceholder": "Search for a group to target…"
+      "targetGroupsPlaceholder": "Search for a group to target…",
+      "targetGroupsScoped": "Target groups",
+      "targetGroupsScopedHelp": "Choose at least one of your groups: only their members will see the poll."
     },
     "detail": {
       "breadcrumb": "Polls",
@@ -2503,7 +2503,6 @@
     "email": "Email",
     "emailReadonly": "Contact an administrator to change your email",
     "role": "Role",
-    "roleGroupAdmin": "Group Administrator",
     "memberSince": "Member Since",
     "personalInfo": "Personal Information",
     "firstName": "First Name",
@@ -2699,7 +2698,7 @@
       "all": "All users",
       "allHelp": "Visible to anyone signed in.",
       "managers": "Managers",
-      "managersHelp": "Visible to admins and group admins only."
+      "managersHelp": "Visible to administrators only."
     },
     "saved": {
       "unit": "Unit saved",
@@ -2951,7 +2950,7 @@
     "nothingPending": "nothing pending",
     "pendingComments": "Comments awaiting moderation",
     "newSuggestions": "New suggestions",
-    "managedGroups": "Managed groups",
+    "managedGroups": "Your groups",
     "resourceCategories": "Resource categories",
     "manage": "Manage"
   },

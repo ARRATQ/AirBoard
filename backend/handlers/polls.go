@@ -267,6 +267,11 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 		return
 	}
 
+	// Gestion limitée à ses groupes : au moins un de ses groupes (sans cible, le sondage est global)
+	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && len(req.TargetGroupIDs) == 0 {
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
+		return
+	}
 	// Gestion limitée à ses groupes : il ne cible que ses groupes
 	managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermPollsManage)
 	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && len(req.TargetGroupIDs) > 0 {
@@ -279,7 +284,7 @@ func (h *PollsHandler) CreatePoll(c *gin.Context) {
 				}
 			}
 			if !canManage {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}
@@ -417,7 +422,11 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 		return
 	}
 
-	// Vérifier les permissions pour les nouveaux groupes cibles (admins de groupe non-global)
+	// Gestion limitée à ses groupes : la liste envoyée garde au moins un groupe
+	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && req.TargetGroupIDs != nil && len(req.TargetGroupIDs) == 0 {
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
+		return
+	}
 	// Gestion limitée à ses groupes : il ne cible que ses groupes
 	managedGroupIDs := middleware.PermissionGroupIDs(c, models.PermPollsManage)
 	if !middleware.HasPermissionEverywhere(c, models.PermPollsManage) && len(req.TargetGroupIDs) > 0 {
@@ -430,7 +439,7 @@ func (h *PollsHandler) UpdatePoll(c *gin.Context) {
 				}
 			}
 			if !canManage {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}

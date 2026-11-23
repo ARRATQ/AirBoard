@@ -47,7 +47,7 @@
         </option>
       </select>
 
-      <!-- Création d'un tag (admin, éditeur et admin de groupe y ont droit) -->
+      <!-- Création d'un tag (toute personne qui gère les actualités ou les événements) -->
       <div class="flex gap-2">
         <input
           v-model="newTagName"

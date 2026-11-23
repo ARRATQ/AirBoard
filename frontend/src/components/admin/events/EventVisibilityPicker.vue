@@ -1,5 +1,6 @@
 <template>
-  <!-- Visibilité d'un événement : public, ou réservé à des groupes choisis parmi `groups` -->
+  <!-- Visibilité d'un événement : public, ou réservé à des groupes choisis parmi `groups`.
+       Sans `allowPublic` (gestion limitée à ses groupes), au moins un groupe est obligatoire. -->
   <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
     <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
       <Icon icon="lucide:users" class="h-5 w-5 text-primary-500" />
@@ -8,11 +9,11 @@
 
     <div class="space-y-3">
       <p class="text-xs text-gray-600 dark:text-gray-400">
-        {{ t('groupAdmin.eventEditor.targetGroupsHelp') }}
+        {{ allowPublic ? t('groupAdmin.eventEditor.targetGroupsHelp') : t('groupAdmin.eventEditor.targetGroupsScopedHelp') }}
       </p>
 
       <!-- Événement public -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-primary-200 dark:border-primary-700">
+      <div v-if="allowPublic" class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-primary-200 dark:border-primary-700">
         <label class="flex items-center cursor-pointer">
           <input
             :checked="isPublic"
@@ -31,7 +32,7 @@
       </div>
 
       <!-- Groupes ciblés (événement non public) -->
-      <div v-if="!isPublic" class="space-y-2">
+      <div v-if="!isPublic || !allowPublic" class="space-y-2">
         <ComboSelect
           :model-value="groupIds"
           kind="group"
@@ -41,7 +42,7 @@
           @update:model-value="emit('update:groupIds', $event)"
         />
         <p v-if="groupIds.length === 0" class="text-sm text-orange-600 dark:text-orange-400" role="status">
-          {{ t('groupAdmin.eventEditor.noGroupSelected') }}
+          {{ allowPublic ? t('groupAdmin.eventEditor.noGroupSelected') : t('groupAdmin.eventEditor.groupRequired') }}
         </p>
       </div>
     </div>
@@ -66,7 +67,12 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  // Groupes proposés (tous les groupes pour l'admin, les groupes administrés pour l'admin de groupe)
+  // Événement public permis (gestion sur tout le site)
+  allowPublic: {
+    type: Boolean,
+    default: true
+  },
+  // Groupes proposés (tous sur tout le site, ses groupes sinon)
   groups: {
     type: Array,
     default: () => []

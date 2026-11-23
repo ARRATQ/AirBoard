@@ -1,6 +1,6 @@
 <template>
   <div class="content-area">
-    <!-- En-tête : libellés propres au périmètre (toute l'organisation ou groupes administrés) -->
+    <!-- En-tête : libellés propres au périmètre (toute l'organisation ou ses groupes) -->
     <PageHeader>
       <template #title>{{ isGlobal ? $t('news.center.title') : $t('groupAdmin.newsManagement.title') }}</template>
       <template #description>{{ isGlobal ? $t('adminShared.news.subtitle') : $t('groupAdmin.newsManagement.subtitle') }}</template>
@@ -11,7 +11,7 @@
       </template>
     </PageHeader>
 
-    <!-- Rappel du périmètre pour l'admin de groupe -->
+    <!-- Rappel du périmètre : gestion limitée à ses groupes -->
     <div v-if="!isGlobal" class="nw-callout" role="note">
       <Icon icon="lucide:info" class="nw-callout__icon" aria-hidden="true" />
       <div>
@@ -174,7 +174,7 @@ const { t, locale } = useI18n()
 const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 
-// Admin et éditeur : toutes les actualités ; admin de groupe seul : celles de ses groupes
+// Sur tout le site : toutes les actualités ; limitée à ses groupes : celles de ses groupes
 const { isGlobal, isAdmin } = useManagementScope(NEWS)
 
 const isLoading = ref(false)

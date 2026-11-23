@@ -16,6 +16,12 @@ const (
 // msgEndBeforeStart est renvoyé quand une période finit avant de commencer.
 const msgEndBeforeStart = "La date de fin doit être postérieure à la date de début"
 
+// Messages des contenus gérés avec une permission limitée à ses groupes.
+const (
+	msgTargetOutsideGroups = "Vous ne pouvez cibler que les groupes couverts par votre rôle"
+	msgNeedsTargetGroup    = "Choisissez au moins un groupe cible : votre rôle ne permet pas de publier pour tout le site"
+)
+
 // endBeforeStart indique une période incohérente : les deux bornes sont fournies
 // et la fin précède le début. Une fin égale au début est acceptée.
 func endBeforeStart(start, end *time.Time) bool {
