@@ -31,7 +31,7 @@ func contentRouter(t *testing.T, tx *gorm.DB, who identity) *gin.Engine {
 	if err != nil {
 		t.Fatalf("permissions : %v", err)
 	}
-	members, err := models.PermissionGroupIDs(tx, who.id)
+	members, err := models.PermissionGroups(tx, who.id)
 	if err != nil {
 		t.Fatalf("groupes : %v", err)
 	}
@@ -47,7 +47,7 @@ func contentRouter(t *testing.T, tx *gorm.DB, who identity) *gin.Engine {
 		c.Set("role", who.role)
 		c.Set("managed_group_ids", who.managed)
 		c.Set(middleware.CtxPermissions, perms)
-		c.Set(middleware.CtxMemberGroupIDs, members)
+		c.Set(middleware.CtxPermissionGroups, members)
 	})
 	// Préfixe réel : GetNews / GetEvents reconnaissent l'interface /group-admin à leur chemin
 	api := r.Group("/api/v1")
@@ -188,7 +188,7 @@ func pollsRouter(t *testing.T, tx *gorm.DB, who identity) *gin.Engine {
 	if err != nil {
 		t.Fatalf("permissions : %v", err)
 	}
-	members, err := models.PermissionGroupIDs(tx, who.id)
+	members, err := models.PermissionGroups(tx, who.id)
 	if err != nil {
 		t.Fatalf("groupes : %v", err)
 	}
@@ -204,7 +204,7 @@ func pollsRouter(t *testing.T, tx *gorm.DB, who identity) *gin.Engine {
 		c.Set("role", who.role)
 		c.Set("managed_group_ids", who.managed)
 		c.Set(middleware.CtxPermissions, perms)
-		c.Set(middleware.CtxMemberGroupIDs, members)
+		c.Set(middleware.CtxPermissionGroups, members)
 	})
 	api := r.Group("/api/v1")
 	pollsAll := api.Group("/editor", am.RequirePermissionEverywhere(models.PermPollsManage))
@@ -344,4 +344,112 @@ func TestGroupsScopeExcludesEveryoneGroup(t *testing.T) {
 	if code != http.StatusForbidden {
 		t.Errorf("sondage ciblant le groupe par défaut : %d, attendu 403", code)
 	}
+}
+
+// Groupes choisis à l'attribution d'un rôle : ils remplacent, pour ce rôle, les groupes dont
+// le compte est membre ; sans groupe choisi, rien ne change.
+func TestRoleAssignmentGroups(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	tx := rollbackTx(t)
+	f := newFixture(t, tx) // f.member est membre de g1 seulement
+
+	roleID := func(name string, perms map[string]string) uint {
+		grantPermissions(t, tx, name, perms)
+		var role models.AccessRole
+		if err := tx.Where("name = ?", name).First(&role).Error; err != nil {
+			t.Fatalf("rôle %s : %v", name, err)
+		}
+		return role.ID
+	}
+	newsRole := roleID(f.tag+"-actus", map[string]string{models.PermNewsManage: models.ScopeGroups})
+	pollsRole := roleID(f.tag+"-sondages", map[string]string{models.PermPollsManage: models.ScopeGroups})
+	admin := pollsRouter(t, tx, f.adm)
+	path := fmt.Sprintf("/api/v1/admin/users/%d/access-roles", f.member.id)
+
+	code, obj, _ := send(t, admin, http.MethodPut, path, map[string]interface{}{"roles": []map[string]interface{}{
+		{"id": newsRole, "group_ids": []uint{f.g2.ID}},
+		{"id": pollsRole},
+	}})
+	if code != http.StatusOK {
+		t.Fatalf("attribution : %d %v", code, obj)
+	}
+
+	t.Run("groupes couverts par permission", func(t *testing.T) {
+		groups, err := models.PermissionGroups(tx, f.member.id)
+		if err != nil {
+			t.Fatalf("groupes : %v", err)
+		}
+		if got := fmt.Sprint(groups[models.PermNewsManage]); got != fmt.Sprint([]uint{f.g2.ID}) {
+			t.Errorf("actualités : %s, attendu le groupe choisi g2", got)
+		}
+		if got := fmt.Sprint(groups[models.PermPollsManage]); got != fmt.Sprint([]uint{f.g1.ID}) {
+			t.Errorf("sondages : %s, attendu le groupe dont il est membre g1", got)
+		}
+	})
+
+	t.Run("relecture des rôles avec leurs groupes", func(t *testing.T) {
+		_, _, list := send(t, admin, http.MethodGet, path, nil)
+		got := map[float64]interface{}{}
+		for _, item := range list {
+			role := item.(map[string]interface{})
+			got[role["id"].(float64)] = role["group_ids"]
+		}
+		if fmt.Sprint(got[float64(newsRole)]) != fmt.Sprintf("[%d]", f.g2.ID) || got[float64(pollsRole)] != nil {
+			t.Errorf("rôles relus : %v", got)
+		}
+	})
+
+	t.Run("groupe inconnu ou groupe par défaut : refusés", func(t *testing.T) {
+		code, _, _ := send(t, admin, http.MethodPut, path, map[string]interface{}{"roles": []map[string]interface{}{
+			{"id": newsRole, "group_ids": []uint{999999999}},
+		}})
+		if code != http.StatusBadRequest {
+			t.Errorf("groupe inconnu : %d, attendu 400", code)
+		}
+		everyone := models.Group{Name: f.tag + "-tous"}
+		mustCreate(t, tx, &everyone)
+		res := tx.Exec("UPDATE app_settings SET default_group_id = ?", everyone.ID)
+		if res.Error == nil && res.RowsAffected == 0 {
+			res = tx.Create(&models.AppSettings{DefaultGroupID: &everyone.ID})
+		}
+		if res.Error != nil {
+			t.Fatalf("paramètres : %v", res.Error)
+		}
+		code, _, _ = send(t, admin, http.MethodPut, path, map[string]interface{}{"roles": []map[string]interface{}{
+			{"id": newsRole, "group_ids": []uint{everyone.ID}},
+		}})
+		if code != http.StatusBadRequest {
+			t.Errorf("groupe par défaut : %d, attendu 400", code)
+		}
+	})
+
+	t.Run("modifier les membres d'un rôle garde les groupes choisis", func(t *testing.T) {
+		r := gin.New()
+		r.PUT("/roles/:id/members", NewAccessRolesHandler(tx, nil).SetRoleMembers)
+		code, _, _ := send(t, r, http.MethodPut, fmt.Sprintf("/roles/%d/members", newsRole),
+			map[string]interface{}{"user_ids": []uint{f.member.id, f.outsider.id}})
+		if code != http.StatusOK {
+			t.Fatalf("membres : %d", code)
+		}
+		chosen, err := models.AssignmentGroups(tx, f.member.id)
+		if err != nil {
+			t.Fatalf("groupes : %v", err)
+		}
+		if fmt.Sprint(chosen[newsRole]) != fmt.Sprint([]uint{f.g2.ID}) {
+			t.Errorf("groupes choisis après modification des membres : %v", chosen)
+		}
+	})
+
+	t.Run("le compte rédige dans le groupe choisi, plus dans le sien", func(t *testing.T) {
+		member := contentRouter(t, tx, f.member)
+		draft := func(g uint) map[string]interface{} {
+			return map[string]interface{}{"title": f.title(fmt.Sprint("choisi-", g)), "content": "x", "is_published": false, "target_group_ids": []uint{g}}
+		}
+		if code, _, _ := send(t, member, http.MethodPost, "/api/v1/group-admin/news", draft(f.g1.ID)); code != http.StatusForbidden {
+			t.Errorf("article ciblant g1 (son groupe, non choisi) : %d, attendu 403", code)
+		}
+		if code, _, _ := send(t, member, http.MethodPost, "/api/v1/group-admin/news", draft(f.g2.ID)); code != http.StatusCreated {
+			t.Errorf("article ciblant g2 (choisi) : %d, attendu 201", code)
+		}
+	})
 }

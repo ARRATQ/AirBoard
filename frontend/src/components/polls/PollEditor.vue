@@ -241,34 +241,23 @@
               </div>
 
               <div class="form-group">
-                <span id="poll-editor-groups" class="form-label">
+                <label id="poll-editor-groups" for="poll-editor-groups-input" class="form-label">
                   {{ t('polls.editor.targetGroups') }}
-                </span>
-                <div role="group" aria-labelledby="poll-editor-groups" class="flex flex-wrap gap-2 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 min-h-[60px]">
-                  <button
-                    v-for="group in availableGroups"
-                    :key="group.id"
-                    type="button"
-                    :aria-pressed="form.target_group_ids.includes(group.id)"
-                    @click="toggleGroup(group.id)"
-                    :class="[
-                      'px-3 py-1.5 rounded text-sm font-medium transition-colors',
-                      form.target_group_ids.includes(group.id)
-                        ? 'bg-purple-600 text-white hover:bg-purple-700'
-                        : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'
-                    ]"
-                  >
-                    <Icon
-                      :icon="form.target_group_ids.includes(group.id) ? 'lucide:check' : 'lucide:plus'"
-                      class="inline h-4 w-4 me-1"
-                      aria-hidden="true"
-                    />
-                    {{ group.name }}
-                  </button>
-                  <span v-if="availableGroups.length === 0" class="text-gray-500 dark:text-gray-400 text-sm italic">
-                    {{ t('polls.editor.noGroupsAvailable') }}
-                  </span>
-                </div>
+                </label>
+                <p v-if="availableGroups.length === 0" class="text-gray-500 dark:text-gray-400 text-sm italic">
+                  {{ t('polls.editor.noGroupsAvailable') }}
+                </p>
+                <ComboSelect
+                  v-else
+                  v-model="form.target_group_ids"
+                  input-id="poll-editor-groups-input"
+                  kind="group"
+                  :options="groupOptions"
+                  :labels="lockedGroupOptions"
+                  :locked-ids="lockedGroupIds"
+                  :label="t('polls.editor.targetGroups')"
+                  :placeholder="t('polls.editor.targetGroupsPlaceholder')"
+                />
                 <p class="form-help">
                   {{ t('polls.editor.targetGroupsHelp') }}
                 </p>
@@ -372,6 +361,8 @@ import { Icon } from '@iconify/vue'
 import { pollsService, newsService, announcementsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { getRoles, canAccess, POLLS } from '@/config/access'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
+import { groupOption } from '@/utils/comboFilter'
 
 const props = defineProps({
   show: {
@@ -542,15 +533,13 @@ const removeOption = (index) => {
   }
 }
 
-// Toggle la sélection d'un groupe
-const toggleGroup = (groupId) => {
-  const index = form.value.target_group_ids.indexOf(groupId)
-  if (index === -1) {
-    form.value.target_group_ids.push(groupId)
-  } else {
-    form.value.target_group_ids.splice(index, 1)
-  }
-}
+// Groupes proposés, et groupes déjà ciblés hors de ceux-là : affichés, mais non retirables
+const groupOptions = computed(() => availableGroups.value.map((group) => groupOption(group)))
+const lockedGroupOptions = computed(() => {
+  const available = new Set(availableGroups.value.map((g) => g.id))
+  return (props.poll?.target_groups || []).filter((g) => !available.has(g.id)).map((group) => groupOption(group))
+})
+const lockedGroupIds = computed(() => lockedGroupOptions.value.map((g) => g.id))
 
 // Formater la date pour datetime-local input
 const formatDateTimeLocal = (dateString) => {

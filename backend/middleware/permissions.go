@@ -12,9 +12,10 @@ import (
 
 // Clés de contexte posées par RequireAuth et RequirePermission (exportées pour les tests).
 const (
-	CtxPermissions    = "permissions"
-	CtxMemberGroupIDs = "member_group_ids"
-	ctxUnrestricted   = "permission_unrestricted"
+	CtxPermissions = "permissions"
+	// CtxPermissionGroups : {permission: groupes couverts} pour la portée « ses groupes »
+	CtxPermissionGroups = "permission_groups"
+	ctxUnrestricted     = "permission_unrestricted"
 	// ctxManagedGroupIDs : groupes où la requête agit (RequirePermission, portée « ses groupes »)
 	ctxManagedGroupIDs = "managed_group_ids"
 )
@@ -66,11 +67,16 @@ func HasPermissionEverywhere(c *gin.Context, permission string) bool {
 }
 
 // PermissionGroupIDs renvoie les groupes où l'utilisateur exerce la permission de portée
-// « ses groupes » : ceux dont il est membre, hors groupe par défaut. Vide sans la permission ;
-// sans objet pour la portée « tout le site » (voir HasPermissionEverywhere).
+// « ses groupes » : ceux choisis à l'attribution de ses rôles, ou ceux dont il est membre
+// (hors groupe par défaut). Vide sans la permission ; sans objet pour la portée « tout le
+// site » (voir HasPermissionEverywhere).
 func PermissionGroupIDs(c *gin.Context, permission string) []uint {
-	if PermissionScope(c, permission) == models.ScopeGroups {
-		return memberGroupIDs(c)
+	if PermissionScope(c, permission) != models.ScopeGroups {
+		return []uint{}
+	}
+	groups, _ := c.Get(CtxPermissionGroups)
+	if m, ok := groups.(map[string][]uint); ok && m[permission] != nil {
+		return m[permission]
 	}
 	return []uint{}
 }
@@ -86,18 +92,10 @@ func GetManagedGroupIDs(c *gin.Context) []uint {
 	return []uint{}
 }
 
-func memberGroupIDs(c *gin.Context) []uint {
-	ids, _ := c.Get(CtxMemberGroupIDs)
-	if list, ok := ids.([]uint); ok {
-		return list
-	}
-	return nil
-}
-
 // RequirePermission laisse passer l'admin et les utilisateurs qui ont la permission.
 //   - Portée « tout le site » : la requête est marquée sans restriction (IsUnrestricted).
-//   - Portée « ses groupes » : les groupes de la requête (GetManagedGroupIDs) sont ceux dont
-//     l'utilisateur est membre, hors groupe par défaut ; sans aucun, il n'a rien à gérer.
+//   - Portée « ses groupes » : les groupes de la requête (GetManagedGroupIDs) sont ceux que
+//     couvre la permission (PermissionGroupIDs) ; sans aucun, il n'a rien à gérer.
 func (am *AuthMiddleware) RequirePermission(permission string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		switch PermissionScope(c, permission) {

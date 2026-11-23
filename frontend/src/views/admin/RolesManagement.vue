@@ -137,30 +137,18 @@
 
           <div class="rm-members">
             <p class="rm-muted">{{ t('roles.members.intro') }}</p>
-            <input
-              v-model="memberQuery"
-              type="search"
-              class="form-input"
-              :aria-label="t('users.searchPlaceholder')"
-              :placeholder="t('users.searchPlaceholder')"
-            />
-
             <p v-if="loadingMembers" class="rm-muted" role="status">{{ t('roles.members.loading') }}</p>
-            <ul v-else class="rm-members__list">
-              <li v-if="memberCandidates.length === 0" class="rm-muted">{{ t('roles.members.noUsers') }}</li>
-              <li v-for="user in memberCandidates" :key="user.id">
-                <label class="choice-card py-2" :class="{ 'choice-card-active': selectedMemberIds.includes(user.id) }">
-                  <input v-model="selectedMemberIds" type="checkbox" :value="user.id" />
-                  <span class="min-w-0 flex-1">
-                    <span class="rm-name block truncate">{{ displayName(user) }}</span>
-                    <span class="rm-desc block truncate" dir="ltr">@{{ user.username }} · {{ user.email }}</span>
-                  </span>
-                </label>
-              </li>
-            </ul>
-            <p v-if="searchTotal > searchResults.length" class="rm-muted">
-              {{ t('ui.table.range', { from: 1, to: searchResults.length, total: searchTotal }) }}
-            </p>
+            <ComboSelect
+              v-else
+              v-model="selectedMemberIds"
+              kind="person"
+              input-id="role-members-input"
+              :options="memberOptions"
+              :search="searchPeople"
+              :label="t('roles.members.title')"
+              :placeholder="t('roles.members.searchPlaceholder')"
+              :empty-text="t('roles.members.noUsers')"
+            />
           </div>
 
           <div class="rm-modal__foot">
@@ -179,7 +167,7 @@
 <script setup>
 // Rôles créés par l'administrateur : permissions du catalogue du serveur (chacune sur tout
 // le site ou sur les groupes de la personne) et membres. L'administrateur, lui, a tout.
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { adminService } from '@/services/api'
@@ -190,12 +178,13 @@ import DataTable from '@/components/ui/DataTable.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import RowActions from '@/components/ui/RowActions.vue'
+import ComboSelect from '@/components/ui/ComboSelect.vue'
+import { personOption } from '@/utils/comboFilter'
 
 const { t, te } = useI18n()
 const { confirm: askConfirm } = useConfirm()
 
 const USER_SEARCH_PAGE_SIZE = 50
-const SEARCH_DEBOUNCE_MS = 300
 
 const loading = ref(false)
 const saving = ref(false)
@@ -208,10 +197,8 @@ const form = ref({ name: '', description: '', scopes: {} })
 
 const membersRole = ref(null)
 const currentMembers = ref([])
-const searchResults = ref([])
-const searchTotal = ref(0)
+const suggestions = ref([])
 const selectedMemberIds = ref([])
-const memberQuery = ref('')
 const loadingMembers = ref(false)
 
 const toast = (kind, message) => window.$toast?.[kind]?.(message)
@@ -331,43 +318,29 @@ const removeRole = async (role) => {
 
 // --- Membres ---
 
-const displayName = (user) =>
-  [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username
+const USER_SUGGESTIONS = 20
 
-const matchesQuery = (user) => {
-  const q = memberQuery.value.trim().toLowerCase()
-  if (!q) return true
-  return [user.username, user.email, user.first_name, user.last_name].some(v => v?.toLowerCase().includes(q))
-}
-
-// Membres actuels (filtrés localement) puis résultats de la recherche, sans doublon
-const memberCandidates = computed(() => {
-  const members = currentMembers.value.filter(matchesQuery)
-  const ids = new Set(members.map(u => u.id))
-  return [...members, ...searchResults.value.filter(u => !ids.has(u.id))]
+// Membres actuels puis premières personnes : proposés avant toute saisie
+const memberOptions = computed(() => {
+  const ids = new Set(currentMembers.value.map((u) => u.id))
+  return [...currentMembers.value, ...suggestions.value.filter((u) => !ids.has(u.id))].map(personOption)
 })
 
-let searchRequest = 0
-const searchUsers = async () => {
-  const request = ++searchRequest
-  try {
-    const data = await adminService.getUsers({ search: memberQuery.value.trim() || undefined, page_size: USER_SEARCH_PAGE_SIZE })
-    if (request !== searchRequest) return
-    searchResults.value = data.data || []
-    searchTotal.value = data.total || 0
-  } catch (error) {
-    if (request !== searchRequest) return
-    console.error('Error searching users:', error)
-    toast('error', t('roles.errors.members'))
-  }
+// Recherche côté serveur (nom, identifiant, e-mail)
+const searchPeople = async (query) => {
+  const data = await adminService.getUsers({ search: query, page_size: USER_SEARCH_PAGE_SIZE })
+  return (data.data || []).map(personOption)
 }
 
 const openMembers = async (role) => {
   membersRole.value = role
-  memberQuery.value = ''
   loadingMembers.value = true
   try {
-    const [members] = await Promise.all([adminService.getAccessRoleMembers(role.id), searchUsers()])
+    const [members, firstPage] = await Promise.all([
+      adminService.getAccessRoleMembers(role.id),
+      adminService.getUsers({ page_size: USER_SUGGESTIONS }).catch(() => ({ data: [] })),
+    ])
+    suggestions.value = firstPage?.data || []
     currentMembers.value = Array.isArray(members) ? members : []
     selectedMemberIds.value = currentMembers.value.map(u => u.id)
   } catch (error) {
@@ -382,7 +355,7 @@ const openMembers = async (role) => {
 const closeMembers = () => {
   membersRole.value = null
   currentMembers.value = []
-  searchResults.value = []
+  suggestions.value = []
 }
 
 const saveMembers = async () => {
@@ -400,13 +373,6 @@ const saveMembers = async () => {
   }
 }
 
-let searchTimer = null
-watch(memberQuery, () => {
-  if (!membersRole.value) return
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(searchUsers, SEARCH_DEBOUNCE_MS)
-})
-onBeforeUnmount(() => clearTimeout(searchTimer))
 
 onMounted(loadRoles)
 
@@ -501,6 +467,5 @@ useEscapeClose(computed(() => !!membersRole.value), () => closeMembers())
 .rm-scope__opt { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-small); cursor: pointer; }
 .rm-scope__help { flex-basis: 100%; margin: 0; font-size: var(--fs-small); color: var(--muted); }
 
-.rm-members { display: grid; gap: 10px; padding: 16px; overflow-y: auto; min-height: 0; }
-.rm-members__list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.rm-members { display: grid; align-content: start; gap: 10px; padding: 16px; overflow-y: auto; min-height: min(22rem, 60vh); }
 </style>

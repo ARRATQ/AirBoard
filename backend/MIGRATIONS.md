@@ -20,6 +20,7 @@ GORM ne crée plus rien : `AutoMigrate` n'est plus appelé.
 | `00006_permissions_news_events.sql` | Actualités et événements par permission : le rôle « Éditeur » reçoit `news.manage` et `events.manage` sur tout le site (ce que les éditeurs avaient déjà) ; rôle réattribué aux comptes `role = 'editor'`. |
 | `00007_permissions_polls_comments.sql` | Sondages et modération par permission : le rôle « Éditeur » reçoit `polls.manage` et `comments.moderate` sur tout le site. Fin du rôle de compte `editor` : ses comptes (dotés du rôle « Éditeur ») redeviennent `user`. |
 | `00008_retrait_admins_groupe.sql` | Fin des admins de groupe : chaque compte de `group_admins` reçoit le rôle « Éditeur de groupe » (ressources, actualités, événements et sondages, portée « ses groupes ») et devient membre des groupes qu'il administrait ; la table `group_admins` est supprimée (le retour arrière la recrée vide). |
+| `00009_groupes_attribution_roles.sql` | Groupes choisis à l'attribution d'un rôle (`user_access_role_groups`) : pour ce compte, les permissions de portée « ses groupes » du rôle couvrent ces groupes au lieu de ceux dont il est membre. Sans groupe choisi, rien ne change. |
 
 ## Ajouter une migration
 

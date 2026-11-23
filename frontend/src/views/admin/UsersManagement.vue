@@ -389,7 +389,7 @@ const handleSubmit = async (formData) => {
     appStore.setLoading(true)
     
     // Les rôles attribués s'enregistrent à part, une fois le compte enregistré
-    const { id, access_role_ids: accessRoleIds, ...userData } = formData
+    const { id, access_roles: accessRoles, ...userData } = formData
     let userId = id
     if (id) {
       await adminService.updateUser(id, userData)
@@ -397,8 +397,8 @@ const handleSubmit = async (formData) => {
       const created = await adminService.createUser(userData)
       userId = created?.id
     }
-    if (userId && Array.isArray(accessRoleIds)) {
-      await adminService.setUserAccessRoles(userId, accessRoleIds)
+    if (userId && Array.isArray(accessRoles)) {
+      await adminService.setUserAccessRoles(userId, accessRoles)
     }
     appStore.showSuccess(t(id ? 'users.toast.updated' : 'users.toast.created'))
     

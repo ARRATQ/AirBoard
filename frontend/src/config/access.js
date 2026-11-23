@@ -99,8 +99,9 @@ export function getScope(access, roles) {
  * le serveur : permission sur tout le site (admin compris), auteur, ou contenu ciblant un
  * groupe où l'on gère ce module (portée « ses groupes »). Un contenu sans groupe cible est
  * global.
- * Les groupes de la portée « ses groupes » viennent du serveur (`permission_group_ids`) :
- * ceux dont la personne est membre, hors groupe par défaut (Common), qui réunit tout le monde.
+ * Les groupes de la portée « ses groupes » viennent du serveur, par permission
+ * (`permission_groups`) : ceux choisis à l'attribution du rôle, sinon ceux dont la personne
+ * est membre, hors groupe par défaut (Common), qui réunit tout le monde.
  *
  * @param {object|null|undefined} user utilisateur du store d'authentification
  * @param {string} permission permission du module (ACCESS_PERMISSION[...])
@@ -116,8 +117,9 @@ export function canManageItem(user, permission, item) {
   if (item.author_id && item.author_id === user.id) return true
   const targets = Array.isArray(item.target_groups) ? item.target_groups.map((g) => g.id) : []
   if (targets.length === 0) return false
-  if (scope !== SCOPE_GROUPS || !Array.isArray(user.permission_group_ids)) return false
-  const ids = new Set(user.permission_group_ids)
+  const groups = user.permission_groups?.[permission]
+  if (scope !== SCOPE_GROUPS || !Array.isArray(groups)) return false
+  const ids = new Set(groups)
   return targets.some((id) => ids.has(id))
 }
 

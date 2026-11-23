@@ -116,10 +116,10 @@ func attachPermissions(db *gorm.DB, user *models.User) {
 		return
 	}
 	user.Permissions = perms
-	if ids, err := models.PermissionGroupIDs(db, user.ID); err != nil {
+	if groups, err := models.PermissionGroups(db, user.ID); err != nil {
 		log.Printf("[Visibility] groupes couverts par les permissions de %d : %v", user.ID, err)
-	} else {
-		user.PermissionGroupIDs = ids
+	} else if len(groups) > 0 {
+		user.PermissionGroups = groups
 	}
 }
 
