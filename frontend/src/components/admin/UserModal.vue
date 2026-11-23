@@ -165,9 +165,14 @@
                   input-id="user-groups"
                   kind="group"
                   :options="groupOptions"
+                  :locked-ids="directoryGroupIds"
                   :label="t('userModal.groups')"
                   :placeholder="t('userModal.groupsPlaceholder')"
                 />
+                <p v-if="directoryGroupIds.length" class="user-dir-groups">
+                  <Icon icon="lucide:network" aria-hidden="true" />
+                  <span>{{ t('userModal.directoryGroups', directoryGroupIds.length) }}</span>
+                </p>
               </div>
 
               <!-- Rôles attribués (permissions) : sans objet pour un administrateur -->
@@ -379,6 +384,9 @@ const loadAssignments = async (userId) => {
 }
 watch(() => (props.show ? props.user?.id : null), (id) => { if (id) loadAssignments(id) }, { immediate: true })
 
+// Groupes venus du trombinoscope : gérés par la synchronisation, pas retirables ici
+const directoryGroupIds = computed(() => props.user?.directory_group_ids || [])
+
 const groupOptions = computed(() =>
   groups.value.map((group) => groupOption(group, t('userModal.membersCount', group.users?.length || 0)))
 )
@@ -549,6 +557,17 @@ useEscapeClose(() => props.show, () => closeModal())
 }
 
 /* Groupes du rôle : rattachés à la carte, décalés sous son intitulé */
+.user-dir-groups {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.user-dir-groups svg { flex: none; width: 14px; height: 14px; margin-top: 1px; color: var(--acc); }
+
 .role-assign__groups {
   margin-inline: 40px 12px;
   padding-block: 2px 12px;

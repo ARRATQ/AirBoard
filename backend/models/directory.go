@@ -113,16 +113,19 @@ func scanJSONBytes(value interface{}) ([]byte, error) {
 
 // OrgUnit représente une unité organisationnelle (direction, département, service…)
 type OrgUnit struct {
-	ID          uint           `json:"id" gorm:"primaryKey"`
-	Name        string         `json:"name" gorm:"not null"`
-	Code        string         `json:"code"` // Sigle optionnel (ex. DSI)
-	Description string         `json:"description" gorm:"type:text"`
-	Color       string         `json:"color" gorm:"default:'#3B82F6'"`
-	ParentID    *uint          `json:"parent_id" gorm:"index"`
-	Order       int            `json:"order" gorm:"default:0"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	ID          uint   `json:"id" gorm:"primaryKey"`
+	Name        string `json:"name" gorm:"not null"`
+	Code        string `json:"code"` // Sigle optionnel (ex. DSI)
+	Description string `json:"description" gorm:"type:text"`
+	Color       string `json:"color" gorm:"default:'#3B82F6'"`
+	ParentID    *uint  `json:"parent_id" gorm:"index"`
+	Order       int    `json:"order" gorm:"default:0"`
+	// GroupID : groupe d'utilisateurs lié ; ses membres venus du trombinoscope sont les personnes
+	// affectées à un poste de l'entité (voir services.SyncDirectoryGroups)
+	GroupID   *uint          `json:"group_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 
 	Positions []OrgPosition `json:"positions" gorm:"foreignKey:UnitID"`
 }

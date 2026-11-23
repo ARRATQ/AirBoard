@@ -247,7 +247,9 @@
     "loadError": "Error while loading groups",
     "saveError": "Error while saving group",
     "deleteError": "Error while deleting group",
-    "membersCount": "{count} users | {count} user | {count} users"
+    "membersCount": "{count} users | {count} user | {count} users",
+    "parentLabel": "Sub-group of: ",
+    "linkedUnit": "Directory: {name}"
   },
   "applications": {
     "title": "Resources",
@@ -364,7 +366,8 @@
     "roleGroups": "Groups covered by the {role} role",
     "roleGroupsPlaceholder": "Their groups (default) — or choose…",
     "roleGroupsChosen": "The role applies only to the chosen groups.",
-    "roleGroupsDefault": "No group chosen: the role applies to the groups this person belongs to (except the default group)."
+    "roleGroupsDefault": "No group chosen: the role applies to the groups this person belongs to (except the default group).",
+    "directoryGroups": "No directory groups | 1 group comes from the directory (locked): it follows the person's unit. | {n} groups come from the directory (locked): they follow the person's unit."
   },
   "groupModal": {
     "titleEdit": "Edit group",
@@ -395,7 +398,11 @@
     "submitCreate": "Create group",
     "errors": {
       "nameRequired": "Name is required"
-    }
+    },
+    "parent": "Parent group",
+    "parentNone": "None (top-level group)",
+    "parentHint": "Members of this group also see what is meant for the parent group. A role limited to the parent group also covers this group.",
+    "linkedUnit": "Linked to the “{name}” unit of the directory: people assigned to this unit are members automatically."
   },
   "settings": {
     "general": "General",
@@ -2747,7 +2754,39 @@
     "layoutTree": "Tree",
     "layoutList": "List",
     "goToUnit": "Go to a unit…",
-    "backToRoot": "Whole organization"
+    "backToRoot": "Whole organization",
+    "groups": {
+      "title": "User group · {name}",
+      "subtitle": "People assigned to this unit join its group automatically.",
+      "current": "Linked group: {name}",
+      "choiceLegend": "What to do?",
+      "createTitle": "Create groups from the directory",
+      "createDesc": "No units | One group for this unit, named after it. An existing group with the same name is linked instead of being created again. | One group for this unit and each of its sub-units ({n} in all), named after them and with the same hierarchy. An existing group with the same name is linked instead of being created again; a unit already linked keeps its group.",
+      "linkTitle": "Link an existing group",
+      "linkDesc": "Only this unit is affected. A group can be linked to one unit only.",
+      "group": "Group",
+      "pick": "Choose a group",
+      "pickRequired": "Choose the group to link.",
+      "noFreeGroup": "Every group is already linked to a unit.",
+      "unlinkTitle": "Remove the link",
+      "unlinkDesc": "The group stays; members who came from the directory are removed, members added by hand stay.",
+      "rules": "Members are the people assigned to a position in the unit, interims included, whose record is linked to an account (a record without an account is linked to the account with the same email). They join their unit's group; the groups above come through the hierarchy. Moving to another unit updates the group.",
+      "createSubmit": "Create the groups",
+      "linkSubmit": "Link the group",
+      "unlinkSubmit": "Remove the link",
+      "created": "Groups created: {created}, existing groups linked: {linked}.",
+      "linked": "Group linked to the unit.",
+      "unlinked": "Link removed.",
+      "syncSummary": "Memberships added: {added}, removed: {removed}.",
+      "sync": "Sync groups",
+      "syncHint": "Recomputes the members of groups linked to units (this also happens on every change).",
+      "synced": "Groups synced. Records linked to an account: {linked} · memberships added: {added} · removed: {removed}.",
+      "syncFailed": "Sync failed.",
+      "loadFailed": "Could not load user groups.",
+      "linkedTo": "Linked group: ",
+      "button": "User group",
+      "buttonFor": "User group of {name}"
+    }
   },
   "ui": {
     "close": "Close",

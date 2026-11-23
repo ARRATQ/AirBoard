@@ -42,9 +42,20 @@
     <section v-else-if="activeTab === 'structure'">
       <div class="dir-admin__bar">
         <p class="dir-admin__help">{{ $t('directory.structureHelp') }}</p>
-        <BaseButton v-if="canAdmin" variant="primary" icon="lucide:plus" @click="openUnit(null, null)">
-          {{ $t('directory.newUnit') }}
-        </BaseButton>
+        <div v-if="canAdmin" class="dir-admin__bar-actions">
+          <BaseButton
+            variant="secondary"
+            icon="lucide:refresh-cw"
+            :loading="syncing"
+            :title="$t('directory.groups.syncHint')"
+            @click="syncGroups"
+          >
+            {{ $t('directory.groups.sync') }}
+          </BaseButton>
+          <BaseButton variant="primary" icon="lucide:plus" @click="openUnit(null, null)">
+            {{ $t('directory.newUnit') }}
+          </BaseButton>
+        </div>
       </div>
 
       <EmptyState v-if="!flatUnits.length" icon="lucide:network" :title="$t('directory.noUnits')" />
@@ -60,7 +71,21 @@
             <span class="dir-unit__dot" />
             <span class="dir-unit__name">{{ unit.name }}</span>
             <span v-if="unit.code" class="dir-mono">{{ unit.code }}</span>
+            <span v-if="canAdmin && groupOf(unit)" class="dir-unit__group">
+              <Icon icon="lucide:users" aria-hidden="true" />
+              <span class="sr-only">{{ $t('directory.groups.linkedTo') }}</span>{{ groupOf(unit).name }}
+            </span>
             <div v-if="canAdmin" class="dir-unit__actions">
+              <button
+                type="button"
+                class="dir-icon-btn"
+                :class="{ 'dir-icon-btn--on': groupOf(unit) }"
+                :title="$t('directory.groups.button')"
+                :aria-label="$t('directory.groups.buttonFor', { name: unit.name })"
+                @click="openUnitGroup(unit)"
+              >
+                <Icon icon="lucide:users-round" />
+              </button>
               <button type="button" class="dir-icon-btn" :title="$t('directory.newPosition')" :aria-label="$t('directory.newPosition')" @click="openPosition(null, unit.id)">
                 <Icon icon="lucide:briefcase-plus" />
               </button>
@@ -239,6 +264,14 @@
       @close="closeModal"
       @saved="onSaved('directory.saved.person')"
     />
+    <UnitGroupModal
+      v-if="modal.type === 'unitGroup'"
+      :unit="modal.item"
+      :groups="groups"
+      :branch-size="descendantIds(modal.item.id).size"
+      @close="closeModal"
+      @saved="onGroupSaved"
+    />
     <FieldFormModal
       v-if="modal.type === 'field'"
       :field="modal.item"
@@ -267,7 +300,8 @@ import PositionFormModal from '@/components/directory/PositionFormModal.vue'
 import AssignmentFormModal from '@/components/directory/AssignmentFormModal.vue'
 import PersonFormModal from '@/components/directory/PersonFormModal.vue'
 import FieldFormModal from '@/components/directory/FieldFormModal.vue'
-import { directoryService } from '@/services/api'
+import UnitGroupModal from '@/components/directory/UnitGroupModal.vue'
+import { adminService, directoryService } from '@/services/api'
 import { useDirectory, fullName, notify, apiError, FIELD_TYPE_ICONS } from '@/components/directory/useDirectory'
 
 const { t } = useI18n()
@@ -344,6 +378,41 @@ const openPosition = (position, unitId = null) => openModal('position', position
 const openAssignment = (position, assignment = null) => openModal('assignment', assignment, { position })
 const openPerson = (person) => openModal('person', person)
 const openField = (field) => openModal('field', field)
+const openUnitGroup = (unit) => openModal('unitGroup', unit)
+
+// ---- Groupes d'utilisateurs liés aux entités (admin) ----
+const groups = ref([])
+const groupsById = computed(() => new Map(groups.value.map((g) => [g.id, g])))
+const groupOf = (unit) => (unit.group_id ? groupsById.value.get(unit.group_id) : null)
+const loadGroups = async () => {
+  if (!canAdmin.value) return
+  try {
+    const data = await adminService.getGroups()
+    groups.value = Array.isArray(data) ? data : []
+  } catch (e) {
+    notify('error', apiError(e, t('directory.groups.loadFailed')))
+  }
+}
+
+const onGroupSaved = async (message) => {
+  closeModal()
+  notify('success', message)
+  await Promise.all([load(), loadGroups()])
+}
+
+const syncing = ref(false)
+const syncGroups = async () => {
+  syncing.value = true
+  try {
+    const res = await directoryService.syncGroups()
+    notify('success', t('directory.groups.synced', { linked: res.linked_people || 0, added: res.added || 0, removed: res.removed || 0 }))
+    await Promise.all([load(), loadGroups()])
+  } catch (e) {
+    notify('error', apiError(e, t('directory.groups.syncFailed')))
+  } finally {
+    syncing.value = false
+  }
+}
 
 const onSaved = async (messageKey) => {
   closeModal()
@@ -383,6 +452,7 @@ const removeField = (f) =>
 
 onMounted(async () => {
   await load()
+  loadGroups()
   // Lien profond depuis la fiche publique : ?person=ID ouvre l'édition
   const personId = Number(route.query.person)
   if (personId && peopleById.value.has(personId)) {
@@ -453,7 +523,7 @@ onMounted(async () => {
   background: var(--surface);
 }
 
-.dir-unit__head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+.dir-unit__head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 14px; }
 .dir-unit__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--unit-color); }
 .dir-unit__name { font-weight: 600; color: var(--text); }
 .dir-unit__none { margin: 0; padding: 0 14px 10px; font-style: italic; }
@@ -502,6 +572,28 @@ onMounted(async () => {
 .dir-icon-btn:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
 .dir-icon-btn--sm { width: 24px; height: 24px; font-size: 14px; }
 .dir-icon-btn--danger:hover { color: var(--bad); }
+.dir-icon-btn--on { color: var(--acc); }
+
+.dir-admin__bar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.dir-unit__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 22ch;
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--acc) 35%, var(--line));
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+}
+
+.dir-unit__group svg { flex: none; width: 12px; height: 12px; color: var(--acc); }
 
 @media (prefers-reduced-motion: reduce) {
   .dir-admin__spin { animation: none; }

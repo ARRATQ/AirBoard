@@ -475,6 +475,8 @@ func (h *OAuthHandler) findOrCreateOAuthUser(providerName string, userInfo map[s
 		}
 
 		log.Printf("[OAuth] New user created: %s (%s) via %s", user.Email, user.Username, providerName)
+		// Fiche du trombinoscope au même e-mail : liée au compte, qui rejoint ses groupes
+		services.SyncDirectoryGroupsLogged(h.db, "compte OAuth créé")
 	} else if err != nil {
 		return models.User{}, err
 	} else {

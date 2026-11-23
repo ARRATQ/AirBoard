@@ -21,6 +21,7 @@ GORM ne crée plus rien : `AutoMigrate` n'est plus appelé.
 | `00007_permissions_polls_comments.sql` | Sondages et modération par permission : le rôle « Éditeur » reçoit `polls.manage` et `comments.moderate` sur tout le site. Fin du rôle de compte `editor` : ses comptes (dotés du rôle « Éditeur ») redeviennent `user`. |
 | `00008_retrait_admins_groupe.sql` | Fin des admins de groupe : chaque compte de `group_admins` reçoit le rôle « Éditeur de groupe » (ressources, actualités, événements et sondages, portée « ses groupes ») et devient membre des groupes qu'il administrait ; la table `group_admins` est supprimée (le retour arrière la recrée vide). |
 | `00009_groupes_attribution_roles.sql` | Groupes choisis à l'attribution d'un rôle (`user_access_role_groups`) : pour ce compte, les permissions de portée « ses groupes » du rôle couvrent ces groupes au lieu de ceux dont il est membre. Sans groupe choisi, rien ne change. |
+| `00010_groupes_hierarchie_trombinoscope.sql` | Groupes hiérarchiques (`groups.parent_id`) : un membre d'un sous-groupe voit ce qui cible les groupes au-dessus, un rôle limité à un groupe couvre ses sous-groupes (vue `user_effective_groups`). Lien entité du trombinoscope → groupe (`org_units.group_id`) et origine des appartenances (`user_groups.source` : `manual` ou `directory`) ; la synchronisation ne retire que les appartenances `directory`. |
 
 ## Ajouter une migration
 

@@ -7,6 +7,7 @@ import (
 
 	"airboard/apierror"
 	"airboard/models"
+	"airboard/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -81,6 +82,7 @@ func (h *DirectoryHandler) CreatePerson(c *gin.Context) {
 		}
 		person.IsActive = false
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "fiche créée")
 	c.JSON(http.StatusCreated, person)
 }
 
@@ -114,6 +116,7 @@ func (h *DirectoryHandler) UpdatePerson(c *gin.Context) {
 		return
 	}
 	h.db.First(&existing, id)
+	services.SyncDirectoryGroupsLogged(h.db, "fiche modifiée")
 	c.JSON(http.StatusOK, existing)
 }
 
@@ -140,6 +143,7 @@ func (h *DirectoryHandler) DeletePerson(c *gin.Context) {
 		respondNotFoundOr500(c, err, "Personne introuvable")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "fiche supprimée")
 	c.JSON(http.StatusOK, gin.H{"message": "Personne supprimée"})
 }
 
@@ -192,6 +196,7 @@ func (h *DirectoryHandler) CreateAssignment(c *gin.Context) {
 		apierror.Respond(c, http.StatusInternalServerError, "Impossible de créer l'affectation")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "affectation créée")
 	c.JSON(http.StatusCreated, assignment)
 }
 
@@ -226,6 +231,7 @@ func (h *DirectoryHandler) UpdateAssignment(c *gin.Context) {
 		return
 	}
 	h.db.First(&assignment, id)
+	services.SyncDirectoryGroupsLogged(h.db, "affectation modifiée")
 	c.JSON(http.StatusOK, assignment)
 }
 
@@ -244,5 +250,6 @@ func (h *DirectoryHandler) DeleteAssignment(c *gin.Context) {
 		apierror.Respond(c, http.StatusNotFound, "Affectation introuvable")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "affectation supprimée")
 	c.JSON(http.StatusOK, gin.H{"message": "Affectation supprimée"})
 }

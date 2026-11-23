@@ -18,6 +18,19 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **Search-as-you-type pickers** replace long checkbox lists for groups and people (user form,
   role members, poll, news and event targeting).
 
+### ✨ Groups & Directory
+
+- **Sub-groups** (Admin → Groups): a group can have a parent group. Members of a sub-group
+  also see content and resources targeted to the groups above it (not the reverse), and a role
+  limited to a group also covers its sub-groups. Deleting a group moves its sub-groups up a level.
+- **Groups linked to directory units**: from the directory structure, an admin links an existing
+  group to a unit, or creates the groups of a unit and all its sub-units with the same hierarchy
+  (an existing group with the same name is linked instead of duplicated). People assigned to a
+  unit, interims included, whose record is linked to an account join its group; when they move,
+  the group follows. Members added by hand are never removed. A record without an account is
+  linked to the account with the same email. Directory groups show as locked in the user form
+  (migration `00010`).
+
 ### 💥 Breaking Changes
 
 - The `editor` account role and **group admins** are gone. Migrations convert them: former

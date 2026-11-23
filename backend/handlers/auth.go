@@ -296,6 +296,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			}
 		}
 	}
+	// Fiche du trombinoscope au même e-mail : liée au compte, qui rejoint ses groupes
+	services.SyncDirectoryGroupsLogged(h.db, "inscription")
 
 	// Recharger l'utilisateur avec ses relations
 	h.db.Preload("Groups").First(&user, user.ID)

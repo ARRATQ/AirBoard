@@ -94,6 +94,22 @@
               </div>
 
               <div class="form-group mb-0">
+                <label for="group-parent" class="form-label">{{ t('groupModal.parent') }}</label>
+                <select id="group-parent" v-model="form.parent_id" class="form-select" aria-describedby="group-parent-hint">
+                  <option :value="null">{{ t('groupModal.parentNone') }}</option>
+                  <option v-for="row in parentOptions" :key="row.group.id" :value="row.group.id">
+                    {{ indentedLabel(row) }}
+                  </option>
+                </select>
+                <p id="group-parent-hint" class="form-help">{{ t('groupModal.parentHint') }}</p>
+              </div>
+
+              <div v-if="group?.org_unit_name" class="gmod-unit" role="note">
+                <Icon icon="lucide:network" class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <span>{{ t('groupModal.linkedUnit', { name: group.org_unit_name }) }}</span>
+              </div>
+
+              <div class="form-group mb-0">
                 <label for="description" class="form-label">{{ t('common.description') }}</label>
                 <textarea
                   id="description"
@@ -226,6 +242,7 @@ import { useEscapeClose } from '@/composables/useEscapeClose'
 import { Icon } from '@iconify/vue'
 import { useI18n } from 'vue-i18n'
 import { adminService } from '@/services/api'
+import { parentCandidates, indentedLabel } from '@/utils/groupTree'
 
 const props = defineProps({
   show: {
@@ -235,6 +252,11 @@ const props = defineProps({
   group: {
     type: Object,
     default: null
+  },
+  // Tous les groupes, pour choisir le parent
+  groups: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -252,10 +274,14 @@ const form = reactive({
   color: '#6B7280',
   app_group_ids: [],
   users: [],
-  is_active: true
+  is_active: true,
+  parent_id: null
 })
 
 const isEdit = computed(() => !!props.group)
+
+// Parents possibles : ni le groupe lui-même ni ses sous-groupes (pas de boucle)
+const parentOptions = computed(() => parentCandidates(props.groups, props.group?.id ?? null))
 
 const activeTab = ref('general')
 const appGroupSearch = ref('')
@@ -310,7 +336,8 @@ watch(() => props.group, (newVal) => {
       color: newVal.color || '#6B7280',
       app_group_ids: newVal.app_groups?.map(ag => ag.id) || [],
       users: newVal.users || [],
-      is_active: newVal.is_active ?? true
+      is_active: newVal.is_active ?? true,
+      parent_id: newVal.parent_id ?? null
     })
   }
 }, { immediate: true })
@@ -323,7 +350,8 @@ const resetForm = () => {
       color: props.group.color || '#6B7280',
       app_group_ids: props.group.app_groups?.map(ag => ag.id) || [],
       users: props.group.users || [],
-      is_active: props.group.is_active ?? true
+      is_active: props.group.is_active ?? true,
+      parent_id: props.group.parent_id ?? null
     })
   } else {
     Object.assign(form, {
@@ -332,7 +360,8 @@ const resetForm = () => {
       color: '#6B7280',
       app_group_ids: [],
       users: [],
-      is_active: true
+      is_active: true,
+      parent_id: null
     })
   }
   errors.value = {}
@@ -394,3 +423,19 @@ const closeModal = () => {
 // Échap ferme la modale
 useEscapeClose(() => props.show, () => closeModal())
 </script>
+
+<style scoped>
+.gmod-unit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-s, 8px);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg-surface);
+}
+
+.gmod-unit svg { margin-top: 2px; color: var(--acc); }
+</style>

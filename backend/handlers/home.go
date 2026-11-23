@@ -317,7 +317,7 @@ func (h *HomeHandler) getNewApps(userID uint, role string) ([]models.Application
 	err := h.db.Distinct("applications.*").
 		Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 		Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
-		Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id").
+		Joins("LEFT JOIN user_effective_groups user_groups ON group_app_groups.group_id = user_groups.group_id").
 		Where("applications.is_active = ? AND (app_groups.is_private = ? OR user_groups.user_id = ?)",
 			true, false, userID).
 		Preload("AppGroup").
@@ -795,7 +795,7 @@ func (h *HomeHandler) getPendingItems(userID uint, role string, groups viewerGro
 			Distinct("applications.id").
 			Joins("JOIN app_groups ON applications.app_group_id = app_groups.id").
 			Joins("LEFT JOIN group_app_groups ON app_groups.id = group_app_groups.app_group_id").
-			Joins("LEFT JOIN user_groups ON group_app_groups.group_id = user_groups.group_id AND user_groups.user_id = ?", userID).
+			Joins("LEFT JOIN user_effective_groups user_groups ON group_app_groups.group_id = user_groups.group_id AND user_groups.user_id = ?", userID).
 			Where("applications.is_active = ? AND applications.created_at >= ? AND (app_groups.is_private = ? OR user_groups.user_id = ?)",
 				true, sevenDaysAgo, false, userID).
 			Count(&pending.NewAppsCount)
