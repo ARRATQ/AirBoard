@@ -361,6 +361,14 @@ Airboard transforms how organizations manage digital resources, internal communi
   - Integrated language selector
   - Complete translations
 
+### Built-in Help
+
+- **Step-by-step guides** opened from the "?" button at the bottom of the menu, right on the
+  guide for the page being viewed
+- **Shown according to the role**: guides for everyone, one guide per role permission (with the
+  text for its scope: whole site or own groups), and the administration guides for admins only
+- Written in the four languages and bundled with the app (`frontend/src/help/content/<lang>/`)
+
 ### Version Management
 
 - **Auto-Update System**

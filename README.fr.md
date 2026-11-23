@@ -283,6 +283,14 @@ Airboard transforme la façon dont les organisations gèrent leurs ressources nu
   - Sélecteur de langue intégré
   - Traductions complètes
 
+### Aide intégrée
+
+- **Guides pas à pas** ouverts par le bouton « ? » en bas du menu, directement sur le guide de
+  la page affichée
+- **Selon le rôle** : guides pour tous, un guide par permission de rôle (avec le texte de sa
+  portée : tout le site ou ses groupes), et les guides d'administration pour l'admin seulement
+- Rédigés dans les quatre langues et livrés avec l'application (`frontend/src/help/content/<langue>/`)
+
 ### Gestion des Versions
 
 - **Auto-Update System**

@@ -2136,65 +2136,6 @@
     "typeArchives": "ملفات مضغوطة",
     "fileTooLarge": "{name} كبير جدًا (الحد الأقصى {max} ميغابايت)"
   },
-  "help": {
-    "sections": {
-      "installation": "التثبيت والتكوين",
-      "gettingStarted": "البدء",
-      "features": "الميزات",
-      "basics": "الأساسيات",
-      "advanced": "متقدم",
-      "management": "الإدارة",
-      "applications": "الموارد",
-      "content": "المحتوى",
-      "system": "النظام"
-    },
-    "pages": {
-      "installation": "التثبيت",
-      "configuration": "التكوين",
-      "introduction": "مقدمة",
-      "firstSteps": "الخطوات الأولى",
-      "dashboard": "لوحة القيادة",
-      "applications": "الموارد",
-      "newsHub": "مركز الأخبار",
-      "events": "الأحداث",
-      "polls": "الاستطلاعات",
-      "profile": "الملف الشخصي",
-      "overview": "نظرة عامة",
-      "creatingNews": "إنشاء الأخبار",
-      "richTextEditor": "محرر النصوص المنسّقة",
-      "managingTags": "إدارة الوسوم",
-      "bestPractices": "أفضل الممارسات",
-      "permissions": "الصلاحيات",
-      "managingAppGroups": "إدارة فئات الموارد",
-      "managingApplications": "إدارة الموارد",
-      "groupMembers": "أعضاء المجموعة",
-      "userManagement": "إدارة المستخدمين",
-      "groupManagement": "إدارة المجموعات",
-      "appGroups": "فئات الموارد",
-      "newsManagement": "إدارة الأخبار",
-      "eventsManagement": "إدارة الأحداث",
-      "pollsManagement": "إدارة الاستطلاعات",
-      "announcements": "الإعلانات",
-      "analytics": "التحليلات",
-      "settings": "الإعدادات"
-    },
-    "title": "المساعدة",
-    "subtitle": "الوثائق والأدلة",
-    "loading": "جارٍ التحميل...",
-    "selectTopic": "اختر موضوعاً",
-    "selectTopicDesc": "اختر دليلاً من القائمة على اليمين للبدء",
-    "contentNotAvailable": "هذا المحتوى غير متوفر بعد بهذه اللغة.",
-    "loadError": "خطأ أثناء تحميل المحتوى. يرجى المحاولة مرة أخرى.",
-    "version": "الوثائق v{version}",
-    "fullDocs": "الوثائق الكاملة",
-    "yourRole": "دورك",
-    "guides": {
-      "user": "مستخدم",
-      "editor": "محرر",
-      "groupAdmin": "مشرف مجموعة",
-      "admin": "مدير"
-    }
-  },
   "directory": {
     "title": "دليل الموظفين",
     "eyebrow": "مؤسستنا",
@@ -3239,6 +3180,45 @@
       "delete": "تعذّر حذف المجموعة.",
       "nameRequired": "الاسم إلزامي.",
       "parentRequired": "اختر المجموعة الأم."
+    }
+  },
+  "help": {
+    "title": "المساعدة",
+    "subtitle": "أدلة خطوة بخطوة حسب صلاحياتك",
+    "chooseTopic": "اختر دليلًا",
+    "loadError": "تعذّر عرض هذا الدليل. حاول مرة أخرى.",
+    "audiences": {
+      "everyone": "للجميع",
+      "contributor": "صلاحياتك",
+      "admin": "الإدارة"
+    },
+    "scope": {
+      "all": "على الموقع كله",
+      "groups": "في مجموعاتك"
+    },
+    "topics": {
+      "start": "التعرّف على البوابة",
+      "resources": "الموارد",
+      "news": "الأخبار",
+      "agenda": "الأحداث",
+      "polls": "الاستطلاعات",
+      "suggestions": "صندوق الاقتراحات",
+      "directory": "دليل الموظفين",
+      "messaging": "المراسلة والمساعدون",
+      "xp": "النقاط والشارات",
+      "profile": "الملف الشخصي والإشعارات",
+      "manage-news": "نشر الأخبار",
+      "manage-events": "نشر الأحداث",
+      "manage-polls": "إنشاء الاستطلاعات",
+      "manage-resources": "إدارة الموارد",
+      "moderation": "الإشراف على التعليقات",
+      "sub-groups": "إدارة المجموعات الفرعية",
+      "admin-users": "المستخدمون",
+      "admin-groups": "المجموعات",
+      "admin-roles": "الأدوار والصلاحيات",
+      "admin-directory": "إدارة دليل الموظفين",
+      "admin-content": "الإعلانات والوسائط وإعدادات المحتوى",
+      "admin-system": "الإعدادات والمتابعة"
     }
   }
 }

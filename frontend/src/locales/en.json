@@ -2379,65 +2379,6 @@
       "contributor": "Contributor"
     }
   },
-  "help": {
-    "title": "Help",
-    "subtitle": "Documentation and guides",
-    "loading": "Loading...",
-    "selectTopic": "Select a topic",
-    "selectTopicDesc": "Choose a guide from the left menu to get started",
-    "contentNotAvailable": "This content is not yet available in this language.",
-    "loadError": "Error loading content. Please try again.",
-    "version": "Documentation v{version}",
-    "fullDocs": "Full documentation",
-    "yourRole": "Your role",
-    "guides": {
-      "user": "User",
-      "editor": "Editor",
-      "groupAdmin": "Group Admin",
-      "admin": "Administrator"
-    },
-    "sections": {
-      "gettingStarted": "Getting Started",
-      "features": "Features",
-      "basics": "Basics",
-      "advanced": "Advanced",
-      "management": "Management",
-      "applications": "Resources",
-      "content": "Content",
-      "system": "System",
-      "installation": "Installation & Configuration"
-    },
-    "pages": {
-      "introduction": "Introduction",
-      "firstSteps": "First Steps",
-      "dashboard": "Dashboard",
-      "applications": "Resources",
-      "newsHub": "News Hub",
-      "events": "Events",
-      "polls": "Polls",
-      "profile": "Profile",
-      "overview": "Overview",
-      "creatingNews": "Creating News",
-      "richTextEditor": "Rich Text Editor",
-      "managingTags": "Managing Tags",
-      "bestPractices": "Best Practices",
-      "permissions": "Permissions",
-      "managingAppGroups": "Managing resource categories",
-      "managingApplications": "Managing Resources",
-      "groupMembers": "Group Members",
-      "userManagement": "User Management",
-      "groupManagement": "Group Management",
-      "appGroups": "Resource categories",
-      "newsManagement": "News Management",
-      "eventsManagement": "Events Management",
-      "pollsManagement": "Polls Management",
-      "announcements": "Announcements",
-      "analytics": "Analytics",
-      "settings": "Settings",
-      "installation": "Installation",
-      "configuration": "Configuration"
-    }
-  },
   "media": {
     "title": "Media Management",
     "subtitle": "Manage files, images and documents",
@@ -3239,6 +3180,45 @@
       "delete": "Could not delete the group.",
       "nameRequired": "The name is required.",
       "parentRequired": "Choose the parent group."
+    }
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "Step-by-step guides, matched to your access",
+    "chooseTopic": "Choose a guide",
+    "loadError": "This guide could not be shown. Please try again.",
+    "audiences": {
+      "everyone": "For everyone",
+      "contributor": "Your permissions",
+      "admin": "Administration"
+    },
+    "scope": {
+      "all": "Whole site",
+      "groups": "In your groups"
+    },
+    "topics": {
+      "start": "Finding your way",
+      "resources": "Resources",
+      "news": "News",
+      "agenda": "Calendar",
+      "polls": "Polls",
+      "suggestions": "Suggestion box",
+      "directory": "Directory",
+      "messaging": "Messaging and assistants",
+      "xp": "Points and badges",
+      "profile": "Profile and notifications",
+      "manage-news": "Publishing news",
+      "manage-events": "Publishing events",
+      "manage-polls": "Creating polls",
+      "manage-resources": "Managing resources",
+      "moderation": "Moderating comments",
+      "sub-groups": "Managing sub-groups",
+      "admin-users": "Users",
+      "admin-groups": "Groups",
+      "admin-roles": "Roles and permissions",
+      "admin-directory": "Managing the directory",
+      "admin-content": "Announcements, media and content settings",
+      "admin-system": "Settings and monitoring"
     }
   }
 }

@@ -2341,65 +2341,6 @@
       "contributor": "Contributeur"
     }
   },
-  "help": {
-    "title": "Aide",
-    "subtitle": "Documentation et guides",
-    "loading": "Chargement...",
-    "selectTopic": "Sélectionnez un sujet",
-    "selectTopicDesc": "Choisissez un guide dans le menu de gauche pour commencer",
-    "contentNotAvailable": "Ce contenu n'est pas encore disponible dans cette langue.",
-    "loadError": "Erreur lors du chargement du contenu. Veuillez réessayer.",
-    "version": "Documentation v{version}",
-    "fullDocs": "Documentation complète",
-    "yourRole": "Votre rôle",
-    "guides": {
-      "user": "Utilisateur",
-      "editor": "Éditeur",
-      "groupAdmin": "Admin Groupe",
-      "admin": "Administrateur"
-    },
-    "sections": {
-      "gettingStarted": "Démarrage",
-      "features": "Fonctionnalités",
-      "basics": "Les bases",
-      "advanced": "Avancé",
-      "management": "Gestion",
-      "applications": "Ressources",
-      "content": "Contenu",
-      "system": "Système",
-      "installation": "Installation & Configuration"
-    },
-    "pages": {
-      "introduction": "Introduction",
-      "firstSteps": "Premiers pas",
-      "dashboard": "Tableau de bord",
-      "applications": "Ressources",
-      "newsHub": "Hub Actualités",
-      "events": "Événements",
-      "polls": "Sondages",
-      "profile": "Profil",
-      "overview": "Vue d'ensemble",
-      "creatingNews": "Créer des actualités",
-      "richTextEditor": "Éditeur de texte riche",
-      "managingTags": "Gérer les tags",
-      "bestPractices": "Bonnes pratiques",
-      "permissions": "Permissions",
-      "managingAppGroups": "Gérer les catégories de ressources",
-      "managingApplications": "Gérer les ressources",
-      "groupMembers": "Membres du groupe",
-      "userManagement": "Gestion des utilisateurs",
-      "groupManagement": "Gestion des groupes",
-      "appGroups": "Catégories de ressources",
-      "newsManagement": "Gestion des actualités",
-      "eventsManagement": "Gestion des événements",
-      "pollsManagement": "Gestion des sondages",
-      "announcements": "Annonces",
-      "analytics": "Analytiques",
-      "settings": "Paramètres",
-      "installation": "Installation",
-      "configuration": "Configuration"
-    }
-  },
   "media": {
     "title": "Gestion des médias",
     "subtitle": "Gérer les fichiers, images et documents",
@@ -3239,6 +3180,45 @@
       "delete": "Impossible de supprimer le groupe.",
       "nameRequired": "Le nom est obligatoire.",
       "parentRequired": "Choisissez le groupe parent."
+    }
+  },
+  "help": {
+    "title": "Aide",
+    "subtitle": "Des guides pas à pas, selon vos accès",
+    "chooseTopic": "Choisir un guide",
+    "loadError": "Impossible d'afficher ce guide. Réessayez.",
+    "audiences": {
+      "everyone": "Pour tous",
+      "contributor": "Vos permissions",
+      "admin": "Administration"
+    },
+    "scope": {
+      "all": "Sur tout le site",
+      "groups": "Dans vos groupes"
+    },
+    "topics": {
+      "start": "Se repérer",
+      "resources": "Ressources",
+      "news": "Actualités",
+      "agenda": "Agenda",
+      "polls": "Sondages",
+      "suggestions": "Boîte à suggestions",
+      "directory": "Trombinoscope",
+      "messaging": "Messagerie et assistants",
+      "xp": "Points et badges",
+      "profile": "Profil et notifications",
+      "manage-news": "Publier des actualités",
+      "manage-events": "Publier des événements",
+      "manage-polls": "Créer des sondages",
+      "manage-resources": "Gérer les ressources",
+      "moderation": "Modérer les commentaires",
+      "sub-groups": "Gérer des sous-groupes",
+      "admin-users": "Utilisateurs",
+      "admin-groups": "Groupes",
+      "admin-roles": "Rôles et permissions",
+      "admin-directory": "Gérer le trombinoscope",
+      "admin-content": "Annonces, médias et réglages du contenu",
+      "admin-system": "Paramètres et suivi"
     }
   }
 }
