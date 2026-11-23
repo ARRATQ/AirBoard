@@ -416,6 +416,24 @@ visuelle. Ensuite :
 - Les chemins d'API `/editor` (permission sur tout le site) et `/group-admin` (limitée à ses
   groupes) gardent leurs noms historiques.
 
+## Après le chantier 8 — Groupes (PR #23 et #24, 2026-11-23)
+
+- **Sous-groupes** (#23, migration `00010`) : `groups.parent_id`, vue `user_effective_groups`
+  (un membre d'un sous-groupe voit aussi ce qui cible les groupes au-dessus). Une permission sur un
+  groupe couvre ses sous-groupes.
+- **Groupes liés au trombinoscope** (#23) : une entité peut avoir son groupe ; ses membres y sont
+  ajoutés et retirés automatiquement (`user_groups.source = 'directory'`), y compris quand une
+  personne change d'entité.
+- **Permission `groups.manage`** (#24, page Admin → Mes groupes) : sur ses groupes, créer,
+  renommer et supprimer des sous-groupes avec seulement des membres de ces groupes ; sur tout le
+  site, gérer tous les groupes. Le groupe par défaut et les groupes liés au trombinoscope restent
+  à l'admin.
+
+## Pistes ouvertes
+
+- **Aide intégrée** : masquée (`HELP_ENABLED = false` dans `Sidebar.vue`). Son contenu date
+  d'avant les rôles et la refonte des pages ; à réécrire (fr/en/es/ar) avant de la réactiver.
+
 ---
 
 ## Comment reprendre
