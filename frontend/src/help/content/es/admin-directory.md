@@ -22,8 +22,8 @@ En **Estructura**, en un **Puesto vacante**, haga clic en **Nombrar** y elija a 
 
 El botón **Grupo de usuarios** de una unidad propone:
 
-- **Crear los grupos desde el directorio**: un grupo por unidad, para esta unidad sola o con todas sus subunidades, respetando la jerarquía;
-- **Vincular un grupo existente**;
+- **Crear los grupos desde el directorio**: un grupo para esta unidad y uno para cada una de sus subunidades, con su nombre y la misma jerarquía. Las subunidades siempre se incluyen: para una sola subunidad, empiece desde ella. Un grupo existente con el mismo nombre se vincula en lugar de crearse de nuevo;
+- **Vincular un grupo existente**: solo para esta unidad; un grupo solo se vincula a una unidad;
 - **Quitar el vínculo**: el grupo se queda, los miembros que venían del organigrama salen de él.
 
 Las personas asignadas a un puesto de la unidad, cuya ficha está vinculada a una cuenta, pasan a ser miembros automáticamente. Un cambio de asignación actualiza el grupo. **Sincronizar los grupos** lo recalcula todo.

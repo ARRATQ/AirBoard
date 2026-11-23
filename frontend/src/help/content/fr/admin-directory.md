@@ -22,8 +22,8 @@ Dans **Structure**, sur un **Poste vacant**, cliquez sur **Nommer** et choisisse
 
 Le bouton **Groupe d'utilisateurs** d'une unité propose :
 
-- **Créer les groupes depuis le trombinoscope** : un groupe par unité, pour cette unité seule ou avec toutes ses sous-unités, en gardant la hiérarchie ;
-- **Lier un groupe existant** ;
+- **Créer les groupes depuis le trombinoscope** : un groupe pour cette unité et un pour chacune de ses sous-unités, à leur nom et avec la même hiérarchie. Les sous-unités sont toujours incluses : pour une seule sous-unité, partez de celle-ci. Un groupe existant du même nom est lié au lieu d'être recréé ;
+- **Lier un groupe existant** : pour cette unité seulement ; un groupe ne se lie qu'à une unité ;
 - **Retirer le lien** : le groupe reste, les membres venus du trombinoscope en sortent.
 
 Les personnes affectées à un poste de l'unité, dont la fiche est liée à un compte, en deviennent membres automatiquement. Un changement d'affectation met le groupe à jour. **Synchroniser les groupes** recalcule tout.

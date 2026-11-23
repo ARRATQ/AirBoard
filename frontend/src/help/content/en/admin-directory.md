@@ -22,8 +22,8 @@ In **Structure**, on a **Vacant position**, click **Assign** and choose the pers
 
 A unit's **User group** button offers:
 
-- **Create groups from the directory**: one group per unit, for this unit alone or with all its sub-units, keeping the hierarchy;
-- **Link an existing group**;
+- **Create groups from the directory**: one group for this unit and one for each of its sub-units, named after them and with the same hierarchy. Sub-units are always included: for a single sub-unit, start from that sub-unit. An existing group with the same name is linked instead of being created again;
+- **Link an existing group**: for this unit only; a group can be linked to one unit only;
 - **Remove the link**: the group stays, members who came from the directory leave it.
 
 People assigned to a position in the unit, whose card is linked to an account, become members automatically. A change of assignment updates the group. **Sync groups** recalculates everything.

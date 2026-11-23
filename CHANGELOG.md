@@ -55,6 +55,9 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🐛 Bug Fixes
 
+- **Deleting a resource category** no longer fails (500) when one of its resources was already
+  clicked, favourited or commented: clicks, favourites and comments are deleted with it, in one
+  transaction.
 - A person who manages news, events or polls only for their groups can no longer publish
   site-wide content: every article, event and poll they write targets at least one of their
   groups (checked by the server and the forms; no more public events for them).

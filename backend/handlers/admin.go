@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -257,27 +258,52 @@ func (h *AdminHandler) DeleteAppGroup(c *gin.Context) {
 		return
 	}
 
-	// Supprimer d'abord les applications associées (hard delete)
-	if err := h.db.Unscoped().Where("app_group_id = ?", id).Delete(&models.Application{}).Error; err != nil {
-		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des applications")
-		return
-	}
-
-	// Supprimer les associations many-to-many (group_app_groups)
-	if err := h.db.Exec("DELETE FROM group_app_groups WHERE app_group_id = ?", id).Error; err != nil {
-		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression des associations")
-		return
-	}
-
-	// Supprimer le groupe d'applications (hard delete pour permettre la recréation avec le même nom)
-	if err := h.db.Unscoped().Delete(&models.AppGroup{}, id).Error; err != nil {
-		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression")
+	// Suppression définitive (le nom redevient libre), d'un seul tenant
+	if err := h.db.Transaction(func(tx *gorm.DB) error { return purgeAppGroup(tx, uint(id)) }); err != nil {
+		log.Printf("[ADMIN] Suppression de la catégorie de ressources %d : %v", id, err)
+		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la suppression de la catégorie")
 		return
 	}
 
 	c.JSON(http.StatusOK, models.SuccessResponse{
 		Message: "Groupe d'applications supprimé avec succès",
 	})
+}
+
+// purgeAppGroup efface une catégorie de ressources et ses ressources (corbeille comprise),
+// avec ce qui s'y rattache : clics, favoris et commentaires. Les clics et les favoris ont une
+// clé étrangère vers la ressource : sans eux, la base refuserait la suppression.
+func purgeAppGroup(tx *gorm.DB, appGroupID uint) error {
+	resources := tx.Unscoped().Model(&models.Application{}).Select("id").Where("app_group_id = ?", appGroupID)
+	steps := []struct {
+		what string
+		run  func() error
+	}{
+		{"clics", func() error {
+			return tx.Where("application_id IN (?)", resources).Delete(&models.ApplicationClick{}).Error
+		}},
+		{"favoris", func() error {
+			return tx.Exec("DELETE FROM user_favorites WHERE application_id IN (?)", resources).Error
+		}},
+		{"commentaires", func() error {
+			return tx.Unscoped().Where("entity_type = ? AND entity_id IN (?)", "application", resources).Delete(&models.Comment{}).Error
+		}},
+		{"ressources", func() error {
+			return tx.Unscoped().Where("app_group_id = ?", appGroupID).Delete(&models.Application{}).Error
+		}},
+		{"accès des groupes", func() error {
+			return tx.Exec("DELETE FROM group_app_groups WHERE app_group_id = ?", appGroupID).Error
+		}},
+		{"catégorie", func() error {
+			return tx.Unscoped().Delete(&models.AppGroup{}, appGroupID).Error
+		}},
+	}
+	for _, step := range steps {
+		if err := step.run(); err != nil {
+			return fmt.Errorf("%s : %w", step.what, err)
+		}
+	}
+	return nil
 }
 
 // ============ GESTION DES APPLICATIONS ============
