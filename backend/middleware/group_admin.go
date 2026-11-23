@@ -26,7 +26,7 @@ func CanManageAppGroupWithDB(c *gin.Context, appGroupID uint, db interface{}) bo
 		return false
 	}
 
-	// Vérifier si l'AppGroup est privé et lié à un des groupes administrés
+	// L'AppGroup doit être privé et lié à un des groupes de la requête
 	var count int64
 	gormDB.Table("app_groups").
 		Joins("JOIN group_app_groups ON group_app_groups.app_group_id = app_groups.id").

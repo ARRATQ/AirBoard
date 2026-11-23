@@ -1143,9 +1143,6 @@
     }
   },
   "groupAdmin": {
-    "title": "Administration de Groupe",
-    "subtitle": "Gérez les ressources des groupes dont vous êtes administrateur",
-    "managedGroups": "Groupes administrés",
     "appGroups": "Catégories de ressources",
     "applications": "Ressources",
     "news": "Articles de groupe",
@@ -1156,9 +1153,7 @@
     "events": "Événements",
     "groupNews": "News de Groupe",
     "yourGroups": "Vos Groupes",
-    "yourGroupsSubtitle": "Groupes dont vous êtes administrateur",
-    "noManagedGroups": "Aucun groupe administré",
-    "noManagedGroupsHelp": "Contactez un administrateur pour obtenir des droits d'administration de groupe",
+    "noManagedGroups": "Aucun groupe pour votre rôle",
     "manageAppGroups": "Gérer les catégories de ressources",
     "manageAppGroupsDesc": "Créer et organiser vos catégories de ressources",
     "manageApplications": "Gérer les Ressources",
@@ -1241,10 +1236,10 @@
     },
     "appGroupsManagement": {
       "title": "Catégories de ressources",
-      "subtitle": "Gérez les catégories de ressources de vos groupes administrés",
+      "subtitle": "Gérez les catégories de ressources de vos groupes",
       "newGroup": "Nouveau Groupe",
-      "noManagedGroups": "Aucun groupe administré",
-      "noManagedGroupsHelp": "Vous devez être administrateur d'au moins un groupe pour créer des catégories de ressources. Contactez un administrateur système pour obtenir des droits d'administration de groupe.",
+      "noManagedGroups": "Aucun groupe pour votre rôle",
+      "noManagedGroupsHelp": "Votre rôle vous permet de gérer les ressources de vos groupes, mais aucun groupe ne lui est associé. Demandez à un administrateur de vous ajouter à un groupe ou de choisir les groupes de votre rôle.",
       "searchPlaceholder": "Rechercher une catégorie...",
       "status": {
         "all": "Tous les statuts",
@@ -1323,7 +1318,7 @@
       "subtitle": "Gérez les actualités pour vos groupes",
       "newArticle": "Nouvel Article",
       "infoTitle": "Gestion des actualités de groupe",
-      "infoDescription": "En tant que Group Admin, vous pouvez créer des actualités ciblées pour vos groupes administrés. Ces actualités seront visibles uniquement par les membres des groupes que vous sélectionnez.",
+      "infoDescription": "Votre rôle vous permet de publier des actualités pour certains groupes. Chaque actualité cible au moins un de ces groupes et n'est visible que par leurs membres.",
       "searchPlaceholder": "Rechercher des articles...",
       "categoryFilter": {
         "all": "Toutes les catégories"
@@ -1462,7 +1457,7 @@
       "subtitle": "Gérez les événements pour vos groupes",
       "newEvent": "Nouvel Événement",
       "infoTitle": "Gestion des événements de groupe",
-      "infoDescription": "En tant que Group Admin, vous pouvez créer des événements pour vos groupes administrés. Les événements publics seront visibles par tous, tandis que les événements ciblés ne seront visibles que par les membres des groupes sélectionnés.",
+      "infoDescription": "Votre rôle vous permet de créer des événements pour certains groupes. Un événement public est visible par tous ; un événement ciblé n'est visible que par les membres des groupes choisis.",
       "searchPlaceholder": "Rechercher des événements...",
       "categoryFilter": {
         "all": "Toutes les catégories"
@@ -2465,7 +2460,6 @@
     "email": "Email",
     "emailReadonly": "Contactez un administrateur pour changer votre email",
     "role": "Rôle",
-    "roleGroupAdmin": "Administrateur de groupe",
     "memberSince": "Membre depuis",
     "personalInfo": "Informations personnelles",
     "firstName": "Prénom",
@@ -2661,7 +2655,7 @@
       "all": "Tous les utilisateurs",
       "allHelp": "Visible par toute personne connectée.",
       "managers": "Gestionnaires",
-      "managersHelp": "Visible uniquement par les admins et admins de groupe."
+      "managersHelp": "Visible uniquement par les administrateurs."
     },
     "saved": {
       "unit": "Unité enregistrée",
@@ -2913,7 +2907,7 @@
     "nothingPending": "rien en attente",
     "pendingComments": "Commentaires en attente de modération",
     "newSuggestions": "Nouvelles suggestions",
-    "managedGroups": "Groupes administrés",
+    "managedGroups": "Vos groupes",
     "resourceCategories": "Catégories de ressources",
     "manage": "Gérer"
   },

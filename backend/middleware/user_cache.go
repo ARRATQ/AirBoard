@@ -8,7 +8,7 @@ import (
 )
 
 // userStatusTTL borne le délai pendant lequel un changement de rôle,
-// une désactivation ou un retrait de groupe administré peut être ignoré.
+// une désactivation ou un changement de rôle ou de groupe peut être ignoré.
 const userStatusTTL = time.Minute
 
 // userStatusCacheMaxEntries évite une croissance illimitée du cache.
@@ -36,7 +36,7 @@ type cachedUserStatus struct {
 }
 
 // userStatusCache garde en mémoire, pour une courte durée, le rôle, l'état
-// actif et les groupes administrés de chaque utilisateur authentifié.
+// actif, les permissions et les groupes couverts de chaque utilisateur authentifié.
 type userStatusCache struct {
 	mu      sync.Mutex
 	entries map[uint]cachedUserStatus

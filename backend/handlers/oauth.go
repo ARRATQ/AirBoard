@@ -292,12 +292,12 @@ func (h *OAuthHandler) OAuthCallback(c *gin.Context) {
 		return
 	}
 
-	// Recharger l'utilisateur avec les groupes et les groupes administrés
+	// Recharger l'utilisateur avec ses groupes
 	if err := h.db.Preload("Groups").First(&user, user.ID).Error; err != nil {
 		log.Printf("Error loading user groups: %v", err)
 	}
 
-	// Groupes administrés (nécessaires au frontend)
+	// Permissions et groupes couverts (nécessaires au frontend)
 	attachPermissions(h.db, &user)
 
 	user.Password = ""

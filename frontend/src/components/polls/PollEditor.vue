@@ -414,7 +414,7 @@ const loadingAnnouncements = ref(false)
 
 const isEdit = computed(() => !!props.poll)
 
-// Groupes disponibles - pour Group Admin, les groupes sont déjà filtrés par le parent
+// Groupes disponibles : limités à ses groupes, ils sont déjà filtrés par le parent
 const availableGroups = computed(() => {
   // Les groupes passés en props sont déjà les bons selon le rôle
   // (managedGroups pour group-admin, tous les groupes pour admin)

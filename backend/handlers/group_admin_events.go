@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateEventGroupAdmin - Créer un événement (Group Admin)
+// CreateEventGroupAdmin - Créer un événement (events.manage limitée à ses groupes)
 // Peut créer des événements publics OU ciblant uniquement ses groupes gérés
 func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	var req models.EventRequest
@@ -27,7 +27,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 		return
 	}
 
-	// Récupérer les groupes gérés par ce group admin
+	// Groupes couverts par sa permission
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
 	// Validation : si des groupes cibles sont spécifiés, ils doivent être dans les groupes gérés
@@ -41,7 +41,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}
@@ -115,7 +115,7 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	c.JSON(http.StatusCreated, event)
 }
 
-// UpdateEventGroupAdmin - Modifier un événement (Group Admin)
+// UpdateEventGroupAdmin - Modifier un événement (events.manage limitée à ses groupes)
 // Peut modifier ses propres événements OU événements ciblant ses groupes gérés
 func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	identifier := c.Param("id")
@@ -141,7 +141,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Vérifier si le group admin peut gérer cet événement
+	// La personne peut-elle gérer cet événement ?
 	canManage := false
 
 	// 1. Si c'est son propre événement
@@ -189,7 +189,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 				}
 			}
 			if !isManaged {
-				apierror.Respond(c, http.StatusForbidden, "Vous ne pouvez cibler que les groupes que vous administrez")
+				apierror.Respond(c, http.StatusForbidden, msgTargetOutsideGroups)
 				return
 			}
 		}
@@ -257,7 +257,7 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, event)
 }
 
-// DeleteEventGroupAdmin - Supprimer un événement (Group Admin)
+// DeleteEventGroupAdmin - Supprimer un événement (events.manage limitée à ses groupes)
 // Peut supprimer ses propres événements OU événements ciblant ses groupes gérés
 func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	identifier := c.Param("id")
@@ -283,7 +283,7 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	managedGroupIDs := middleware.GetManagedGroupIDs(c)
 
-	// Vérifier si le group admin peut gérer cet événement
+	// La personne peut-elle gérer cet événement ?
 	canManage := false
 
 	// 1. Si c'est son propre événement

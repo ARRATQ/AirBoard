@@ -752,7 +752,7 @@ export const newsService = {
   }
 }
 
-// Group Admin Service
+// Gestion limitée à ses groupes (routes /group-admin)
 export const groupAdminService = {
   // AppGroups (scoped to managed groups)
   async getAppGroups(params = {}) {
@@ -835,7 +835,7 @@ export const groupAdminService = {
     return response.data
   },
 
-  // Categories (group admin peut créer/modifier des catégories)
+  // Catégories (réservé à l'admin)
   async createCategory(data) {
     const response = await api.post('/group-admin/news/categories', data)
     return response.data
@@ -1037,7 +1037,7 @@ export const editorEventsService = {
   }
 }
 
-// Group Admin Events Service
+// Événements, gestion limitée à ses groupes (routes /group-admin)
 export const groupAdminEventsService = {
   async getEvents(params = {}) {
     const response = await api.get('/group-admin/events', { params })
@@ -1280,7 +1280,7 @@ export const pollsService = {
   },
 
 
-  // Créer un sondage (admin de groupe)
+  // Créer un sondage (limitée à ses groupes)
   async createPollAsGroupAdmin(data) {
     const response = await api.post('/group-admin/polls', data)
     return response.data
@@ -1293,7 +1293,7 @@ export const pollsService = {
   },
 
 
-  // Mettre à jour un sondage (admin de groupe)
+  // Mettre à jour un sondage (limitée à ses groupes)
   async updatePollAsGroupAdmin(id, data) {
     const response = await api.put(`/group-admin/polls/${id}`, data)
     return response.data
@@ -1306,7 +1306,7 @@ export const pollsService = {
   },
 
 
-  // Supprimer un sondage (admin de groupe)
+  // Supprimer un sondage (limitée à ses groupes)
   async deletePollAsGroupAdmin(id) {
     const response = await api.delete(`/group-admin/polls/${id}`)
     return response.data
@@ -1318,7 +1318,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Fermer un sondage (admin de groupe)
+  // Fermer un sondage (limitée à ses groupes)
   async closePollAsGroupAdmin(id) {
     const response = await api.post(`/group-admin/polls/${id}/close`)
     return response.data
@@ -1350,7 +1350,7 @@ export const pollsService = {
     return response.data
   },
 
-  // Récupérer les sondages pour group admin
+  // Sondages de ses groupes
   async getPollsAsGroupAdmin(params = {}) {
     const response = await api.get('/group-admin/polls', { params })
     return response.data
@@ -1468,7 +1468,7 @@ export const commentsService = {
 
 // ===== Media Service =====
 export const mediaService = {
-  // Upload un fichier média (editor/admin de groupe/admin)
+  // Envoi d'un fichier média (permission sur tout le site)
   async uploadMedia(file, onUploadProgress) {
     const formData = new FormData()
     formData.append('file', file)
@@ -1500,7 +1500,7 @@ export const mediaService = {
     return response.data
   },
 
-  // Upload média pour group admin
+  // Envoi d'un média (limitée à ses groupes)
   async uploadMediaAsGroupAdmin(file, onUploadProgress) {
     const formData = new FormData()
     formData.append('file', file)
@@ -1613,7 +1613,7 @@ export const directoryService = {
     return (await api.delete(`/admin/directory/fields/${id}`)).data
   },
 
-  // Personnes et affectations (admin + admin de groupe)
+  // Personnes et affectations (admin)
   async searchUsers(q) {
     return (await api.get('/group-admin/directory/users', { params: { q } })).data
   },

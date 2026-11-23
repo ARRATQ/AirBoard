@@ -131,6 +131,19 @@ func TestNewsEventsByPermission(t *testing.T) {
 		}
 	})
 
+	t.Run("ses groupes : un article cible au moins un de ses groupes", func(t *testing.T) {
+		if code := status(inGroups, http.MethodPost, "/group-admin/news", draft("m-sans-groupe")); code != http.StatusBadRequest {
+			t.Errorf("article sans groupe cible : %d, attendu 400", code)
+		}
+		empty := map[string]interface{}{"title": f.title("g1-draft-vide"), "content": "x", "target_group_ids": []uint{}}
+		if code := status(inGroups, http.MethodPut, "/group-admin/news/"+news["g1-draft"].Slug, empty); code != http.StatusBadRequest {
+			t.Errorf("retrait de tous les groupes cibles : %d, attendu 400", code)
+		}
+		if code := status(everywhere, http.MethodPost, "/editor/news", draft("o-global")); code != http.StatusCreated {
+			t.Errorf("article global, permission sur tout le site : %d, attendu 201", code)
+		}
+	})
+
 	t.Run("groupes gérés selon la permission demandée", func(t *testing.T) {
 		code, _, groups := send(t, inGroups, http.MethodGet, "/api/v1/group-admin/managed-groups?permission=news.manage", nil)
 		if code != http.StatusOK || len(groups) != 1 {

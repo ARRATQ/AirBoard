@@ -162,7 +162,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Groupes administrés (nécessaires au frontend)
+	// Permissions et groupes couverts (nécessaires au frontend)
 	attachPermissions(h.db, &user)
 
 	// Masquer le mot de passe
@@ -414,7 +414,7 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	// Groupes administrés (nécessaires au frontend)
+	// Permissions et groupes couverts (nécessaires au frontend)
 	attachPermissions(h.db, &user)
 
 	// Masquer le mot de passe
@@ -556,14 +556,14 @@ func (h *AuthHandler) SSOAutoLogin(c *gin.Context) {
 		return
 	}
 
-	// Recharger l'utilisateur avec les groupes et les groupes administrés
+	// Recharger l'utilisateur avec ses groupes
 	var user models.User
 	if err := h.db.Preload("Groups").First(&user, ssoUser.ID).Error; err != nil {
 		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de la récupération des informations utilisateur")
 		return
 	}
 
-	// Groupes administrés (nécessaires au frontend)
+	// Permissions et groupes couverts (nécessaires au frontend)
 	attachPermissions(h.db, &user)
 
 	// Gamification XP (Daily Login)

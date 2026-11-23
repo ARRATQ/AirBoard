@@ -407,7 +407,7 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const appStore = useAppStore()
-// Admin et éditeur : API globale ; admin de groupe : API /group-admin, groupes administrés
+// Sur tout le site : API globale ; limitée à ses groupes : API /group-admin, ses groupes
 const { isGlobal, isAdmin } = useManagementScope(EVENTS)
 
 const isEditMode = computed(() => route.params.slug && route.params.slug !== 'new')
@@ -534,7 +534,7 @@ const loadCategories = async () => {
   }
 }
 
-// Groupes proposés comme cibles : tous pour l'admin, ceux qu'il administre pour l'admin de groupe.
+// Groupes proposés comme cibles : tous sur tout le site, ses groupes sinon.
 // L'éditeur n'a pas d'API listant les groupes (GET /admin/groups est réservé à l'admin).
 const fetchTargetGroups = async () => {
   if (!isGlobal.value) {

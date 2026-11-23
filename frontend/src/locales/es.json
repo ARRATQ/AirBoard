@@ -886,16 +886,11 @@
     "noneOfType": "Ningún recurso de este tipo."
   },
   "groupAdmin": {
-    "title": "Administración de Grupo",
-    "subtitle": "Gestiona los recursos de los grupos que administras",
-    "managedGroups": "Grupos Administrados",
     "appGroups": "Categorías de recursos",
     "applications": "Recursos",
     "news": "Noticias de Grupo",
     "yourGroups": "Tus Grupos",
-    "yourGroupsSubtitle": "Grupos que administras",
-    "noManagedGroups": "No hay grupos administrados",
-    "noManagedGroupsHelp": "Contacta a un administrador para obtener derechos de administración de grupo",
+    "noManagedGroups": "Ningún grupo para tu rol",
     "manageAppGroups": "Gestionar categorías de recursos",
     "manageAppGroupsDesc": "Crear y organizar tus categorías de recursos",
     "manageApplications": "Gestionar Recursos",
@@ -984,10 +979,10 @@
     },
     "appGroupsManagement": {
       "title": "Categorías de recursos",
-      "subtitle": "Gestionar categorías de recursos de tus grupos administrados",
+      "subtitle": "Gestiona las categorías de recursos de tus grupos",
       "newGroup": "Nuevo Grupo",
-      "noManagedGroups": "No hay grupos administrados",
-      "noManagedGroupsHelp": "Debes ser administrador de al menos un grupo para crear categorías de recursos. Contacta a un administrador del sistema para obtener derechos de administración de grupo.",
+      "noManagedGroups": "Ningún grupo para tu rol",
+      "noManagedGroupsHelp": "Tu rol te permite gestionar los recursos de tus grupos, pero no tiene ningún grupo asociado. Pide a un administrador que te añada a un grupo o que elija los grupos de tu rol.",
       "searchPlaceholder": "Buscar una categoría...",
       "status": {
         "all": "Todos los estados",
@@ -1066,7 +1061,7 @@
       "subtitle": "Gestionar noticias para tus grupos",
       "newArticle": "Nuevo Artículo",
       "infoTitle": "Gestión de noticias de grupo",
-      "infoDescription": "Como Administrador de Grupo, puedes crear noticias dirigidas para tus grupos administrados. Estas noticias serán visibles solo para los miembros de los grupos que selecciones.",
+      "infoDescription": "Tu rol te permite publicar noticias para determinados grupos. Cada noticia se dirige al menos a uno de esos grupos y solo la ven sus miembros.",
       "searchPlaceholder": "Buscar artículos...",
       "categoryFilter": {
         "all": "Todas las categorías"
@@ -1205,7 +1200,7 @@
       "subtitle": "Gestiona eventos para tus grupos",
       "newEvent": "Nuevo Evento",
       "infoTitle": "Gestión de eventos del grupo",
-      "infoDescription": "Como Administrador de Grupo, puedes crear eventos para tus grupos administrados. Los eventos públicos serán visibles para todos, mientras que los eventos dirigidos solo serán visibles para miembros de los grupos seleccionados.",
+      "infoDescription": "Tu rol te permite crear eventos para determinados grupos. Un evento público es visible para todos; un evento dirigido solo lo ven los miembros de los grupos elegidos.",
       "searchPlaceholder": "Buscar eventos...",
       "categoryFilter": {
         "all": "Todas las categorías"
@@ -2303,7 +2298,7 @@
       "all": "Todos los usuarios",
       "allHelp": "Visible para cualquier persona conectada.",
       "managers": "Gestores",
-      "managersHelp": "Visible solo para administradores y administradores de grupo."
+      "managersHelp": "Visible solo para los administradores."
     },
     "saved": {
       "unit": "Unidad guardada",
@@ -2555,7 +2550,7 @@
     "nothingPending": "nada pendiente",
     "pendingComments": "Comentarios pendientes de moderación",
     "newSuggestions": "Sugerencias nuevas",
-    "managedGroups": "Grupos administrados",
+    "managedGroups": "Tus grupos",
     "resourceCategories": "Categorías de recursos",
     "manage": "Gestionar"
   },
@@ -2836,7 +2831,6 @@
     "email": "Correo electrónico",
     "emailReadonly": "Póngase en contacto con un administrador para cambiar su correo electrónico",
     "role": "Rol",
-    "roleGroupAdmin": "Administrador de grupo",
     "memberSince": "Miembro desde",
     "personalInfo": "Información personal",
     "firstName": "Nombre",

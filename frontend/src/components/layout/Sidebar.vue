@@ -92,7 +92,7 @@
           </CollapsibleMenu>
         </template>
 
-        <!-- Admin de groupe, éditeur : la courte liste des pages permises -->
+        <!-- Rôles avec permissions : la courte liste des pages permises -->
         <template v-else>
           <SidebarLink
             v-for="item in adminNav.items"

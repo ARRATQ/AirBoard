@@ -22,11 +22,11 @@ func NewGroupAdminHandler(db *gorm.DB) *GroupAdminHandler {
 	return &GroupAdminHandler{db: db}
 }
 
-// groupAdminPageLimits : les écrans de l'admin de groupe filtrent côté client et demandent une
+// groupAdminPageLimits : les écrans de gestion limitée aux groupes filtrent côté client et demandent une
 // grande page ; le plafond borne quand même la requête.
 var groupAdminPageLimits = pageLimits{Default: 100, Max: 1000}
 
-// privateAppGroupIDs : sous-requête des AppGroups privés liés aux groupes administrés.
+// privateAppGroupIDs : sous-requête des AppGroups privés liés aux groupes de la personne.
 func (h *GroupAdminHandler) privateAppGroupIDs(managedGroupIDs []uint) *gorm.DB {
 	return h.db.Table("group_app_groups").
 		Select("group_app_groups.app_group_id").
@@ -41,7 +41,7 @@ func respondGroupAdminListError(c *gin.Context, what string, err error) {
 }
 
 // GetAppGroups retourne une page des AppGroups accessibles : tous pour l'admin global,
-// les AppGroups privés liés aux groupes administrés pour un admin de groupe.
+// les AppGroups privés liés à ses groupes avec une gestion limitée à ses groupes.
 func (h *GroupAdminHandler) GetAppGroups(c *gin.Context) {
 	page := parsePageParams(c, groupAdminPageLimits)
 	query := h.db.Model(&models.AppGroup{})
@@ -138,7 +138,7 @@ func (h *GroupAdminHandler) groupUserCounts(groups []models.Group) (map[uint]int
 }
 
 // GetApplications retourne une page des applications : toutes pour l'admin global, celles des
-// AppGroups privés liés aux groupes administrés pour un admin de groupe.
+// AppGroups privés liés à ses groupes avec une gestion limitée à ses groupes.
 func (h *GroupAdminHandler) GetApplications(c *gin.Context) {
 	page := parsePageParams(c, groupAdminPageLimits)
 	query := h.db.Model(&models.Application{})
@@ -191,7 +191,7 @@ func (h *GroupAdminHandler) CreateApplication(c *gin.Context) {
 	}
 
 	if !middleware.IsUnrestricted(c) {
-		// Vérifier que l'AppGroup est privé et appartient aux groupes administrés
+		// L'AppGroup doit être privé et appartenir à ses groupes
 		managedGroupIDs := middleware.GetManagedGroupIDs(c)
 		if len(managedGroupIDs) == 0 {
 			apierror.Respond(c, http.StatusForbidden, "You don't manage any groups")

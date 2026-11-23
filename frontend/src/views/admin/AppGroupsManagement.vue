@@ -10,7 +10,7 @@
       </template>
     </PageHeader>
 
-    <!-- Admin de groupe sans groupe administré : création impossible -->
+    <!-- Gestion limitée à ses groupes, sans aucun groupe : création impossible -->
     <div v-if="showNoManagedGroups" class="ag-callout" role="note">
       <Icon icon="lucide:info" class="ag-callout__icon" aria-hidden="true" />
       <div>
@@ -121,7 +121,7 @@ const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
 
 // Admin global : tous les groupes de ressources (API admin) ;
-// admin de groupe : groupes de ressources privés de ses groupes (API group-admin)
+// limitée à ses groupes : groupes de ressources privés de ses groupes (API group-admin)
 const { isGlobal } = useManagementScope(RESOURCES)
 const service = computed(() => (isGlobal.value ? adminService : groupAdminService))
 
@@ -141,7 +141,7 @@ const toList = (data) => {
 }
 
 // Computed
-// L'admin de groupe ne peut créer que s'il administre au moins un groupe (groupe propriétaire obligatoire)
+// Limitée à ses groupes : création possible avec au moins un groupe (groupe propriétaire obligatoire)
 const canCreate = computed(() => isGlobal.value || managedGroups.value.length > 0)
 const showNoManagedGroups = computed(() =>
   !isGlobal.value && managedGroupsLoaded.value && managedGroups.value.length === 0

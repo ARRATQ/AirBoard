@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// ---- Personnes (admin + admin de groupe) ----
+// ---- Personnes (admin) ----
 
 // buildPerson valide la requête et renvoie les valeurs à enregistrer
 func (h *DirectoryHandler) buildPerson(c *gin.Context) (*models.DirectoryPerson, bool) {
@@ -143,7 +143,7 @@ func (h *DirectoryHandler) DeletePerson(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Personne supprimée"})
 }
 
-// ---- Affectations (admin + admin de groupe) ----
+// ---- Affectations (admin) ----
 
 func parseStartDate(raw string) (*time.Time, error) {
 	if strings.TrimSpace(raw) == "" {

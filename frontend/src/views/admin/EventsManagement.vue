@@ -15,7 +15,7 @@
       </template>
     </PageHeader>
 
-    <!-- Rappel du périmètre pour l'admin de groupe -->
+    <!-- Rappel du périmètre : gestion limitée à ses groupes -->
     <div v-if="!isGlobal" class="ev-callout" role="note">
       <Icon icon="lucide:info" class="ev-callout__icon" aria-hidden="true" />
       <div>
@@ -177,7 +177,7 @@ const SCOPED_PAGE_SIZE = 20
 const { t, locale } = useI18n()
 const appStore = useAppStore()
 const { confirm: askConfirm } = useConfirm()
-// Admin et éditeur : tous les événements ; admin de groupe : ceux de ses groupes
+// Sur tout le site : tous les événements ; limitée à ses groupes : ceux de ses groupes
 const { isGlobal, isAdmin } = useManagementScope(EVENTS)
 
 const eventsList = ref([])

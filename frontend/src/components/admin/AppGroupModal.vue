@@ -86,7 +86,7 @@
                 <span class="switch-track" aria-hidden="true"></span>
               </label>
 
-              <!-- Groupe propriétaire : si privé (admin global), toujours (admin de groupe) -->
+              <!-- Groupe propriétaire : si privé (tout le site), toujours (limitée à ses groupes) -->
               <div v-if="showOwnerSelect" class="form-group mb-0">
                 <label for="owner_group_id" class="form-label form-label-required">{{ $t('groupAdmin.appGroupModal.ownerGroup') }}</label>
                 <select
@@ -186,7 +186,7 @@ const props = defineProps({
     type: Object,
     default: null
   },
-  // Groupes administrés (admin de groupe uniquement) : choix du groupe propriétaire
+  // Ses groupes (gestion limitée à ses groupes) : choix du groupe propriétaire
   managedGroups: {
     type: Array,
     default: () => []
@@ -197,7 +197,7 @@ const emit = defineEmits(['close', 'submit'])
 
 const { t } = useI18n()
 // Admin global : public/privé et n'importe quel groupe propriétaire ;
-// admin de groupe : toujours privé, propriétaire parmi ses groupes administrés
+// limitée à ses groupes : toujours privé, propriétaire parmi ses groupes
 const { isGlobal, isAdmin } = useManagementScope(RESOURCES)
 
 const DEFAULT_COLOR = '#10b981'
@@ -222,7 +222,7 @@ const isEdit = computed(() => !!props.appGroup)
 
 const showOwnerSelect = computed(() => !isGlobal.value || form.is_private)
 const ownerOptions = computed(() => (isGlobal.value ? groups.value : props.managedGroups))
-// L'admin de groupe ne peut pas changer le propriétaire d'un groupe existant
+// Limitée à ses groupes : pas de changement de propriétaire d'un groupe existant
 const isOwnerLocked = computed(() => !isGlobal.value && isEdit.value)
 const ownerHelp = computed(() => {
   if (isGlobal.value) return t('adminShared.appGroups.ownerGroupManageHelp')

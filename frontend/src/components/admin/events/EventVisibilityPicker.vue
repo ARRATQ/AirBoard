@@ -66,7 +66,7 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  // Groupes proposés (tous les groupes pour l'admin, les groupes administrés pour l'admin de groupe)
+  // Groupes proposés (tous sur tout le site, ses groupes sinon)
   groups: {
     type: Array,
     default: () => []

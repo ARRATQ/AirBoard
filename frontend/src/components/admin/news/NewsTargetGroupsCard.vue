@@ -1,5 +1,5 @@
 <template>
-  <!-- Ciblage par groupe : obligatoire pour l'admin de groupe (au moins un de ses groupes) -->
+  <!-- Ciblage par groupe : obligatoire avec une gestion limitée à ses groupes (au moins un) -->
   <div class="card bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800">
     <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
       <Icon icon="lucide:users" class="h-5 w-5 text-primary-500" />
@@ -39,7 +39,7 @@ const props = defineProps({
   modelValue: { type: Array, required: true },
   // Groupes que l'utilisateur administre
   groups: { type: Array, required: true },
-  // Groupes déjà ciblés qu'il n'administre pas : affichés, mais non retirables
+  // Groupes déjà ciblés hors de ses groupes : affichés, mais non retirables
   lockedGroups: { type: Array, default: () => [] }
 })
 

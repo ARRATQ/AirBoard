@@ -64,7 +64,7 @@
                 {{ $t('groupAdmin.newsEditor.contentLabel') }} *
               </p>
               <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
-                <!-- L'admin de groupe téléverse ses médias via l'API group-admin -->
+                <!-- Limitée à ses groupes : médias envoyés par l'API group-admin -->
                 <RichTextEditor
                   v-model="form.content"
                   :placeholder="$t('groupAdmin.newsEditor.contentPlaceholder')"
@@ -131,7 +131,7 @@
             </div>
           </div>
 
-          <!-- Groupes cibles : admin de groupe uniquement -->
+          <!-- Groupes cibles : gestion limitée à ses groupes uniquement -->
           <NewsTargetGroupsCard
             v-if="!isGlobal"
             v-model="form.target_group_ids"
@@ -273,7 +273,7 @@ const { t } = useI18n()
 const appStore = useAppStore()
 const typesStore = useNewsTypesStore()
 
-// Admin et éditeur : API éditeur ; admin de groupe seul : API group-admin + ciblage obligatoire
+// Sur tout le site : API editor ; limitée à ses groupes : API group-admin + ciblage obligatoire
 const { isGlobal, isAdmin } = useManagementScope(NEWS)
 
 const isEditMode = computed(() => Boolean(route.params.slug && route.params.slug !== 'new'))
@@ -281,7 +281,7 @@ const isSaving = ref(false)
 const categories = ref([])
 const tags = ref([])
 const managedGroups = ref([])
-// Groupes ciblés par l'article que l'admin de groupe n'administre pas (lecture seule)
+// Groupes ciblés par l'article hors de ses groupes (lecture seule)
 const targetGroups = ref([])
 const lockedGroups = computed(() =>
   targetGroups.value.filter((group) => !managedGroups.value.some((g) => g.id === group.id))
@@ -371,7 +371,7 @@ const loadManagedGroups = async () => {
     const data = await groupAdminService.getManagedGroups(ACCESS_PERMISSION[NEWS])
     managedGroups.value = Array.isArray(data) ? data : (data?.groups || data?.data || [])
   } catch (error) {
-    console.error('Erreur au chargement des groupes administrés :', error)
+    console.error('Erreur au chargement de ses groupes :', error)
     managedGroups.value = []
   }
 }
@@ -415,7 +415,7 @@ const loadMetadata = async () => {
   }
 }
 
-// Charge utile envoyée à l'API. Les groupes cibles ne sont transmis que par l'admin de groupe :
+// Charge utile envoyée à l'API. Les groupes cibles ne sont transmis qu'avec une gestion limitée à ses groupes :
 // sans le champ, le backend conserve le ciblage existant (aucun écrasement côté admin/éditeur).
 const buildPayload = () => {
   const { target_group_ids: targetGroupIds, ...rest } = form.value

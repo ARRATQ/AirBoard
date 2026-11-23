@@ -59,9 +59,9 @@ func (h *AdminHandler) applyFlags(model interface{}, f resourceFlags, columns ..
 	return h.db.Model(model).Updates(values).Error
 }
 
-// resolveOwnerGroup choisit le groupe propriétaire d'une catégorie créée par un admin de groupe :
-// le groupe demandé s'il l'administre, sinon son premier groupe quand aucun n'est demandé.
-// Renvoie false si le groupe demandé ne fait pas partie de ses groupes administrés.
+// resolveOwnerGroup choisit le groupe propriétaire d'une catégorie créée avec une gestion
+// limitée à ses groupes : le groupe demandé s'il en fait partie, sinon son premier groupe quand
+// aucun n'est demandé. Renvoie false si le groupe demandé n'est pas un de ses groupes.
 func resolveOwnerGroup(requested *uint, managed []uint) (uint, bool) {
 	if len(managed) == 0 {
 		return 0, false

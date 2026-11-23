@@ -87,7 +87,7 @@ func (m *SSOMapper) SyncUser(info *SSOUserInfo) (*models.User, error) {
 		return nil, err
 	}
 
-	// Recharger l'utilisateur avec les groupes et les groupes administrés
+	// Recharger l'utilisateur avec ses groupes
 	if err := m.db.Preload("Groups").First(&user, user.ID).Error; err != nil {
 		return nil, err
 	}
