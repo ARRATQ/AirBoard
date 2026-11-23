@@ -94,10 +94,11 @@ func (t targetGroups) manageableBy(authorID uint, managedGroupIDs []uint) func(*
 // publishedCondition : publié et date de publication atteinte (arguments : true, now).
 const publishedCondition = "is_published = ? AND (published_at IS NULL OR published_at <= ?)"
 
-// userGroupIDs renvoie les groupes dont l'utilisateur est membre.
+// userGroupIDs renvoie les groupes dont l'utilisateur est membre, plus les groupes au-dessus :
+// un membre d'un sous-groupe voit ce qui cible ses groupes parents.
 func userGroupIDs(db *gorm.DB, userID uint) []uint {
 	var ids []uint
-	if err := db.Table("user_groups").Where("user_id = ?", userID).Pluck("group_id", &ids).Error; err != nil {
+	if err := db.Table("user_effective_groups").Where("user_id = ?", userID).Pluck("group_id", &ids).Error; err != nil {
 		log.Printf("[Visibility] groupes de l'utilisateur %d : %v", userID, err)
 	}
 	return ids
@@ -145,13 +146,13 @@ func mergeGroupIDs(lists ...[]uint) []uint {
 	return out
 }
 
-// groupMemberIDs renvoie les membres (distincts) des groupes donnés.
+// groupMemberIDs renvoie les membres (distincts) des groupes donnés et de leurs sous-groupes.
 func groupMemberIDs(db *gorm.DB, groupIDs []uint) []uint {
 	var ids []uint
 	if len(groupIDs) == 0 {
 		return ids
 	}
-	if err := db.Table("user_groups").Where("group_id IN ?", groupIDs).
+	if err := db.Table("user_effective_groups").Where("group_id IN ?", groupIDs).
 		Distinct("user_id").Pluck("user_id", &ids).Error; err != nil {
 		log.Printf("[Visibility] membres des groupes %v : %v", groupIDs, err)
 	}

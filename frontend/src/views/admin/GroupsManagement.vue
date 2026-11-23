@@ -43,13 +43,21 @@
       </template>
 
       <template #cell-name="{ row }">
-        <span class="gm-name">
+        <span class="gm-name" :style="{ '--gm-depth': row.depth }">
+          <Icon v-if="row.depth > 0" icon="lucide:corner-down-right" class="gm-name__branch rtl-flip" aria-hidden="true" />
           <span class="gm-name__swatch" :style="{ backgroundColor: row.raw.color || undefined }">
             <Icon icon="lucide:users" aria-hidden="true" />
           </span>
           <span class="gm-name__text">
             <span class="gm-name__title">{{ row.name }}</span>
+            <span v-if="row.parentPath" class="gm-name__path">
+              <span class="sr-only">{{ $t('groups.parentLabel') }}</span>{{ row.parentPath }}
+            </span>
             <span v-if="row.description" class="gm-name__desc">{{ row.description }}</span>
+            <span v-if="row.raw.org_unit_name" class="gm-unit">
+              <Icon icon="lucide:network" aria-hidden="true" />
+              {{ $t('groups.linkedUnit', { name: row.raw.org_unit_name }) }}
+            </span>
           </span>
         </span>
       </template>
@@ -86,6 +94,7 @@
     <GroupModal
       :show="showModal"
       :group="selectedGroup"
+      :groups="groups"
       @close="closeModal"
       @submit="handleSubmit"
     />
@@ -106,6 +115,7 @@ import { adminService } from '@/services/api'
 import { useAppStore } from '@/stores/app'
 import { useI18n } from 'vue-i18n'
 import GroupModal from '@/components/admin/GroupModal.vue'
+import { orderGroupTree } from '@/utils/groupTree'
 
 const appStore = useAppStore()
 const { t } = useI18n()
@@ -119,25 +129,28 @@ const statusFilter = ref('')
 
 // Computed
 const columns = computed(() => [
-  { key: 'name', label: t('ui.table.columns.name'), sortable: true },
+  { key: 'name', label: t('ui.table.columns.name') },
   { key: 'members', label: t('ui.table.columns.members'), sortable: true, align: 'end', hideSm: true },
   { key: 'appGroups', label: t('groups.appsAccess').replace(/\s*:\s*$/, ''), hideSm: true },
   { key: 'status', label: t('ui.table.columns.status'), sortable: true },
   { key: 'actions', label: '', align: 'end', width: '120px' },
 ])
 
-// Lignes du tableau : filtre de statut ; la recherche et le tri sont dans DataTable.
+// Lignes du tableau dans l'ordre de l'arbre (parent puis sous-groupes) ; filtre de statut ici,
+// recherche et tri dans DataTable. Le chemin des parents reste lisible quand le tri ou la
+// recherche sépare un sous-groupe de son parent.
 const rows = computed(() =>
-  groups.value
-    .filter(group => {
+  orderGroupTree(groups.value)
+    .filter(({ group }) => {
       if (statusFilter.value === 'active') return group.is_active
       if (statusFilter.value === 'inactive') return !group.is_active
       return true
     })
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(group => ({
+    .map(({ group, depth, path }) => ({
       id: group.id,
       name: group.name,
+      depth,
+      parentPath: path.join(' › '),
       description: group.description || '',
       members: group.users?.length || 0,
       status: group.is_active ? t('common.active') : t('common.inactive'),
@@ -226,7 +239,47 @@ onMounted(() => {
 })
 </script>
 <style scoped>
-.gm-name { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.gm-name {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  padding-inline-start: calc(min(var(--gm-depth, 0), 6) * 18px);
+}
+
+.gm-name__branch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 7px;
+  margin-inline-end: -4px;
+  color: var(--muted);
+}
+
+.gm-name__path {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.gm-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--bg-surface);
+}
+
+.gm-unit svg { width: 12px; height: 12px; color: var(--acc); }
+
+@media (max-width: 640px) {
+  .gm-name { padding-inline-start: calc(min(var(--gm-depth, 0), 3) * 12px); }
+}
 
 .gm-name__swatch {
   flex: none;

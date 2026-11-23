@@ -7,6 +7,7 @@ import (
 
 	"airboard/apierror"
 	"airboard/models"
+	"airboard/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -124,6 +125,7 @@ func (h *DirectoryHandler) DeleteUnit(c *gin.Context) {
 		respondNotFoundOr500(c, err, "Unité introuvable")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "entité supprimée")
 	c.JSON(http.StatusOK, gin.H{"message": "Unité supprimée"})
 }
 
@@ -200,6 +202,7 @@ func (h *DirectoryHandler) UpdatePosition(c *gin.Context) {
 		return
 	}
 	h.db.Preload("Assignments").First(&position, id)
+	services.SyncDirectoryGroupsLogged(h.db, "poste modifié")
 	c.JSON(http.StatusOK, position)
 }
 
@@ -226,6 +229,7 @@ func (h *DirectoryHandler) DeletePosition(c *gin.Context) {
 		respondNotFoundOr500(c, err, "Poste introuvable")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "poste supprimé")
 	c.JSON(http.StatusOK, gin.H{"message": "Poste supprimé"})
 }
 

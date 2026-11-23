@@ -116,10 +116,10 @@ func (s *EmailService) SendNotification(templateType string, contentID uint, tar
 		// Notification globale - envoyer à tous les utilisateurs actifs
 		s.db.Model(&models.User{}).Where("is_active = ? AND email != '' AND email IS NOT NULL", true).Pluck("email", &recipients)
 	} else {
-		// Notification ciblée par groupe
+		// Notification ciblée par groupe (membres des sous-groupes compris)
 		s.db.Table("users").
 			Select("DISTINCT users.email").
-			Joins("JOIN user_groups ON user_groups.user_id = users.id").
+			Joins("JOIN user_effective_groups user_groups ON user_groups.user_id = users.id").
 			Where("user_groups.group_id IN ? AND users.is_active = ? AND users.email != '' AND users.email IS NOT NULL", targetGroupIDs, true).
 			Pluck("email", &recipients)
 	}

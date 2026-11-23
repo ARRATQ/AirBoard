@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -604,8 +605,33 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 	for i := range users {
 		users[i].Password = ""
 	}
+	attachDirectoryGroups(h.db, users)
 
 	c.JSON(http.StatusOK, page.Response(users, total))
+}
+
+// attachDirectoryGroups renseigne les groupes où chaque compte est membre par le trombinoscope
+// (l'interface ne propose pas de les retirer à la main).
+func attachDirectoryGroups(db *gorm.DB, users []models.User) {
+	if len(users) == 0 {
+		return
+	}
+	ids := make([]uint, len(users))
+	index := make(map[uint]int, len(users))
+	for i, u := range users {
+		ids[i] = u.ID
+		index[u.ID] = i
+	}
+	var rows []struct{ UserID, GroupID uint }
+	if err := db.Table("user_groups").Select("user_id, group_id").
+		Where("user_id IN ? AND source = ?", ids, "directory").Order("group_id").Scan(&rows).Error; err != nil {
+		log.Printf("utilisateurs : groupes du trombinoscope illisibles : %v", err)
+		return
+	}
+	for _, r := range rows {
+		i := index[r.UserID]
+		users[i].DirectoryGroupIDs = append(users[i].DirectoryGroupIDs, r.GroupID)
+	}
 }
 
 var userPageLimits = pageLimits{Default: 25, Max: 500}
@@ -732,6 +758,8 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 			h.db.Model(&user).Association("Groups").Replace(groups)
 		}
 	}
+	// Une fiche du trombinoscope au même e-mail est liée au compte, qui rejoint ses groupes
+	services.SyncDirectoryGroupsLogged(h.db, "compte créé")
 
 	user.Password = ""
 	h.db.Preload("Groups").First(&user, user.ID)
@@ -817,13 +845,15 @@ func (h *AdminHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	// Mise à jour des groupes si fournis
+	// Mise à jour des groupes si fournis ; les groupes venus du trombinoscope restent (la
+	// synchronisation les rétablit tant que la personne est dans l'entité)
 	if updateData.GroupIDs != nil {
 		var groups []models.Group
 		if err := h.db.Where("id IN ?", updateData.GroupIDs).Find(&groups).Error; err == nil {
 			h.db.Model(&user).Association("Groups").Replace(groups)
 		}
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "compte modifié")
 
 	// Masquer le mot de passe
 	user.Password = ""
@@ -1062,11 +1092,12 @@ func (h *AdminHandler) AssignUserToGroups(c *gin.Context) {
 		return
 	}
 
-	// Remplacer les associations
+	// Remplacer les associations (les groupes venus du trombinoscope sont rétablis ensuite)
 	if err := h.db.Model(&user).Association("Groups").Replace(groups); err != nil {
 		apierror.Respond(c, http.StatusInternalServerError, "Erreur lors de l'assignation")
 		return
 	}
+	services.SyncDirectoryGroupsLogged(h.db, "groupes du compte")
 
 	// Recharger avec les relations
 	h.db.Preload("Groups").First(&user, user.ID)
@@ -1096,6 +1127,7 @@ func (h *AdminHandler) GetGroups(c *gin.Context) {
 			groups[i].IsDefault = groups[i].ID == everyone
 		}
 	}
+	attachOrgUnits(h.db, groups)
 
 	c.JSON(http.StatusOK, groups)
 }
@@ -1115,11 +1147,16 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		Description string `json:"description"`
 		Color       string `json:"color"`
 		IsActive    bool   `json:"is_active"`
+		ParentID    *uint  `json:"parent_id"`
 		AppGroupIDs []uint `json:"app_group_ids"`
 	}
 
 	if err := c.ShouldBindBodyWith(&createData, binding.JSON); err != nil {
 		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
+		return
+	}
+	if createData.ParentID != nil && !h.groupExists(*createData.ParentID) {
+		apierror.Respond(c, http.StatusBadRequest, "Groupe parent introuvable")
 		return
 	}
 
@@ -1128,6 +1165,7 @@ func (h *AdminHandler) CreateGroup(c *gin.Context) {
 		Description: createData.Description,
 		Color:       createData.Color,
 		IsActive:    createData.IsActive,
+		ParentID:    createData.ParentID,
 	}
 
 	if err := createKeepingFalse(h.db, c, &group, "is_active"); err != nil {
@@ -1177,12 +1215,22 @@ func (h *AdminHandler) UpdateGroup(c *gin.Context) {
 		Description string `json:"description"`
 		Color       string `json:"color"`
 		IsActive    *bool  `json:"is_active"`
-		AppGroupIDs []uint `json:"app_group_ids"`
+		// Présent : nouveau parent (null = groupe racine) ; absent : inchangé
+		ParentID    json.RawMessage `json:"parent_id"`
+		AppGroupIDs []uint          `json:"app_group_ids"`
 	}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		apierror.Respond(c, http.StatusBadRequest, "Données invalides")
 		return
+	}
+	if len(updateData.ParentID) > 0 {
+		parentID, msg := h.validParent(group.ID, updateData.ParentID)
+		if msg != "" {
+			apierror.Respond(c, http.StatusBadRequest, msg)
+			return
+		}
+		group.ParentID = parentID
 	}
 
 	// Mise à jour des champs
@@ -1244,9 +1292,16 @@ func (h *AdminHandler) DeleteGroup(c *gin.Context) {
 		return
 	}
 
-	// Supprimer les associations
+	// Supprimer les associations ; les sous-groupes remontent d'un niveau et l'entité du
+	// trombinoscope liée n'a plus de groupe
 	h.db.Model(&group).Association("Users").Clear()
 	h.db.Model(&group).Association("AppGroups").Clear()
+	if err := h.db.Model(&models.Group{}).Where("parent_id = ?", group.ID).Update("parent_id", group.ParentID).Error; err != nil {
+		log.Printf("groupes : sous-groupes de %d non rattachés : %v", group.ID, err)
+	}
+	if err := h.db.Model(&models.OrgUnit{}).Where("group_id = ?", group.ID).Update("group_id", nil).Error; err != nil {
+		log.Printf("groupes : entité liée à %d non déliée : %v", group.ID, err)
+	}
 
 	// Supprimer le groupe
 	if err := h.db.Delete(&group).Error; err != nil {
@@ -1388,4 +1443,58 @@ const msgInvalidUserRole = "Rôle invalide : admin ou user"
 // validUserRole : rôle de compte accepté.
 func validUserRole(role string) bool {
 	return role == "admin" || role == "user"
+}
+
+// groupExists : groupe existant et non supprimé.
+func (h *AdminHandler) groupExists(id uint) bool {
+	var n int64
+	h.db.Model(&models.Group{}).Where("id = ?", id).Count(&n)
+	return n > 0
+}
+
+// validParent lit le parent demandé pour groupID (null : groupe racine) et refuse un parent
+// inconnu ou une boucle. Renvoie un message d'erreur si la demande est refusée.
+func (h *AdminHandler) validParent(groupID uint, raw json.RawMessage) (*uint, string) {
+	if string(raw) == "null" {
+		return nil, ""
+	}
+	var parentID uint
+	if err := json.Unmarshal(raw, &parentID); err != nil || parentID == 0 {
+		return nil, "Groupe parent invalide"
+	}
+	if !h.groupExists(parentID) {
+		return nil, "Groupe parent introuvable"
+	}
+	cycle, err := models.WouldCreateCycle(h.db, groupID, parentID)
+	if err != nil {
+		log.Printf("groupes : contrôle de boucle %d → %d : %v", groupID, parentID, err)
+		return nil, "Groupe parent invalide"
+	}
+	if cycle {
+		return nil, "Un groupe ne peut pas être placé sous lui-même ni sous l'un de ses sous-groupes"
+	}
+	return &parentID, ""
+}
+
+// attachOrgUnits renseigne l'entité du trombinoscope liée à chaque groupe.
+func attachOrgUnits(db *gorm.DB, groups []models.Group) {
+	if len(groups) == 0 {
+		return
+	}
+	var units []models.OrgUnit
+	if err := db.Select("id, name, group_id").Where("group_id IS NOT NULL").Find(&units).Error; err != nil {
+		log.Printf("groupes : entités liées illisibles : %v", err)
+		return
+	}
+	byGroup := make(map[uint]models.OrgUnit, len(units))
+	for _, u := range units {
+		byGroup[*u.GroupID] = u
+	}
+	for i := range groups {
+		if u, ok := byGroup[groups[i].ID]; ok {
+			id := u.ID
+			groups[i].OrgUnitID = &id
+			groups[i].OrgUnitName = u.Name
+		}
+	}
 }

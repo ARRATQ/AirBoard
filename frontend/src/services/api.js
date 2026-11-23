@@ -1592,6 +1592,17 @@ export const directoryService = {
   async deleteUnit(id) {
     return (await api.delete(`/admin/directory/units/${id}`)).data
   },
+  // Groupe d'utilisateurs lié à une entité (groupId null : retirer le lien)
+  async linkUnitGroup(id, groupId) {
+    return (await api.put(`/admin/directory/units/${id}/group`, { group_id: groupId })).data
+  },
+  // Crée (ou lie par le nom) les groupes de l'entité et de ses sous-entités
+  async createUnitGroups(id) {
+    return (await api.post(`/admin/directory/units/${id}/groups`)).data
+  },
+  async syncGroups() {
+    return (await api.post('/admin/directory/groups/sync')).data
+  },
   async createPosition(data) {
     return (await api.post('/admin/directory/positions', data)).data
   },

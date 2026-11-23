@@ -247,7 +247,9 @@
     "loadError": "Error al cargar los grupos",
     "saveError": "Error al guardar el grupo",
     "deleteError": "Error al eliminar el grupo",
-    "membersCount": "{count} usuarios | {count} usuario | {count} usuarios"
+    "membersCount": "{count} usuarios | {count} usuario | {count} usuarios",
+    "parentLabel": "Subgrupo de: ",
+    "linkedUnit": "Directorio: {name}"
   },
   "applications": {
     "title": "Recursos",
@@ -364,7 +366,8 @@
     "roleGroups": "Grupos cubiertos por el rol {role}",
     "roleGroupsPlaceholder": "Sus grupos (por defecto) — o elija…",
     "roleGroupsChosen": "El rol se aplica solo a los grupos elegidos.",
-    "roleGroupsDefault": "Ningún grupo elegido: el rol se aplica a los grupos de los que la persona es miembro (excepto el grupo por defecto)."
+    "roleGroupsDefault": "Ningún grupo elegido: el rol se aplica a los grupos de los que la persona es miembro (excepto el grupo por defecto).",
+    "directoryGroups": "Ningún grupo del directorio | 1 grupo viene del directorio (bloqueado): sigue la unidad de la persona. | {n} grupos vienen del directorio (bloqueados): siguen la unidad de la persona."
   },
   "groupModal": {
     "titleEdit": "Editar grupo",
@@ -395,7 +398,11 @@
     "submitCreate": "Crear el grupo",
     "errors": {
       "nameRequired": "El nombre es obligatorio"
-    }
+    },
+    "parent": "Grupo principal",
+    "parentNone": "Ninguno (grupo de primer nivel)",
+    "parentHint": "Los miembros de este grupo también ven lo destinado al grupo principal. Un rol limitado al grupo principal también cubre este grupo.",
+    "linkedUnit": "Vinculado a la unidad «{name}» del directorio: las personas asignadas a esta unidad son miembros automáticamente."
   },
   "settings": {
     "general": "General",
@@ -2352,7 +2359,39 @@
     "layoutTree": "Árbol",
     "layoutList": "Lista",
     "goToUnit": "Ir a una unidad…",
-    "backToRoot": "Toda la organización"
+    "backToRoot": "Toda la organización",
+    "groups": {
+      "title": "Grupo de usuarios · {name}",
+      "subtitle": "Las personas asignadas a esta unidad se unen automáticamente a su grupo.",
+      "current": "Grupo vinculado: {name}",
+      "choiceLegend": "¿Qué hacer?",
+      "createTitle": "Crear los grupos desde el directorio",
+      "createDesc": "Ninguna unidad | Un grupo para esta unidad, con su nombre. Un grupo existente con el mismo nombre se vincula en lugar de crearse de nuevo. | Un grupo para esta unidad y cada una de sus subunidades ({n} en total), con sus nombres y la misma jerarquía. Un grupo existente con el mismo nombre se vincula en lugar de crearse de nuevo; una unidad ya vinculada conserva su grupo.",
+      "linkTitle": "Vincular un grupo existente",
+      "linkDesc": "Solo afecta a esta unidad. Un grupo solo se vincula a una unidad.",
+      "group": "Grupo",
+      "pick": "Elegir un grupo",
+      "pickRequired": "Elija el grupo que desea vincular.",
+      "noFreeGroup": "Todos los grupos ya están vinculados a una unidad.",
+      "unlinkTitle": "Quitar el vínculo",
+      "unlinkDesc": "El grupo se conserva; se retiran los miembros que vienen del directorio y se mantienen los añadidos a mano.",
+      "rules": "Son miembros las personas asignadas a un puesto de la unidad, interinos incluidos, cuya ficha está vinculada a una cuenta (una ficha sin cuenta se vincula a la cuenta con el mismo correo). Se unen al grupo de su unidad; los grupos superiores se obtienen por la jerarquía. Un cambio de unidad actualiza el grupo.",
+      "createSubmit": "Crear los grupos",
+      "linkSubmit": "Vincular el grupo",
+      "unlinkSubmit": "Quitar el vínculo",
+      "created": "Grupos creados: {created}, grupos existentes vinculados: {linked}.",
+      "linked": "Grupo vinculado a la unidad.",
+      "unlinked": "Vínculo quitado.",
+      "syncSummary": "Pertenencias añadidas: {added}, retiradas: {removed}.",
+      "sync": "Sincronizar los grupos",
+      "syncHint": "Recalcula los miembros de los grupos vinculados a unidades (también se hace en cada cambio).",
+      "synced": "Grupos sincronizados. Fichas vinculadas a una cuenta: {linked} · pertenencias añadidas: {added} · retiradas: {removed}.",
+      "syncFailed": "No se pudo sincronizar.",
+      "loadFailed": "No se pudieron cargar los grupos de usuarios.",
+      "linkedTo": "Grupo vinculado: ",
+      "button": "Grupo de usuarios",
+      "buttonFor": "Grupo de usuarios de {name}"
+    }
   },
   "ui": {
     "close": "Cerrar",

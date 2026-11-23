@@ -109,6 +109,11 @@ Airboard transforms how organizations manage digital resources, internal communi
 
 - **Group Management**
   - Create and organize groups
+  - Groups and sub-groups: members of a sub-group also see what targets the groups above it,
+    and a role limited to a group also covers its sub-groups
+  - Groups linked to directory units: people assigned to a unit join its group automatically
+    and follow it when they change unit (members added by hand stay). One click creates the
+    groups of a unit and its sub-units with the same hierarchy
   - Public and private groups
   - Granular access control
 

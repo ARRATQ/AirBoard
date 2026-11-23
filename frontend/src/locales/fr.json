@@ -247,7 +247,9 @@
     "loadError": "Erreur lors du chargement des groupes",
     "saveError": "Erreur lors de la sauvegarde du groupe",
     "deleteError": "Erreur lors de la suppression du groupe",
-    "membersCount": "{count} utilisateur | {count} utilisateur | {count} utilisateurs"
+    "membersCount": "{count} utilisateur | {count} utilisateur | {count} utilisateurs",
+    "parentLabel": "Sous-groupe de : ",
+    "linkedUnit": "Trombinoscope : {name}"
   },
   "applications": {
     "title": "Ressources",
@@ -364,7 +366,8 @@
     "roleGroups": "Groupes couverts par le rôle {role}",
     "roleGroupsPlaceholder": "Ses groupes (par défaut) — ou choisissez…",
     "roleGroupsChosen": "Le rôle s'applique seulement aux groupes choisis.",
-    "roleGroupsDefault": "Aucun groupe choisi : le rôle s'applique aux groupes dont la personne est membre (hors groupe par défaut)."
+    "roleGroupsDefault": "Aucun groupe choisi : le rôle s'applique aux groupes dont la personne est membre (hors groupe par défaut).",
+    "directoryGroups": "Aucun groupe du trombinoscope | 1 groupe vient du trombinoscope (verrouillé) : il suit l'entité de la personne. | {n} groupes viennent du trombinoscope (verrouillés) : ils suivent l'entité de la personne."
   },
   "groupModal": {
     "titleEdit": "Modifier le groupe",
@@ -395,7 +398,11 @@
     "submitCreate": "Créer le groupe",
     "errors": {
       "nameRequired": "Le nom est requis"
-    }
+    },
+    "parent": "Groupe parent",
+    "parentNone": "Aucun (groupe principal)",
+    "parentHint": "Les membres de ce groupe voient aussi ce qui est destiné au groupe parent. Un rôle limité au groupe parent couvre aussi ce groupe.",
+    "linkedUnit": "Lié à l'entité « {name} » du trombinoscope : les personnes affectées à cette entité en sont membres automatiquement."
   },
   "settings": {
     "general": "Général",
@@ -2709,7 +2716,39 @@
     "layoutTree": "Arbre",
     "layoutList": "Liste",
     "goToUnit": "Aller à une unité…",
-    "backToRoot": "Toute l'organisation"
+    "backToRoot": "Toute l'organisation",
+    "groups": {
+      "title": "Groupe d'utilisateurs · {name}",
+      "subtitle": "Les personnes affectées à cette entité rejoignent automatiquement son groupe.",
+      "current": "Groupe lié : {name}",
+      "choiceLegend": "Que faire ?",
+      "createTitle": "Créer les groupes depuis le trombinoscope",
+      "createDesc": "Aucune entité | Un groupe pour cette entité, à son nom. Un groupe existant du même nom est lié au lieu d'être recréé. | Un groupe pour cette entité et chacune de ses sous-entités ({n} au total), à leur nom et avec la même hiérarchie. Un groupe existant du même nom est lié au lieu d'être recréé ; une entité déjà liée garde son groupe.",
+      "linkTitle": "Lier un groupe existant",
+      "linkDesc": "Seule cette entité est concernée. Un groupe ne se lie qu'à une entité.",
+      "group": "Groupe",
+      "pick": "Choisir un groupe",
+      "pickRequired": "Choisissez le groupe à lier.",
+      "noFreeGroup": "Tous les groupes sont déjà liés à une entité.",
+      "unlinkTitle": "Retirer le lien",
+      "unlinkDesc": "Le groupe reste ; les membres venus du trombinoscope en sont retirés, les membres ajoutés à la main restent.",
+      "rules": "Sont membres les personnes affectées à un poste de l'entité, intérims compris, dont la fiche est liée à un compte (une fiche sans compte est liée au compte qui a le même e-mail). Elles rejoignent le groupe de leur entité ; les groupes au-dessus leur sont acquis par la hiérarchie. Un changement d'entité met le groupe à jour.",
+      "createSubmit": "Créer les groupes",
+      "linkSubmit": "Lier le groupe",
+      "unlinkSubmit": "Retirer le lien",
+      "created": "Groupes créés : {created}, groupes existants liés : {linked}.",
+      "linked": "Groupe lié à l'entité.",
+      "unlinked": "Lien retiré.",
+      "syncSummary": "Appartenances ajoutées : {added}, retirées : {removed}.",
+      "sync": "Synchroniser les groupes",
+      "syncHint": "Recalcule les membres des groupes liés aux entités (la mise à jour est aussi faite à chaque modification).",
+      "synced": "Groupes synchronisés. Fiches liées à un compte : {linked} · appartenances ajoutées : {added} · retirées : {removed}.",
+      "syncFailed": "Synchronisation impossible.",
+      "loadFailed": "Impossible de charger les groupes d'utilisateurs.",
+      "linkedTo": "Groupe lié : ",
+      "button": "Groupe d'utilisateurs",
+      "buttonFor": "Groupe d'utilisateurs de {name}"
+    }
   },
   "ui": {
     "close": "Fermer",

@@ -177,10 +177,12 @@ func (m *SSOMapper) syncGroups(user *models.User, authentikGroups []string) erro
 		airboardGroups = append(airboardGroups, defaultGroup)
 	}
 
-	// Remplacer les groupes de l'utilisateur
+	// Remplacer les groupes de l'utilisateur, puis rétablir ceux du trombinoscope (et lier sa
+	// fiche par l'e-mail)
 	if err := m.db.Model(user).Association("Groups").Replace(airboardGroups); err != nil {
 		return err
 	}
+	SyncDirectoryGroupsLogged(m.db, "groupes SSO")
 
 	log.Printf("[SSO] Groupes synchronisés pour %s: %d groupe(s)", user.Email, len(airboardGroups))
 	return nil

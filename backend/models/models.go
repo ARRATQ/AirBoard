@@ -39,20 +39,28 @@ type User struct {
 	Permissions map[string]string `json:"permissions,omitempty" gorm:"-"`
 	// Groupes couverts par chaque permission de portée « ses groupes » {permission: groupes}
 	PermissionGroups map[string][]uint `json:"permission_groups,omitempty" gorm:"-"`
+	// Groupes où le compte est membre par le trombinoscope (user_groups.source = 'directory') :
+	// l'admin ne les retire pas à la main, la synchronisation les gère
+	DirectoryGroupIDs []uint `json:"directory_group_ids,omitempty" gorm:"-"`
 }
 
 // Group représente un groupe d'utilisateurs
 type Group struct {
-	ID          uint           `json:"id" gorm:"primaryKey"`
-	Name        string         `json:"name" gorm:"unique;not null"`
-	Description string         `json:"description"`
-	Color       string         `json:"color" gorm:"default:'#3B82F6'"` // Couleur pour l'affichage
-	IsActive    bool           `json:"is_active" gorm:"default:true"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	ID          uint   `json:"id" gorm:"primaryKey"`
+	Name        string `json:"name" gorm:"unique;not null"`
+	Description string `json:"description"`
+	Color       string `json:"color" gorm:"default:'#3B82F6'"` // Couleur pour l'affichage
+	IsActive    bool   `json:"is_active" gorm:"default:true"`
+	// ParentID : groupe parent (voir group_tree.go) ; nil pour un groupe racine
+	ParentID  *uint          `json:"parent_id" gorm:"index"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 	// IsDefault : groupe par défaut, qui réunit tout le monde (calculé, voir EveryoneGroupID)
 	IsDefault bool `json:"is_default,omitempty" gorm:"-"`
+	// Entité du trombinoscope liée (calculé, liste des groupes de l'admin)
+	OrgUnitID   *uint  `json:"org_unit_id,omitempty" gorm:"-"`
+	OrgUnitName string `json:"org_unit_name,omitempty" gorm:"-"`
 
 	// Relations
 	Users     []User     `json:"users,omitempty" gorm:"many2many:user_groups;"`

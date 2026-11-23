@@ -109,6 +109,12 @@ Airboard transforme la façon dont les organisations gèrent leurs ressources nu
 
 - **Gestion des Groupes**
   - Création et organisation de groupes
+  - Groupes et sous-groupes : les membres d'un sous-groupe voient aussi ce qui cible les groupes
+    au-dessus, et un rôle limité à un groupe couvre aussi ses sous-groupes
+  - Groupes liés aux entités du trombinoscope : les personnes affectées à une entité rejoignent
+    son groupe automatiquement et le suivent quand elles changent d'entité (les membres ajoutés
+    à la main restent). Un clic crée les groupes d'une entité et de ses sous-entités, avec la
+    même hiérarchie
   - Groupes publics et privés
   - Contrôle d'accès granulaire
 

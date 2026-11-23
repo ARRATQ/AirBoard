@@ -1,7 +1,6 @@
 package models
 
 import (
-	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -165,7 +164,27 @@ func PermissionGroupIDs(db *gorm.DB, userID uint) ([]uint, error) {
 	if err != nil {
 		return nil, err
 	}
-	return memberGroupsExcept(db, userID, everyone)
+	members, err := memberGroupsExcept(db, userID, everyone)
+	if err != nil {
+		return nil, err
+	}
+	return withSubgroupsExcept(db, members, everyone)
+}
+
+// withSubgroupsExcept : les groupes et leurs sous-groupes (un rôle limité à un groupe couvre
+// aussi ses sous-groupes), sans le groupe par défaut.
+func withSubgroupsExcept(db *gorm.DB, ids []uint, everyone uint) ([]uint, error) {
+	all, err := GroupsWithDescendants(db, ids)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]uint, 0, len(all))
+	for _, id := range all {
+		if id != everyone {
+			out = append(out, id)
+		}
+	}
+	return out, nil
 }
 
 func memberGroupsExcept(db *gorm.DB, userID, everyone uint) ([]uint, error) {
@@ -273,8 +292,12 @@ func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
 		for id := range set {
 			ids = append(ids, id)
 		}
-		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
-		out[perm] = ids
+		// Sous-groupes compris (résultat trié)
+		expanded, err := withSubgroupsExcept(db, ids, everyone)
+		if err != nil {
+			return nil, err
+		}
+		out[perm] = expanded
 	}
 	return out, nil
 }
