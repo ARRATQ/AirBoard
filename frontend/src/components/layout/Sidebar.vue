@@ -141,7 +141,6 @@
 
           <!-- Help button -->
           <button
-            v-if="HELP_ENABLED"
             type="button"
             @click="showHelpDrawer = true"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -196,7 +195,6 @@
 
         <!-- Help button -->
         <button
-          v-if="HELP_ENABLED"
           type="button"
           @click="showHelpDrawer = true"
           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -400,7 +398,7 @@
     </Teleport>
 
     <!-- Help Drawer -->
-    <HelpDrawer v-if="HELP_ENABLED && helpDrawerLoaded" v-model="showHelpDrawer" />
+    <HelpDrawer v-if="helpDrawerLoaded" v-model="showHelpDrawer" />
   </aside>
 </template>
 
@@ -430,9 +428,6 @@ const router = useRouter()
 
 // State for update modal
 const showUpdateModal = ref(false)
-// Aide intégrée désactivée pour le moment : ses pages (dossier docs/, hors dépôt) sont
-// incomplètes et décrivent encore les admins de groupe. Remettre à true une fois refaites.
-const HELP_ENABLED = false
 const showHelpDrawer = ref(false)
 const helpDrawerLoaded = ref(false)
 watch(showHelpDrawer, (open) => {

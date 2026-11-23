@@ -431,8 +431,10 @@ visuelle. Ensuite :
 
 ## Pistes ouvertes
 
-- **Aide intégrée** : masquée (`HELP_ENABLED = false` dans `Sidebar.vue`). Son contenu date
-  d'avant les rôles et la refonte des pages ; à réécrire (fr/en/es/ar) avant de la réactiver.
+- ~~**Aide intégrée**~~ → fait (PR « aide intégrée », 2026-11-23) : 22 guides fr/en/es/ar dans
+  `frontend/src/help/content/`, catalogue `src/help/catalog.js` (public : pour tous, une permission,
+  admin ; blocs `:::all` / `:::groups` selon la portée), ouverture sur le guide de la page affichée.
+  `HELP_ENABLED` et la copie de `docs/` au build sont supprimés.
 
 ---
 

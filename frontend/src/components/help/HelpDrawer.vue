@@ -1,171 +1,72 @@
 <template>
   <Teleport to="body">
-    <!-- Backdrop -->
-    <Transition name="fade">
-      <div
-        v-if="modelValue"
-        class="fixed inset-0 z-40 bg-black/50"
-        aria-hidden="true"
-        @click="close"
-      />
+    <Transition name="help-fade">
+      <div v-if="modelValue" class="help-backdrop" aria-hidden="true" @click="close" />
     </Transition>
 
-    <!-- Modal -->
-    <Transition name="modal">
-      <div
-        v-if="modelValue"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div
-          v-focus-trap
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="help-drawer-title"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden"
-        >
-          <!-- Header -->
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-primary-500 to-primary-600 flex-shrink-0">
-            <div class="flex items-center gap-3">
-              <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center">
-                <Icon icon="lucide:circle-help" class="h-6 w-6 text-primary-600" />
-              </div>
-              <div>
-                <h2 id="help-drawer-title" class="text-lg font-semibold text-white">{{ $t('help.title') }}</h2>
-                <p class="text-sm text-primary-100">{{ $t('help.subtitle') }}</p>
-              </div>
+    <Transition name="help-pop">
+      <div v-if="modelValue" class="help-layer">
+        <div v-focus-trap role="dialog" aria-modal="true" aria-labelledby="help-title" class="help">
+          <header class="help__head">
+            <span class="help__mark" aria-hidden="true"><Icon icon="lucide:circle-help" /></span>
+            <div class="help__heading">
+              <h2 id="help-title" class="help__title">{{ $t('help.title') }}</h2>
+              <p class="help__subtitle">{{ $t('help.subtitle') }}</p>
             </div>
-            <button
-              type="button"
-              @click="close"
-              class="text-white hover:text-gray-200 transition-colors p-2 rounded-lg hover:bg-white/10"
-              :aria-label="$t('common.close')"
-            >
-              <Icon icon="lucide:x" class="h-6 w-6" />
+            <button type="button" class="help__close" :aria-label="$t('common.close')" @click="close">
+              <Icon icon="lucide:x" aria-hidden="true" />
             </button>
-          </div>
+          </header>
 
-          <!-- Navigation Tabs - Only show if multiple guides available -->
-          <div v-if="availableGuides.length > 1" class="border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <nav class="flex overflow-x-auto px-4 -mb-px">
-              <button
-                v-for="guide in availableGuides"
-                :key="guide.id"
-                type="button"
-                :aria-pressed="selectedGuide === guide.id"
-                @click="selectedGuide = guide.id"
-                :class="[
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors',
-                  selectedGuide === guide.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
-                ]"
-              >
-                <Icon :icon="guide.icon" class="h-4 w-4" />
-                {{ guide.label }}
-              </button>
+          <div class="help__body">
+            <!-- Mobile : liste déroulante des guides -->
+            <div class="help__picker">
+              <label for="help-topic" class="sr-only">{{ $t('help.chooseTopic') }}</label>
+              <select id="help-topic" class="form-select" :value="currentId" @change="select($event.target.value)">
+                <optgroup v-for="group in groups" :key="group.audience" :label="$t(`help.audiences.${group.audience}`)">
+                  <option v-for="topic in group.topics" :key="topic.id" :value="topic.id">{{ $t(`help.topics.${topic.id}`) }}</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <nav class="help__nav" :aria-label="$t('help.chooseTopic')">
+              <section v-for="group in groups" :key="group.audience" class="help__group">
+                <h3 class="help__group-title">{{ $t(`help.audiences.${group.audience}`) }}</h3>
+                <ul>
+                  <li v-for="topic in group.topics" :key="topic.id">
+                    <button
+                      type="button"
+                      class="help__topic"
+                      :class="{ 'help__topic--on': topic.id === currentId }"
+                      :aria-current="topic.id === currentId ? 'page' : undefined"
+                      @click="select(topic.id)"
+                    >
+                      <Icon :icon="topic.icon" aria-hidden="true" />
+                      <span>{{ $t(`help.topics.${topic.id}`) }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </section>
             </nav>
-          </div>
 
-          <!-- Content -->
-          <div class="flex-1 overflow-hidden flex min-h-0">
-            <!-- Sidebar Navigation -->
-            <div class="w-56 border-e border-gray-200 dark:border-gray-700 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
-              <div class="p-3">
-                <div v-for="section in currentGuide?.sections" :key="section.id" class="mb-4">
-                  <button
-                    type="button"
-                    :aria-expanded="expandedSections.includes(section.id)"
-                    @click="toggleSection(section.id)"
-                    class="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                  >
-                    <span>{{ section.title }}</span>
-                    <Icon
-                      :icon="expandedSections.includes(section.id) ? 'lucide:chevron-down' : 'lucide:chevron-right'"
-                      class="rtl-flip h-4 w-4"
-                    />
-                  </button>
-                  <Transition name="expand">
-                    <ul v-if="expandedSections.includes(section.id)" class="mt-1 space-y-1">
-                      <li v-for="item in section.items" :key="item.id">
-                        <button
-                          type="button"
-                          :aria-current="selectedPage?.id === item.id ? 'page' : undefined"
-                          @click="selectPage(item)"
-                          :class="[
-                            'w-full text-start px-3 py-2 text-sm rounded-lg transition-colors',
-                            selectedPage?.id === item.id
-                              ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                          ]"
-                        >
-                          {{ item.title }}
-                        </button>
-                      </li>
-                    </ul>
-                  </Transition>
+            <article ref="article" class="help__content" aria-live="polite" @click="followLink">
+              <template v-if="current">
+                <p class="help__eyebrow">
+                  <span>{{ $t(`help.audiences.${current.audience}`) }}</span>
+                  <span v-if="scope" class="help__scope" :class="`help__scope--${scope}`">
+                    <Icon :icon="scope === 'all' ? 'lucide:globe' : 'lucide:users-round'" aria-hidden="true" />
+                    {{ $t(`help.scope.${scope}`) }}
+                  </span>
+                </p>
+                <div v-if="loading" class="help__state">
+                  <Icon icon="lucide:loader-circle" class="help__spin" aria-hidden="true" />
+                  <span class="sr-only">{{ $t('common.loading') }}</span>
                 </div>
-              </div>
-            </div>
-
-            <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto">
-              <div v-if="loading" class="flex items-center justify-center h-full">
-                <div class="text-center">
-                  <Icon icon="lucide:loader-circle" class="h-8 w-8 text-primary-500 animate-spin mx-auto mb-2" />
-                  <p class="text-gray-500 dark:text-gray-400">{{ $t('help.loading') }}</p>
-                </div>
-              </div>
-              <div v-else-if="selectedPage" class="p-6">
-                <!-- Page Header -->
-                <div class="mb-6">
-                  <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {{ selectedPage.title }}
-                  </h1>
-                  <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <Icon :icon="currentGuide?.icon" class="h-4 w-4" />
-                    <span>{{ currentGuide?.label }}</span>
-                    <Icon icon="lucide:chevron-right" class="rtl-flip h-4 w-4" />
-                    <span>{{ selectedPage.section }}</span>
-                  </div>
-                </div>
-
-                <!-- Markdown Content -->
-                <div
-                  class="prose prose-blue dark:prose-invert max-w-none prose-headings:scroll-mt-4 prose-img:rounded-lg prose-img:shadow-lg prose-a:text-primary-600 dark:prose-a:text-primary-400"
-                  v-html="renderedContent"
-                />
-              </div>
-              <div v-else class="flex items-center justify-center h-full">
-                <div class="text-center p-8">
-                  <Icon icon="lucide:book-open-text" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                  <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('help.selectTopic') }}
-                  </h3>
-                  <p class="text-gray-500 dark:text-gray-400">
-                    {{ $t('help.selectTopicDesc') }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Footer -->
-          <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-3 bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <Icon icon="lucide:user" class="h-4 w-4" />
-                  <span>{{ $t('help.yourRole') }}: <strong class="text-gray-700 dark:text-gray-300">{{ userRoleLabel }}</strong></span>
-                </div>
-              </div>
-              <button
-                type="button"
-                @click="close"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                {{ $t('common.close') }}
-              </button>
-            </div>
+                <p v-else-if="loadError" class="help__state">{{ $t('help.loadError') }}</p>
+                <!-- eslint-disable-next-line vue/no-v-html -- Markdown de l'application, nettoyé par DOMPurify -->
+                <div v-else class="help-prose" v-html="html" />
+              </template>
+            </article>
           </div>
         </div>
       </div>
@@ -174,422 +75,304 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { useEscapeClose } from '@/composables/useEscapeClose'
-import { Icon } from '@iconify/vue'
+// Aide intégrée : guides choisis selon les permissions de la personne (help/catalog.js),
+// ouverte sur le guide de la page affichée. Les passages propres à une portée (« tout le
+// site » / « vos groupes ») ne s'affichent qu'à qui a cette portée.
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useAuthStore } from '@/stores/auth'
-import { getRoles, permissionScope } from '@/config/access'
+import { Icon } from '@iconify/vue'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+import { useAuthStore } from '@/stores/auth'
+import { useEscapeClose } from '@/composables/useEscapeClose'
+import { getRoles } from '@/config/access'
+import { HELP_AUDIENCES, visibleTopics, topicScope, topicForRoute, applyScope } from '@/help/catalog'
+import { loadTopic } from '@/help/content'
 
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: false
-  }
+  modelValue: { type: Boolean, default: false },
 })
-
 const emit = defineEmits(['update:modelValue'])
 
-const { locale, t } = useI18n()
+const { locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 
+const roles = computed(() => getRoles(authStore.user))
+const topics = computed(() => visibleTopics(roles.value))
+const groups = computed(() =>
+  HELP_AUDIENCES
+    .map((audience) => ({ audience, topics: topics.value.filter((t) => t.audience === audience) }))
+    .filter((g) => g.topics.length > 0)
+)
+
+const currentId = ref('')
+const current = computed(() => topics.value.find((t) => t.id === currentId.value) || null)
+const scope = computed(() => (current.value ? topicScope(current.value, roles.value) : ''))
+
+const markdown = ref('')
 const loading = ref(false)
-const selectedGuide = ref(null)
-const selectedPage = ref(null)
-const expandedSections = ref([])
-const contentCache = ref({})
+const loadError = ref(false)
+const article = ref(null)
+let request = 0
 
-// Profil d'aide : admin, contributeur (permission de rédaction), utilisateur
-const CONTENT_PERMISSIONS = ['news.manage', 'events.manage', 'polls.manage']
-const guideRole = computed(() => {
-  const roles = getRoles(authStore.user)
-  if (roles.isAdmin) return 'admin'
-  if (CONTENT_PERMISSIONS.some(p => permissionScope(roles, p) !== '')) return 'editor'
-  return 'user'
-})
+const html = computed(() => DOMPurify.sanitize(marked.parse(applyScope(markdown.value, scope.value), { gfm: true })))
 
-// User role label for display
-const userRoleLabel = computed(() => (authStore.user?.role === 'admin' ? t('users.role_admin') : t('users.role_user')))
-
-// All guide definitions
-const allGuides = computed(() => [
-  {
-    id: 'user',
-    label: t('help.guides.user'),
-    icon: 'lucide:user',
-    roles: ['user', 'editor', 'admin'], // Available to all
-    sections: [
-      {
-        id: 'getting-started',
-        title: t('help.sections.gettingStarted'),
-        items: [
-          { id: 'introduction', title: t('help.pages.introduction'), file: 'user-guide/index' }
-        ]
-      },
-      {
-        id: 'features',
-        title: t('help.sections.features'),
-        items: [
-          { id: 'dashboard', title: t('help.pages.dashboard'), file: 'user-guide/dashboard' },
-          { id: 'applications', title: t('help.pages.applications'), file: 'user-guide/applications' },
-          { id: 'news-hub', title: t('help.pages.newsHub'), file: 'user-guide/news-hub' },
-          { id: 'events', title: t('help.pages.events'), file: 'user-guide/events' },
-          { id: 'polls', title: t('help.pages.polls'), file: 'user-guide/polls' },
-          { id: 'profile', title: t('help.pages.profile'), file: 'user-guide/profile' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'editor',
-    label: t('help.guides.editor'),
-    icon: 'lucide:pencil',
-    roles: ['editor', 'admin'], // Contributeurs et admins
-    sections: [
-      {
-        id: 'editor-basics',
-        title: t('help.sections.basics'),
-        items: [
-          { id: 'editor-overview', title: t('help.pages.overview'), file: 'editor-guide/index' },
-          { id: 'creating-news', title: t('help.pages.creatingNews'), file: 'editor-guide/creating-news' },
-          { id: 'rich-text', title: t('help.pages.richTextEditor'), file: 'editor-guide/rich-text-editor' }
-        ]
-      },
-      {
-        id: 'editor-advanced',
-        title: t('help.sections.advanced'),
-        items: [
-          { id: 'managing-tags', title: t('help.pages.managingTags'), file: 'editor-guide/managing-tags' },
-          { id: 'best-practices', title: t('help.pages.bestPractices'), file: 'editor-guide/best-practices' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'group-admin',
-    label: t('help.guides.groupAdmin'),
-    icon: 'lucide:shield-user',
-    roles: ['admin'], // Only for admins (or users with managed groups)
-    sections: [
-      {
-        id: 'group-admin-basics',
-        title: t('help.sections.basics'),
-        items: [
-          { id: 'ga-overview', title: t('help.pages.overview'), file: 'group-admin-guide/index' },
-          { id: 'ga-dashboard', title: t('help.pages.dashboard'), file: 'group-admin-guide/dashboard' },
-          { id: 'ga-permissions', title: t('help.pages.permissions'), file: 'group-admin-guide/permissions' }
-        ]
-      },
-      {
-        id: 'group-admin-management',
-        title: t('help.sections.management'),
-        items: [
-          { id: 'managing-app-groups', title: t('help.pages.managingAppGroups'), file: 'group-admin-guide/managing-app-groups' },
-          { id: 'managing-applications', title: t('help.pages.managingApplications'), file: 'group-admin-guide/managing-applications' },
-          { id: 'group-members', title: t('help.pages.groupMembers'), file: 'group-admin-guide/group-members' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'admin',
-    label: t('help.guides.admin'),
-    icon: 'lucide:shield-check',
-    roles: ['admin'], // Only for admins
-    sections: [
-      {
-        id: 'admin-installation',
-        title: t('help.sections.installation'),
-        items: [
-          { id: 'installation', title: t('help.pages.installation'), file: 'getting-started/index' },
-          { id: 'configuration', title: t('help.pages.configuration'), file: 'getting-started/configuration' },
-          { id: 'first-steps', title: t('help.pages.firstSteps'), file: 'getting-started/first-steps' }
-        ]
-      },
-      {
-        id: 'admin-basics',
-        title: t('help.sections.basics'),
-        items: [
-          { id: 'admin-overview', title: t('help.pages.overview'), file: 'admin-guide/index' },
-          { id: 'user-management', title: t('help.pages.userManagement'), file: 'admin-guide/user-management' },
-          { id: 'group-management', title: t('help.pages.groupManagement'), file: 'admin-guide/group-management' }
-        ]
-      },
-      {
-        id: 'admin-apps',
-        title: t('help.sections.applications'),
-        items: [
-          { id: 'admin-app-groups', title: t('help.pages.appGroups'), file: 'admin-guide/app-groups' },
-          { id: 'admin-applications', title: t('help.pages.applications'), file: 'admin-guide/applications' }
-        ]
-      },
-      {
-        id: 'admin-content',
-        title: t('help.sections.content'),
-        items: [
-          { id: 'news-management', title: t('help.pages.newsManagement'), file: 'admin-guide/news-management' },
-          { id: 'events-management', title: t('help.pages.eventsManagement'), file: 'admin-guide/events' },
-          { id: 'polls-management', title: t('help.pages.pollsManagement'), file: 'admin-guide/polls' },
-          { id: 'announcements', title: t('help.pages.announcements'), file: 'admin-guide/announcements' }
-        ]
-      },
-      {
-        id: 'admin-system',
-        title: t('help.sections.system'),
-        items: [
-          { id: 'analytics', title: t('help.pages.analytics'), file: 'admin-guide/analytics' },
-          { id: 'settings', title: t('help.pages.settings'), file: 'admin-guide/settings' }
-        ]
-      }
-    ]
-  }
-])
-
-// Filter guides based on user role
-const availableGuides = computed(() => allGuides.value.filter(guide => guide.roles.includes(guideRole.value)))
-
-const currentGuide = computed(() => availableGuides.value.find(g => g.id === selectedGuide.value))
-
-const renderedContent = computed(() => {
-  if (!selectedPage.value?.content) return ''
-
-  // Configure marked options
-  marked.setOptions({
-    breaks: true,
-    gfm: true
-  })
-
-  return marked(selectedPage.value.content)
-})
-
-// Get locale code for docs path
-const docsLocale = computed(() => {
-  const loc = locale.value
-  const localeMap = {
-    'fr': 'fr',
-    'en': 'en',
-    'es': 'es',
-    'ar': 'ar'
-  }
-  return localeMap[loc] || 'en'
-})
-
-function close() {
-  emit('update:modelValue', false)
-}
-
-function toggleSection(sectionId) {
-  const index = expandedSections.value.indexOf(sectionId)
-  if (index === -1) {
-    expandedSections.value.push(sectionId)
-  } else {
-    expandedSections.value.splice(index, 1)
-  }
-}
-
-async function selectPage(item) {
-  const cacheKey = `${docsLocale.value}/${item.file}`
-
-  // Check cache first
-  if (contentCache.value[cacheKey]) {
-    selectedPage.value = {
-      ...item,
-      content: contentCache.value[cacheKey],
-      section: currentGuide.value?.sections.find(s => s.items.some(i => i.id === item.id))?.title
-    }
-    return
-  }
-
+const load = async () => {
+  if (!current.value) return
+  const id = current.value.id
+  const mine = ++request
   loading.value = true
-
+  loadError.value = false
   try {
-    // Try to load from docs directory
-    const response = await fetch(`/docs/${docsLocale.value}/${item.file}.md`)
-
-    if (response.ok) {
-      let content = await response.text()
-
-      // Vérifier que le contenu ne contient pas de HTML (page d'erreur)
-      // Rejeter si on trouve des balises HTML typiques d'une page d'erreur
-      const htmlPatterns = [
-        /^\s*<!DOCTYPE/i,
-        /^\s*<html/i,
-        /<link\s+rel=["']preconnect["']/i,
-        /<script\s+type=["']module["']/i,
-        /<link\s+rel=["']modulepreload["']/i
-      ]
-
-      const isHtmlContent = htmlPatterns.some(pattern => pattern.test(content))
-
-      if (isHtmlContent) {
-        console.warn(`HTML content detected instead of markdown for ${item.file}`)
-        selectedPage.value = {
-          ...item,
-          content: t('help.contentNotAvailable'),
-          section: currentGuide.value?.sections.find(s => s.items.some(i => i.id === item.id))?.title
-        }
-      } else {
-        // Remove frontmatter if present
-        content = content.replace(/^---[\s\S]*?---\n/, '')
-
-        // Remove VitePress-specific elements
-        content = content.replace(/<div class="role-badge[^"]*">[^<]*<\/div>/g, '')
-
-        // Cache the content
-        contentCache.value[cacheKey] = content
-
-        selectedPage.value = {
-          ...item,
-          content,
-          section: currentGuide.value?.sections.find(s => s.items.some(i => i.id === item.id))?.title
-        }
-      }
-    } else {
-      // Fallback content
-      selectedPage.value = {
-        ...item,
-        content: t('help.contentNotAvailable'),
-        section: currentGuide.value?.sections.find(s => s.items.some(i => i.id === item.id))?.title
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load help content:', error)
-    selectedPage.value = {
-      ...item,
-      content: t('help.loadError'),
-      section: currentGuide.value?.sections.find(s => s.items.some(i => i.id === item.id))?.title
-    }
+    const text = await loadTopic(locale.value, id)
+    if (mine !== request) return
+    markdown.value = text
+  } catch {
+    if (mine === request) loadError.value = true
   } finally {
-    loading.value = false
+    if (mine === request) loading.value = false
   }
+  await nextTick()
+  if (article.value) article.value.scrollTop = 0
 }
 
-// Initialize selected guide based on user role
-function initializeGuide() {
-  if (availableGuides.value.length > 0) {
-    // Select the most relevant guide for the user's role
-    selectedGuide.value = guideRole.value
-
-    // Expand first section
-    if (currentGuide.value?.sections.length) {
-      expandedSections.value = [currentGuide.value.sections[0].id]
-    }
-  }
+const select = (id) => {
+  currentId.value = id
 }
 
-// Watch for guide changes
-watch(selectedGuide, () => {
-  selectedPage.value = null
-  if (currentGuide.value?.sections.length) {
-    expandedSections.value = [currentGuide.value.sections[0].id]
-  }
-})
+const close = () => emit('update:modelValue', false)
 
-// Watch for modal open
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    initializeGuide()
-  }
-})
+// Liens internes des guides (« [Ressources](/resources) ») : navigation dans l'application
+const followLink = (event) => {
+  const link = event.target.closest?.('a')
+  const href = link?.getAttribute('href')
+  if (!href || !href.startsWith('/') || href.startsWith('//')) return
+  event.preventDefault()
+  close()
+  router.push(href)
+}
 
-// Initialize on mount
-onMounted(() => {
-  if (props.modelValue) {
-    initializeGuide()
-  }
-})
+watch(() => props.modelValue, (open) => {
+  if (!open) return
+  const forPage = topicForRoute(route.path, topics.value)
+  currentId.value = (forPage || topics.value[0])?.id || ''
+}, { immediate: true })
 
-// Échap ferme la modale
-useEscapeClose(() => props.modelValue, () => close())
+// immediate : la fenêtre n'est créée qu'à la première ouverture, guide déjà choisi
+watch([currentId, locale], load, { immediate: true })
+
+useEscapeClose(() => props.modelValue, close)
 </script>
 
 <style scoped>
-/* Transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
+.help-backdrop { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.5); }
+
+.help-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  pointer-events: none;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.3s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.expand-enter-active,
-.expand-leave-active {
-  transition: all 0.2s ease;
+.help {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 960px);
+  height: min(100%, 720px);
   overflow: hidden;
-}
-
-.expand-enter-from,
-.expand-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-
-.expand-enter-to,
-.expand-leave-from {
-  max-height: 500px;
-}
-
-/* Prose customization */
-:deep(.prose) {
-  @apply text-gray-700 dark:text-gray-300;
-}
-
-:deep(.prose h1) {
-  @apply text-gray-900 dark:text-white;
-}
-
-:deep(.prose h2) {
-  @apply text-gray-800 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2;
-}
-
-:deep(.prose h3) {
-  @apply text-gray-800 dark:text-gray-200;
-}
-
-:deep(.prose code) {
-  @apply px-1.5 py-0.5 rounded text-sm;
-  background-color: var(--bg-surface);
-}
-
-:deep(.prose pre) {
-  @apply rounded-lg;
-  background-color: #111827;
-}
-
-:deep(.prose table) {
-  @apply w-full;
-}
-
-:deep(.prose th) {
-  background-color: var(--bg-surface);
-}
-
-:deep(.prose td),
-:deep(.prose th) {
-  @apply px-3 py-2;
   border: 1px solid var(--border);
+  border-radius: var(--r-l);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-float);
 }
 
-:deep(.prose img) {
-  @apply mx-auto;
+.help__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-:deep(.prose blockquote) {
-  @apply border-s-4 border-primary-500 bg-primary-50 dark:bg-primary-900/20 ps-4 py-2 italic;
+.help__mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-m);
+  background: var(--acc);
+  color: var(--on-fill, #fff);
+  font-size: 20px;
+}
+
+.help__heading { flex: 1; min-width: 0; }
+.help__title { margin: 0; font-size: 17px; font-weight: 700; color: var(--text); }
+.help__subtitle { margin: 0; font-size: 13px; color: var(--muted); }
+
+.help__close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-s);
+  color: var(--muted);
+  font-size: 20px;
+}
+
+.help__close:hover { background: var(--hover); color: var(--text); }
+.help__close:focus-visible, .help__topic:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+.help__body { display: flex; flex: 1; min-height: 0; }
+.help__picker { display: none; }
+
+.help__nav {
+  flex: none;
+  width: 250px;
+  overflow-y: auto;
+  padding: 14px 10px;
+  border-inline-end: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.help__group + .help__group { margin-top: 14px; }
+
+.help__group-title {
+  margin: 0 0 4px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.help__topic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: var(--r-s);
+  font-size: 14px;
+  color: var(--text);
+  text-align: start;
+}
+
+.help__topic svg { flex: none; width: 16px; height: 16px; color: var(--muted); }
+.help__topic:hover { background: var(--hover); }
+.help__topic--on { background: var(--bg-card); box-shadow: inset 3px 0 0 var(--acc); font-weight: 600; }
+[dir='rtl'] .help__topic--on { box-shadow: inset -3px 0 0 var(--acc); }
+.help__topic--on svg { color: var(--acc-ink, var(--acc)); }
+
+.help__content { flex: 1; min-width: 0; overflow-y: auto; padding: 22px 28px 32px; }
+
+.help__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.help__scope {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+  background: var(--bg-surface);
+}
+
+.help__scope svg { width: 13px; height: 13px; }
+.help__scope--groups svg { color: var(--acc-ink, var(--acc)); }
+
+.help__state { display: grid; place-items: center; min-height: 10rem; color: var(--muted); }
+.help__spin { width: 24px; height: 24px; animation: help-spin 0.9s linear infinite; }
+@keyframes help-spin { to { transform: rotate(360deg); } }
+
+/* Texte des guides */
+.help-prose { max-width: 68ch; font-size: 15px; line-height: 1.65; color: var(--text); }
+.help-prose :deep(h1) { margin: 0 0 12px; font-size: 24px; line-height: 1.25; font-weight: 700; }
+.help-prose :deep(h2) { margin: 26px 0 8px; font-size: 17px; font-weight: 700; }
+.help-prose :deep(h3) { margin: 18px 0 6px; font-size: 15px; font-weight: 700; }
+.help-prose :deep(p) { margin: 0 0 10px; }
+.help-prose :deep(ul), .help-prose :deep(ol) { margin: 0 0 12px; padding-inline-start: 22px; }
+.help-prose :deep(ul) { list-style: disc; }
+.help-prose :deep(ol) { list-style: decimal; }
+.help-prose :deep(li) { margin: 3px 0; }
+.help-prose :deep(li::marker) { color: var(--muted); }
+.help-prose :deep(strong) { font-weight: 650; }
+.help-prose :deep(a) { color: var(--acc-ink, var(--acc)); text-decoration: underline; text-underline-offset: 2px; }
+.help-prose :deep(code) { padding: 1px 5px; border-radius: 4px; background: var(--bg-surface); font-size: 0.9em; }
+
+/* Encadré « Bon à savoir » : citations Markdown */
+.help-prose :deep(blockquote) {
+  margin: 14px 0;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--acc);
+  border-radius: var(--r-s);
+  background: var(--bg-surface);
+}
+
+.help-prose :deep(blockquote p:last-child) { margin-bottom: 0; }
+
+.help-prose :deep(table) {
+  width: 100%;
+  margin: 12px 0 16px;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.help-prose :deep(th),
+.help-prose :deep(td) {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+
+.help-prose :deep(th) {
+  color: var(--muted);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Transitions */
+.help-fade-enter-active, .help-fade-leave-active { transition: opacity 0.2s ease; }
+.help-fade-enter-from, .help-fade-leave-to { opacity: 0; }
+.help-pop-enter-active, .help-pop-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.help-pop-enter-from, .help-pop-leave-to { opacity: 0; transform: scale(0.97); }
+
+@media (max-width: 720px) {
+  .help-layer { padding: 0; }
+  .help { width: 100%; height: 100%; border: 0; border-radius: 0; }
+  .help__body { flex-direction: column; }
+  .help__nav { display: none; }
+  .help__picker { display: block; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-surface); }
+  .help__content { padding: 18px 16px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-fade-enter-active, .help-fade-leave-active, .help-pop-enter-active, .help-pop-leave-active { transition: none; }
+  .help__spin { animation: none; }
 }
 </style>

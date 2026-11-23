@@ -8,6 +8,17 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### ✨ Built-in Help
+
+- **Help rebuilt and shown again** ("?" button at the bottom of the menu): 22 step-by-step guides
+  in French, English, Spanish and Arabic, bundled with the app (`src/help/content/<lang>/`), so the
+  help no longer depends on the `docs/` folder.
+- **Targeted by role**: "For everyone" guides, one "Your permissions" guide per role permission
+  (its text follows the permission's scope: whole site or own groups) and "Administration" guides
+  for admins only.
+- Opens on the guide for the current page; links inside a guide open the page and close the help.
+  Mobile: a topic picker replaces the side list.
+
 ### ✨ Roles & Permissions
 
 - **Custom roles** (Admin → Roles): the admin builds roles from a fixed permission catalogue

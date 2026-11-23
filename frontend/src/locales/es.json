@@ -2136,65 +2136,6 @@
     "typeArchives": "Archivos comprimidos",
     "fileTooLarge": "{name} es demasiado grande (máx. {max} MB)"
   },
-  "help": {
-    "sections": {
-      "installation": "Instalación y Configuración",
-      "gettingStarted": "Primeros pasos",
-      "features": "Funcionalidades",
-      "basics": "Lo básico",
-      "advanced": "Avanzado",
-      "management": "Gestión",
-      "applications": "Recursos",
-      "content": "Contenido",
-      "system": "Sistema"
-    },
-    "pages": {
-      "installation": "Instalación",
-      "configuration": "Configuración",
-      "introduction": "Introducción",
-      "firstSteps": "Primeros pasos",
-      "dashboard": "Panel de control",
-      "applications": "Recursos",
-      "newsHub": "Centro de noticias",
-      "events": "Eventos",
-      "polls": "Encuestas",
-      "profile": "Perfil",
-      "overview": "Visión general",
-      "creatingNews": "Crear noticias",
-      "richTextEditor": "Editor de texto enriquecido",
-      "managingTags": "Gestionar las etiquetas",
-      "bestPractices": "Buenas prácticas",
-      "permissions": "Permisos",
-      "managingAppGroups": "Gestionar las categorías de recursos",
-      "managingApplications": "Gestionar los recursos",
-      "groupMembers": "Miembros del grupo",
-      "userManagement": "Gestión de usuarios",
-      "groupManagement": "Gestión de grupos",
-      "appGroups": "Categorías de recursos",
-      "newsManagement": "Gestión de noticias",
-      "eventsManagement": "Gestión de eventos",
-      "pollsManagement": "Gestión de encuestas",
-      "announcements": "Anuncios",
-      "analytics": "Analíticas",
-      "settings": "Configuración"
-    },
-    "title": "Ayuda",
-    "subtitle": "Documentación y guías",
-    "loading": "Cargando...",
-    "selectTopic": "Seleccione un tema",
-    "selectTopicDesc": "Elija una guía en el menú de la izquierda para empezar",
-    "contentNotAvailable": "Este contenido aún no está disponible en este idioma.",
-    "loadError": "Error al cargar el contenido. Inténtelo de nuevo.",
-    "version": "Documentación v{version}",
-    "fullDocs": "Documentación completa",
-    "yourRole": "Su rol",
-    "guides": {
-      "user": "Usuario",
-      "editor": "Editor",
-      "groupAdmin": "Admin de grupo",
-      "admin": "Administrador"
-    }
-  },
   "directory": {
     "title": "Organigrama del personal",
     "eyebrow": "Nuestra organización",
@@ -3239,6 +3180,45 @@
       "delete": "No se pudo eliminar el grupo.",
       "nameRequired": "El nombre es obligatorio.",
       "parentRequired": "Elija el grupo principal."
+    }
+  },
+  "help": {
+    "title": "Ayuda",
+    "subtitle": "Guías paso a paso, según sus accesos",
+    "chooseTopic": "Elegir una guía",
+    "loadError": "No se pudo mostrar esta guía. Inténtelo de nuevo.",
+    "audiences": {
+      "everyone": "Para todos",
+      "contributor": "Sus permisos",
+      "admin": "Administración"
+    },
+    "scope": {
+      "all": "Todo el sitio",
+      "groups": "En sus grupos"
+    },
+    "topics": {
+      "start": "Orientarse",
+      "resources": "Recursos",
+      "news": "Noticias",
+      "agenda": "Agenda",
+      "polls": "Encuestas",
+      "suggestions": "Buzón de sugerencias",
+      "directory": "Directorio",
+      "messaging": "Mensajería y asistentes",
+      "xp": "Puntos e insignias",
+      "profile": "Perfil y notificaciones",
+      "manage-news": "Publicar noticias",
+      "manage-events": "Publicar eventos",
+      "manage-polls": "Crear encuestas",
+      "manage-resources": "Gestionar los recursos",
+      "moderation": "Moderar los comentarios",
+      "sub-groups": "Gestionar subgrupos",
+      "admin-users": "Usuarios",
+      "admin-groups": "Grupos",
+      "admin-roles": "Roles y permisos",
+      "admin-directory": "Gestionar el directorio",
+      "admin-content": "Anuncios, medios y ajustes del contenido",
+      "admin-system": "Ajustes y seguimiento"
     }
   }
 }
