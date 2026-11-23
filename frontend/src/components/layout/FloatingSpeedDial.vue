@@ -118,6 +118,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import { chatbotsService } from '@/services/api'
 import { playChatNotificationSound } from '@/utils/chatNotificationSound'
+import { useChatDeepLink } from '@/composables/useChatDeepLink'
 
 const ChatOverlay = defineAsyncComponent(() => import('@/components/chat/ChatOverlay.vue'))
 const ChatbotWidget = defineAsyncComponent(() => import('@/components/ChatbotWidget.vue'))
@@ -153,6 +154,9 @@ const fabLabel = computed(() => {
 watch(() => chatStore.isOpen, (open) => {
   if (open) chatLoaded.value = true
 })
+
+// Lien /chat (emails) : ouvre la messagerie une fois connecté
+useChatDeepLink(() => chatStore.isOpen, () => chatStore.toggleChat())
 
 // Son à l'arrivée d'un message, même quand le panneau n'a jamais été ouvert.
 watch(totalUnread, (newTotal, oldTotal) => {

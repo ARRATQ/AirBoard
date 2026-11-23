@@ -90,6 +90,8 @@ const routes = [
     }
   },
   { path: '/dashboard', redirect: '/resources' },
+  // Lien « Ouvrir la conversation » des emails de messagerie : ouvre le chat sur l'accueil
+  { path: '/chat', redirect: { path: '/home', query: { chat: 'open' } } },
   {
     path: '/directory',
     name: 'Directory',

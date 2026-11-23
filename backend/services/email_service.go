@@ -37,6 +37,7 @@ func NewEmailService(db *gorm.DB, cfg *config.Config) *EmailService {
 
 // NewsEmailData contient les données pour le template news
 type NewsEmailData struct {
+	EmailBrand
 	Title       string
 	Summary     string
 	Author      string
@@ -47,6 +48,7 @@ type NewsEmailData struct {
 
 // ApplicationEmailData contient les données pour le template application
 type ApplicationEmailData struct {
+	EmailBrand
 	Name        string
 	Description string
 	URL         string
@@ -56,6 +58,7 @@ type ApplicationEmailData struct {
 
 // EventEmailData contient les données pour le template event
 type EventEmailData struct {
+	EmailBrand
 	Title       string
 	Description string
 	StartDate   string
@@ -67,19 +70,35 @@ type EventEmailData struct {
 
 // AnnouncementEmailData contient les données pour le template announcement
 type AnnouncementEmailData struct {
+	EmailBrand
 	Title   string
 	Content string
 	Type    string
 	AppName string
+	// Libellé (« Information »…) et couleur de statut du type
+	TypeLabel string
+	TypeColor string
 }
 
 // ChatMessageEmailData contient les données pour le template chat_message
 type ChatMessageEmailData struct {
+	EmailBrand
 	SenderName     string
 	MessagePreview string
 	SentAt         string
 	ChatLink       string
 	AppName        string
+}
+
+// branding : nom du portail et identité visuelle (palette de Réglages → Apparence).
+func (s *EmailService) branding() (string, EmailBrand) {
+	var appSettings models.AppSettings
+	s.db.First(&appSettings)
+	appName := appSettings.AppName
+	if appName == "" {
+		appName = "Airboard"
+	}
+	return appName, brandFor(appSettings, s.config.Server.PublicURL)
 }
 
 // SendNotification envoie des notifications email aux groupes cibles
@@ -258,20 +277,15 @@ func (s *EmailService) SendChatNotificationEmail(senderID, recipientID uint) err
 
 	// Tronquer l'aperçu du message
 	messagePreview := lastMessage.Content
-	if len(messagePreview) > 100 {
-		messagePreview = messagePreview[:100] + "..."
+	if preview := []rune(messagePreview); len(preview) > 100 {
+		messagePreview = string(preview[:100]) + "…"
 	}
 
-	// Nom de l'application
-	var appSettings models.AppSettings
-	s.db.First(&appSettings)
-	appName := appSettings.AppName
-	if appName == "" {
-		appName = "Airboard"
-	}
+	appName, brand := s.branding()
 
 	// Construire les données du template
 	emailData := ChatMessageEmailData{
+		EmailBrand:     brand,
 		SenderName:     senderName,
 		MessagePreview: messagePreview,
 		SentAt:         lastMessage.CreatedAt.Format("02/01/2006 à 15:04"),
@@ -302,13 +316,7 @@ func (s *EmailService) SendChatNotificationEmail(senderID, recipientID uint) err
 
 // prepareEmailData prépare les données selon le type de contenu
 func (s *EmailService) prepareEmailData(templateType string, contentID uint) (interface{}, string, error) {
-	// Récupérer le nom de l'application
-	var appSettings models.AppSettings
-	s.db.First(&appSettings)
-	appName := appSettings.AppName
-	if appName == "" {
-		appName = "Airboard"
-	}
+	appName, brand := s.branding()
 
 	switch templateType {
 	case "news":
@@ -327,6 +335,7 @@ func (s *EmailService) prepareEmailData(templateType string, contentID uint) (in
 			publishedAt = time.Now().Format("02/01/2006 à 15:04")
 		}
 		return NewsEmailData{
+			EmailBrand:  brand,
 			Title:       news.Title,
 			Summary:     news.Summary,
 			Author:      authorName,
@@ -345,6 +354,7 @@ func (s *EmailService) prepareEmailData(templateType string, contentID uint) (in
 			appGroupName = app.AppGroup.Name
 		}
 		return ApplicationEmailData{
+			EmailBrand:  brand,
 			Name:        app.Name,
 			Description: app.Description,
 			URL:         app.URL,
@@ -362,6 +372,7 @@ func (s *EmailService) prepareEmailData(templateType string, contentID uint) (in
 			endDate = event.EndDate.Format("02/01/2006 à 15:04")
 		}
 		return EventEmailData{
+			EmailBrand:  brand,
 			Title:       event.Title,
 			Description: event.Description,
 			StartDate:   event.StartDate.Format("02/01/2006 à 15:04"),
@@ -376,11 +387,15 @@ func (s *EmailService) prepareEmailData(templateType string, contentID uint) (in
 		if err := s.db.First(&announcement, contentID).Error; err != nil {
 			return nil, "", fmt.Errorf("annonce non trouvée: %w", err)
 		}
+		typeLabel, typeColor := announcementType(announcement.Type)
 		return AnnouncementEmailData{
-			Title:   announcement.Title,
-			Content: announcement.Content,
-			Type:    announcement.Type,
-			AppName: appName,
+			EmailBrand: brand,
+			TypeLabel:  typeLabel,
+			TypeColor:  typeColor,
+			Title:      announcement.Title,
+			Content:    announcement.Content,
+			Type:       announcement.Type,
+			AppName:    appName,
 		}, announcement.Title, nil
 	}
 
@@ -627,17 +642,12 @@ func (s *EmailService) DecryptPassword(encrypted string) (string, error) {
 
 // GetSampleData retourne des données exemple pour un type de template
 func (s *EmailService) GetSampleData(templateType string) interface{} {
-	// Récupérer le nom de l'application
-	var appSettings models.AppSettings
-	s.db.First(&appSettings)
-	appName := appSettings.AppName
-	if appName == "" {
-		appName = "Airboard"
-	}
+	appName, brand := s.branding()
 
 	switch templateType {
 	case "news":
 		return NewsEmailData{
+			EmailBrand:  brand,
 			Title:       "Exemple d'article",
 			Summary:     "Ceci est un résumé exemple pour prévisualiser le template d'email.",
 			Author:      "Jean Dupont",
@@ -647,6 +657,7 @@ func (s *EmailService) GetSampleData(templateType string) interface{} {
 		}
 	case "application":
 		return ApplicationEmailData{
+			EmailBrand:  brand,
 			Name:        "Application Exemple",
 			Description: "Ceci est une description exemple pour prévisualiser le template.",
 			URL:         "https://example.com/app",
@@ -655,6 +666,7 @@ func (s *EmailService) GetSampleData(templateType string) interface{} {
 		}
 	case "event":
 		return EventEmailData{
+			EmailBrand:  brand,
 			Title:       "Événement Exemple",
 			Description: "Ceci est une description exemple pour prévisualiser le template d'événement.",
 			StartDate:   time.Now().Format("02/01/2006 à 15:04"),
@@ -664,14 +676,19 @@ func (s *EmailService) GetSampleData(templateType string) interface{} {
 			AppName:     appName,
 		}
 	case "announcement":
+		typeLabel, typeColor := announcementType("info")
 		return AnnouncementEmailData{
-			Title:   "Annonce Exemple",
-			Content: "Ceci est un contenu d'annonce exemple pour prévisualiser le template.",
-			Type:    "info",
-			AppName: appName,
+			EmailBrand: brand,
+			TypeLabel:  typeLabel,
+			TypeColor:  typeColor,
+			Title:      "Annonce Exemple",
+			Content:    "Ceci est un contenu d'annonce exemple pour prévisualiser le template.",
+			Type:       "info",
+			AppName:    appName,
 		}
 	case "chat_message":
 		return ChatMessageEmailData{
+			EmailBrand:     brand,
 			SenderName:     "Jean Dupont",
 			MessagePreview: "Bonjour, avez-vous vu le dernier rapport ? Je l'ai partagé dans le dossier commun...",
 			SentAt:         time.Now().Format("02/01/2006 à 15:04"),
