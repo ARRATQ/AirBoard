@@ -1,6 +1,7 @@
 package models
 
 import (
+	"sort"
 	"time"
 
 	"gorm.io/gorm"
@@ -28,6 +29,12 @@ const (
 	// PermCommentsModerate : voir les commentaires en attente, les approuver, les modifier
 	// ou les supprimer. Sans notion de groupe : sur tout le site seulement.
 	PermCommentsModerate = "comments.moderate"
+	// PermGroupsManage : créer, modifier et supprimer des groupes d'utilisateurs et choisir
+	// leurs membres. Portée « ses groupes » : des sous-groupes sous les groupes couverts, avec
+	// des membres de ces groupes ; les groupes couverts eux-mêmes restent à l'admin. Portée
+	// « tout le site » : tous les groupes. Dans les deux cas, le groupe par défaut et les
+	// groupes liés au trombinoscope restent réservés à l'admin.
+	PermGroupsManage = "groups.manage"
 )
 
 // PermissionDef décrit une permission du catalogue et les portées qu'elle accepte.
@@ -44,6 +51,7 @@ var PermissionCatalog = []PermissionDef{
 	{Key: PermEventsManage, Module: "events", Scopes: []string{ScopeAll, ScopeGroups}},
 	{Key: PermPollsManage, Module: "polls", Scopes: []string{ScopeAll, ScopeGroups}},
 	{Key: PermCommentsModerate, Module: "comments", Scopes: []string{ScopeAll}},
+	{Key: PermGroupsManage, Module: "groups", Scopes: []string{ScopeAll, ScopeGroups}},
 }
 
 // LookupPermission renvoie la définition d'une permission du catalogue.
@@ -241,8 +249,42 @@ func assignmentGroupsExcept(db *gorm.DB, userID, everyone uint) (map[uint][]uint
 
 // PermissionGroups renvoie, pour chaque permission que le compte exerce avec la portée « ses
 // groupes », les groupes couverts : l'union, sur les rôles qui la donnent, des groupes choisis
-// à l'attribution, ou des groupes dont il est membre si aucun n'a été choisi.
+// à l'attribution, ou des groupes dont il est membre si aucun n'a été choisi, sous-groupes
+// compris.
 func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
+	roots, everyone, err := permissionRootSets(db, userID)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string][]uint{}
+	for perm, ids := range roots {
+		// Sous-groupes compris (résultat trié)
+		expanded, err := withSubgroupsExcept(db, ids, everyone)
+		if err != nil {
+			return nil, err
+		}
+		out[perm] = expanded
+	}
+	return out, nil
+}
+
+// PermissionRootGroups renvoie les groupes que la permission couvre directement (portée « ses
+// groupes »), sans leurs sous-groupes : groupes choisis à l'attribution, ou groupes dont le
+// compte est membre. Triés ; vide si le compte n'exerce pas la permission avec cette portée.
+func PermissionRootGroups(db *gorm.DB, userID uint, permission string) ([]uint, error) {
+	roots, _, err := permissionRootSets(db, userID)
+	if err != nil {
+		return nil, err
+	}
+	if roots[permission] == nil {
+		return []uint{}, nil
+	}
+	return roots[permission], nil
+}
+
+// permissionRootSets : {permission: groupes couverts directement (triés)} pour la portée
+// « ses groupes », et l'identifiant du groupe par défaut.
+func permissionRootSets(db *gorm.DB, userID uint) (map[string][]uint, uint, error) {
 	var rows []struct {
 		Permission   string
 		AccessRoleID uint
@@ -252,19 +294,19 @@ func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
 		Joins("JOIN user_access_roles uar ON uar.access_role_id = arp.role_id").
 		Where("uar.user_id = ? AND arp.scope = ?", userID, ScopeGroups).
 		Scan(&rows).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	out := map[string][]uint{}
 	if len(rows) == 0 {
-		return out, nil
+		return out, 0, nil
 	}
 	everyone, err := EveryoneGroupID(db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	chosen, err := assignmentGroupsExcept(db, userID, everyone)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	var members []uint
 	membersLoaded := false
@@ -274,7 +316,7 @@ func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
 		if !ok {
 			if !membersLoaded {
 				if members, err = memberGroupsExcept(db, userID, everyone); err != nil {
-					return nil, err
+					return nil, 0, err
 				}
 				membersLoaded = true
 			}
@@ -292,12 +334,8 @@ func PermissionGroups(db *gorm.DB, userID uint) (map[string][]uint, error) {
 		for id := range set {
 			ids = append(ids, id)
 		}
-		// Sous-groupes compris (résultat trié)
-		expanded, err := withSubgroupsExcept(db, ids, everyone)
-		if err != nil {
-			return nil, err
-		}
-		out[perm] = expanded
+		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+		out[perm] = ids
 	}
-	return out, nil
+	return out, everyone, nil
 }

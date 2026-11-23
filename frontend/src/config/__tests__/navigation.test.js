@@ -30,8 +30,8 @@ describe('buildAdminNav', () => {
     expect(links.some((to) => to.startsWith('/group-admin'))).toBe(false)
   })
 
-  it("donne à l'admin chaque page déclarée", () => {
-    const declared = ADMIN_SECTIONS.flatMap((s) => s.items.map((i) => i.to))
+  it("donne à l'admin chaque page déclarée, sauf celles qui ne sont pas pour lui", () => {
+    const declared = ADMIN_SECTIONS.flatMap((s) => s.items.filter((i) => !i.hideForAdmin).map((i) => i.to))
     expect(allLinks(buildAdminNav(admin))).toEqual(['/admin', ...declared])
   })
 
@@ -87,5 +87,21 @@ describe('visibleTabs', () => {
 
   it('renvoie une liste vide pour une section inconnue', () => {
     expect(visibleTabs('inconnue', admin)).toEqual([])
+  })
+})
+
+describe('« Mes groupes » (permission groups.manage)', () => {
+  const subGroups = getRoles({ role: 'user', permissions: { 'groups.manage': 'groups' } })
+
+  it('apparaît pour qui a la permission, quelle qu’en soit la portée', () => {
+    expect(allLinks(buildAdminNav(subGroups))).toContain('/admin/my-groups')
+    const everywhere = getRoles({ role: 'user', permissions: { 'groups.manage': 'all' } })
+    expect(allLinks(buildAdminNav(everywhere))).toContain('/admin/my-groups')
+  })
+
+  it("n'apparaît ni pour l'admin (il a « Groupes ») ni pour les autres", () => {
+    expect(allLinks(buildAdminNav(admin))).not.toContain('/admin/my-groups')
+    expect(allLinks(buildAdminNav(admin))).toContain('/admin/groups')
+    expect(allLinks(buildAdminNav(groupAdmin))).not.toContain('/admin/my-groups')
   })
 })

@@ -354,6 +354,18 @@ func newRouter(cfg *config.Config, db *gorm.DB, storageService services.StorageS
 		// par défaut) : tous si elle l'a sur tout le site.
 		protected.GET("/group-admin/managed-groups", authMiddleware.RequirePermissionParam(), groupAdminHandler.GetManagedGroups)
 
+		// Groupes d'utilisateurs (permission groups.manage, page « Mes groupes ») : sous-groupes de
+		// ses groupes avec leurs membres, ou tous les groupes avec la portée « tout le site ».
+		userGroupsScoped := protected.Group("/group-admin/user-groups")
+		userGroupsScoped.Use(authMiddleware.RequirePermission(models.PermGroupsManage))
+		{
+			userGroupsScoped.GET("", groupAdminHandler.GetUserGroups)
+			userGroupsScoped.GET("/candidates", groupAdminHandler.GetUserGroupCandidates)
+			userGroupsScoped.POST("", groupAdminHandler.CreateUserGroup)
+			userGroupsScoped.PUT("/:id", groupAdminHandler.UpdateUserGroup)
+			userGroupsScoped.DELETE("/:id", groupAdminHandler.DeleteUserGroup)
+		}
+
 		// Envoi de médias (images des articles, des événements et des sondages) : sans notion
 		// de groupe.
 		mediaUpload := authMiddleware.RequireAnyPermission(models.PermNewsManage, models.PermEventsManage, models.PermPollsManage)

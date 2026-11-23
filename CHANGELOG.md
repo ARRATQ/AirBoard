@@ -11,10 +11,15 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### ✨ Roles & Permissions
 
 - **Custom roles** (Admin → Roles): the admin builds roles from a fixed permission catalogue
-  (`resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`),
+  (`resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`,
+  `groups.manage`),
   each scoped to the whole site or to groups. A user can hold several roles; rights add up.
 - **Groups chosen per assignment**: when giving a role to someone, the admin can pick the groups
   it applies to. With none chosen, it covers the person's own groups, except the default group.
+- **Sub-group management** (`groups.manage`, page Admin → My groups): on their groups, a holder
+  creates, renames and deletes sub-groups and picks their members among the members of those
+  groups; the groups they cover stay unchanged. Whole site: every group. The default group and
+  directory-linked groups stay admin-only.
 - **Search-as-you-type pickers** replace long checkbox lists for groups and people (user form,
   role members, poll, news and event targeting).
 

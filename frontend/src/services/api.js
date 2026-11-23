@@ -1575,6 +1575,28 @@ export const settingsService = {
 }
 
 // ===== Trombinoscope =====
+// Groupes d'utilisateurs gérés avec la permission groups.manage (page « Mes groupes »)
+export const userGroupsService = {
+  async list() {
+    return (await api.get('/group-admin/user-groups')).data
+  },
+  async create(data) {
+    return (await api.post('/group-admin/user-groups', data)).data
+  },
+  async update(id, data) {
+    return (await api.put(`/group-admin/user-groups/${id}`, data)).data
+  },
+  async remove(id) {
+    return (await api.delete(`/group-admin/user-groups/${id}`)).data
+  },
+  // Comptes que l'on peut mettre dans un groupe placé sous parentId
+  async candidates(parentId, q) {
+    const params = { q }
+    if (parentId) params.parent_id = parentId
+    return (await api.get('/group-admin/user-groups/candidates', { params })).data
+  }
+}
+
 export const directoryService = {
   // Lecture (tous les utilisateurs connectés)
   async getDirectory() {

@@ -24,6 +24,8 @@ export const EVENTS = 'events'
 export const POLLS = 'polls'
 /** Modération des commentaires : permission comments.moderate (sur tout le site) */
 export const MODERATION = 'moderation'
+/** Groupes d'utilisateurs (page « Mes groupes ») : permission groups.manage */
+export const USER_GROUPS = 'userGroups'
 
 /** Permission du serveur qui ouvre chaque niveau d'accès géré par permission */
 export const ACCESS_PERMISSION = {
@@ -31,7 +33,8 @@ export const ACCESS_PERMISSION = {
   [NEWS]: 'news.manage',
   [EVENTS]: 'events.manage',
   [POLLS]: 'polls.manage',
-  [MODERATION]: 'comments.moderate'
+  [MODERATION]: 'comments.moderate',
+  [USER_GROUPS]: 'groups.manage'
 }
 
 /** Portées d'une permission */

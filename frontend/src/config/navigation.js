@@ -1,4 +1,4 @@
-import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, canAccess } from './access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, USER_GROUPS, canAccess } from './access'
 
 /**
  * Menu latéral, décrit une seule fois pour tous les rôles.
@@ -69,6 +69,9 @@ export const ADMIN_SECTIONS = [
     items: [
       { to: '/admin/users', icon: 'lucide:users', labelKey: 'nav.admin.users', access: ADMIN },
       { to: '/admin/groups', icon: 'lucide:users', labelKey: 'nav.admin.groups', access: ADMIN },
+      // L'admin gère tous les groupes depuis « Groupes » : « Mes groupes » est pour les titulaires
+      // de la permission groups.manage
+      { to: '/admin/my-groups', icon: 'lucide:users-round', labelKey: 'nav.admin.myGroups', access: USER_GROUPS, hideForAdmin: true },
       { to: '/admin/roles', icon: 'lucide:shield-check', labelKey: 'nav.admin.roles', access: ADMIN },
       { to: '/admin/oauth', icon: 'lucide:shield-ellipsis', labelKey: 'nav.admin.oauth', access: ADMIN }
     ]
@@ -99,7 +102,7 @@ export const ADMIN_SECTIONS = [
  * @returns {null | { titleKey: string, grouped: boolean, overview: object|null, sections: Array, items: Array }}
  */
 export function buildAdminNav(roles) {
-  const allowed = (item) => canAccess(item.access, roles)
+  const allowed = (item) => canAccess(item.access, roles) && !(roles.isAdmin && item.hideForAdmin)
   const sections = ADMIN_SECTIONS
     .map((section) => ({ ...section, items: section.items.filter(allowed) }))
     .filter((section) => section.items.length > 0)
