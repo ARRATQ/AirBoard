@@ -2968,7 +2968,8 @@
       "analytics": "Analytics",
       "reports": "Reports",
       "chatbots": "Chatbots",
-      "roles": "Roles"
+      "roles": "Roles",
+      "myGroups": "My groups"
     },
     "tabs": {
       "label": "Page sections",
@@ -3168,6 +3169,10 @@
       "comments_moderate": {
         "label": "Moderate comments",
         "help": "Approve, edit or delete comments. Applies to the whole site."
+      },
+      "groups_manage": {
+        "label": "Manage sub-groups",
+        "help": "Their groups: create, edit and delete sub-groups of their groups, with members of those groups. Whole site: manage every group. The default group and directory groups stay with the administrator."
       }
     },
     "members": {
@@ -3194,5 +3199,46 @@
     "noOption": "Nothing to suggest",
     "selected": "{label}: selection",
     "results": "No results | 1 result | {n} results"
+  },
+  "myGroups": {
+    "title": "My groups",
+    "subtitleGroups": "Split your groups into sub-groups. Their members also see what is meant for the group above.",
+    "subtitleAll": "Create and organise the site's user groups.",
+    "newSubGroup": "New sub-group",
+    "newGroup": "New group",
+    "addSubGroup": "Add a sub-group",
+    "addSubGroupTo": "Add a sub-group to {name}",
+    "adminOnly": "Managed by the administrator",
+    "searchPlaceholder": "Search a group or a member…",
+    "emptyTitle": "No groups",
+    "emptyText": "You are not a member of any group this permission applies to.",
+    "created": "Group created.",
+    "updated": "Group updated.",
+    "deleted": "Group deleted.",
+    "confirmDeleteTitle": "Delete the group",
+    "confirmDeleteText": "Delete “{name}”? Its sub-groups move up a level; its members leave this group.",
+    "modal": {
+      "createTitle": "New group",
+      "editTitle": "Edit “{name}”",
+      "subtitleGroups": "A sub-group sits under one of your groups and only gathers members of that group.",
+      "subtitleAll": "Place the group anywhere and choose its members.",
+      "create": "Create the group",
+      "name": "Name",
+      "color": "Colour",
+      "parent": "Parent group",
+      "pickParent": "Choose the parent group",
+      "members": "Members",
+      "membersPlaceholder": "Search a person…",
+      "pickParentFirst": "Choose the parent group first.",
+      "membersHintGroups": "Only members of your groups above this sub-group can be added.",
+      "membersHintAll": "Any active account can be added."
+    },
+    "errors": {
+      "load": "Could not load your groups.",
+      "save": "Could not save the group.",
+      "delete": "Could not delete the group.",
+      "nameRequired": "The name is required.",
+      "parentRequired": "Choose the parent group."
+    }
   }
 }

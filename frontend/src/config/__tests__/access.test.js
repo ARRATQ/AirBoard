@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess, getScope, permissionScope, canManageItem, canModerateComments } from '../access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, USER_GROUPS, getRoles, canAccess, getScope, permissionScope, canManageItem, canModerateComments } from '../access'
 
 const admin = getRoles({ role: 'admin' })
 // Ancien compte « editor » resté sans rôle : traité comme un utilisateur
@@ -171,5 +171,18 @@ describe('canManageItem', () => {
     expect(canManageItem({ id: 9, role: 'user' }, 'news.manage', { author_id: 9 })).toBe(true)
     expect(canManageItem({ id: 9, role: 'user', managed_group_ids: [2], admin_of_groups: [g2] }, 'news.manage', { target_groups: [g2] })).toBe(false)
     expect(canManageItem(null, 'news.manage', { author_id: 9 })).toBe(false)
+  })
+})
+
+describe('USER_GROUPS (permission groups.manage)', () => {
+  it('ouvre la page à qui a la permission, sur ses groupes ou partout', () => {
+    expect(canAccess(USER_GROUPS, getRoles({ role: 'user', permissions: { 'groups.manage': 'groups' } }))).toBe(true)
+    expect(getScope(USER_GROUPS, getRoles({ role: 'user', permissions: { 'groups.manage': 'groups' } }))).toBe('group')
+    expect(getScope(USER_GROUPS, getRoles({ role: 'user', permissions: { 'groups.manage': 'all' } }))).toBe('global')
+  })
+
+  it('reste fermée sans la permission', () => {
+    expect(canAccess(USER_GROUPS, groupAdmin)).toBe(false)
+    expect(canAccess(USER_GROUPS, user)).toBe(false)
   })
 })

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, getRoles, canAccess } from '@/config/access'
+import { ADMIN, MANAGEMENT, RESOURCES, NEWS, EVENTS, POLLS, MODERATION, USER_GROUPS, getRoles, canAccess } from '@/config/access'
 
 // Import des vues
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
@@ -13,6 +13,7 @@ const AppGroupsManagement = () => import('@/views/admin/AppGroupsManagement.vue'
 const ApplicationsManagement = () => import('@/views/admin/ApplicationsManagement.vue')
 const UsersManagement = () => import('@/views/admin/UsersManagement.vue')
 const GroupsManagement = () => import('@/views/admin/GroupsManagement.vue')
+const MyGroups = () => import('@/views/admin/MyGroups.vue')
 const RolesManagement = () => import('@/views/admin/RolesManagement.vue')
 const Analytics = () => import('@/views/admin/Analytics.vue')
 const AnnouncementsManagement = () => import('@/views/admin/AnnouncementsManagement.vue')
@@ -311,6 +312,12 @@ const routes = [
       access: ADMIN,
       title: 'Groupes'
     }
+  },
+  {
+    path: '/admin/my-groups',
+    name: 'AdminMyGroups',
+    component: MyGroups,
+    meta: { requiresAuth: true, access: USER_GROUPS, title: 'Mes groupes' }
   },
   {
     path: '/admin/roles',

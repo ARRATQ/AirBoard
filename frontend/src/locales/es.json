@@ -2573,7 +2573,8 @@
       "analytics": "Estadísticas",
       "reports": "Informes",
       "chatbots": "Chatbots",
-      "roles": "Roles"
+      "roles": "Roles",
+      "myGroups": "Mis grupos"
     },
     "tabs": {
       "label": "Secciones de la página",
@@ -3168,6 +3169,10 @@
       "comments_moderate": {
         "label": "Moderar los comentarios",
         "help": "Aprobar, editar o eliminar comentarios. Se aplica a todo el sitio."
+      },
+      "groups_manage": {
+        "label": "Gestionar los subgrupos",
+        "help": "Sus grupos: crear, modificar y eliminar subgrupos de sus grupos, con miembros de esos grupos. Todo el sitio: gestionar todos los grupos. El grupo predeterminado y los grupos del directorio quedan para el administrador."
       }
     },
     "members": {
@@ -3194,5 +3199,46 @@
     "noOption": "Nada que proponer",
     "selected": "{label}: selección",
     "results": "Sin resultados | 1 resultado | {n} resultados"
+  },
+  "myGroups": {
+    "title": "Mis grupos",
+    "subtitleGroups": "Divida sus grupos en subgrupos. Sus miembros también ven lo destinado al grupo superior.",
+    "subtitleAll": "Cree y organice los grupos de usuarios del sitio.",
+    "newSubGroup": "Nuevo subgrupo",
+    "newGroup": "Nuevo grupo",
+    "addSubGroup": "Añadir un subgrupo",
+    "addSubGroupTo": "Añadir un subgrupo a {name}",
+    "adminOnly": "Gestionado por el administrador",
+    "searchPlaceholder": "Buscar un grupo o un miembro…",
+    "emptyTitle": "Ningún grupo",
+    "emptyText": "No es miembro de ningún grupo al que se aplique este permiso.",
+    "created": "Grupo creado.",
+    "updated": "Grupo modificado.",
+    "deleted": "Grupo eliminado.",
+    "confirmDeleteTitle": "Eliminar el grupo",
+    "confirmDeleteText": "¿Eliminar «{name}»? Sus subgrupos suben un nivel; sus miembros dejan este grupo.",
+    "modal": {
+      "createTitle": "Nuevo grupo",
+      "editTitle": "Modificar «{name}»",
+      "subtitleGroups": "Un subgrupo se sitúa bajo uno de sus grupos y solo reúne a miembros de ese grupo.",
+      "subtitleAll": "Coloque el grupo donde quiera y elija sus miembros.",
+      "create": "Crear el grupo",
+      "name": "Nombre",
+      "color": "Color",
+      "parent": "Grupo principal",
+      "pickParent": "Elegir el grupo principal",
+      "members": "Miembros",
+      "membersPlaceholder": "Buscar una persona…",
+      "pickParentFirst": "Elija primero el grupo principal.",
+      "membersHintGroups": "Solo se pueden añadir miembros de sus grupos por encima de este subgrupo.",
+      "membersHintAll": "Se puede añadir cualquier cuenta activa."
+    },
+    "errors": {
+      "load": "No se pudieron cargar sus grupos.",
+      "save": "No se pudo guardar el grupo.",
+      "delete": "No se pudo eliminar el grupo.",
+      "nameRequired": "El nombre es obligatorio.",
+      "parentRequired": "Elija el grupo principal."
+    }
   }
 }

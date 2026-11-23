@@ -121,10 +121,14 @@ Airboard transforms how organizations manage digital resources, internal communi
 
 - **Custom Roles** (Admin → Roles)
   - The admin creates roles and fills them from a fixed permission catalogue:
-    `resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`
+    `resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`,
+    `groups.manage`
   - Each permission is scoped either to the **whole site** or to **groups**
   - A user can hold several roles; their rights add up
   - Assigning roles stays admin-only
+  - `groups.manage` opens **Admin → My groups**: on their groups, create, rename and delete
+    sub-groups with members of those groups; on the whole site, manage every group. The default
+    group and directory-linked groups stay admin-only
 
 - **Group Scope**
   - When assigning a role, the admin can choose the groups it applies to
@@ -1406,6 +1410,11 @@ Routes under `/editor` require the permission on the whole site; routes under `/
 | POST | `/group-admin/polls` | Create poll | `polls.manage` |
 | PUT | `/group-admin/polls/:id` | Update poll | `polls.manage` |
 | DELETE | `/group-admin/polls/:id` | Delete poll | `polls.manage` |
+| GET | `/group-admin/user-groups` | Groups manageable with the permission | `groups.manage` |
+| GET | `/group-admin/user-groups/candidates` | Accounts allowed in a group (`parent_id`, `q`) | `groups.manage` |
+| POST | `/group-admin/user-groups` | Create a (sub-)group | `groups.manage` |
+| PUT | `/group-admin/user-groups/:id` | Update a (sub-)group | `groups.manage` |
+| DELETE | `/group-admin/user-groups/:id` | Delete a (sub-)group | `groups.manage` |
 
 #### Notifications
 

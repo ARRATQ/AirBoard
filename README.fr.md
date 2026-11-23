@@ -122,10 +122,14 @@ Airboard transforme la façon dont les organisations gèrent leurs ressources nu
 
 - **Rôles personnalisés** (Admin → Rôles)
   - L'admin crée des rôles et les remplit à partir d'un catalogue fixe de permissions :
-    `resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`
+    `resources.manage`, `news.manage`, `events.manage`, `polls.manage`, `comments.moderate`,
+    `groups.manage`
   - Chaque permission vaut soit sur **tout le site**, soit sur des **groupes**
   - Un utilisateur peut avoir plusieurs rôles ; leurs droits s'additionnent
   - Seul l'admin attribue les rôles
+  - `groups.manage` ouvre **Admin → Mes groupes** : sur ses groupes, créer, renommer et supprimer
+    des sous-groupes avec des membres de ces groupes ; sur tout le site, gérer tous les groupes. Le
+    groupe par défaut et les groupes liés au trombinoscope restent à l'admin
 
 - **Portée « groupes »**
   - En attribuant un rôle, l'admin peut choisir les groupes auxquels il s'applique
@@ -1328,6 +1332,11 @@ Les routes `/editor` exigent la permission sur tout le site ; les routes `/group
 | POST | `/group-admin/polls` | Créer sondage | `polls.manage` |
 | PUT | `/group-admin/polls/:id` | Modifier sondage | `polls.manage` |
 | DELETE | `/group-admin/polls/:id` | Supprimer sondage | `polls.manage` |
+| GET | `/group-admin/user-groups` | Groupes gérables avec la permission | `groups.manage` |
+| GET | `/group-admin/user-groups/candidates` | Comptes admissibles dans un groupe (`parent_id`, `q`) | `groups.manage` |
+| POST | `/group-admin/user-groups` | Créer un (sous-)groupe | `groups.manage` |
+| PUT | `/group-admin/user-groups/:id` | Modifier un (sous-)groupe | `groups.manage` |
+| DELETE | `/group-admin/user-groups/:id` | Supprimer un (sous-)groupe | `groups.manage` |
 
 #### Notifications
 
