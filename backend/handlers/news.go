@@ -227,7 +227,7 @@ func (h *NewsHandler) CreateNews(c *gin.Context) {
 		return
 	}
 	if !middleware.HasPermissionEverywhere(c, models.PermNewsManage) && len(req.TargetGroupIDs) == 0 {
-		apierror.Respond(c, http.StatusBadRequest, msgNewsNeedsGroup)
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
 		return
 	}
 
@@ -771,7 +771,7 @@ func (h *NewsHandler) updatedNewsTargets(c *gin.Context, newsID uint, requested 
 		return nil, false
 	}
 	if len(merged) == 0 {
-		apierror.Respond(c, http.StatusBadRequest, msgNewsNeedsGroup)
+		apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
 		return nil, false
 	}
 	return merged, true

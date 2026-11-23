@@ -1457,7 +1457,7 @@
       "subtitle": "Gérez les événements pour vos groupes",
       "newEvent": "Nouvel Événement",
       "infoTitle": "Gestion des événements de groupe",
-      "infoDescription": "Votre rôle vous permet de créer des événements pour certains groupes. Un événement public est visible par tous ; un événement ciblé n'est visible que par les membres des groupes choisis.",
+      "infoDescription": "Votre rôle vous permet de créer des événements pour certains groupes. Chaque événement cible au moins un de ces groupes et n'est visible que par leurs membres.",
       "searchPlaceholder": "Rechercher des événements...",
       "categoryFilter": {
         "all": "Toutes les catégories"
@@ -1578,7 +1578,9 @@
       "loadError": "Échec du chargement de l'événement",
       "saveError": "Échec de l'enregistrement de l'événement",
       "createSuccess": "Événement créé avec succès",
-      "updateSuccess": "Événement mis à jour avec succès"
+      "updateSuccess": "Événement mis à jour avec succès",
+      "targetGroupsScopedHelp": "Choisissez au moins un de vos groupes : seuls leurs membres verront l'événement.",
+      "groupRequired": "Choisissez au moins un groupe cible"
     }
   },
   "version": {
@@ -2057,7 +2059,8 @@
       "save": "Enregistrer",
       "validation": {
         "titleRequired": "Le titre est requis",
-        "minOptionsRequired": "Le sondage doit avoir au moins 2 options"
+        "minOptionsRequired": "Le sondage doit avoir au moins 2 options",
+        "groupRequired": "Choisissez au moins un groupe cible"
       },
       "messages": {
         "createSuccess": "Sondage créé avec succès",
@@ -2065,7 +2068,9 @@
         "saveError": "Erreur lors de la sauvegarde"
       },
       "removeOption": "Supprimer l'option {index}",
-      "targetGroupsPlaceholder": "Rechercher un groupe à cibler…"
+      "targetGroupsPlaceholder": "Rechercher un groupe à cibler…",
+      "targetGroupsScoped": "Groupes cibles",
+      "targetGroupsScopedHelp": "Choisissez au moins un de vos groupes : seuls leurs membres verront le sondage."
     },
     "detail": {
       "breadcrumb": "Sondages",

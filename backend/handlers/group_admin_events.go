@@ -14,7 +14,7 @@ import (
 )
 
 // CreateEventGroupAdmin - Créer un événement (events.manage limitée à ses groupes)
-// Peut créer des événements publics OU ciblant uniquement ses groupes gérés
+// L'événement cible au moins un de ses groupes, et seulement eux (pas d'événement public).
 func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 	var req models.EventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -24,6 +24,9 @@ func (h *EventsHandler) CreateEventGroupAdmin(c *gin.Context) {
 
 	if endBeforeStart(&req.StartDate, req.EndDate) {
 		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
+		return
+	}
+	if !h.scopedEventHasTarget(c, req.TargetGroupIDs) {
 		return
 	}
 
@@ -177,6 +180,10 @@ func (h *EventsHandler) UpdateEventGroupAdmin(c *gin.Context) {
 		apierror.Respond(c, http.StatusBadRequest, msgEndBeforeStart)
 		return
 	}
+	// Les groupes cibles sont toujours remplacés : une liste vide rendrait l'événement public
+	if !h.scopedEventHasTarget(c, req.TargetGroupIDs) {
+		return
+	}
 
 	// Validation : si des groupes cibles sont spécifiés, ils doivent être dans les groupes gérés
 	if len(req.TargetGroupIDs) > 0 {
@@ -316,4 +323,14 @@ func (h *EventsHandler) DeleteEventGroupAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Événement supprimé avec succès"})
+}
+
+// scopedEventHasTarget : avec une gestion des événements limitée à ses groupes, l'événement
+// cible au moins un groupe (un événement sans cible est public). Répond 400 sinon.
+func (h *EventsHandler) scopedEventHasTarget(c *gin.Context, targets []uint) bool {
+	if len(targets) > 0 || middleware.HasPermissionEverywhere(c, models.PermEventsManage) {
+		return true
+	}
+	apierror.Respond(c, http.StatusBadRequest, msgNeedsTargetGroup)
+	return false
 }

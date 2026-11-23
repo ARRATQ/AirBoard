@@ -19,7 +19,7 @@ const msgEndBeforeStart = "La date de fin doit être postérieure à la date de 
 // Messages des contenus gérés avec une permission limitée à ses groupes.
 const (
 	msgTargetOutsideGroups = "Vous ne pouvez cibler que les groupes couverts par votre rôle"
-	msgNewsNeedsGroup      = "Choisissez au moins un groupe cible : votre rôle ne permet pas de publier pour tout le site"
+	msgNeedsTargetGroup    = "Choisissez au moins un groupe cible : votre rôle ne permet pas de publier pour tout le site"
 )
 
 // endBeforeStart indique une période incohérente : les deux bornes sont fournies

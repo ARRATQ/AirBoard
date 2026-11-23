@@ -1199,7 +1199,7 @@
       "subtitle": "إدارة الأحداث لمجموعاتك",
       "newEvent": "حدث جديد",
       "infoTitle": "إدارة أحداث المجموعة",
-      "infoDescription": "يتيح لك دورك إنشاء أحداث لمجموعات محددة. الحدث العام مرئي للجميع، أما الحدث المستهدف فلا يراه إلا أعضاء المجموعات المختارة.",
+      "infoDescription": "يتيح لك دورك إنشاء أحداث لمجموعات محددة. يستهدف كل حدث مجموعة واحدة على الأقل من هذه المجموعات، ولا يراه إلا أعضاؤها.",
       "searchPlaceholder": "البحث عن الأحداث...",
       "categoryFilter": {
         "all": "جميع الفئات"
@@ -1320,7 +1320,9 @@
       "loadError": "فشل في تحميل الحدث",
       "saveError": "فشل في حفظ الحدث",
       "createSuccess": "تم إنشاء الحدث بنجاح",
-      "updateSuccess": "تم تحديث الحدث بنجاح"
+      "updateSuccess": "تم تحديث الحدث بنجاح",
+      "targetGroupsScopedHelp": "اختر مجموعة واحدة على الأقل من مجموعاتك: لن يرى الحدث إلا أعضاؤها.",
+      "groupRequired": "اختر مجموعة مستهدفة واحدة على الأقل"
     },
     "groupNews": "أخبار المجموعة"
   },
@@ -1797,7 +1799,8 @@
       "save": "حفظ",
       "validation": {
         "titleRequired": "العنوان مطلوب",
-        "minOptionsRequired": "يجب أن يحتوي الاستطلاع على خيارين على الأقل"
+        "minOptionsRequired": "يجب أن يحتوي الاستطلاع على خيارين على الأقل",
+        "groupRequired": "اختر مجموعة مستهدفة واحدة على الأقل"
       },
       "messages": {
         "createSuccess": "تم إنشاء الاستطلاع بنجاح",
@@ -1808,7 +1811,9 @@
       "noArticleSelected": "-- بدون مقال --",
       "noAnnouncementSelected": "-- بدون إعلان --",
       "removeOption": "حذف الخيار {index}",
-      "targetGroupsPlaceholder": "ابحث عن مجموعة لاستهدافها…"
+      "targetGroupsPlaceholder": "ابحث عن مجموعة لاستهدافها…",
+      "targetGroupsScoped": "المجموعات المستهدفة",
+      "targetGroupsScopedHelp": "اختر مجموعة واحدة على الأقل من مجموعاتك: لن يرى الاستطلاع إلا أعضاؤها."
     },
     "detail": {
       "breadcrumb": "الاستطلاعات",

@@ -283,6 +283,7 @@
           <EventVisibilityPicker
             v-model:group-ids="form.target_group_ids"
             v-model:is-public="isPublicEvent"
+            :allow-public="isGlobal"
             :groups="availableGroups"
           />
 
@@ -496,7 +497,7 @@ const loadEvent = async () => {
     recurrencePattern.value = parseJson(event.recurrence_rule, { ...DEFAULT_RECURRENCE })
 
     const targetGroups = event.target_groups || []
-    isPublicEvent.value = targetGroups.length === 0
+    isPublicEvent.value = isGlobal.value && targetGroups.length === 0
 
     form.value = {
       title: event.title,
@@ -572,13 +573,18 @@ const buildPayload = () => ({
   end_date: toIsoDateTime(form.value.end_date),
   published_at: toIsoDateTime(form.value.published_at),
   recurrence_end: toIsoDate(form.value.recurrence_end),
-  // Événement public : aucun groupe ciblé
-  target_group_ids: isPublicEvent.value ? [] : form.value.target_group_ids
+  // Événement public (gestion sur tout le site seulement) : aucun groupe ciblé
+  target_group_ids: isPublicEvent.value && isGlobal.value ? [] : form.value.target_group_ids
 })
 
 const saveEvent = async () => {
   if (isEndBeforeStart(form.value.start_date, form.value.end_date)) {
     appStore.showError(t('common.validation.endBeforeStart'))
+    return
+  }
+  // Gestion limitée à ses groupes : au moins un groupe cible (le serveur refuse sinon)
+  if (!isGlobal.value && form.value.target_group_ids.length === 0) {
+    appStore.showError(t('groupAdmin.eventEditor.groupRequired'))
     return
   }
   isSaving.value = true

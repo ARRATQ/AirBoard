@@ -26,8 +26,14 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🐛 Bug Fixes
 
-- A person who manages news only for their groups can no longer publish a site-wide article
-  through the API: every article they write must target at least one of their groups.
+- A person who manages news, events or polls only for their groups can no longer publish
+  site-wide content: every article, event and poll they write targets at least one of their
+  groups (checked by the server and the forms; no more public events for them).
+
+### 🔧 Changes
+
+- The in-app help drawer is hidden for now: its pages (`docs/`, outside the repository) are
+  incomplete and still describe group admins.
 
 ---
 

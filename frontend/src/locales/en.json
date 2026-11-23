@@ -1285,7 +1285,7 @@
       "subtitle": "Manage events for your groups",
       "newEvent": "New Event",
       "infoTitle": "Group events management",
-      "infoDescription": "Your role lets you create events for specific groups. A public event is visible to everyone; a targeted event is visible only to members of the chosen groups.",
+      "infoDescription": "Your role lets you create events for specific groups. Each event targets at least one of these groups and is visible only to their members.",
       "searchPlaceholder": "Search events...",
       "categoryFilter": {
         "all": "All categories"
@@ -1406,7 +1406,9 @@
       "loadError": "Failed to load event",
       "saveError": "Failed to save event",
       "createSuccess": "Event created successfully",
-      "updateSuccess": "Event updated successfully"
+      "updateSuccess": "Event updated successfully",
+      "targetGroupsScopedHelp": "Choose at least one of your groups: only their members will see the event.",
+      "groupRequired": "Choose at least one target group"
     }
   },
   "events": {
@@ -2095,7 +2097,8 @@
       "save": "Save",
       "validation": {
         "titleRequired": "Title is required",
-        "minOptionsRequired": "Poll must have at least 2 options"
+        "minOptionsRequired": "Poll must have at least 2 options",
+        "groupRequired": "Choose at least one target group"
       },
       "messages": {
         "createSuccess": "Poll created successfully",
@@ -2103,7 +2106,9 @@
         "saveError": "Error while saving"
       },
       "removeOption": "Remove option {index}",
-      "targetGroupsPlaceholder": "Search for a group to target…"
+      "targetGroupsPlaceholder": "Search for a group to target…",
+      "targetGroupsScoped": "Target groups",
+      "targetGroupsScopedHelp": "Choose at least one of your groups: only their members will see the poll."
     },
     "detail": {
       "breadcrumb": "Polls",

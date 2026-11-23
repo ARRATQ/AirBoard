@@ -242,7 +242,7 @@
 
               <div class="form-group">
                 <label id="poll-editor-groups" for="poll-editor-groups-input" class="form-label">
-                  {{ t('polls.editor.targetGroups') }}
+                  {{ isScoped ? t('polls.editor.targetGroupsScoped') : t('polls.editor.targetGroups') }}
                 </label>
                 <p v-if="availableGroups.length === 0" class="text-gray-500 dark:text-gray-400 text-sm italic">
                   {{ t('polls.editor.noGroupsAvailable') }}
@@ -255,11 +255,14 @@
                   :options="groupOptions"
                   :labels="lockedGroupOptions"
                   :locked-ids="lockedGroupIds"
-                  :label="t('polls.editor.targetGroups')"
+                  :label="isScoped ? t('polls.editor.targetGroupsScoped') : t('polls.editor.targetGroups')"
                   :placeholder="t('polls.editor.targetGroupsPlaceholder')"
                 />
                 <p class="form-help">
-                  {{ t('polls.editor.targetGroupsHelp') }}
+                  {{ isScoped ? t('polls.editor.targetGroupsScopedHelp') : t('polls.editor.targetGroupsHelp') }}
+                </p>
+                <p v-if="errors.target_group_ids" class="text-sm text-red-500 dark:text-red-400" role="alert">
+                  {{ errors.target_group_ids }}
                 </p>
               </div>
             </div>
@@ -360,7 +363,7 @@ import { useI18n } from 'vue-i18n'
 import { Icon } from '@iconify/vue'
 import { pollsService, newsService, announcementsService } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
-import { getRoles, canAccess, POLLS } from '@/config/access'
+import { getRoles, canAccess, getScope, POLLS } from '@/config/access'
 import ComboSelect from '@/components/ui/ComboSelect.vue'
 import { groupOption } from '@/utils/comboFilter'
 
@@ -413,6 +416,8 @@ const loadingNews = ref(false)
 const loadingAnnouncements = ref(false)
 
 const isEdit = computed(() => !!props.poll)
+// Gestion limitée à ses groupes : au moins un groupe cible (pas de sondage global)
+const isScoped = computed(() => getScope(POLLS, getRoles(authStore.user)) === 'group')
 
 // Groupes disponibles : limités à ses groupes, ils sont déjà filtrés par le parent
 const availableGroups = computed(() => {
@@ -578,6 +583,11 @@ const handleSubmit = async () => {
     if (window.$toast) {
       window.$toast.error(t('common.validation.endBeforeStart'))
     }
+    return
+  }
+
+  if (isScoped.value && form.value.target_group_ids.length === 0) {
+    errors.value.target_group_ids = t('polls.editor.validation.groupRequired')
     return
   }
 

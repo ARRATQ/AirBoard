@@ -409,8 +409,10 @@ visuelle. Ensuite :
 - Groupes choisis à l'attribution d'un rôle (#21, table `user_access_role_groups`) ; sans choix,
   les groupes de la personne hors groupe par défaut. Sélecteurs à saisie semi-automatique
   (`ui/ComboSelect`) au lieu des listes à cocher.
-- Nettoyage (#22) : textes, commentaires et README alignés sur ce modèle ; une actualité écrite
-  avec une gestion limitée à ses groupes cible au moins un de ses groupes, aussi côté serveur.
+- Nettoyage (#22) : textes, commentaires et README alignés sur ce modèle ; une actualité, un
+  événement ou un sondage écrit avec une gestion limitée à ses groupes cible au moins un de ses
+  groupes (serveur et formulaires). Aide intégrée masquée (`HELP_ENABLED` dans `Sidebar.vue`)
+  tant que ses pages ne sont pas refaites.
 - Les chemins d'API `/editor` (permission sur tout le site) et `/group-admin` (limitée à ses
   groupes) gardent leurs noms historiques.
 

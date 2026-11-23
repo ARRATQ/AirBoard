@@ -1200,7 +1200,7 @@
       "subtitle": "Gestiona eventos para tus grupos",
       "newEvent": "Nuevo Evento",
       "infoTitle": "Gestión de eventos del grupo",
-      "infoDescription": "Tu rol te permite crear eventos para determinados grupos. Un evento público es visible para todos; un evento dirigido solo lo ven los miembros de los grupos elegidos.",
+      "infoDescription": "Tu rol te permite crear eventos para determinados grupos. Cada evento se dirige al menos a uno de esos grupos y solo lo ven sus miembros.",
       "searchPlaceholder": "Buscar eventos...",
       "categoryFilter": {
         "all": "Todas las categorías"
@@ -1321,7 +1321,9 @@
       "loadError": "Error al cargar evento",
       "saveError": "Error al guardar evento",
       "createSuccess": "Evento creado correctamente",
-      "updateSuccess": "Evento actualizado correctamente"
+      "updateSuccess": "Evento actualizado correctamente",
+      "targetGroupsScopedHelp": "Elige al menos uno de tus grupos: solo sus miembros verán el evento.",
+      "groupRequired": "Elige al menos un grupo destinatario"
     }
   },
   "version": {
@@ -1797,7 +1799,8 @@
       "save": "Guardar",
       "validation": {
         "titleRequired": "El título es requerido",
-        "minOptionsRequired": "La encuesta debe tener al menos 2 opciones"
+        "minOptionsRequired": "La encuesta debe tener al menos 2 opciones",
+        "groupRequired": "Elige al menos un grupo destinatario"
       },
       "messages": {
         "createSuccess": "Encuesta creada correctamente",
@@ -1808,7 +1811,9 @@
       "noArticleSelected": "-- Ningún artículo --",
       "noAnnouncementSelected": "-- Ningún anuncio --",
       "removeOption": "Eliminar la opción {index}",
-      "targetGroupsPlaceholder": "Buscar un grupo destinatario…"
+      "targetGroupsPlaceholder": "Buscar un grupo destinatario…",
+      "targetGroupsScoped": "Grupos destinatarios",
+      "targetGroupsScopedHelp": "Elige al menos uno de tus grupos: solo sus miembros verán la encuesta."
     },
     "detail": {
       "breadcrumb": "Encuestas",
